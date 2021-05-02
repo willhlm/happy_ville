@@ -3,7 +3,6 @@ import pygame, sys
 class Organisms(pygame.sprite.Sprite):
 
     acceleration=[1,1]
-    friction=0.2
 
     def __init__(self):
         super().__init__()
@@ -86,7 +85,7 @@ class Enemy_1(Organisms):
                   29: pygame.transform.flip(pygame.image.load("sprites/HeroKnight_Attack2_4.png"),True, False),#down
                   30: pygame.transform.flip(pygame.image.load("sprites/HeroKnight_Attack2_5.png"),True, False)}#down
 
-    velocity=[0,0]
+    friction=0.2
     def __init__(self,pos,ID):
         super().__init__()
         self.image = self.images[1]
@@ -94,7 +93,7 @@ class Enemy_1(Organisms):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20}
-
+        self.velocity=[0,0]
         self.health=100
         self.dmg=10
         self.ID=ID
@@ -131,7 +130,7 @@ class Enemy_1(Organisms):
                     entity.action['run']=False
                     entity.action['stand']=True
 
-            if abs(distance[0])<40 and abs(distance[1])<40:#swing sword when close
+            if abs(distance[0])<40 and abs(distance[1])<40 and not player.action['death']:#swing sword when close
                 entity.action['sword']=True
 
 class Player(Organisms):
@@ -204,7 +203,7 @@ class Player(Organisms):
                   28: pygame.transform.flip(pygame.image.load("sprites/HeroKnight_Attack2_3.png"),True, False),#down
                   29: pygame.transform.flip(pygame.image.load("sprites/HeroKnight_Attack2_4.png"),True, False),#down
                   30: pygame.transform.flip(pygame.image.load("sprites/HeroKnight_Attack2_5.png"),True, False)}#down
-
+    friction=0.2
     velocity=[0,0]
     def __init__(self,pos):
         super().__init__()

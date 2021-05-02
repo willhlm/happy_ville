@@ -73,6 +73,7 @@ class Physics():
     @staticmethod
     def movement(dynamic_entties):
         for entity in dynamic_entties.sprites():
+
             entity.movement[1]+=entity.acceleration[1]#gravity
             if entity.movement[1]>5:#set a y max speed
                 entity.movement[1]=5
@@ -105,7 +106,7 @@ class Animation():
                     entity.image=entity.images[entity.frame['dmg']//10+36]
                     entity.frame['dmg']+=1
 
-                #reset frames
+                    #reset frames
                     if entity.frame['dmg']==entity.frame_timer['dmg']:
                         entity.frame['dmg']=1
                         entity.action['dmg']=False
