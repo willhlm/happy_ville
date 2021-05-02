@@ -215,44 +215,6 @@ class Player(Organisms):
         self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20}
         self.dmg=50
 
-    def move(self):#define the movements
-
-        #game input
-        for event in pygame.event.get():
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    self.action['run']=True
-                    self.action['stand']=False
-                    self.dir[0]=1
-                if event.key == pygame.K_LEFT:
-                    self.action['run']=True
-                    self.action['stand']=False
-                    self.dir[0]=-1
-                if event.key == pygame.K_UP:#press up
-                    self.dir[1]=1
-                if event.key == pygame.K_DOWN:#press down
-                    self.dir[1]=-1
-                if event.key==pygame.K_SPACE and self.action['jump']==False:#jump
-                    self.movement[1]=-10
-                    self.action['jump']=True
-                if event.key==pygame.K_f:
-                    self.action['sword']=True
-
-            elif event.type == pygame.KEYUP:#lift bottom
-                if event.key == pygame.K_RIGHT and self.dir[0]>0:
-                    self.action['stand']=True
-                    self.action['run']=False
-                if event.key == pygame.K_LEFT and self.dir[0]<0:
-                    self.action['stand']=True
-                    self.action['run']=False
-                if event.key == pygame.K_UP:
-                    self.dir[1]=0
-                if event.key == pygame.K_DOWN:
-                    self.dir[1]=0
-
 class Block(Organisms):
 
     images = {1 : pygame.image.load("sprites/block_castle.png"),

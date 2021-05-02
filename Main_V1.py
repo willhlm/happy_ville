@@ -3,10 +3,9 @@ import Engine
 import Entities
 import Level
 import Action
+import UI
 
-pygame.init()#initilise
-screen=pygame.display.set_mode((800,600))
-clock=pygame.time.Clock()
+game=UI.Game_UI()
 
 platforms = pygame.sprite.Group()
 hero = pygame.sprite.Group()
@@ -23,9 +22,9 @@ map.define_chunks('./Tiled/Level1.csv')
 #enemies.add(teEnemies)#whole map
 
 def draw():
-    platforms.draw(screen)
-    hero.draw(screen)
-    enemies.draw(screen)
+    platforms.draw(game.screen)
+    hero.draw(game.screen)
+    enemies.draw(game.screen)
 
 def scrolling():
     map.true_scroll[0]+=(knight.rect.center[0]-4*map.true_scroll[0]-410)/20
@@ -35,7 +34,7 @@ def scrolling():
     map.scroll[0]=int(map.scroll[0])
     map.scroll[1]=int(map.scroll[1])
 
-    if knight.action['death']:#if kngiht is dead, don't move screen
+    if knight.action['death']:#if kngiht is dead, don't move game.screen
         map.scroll[0]=0
         map.scroll[1]=0
 
@@ -44,13 +43,13 @@ def scrolling():
     enemies.update([-map.scroll[0],-map.scroll[1]])
 
 while True:
-    screen.fill((255,255,255))#fill screen
+    game.screen.fill((255,255,255))#fill game.screen
 
     platforms,enemies=map.load_chunks()
 
     scrolling()
 
-    knight.move()
+    game.input(knight)
     Entities.Enemy_1.move(knight,enemies)#the enemy Ai movement, based on knight position
 
     Engine.Physics.movement(hero)
@@ -60,12 +59,12 @@ while True:
     Engine.Animation.set_img(hero)
     Engine.Animation.set_img(enemies)
 
-    Action.swing_sword(hero,platforms,enemies,screen)#sword swinger, target1,target2
-    Action.swing_sword(enemies,platforms,hero,screen)#sword swinger, target1,target2
+    Action.swing_sword(hero,platforms,enemies,game.screen)#sword swinger, target1,target2
+    Action.swing_sword(enemies,platforms,hero,game.screen)#sword swinger, target1,target2
 
-    pygame.draw.rect(screen, (255,0,0), knight.rect,2)#checking hitbox
-    pygame.draw.rect(screen, (0,255,0), knight.hitbox,2)#checking hitbox
+    pygame.draw.rect(game.screen, (255,0,0), knight.rect,2)#checking hitbox
+    pygame.draw.rect(game.screen, (0,255,0), knight.hitbox,2)#checking hitbox
 
     draw()
     pygame.display.update()#update after every change
-    clock.tick(60)#limmit FPS
+    game.clock.tick(60)#limmit FPS
