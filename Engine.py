@@ -16,7 +16,7 @@ class Collisions():
                     entity.frame['sword']=1
             elif not collision_types['bottom']:
                 entity.action['jump']=True
-            elif collision_types['top']:#knock back when hit head
+            if collision_types['top']:#knock back when hit head
                 entity.movement[1]=1
 
     #collisions between enteties-groups: a dynamic and a static one
