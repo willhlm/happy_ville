@@ -8,8 +8,9 @@ class Entity(pygame.sprite.Sprite):
         super().__init__()
         self.movement=[0,0]
         self.frame = 0
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'dmg':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
+        self.vdir=0
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -20,24 +21,26 @@ class Entity(pygame.sprite.Sprite):
             self.action[new_action] = True
             self.timer = 0
 
-
     def reset_timer(self):
         self.frame = 0
+
 
 class Enemy_1(Entity):
 
     friction=0.2
     def __init__(self,pos,ID):
         super().__init__()
-        self.image = self.images[1]
+        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20}
+        #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20}
         self.velocity=[0,0]
         self.health=100
         self.dmg=10
         self.ID=ID
+        self.prioriy_list = ['death','hurt','sword','jump','run','stand']
+        self.state = 'stand'
 
     @staticmethod
     def move(player,group):#maybe want different AI types depending on eneymy type
@@ -48,7 +51,7 @@ class Enemy_1(Entity):
             distance[0]=(entity.rect[0]-player.rect[0])#follow the player
             distance[1]=(entity.rect[1]-player.rect[1])#follow the player
 
-            if abs(distance[0])>200 and abs(distance[1])>50 or player.action['death'] or entity.action['dmg']:#don't do anything if far away, or player dead or while taking dmg
+            if abs(distance[0])>200 and abs(distance[1])>50 or player.action['death'] or entity.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
                 entity.action['run']=False
                 entity.action['stand']=True
 
@@ -87,7 +90,7 @@ class Player(Entity):
         self.health=50
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
-        self.prioriy_list = ['death','dmg','sword','jump','run','stand']
+        self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.state = 'stand'
 
 class Block(Entity):

@@ -140,6 +140,6 @@ class Game_UI():
                     player_class.action['stand']=True
                     player_class.action['run']=False
                 if event.key == pygame.K_UP:
-                    player_class.dir[1]=0
+                        player_class.dir[1]=0
                 if event.key == pygame.K_DOWN:
                     player_class.dir[1]=0

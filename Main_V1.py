@@ -27,7 +27,7 @@ map.define_chunks('./Tiled/Level1.csv')
 def draw():
     platforms.draw(game.screen)
     hero.draw(game.screen)
-    #enemies.draw(game.screen)
+    enemies.draw(game.screen)
 
 def scrolling():
     map.true_scroll[0]+=(knight.rect.center[0]-4*map.true_scroll[0]-410)/20
@@ -61,7 +61,6 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
-    
 
     Action.swing_sword(hero,platforms,enemies,game.screen)#sword swinger, target1,target2
     Action.swing_sword(enemies,platforms,hero,game.screen)#sword swinger, target1,target2

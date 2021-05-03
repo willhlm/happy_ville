@@ -101,17 +101,16 @@ class Animation():
 
         for entity in enteties.sprites():#go through the group
 
-
             for action in entity.prioriy_list:
                 if entity.action[action]:
                     if action != entity.state:
                         entity.state = action
                         entity.reset_timer()
+
                     entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir[0])
                     entity.frame += 1
-                    print(action, entity.frame)
-                    if entity.frame == sprite_img.get_frame_number(action)*3:
-                        print('yo')
+
+                    if entity.frame == sprite_img.get_frame_number(action,entity.dir[0])*3:
                         if action == 'death':
                             entity.kill()
                         else:
