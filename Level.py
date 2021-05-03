@@ -12,7 +12,7 @@ class Tilemap():
         self.total_disatnce=[0,0]
         self.chunks={}#placeholder to store the chunks
         self.keys=[]
-        self.chunk_render_distance=400
+        self.chunk_render_distance=800
 
     @staticmethod
     def read_csv(path):

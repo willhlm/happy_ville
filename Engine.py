@@ -13,7 +13,7 @@ class Collisions():
                 entity.action['jump']=False
                 if entity.dir[1]<0:#if on ground, cancel sword swing
                     entity.action['sword']=False
-                    entity.frame['sword']=1
+                    entity.frame = 0
             elif not collision_types['bottom']:
                 entity.action['jump']=True
             if collision_types['top']:#knock back when hit head
@@ -75,8 +75,8 @@ class Physics():
         for entity in dynamic_entties.sprites():
 
             entity.movement[1]+=entity.acceleration[1]#gravity
-            if entity.movement[1]>5:#set a y max speed
-                entity.movement[1]=5
+            if entity.movement[1]>7:#set a y max speed
+                entity.movement[1]=7
 
             if entity.action['run'] and entity.dir[0]>0:#accelerate right
                 entity.velocity[0]+=entity.acceleration[0]
@@ -95,12 +95,14 @@ class Animation():
         #super().__init__()
         pass
 
+    ### FIX frame rate thingy
     @staticmethod
     def set_img(enteties,sprite_img):
         
         for entity in enteties.sprites():#go through the group
 
 
+<<<<<<< HEAD
 
             #need to order according to priority
 
@@ -171,3 +173,24 @@ class Animation():
                 entity.frame+=1
                 if entity.frame==entity.frame_timer['death']:
                     entity.kill()#remove the sprite after animation
+=======
+            for action in entity.prioriy_list:
+                if entity.action[action]:
+                    if action != entity.state:
+                        entity.state = action
+                        entity.reset_timer()
+                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir[0])
+                    entity.frame += 1
+                    print(action, entity.frame)
+                    if entity.frame == sprite_img.get_frame_number(action)*3:
+                        print('yo')
+                        if action == 'death':
+                            entity.kill()
+                        else:
+                            entity.reset_timer()
+                            if action != 'run':
+                                entity.action[action] = False
+                    break
+                else:
+                    pass
+>>>>>>> c51deadd14526ea7d1bdb9685542f36a8031dd2a
