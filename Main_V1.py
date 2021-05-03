@@ -12,7 +12,7 @@ platforms = pygame.sprite.Group()
 hero = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 
-knight=Entities.Player([400,300])
+knight=Entities.Player([200,130])
 hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
@@ -29,9 +29,11 @@ def draw():
     hero.draw(game.screen)
     enemies.draw(game.screen)
 
+    game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
+
 def scrolling():
-    map.true_scroll[0]+=(knight.rect.center[0]-4*map.true_scroll[0]-410)/20
-    map.true_scroll[1]+=(knight.rect.center[1]-map.true_scroll[1]-328)
+    map.true_scroll[0]+=(knight.rect.center[0]-4*map.true_scroll[0]-240)/20
+    map.true_scroll[1]+=(knight.rect.center[1]-map.true_scroll[1]-180)
 
     map.scroll=map.true_scroll.copy()
     map.scroll[0]=int(map.scroll[0])
@@ -61,6 +63,7 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
+
 
     Action.swing_sword(hero,platforms,enemies,game.screen)#sword swinger, target1,target2
     Action.swing_sword(enemies,platforms,hero,game.screen)#sword swinger, target1,target2

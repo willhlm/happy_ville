@@ -4,10 +4,12 @@ class Game_UI():
 
     def __init__(self):
         pygame.init()#initilise
-        self.height=600
-        self.width=800
-        self.screen=pygame.display.set_mode((self.width,self.height))
-        self.start_BG=pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg'),(self.width,self.height))
+        self.WINDOW_SIZE = (480,270)
+        self.scale = 1
+        self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
+        self.screen=pygame.Surface(self.WINDOW_SIZE)
+        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
+        self.start_BG=pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg'),self.WINDOW_SIZE)
         self.clock=pygame.time.Clock()
         self.gameover=False
         self.ESC=False
@@ -16,6 +18,7 @@ class Game_UI():
 
     def start_menu(self):
         self.screen.blit(self.start_BG,(0,0))
+        self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
 
         while self.ESC:
 
@@ -44,6 +47,7 @@ class Game_UI():
 
     def option_menu(self):
         self.screen.blit(self.start_BG,(0,0))
+        self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE),(0,0))
 
         while self.option:
 
