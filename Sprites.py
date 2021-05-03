@@ -40,4 +40,4 @@ class Sprites_player(Sprites):
         self.attack_down_right = self.load_sprites(self.player_path + "attack_down/")
         self.attack_down_left = [pygame.transform.flip(f, True, False) for f in self.load_sprites(self.player_path + "attack_down/")]
 
-class Sprites_evil_knight(Sprites):
+#class Sprites_evil_knight(Sprites):

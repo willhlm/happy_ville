@@ -97,7 +97,10 @@ class Animation():
 
     @staticmethod
     def set_img(enteties,sprite_img):
+        
         for entity in enteties.sprites():#go through the group
+
+
 
             #need to order according to priority
 

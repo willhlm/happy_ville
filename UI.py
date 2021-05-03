@@ -2,17 +2,15 @@ import pygame, sys
 
 class Game_UI():
 
-    start_BG=pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg'),(800,600))
-
     def __init__(self):
         pygame.init()#initilise
         self.height=600
         self.width=800
         self.screen=pygame.display.set_mode((self.width,self.height))
+        self.start_BG=pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg'),(self.width,self.height))
         self.clock=pygame.time.Clock()
         self.gameover=False
         self.ESC=False
-        self.option=False
         self.click=False
         self.font=pygame.font.Font('freesansbold.ttf',40)
 
@@ -35,27 +33,14 @@ class Game_UI():
                 self.click=False
                 self.option=True
                 self.option_menu()#go to option
-
             elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
                 pygame.quit()
                 sys.exit()
 
-            for event in pygame.event.get():
-                if event.type==pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type==pygame.MOUSEBUTTONDOWN:
-                    self.click=True
-                if event.type==pygame.MOUSEBUTTONUP:
-                    self.click=False
-                if event.type == pygame.KEYDOWN:
-                    if event.key==pygame.K_ESCAPE:#escape button
-                        self.ESC=False
-
             self.screen.blit(start_surface,start_rect)
-            self.screen.blit(exit_surface,exit_rect)
             self.screen.blit(option_surface,option_rect)
-            pygame.display.update()
+            self.screen.blit(exit_surface,exit_rect)
+            Game_UI.input_quit(self)
 
     def option_menu(self):
         self.screen.blit(self.start_BG,(0,0))
@@ -73,20 +58,9 @@ class Game_UI():
                 self.resolution=True
                 self.resolution_menu()#go to resolution selections
 
-            for event in pygame.event.get():
-                if event.type==pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type==pygame.MOUSEBUTTONDOWN:
-                    self.click=True
-                if event.type==pygame.MOUSEBUTTONUP:
-                    self.click=False
-                if event.type == pygame.KEYDOWN:
-                    if event.key==pygame.K_ESCAPE:#escape button
-                        self.option=False
-                        self.screen.blit(self.start_BG,(0,0))
+            Game_UI.input_quit(self)
 
-            pygame.display.update()
+        self.ESC=True
 
     def resolution_menu(self):
 
@@ -103,22 +77,28 @@ class Game_UI():
                 self.screen.blit(self.start_BG,(0,0))
                 self.resolution=False
 
-            for event in pygame.event.get():
-                if event.type==pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type==pygame.MOUSEBUTTONDOWN:
-                    self.click=True
-                if event.type==pygame.MOUSEBUTTONUP:
-                    self.click=False
-                if event.type == pygame.KEYDOWN:
-                    if event.key==pygame.K_ESCAPE:#escape button
-                        self.resolution=False
-                        self.screen.blit(self.start_BG,(0,0))
+            Game_UI.input_quit(self)
 
-            pygame.display.update()
+        self.option=True
 
-    def input(self,player_class):
+    def input_quit(self):#to exits between option menues
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type==pygame.MOUSEBUTTONDOWN:
+                self.click=True
+            if event.type==pygame.MOUSEBUTTONUP:
+                self.click=False
+            if event.type == pygame.KEYDOWN:
+                if event.key==pygame.K_ESCAPE:#escape button
+                    self.screen.blit(self.start_BG,(0,0))
+                    self.resolution=False
+                    self.option=False
+                    self.ESC=False
+
+    def input(self,player_class):#input while playing
         #game input
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
