@@ -47,9 +47,9 @@ class Sprites_player(Sprites):
         print(self.sprite_dict['run'])
 
     def get_image(self, input, timer, dir):
-        if dir >= 0:
+        if dir[0] >= 0:
             return self.sprite_dict[input][timer]
-        elif dir < 0:
+        elif dir[0] < 0:
             return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
 
     def get_frame_number(self, input):
