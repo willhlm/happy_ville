@@ -133,24 +133,29 @@ class Game_UI():
                     player_class.action['run']=True
                     player_class.action['stand']=False
                     player_class.dir[0]=1
+
                 if event.key == pygame.K_LEFT:
                     player_class.action['run']=True
                     player_class.action['stand']=False
                     player_class.dir[0]=-1
+
                 if event.key == pygame.K_UP:#press up
                     player_class.dir[1]=1
                 if event.key == pygame.K_DOWN:#press down
                     player_class.dir[1]=-1
                 if event.key==pygame.K_SPACE and player_class.action['jump']==False:#jump
-                    player_class.movement[1]=-10
+                    player_class.movement[1]=-11
                     player_class.action['jump']=True
+
                 if event.key==pygame.K_f:
                     player_class.action['sword']=True
+
 
             elif event.type == pygame.KEYUP:#lift bottom
                 if event.key == pygame.K_RIGHT and player_class.dir[0]>0:
                     player_class.action['stand']=True
                     player_class.action['run']=False
+
                 if event.key == pygame.K_LEFT and player_class.dir[0]<0:
                     player_class.action['stand']=True
                     player_class.action['run']=False

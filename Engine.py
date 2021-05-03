@@ -13,7 +13,7 @@ class Collisions():
                 entity.action['jump']=False
                 if entity.dir[1]<0:#if on ground, cancel sword swing
                     entity.action['sword']=False
-                    entity.frame['sword']=1
+                    entity.frame = 0
             elif not collision_types['bottom']:
                 entity.action['jump']=True
             if collision_types['top']:#knock back when hit head
@@ -75,8 +75,8 @@ class Physics():
         for entity in dynamic_entties.sprites():
 
             entity.movement[1]+=entity.acceleration[1]#gravity
-            if entity.movement[1]>5:#set a y max speed
-                entity.movement[1]=5
+            if entity.movement[1]>7:#set a y max speed
+                entity.movement[1]=7
 
             if entity.action['run'] and entity.dir[0]>0:#accelerate right
                 entity.velocity[0]+=entity.acceleration[0]
@@ -95,76 +95,28 @@ class Animation():
         #super().__init__()
         pass
 
+    ### FIX frame rate thingy
     @staticmethod
     def set_img(enteties,sprite_img):
         for entity in enteties.sprites():#go through the group
 
-            #need to order according to priority
 
-            if not entity.action['death']:#if not dead
-                if entity.action['dmg']:#if took dmg
-                    entity.image=sprite_img.hurt[entity.frame//10]
-                    entity.frame+=1
-
-                    #reset frames
-                    if entity.frame==entity.frame_timer['dmg']:
-                        entity.frame=1
-                        entity.action['dmg']=False
-
-                elif entity.action['sword']:#sword
-                    if entity.dir[1]>0 and entity.dir[0]>0:#sword up-right
-                        entity.image=sprite_img.attack_up_right[entity.frame//3]
-                        entity.frame+=1
-                    elif entity.dir[1]>0 and entity.dir[0]<0:#sword up-left
-                        entity.image=sprite_img.attack_up_left[entity.frame//3]
-                        entity.frame+=1
-                    elif entity.dir[0]>0 and entity.dir[1]==0:#sword right and not up or down
-                        entity.image=sprite_img.attack_right[entity.frame//3]
-                        entity.frame+=1
-                    elif entity.dir[0]<0 and entity.dir[1]==0:#sword left and not up or down
-                        entity.image=sprite_img.attack_left[entity.frame//3]
-                        entity.frame+=1
-                    elif entity.dir[1]<0 and entity.dir[0]>0:# down
-                        entity.image=sprite_img.attack_down_right[entity.frame//3]
-                        entity.frame+=1
-                    elif entity.dir[1]<0 and entity.dir[0]<0:# down
-                        entity.image=sprite_img.attack_down_left[entity.frame//3]
-                        entity.frame+=1
-
-                    #reset frames
-                    if entity.frame==entity.frame_timer['sword']:
-                        entity.frame=1
-                        entity.action['sword']=False
-
-                elif not entity.action['sword']:#not sword
-                    #jump
-                    if entity.action['jump']==True and entity.dir[0]>0:#jump without sword right
-                        entity.image=sprite_img.jump_right[entity.frame//7]
-                        entity.frame+=1
-                    elif entity.action['jump']==True and entity.dir[0]<0:#jump without sword left
-                        entity.image=sprite_img.jump_left[entity.frame//7]
-                        entity.frame+=1
-                    #run
-                    elif entity.action['run']==True and entity.dir[0]>0:#run right
-                        entity.image=sprite_img.run_right[entity.frame//4]
-                        entity.frame+=1
-                    elif entity.action['run']==True and entity.dir[0]<0:#run left
-                        entity.image=sprite_img.run_left[entity.frame//4]
-                        entity.frame+=1
-                    #stand
-                    elif entity.action['stand']==True and entity.dir[0]>0:#stand right
-                        entity.image=sprite_img.run_right[0]
-                    elif entity.action['stand']==True and entity.dir[0]<0:#stand left
-                        entity.image=sprite_img.run_left[0]
-
-                    #reset frames
-                    if entity.frame==entity.frame_timer['run']:
-                        entity.frame=1
-                    if entity.frame == entity.frame_timer['jump']:
-                        entity.frame = 1
-
-            else:#if dead
-                entity.image=sprite_img.death[entity.frame//4]
-                entity.frame+=1
-                if entity.frame==entity.frame_timer['death']:
-                    entity.kill()#remove the sprite after animation
+            for action in entity.prioriy_list:
+                if entity.action[action]:
+                    if action != entity.state:
+                        entity.state = action
+                        entity.reset_timer()
+                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir[0])
+                    entity.frame += 1
+                    print(action, entity.frame)
+                    if entity.frame == sprite_img.get_frame_number(action)*3:
+                        print('yo')
+                        if action == 'death':
+                            entity.kill()
+                        else:
+                            entity.reset_timer()
+                            if action != 'run':
+                                entity.action[action] = False
+                    break
+                else:
+                    pass

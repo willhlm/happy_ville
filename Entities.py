@@ -2,18 +2,27 @@ import pygame, sys
 
 class Entity(pygame.sprite.Sprite):
 
-    acceleration=[1,1]
+    acceleration=[1,0.8]
 
     def __init__(self):
         super().__init__()
         self.movement=[0,0]
-        self.frame = 1
+        self.frame = 0
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'dmg':False}
-        self.dir=[1,0]#[horixontal (right 1, left -1),vertical (up 1, down -1)]
+        self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
+
+    def update_action(self, new_action):
+        if not self.action[new_action]:
+            self.action[new_action] = True
+            self.timer = 0
+
+
+    def reset_timer(self):
+        self.frame = 0
 
 class Enemy_1(Entity):
 
@@ -76,8 +85,10 @@ class Player(Entity):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health=50
-        self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20}
+        #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
+        self.prioriy_list = ['death','dmg','sword','jump','run','stand']
+        self.state = 'stand'
 
 class Block(Entity):
 
