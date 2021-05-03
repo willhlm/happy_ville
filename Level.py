@@ -44,8 +44,8 @@ class Tilemap():
             y=int(key.split(';')[0])#y
             x=int(key.split(';')[1])#x
 
-            chunk_distance_x=self.chunk_size*self.tile_size*x-400-self.total_disatnce[0]+self.chunk_size*self.tile_size/2#from middle
-            chunk_distance_y=self.chunk_size*self.tile_size*y-200-self.total_disatnce[1]+self.chunk_size*self.tile_size/2#from middle
+            chunk_distance_x=self.chunk_size*self.tile_size*x-240-self.total_disatnce[0]+self.chunk_size*self.tile_size/2#from middle
+            chunk_distance_y=self.chunk_size*self.tile_size*y-180-self.total_disatnce[1]+self.chunk_size*self.tile_size/2#from middle
 
             chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
         return chunk_distance

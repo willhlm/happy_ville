@@ -40,21 +40,21 @@ class Game_UI():
                 pygame.quit()
                 sys.exit()
 
-            self.screen.blit(start_surface,start_rect)
-            self.screen.blit(option_surface,option_rect)
-            self.screen.blit(exit_surface,exit_rect)
+            self.display.blit(start_surface,start_rect)
+            self.display.blit(option_surface,option_rect)
+            self.display.blit(exit_surface,exit_rect)
             Game_UI.input_quit(self)
 
     def option_menu(self):
         self.screen.blit(self.start_BG,(0,0))
-        self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE),(0,0))
+        self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
 
         while self.option:
 
             Resolution_surface=self.font.render('Resoltion',True,(255,255,255))#antialias flag
             Resolution_rect=Resolution_surface.get_rect(center=(200,100))#position
 
-            self.screen.blit(Resolution_surface,Resolution_rect)
+            self.display.blit(Resolution_surface,Resolution_rect)
 
             if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
                 self.click=False
@@ -67,13 +67,15 @@ class Game_UI():
         self.ESC=True
 
     def resolution_menu(self):
+        self.screen.blit(self.start_BG,(0,0))
+        self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
 
         while self.resolution:
 
             Resolution_surface=self.font.render('1000x800',True,(255,255,255))#antialias flag
             Resolution_rect=Resolution_surface.get_rect(center=(200,100))#position
 
-            self.screen.blit(Resolution_surface,Resolution_rect)
+            self.display.blit(Resolution_surface,Resolution_rect)
 
             if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
                 self.screen=pygame.display.set_mode((1000,800))
@@ -98,6 +100,7 @@ class Game_UI():
             if event.type == pygame.KEYDOWN:
                 if event.key==pygame.K_ESCAPE:#escape button
                     self.screen.blit(self.start_BG,(0,0))
+                    self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
                     self.resolution=False
                     self.option=False
                     self.ESC=False
@@ -144,6 +147,6 @@ class Game_UI():
                     player_class.action['stand']=True
                     player_class.action['run']=False
                 if event.key == pygame.K_UP:
-                    player_class.dir[1]=0
+                        player_class.dir[1]=0
                 if event.key == pygame.K_DOWN:
                     player_class.dir[1]=0

@@ -27,7 +27,7 @@ map.define_chunks('./Tiled/Level1.csv')
 def draw():
     platforms.draw(game.screen)
     hero.draw(game.screen)
-    #enemies.draw(game.screen)
+    enemies.draw(game.screen)
 
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 

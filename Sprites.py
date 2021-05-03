@@ -44,15 +44,24 @@ class Sprites_player(Sprites):
     def __init__(self):
         super().__init__()
         self.sprite_dict = self.load_all_sprites(self.player_path)
-        print(self.sprite_dict['run'])
 
     def get_image(self, input, timer, dir):
-        if dir[0] >= 0:
+        #if input=='sword' and vdir>0:
+    #        input='sword_up'
+#        elif input=='sword' and vdir<0:
+#            input='sword_down'
+
+        if dir >= 0:
             return self.sprite_dict[input][timer]
         elif dir[0] < 0:
             return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
 
-    def get_frame_number(self, input):
+    def get_frame_number(self, input,dir):
+    #    if input=='sword' and vdir>0:
+    #        input='sword_up'
+    #    elif input=='sword' and vdir<0:
+    #        input='sword_down'
+
         return len(self.sprite_dict[input])
 
 class Sprites_evil_knight(Sprites):
