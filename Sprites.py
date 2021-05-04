@@ -53,7 +53,7 @@ class Sprites_player(Sprites):
 
         if dir >= 0:
             return self.sprite_dict[input][timer]
-        elif dir[0] < 0:
+        elif dir < 0:
             return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
 
     def get_frame_number(self, input,dir):
@@ -75,4 +75,4 @@ class Sprites_evil_knight(Sprites):
         if dir >= 0:
             return self.sprite_dict[input][timer]
         elif dir < 0:
-            return pygame.transformation.flip(self.sprite_dict[input][timer])
+            return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
