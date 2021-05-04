@@ -55,7 +55,9 @@ while True:
     scrolling()
 
     game.input(knight)
-    Entities.Enemy_1.move(knight,enemies)#the enemy Ai movement, based on knight position
+
+    for entity in enemies.sprites():
+        entity.AI(knight)#the enemy Ai movement, based on knight position
 
     Engine.Physics.movement(hero)
     Engine.Physics.movement(enemies)
@@ -63,7 +65,6 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
-
 
     Action.swing_sword(hero,platforms,enemies,game.screen)#sword swinger, target1,target2
     Action.swing_sword(enemies,platforms,hero,game.screen)#sword swinger, target1,target2

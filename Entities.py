@@ -3,14 +3,11 @@ import pygame, sys
 class Entity(pygame.sprite.Sprite):
 
     acceleration=[1,0.8]
-
     def __init__(self):
         super().__init__()
         self.movement=[0,0]
         self.frame = 0
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.vdir=0
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -23,7 +20,7 @@ class Entity(pygame.sprite.Sprite):
 
     def reset_timer(self):
         self.frame = 0
-
+        self.vdir=self.dir[1]
 
 class Enemy_1(Entity):
 
@@ -40,42 +37,41 @@ class Enemy_1(Entity):
         self.dmg=10
         self.ID=ID
         self.prioriy_list = ['death','hurt','sword','jump','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
         self.state = 'stand'
+        self.distance=[0,0]
+        self.vdir=0
 
-    @staticmethod
-    def move(player,group):#maybe want different AI types depending on eneymy type
-        enemy_1_list = [i for i in group.sprites() if i.ID==1]#extract all enemy type ID
+    def AI(self,player):#maybe want different AI types depending on eneymy type
 
-        for entity in enemy_1_list:#go through the enemy type
-            distance=[0,0]
-            distance[0]=(entity.rect[0]-player.rect[0])#follow the player
-            distance[1]=(entity.rect[1]-player.rect[1])#follow the player
+        self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
+        self.distance[1]=(self.rect[1]-player.rect[1])#follow the player
 
-            if abs(distance[0])>200 and abs(distance[1])>50 or player.action['death'] or entity.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
-                entity.action['run']=False
-                entity.action['stand']=True
+        if abs(self.distance[0])>200 and abs(self.distance[1])>50 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
+            self.action['run']=False
+            self.action['stand']=True
 
-            elif abs(distance[0])>500 or abs(distance[1])>500:#remove the enmy if far away
-                entity.kill()
+        elif abs(self.distance[0])>500 or abs(self.distance[1])>500:#remove the enmy if far away
+            self.kill()
 
-            elif distance[0]<0 and not entity.action['death'] and abs(distance[1])<40:#if player close on right
-                entity.dir[0]=1
-                entity.action['run']=True
-                entity.action['stand']=False
-                if distance[0]>-40:#don't get too close
-                    entity.action['run']=False
-                    entity.action['stand']=True
+        elif self.distance[0]<0 and not self.action['death'] and abs(self.distance[1])<40:#if player close on right
+            self.dir[0]=1
+            self.action['run']=True
+            self.action['stand']=False
+            if self.distance[0]>-40:#don't get too close
+                self.action['run']=False
+                self.action['stand']=True
 
-            elif distance[0]>0 and not entity.action['death'] and abs(distance[1])<40:#if player close on left
-                entity.dir[0]=-1
-                entity.action['run']=True
-                entity.action['stand']=False
-                if distance[0]<40:#don't get too close
-                    entity.action['run']=False
-                    entity.action['stand']=True
+        elif self.distance[0]>0 and not self.action['death'] and abs(self.distance[1])<40:#if player close on left
+            self.dir[0]=-1
+            self.action['run']=True
+            self.action['stand']=False
+            if self.distance[0]<40:#don't get too close
+                self.action['run']=False
+                self.action['stand']=True
 
-            if abs(distance[0])<40 and abs(distance[1])<40 and not player.action['death']:#swing sword when close
-                entity.action['sword']=True
+        if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+            self.action['sword']=True
 
 class Player(Entity):
 
@@ -91,7 +87,9 @@ class Player(Entity):
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
         self.prioriy_list = ['death','hurt','sword','jump','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
         self.state = 'stand'
+        self.vdir=0
 
 class Block(Entity):
 
@@ -113,13 +111,13 @@ class Items():
         self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1],10,15)
 
     def update(self,entity):
-        if entity.dir[0]>0 and entity.dir[1]==0:#right
+        if entity.dir[0]>0 and entity.vdir==0:#right
             self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
-        elif entity.dir[0]<0 and entity.dir[1]==0:#left
+        elif entity.dir[0]<0 and entity.vdir==0:#left
             self.rect=pygame.Rect(entity.hitbox.midleft[0]-40,entity.hitbox.midleft[1]-20,40,40)
-        elif entity.dir[1]>0:#up
+        elif entity.vdir>0:#up
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
-        elif entity.dir[1]<0:#down
+        elif entity.vdir<0:#down
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
 
 #class Sword(Items):
