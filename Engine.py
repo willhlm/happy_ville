@@ -11,11 +11,12 @@ class Collisions():
         for entity in dynamic_entties.sprites():
             if collision_types['bottom']:
                 entity.action['jump']=False
+                entity.action['stand']=True
                 if entity.dir[1]<0:#if on ground, cancel sword swing
                     entity.action['sword']=False
-                    entity.frame = 0
             elif not collision_types['bottom']:
                 entity.action['jump']=True
+                entity.action['stand']=False
             if collision_types['top']:#knock back when hit head
                 entity.movement[1]=1
 
@@ -65,7 +66,7 @@ class Collisions():
     @staticmethod
     def collided(dynamic_entties,static_enteties):
         return dynamic_entties.hitbox.colliderect(static_enteties.rect)
-
+#
 class Physics():
     def __init__(self):
         pass
@@ -107,10 +108,13 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir[0])
+                    if entity.action[action]=='sword' and entity.frame==0:#do not chnage the animation (and sword hitbox) until animation is complete
+                        entity.vdir=entity.dir[1]
+
+                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir[0],entity.vdir)
                     entity.frame += 1
 
-                    if entity.frame == sprite_img.get_frame_number(action,entity.dir[0])*3:
+                    if entity.frame == sprite_img.get_frame_number(action,entity.dir[0],entity.vdir)*3:
                         if action == 'death':
                             entity.kill()
                         else:
