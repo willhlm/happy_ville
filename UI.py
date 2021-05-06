@@ -135,7 +135,7 @@ class Game_UI():
                     player_class.action['jump']=True
 
                 if event.key==pygame.K_f:
-                    player_class.action['sword']=True
+                    player_class.action[player_class.equip]=True
 
 
             elif event.type == pygame.KEYUP:#lift bottom

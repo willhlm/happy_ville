@@ -41,8 +41,11 @@ class Enemy_1(Entity):
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
         self.state = 'stand'
         self.distance=[0,0]
-        self.vdir=0
-
+        self.ac_dir=[0,0]
+        self.equip='sword'#can change to bow
+        self.f_action=['sword','bow']
+        self.f_action_cooldown=True
+        
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
         self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
@@ -74,6 +77,9 @@ class Enemy_1(Entity):
         if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
             self.action['sword']=True
 
+    def f_acton(self):
+        pass
+
 class Player(Entity):
 
     friction=0.2
@@ -89,11 +95,14 @@ class Player(Entity):
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
-        self.priority_action=['death','hurt','sword']
+        self.priority_action=['death','hurt','sword','bow']
         self.nonpriority_action=['jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False}
         self.state = 'stand'
         self.ac_dir=[0,0]
+        self.equip='sword'#can change to bow
+        self.f_action=['sword','bow']
+        self.f_action_cooldown=True
 
     def f_action(self):
         pass
@@ -114,9 +123,13 @@ class Block(Entity):
 class Items():
 
     def __init__(self,entity):
-        self.movement=[0,0]
         self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1],10,15)
         self.hit=False
+
+class Sword(Items):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.movement=[0,0]
 
     def update(self,entity):
         if entity.ac_dir[0]>0 and entity.ac_dir[1]==0:#right
@@ -127,8 +140,3 @@ class Items():
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
         elif entity.ac_dir[1]<0:#down
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
-
-#class Sword(Items):
-#    def __init__(self,entity):
-#        super().__init__()
-#        self.rect.center = entity.rect.midright
