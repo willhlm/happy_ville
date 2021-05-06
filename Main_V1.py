@@ -6,11 +6,11 @@ import Action
 import UI
 import Sprites
 
-game=UI.Game_UI()
-
 platforms = pygame.sprite.Group()
 hero = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+
+game=UI.Game_UI()#initilise the game
 
 knight=Entities.Player([200,130])
 hero.add(knight)
@@ -66,8 +66,8 @@ while True:
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
 
-    Action.swing_sword(hero,platforms,enemies,game.screen)#sword swinger, target1,target2
-    Action.swing_sword(enemies,platforms,hero,game.screen)#sword swinger, target1,target2
+    Action.f_action(hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
+    Action.f_action(enemies,platforms,hero,game.screen)#f_action swinger, target1,target2
 
     pygame.draw.rect(game.screen, (255,0,0), knight.rect,2)#checking hitbox
     pygame.draw.rect(game.screen, (0,255,0), knight.hitbox,2)#checking hitbox

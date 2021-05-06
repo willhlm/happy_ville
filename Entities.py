@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame
 
 class Entity(pygame.sprite.Sprite):
 
@@ -20,7 +20,8 @@ class Entity(pygame.sprite.Sprite):
 
     def reset_timer(self):
         self.frame = 0
-        self.vdir=self.dir[1]
+        self.ac_dir[0]=self.dir[0]
+        self.ac_dir[1]=self.dir[1]
 
 class Enemy_1(Entity):
 
@@ -40,8 +41,11 @@ class Enemy_1(Entity):
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
         self.state = 'stand'
         self.distance=[0,0]
-        self.vdir=0
-
+        self.ac_dir=[0,0]
+        self.equip='sword'#can change to bow
+        self.f_action=['sword','bow']
+        self.f_action_cooldown=True
+        
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
         self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
@@ -73,10 +77,13 @@ class Enemy_1(Entity):
         if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
             self.action['sword']=True
 
+    def f_acton(self):
+        pass
+
 class Player(Entity):
 
     friction=0.2
-    velocity=[0,0]
+
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
@@ -84,12 +91,21 @@ class Player(Entity):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health=50
+        self.velocity=[0,0]
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
-        self.prioriy_list = ['death','hurt','sword','jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
+        #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
+        self.priority_action=['death','hurt','sword','bow']
+        self.nonpriority_action=['jump','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False}
         self.state = 'stand'
-        self.vdir=0
+        self.ac_dir=[0,0]
+        self.equip='sword'#can change to bow
+        self.f_action=['sword','bow']
+        self.f_action_cooldown=True
+
+    def f_action(self):
+        pass
 
 class Block(Entity):
 
@@ -107,20 +123,20 @@ class Block(Entity):
 class Items():
 
     def __init__(self,entity):
-        self.movement=[0,0]
         self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1],10,15)
+        self.hit=False
+
+class Sword(Items):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.movement=[0,0]
 
     def update(self,entity):
-        if entity.dir[0]>0 and entity.vdir==0:#right
+        if entity.ac_dir[0]>0 and entity.ac_dir[1]==0:#right
             self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
-        elif entity.dir[0]<0 and entity.vdir==0:#left
+        elif entity.ac_dir[0]<0 and entity.ac_dir[1]==0:#left
             self.rect=pygame.Rect(entity.hitbox.midleft[0]-40,entity.hitbox.midleft[1]-20,40,40)
-        elif entity.vdir>0:#up
+        elif entity.ac_dir[1]>0:#up
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
-        elif entity.vdir<0:#down
+        elif entity.ac_dir[1]<0:#down
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
-
-#class Sword(Items):
-#    def __init__(self,entity):
-#        super().__init__()
-#        self.rect.center = entity.rect.midright
