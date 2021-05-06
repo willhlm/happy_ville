@@ -101,26 +101,35 @@ class Animation():
     def set_img(enteties,sprite_img):
 
         for entity in enteties.sprites():#go through the group
-
-            for action in entity.prioriy_list:
-                if entity.action[action]:
+            for action in entity.priority_action+entity.nonpriority_action:#go through the group
+                if entity.action[action] and action in entity.priority_action:#if the action is priority
                     if action != entity.state:
                         entity.state = action
                         entity.reset_timer()
 
-                    if entity.action[action]=='sword' and entity.frame==0:#do not chnage the animation (and sword hitbox) until animation is complete
-                        entity.vdir=entity.dir[1]
-
-                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir[0],entity.vdir)
+                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.ac_dir)
                     entity.frame += 1
 
-                    if entity.frame == sprite_img.get_frame_number(action,entity.dir[0],entity.vdir)*3:
+                    if entity.frame == sprite_img.get_frame_number(action,entity.ac_dir)*3:
                         if action == 'death':
                             entity.kill()
                         else:
                             entity.reset_timer()
+                            entity.action[action] = False
+                    break
+
+                elif entity.action[action] and action in entity.nonpriority_action:#if the action is nonpriority
+
+                    #reset timer if the action is wrong
+                    if action != entity.state:
+                        entity.state = action
+                        entity.reset_timer()
+
+                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir)
+                    entity.frame += 1
+
+                    if entity.frame == sprite_img.get_frame_number(action,entity.dir)*3:
+                            entity.reset_timer()
                             if action != 'run':
                                 entity.action[action] = False
-                    break
-                else:
-                    pass
+                    break#take only the higest priority of the nonpriority list
