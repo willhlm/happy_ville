@@ -38,9 +38,9 @@ class Enemy_1(Entity):
         self.dmg=10
         self.ID=ID
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
-        self.priority_action=['death','hurt','sword','bow']
+        self.priority_action=['death','hurt','dash','sword','bow']
         self.nonpriority_action=['jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False}
         self.state = 'stand'
         self.distance=[0,0]
         self.ac_dir=[0,0]
@@ -79,7 +79,7 @@ class Enemy_1(Entity):
         if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
             self.action['sword']=True
 
-    def attack_acton(self):
+    def attack_action(self):
         pass
 
 class Player(Entity):
@@ -97,17 +97,29 @@ class Player(Entity):
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
-        self.priority_action=['death','hurt','sword','bow']
+        self.priority_action=['death','hurt','dash','sword','bow']
         self.nonpriority_action=['jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False}
         self.state = 'stand'
         self.ac_dir=[0,0]
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
         self.f_action_cooldown=True
 
-    def attack_acton(self):
-        pass
+    def attack_action(self):
+        if self.equip=='sword':
+            return Sword(self)
+        elif self.equip=='bow':
+            pass#return Bow(self)
+
+    def dashing(self):
+        self.velocity[0]=20*self.dir[0]#dash
+        self.action['dash']=True
+        self.action[self.equip]=False#cancel attack_action
+
+    def jump(self):
+        self.movement[1]=-11
+        self.action['jump']=True
 
 class Block(Entity):
 

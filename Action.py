@@ -10,6 +10,7 @@ def f_action(sword_enteties,platforms,enemies,screen):
 
                 if f_action=='sword':#if sword is quipped
 
+
                     sword=Entities.Sword(entity)#make a sword hitbox
 
                     #update sword position based on swing direction
@@ -44,6 +45,7 @@ def f_action(sword_enteties,platforms,enemies,screen):
                             collision_ene.action['run']=False
                         entity.f_action_cooldown=False#a flag to remove hitbox if hit something
 
+                    return sword
                 elif f_action=='bow':#if bow is equipeed
                     pass
 

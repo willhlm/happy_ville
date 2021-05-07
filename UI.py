@@ -131,11 +131,13 @@ class Game_UI():
                 if event.key == pygame.K_DOWN:#press down
                     player_class.dir[1]=-1
                 if event.key==pygame.K_SPACE and player_class.action['jump']==False:#jump
-                    player_class.movement[1]=-11
-                    player_class.action['jump']=True
+                    player_class.jump()
 
                 if event.key==pygame.K_f:
                     player_class.action[player_class.equip]=True
+
+                if event.key == pygame.K_LSHIFT:#left shift
+                    player_class.dashing()
 
 
             elif event.type == pygame.KEYUP:#lift bottom

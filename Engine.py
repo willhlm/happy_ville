@@ -79,14 +79,11 @@ class Physics():
             if entity.movement[1]>7:#set a y max speed
                 entity.movement[1]=7
 
-            if entity.action['run'] and entity.dir[0]>0:#accelerate right
-                entity.velocity[0]+=entity.acceleration[0]
-                if entity.velocity[0]>10:#max speed
-                    entity.velocity[0]=10
-            elif entity.action['run'] and entity.dir[0]<0:#accelerate left
-                entity.velocity[0]+=-entity.acceleration[0]
-                if entity.velocity[0]<-10:#max speed
-                    entity.velocity[0]=-10
+            if entity.action['run'] and not entity.action['dash']:#accelerate to direction when not dashing
+                entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
+
+                if abs(entity.velocity[0])>10:#max speed
+                    entity.velocity[0]=entity.dir[0]*10
 
             entity.velocity[0]=entity.velocity[0]-entity.friction*entity.velocity[0]#friction
             entity.movement[0]=entity.velocity[0]#set the horizontal velocity
