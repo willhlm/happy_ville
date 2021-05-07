@@ -37,15 +37,17 @@ class Enemy_1(Entity):
         self.health=100
         self.dmg=10
         self.ID=ID
-        self.prioriy_list = ['death','hurt','sword','jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
+        #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
+        self.priority_action=['death','hurt','sword','bow']
+        self.nonpriority_action=['jump','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False}
         self.state = 'stand'
         self.distance=[0,0]
         self.ac_dir=[0,0]
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
         self.f_action_cooldown=True
-        
+
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
         self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
@@ -77,7 +79,7 @@ class Enemy_1(Entity):
         if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
             self.action['sword']=True
 
-    def f_acton(self):
+    def attack_acton(self):
         pass
 
 class Player(Entity):
@@ -104,7 +106,7 @@ class Player(Entity):
         self.f_action=['sword','bow']
         self.f_action_cooldown=True
 
-    def f_action(self):
+    def attack_acton(self):
         pass
 
 class Block(Entity):

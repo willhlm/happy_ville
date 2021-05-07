@@ -131,6 +131,4 @@ class Animation():
 
                     if entity.frame == sprite_img.get_frame_number(action,entity.dir)*3:
                             entity.reset_timer()
-                            if action != 'run':
-                                entity.action[action] = False
                     break#take only the higest priority of the nonpriority list
