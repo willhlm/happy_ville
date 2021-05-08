@@ -14,6 +14,18 @@ class Tilemap():
         self.keys=[]
         self.chunk_render_distance=400
 
+    def scrolling(self,knight):
+        self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+
+        self.scroll=self.true_scroll.copy()
+        self.scroll[0]=int(self.scroll[0])
+        self.scroll[1]=int(self.scroll[1])
+
+        #if knight.action['death']:#if kngiht is dead, don't move game.screen
+        #    self.scroll[0]=0
+        #    self.scroll[1]=0
+
     @staticmethod
     def read_csv(path):
         tile_map=[]

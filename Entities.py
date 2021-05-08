@@ -25,7 +25,7 @@ class Entity(pygame.sprite.Sprite):
 
 class Enemy_1(Entity):
 
-    friction=0.2
+    friction=[0.2,1]
     def __init__(self,pos,ID):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
@@ -37,15 +37,17 @@ class Enemy_1(Entity):
         self.health=100
         self.dmg=10
         self.ID=ID
-        self.prioriy_list = ['death','hurt','sword','jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False}
+        #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
+        self.priority_action=['death','hurt','dash','sword','bow']
+        self.nonpriority_action=['jump','wall','fall','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False}
         self.state = 'stand'
         self.distance=[0,0]
         self.ac_dir=[0,0]
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
         self.f_action_cooldown=True
-        
+
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
         self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
@@ -77,13 +79,12 @@ class Enemy_1(Entity):
         if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
             self.action['sword']=True
 
-    def f_acton(self):
+    def attack_action(self):
         pass
 
 class Player(Entity):
 
-    friction=0.2
-
+    friction=[0.2,1]
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
@@ -95,17 +96,29 @@ class Player(Entity):
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
-        self.priority_action=['death','hurt','sword','bow']
-        self.nonpriority_action=['jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False}
+        self.priority_action=['death','hurt','dash','sword','bow']
+        self.nonpriority_action=['jump','wall','fall','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False}
         self.state = 'stand'
-        self.ac_dir=[0,0]
+        self.ac_dir=[0,0]#the direction while doing a priority action
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
-        self.f_action_cooldown=True
+        self.f_action_cooldown=True#True means you can use it
 
-    def f_action(self):
-        pass
+    def attack_action(self):
+        if self.equip=='sword':
+            return Sword(self)#make a sword
+        elif self.equip=='bow':
+            pass#return Bow(self)
+
+    def dashing(self):
+        self.velocity[0]=20*self.dir[0]#dash
+        self.action['dash']=True
+        self.action[self.equip]=False#cancel attack_action
+
+    def jump(self):
+        self.velocity[1]=-11
+        self.action['jump']=True
 
 class Block(Entity):
 

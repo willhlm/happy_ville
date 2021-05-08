@@ -32,16 +32,7 @@ def draw():
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 
 def scrolling():
-    map.true_scroll[0]+=(knight.rect.center[0]-4*map.true_scroll[0]-240)/20
-    map.true_scroll[1]+=(knight.rect.center[1]-map.true_scroll[1]-180)
-
-    map.scroll=map.true_scroll.copy()
-    map.scroll[0]=int(map.scroll[0])
-    map.scroll[1]=int(map.scroll[1])
-
-    if knight.action['death']:#if kngiht is dead, don't move game.screen
-        map.scroll[0]=0
-        map.scroll[1]=0
+    map.scrolling(knight.rect)
 
     platforms.update([-map.scroll[0],-map.scroll[1]])
     hero.update([-map.scroll[0],-map.scroll[1]])
