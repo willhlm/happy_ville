@@ -10,15 +10,25 @@ class Collisions():
 
         for entity in dynamic_entties.sprites():
             if collision_types['bottom']:
-                entity.action['jump']=False
+                entity.action['fall']=False
                 entity.action['stand']=True
+                entity.action['wall']=False
                 if entity.dir[1]<0:#if on ground, cancel sword swing
                     entity.action['sword']=False
-            elif not collision_types['bottom']:
+            else:#if not on ground
                 entity.action['jump']=True
                 entity.action['stand']=False
+                if entity.velocity[1]>0:#if falling down
+                    entity.action['jump']=False
+                    entity.action['fall']=True
+                    if collision_types['right'] or collision_types['left']:#on wall and not on ground
+                        entity.action['wall']=True
+                        entity.action['jump']=False
+                    else:
+                        entity.action['wall']=False
             if collision_types['top']:#knock back when hit head
                 entity.movement[1]=1
+
 
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
@@ -75,17 +85,18 @@ class Physics():
     def movement(dynamic_entties):
         for entity in dynamic_entties.sprites():
 
-            entity.movement[1]+=entity.acceleration[1]#gravity
-            if entity.movement[1]>7:#set a y max speed
-                entity.movement[1]=7
+            entity.velocity[1]=entity.velocity[1]+entity.acceleration[1]*entity.friction[1]#gravity
+            if entity.velocity[1]>7:#set a y max speed
+                entity.velocity[1]=7
+            entity.movement[1]=entity.velocity[1]#set the vertical velocity
 
-            if entity.action['run'] and not entity.action['dash']:#accelerate to direction when not dashing
+            if entity.action['run'] and not entity.action['dash']:#accelerate horizontal to direction when not dashing
                 entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
 
-                if abs(entity.velocity[0])>10:#max speed
+                if abs(entity.velocity[0])>10:#max horizontal speed
                     entity.velocity[0]=entity.dir[0]*10
 
-            entity.velocity[0]=entity.velocity[0]-entity.friction*entity.velocity[0]#friction
+            entity.velocity[0]=entity.velocity[0]-entity.friction[0]*entity.velocity[0]#friction
             entity.movement[0]=entity.velocity[0]#set the horizontal velocity
 
 class Animation():

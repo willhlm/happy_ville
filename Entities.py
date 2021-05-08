@@ -25,7 +25,7 @@ class Entity(pygame.sprite.Sprite):
 
 class Enemy_1(Entity):
 
-    friction=0.2
+    friction=[0.2,1]
     def __init__(self,pos,ID):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
@@ -84,8 +84,7 @@ class Enemy_1(Entity):
 
 class Player(Entity):
 
-    friction=0.2
-
+    friction=[0.2,1]
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
@@ -98,17 +97,17 @@ class Player(Entity):
         self.dmg=50
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']
-        self.nonpriority_action=['jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False}
+        self.nonpriority_action=['jump','wall','fall','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False}
         self.state = 'stand'
-        self.ac_dir=[0,0]
+        self.ac_dir=[0,0]#the direction while doing a priority action
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
-        self.f_action_cooldown=True
+        self.f_action_cooldown=True#True means you can use it
 
     def attack_action(self):
         if self.equip=='sword':
-            return Sword(self)
+            return Sword(self)#make a sword
         elif self.equip=='bow':
             pass#return Bow(self)
 
@@ -118,7 +117,7 @@ class Player(Entity):
         self.action[self.equip]=False#cancel attack_action
 
     def jump(self):
-        self.movement[1]=-11
+        self.velocity[1]=-11
         self.action['jump']=True
 
 class Block(Entity):
