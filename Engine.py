@@ -23,7 +23,7 @@ class Collisions():
                     entity.action['fall']=True
                     if collision_types['right'] or collision_types['left']:#on wall and not on ground
                         entity.action['wall']=True
-                        entity.action['jump']=False
+                        entity.action['fall']=False
                     else:
                         entity.action['wall']=False
             if collision_types['top']:#knock back when hit head

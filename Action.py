@@ -24,9 +24,9 @@ def f_action(sword_enteties,platforms,enemies,screen):
                     #if sword hit
                     if collision_plat or collision_ene and not collision_ene.action['death']:#any kind of sword hit
                         if entity.dir[1]>0:#up
-                            entity.movement[1]=5#knock back
+                            entity.velocity[1]=5#knock back
                         elif entity.dir[1]<0:#down
-                            entity.movement[1]=-10#knock back
+                            entity.velocity[1]=-10#knock back
                         elif entity.dir[0]>0:#right
                             entity.velocity[0]=-10#knock back
                         elif entity.dir[0]<0:#left
