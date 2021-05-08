@@ -39,8 +39,8 @@ class Enemy_1(Entity):
         self.ID=ID
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']
-        self.nonpriority_action=['jump','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False}
+        self.nonpriority_action=['jump','wall','fall','run','stand']
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False}
         self.state = 'stand'
         self.distance=[0,0]
         self.ac_dir=[0,0]

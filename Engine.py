@@ -9,14 +9,13 @@ class Collisions():
         collision_types=Collisions.collide(dynamic_entties,platforms)
 
         for entity in dynamic_entties.sprites():
-            if collision_types['bottom']:
+            if collision_types['bottom']:#if on ground
                 entity.action['fall']=False
                 entity.action['stand']=True
                 entity.action['wall']=False
                 if entity.dir[1]<0:#if on ground, cancel sword swing
                     entity.action['sword']=False
             else:#if not on ground
-                entity.action['jump']=True
                 entity.action['stand']=False
                 if entity.velocity[1]>0:#if falling down
                     entity.action['jump']=False
@@ -26,9 +25,11 @@ class Collisions():
                         entity.action['fall']=False
                     else:
                         entity.action['wall']=False
-            if collision_types['top']:#knock back when hit head
-                entity.movement[1]=1
+                else:#if going up
+                    entity.action['jump']=True
 
+            if collision_types['top']:#knock back when hit head
+                entity.velocity[1]=1
 
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
@@ -85,7 +86,7 @@ class Physics():
     def movement(dynamic_entties):
         for entity in dynamic_entties.sprites():
 
-            entity.velocity[1]=entity.velocity[1]+entity.acceleration[1]*entity.friction[1]#gravity
+            entity.velocity[1]=entity.velocity[1]*entity.friction[1]+entity.acceleration[1]#gravity
             if entity.velocity[1]>7:#set a y max speed
                 entity.velocity[1]=7
             entity.movement[1]=entity.velocity[1]#set the vertical velocity
