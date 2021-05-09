@@ -3,6 +3,7 @@ from os import listdir, walk
 from os.path import isfile, join
 
 class Sprites():
+    #use for animation sprites
     def __init__(self):
         # Add lists for each sprite animation here, in sub classes
 
@@ -34,7 +35,6 @@ class Sprites():
         #use to load single sprite, full path must be provided
 
         return pygame.image.load(path_to_sprite)
-
 
 
 #class containing sprites for player
@@ -74,10 +74,5 @@ class Sprites_evil_knight(Sprites):
     def get_image(self, input, timer, dir):
         if dir[0] >= 0:
             return self.sprite_dict[input][timer]
-<<<<<<< HEAD
-        elif dir < 0:
-            return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
-=======
         elif dir[0] < 0:
-            return pygame.transformation.flip(self.sprite_dict[input][timer])
->>>>>>> 75a4ecbc92b19e7a36a4c4d9aaa7dbcd76e132de
+            return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)

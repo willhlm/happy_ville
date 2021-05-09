@@ -14,13 +14,14 @@ invisible_blocks = pygame.sprite.Group()
 
 game=UI.Game_UI()#initilise the game
 
-knight=Entities.Player([200,130])
+knight=Entities.Player([200,50])
 hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
 
-map=Level.Tilemap()
-map.define_chunks('./Tiled/Level1.csv')
+map=Level.Tilemap('layer_test_2')
+#map.define_chunks('./Tiled/Level1.csv')
+map.define_chunks()#('./Tiled/layer_test_collision.csv')
 
 #tePlatforms,teEnemies=map.load_tiles('./Tiled/Level1.csv')
 #platforms.add(tePlatforms)#whole map

@@ -128,7 +128,7 @@ class Block(Entity):
 
     def __init__(self,img,pos,chunk_key=False):
         super().__init__()
-        self.image = self.images[img].convert_alpha()
+        self.image = img
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
