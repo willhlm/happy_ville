@@ -130,7 +130,7 @@ class Game_UI():
                     player_class.dir[1]=1
                 if event.key == pygame.K_DOWN:#press down
                     player_class.dir[1]=-1
-                if event.key==pygame.K_SPACE and player_class.action['fall'] == False:#jump
+                if event.key==pygame.K_SPACE and not player_class.action['fall'] and not player_class.action['jump']:#jump
                     player_class.jump()
 
                 if event.key==pygame.K_f:
