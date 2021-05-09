@@ -5,6 +5,14 @@ class Collisions():
         pass
 
     @staticmethod
+    def check_invisible(dynamic_entties,inv_enteties):
+        collided=Collisions.collided#make the hitbox collide and not rect
+
+        collisions=pygame.sprite.groupcollide(dynamic_entties,inv_enteties,False,False,collided)
+        for dyn_entity, inv_entity in collisions.items():
+            dyn_entity.action['inv']=True
+
+    @staticmethod
     def check_collisions(dynamic_entties,platforms):
         collision_types=Collisions.collide(dynamic_entties,platforms)
 

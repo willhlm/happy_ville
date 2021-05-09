@@ -2,6 +2,8 @@ import pygame, csv, Entities, math
 
 platforms = pygame.sprite.Group()
 Enemies = pygame.sprite.Group()
+npc = pygame.sprite.Group()
+invisible_blocks = pygame.sprite.Group()
 
 class Tilemap():
     def __init__(self):
@@ -88,9 +90,15 @@ class Tilemap():
                         elif tile=='e':
                             new_Enemies = Entities.Enemy_1([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))],1)
                             Enemies.add(new_Enemies)
-
+                        elif tile=='n':
+                            new_NPC = Entities.NPC([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))])
+                            npc.add(new_NPC)
+                        elif tile=='i':
+                            New_invisible_block = Entities.Invisible_block([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))])
+                            invisible_blocks.add(New_invisible_block)
                         tile_x+=1
                     tile_y+=1
+
             elif chunk_distances[key]>self.chunk_render_distance and key in self.keys:
                 entity_list = [i for i in platforms.sprites() if i.chunk_key==key]
 
@@ -99,7 +107,7 @@ class Tilemap():
                 #update key
                 self.keys.remove(key)
 
-        return platforms, Enemies
+        return platforms, Enemies, npc, invisible_blocks
 #________________chunks#
 
 
