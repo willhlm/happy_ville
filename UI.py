@@ -15,7 +15,7 @@ class Game_UI():
         self.ESC=False
         self.click=False
         self.font=pygame.font.Font('freesansbold.ttf',40)
-        self.text_surface=pygame.image.load("Sprites/House wall exterior 1.png")
+        self.text_surface=pygame.image.load("Sprites/aseprite/tile_sheets/House wall exterior 1.png")
 
     def start_menu(self):
         self.screen.blit(self.start_BG,(0,0))

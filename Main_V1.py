@@ -20,11 +20,7 @@ hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
 
-<<<<<<< HEAD
-map=Level.Tilemap('layer_test_2')
-=======
 map=Level.Tilemap('ground')
->>>>>>> 8de7ebcf95f7db8f76270f919fd4edddda0cda8e
 #map.define_chunks('./Tiled/Level1.csv')
 map.define_chunks()#('./Tiled/layer_test_collision.csv')
 
@@ -38,8 +34,6 @@ def draw():
     hero.draw(game.screen)
     enemies.draw(game.screen)
     npc.draw(game.screen)
-
-    game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 
 def scrolling():
     map.scrolling(knight.rect)
@@ -74,8 +68,6 @@ while True:
     Engine.Collisions.check_invisible(npc,invisible_blocks)
     conv=Engine.Collisions.check_npc_collision(knight,npc)
 
-    game.conversation(conv,knight)
-
 
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
@@ -89,6 +81,9 @@ while True:
 
     draw()
 
+    game.conversation(conv,knight)
+
+    game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 
     pygame.display.update()#update after every change
     game.clock.tick(60)#limmit FPS
