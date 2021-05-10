@@ -6,15 +6,18 @@ npc = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
 
 class Tilemap():
-    def __init__(self):
+    def __init__(self, level):
         self.tile_size=16
-        self.chunk_size=10
+        self.chunk_size=3
         self.scroll=[0,0]
         self.true_scroll=[0,0]
         self.total_disatnce=[0,0]
         self.chunks={}#placeholder to store the chunks
         self.keys=[]
         self.chunk_render_distance=400
+        self.level_name = level
+        self.collision_sheet = self.read_spritesheet("Sprites/" + level + "/collision.png")
+        print(self.collision_sheet[1])
 
     def scrolling(self,knight):
         self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
@@ -28,8 +31,8 @@ class Tilemap():
         #    self.scroll[0]=0
         #    self.scroll[1]=0
 
-    @staticmethod
-    def read_csv(path):
+    #@staticmethod
+    def read_csv(self, path):
         tile_map=[]
         with open(path) as data:
             data=csv.reader(data,delimiter=',')
@@ -37,16 +40,38 @@ class Tilemap():
                 tile_map.append(list(row))
         return tile_map
 
+    def read_spritesheet(self, path):
+        sprites = {}
+        print(path)
+        sheet = pygame.image.load(path).convert_alpha()
+        rows = int(sheet.get_rect().w/self.tile_size)
+        columns = int(sheet.get_rect().h/self.tile_size)
+        n = 0
+
+        for row in range(rows):
+            for column in range(columns):
+                y = row * self.tile_size
+                x = column * self.tile_size
+                rect = pygame.Rect(x, y, x + self.tile_size, y + self.tile_size)
+                image = pygame.Surface((self.tile_size,self.tile_size),pygame.SRCALPHA,32)
+                print(image.get_rect())
+                image.blit(sheet,(0,0),rect)
+                sprites[n] = image
+                n += 1
+
+        return sprites
+
 
 #________________chunks#
-    def define_chunks(self,path):#devide the data into chunks
-        map=self.read_csv(path)
+    def define_chunks(self):#devide the data into chunks
+        map=self.read_csv("Tiled/" + self.level_name + "_collision.csv")
         for k in range(len(map[0])//self.chunk_size):#Row: number of chunks
             for j in range(len(map[:][0])//self.chunk_size):#Column: number of chunks
                 chunk=[[]*self.chunk_size]*self.chunk_size
                 for i in range(0,self.chunk_size):#extract rows
                     chunk[i]=map[i+k*self.chunk_size][j*self.chunk_size:j*self.chunk_size+self.chunk_size]
                 string=str(k)+';'+str(j)
+                print(chunk)
                 self.chunks[string]=chunk#will look like chunks={'0;0':data,'0;1':data...}
 
     def chunk_distance(self):
@@ -64,8 +89,12 @@ class Tilemap():
             chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
         return chunk_distance
 
+    def test(self):
+        print(self.collision_sheet[1])
+
     def load_chunks(self):
         chunk_distances=self.chunk_distance()
+
 
         for key in chunk_distances.keys():
             if chunk_distances[key]<self.chunk_render_distance and key not in self.keys:
@@ -81,21 +110,11 @@ class Tilemap():
                 for row in map:
                     tile_x=0
                     for tile in row:
-                        if tile=='1':
-                            new_block = Entities.Block(1,[tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))],key)
-                            platforms.add(new_block)
-                        elif tile=='2':
-                            new_block = Entities.Block(2,[tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))],key)
-                            platforms.add(new_block)
-                        elif tile=='e':
-                            new_Enemies = Entities.Enemy_1([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))],1)
-                            Enemies.add(new_Enemies)
-                        elif tile=='n':
-                            new_NPC = Entities.NPC_1([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))])
-                            npc.add(new_NPC)
-                        elif tile=='i':
-                            New_invisible_block = Entities.Invisible_block([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))])
-                            invisible_blocks.add(New_invisible_block)
+                        if tile=='-1':
+                            tile_x+=1
+                            continue
+                        new_block = Entities.Block(self.collision_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                        platforms.add(new_block)
                         tile_x+=1
                     tile_y+=1
 
@@ -110,9 +129,10 @@ class Tilemap():
         return platforms, Enemies, npc, invisible_blocks
 #________________chunks#
 
-
-
-
+    def entity_position(self, tile_x, tile_y, x, y):
+        x_pos = tile_x * self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0]))
+        y_pos = tile_y * self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))
+        return [x_pos,y_pos]
 
     #load everything at once
     def load_tiles(self,path):
@@ -136,3 +156,28 @@ class Tilemap():
         self.map_w,self.map_h=x*self.tile_size,y*self.tile_size#map size
 
         return platforms, Enemies
+
+class Sprite_sheet():
+
+    def __init__(self, filename):
+        try:
+            self.sheet =  pygame.image.load(filename).convert()
+        except:
+            print(f"Unable to load spritesheet image: {filename}")
+            raise SystemExit(e)
+
+    def image_at(self, rectangle, colorkey = None):
+        #Loads image from x, y, x+tilesize, y+tilesize.
+
+        rect = pygame.Rect(rectangle)
+        image = pygame.Surface(rect.size).convert()
+        image.blit(self.sheet, (0, 0), rect)
+        if colorkey is not None:
+            if colorkey is -1:
+                colorkey = image.get_at((0,0))
+            image.set_colorkey(colorkey, pygame.RLEACCEL)
+        return image
+
+    def images_at(self, rects, colorkey = None):
+        #returns list of all images in sheet
+        return [self.image_at(rect, colorkey) for rect in rects]
