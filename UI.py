@@ -6,7 +6,7 @@ class Game_UI():
     def __init__(self):
         pygame.init()#initilise
         self.WINDOW_SIZE = (480,270)
-        self.scale = 2
+        self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen=pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
