@@ -132,7 +132,7 @@ class Animation():
 
     ### FIX frame rate thingy
     @staticmethod
-    def set_img(enteties,sprite_img):
+    def set_img(enteties):
 
         for entity in enteties.sprites():#go through the group
             for action in entity.priority_action+entity.nonpriority_action:#go through the group
@@ -141,10 +141,10 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.ac_dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//3,entity.ac_dir)
                     entity.frame += 1
 
-                    if entity.frame == sprite_img.get_frame_number(action,entity.ac_dir)*3:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.ac_dir)*3:
                         if action == 'death':
                             entity.kill()
                         else:
@@ -160,9 +160,9 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = sprite_img.get_image(action,entity.frame//3,entity.dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//3,entity.dir)
                     entity.frame += 1
 
-                    if entity.frame == sprite_img.get_frame_number(action,entity.dir)*3:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*3:
                             entity.reset_timer()
                     break#take only the higest priority of the nonpriority list

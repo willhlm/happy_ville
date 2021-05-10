@@ -68,9 +68,9 @@ while True:
     Engine.Collisions.check_collisions(npc,platforms)
     Engine.Collisions.check_invisible(npc,invisible_blocks)
 
-    Engine.Animation.set_img(hero,sprites['knight'])
-    Engine.Animation.set_img(enemies,sprites['knight'])
-    Engine.Animation.set_img(npc,sprites['knight'])
+    Engine.Animation.set_img(hero)
+    Engine.Animation.set_img(enemies)
+    Engine.Animation.set_img(npc)
 
     Action.f_action(hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
     Action.f_action(enemies,platforms,hero,game.screen)#f_action swinger, target1,target2

@@ -65,6 +65,24 @@ class Sprites_player(Sprites):
 
         return len(self.sprite_dict[input])
 
+class NPC(Sprites):
+
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+        self.sprite_dict = self.load_all_sprites("Sprites/NPC/" + name + "/")
+
+    def get_image(self, input, timer,dir):
+
+        if dir[0] < 0:
+            return self.sprite_dict[input][timer]
+        elif dir[0] >= 0:
+            return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
+
+    def get_frame_number(self, input,dir):
+
+        return len(self.sprite_dict[input])
+
 class Sprites_evil_knight(Sprites):
 
     player_path = "Sprites/player/"

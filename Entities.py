@@ -1,4 +1,4 @@
-import pygame
+import pygame, Read_files
 
 class Entity(pygame.sprite.Sprite):
 
@@ -114,6 +114,7 @@ class Player(Entity):
         #conversations with villigers
         self.letter_frame=1
         self.text_frame=0
+        self.sprites = Read_files.Sprites_player()
 
 
     def attack_action(self):
@@ -243,8 +244,10 @@ class NPC_1(NPC):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.text=['hej pelle','boobies','bye']
-        self.portrait=pygame.image.load("Sprites/NPC/Woman1.png")
+        self.portrait=pygame.image.load("Sprites/NPC/NPC_1/Woman1.png")
         self.text_surface=pygame.image.load("Sprites/aseprite/tile_sheets/House wall exterior 1.png")
+        self.name = 'NPC_1'
+        self.sprites = Read_files.NPC(self.name)
         #self.font=pygame.font.Font('freesansbold.ttf',40)
 
     def AI(self):
