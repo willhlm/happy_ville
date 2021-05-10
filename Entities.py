@@ -92,12 +92,12 @@ class Enemy_1(Entity):
 
 class Player(Entity):
 
-    friction=[0.2,1]
+    friction=[0.2,0]
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,42)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health=50
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
@@ -125,6 +125,7 @@ class Player(Entity):
         self.action[self.equip]=False#cancel attack_action
 
     def jump(self):
+        self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
         if self.action['wall']:
