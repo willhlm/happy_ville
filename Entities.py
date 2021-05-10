@@ -21,6 +21,12 @@ class Entity(pygame.sprite.Sprite):
             self.action[new_action] = True
             self.timer = 0
 
+    def update_hitbox(self):
+        self.hitbox.center = self.rect.center
+
+    def update_rect(self):
+        self.rect.center = self.hitbox.center
+
     def reset_timer(self):
         self.frame = 0
         self.ac_dir[0]=self.dir[0]
@@ -91,7 +97,7 @@ class Player(Entity):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,42)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health=50
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
@@ -104,8 +110,9 @@ class Player(Entity):
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
         self.f_action_cooldown=True#True means you can use it
-        self.letter_frame=1
         self.text_frame=0
+        self.hitbox_offset = 3
+        self.letter_frame=1
 
     def attack_action(self):
         if self.equip=='sword':
@@ -128,6 +135,18 @@ class Player(Entity):
         self.action['talk'] = not self.action['talk']
         self.letter_frame=1
         self.text_frame+=1
+
+    def update(self,pos):
+        super(Player, self).update(pos)
+        self.update_hitbox()
+
+    def update_hitbox(self):
+        self.hitbox.center = [self.rect.center[0], self.rect.center[1] + self.hitbox_offset]
+
+    def update_rect(self):
+        self.rect.center = [self.hitbox.center[0], self.hitbox.center[1] - self.hitbox_offset]
+
+
 
 class Block(Entity):
 

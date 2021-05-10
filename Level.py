@@ -25,6 +25,8 @@ class Tilemap():
         self.true_scroll[0]+=(knight.topleft[0]-1*self.true_scroll[0]-240)/1
         self.true_scroll[1]+=(knight.topleft[1]-self.true_scroll[1]-180)
 
+        #print(self.true_scroll)
+
         self.scroll=self.true_scroll.copy()
         self.scroll[0]=int(self.scroll[0])
         self.scroll[1]=int(self.scroll[1])
