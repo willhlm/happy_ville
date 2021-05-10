@@ -15,7 +15,7 @@ class Game_UI():
         self.ESC=False
         self.click=False
         self.font=pygame.font.Font('freesansbold.ttf',40)
-        self.conv=0
+        self.text_surface=pygame.image.load("Sprites/aseprite/tile_sheets/House wall exterior 1.png")
 
     def start_menu(self):
         self.screen.blit(self.start_BG,(0,0))
@@ -108,30 +108,24 @@ class Game_UI():
 
     def conversation(self,npc,knight):
         if npc:
-
             if knight.text_frame//3!=len(npc.text[0]):#if not everything has been said.
-                time=0.01 #letters per secnodn
-                fps=60
 
-            #    print(int((fps/time)*len(npc.text[0])))
                 text=npc.text[0][:knight.text_frame//3+1]
-                print(text)
+                text_surface=self.font.render(text,True,(0,0,0))
 
-                #need a delay of some sort so tht each letter comes in slower
+                self.print_conversation(npc,text_surface)
 
-                text_surface=self.font.render(text,True,(0,0,0))#antialias flag
-                text_rect=text_surface.get_rect(center=(100,100))#position
-                pygame.draw.rect(self.screen, (0,0,0), text_rect, 1)
-                self.screen.blit(text_surface,text_rect)
                 knight.text_frame+=1
-            else:
+            else:#if everything was said, print the whole text
 
-                text_surface=self.font.render(npc.text[0],True,(0,0,0))#antialias flag
-                text_rect=text_surface.get_rect(center=(100,100))#position
-                pygame.draw.rect(self.screen, (0,0,0), text_rect, 1)
-                self.screen.blit(text_surface,text_rect)
+                text_surface=self.font.render(npc.text[0],True,(0,0,0))
 
+                self.print_conversation(npc,text_surface)
 
+    def print_conversation(self,npc,text):#blitting of text from conversation
+        self.screen.blit(self.text_surface,(100,100))#the text BG
+        self.screen.blit(npc.portrait,(200,100))#the portait
+        self.screen.blit(text,(100,100))#the text
 
     def input(self,player_class):#input while playing
         #game input

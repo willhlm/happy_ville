@@ -35,8 +35,6 @@ def draw():
     enemies.draw(game.screen)
     npc.draw(game.screen)
 
-    game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
-
 def scrolling():
     map.scrolling(knight.rect)
     scroll = [-map.scroll[0],-map.scroll[1]]
@@ -71,7 +69,6 @@ while True:
     Engine.Collisions.check_invisible(npc,invisible_blocks)
     conv=Engine.Collisions.check_npc_collision(knight,npc)
 
-    game.conversation(conv,knight)
 
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
@@ -84,5 +81,10 @@ while True:
     pygame.draw.rect(game.screen, (0,255,0), knight.hitbox,2)#checking hitbox
 
     draw()
+
+    game.conversation(conv,knight)
+
+    game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
+
     pygame.display.update()#update after every change
     game.clock.tick(60)#limmit FPS
