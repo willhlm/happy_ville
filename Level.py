@@ -91,7 +91,7 @@ class Tilemap():
                             new_Enemies = Entities.Enemy_1([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))],1)
                             Enemies.add(new_Enemies)
                         elif tile=='n':
-                            new_NPC = Entities.NPC([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))])
+                            new_NPC = Entities.NPC_1([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))])
                             npc.add(new_NPC)
                         elif tile=='i':
                             New_invisible_block = Entities.Invisible_block([tile_x*self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0])),tile_y*self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))])

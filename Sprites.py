@@ -5,7 +5,6 @@ from os.path import isfile, join
 class Sprites():
     def __init__(self):
         # Add lists for each sprite animation here, in sub classes
-
         pass
 
     def load_all_sprites(self,base_path):

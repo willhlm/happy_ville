@@ -3,6 +3,7 @@ import pygame
 class Entity(pygame.sprite.Sprite):
 
     acceleration=[1,0.8]
+
     def __init__(self):
         super().__init__()
         self.movement=[0,0]
@@ -98,11 +99,12 @@ class Player(Entity):
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
         self.f_action_cooldown=True#True means you can use it
+        self.text_frame=1
 
     def attack_action(self):
         if self.equip=='sword':
@@ -120,6 +122,10 @@ class Player(Entity):
         self.action['jump']=True
         if self.action['wall']:
             self.velocity[0]=-self.dir[0]*10
+
+    def talk(self):
+        self.action['talk'] = not self.action['talk']
+        self.text_frame=1
 
 class Block(Entity):
 
@@ -167,21 +173,34 @@ class NPC(Entity):
     friction=[0.2,1]
     acceleration=[0.3,0.8]
 
+    def __init__(self):
+        super().__init__()
+        self.action = {'stand':True,'run':False,'death':False,'hurt':False,'dash':False,'inv':False,'talk':False}
+        self.nonpriority_action = ['run','stand']
+        self.priority_action = ['death','hurt']
+        self.health = 50
+        self.state = 'stand'
+        #self.text_frame=0
+
+class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.action={'stand':True,'run':False,'death':False,'hurt':False,'dash':False,'inv':False}
-        self.nonpriority_action=['run','stand']
-        self.priority_action=['death','hurt','dash']
-        self.health=50
-        self.state = 'stand'
-
+        self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
+        self.rect.center = self.hitbox.center#match the positions of hitboxes
+        self.text=['hej','boobies','bye']
+        self.letter_frame=0
+        
     def AI(self):
         self.action['run']=True
         if self.action['inv']:#collision with invisble block
-            self.velocity[0]=-self.velocity[0]
-            self.dir[0]=-self.dir[0]
-            self.action['inv']=False
+            self.velocity[0] = -self.velocity[0]
+            self.dir[0] = -self.dir[0]
+            self.action['inv'] = False
+
+    def talk(self):
+        self.action['run']=False
+        self.action['stand']=True
+        self.velocity=[0,0]
+        self.action['talk']=True
