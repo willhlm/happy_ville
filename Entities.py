@@ -99,8 +99,11 @@ class Player(Entity):
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
+<<<<<<< HEAD
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,
                      'bow':False,'dash':False,'wall':False,'fall':False,'inv':False}
+=======
+>>>>>>> 8de7ebcf95f7db8f76270f919fd4edddda0cda8e
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
@@ -130,9 +133,6 @@ class Player(Entity):
         self.text_frame=1
 
 class Block(Entity):
-
-    images = {1 : pygame.image.load("sprites/block_castle.png"),
-             2 : pygame.image.load("sprites/block_question.png")}
 
     def __init__(self,img,pos,chunk_key=False):
         super().__init__()
@@ -202,7 +202,7 @@ class NPC_1(NPC):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.text=['hej','boobies','bye']
         self.portrait=pygame.image.load("Sprites/NPC/Woman1.png")
-
+        
     def AI(self):
         #self.action['run']=True
         if self.action['inv']:#collision with invisble block
