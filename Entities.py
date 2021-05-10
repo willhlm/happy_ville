@@ -91,7 +91,7 @@ class Player(Entity):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,42)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health=50
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
@@ -126,6 +126,10 @@ class Player(Entity):
     def talk(self):
         self.action['talk'] = not self.action['talk']
         self.text_frame=1
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.topleft = [self.rect.center[0], self.rect.center[1] + pos[1]]
 
 class Block(Entity):
 

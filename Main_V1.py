@@ -39,12 +39,13 @@ def draw():
 
 def scrolling():
     map.scrolling(knight.rect)
-    platforms.update([-map.scroll[0],-map.scroll[1]])
-    bg_blocks.update([-map.scroll[0],-map.scroll[1]])
-    hero.update([-map.scroll[0],-map.scroll[1]])
-    enemies.update([-map.scroll[0],-map.scroll[1]])
-    npc.update([-map.scroll[0],-map.scroll[1]])
-    invisible_blocks.update([-map.scroll[0],-map.scroll[1]])
+    scroll = [-map.scroll[0],-map.scroll[1]]
+    platforms.update(scroll)
+    bg_blocks.update(scroll)
+    hero.update(scroll)
+    enemies.update(scroll)
+    npc.update(scroll)
+    invisible_blocks.update(scroll)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen

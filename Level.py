@@ -16,7 +16,7 @@ class Tilemap():
         self.chunks={}#placeholder to store the chunks containing collision information
         self.chunks_bg1={} #chunks containg first bg layer
         self.keys=[]
-        self.chunk_render_distance=800
+        self.chunk_render_distance=400
         self.level_name = level
         self.collision_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/collision.png")
         self.bg1_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg1.png")
@@ -24,6 +24,8 @@ class Tilemap():
     def scrolling(self,knight):
         self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+
+        #print(self.true_scroll)
 
         self.scroll=self.true_scroll.copy()
         self.scroll[0]=int(self.scroll[0])
