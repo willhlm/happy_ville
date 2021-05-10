@@ -20,7 +20,7 @@ hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
 
-map=Level.Tilemap('ground')
+map=Level.Tilemap('village1')
 #map.define_chunks('./Tiled/Level1.csv')
 map.define_chunks()#('./Tiled/layer_test_collision.csv')
 

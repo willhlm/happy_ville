@@ -9,7 +9,7 @@ invisible_blocks = pygame.sprite.Group()
 class Tilemap():
     def __init__(self, level):
         self.tile_size=16
-        self.chunk_size=50
+        self.chunk_size=10
         self.scroll=[0,0]
         self.true_scroll=[0,0]
         self.total_disatnce=[0,0]
@@ -48,8 +48,8 @@ class Tilemap():
         sprites = {}
         print(path)
         sheet = pygame.image.load(path).convert_alpha()
-        rows = int(sheet.get_rect().w/self.tile_size)
-        columns = int(sheet.get_rect().h/self.tile_size)
+        rows = int(sheet.get_rect().h/self.tile_size)
+        columns = int(sheet.get_rect().w/self.tile_size)
         n = 0
 
         for row in range(rows):
@@ -69,8 +69,11 @@ class Tilemap():
     def define_chunks(self):#devide the data into chunks
         map=self.read_csv("Tiled/" + self.level_name + "_collision.csv")
         map_bg=self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
-        for k in range(len(map[0])//self.chunk_size):#Row: number of chunks
-            for j in range(len(map[:][0])//self.chunk_size):#Column: number of chunks
+        columns = len(map[0])//self.chunk_size
+        rows = len(map)//self.chunk_size
+        print(rows, " ", columns)
+        for k in range(rows):#Row: number of chunks
+            for j in range(columns):#Column: number of chunks
                 chunk=[[]*self.chunk_size]*self.chunk_size
                 chunk_bg=[[]*self.chunk_size]*self.chunk_size
                 for i in range(0,self.chunk_size):#extract rows
