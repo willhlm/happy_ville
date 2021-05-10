@@ -180,7 +180,6 @@ class NPC(Entity):
         self.priority_action = ['death','hurt']
         self.health = 50
         self.state = 'stand'
-        #self.text_frame=0
 
 class NPC_1(NPC):
     def __init__(self,pos):
@@ -190,8 +189,7 @@ class NPC_1(NPC):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.text=['hej','boobies','bye']
-        self.letter_frame=0
-        
+
     def AI(self):
         self.action['run']=True
         if self.action['inv']:#collision with invisble block

@@ -110,12 +110,9 @@ class Game_UI():
         if npc:
 
             if knight.text_frame//3!=len(npc.text[0]):#if not everything has been said.
-                time=0.01 #letters per secnodn
-                fps=60
 
             #    print(int((fps/time)*len(npc.text[0])))
                 text=npc.text[0][:knight.text_frame//3+1]
-                print(text)
 
                 #need a delay of some sort so tht each letter comes in slower
 
@@ -124,7 +121,8 @@ class Game_UI():
                 pygame.draw.rect(self.screen, (0,0,0), text_rect, 1)
                 self.screen.blit(text_surface,text_rect)
                 knight.text_frame+=1
-            else:
+
+            else:#if everything was said, print the whole text
 
                 text_surface=self.font.render(npc.text[0],True,(0,0,0))#antialias flag
                 text_rect=text_surface.get_rect(center=(100,100))#position
