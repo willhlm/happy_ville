@@ -20,7 +20,7 @@ hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
 
-map=Level.Tilemap('chunk_test')
+map=Level.Tilemap('ground')
 #map.define_chunks('./Tiled/Level1.csv')
 map.define_chunks()#('./Tiled/layer_test_collision.csv')
 
@@ -29,8 +29,8 @@ map.define_chunks()#('./Tiled/layer_test_collision.csv')
 #enemies.add(teEnemies)#whole map
 
 def draw():
-    platforms.draw(game.screen)
     bg_blocks.draw(game.screen)
+    platforms.draw(game.screen)
     hero.draw(game.screen)
     enemies.draw(game.screen)
     npc.draw(game.screen)

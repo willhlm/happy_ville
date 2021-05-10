@@ -18,8 +18,8 @@ class Tilemap():
         self.keys=[]
         self.chunk_render_distance=800
         self.level_name = level
-        self.collision_sheet = self.read_spritesheet("Sprites/" + level + "/collision.png")
-        self.bg1_sheet = self.read_spritesheet("Sprites/" + level + "/bg1.png")
+        self.collision_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/collision.png")
+        self.bg1_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg1.png")
 
     def scrolling(self,knight):
         self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
