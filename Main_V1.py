@@ -39,7 +39,6 @@ def draw():
 
 def scrolling():
     map.scrolling(knight.rect)
-
     platforms.update([-map.scroll[0],-map.scroll[1]])
     bg_blocks.update([-map.scroll[0],-map.scroll[1]])
     hero.update([-map.scroll[0],-map.scroll[1]])
@@ -69,6 +68,9 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Collisions.check_collisions(npc,platforms)
     Engine.Collisions.check_invisible(npc,invisible_blocks)
+    conv=Engine.Collisions.check_npc_collision(knight,npc)
+
+    game.conversation(conv,knight)
 
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])

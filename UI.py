@@ -15,6 +15,7 @@ class Game_UI():
         self.ESC=False
         self.click=False
         self.font=pygame.font.Font('freesansbold.ttf',40)
+        self.conv=0
 
     def start_menu(self):
         self.screen.blit(self.start_BG,(0,0))
@@ -105,6 +106,33 @@ class Game_UI():
                     self.option=False
                     self.ESC=False
 
+    def conversation(self,npc,knight):
+        if npc:
+
+            if knight.text_frame//3!=len(npc.text[0]):#if not everything has been said.
+                time=0.01 #letters per secnodn
+                fps=60
+
+            #    print(int((fps/time)*len(npc.text[0])))
+                text=npc.text[0][:knight.text_frame//3+1]
+                print(text)
+
+                #need a delay of some sort so tht each letter comes in slower
+
+                text_surface=self.font.render(text,True,(0,0,0))#antialias flag
+                text_rect=text_surface.get_rect(center=(100,100))#position
+                pygame.draw.rect(self.screen, (0,0,0), text_rect, 1)
+                self.screen.blit(text_surface,text_rect)
+                knight.text_frame+=1
+            else:
+
+                text_surface=self.font.render(npc.text[0],True,(0,0,0))#antialias flag
+                text_rect=text_surface.get_rect(center=(100,100))#position
+                pygame.draw.rect(self.screen, (0,0,0), text_rect, 1)
+                self.screen.blit(text_surface,text_rect)
+
+
+
     def input(self,player_class):#input while playing
         #game input
         for event in pygame.event.get():
@@ -116,34 +144,42 @@ class Game_UI():
                     self.ESC=True
                     self.start_menu()
 
-                if event.key == pygame.K_RIGHT:
-                    player_class.action['run']=True
-                    player_class.action['stand']=False
-                    player_class.dir[0]=1
+                if event.key == pygame.K_t:
+                    player_class.talk()
 
-                if event.key == pygame.K_LEFT:
-                    player_class.action['run']=True
-                    player_class.action['stand']=False
-                    player_class.dir[0]=-1
+                if not player_class.action['talk']:#if not in conversation
 
-                if event.key == pygame.K_UP:#press up
-                    player_class.dir[1]=1
-                if event.key == pygame.K_DOWN:#press down
-                    player_class.dir[1]=-1
-                if event.key==pygame.K_SPACE and not player_class.action['fall'] and not player_class.action['jump']:#jump
-                    player_class.jump()
+                    if event.key == pygame.K_RIGHT:
+                        player_class.action['run']=True
+                        player_class.action['stand']=False
+                        player_class.dir[0]=1
 
-                if event.key==pygame.K_f:
-                    player_class.action[player_class.equip]=True
+                    if event.key == pygame.K_LEFT:
+                        player_class.action['run']=True
+                        player_class.action['stand']=False
+                        player_class.dir[0]=-1
 
-                if event.key == pygame.K_LSHIFT:#left shift
-                    player_class.dashing()
+                    if event.key == pygame.K_UP:#press up
+                        player_class.dir[1]=1
+                    if event.key == pygame.K_DOWN:#press down
+                        player_class.dir[1]=-1
+                    if event.key==pygame.K_SPACE and not player_class.action['fall'] and not player_class.action['jump']:#jump
+                        player_class.jump()
+
+                    if event.key==pygame.K_f:
+                        player_class.action[player_class.equip]=True
+
+                    if event.key == pygame.K_LSHIFT:#left shift
+                        player_class.dashing()
 
 
             elif event.type == pygame.KEYUP:#lift bottom
                 if event.key == pygame.K_RIGHT and player_class.dir[0]>0:
                     player_class.action['stand']=True
                     player_class.action['run']=False
+
+                if event.key == event.key == pygame.K_t:
+                    pass#player_class.talk()
 
                 if event.key == pygame.K_LEFT and player_class.dir[0]<0:
                     player_class.action['stand']=True

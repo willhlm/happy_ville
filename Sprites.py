@@ -6,7 +6,6 @@ class Sprites():
     #use for animation sprites
     def __init__(self):
         # Add lists for each sprite animation here, in sub classes
-
         pass
 
     def load_all_sprites(self,base_path):

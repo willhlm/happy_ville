@@ -4,6 +4,16 @@ class Collisions():
     def __init__(self):
         pass
 
+    #npc player conversation
+    @staticmethod
+    def check_npc_collision(player,npcs):
+        npc=pygame.sprite.spritecollideany(player,npcs)
+        if npc and player.action['talk']:#if player want to talk talks
+            npc.talk()
+            return npc
+
+
+    #invisible wall collision for NPC and enemy
     @staticmethod
     def check_invisible(dynamic_entties,inv_enteties):
         collided=Collisions.collided#make the hitbox collide and not rect
@@ -12,6 +22,7 @@ class Collisions():
         for dyn_entity, inv_entity in collisions.items():
             dyn_entity.action['inv']=True
 
+    #collision of player and enemy: setting the flags depedning on the collisoin directions
     @staticmethod
     def check_collisions(dynamic_entties,platforms):
         collision_types=Collisions.collide(dynamic_entties,platforms)
@@ -82,6 +93,7 @@ class Collisions():
 
         return collision_types
 
+    #make the hitbox collide instead of rect
     @staticmethod
     def collided(dynamic_entties,static_enteties):
         return dynamic_entties.hitbox.colliderect(static_enteties.rect)
