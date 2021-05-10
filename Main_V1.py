@@ -4,13 +4,7 @@ import Entities
 import Level
 import Action
 import UI
-import Sprites
-
-
-
-#Alphabet_Font=Font.Alphabet("Sprites/Alphabet/Alphabet.png")
-#Alphabet_Font.render(screen,'Will I am Hurt',(20,20))
-
+import Read_files
 
 platforms = pygame.sprite.Group()
 bg_blocks = pygame.sprite.Group()
@@ -24,7 +18,7 @@ game=UI.Game_UI()#initilise the game
 knight=Entities.Player([200,50])
 hero.add(knight)
 
-sprites = {'knight': Sprites.Sprites_player()}
+sprites = {'knight': Read_files.Sprites_player()}
 
 map=Level.Tilemap('village1')
 #map.define_chunks('./Tiled/Level1.csv')

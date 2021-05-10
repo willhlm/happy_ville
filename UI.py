@@ -1,8 +1,7 @@
 import pygame, sys
-import Font
+import Read_files#for the fonts
 
 class Game_UI():
-
     def __init__(self):
         pygame.init()#initilise
         self.WINDOW_SIZE = (480,270)
@@ -15,7 +14,7 @@ class Game_UI():
         self.gameover=False
         self.ESC=False
         self.click=False
-        self.font=Font.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
 
     def start_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -98,8 +97,7 @@ class Game_UI():
             if event.type == pygame.KEYDOWN:
                 if event.key==pygame.K_ESCAPE:#escape button
                     self.display.fill((207,238,250))#fill game.screen
-
-                #    self.screen.blit(self.start_BG,(0,0))
+                    #self.screen.blit(self.start_BG,(0,0))
                     #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
                     self.resolution=False
                     self.option=False
@@ -143,7 +141,6 @@ class Game_UI():
 
                     if event.key == pygame.K_LSHIFT:#left shift
                         player_class.dashing()
-
 
             elif event.type == pygame.KEYUP:#lift bottom
                 if event.key == pygame.K_RIGHT and player_class.dir[0]>0:

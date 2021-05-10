@@ -46,7 +46,7 @@ class Tilemap():
 
     def read_spritesheet(self, path):
         sprites = {}
-        print(path)
+
         sheet = pygame.image.load(path).convert_alpha()
         rows = int(sheet.get_rect().h/self.tile_size)
         columns = int(sheet.get_rect().w/self.tile_size)
@@ -71,7 +71,7 @@ class Tilemap():
         map_bg=self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
         columns = len(map[0])//self.chunk_size
         rows = len(map)//self.chunk_size
-        print(rows, " ", columns)
+
         for k in range(rows):#Row: number of chunks
             for j in range(columns):#Column: number of chunks
                 chunk=[[]*self.chunk_size]*self.chunk_size
