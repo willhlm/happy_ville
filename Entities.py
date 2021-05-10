@@ -210,9 +210,9 @@ class NPC(Entity):
         self.priority_action = ['death','hurt']
         self.health = 50
         self.state = 'stand'
+        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
 
-
-    def talk(self,game_screen,knight,font):
+    def talk(self,game_screen,knight):
         self.action['run']=False
         self.action['stand']=True
         self.velocity=[0,0]
@@ -225,16 +225,16 @@ class NPC(Entity):
 
             text=self.text[knight.text_frame//2][:knight.letter_frame//3+1]
             knight.letter_frame+=1
-            self.blit_conversation(text,game_screen,font)
+            self.blit_conversation(text,game_screen)
 
         else:#if everything was said, print the whole text
-            self.blit_conversation(self.text[knight.text_frame//2],game_screen,font)
+            self.blit_conversation(self.text[knight.text_frame//2],game_screen)
 
-    def blit_conversation(self,text,game_screen,font):#blitting of text from conversation
+    def blit_conversation(self,text,game_screen):#blitting of text from conversation
 
         game_screen.blit(self.text_surface,(100,100))#the text BG
         game_screen.blit(self.portrait,(200,100))#the portait
-        font.render(game_screen,text,(100,100))
+        self.font.render(game_screen,text,(100,100))
 
 class NPC_1(NPC):
     def __init__(self,pos):
