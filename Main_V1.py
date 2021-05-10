@@ -6,6 +6,12 @@ import Action
 import UI
 import Sprites
 
+
+
+#Alphabet_Font=Font.Alphabet("Sprites/Alphabet/Alphabet.png")
+#Alphabet_Font.render(screen,'Will I am Hurt',(20,20))
+
+
 platforms = pygame.sprite.Group()
 bg_blocks = pygame.sprite.Group()
 hero = pygame.sprite.Group()
@@ -83,7 +89,7 @@ while True:
 
     draw()
 
-    Engine.Collisions.check_npc_collision(knight,npc,game.screen)#need to be after draw if conversation screen is notop if platforms
+    Engine.Collisions.check_npc_collision(knight,npc,game.screen,game.font)#need to be after draw if conversation screen is notop if platforms
 
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 
