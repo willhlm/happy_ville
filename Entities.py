@@ -21,6 +21,12 @@ class Entity(pygame.sprite.Sprite):
             self.action[new_action] = True
             self.timer = 0
 
+    def update_hitbox(self):
+        self.hitbox.center = self.rect.center
+
+    def update_rect(self):
+        self.rect.center = self.hitbox.center
+
     def reset_timer(self):
         self.frame = 0
         self.ac_dir[0]=self.dir[0]
@@ -105,6 +111,7 @@ class Player(Entity):
         self.f_action=['sword','bow']
         self.f_action_cooldown=True#True means you can use it
         self.text_frame=1
+        self.hitbox_offset = 3
 
     def attack_action(self):
         if self.equip=='sword':
@@ -128,8 +135,16 @@ class Player(Entity):
         self.text_frame=1
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.topleft = [self.rect.center[0], self.rect.center[1] + pos[1]]
+        super(Player, self).update(pos)
+        self.update_hitbox()
+
+    def update_hitbox(self):
+        self.hitbox.center = [self.rect.center[0], self.rect.center[1] + self.hitbox_offset]
+
+    def update_rect(self):
+        self.rect.center = [self.hitbox.center[0], self.hitbox.center[1] - self.hitbox_offset]
+
+
 
 class Block(Entity):
 
