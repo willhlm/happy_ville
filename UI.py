@@ -15,7 +15,6 @@ class Game_UI():
         self.ESC=False
         self.click=False
         self.font=pygame.font.Font('freesansbold.ttf',40)
-        self.text_surface=pygame.image.load("Sprites/aseprite/tile_sheets/House wall exterior 1.png")
 
     def start_menu(self):
         self.screen.blit(self.start_BG,(0,0))
@@ -105,27 +104,6 @@ class Game_UI():
                     self.resolution=False
                     self.option=False
                     self.ESC=False
-
-    def conversation(self,npc,knight):
-        if npc:
-            if knight.text_frame//3!=len(npc.text[0]):#if not everything has been said.
-
-                text=npc.text[0][:knight.text_frame//3+1]
-                text_surface=self.font.render(text,True,(0,0,0))
-
-                self.print_conversation(npc,text_surface)
-
-                knight.text_frame+=1
-            else:#if everything was said, print the whole text
-
-                text_surface=self.font.render(npc.text[0],True,(0,0,0))
-
-                self.print_conversation(npc,text_surface)
-
-    def print_conversation(self,npc,text):#blitting of text from conversation
-        self.screen.blit(self.text_surface,(100,100))#the text BG
-        self.screen.blit(npc.portrait,(200,100))#the portait
-        self.screen.blit(text,(100,100))#the text
 
     def input(self,player_class):#input while playing
         #game input

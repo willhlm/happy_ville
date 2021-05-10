@@ -104,7 +104,8 @@ class Player(Entity):
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
         self.f_action_cooldown=True#True means you can use it
-        self.text_frame=1
+        self.letter_frame=1
+        self.text_frame=0
 
     def attack_action(self):
         if self.equip=='sword':
@@ -125,7 +126,8 @@ class Player(Entity):
 
     def talk(self):
         self.action['talk'] = not self.action['talk']
-        self.text_frame=1
+        self.letter_frame=1
+        self.text_frame+=1
 
 class Block(Entity):
 
@@ -177,7 +179,7 @@ class Sword(Items):
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
 
 class NPC(Entity):
-    friction=[0.2,1]
+    friction=[0.2,0]
     acceleration=[0.3,0.8]
 
     def __init__(self):
@@ -188,6 +190,33 @@ class NPC(Entity):
         self.health = 50
         self.state = 'stand'
 
+    def talk(self,game_screen,knight):
+        self.action['run']=False
+        self.action['stand']=True
+        self.velocity=[0,0]
+        self.action['talk']=True
+
+        if knight.text_frame >= len(self.text)*2:
+            knight.text_frame=0
+
+        if knight.letter_frame//3!=len(self.text[knight.text_frame//2]):#if not everything has been said.
+
+            text=self.text[knight.text_frame//2][:knight.letter_frame//3+1]
+            text_surface=self.font.render(text,True,(0,0,0))
+
+            knight.letter_frame+=1
+            self.blit_conversation(text_surface,game_screen)
+
+        else:#if everything was said, print the whole text
+            text_surface=self.font.render(self.text[knight.text_frame//2],True,(0,0,0))
+
+            self.blit_conversation(text_surface,game_screen)
+
+    def blit_conversation(self,text,game_screen):#blitting of text from conversation
+        game_screen.blit(self.text_surface,(100,100))#the text BG
+        game_screen.blit(self.portrait,(200,100))#the portait
+        game_screen.blit(text,(100,100))#the text
+
 class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
@@ -197,16 +226,12 @@ class NPC_1(NPC):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.text=['hej','boobies','bye']
         self.portrait=pygame.image.load("Sprites/NPC/Woman1.png")
+        self.text_surface=pygame.image.load("Sprites/aseprite/tile_sheets/House wall exterior 1.png")
+        self.font=pygame.font.Font('freesansbold.ttf',40)
 
     def AI(self):
-        #self.action['run']=True
+        self.action['run']=True
         if self.action['inv']:#collision with invisble block
             self.velocity[0] = -self.velocity[0]
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
-
-    def talk(self):
-        self.action['run']=False
-        self.action['stand']=True
-        self.velocity=[0,0]
-        self.action['talk']=True

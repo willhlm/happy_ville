@@ -20,6 +20,9 @@ hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
 
+#dialoges=UI.Conversation()
+
+
 map=Level.Tilemap('ground')
 #map.define_chunks('./Tiled/Level1.csv')
 map.define_chunks()#('./Tiled/layer_test_collision.csv')
@@ -37,6 +40,7 @@ def draw():
 
 def scrolling():
     map.scrolling(knight.rect)
+
     platforms.update([-map.scroll[0],-map.scroll[1]])
     bg_blocks.update([-map.scroll[0],-map.scroll[1]])
     hero.update([-map.scroll[0],-map.scroll[1]])
@@ -66,8 +70,6 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Collisions.check_collisions(npc,platforms)
     Engine.Collisions.check_invisible(npc,invisible_blocks)
-    conv=Engine.Collisions.check_npc_collision(knight,npc)
-
 
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
@@ -81,7 +83,7 @@ while True:
 
     draw()
 
-    game.conversation(conv,knight)
+    Engine.Collisions.check_npc_collision(knight,npc,game.screen)#need to be after draw if conversation screen is notop if platforms
 
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 
