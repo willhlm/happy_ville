@@ -1,6 +1,7 @@
 import pygame, csv, Entities, math
 
 platforms = pygame.sprite.Group()
+bg_blocks = pygame.sprite.Group()
 Enemies = pygame.sprite.Group()
 npc = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
@@ -8,16 +9,17 @@ invisible_blocks = pygame.sprite.Group()
 class Tilemap():
     def __init__(self, level):
         self.tile_size=16
-        self.chunk_size=3
+        self.chunk_size=50
         self.scroll=[0,0]
         self.true_scroll=[0,0]
         self.total_disatnce=[0,0]
-        self.chunks={}#placeholder to store the chunks
+        self.chunks={}#placeholder to store the chunks containing collision information
+        self.chunks_bg1={} #chunks containg first bg layer
         self.keys=[]
-        self.chunk_render_distance=400
+        self.chunk_render_distance=800
         self.level_name = level
         self.collision_sheet = self.read_spritesheet("Sprites/" + level + "/collision.png")
-        print(self.collision_sheet[1])
+        self.bg1_sheet = self.read_spritesheet("Sprites/" + level + "/bg1.png")
 
     def scrolling(self,knight):
         self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
@@ -54,7 +56,6 @@ class Tilemap():
                 x = column * self.tile_size
                 rect = pygame.Rect(x, y, x + self.tile_size, y + self.tile_size)
                 image = pygame.Surface((self.tile_size,self.tile_size),pygame.SRCALPHA,32)
-                print(image.get_rect())
                 image.blit(sheet,(0,0),rect)
                 sprites[n] = image
                 n += 1
@@ -65,14 +66,17 @@ class Tilemap():
 #________________chunks#
     def define_chunks(self):#devide the data into chunks
         map=self.read_csv("Tiled/" + self.level_name + "_collision.csv")
+        map_bg=self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
         for k in range(len(map[0])//self.chunk_size):#Row: number of chunks
             for j in range(len(map[:][0])//self.chunk_size):#Column: number of chunks
                 chunk=[[]*self.chunk_size]*self.chunk_size
+                chunk_bg=[[]*self.chunk_size]*self.chunk_size
                 for i in range(0,self.chunk_size):#extract rows
                     chunk[i]=map[i+k*self.chunk_size][j*self.chunk_size:j*self.chunk_size+self.chunk_size]
+                    chunk_bg[i]=map_bg[i+k*self.chunk_size][j*self.chunk_size:j*self.chunk_size+self.chunk_size]
                 string=str(k)+';'+str(j)
-                print(chunk)
-                self.chunks[string]=chunk#will look like chunks={'0;0':data,'0;1':data...}
+                self.chunks[string] = chunk#will look like chunks={'0;0':data,'0;1':data...}
+                self.chunks_bg1[string] = chunk_bg
 
     def chunk_distance(self):
         chunk_distance={}
@@ -107,6 +111,7 @@ class Tilemap():
                 y=int(key.split(';')[0])#y
                 x=int(key.split(';')[1])#x
 
+                #add collision blocks for new chunk
                 for row in map:
                     tile_x=0
                     for tile in row:
@@ -118,6 +123,22 @@ class Tilemap():
                         tile_x+=1
                     tile_y+=1
 
+                map = self.chunks_bg1[key]
+                tile_x=0
+                tile_y=0
+
+                #add bg blocks for new chunk
+                for row in map:
+                    tile_x=0
+                    for tile in row:
+                        if tile=='-1':
+                            tile_x+=1
+                            continue
+                        new_block = Entities.BG_Block(self.bg1_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                        bg_blocks.add(new_block)
+                        tile_x+=1
+                    tile_y+=1
+
             elif chunk_distances[key]>self.chunk_render_distance and key in self.keys:
                 entity_list = [i for i in platforms.sprites() if i.chunk_key==key]
 
@@ -126,7 +147,7 @@ class Tilemap():
                 #update key
                 self.keys.remove(key)
 
-        return platforms, Enemies, npc, invisible_blocks
+        return platforms, bg_blocks, Enemies, npc, invisible_blocks
 #________________chunks#
 
     def entity_position(self, tile_x, tile_y, x, y):

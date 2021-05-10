@@ -7,6 +7,7 @@ import UI
 import Sprites
 
 platforms = pygame.sprite.Group()
+bg_blocks = pygame.sprite.Group()
 hero = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 npc = pygame.sprite.Group()
@@ -19,7 +20,7 @@ hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
 
-map=Level.Tilemap('layer_test_2')
+map=Level.Tilemap('chunk_test')
 #map.define_chunks('./Tiled/Level1.csv')
 map.define_chunks()#('./Tiled/layer_test_collision.csv')
 
@@ -29,6 +30,7 @@ map.define_chunks()#('./Tiled/layer_test_collision.csv')
 
 def draw():
     platforms.draw(game.screen)
+    bg_blocks.draw(game.screen)
     hero.draw(game.screen)
     enemies.draw(game.screen)
     npc.draw(game.screen)
@@ -39,15 +41,16 @@ def scrolling():
     map.scrolling(knight.rect)
 
     platforms.update([-map.scroll[0],-map.scroll[1]])
+    bg_blocks.update([-map.scroll[0],-map.scroll[1]])
     hero.update([-map.scroll[0],-map.scroll[1]])
     enemies.update([-map.scroll[0],-map.scroll[1]])
     npc.update([-map.scroll[0],-map.scroll[1]])
     invisible_blocks.update([-map.scroll[0],-map.scroll[1]])
 
 while True:
-    game.screen.fill((255,255,255))#fill game.screen
+    game.screen.fill((207,238,250))#fill game.screen
 
-    platforms,enemies,npc,invisible_blocks=map.load_chunks()
+    platforms,bg_blocks,enemies,npc,invisible_blocks=map.load_chunks()
 
     scrolling()
 

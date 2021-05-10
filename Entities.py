@@ -98,7 +98,8 @@ class Player(Entity):
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,
+                     'bow':False,'dash':False,'wall':False,'fall':False,'inv':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
@@ -125,6 +126,16 @@ class Block(Entity):
 
     images = {1 : pygame.image.load("sprites/block_castle.png"),
              2 : pygame.image.load("sprites/block_question.png")}
+
+    def __init__(self,img,pos,chunk_key=False):
+        super().__init__()
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+
+class BG_Block(Entity):
 
     def __init__(self,img,pos,chunk_key=False):
         super().__init__()
