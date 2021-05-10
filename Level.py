@@ -118,6 +118,11 @@ class Tilemap():
                         if tile=='-1':
                             tile_x+=1
                             continue
+                        if tile=='n':#temporary NPC
+                            new_npc = Entities.NPC_1(self.entity_position(tile_x, tile_y, x, y))
+                            npc.add(new_npc)
+                            tile_x+=1
+                            continue
                         new_block = Entities.Block(self.collision_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
                         platforms.add(new_block)
                         tile_x+=1
@@ -155,6 +160,8 @@ class Tilemap():
         y_pos = tile_y * self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))
         return [x_pos,y_pos]
 
+
+
     #load everything at once
     def load_tiles(self,path):
         map=self.read_csv(path)
@@ -172,6 +179,9 @@ class Tilemap():
                 elif tile=='e':
                     new_Enemies = Entities.Enemy_1([x*self.tile_size,y*self.tile_size],1)
                     Enemies.add(new_Enemies)
+                elif tile=='n':
+                    new_npc = Entities.NPC_1([x*self.tile_size,y*self.tile_size])
+                    npc.add(new_npc)
                 x+=1
             y+=1
         self.map_w,self.map_h=x*self.tile_size,y*self.tile_size#map size

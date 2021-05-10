@@ -20,7 +20,7 @@ hero.add(knight)
 
 sprites = {'knight': Sprites.Sprites_player()}
 
-map=Level.Tilemap('chunk_test')
+map=Level.Tilemap('layer_test_2')
 #map.define_chunks('./Tiled/Level1.csv')
 map.define_chunks()#('./Tiled/layer_test_collision.csv')
 
@@ -72,6 +72,7 @@ while True:
 
     game.conversation(conv,knight)
 
+
     Engine.Animation.set_img(hero,sprites['knight'])
     Engine.Animation.set_img(enemies,sprites['knight'])
     Engine.Animation.set_img(npc,sprites['knight'])
@@ -83,5 +84,7 @@ while True:
     pygame.draw.rect(game.screen, (0,255,0), knight.hitbox,2)#checking hitbox
 
     draw()
+
+
     pygame.display.update()#update after every change
     game.clock.tick(60)#limmit FPS

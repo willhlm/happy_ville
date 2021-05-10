@@ -99,12 +99,9 @@ class Player(Entity):
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-<<<<<<< HEAD
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,
                      'bow':False,'dash':False,'wall':False,'fall':False,'inv':False}
-=======
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
->>>>>>> e1bbf41164006c4e26e61d0e05e509c0e8c0edde
         self.state = 'stand'
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
@@ -204,9 +201,10 @@ class NPC_1(NPC):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.text=['hej','boobies','bye']
+        self.portrait=pygame.image.load("Sprites/NPC/Woman1.png")
 
     def AI(self):
-        self.action['run']=True
+        #self.action['run']=True
         if self.action['inv']:#collision with invisble block
             self.velocity[0] = -self.velocity[0]
             self.dir[0] = -self.dir[0]
