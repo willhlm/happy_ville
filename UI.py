@@ -15,7 +15,7 @@ class Game_UI():
         self.ESC=False
         self.click=False
         self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
-        self.health_sprites = Read_files.Hearts().get_sprites()
+        self.health_sprites = Read_files.Hearts_Black().get_sprites()
 
     def start_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -87,17 +87,24 @@ class Game_UI():
 
     def blit_health(self, player):
         #this code is specific to using heart.png sprites
-        blit_surface = pygame.Surface((int(player.max_health/10)*8,6),pygame.SRCALPHA,32)
+        sprite_dim = [9,8] #width, height specific to sprites used
+        blit_surface = pygame.Surface((int(player.max_health/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
         health = player.health
 
-        for i in range(int(player.max_health/10)):
-            health -= 10
+        for i in range(int(player.max_health/20)):
+            health -= 20
             if health >= 0:
-                blit_surface.blit(self.health_sprites[2],(i*8,0))
-            elif health > -10:
-                blit_surface.blit(self.health_sprites[1],(i*8,0))
+                blit_surface.blit(self.health_sprites[0],(i*(sprite_dim[0] + 1),0))
+            elif health >= -4:
+                blit_surface.blit(self.health_sprites[1],(i*(sprite_dim[0] + 1),0))
+            elif health >= -8:
+                blit_surface.blit(self.health_sprites[2],(i*(sprite_dim[0] + 1),0))
+            elif health >= -12:
+                blit_surface.blit(self.health_sprites[3],(i*(sprite_dim[0] + 1),0))
+            elif health >= -16:
+                blit_surface.blit(self.health_sprites[4],(i*(sprite_dim[0] + 1),0))
             else:
-                blit_surface.blit(self.health_sprites[0],(i*8,0))
+                blit_surface.blit(self.health_sprites[5],(i*(sprite_dim[0] + 1),0))
 
         return blit_surface
 
