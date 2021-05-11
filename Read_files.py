@@ -169,15 +169,14 @@ class Alphabet():
         x_offset=0
         y_offset=0
         for char in text:
-            if char!=' ' and char!='\n':
+            if char!=' ' and char!='\n' and char!='*':
                 screen.blit(self.characters[char],(loc[0]+x_offset,loc[1]+y_offset))
                 x_offset+=self.characters[char].get_width()+self.spacing
-            else:
-                if char=='\n':
-                    x_offset=0
-                    y_offset+=10
-                else:
-                    x_offset+=self.space_width+self.spacing
+            elif char=='*':#new line
+                x_offset=0
+                y_offset+=10
+            else:#spacing
+                x_offset+=self.space_width+self.spacing
 
     def clip(self,surf,x,y,x_size,y_size):
         handle_surf=surf.copy()
@@ -186,8 +185,8 @@ class Alphabet():
         image=surf.subsurface(handle_surf.get_clip())
         return image.copy()
 
-class Conversations():
-    def __init__(self, path="conversation.txt"):
+class Conversations():#Make a dictinoary of conversations available
+    def __init__(self, path):
         f = open(path, "r")
         contents=f.readlines()
         f.close()
