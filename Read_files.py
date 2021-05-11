@@ -37,6 +37,27 @@ class Sprites():
 
         return pygame.image.load(path_to_sprite)
 
+    def generic_sheet_reader(self, path_to_sheet, w, h, r, c):
+    #width, height, no o sprites in row, no o sprites in column
+    #loads all sprites from a sheet,
+    #this method requires all sprites to have the same dimension in the sheet
+        sprite_dict = {}
+        sheet = pygame.image.load(path_to_sheet).convert_alpha()
+        sprite_size = (w,h) #[width, height] of sprite in sheet
+        sprite_count = [r,c] # nomber of sprites per [row,column]
+        n = 0
+
+        for i in range(sprite_count[0]):
+            for j in range(sprite_count[1]):
+                rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
+                image = pygame.Surface(sprite_size,pygame.SRCALPHA,32)
+                image.blit(sheet,(0,0),rect)
+                sprite_dict[n] = image
+                n+=1
+
+        return sprite_dict
+
+
 
 #class containing sprites for player
 class Sprites_player(Sprites):
@@ -96,28 +117,22 @@ class Sprites_evil_knight(Sprites):
         elif dir[0] < 0:
             return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
 
-class Hearts():
+class Hearts(Sprites):
 
     def __init__(self):
+        super().__init__()
         self.path = "Sprites/hearts.png"
-        self.sprites = self.load_sprites(self.path)
+        self.sprites = self.generic_sheet_reader(self.path,7,6,2,2)
 
-    def load_sprites(self, path):
-        sprites = {}
-        sheet = pygame.image.load(path).convert_alpha()
-        sprite_size = (7,6) #[width, height] of sprite in sheet
-        sprite_count = [2,2] # nomber of sprites per [row,column]
-        n = 0
+    def get_sprites(self):
+        return self.sprites
 
-        for i in range(sprite_count[0]):
-            for j in range(sprite_count[1]):
-                rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
-                image = pygame.Surface(sprite_size,pygame.SRCALPHA,32)
-                image.blit(sheet,(0,0),rect)
-                sprites[n] = image
-                n+=1
+class Hearts_Black(Sprites):
 
-        return sprites
+    def __init__(self):
+        super().__init__()
+        self.path = "Sprites/hearts_black.png"
+        self.sprites = self.generic_sheet_reader(self.path,9,8,2,3)
 
     def get_sprites(self):
         return self.sprites

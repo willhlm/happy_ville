@@ -99,8 +99,8 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 75
-        self.max_health = 200
+        self.health = 76
+        self.max_health = 100
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         self.dmg=50
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
