@@ -34,7 +34,6 @@ class Entity(pygame.sprite.Sprite):
 
 class Enemy_1(Entity):
 
-    friction=[0.2,1]
     def __init__(self,pos,ID):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
@@ -55,6 +54,7 @@ class Enemy_1(Entity):
         self.f_action=['sword','bow']
         self.f_action_cooldown=True
         self.inv=False#flag to check if collision with invisible blocks
+        self.friction=[0.2,1]
 
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
@@ -200,7 +200,6 @@ class Sword(Items):
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
 
 class NPC(Entity):
-    friction=[0.2,0]
     acceleration=[0.3,0.8]
 
     def __init__(self):
@@ -211,6 +210,7 @@ class NPC(Entity):
         self.health = 50
         self.state = 'stand'
         self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.friction=[0.2,0]
 
     def talk(self,game_screen,knight):
         self.action['run']=False
