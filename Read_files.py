@@ -96,9 +96,37 @@ class Sprites_evil_knight(Sprites):
         elif dir[0] < 0:
             return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
 
+class Hearts():
+
+    def __init__(self):
+        self.path = "Sprites/hearts.png"
+        self.sprites = self.load_sprites(self.path)
+
+    def load_sprites(self, path):
+        sprites = {}
+        sheet = pygame.image.load(path).convert_alpha()
+        sprite_size = (7,6) #[width, height] of sprite in sheet
+        sprite_count = [2,2] # nomber of sprites per [row,column]
+        n = 0
+
+        for i in range(sprite_count[0]):
+            for j in range(sprite_count[1]):
+                rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
+                image = pygame.Surface(sprite_size,pygame.SRCALPHA,32)
+                image.blit(sheet,(0,0),rect)
+                sprites[n] = image
+                n+=1
+
+        return sprites
+
+    def get_sprites(self):
+        return self.sprites
+
+
+
 #reading fonts
 class Alphabet():
-    def __init__(self,path):
+    def __init__(self, path):
         self.spacing=1
         self.letter_hight=16
         self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']

@@ -15,6 +15,7 @@ class Game_UI():
         self.ESC=False
         self.click=False
         self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.health_sprites = Read_files.Hearts().get_sprites()
 
     def start_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -83,6 +84,23 @@ class Game_UI():
             Game_UI.input_quit(self)
 
         self.option=True
+
+    def blit_health(self, player):
+        #this code is specific to using heart.png sprites
+        blit_surface = pygame.Surface((int(player.max_health/10)*8,6),pygame.SRCALPHA,32)
+        health = player.health
+
+        for i in range(int(player.max_health/10)):
+            health -= 10
+            if health >= 0:
+                blit_surface.blit(self.health_sprites[2],(i*8,0))
+            elif health > -10:
+                blit_surface.blit(self.health_sprites[1],(i*8,0))
+            else:
+                blit_surface.blit(self.health_sprites[0],(i*8,0))
+
+        return blit_surface
+
 
     def input_quit(self):#to exits between option menues
         pygame.display.update()

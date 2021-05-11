@@ -82,6 +82,7 @@ while True:
 
     Engine.Collisions.check_npc_collision(knight,npc,game.screen,game.font)#need to be after draw if conversation screen is notop if platforms
 
+    game.screen.blit(game.blit_health(knight),(20,20))
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 
     pygame.display.update()#update after every change
