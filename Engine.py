@@ -6,10 +6,10 @@ class Collisions():
 
     #npc player conversation
     @staticmethod
-    def check_npc_collision(player,npcs,screen,font):
+    def check_npc_collision(player,npcs,screen):
         npc=pygame.sprite.spritecollideany(player,npcs)#check collision
         if npc and player.action['talk']:#if player want to talk talks
-            npc.talk(screen,player,font)
+            npc.talk(screen,player)
 
 
     #invisible wall collision for NPC and enemy
