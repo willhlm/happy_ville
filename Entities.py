@@ -113,10 +113,11 @@ class Player(Entity):
         self.f_action=['sword','bow']
         self.f_action_cooldown=True#True means you can use it
         self.hitbox_offset = 3
-        #conversations with villigers
-        self.letter_frame=1
-        self.text_frame=0
         self.sprites = Read_files.Sprites_player()
+
+        #conversations with villigers
+        self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
+        self.text_frame=0#chosing which text to say: woudl ike to move this to NPC class instead
 
 
     def attack_action(self):
@@ -138,9 +139,15 @@ class Player(Entity):
             self.velocity[0]=-self.dir[0]*10
 
     def talk(self):
-        self.action['talk'] = not self.action['talk']
-        self.letter_frame=1
-        self.text_frame+=1
+        self.action['talk']=True
+        if self.state=='talk':#if finish talking, move on to the next text
+            self.letter_frame=1#reset the letter frame
+            self.text_frame+=1
+            self.action['talk']=False
+            self.state='stand'
+
+        #if not self.action['talk']:
+            #self.state=False
 
     def update(self,pos):
         super(Player, self).update(pos)
@@ -211,7 +218,7 @@ class NPC(Entity):
         self.priority_action = ['death','hurt']
         self.health = 50
         self.state = 'stand'
-        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png",1)#intitilise the alphabet class
         self.friction=[0.2,0]
 
     def talk(self,game_screen,knight):
@@ -220,20 +227,18 @@ class NPC(Entity):
         self.velocity=[0,0]
         self.action['talk']=True
 
-        if knight.text_frame >= len(self.conversation.text[self.world_state])*2:
+        if knight.text_frame >= len(self.conversation.text[self.world_state]):
             knight.text_frame=0
 
-        if knight.letter_frame//3!=len(self.conversation.text[self.world_state][knight.text_frame//2]):#if not everything has been said.
-
-            text=self.conversation.text[self.world_state][knight.text_frame//2][:knight.letter_frame//3+1]
+        if knight.letter_frame//3!=len(self.conversation.text[self.world_state][knight.text_frame//1]):#if not everything has been said.
+            text=self.conversation.text[self.world_state][knight.text_frame//1][:knight.letter_frame//3+1]
             knight.letter_frame+=1
             self.blit_conversation(text,game_screen)
 
         else:#if everything was said, print the whole text
-            self.blit_conversation(self.conversation.text[self.world_state][knight.text_frame//2],game_screen)
+            self.blit_conversation(self.conversation.text[self.world_state][knight.text_frame//1],game_screen)
 
     def blit_conversation(self,text,game_screen):#blitting of text from conversation
-
         game_screen.blit(self.text_surface,(100,100))#the text BG
         game_screen.blit(self.portrait,(200,100))#the portait
         self.font.render(game_screen,text,(100,100))#call the self made aplhabet blit

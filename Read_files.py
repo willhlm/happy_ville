@@ -140,10 +140,11 @@ class Hearts_Black(Sprites):
 
 
 #reading fonts
-class Alphabet():
-    def __init__(self, path):
+class Alphabet():#scale needs to be larger than one, for reasons
+    def __init__(self, path,scale=1):
         self.spacing=1
-        self.letter_hight=16
+        self.scale=scale
+        self.letter_hight=16*self.scale
         self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
         sheet=pygame.image.load(path).convert()
         self.characters={}
@@ -163,18 +164,19 @@ class Alphabet():
                     current_char_width=0
                 else:
                     current_char_width+=1
-        self.space_width=self.characters['A'].get_width()
+        self.space_width=self.characters['A'].get_width()*self.scale
 
     def render(self,screen,text,loc):
         x_offset=0
         y_offset=0
         for char in text:
             if char!=' ' and char!='\n' and char!='*':
-                screen.blit(self.characters[char],(loc[0]+x_offset,loc[1]+y_offset))
+                scaled_letter=pygame.transform.scale(self.characters[char], (int(self.scale*self.characters[char].get_width()), int(self.scale*self.letter_hight)))
+                screen.blit(scaled_letter,(loc[0]+x_offset,loc[1]+y_offset))
                 x_offset+=self.characters[char].get_width()+self.spacing
             elif char=='*':#new line
                 x_offset=0
-                y_offset+=10
+                y_offset+=self.letter_hight
             else:#spacing
                 x_offset+=self.space_width+self.spacing
 
@@ -195,22 +197,19 @@ class Conversations():#Make a dictinoary of conversations available
         w, h = 1, number_of_worldstates;
         Matrix = [[0 for x in range(w)] for y in range(h)]#place hodlers
 
-        text={}
+        text={}#place holder
         i=0
         j=1
-
         for line in contents:
             if line=='\n':#skip these
                 continue
-
-            if line == 'worldstate_'+str(j)+'\n':
+            elif line == 'worldstate_'+str(j)+'\n':
                 j+=1
 
             Matrix[j-2].append(line)
             i+=1
         for i in range(0,len(Matrix)):
             Matrix[i]=Matrix[i][2:]#remove the first 0 and world state from list
-        #    Matrix[i]=Matrix[i][:-3]#remove the two last \ n from list
 
         #make a dictinoary
         for key in range(0,number_of_worldstates):

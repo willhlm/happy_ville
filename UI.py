@@ -14,7 +14,7 @@ class Game_UI():
         self.gameover=False
         self.ESC=False
         self.click=False
-        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png",2)#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
 
     def start_menu(self):
@@ -128,6 +128,7 @@ class Game_UI():
             if event.type==pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.KEYDOWN:
                 if event.key==pygame.K_ESCAPE:#escape button
                     self.ESC=True
@@ -136,7 +137,7 @@ class Game_UI():
                 if event.key == pygame.K_t:
                     player_class.talk()
 
-                if not player_class.action['talk']:#if not in conversation
+                if player_class.state!='talk':#if not in conversation
 
                     if event.key == pygame.K_RIGHT:
                         player_class.action['run']=True
@@ -166,13 +167,17 @@ class Game_UI():
                     player_class.action['stand']=True
                     player_class.action['run']=False
 
-                if event.key == event.key == pygame.K_t:
-                    pass#player_class.talk()
+                if event.key == event.key == pygame.K_t:#if release button
+                    if player_class.state!='talk':#if not in conversation
+                        player_class.state='stand'
+                        player_class.action['talk']=False
 
                 if event.key == pygame.K_LEFT and player_class.dir[0]<0:
                     player_class.action['stand']=True
                     player_class.action['run']=False
+
                 if event.key == pygame.K_UP:
-                        player_class.dir[1]=0
+                    player_class.dir[1]=0
+
                 if event.key == pygame.K_DOWN:
                     player_class.dir[1]=0
