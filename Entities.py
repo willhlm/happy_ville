@@ -11,6 +11,7 @@ class Entity(pygame.sprite.Sprite):
         self.frame = 0
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.ac_dir=[0,0]
+        self.world_state=0
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -219,23 +220,23 @@ class NPC(Entity):
         self.velocity=[0,0]
         self.action['talk']=True
 
-        if knight.text_frame >= len(self.text)*2:
+        if knight.text_frame >= len(self.conversation.text[self.world_state])*2:
             knight.text_frame=0
 
-        if knight.letter_frame//3!=len(self.text[knight.text_frame//2]):#if not everything has been said.
+        if knight.letter_frame//3!=len(self.conversation.text[self.world_state][knight.text_frame//2]):#if not everything has been said.
 
-            text=self.text[knight.text_frame//2][:knight.letter_frame//3+1]
+            text=self.conversation.text[self.world_state][knight.text_frame//2][:knight.letter_frame//3+1]
             knight.letter_frame+=1
             self.blit_conversation(text,game_screen)
 
         else:#if everything was said, print the whole text
-            self.blit_conversation(self.text[knight.text_frame//2],game_screen)
+            self.blit_conversation(self.conversation.text[self.world_state][knight.text_frame//2],game_screen)
 
     def blit_conversation(self,text,game_screen):#blitting of text from conversation
 
         game_screen.blit(self.text_surface,(100,100))#the text BG
         game_screen.blit(self.portrait,(200,100))#the portait
-        self.font.render(game_screen,text,(100,100))
+        self.font.render(game_screen,text,(100,100))#call the self made aplhabet blit
 
 class NPC_1(NPC):
     def __init__(self,pos):
@@ -244,12 +245,11 @@ class NPC_1(NPC):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.text=['hej pelle','boobies','bye']
         self.portrait=pygame.image.load("Sprites/NPC/NPC_1/Woman1.png")
         self.text_surface=pygame.image.load("Sprites/aseprite/tile_sheets/House wall exterior 1.png")
         self.name = 'NPC_1'
         self.sprites = Read_files.NPC(self.name)
-        #self.font=pygame.font.Font('freesansbold.ttf',40)
+        self.conversation=Read_files.Conversations('Sprites/NPC/conversation.txt')#a dictionary with "world state" as keys
 
     def AI(self):
         self.action['run']=True

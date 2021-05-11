@@ -167,12 +167,17 @@ class Alphabet():
 
     def render(self,screen,text,loc):
         x_offset=0
+        y_offset=0
         for char in text:
-            if char!=' ':
-                screen.blit(self.characters[char],(loc[0]+x_offset,loc[1]))
+            if char!=' ' and char!='\n':
+                screen.blit(self.characters[char],(loc[0]+x_offset,loc[1]+y_offset))
                 x_offset+=self.characters[char].get_width()+self.spacing
             else:
-                x_offset+=self.space_width+self.spacing
+                if char=='\n':
+                    x_offset=0
+                    y_offset+=10
+                else:
+                    x_offset+=self.space_width+self.spacing
 
     def clip(self,surf,x,y,x_size,y_size):
         handle_surf=surf.copy()
@@ -180,3 +185,36 @@ class Alphabet():
         handle_surf.set_clip(clipR)
         image=surf.subsurface(handle_surf.get_clip())
         return image.copy()
+
+class Conversations():
+    def __init__(self, path="conversation.txt"):
+        f = open(path, "r")
+        contents=f.readlines()
+        f.close()
+
+        number_of_worldstates=2
+        w, h = 1, number_of_worldstates;
+        Matrix = [[0 for x in range(w)] for y in range(h)]#place hodlers
+
+        text={}
+        i=0
+        j=1
+
+        for line in contents:
+            if line=='\n':#skip these
+                continue
+
+            if line == 'worldstate_'+str(j)+'\n':
+                j+=1
+
+            Matrix[j-2].append(line)
+            i+=1
+        for i in range(0,len(Matrix)):
+            Matrix[i]=Matrix[i][2:]#remove the first 0 and world state from list
+        #    Matrix[i]=Matrix[i][:-3]#remove the two last \ n from list
+
+        #make a dictinoary
+        for key in range(0,number_of_worldstates):
+            text[key]=Matrix[key]
+
+        self.text=text

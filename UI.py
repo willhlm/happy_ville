@@ -95,14 +95,8 @@ class Game_UI():
             health -= 20
             if health >= 0:
                 blit_surface.blit(self.health_sprites[0],(i*(sprite_dim[0] + 1),0))
-            elif health >= -4:
-                blit_surface.blit(self.health_sprites[1],(i*(sprite_dim[0] + 1),0))
-            elif health >= -8:
-                blit_surface.blit(self.health_sprites[2],(i*(sprite_dim[0] + 1),0))
-            elif health >= -12:
-                blit_surface.blit(self.health_sprites[3],(i*(sprite_dim[0] + 1),0))
-            elif health >= -16:
-                blit_surface.blit(self.health_sprites[4],(i*(sprite_dim[0] + 1),0))
+            elif health > -20:
+                blit_surface.blit(self.health_sprites[-(health//4)],(i*(sprite_dim[0] + 1),0))
             else:
                 blit_surface.blit(self.health_sprites[5],(i*(sprite_dim[0] + 1),0))
 
