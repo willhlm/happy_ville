@@ -185,27 +185,6 @@ class Invisible_block(Entity):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
 
-class Items():
-
-    def __init__(self,entity):
-        self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1],10,15)
-        self.hit=False
-
-class Sword(Items):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.movement=[0,0]
-
-    def update(self,entity):
-        if entity.ac_dir[0]>0 and entity.ac_dir[1]==0:#right
-            self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
-        elif entity.ac_dir[0]<0 and entity.ac_dir[1]==0:#left
-            self.rect=pygame.Rect(entity.hitbox.midleft[0]-40,entity.hitbox.midleft[1]-20,40,40)
-        elif entity.ac_dir[1]>0:#up
-            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
-        elif entity.ac_dir[1]<0:#down
-            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
-
 class NPC(Entity):
     acceleration=[0.3,0.8]
 

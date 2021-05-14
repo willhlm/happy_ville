@@ -17,7 +17,6 @@ weather=pygame.sprite.Group()
 
 game=UI.Game_UI()#initilise the game
 
-
 weather_paricles=BG.Background()
 weather.add(weather_paricles)
 
@@ -55,7 +54,7 @@ def scrolling():
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=BG.create_particle(weather_paricles.number_of_particles,100)
+    weather=weather_paricles.create_particle('snow')
 
     platforms,bg_blocks,enemies,npc,invisible_blocks=map.load_chunks()
 
