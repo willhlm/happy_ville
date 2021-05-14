@@ -54,7 +54,7 @@ def scrolling():
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=weather_paricles.create_particle('snow')
+    weather=weather_paricles.create_particle('sakura')
 
     platforms,bg_blocks,enemies,npc,invisible_blocks=map.load_chunks()
 

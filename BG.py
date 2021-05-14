@@ -17,7 +17,7 @@ class Background(pygame.sprite.Sprite):
     def update(self,pos,screen):
         pygame.draw.circle(screen,self.color,self.pos,self.radius)#draw a circle
 
-        self.pos = [self.pos[0] + pos[0], self.pos[1] + pos[1]]#compensate for scroll
+        self.pos = [self.pos[0] + pos[0], self.pos[1] + pos[1]]#compensate for scroll and new speed
 
         self.speed()#modulate the speed according to the particle type
 
@@ -41,6 +41,9 @@ class Background(pygame.sprite.Sprite):
             elif particle=='rain':
                 particles=Rain()
                 weather.add(particles)
+            elif particle=='autumn':
+                particles=Autumn()
+                weather.add(particles)
         return weather
 
 class Snow(Background):
@@ -58,14 +61,21 @@ class Snow(Background):
 class Sakura(Background):
     def __init__(self):
         super().__init__()
+        colors=[[255,192,203],[255,105,180],[255,100,180]]
         self.radius=2#size
         self.timer=500#lifetime
-        self.color=(255,100,180)
+        self.color=colors[random.randint(0, len(colors)-1)]
 
     def speed(self):
         self.timer-=1
         self.velocity=[self.phase,1.5]
         self.pos=[self.pos[0]+self.velocity[0],self.pos[1]+self.velocity[1]]
+
+class Autumn(Sakura):
+    def __init__(self):
+        super().__init__()
+        colors=[[178,34,34],[139,69,19],[128,128,0],[255,228,181]]
+        self.color=colors[random.randint(0, len(colors)-1)]
 
 class Rain(Background):
     def __init__(self):
