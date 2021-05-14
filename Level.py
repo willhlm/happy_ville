@@ -150,10 +150,11 @@ class Tilemap():
                     tile_y+=1
 
             elif chunk_distances[key]>self.chunk_render_distance and key in self.keys:
-                entity_list = [i for i in platforms.sprites() if i.chunk_key==key]
+                platform_list = [i for i in platforms.sprites() if i.chunk_key==key]
+                platforms.remove(platform_list)#need to remove from playforms grup in main
 
-                platforms.remove(entity_list)#need to remove from playforms grup in main
-
+                bg_list = [i for i in bg_blocks.sprites() if i.chunk_key==key]
+                bg_blocks.remove(bg_list)
                 #update key
                 self.keys.remove(key)
 
@@ -165,8 +166,6 @@ class Tilemap():
         y_pos = tile_y * self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))
         return [x_pos,y_pos]
 
-
-
     #load everything at once
     def load_tiles(self,path):
         map=self.read_csv(path)
@@ -175,18 +174,9 @@ class Tilemap():
         for row in map:
             x=0
             for tile in row:
-                if tile=='1':
+                if tile=='12':
                     new_block = Entities.Block(1,[x*self.tile_size,y*self.tile_size])
                     platforms.add(new_block)
-                elif tile=='2':
-                    new_block = Entities.Block(2,[x*self.tile_size,y*self.tile_size])
-                    platforms.add(new_block)
-                elif tile=='e':
-                    new_Enemies = Entities.Enemy_1([x*self.tile_size,y*self.tile_size],1)
-                    Enemies.add(new_Enemies)
-                elif tile=='n':
-                    new_npc = Entities.NPC_1([x*self.tile_size,y*self.tile_size])
-                    npc.add(new_npc)
                 x+=1
             y+=1
         self.map_w,self.map_h=x*self.tile_size,y*self.tile_size#map size

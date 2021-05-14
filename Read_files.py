@@ -57,8 +57,6 @@ class Sprites():
 
         return sprite_dict
 
-
-
 #class containing sprites for player
 class Sprites_player(Sprites):
 
@@ -137,8 +135,6 @@ class Hearts_Black(Sprites):
     def get_sprites(self):
         return self.sprites
 
-
-
 #reading fonts
 class Alphabet():#scale needs to be larger than one, for reasons
     def __init__(self, path,scale=1):
@@ -158,7 +154,7 @@ class Alphabet():#scale needs to be larger than one, for reasons
                 break
             else:
                 if c[0]==238:#check for red color
-                    char_img=self.clip(sheet,x-current_char_width,0, current_char_width,self.letter_hight)
+                    char_img=Alphabet.clip(sheet,x-current_char_width,0, current_char_width,self.letter_hight)
                     self.characters[self.character_order[character_count]]=char_img.copy()
                     character_count+=1
                     current_char_width=0
@@ -180,7 +176,8 @@ class Alphabet():#scale needs to be larger than one, for reasons
             else:#spacing
                 x_offset+=self.space_width+self.spacing
 
-    def clip(self,surf,x,y,x_size,y_size):
+    @staticmethod
+    def clip(surf,x,y,x_size,y_size):
         handle_surf=surf.copy()
         clipR=pygame.Rect(x,y,x_size,y_size)
         handle_surf.set_clip(clipR)

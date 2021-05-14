@@ -5,6 +5,7 @@ import Level
 import Action
 import UI
 import Read_files
+import BG
 
 platforms = pygame.sprite.Group()
 bg_blocks = pygame.sprite.Group()
@@ -12,8 +13,13 @@ hero = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 npc = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
+weather=pygame.sprite.Group()
 
 game=UI.Game_UI()#initilise the game
+
+
+weather_paricles=BG.Background()
+weather.add(weather_paricles)
 
 knight=Entities.Player([200,50])
 hero.add(knight)
@@ -24,7 +30,7 @@ map=Level.Tilemap('village1')
 #map.define_chunks('./Tiled/Level1.csv')
 map.define_chunks()#('./Tiled/layer_test_collision.csv')
 
-#tePlatforms,teEnemies=map.load_tiles('./Tiled/Level1.csv')
+#tePlatforms,teEnemies=map.load_tiles('./Tiled/village1_colision.csv')
 #platforms.add(tePlatforms)#whole map
 #enemies.add(teEnemies)#whole map
 
@@ -44,9 +50,12 @@ def scrolling():
     enemies.update(scroll)
     npc.update(scroll)
     invisible_blocks.update(scroll)
+    weather.update(scroll,game.screen)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen
+
+    weather=BG.create_particle(weather_paricles.number_of_particles,100)
 
     platforms,bg_blocks,enemies,npc,invisible_blocks=map.load_chunks()
 
@@ -80,10 +89,11 @@ while True:
 
     draw()
 
-    Engine.Collisions.check_npc_collision(knight,npc,game.screen)#need to be after draw if conversation screen is notop if platforms
-
-    game.screen.blit(game.blit_health(knight),(20,20))
+    game.screen.blit(game.blit_health(knight),(20,20))#blir hearts
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
 
+    Engine.Collisions.check_npc_collision(knight,npc,game.display)#need to be at the end so that the conversation text doesn't get scaled
+
+    print(game.clock)
     pygame.display.update()#update after every change
     game.clock.tick(60)#limmit FPS

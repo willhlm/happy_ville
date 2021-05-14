@@ -14,7 +14,7 @@ class Game_UI():
         self.gameover=False
         self.ESC=False
         self.click=False
-        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png",2)#intitilise the alphabet class, scale of alphabet
+        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",2)#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
 
     def start_menu(self):

@@ -56,6 +56,7 @@ class Enemy_1(Entity):
         self.f_action_cooldown=True
         self.inv=False#flag to check if collision with invisible blocks
         self.friction=[0.2,1]
+        self.sprites = Read_files.Sprites_player()
 
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
@@ -96,7 +97,7 @@ class Player(Entity):
     friction=[0.2,0]
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
+        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
@@ -145,9 +146,6 @@ class Player(Entity):
             self.text_frame+=1
             self.action['talk']=False
             self.state='stand'
-
-        #if not self.action['talk']:
-            #self.state=False
 
     def update(self,pos):
         super(Player, self).update(pos)
@@ -218,8 +216,7 @@ class NPC(Entity):
         self.priority_action = ['death','hurt']
         self.health = 50
         self.state = 'stand'
-        self.font=Read_files.Alphabet("Sprites/Alphabet/Alphabet.png",1)#intitilise the alphabet class
-        self.friction=[0.2,0]
+        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",1)#intitilise the alphabet class
 
     def talk(self,game_screen,knight):
         self.action['run']=False
@@ -234,31 +231,35 @@ class NPC(Entity):
             text=self.conversation.text[self.world_state][knight.text_frame//1][:knight.letter_frame//3+1]
             knight.letter_frame+=1
             self.blit_conversation(text,game_screen)
-
         else:#if everything was said, print the whole text
             self.blit_conversation(self.conversation.text[self.world_state][knight.text_frame//1],game_screen)
 
     def blit_conversation(self,text,game_screen):#blitting of text from conversation
-        game_screen.blit(self.text_surface,(100,100))#the text BG
-        game_screen.blit(self.portrait,(200,100))#the portait
-        self.font.render(game_screen,text,(100,100))#call the self made aplhabet blit
+        self.text_surface.blit(self.portrait,(180,20))#the portait on to the text_surface
+        self.font.render(game_screen,text,(20,20))#call the self made aplhabet blit
+        game_screen.blit(self.text_surface,(150,50))#the text BG
 
 class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
+        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.portrait=pygame.image.load("Sprites/NPC/NPC_1/Woman1.png")
-        self.text_surface=pygame.image.load("Sprites/aseprite/tile_sheets/House wall exterior 1.png")
+        self.portrait=pygame.image.load("Sprites/NPC/NPC_1/Woman1.png").convert_alpha()
+        self.text_surface=pygame.image.load("Sprites/aseprite/conversation/Conv_BG.png").convert_alpha()
         self.name = 'NPC_1'
         self.sprites = Read_files.NPC(self.name)
         self.conversation=Read_files.Conversations('Sprites/NPC/conversation.txt')#a dictionary with "world state" as keys
+        self.friction=[0.2,0]
 
     def AI(self):
         self.action['run']=True
-        if self.action['inv']:#collision with invisble block
+
+        if abs(self.rect[0]+self.rect[1])>800:#if far away
+            self.kill()
+
+        elif self.action['inv']:#collision with invisble block
             self.velocity[0] = -self.velocity[0]
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
