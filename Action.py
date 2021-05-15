@@ -4,8 +4,8 @@ def f_action(sword_enteties,platforms,enemies,screen,scroll):
     for entity in sword_enteties.sprites():#go through the group
         for f_action in entity.f_action:
 
-            if entity.action[f_action] and not entity.action['death'] and entity.equipment:#if alive and doing f_action
-                if f_action=='sword':#if sword is quipped
+            if not entity.action['death'] and entity.equipment:#if alive and doing f_action
+                if entity.equip=='sword':#if sword is quipped
 
                     #update sword position based on swing direction
                     entity.equipment.update(entity)
@@ -14,6 +14,9 @@ def f_action(sword_enteties,platforms,enemies,screen,scroll):
                     #sword collision?
                     collision_plat=pygame.sprite.spritecollideany(entity.equipment,platforms)
                     collision_ene=pygame.sprite.spritecollideany(entity.equipment,enemies,collided)
+
+                    if entity.equipment.lifetime<0:
+                        entity.equipment=None#remove the sword
 
                     #any kind of sword hit
                     if collision_plat or collision_ene and not collision_ene.action['death']:
@@ -36,7 +39,8 @@ def f_action(sword_enteties,platforms,enemies,screen,scroll):
                             collision_ene.action['death']=True
                             collision_ene.action['run']=False
 
-                elif f_action=='bow':#if bow is equipeed
+                elif entity.equip=='bow':#if bow is equipeed
+
                     entity.equipment.update(screen,scroll)
 
                     #arrow collisions?
@@ -45,8 +49,8 @@ def f_action(sword_enteties,platforms,enemies,screen,scroll):
 
                     pygame.draw.rect(screen, (0,0,255), entity.equipment.hitbox,2)#draw hitbox
 
-
-                    if collision_plat or collision_ene and not collision_ene.action['death']:
+                    #remove arrow
+                    if collision_plat or collision_ene and not collision_ene.action['death'] or entity.equipment.lifetime<0:
                         entity.equipment=None
 
                     #if hit enemy
