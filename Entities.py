@@ -195,6 +195,16 @@ class Invisible_block(Entity):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
 
+class Interactable(Entity):
+
+    def __init__(self,img,pos,chunk_key=False):
+        super().__init__()
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+
 class NPC(Entity):
     acceleration=[0.3,0.8]
 

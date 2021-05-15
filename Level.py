@@ -4,6 +4,7 @@ platforms = pygame.sprite.Group()
 bg_blocks = pygame.sprite.Group()
 Enemies = pygame.sprite.Group()
 npc = pygame.sprite.Group()
+interactables = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
 
 class Tilemap():
@@ -13,13 +14,13 @@ class Tilemap():
         self.scroll=[0,0]
         self.true_scroll=[0,0]
         self.total_disatnce=[0,0]
-        self.chunks={}#placeholder to store the chunks containing collision information
-        self.chunks_bg1={} #chunks containg first bg layer
+        self.level_name = level
+        self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
+        self.chunks_bg1=self.define_chunks("bg1") #chunks containg first bg layer
+        self.chunks_interactables=self.define_chunks("interactables")
         self.keys=[]
         self.chunk_render_distance=800
-        self.level_name = level
-        self.collision_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/collision.png")
-        self.bg1_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg1.png")
+        self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
 
     def scrolling(self,knight):
         self.true_scroll[0]+=(knight.topleft[0]-4*self.true_scroll[0]-240)/20
@@ -66,22 +67,22 @@ class Tilemap():
 
 
 #________________chunks#
-    def define_chunks(self):#devide the data into chunks
-        map=self.read_csv("Tiled/" + self.level_name + "_collision.csv")
-        map_bg=self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
+    def define_chunks(self,path):#devide the data into chunks
+        map=self.read_csv("Tiled/" + self.level_name + "_" + path + ".csv")
+
         columns = len(map[0])//self.chunk_size
         rows = len(map)//self.chunk_size
+        chunks = {}
 
         for k in range(rows):#Row: number of chunks
             for j in range(columns):#Column: number of chunks
                 chunk=[[]*self.chunk_size]*self.chunk_size
-                chunk_bg=[[]*self.chunk_size]*self.chunk_size
                 for i in range(0,self.chunk_size):#extract rows
                     chunk[i]=map[i+k*self.chunk_size][j*self.chunk_size:j*self.chunk_size+self.chunk_size]
-                    chunk_bg[i]=map_bg[i+k*self.chunk_size][j*self.chunk_size:j*self.chunk_size+self.chunk_size]
                 string=str(k)+';'+str(j)
-                self.chunks[string] = chunk#will look like chunks={'0;0':data,'0;1':data...}
-                self.chunks_bg1[string] = chunk_bg
+                chunks[string] = chunk#will look like chunks={'0;0':data,'0;1':data...}
+
+        return chunks
 
     def chunk_distance(self):
         chunk_distance={}
@@ -128,7 +129,8 @@ class Tilemap():
                             npc.add(new_npc)
                             tile_x+=1
                             continue
-                        new_block = Entities.Block(self.collision_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                        print(int(tile))
+                        new_block = Entities.Block(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
                         platforms.add(new_block)
                         tile_x+=1
                     tile_y+=1
@@ -144,21 +146,41 @@ class Tilemap():
                         if tile=='-1':
                             tile_x+=1
                             continue
-                        new_block = Entities.BG_Block(self.bg1_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                        new_block = Entities.BG_Block(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
                         bg_blocks.add(new_block)
+                        tile_x+=1
+                    tile_y+=1
+
+                map = self.chunks_interactables[key]
+                tile_x=0
+                tile_y=0
+
+                #add bg blocks for new chunk
+                for row in map:
+                    tile_x=0
+                    for tile in row:
+                        if tile=='-1':
+                            tile_x+=1
+                            continue
+                        new_block = Entities.Interactable(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                        interactables.add(new_block)
                         tile_x+=1
                     tile_y+=1
 
             elif chunk_distances[key]>self.chunk_render_distance and key in self.keys:
                 platform_list = [i for i in platforms.sprites() if i.chunk_key==key]
-                platforms.remove(platform_list)#need to remove from playforms grup in main
+                platforms.remove(platform_list)
 
                 bg_list = [i for i in bg_blocks.sprites() if i.chunk_key==key]
                 bg_blocks.remove(bg_list)
+
+                inter_list = [i for i in interactables.sprites() if i.chunk_key==key]
+                interactables.remove(inter_list)
+
                 #update key
                 self.keys.remove(key)
 
-        return platforms, bg_blocks, Enemies, npc, invisible_blocks
+        return platforms, bg_blocks, Enemies, npc, invisible_blocks, interactables
 #________________chunks#
 
     def entity_position(self, tile_x, tile_y, x, y):
