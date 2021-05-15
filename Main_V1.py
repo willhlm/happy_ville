@@ -78,13 +78,13 @@ while True:
     Engine.Animation.set_img(enemies)
     Engine.Animation.set_img(npc)
 
-    Action.f_action(hero,platforms,enemies,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
-    Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
-
     pygame.draw.rect(game.screen, (255,0,0), knight.rect,2)#checking hitbox
     pygame.draw.rect(game.screen, (0,255,0), knight.hitbox,2)#checking hitbox
 
     draw()
+
+    Action.f_action(hero,platforms,enemies,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
+    Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
 
     game.screen.blit(game.blit_health(knight),(20,20))#blit hearts
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))#scale the screen

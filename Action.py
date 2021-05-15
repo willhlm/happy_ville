@@ -36,12 +36,14 @@ def f_action(sword_enteties,platforms,enemies,screen,scroll):
                             collision_ene.action['death']=True
                             collision_ene.action['run']=False
 
-                if f_action=='bow':#if bow is equipeed
+                elif f_action=='bow':#if bow is equipeed
                     entity.equipment.update(screen,scroll)
 
                     #arrow collisions?
                     collision_plat=pygame.sprite.spritecollideany(entity.equipment,platforms)
                     collision_ene=pygame.sprite.spritecollideany(entity.equipment,enemies,collided)
+
+                    pygame.draw.rect(screen, (0,0,255), entity.equipment.hitbox,2)#draw hitbox
 
 
                     if collision_plat or collision_ene and not collision_ene.action['death']:

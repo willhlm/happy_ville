@@ -126,7 +126,7 @@ class Player(Entity):
             if self.equip=='sword':
                 self.equipment=Sword()#equip a sword
             elif self.equip=='bow':
-                self.equipment=Bow(self.ac_dir,self.hitbox)#equip a sword
+                self.equipment=Bow(self.dir,self.hitbox)#equip a sword
             self.action[self.equip]=True
 
 
@@ -272,22 +272,21 @@ class Sword(Items):
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
 
 class Bow(Items):
-    def __init__(self,entity_ac_dir,entity_hitbox):
+    def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
         self.pos=[entity_hitbox[0],entity_hitbox[1]]
-        self.velocity=[entity_ac_dir[0]*10,entity_ac_dir[1]*10]
+        self.velocity=[entity_dir[0]*10,0]
 
         self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
         if self.velocity[0]<0:
             self.image=pygame.transform.flip(self.image,True,False)
 
         self.rect = self.image.get_rect(center=self.pos)
-        self.hitbox=pygame.Rect(self.pos[0],self.pos[1],20,40)
+        self.hitbox=pygame.Rect(self.pos[0],self.pos[1],20,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-
-    def update(self,screen,pos):
-        self.pos=[self.pos[0]+self.velocity[0]+pos[0],self.pos[1]+self.velocity[1]+ pos[1]]#compensate for scroll and new speed
+    def update(self,screen,scroll):
+        self.pos=[self.pos[0]+self.velocity[0]+scroll[0],self.pos[1]+self.velocity[1]+ scroll[1]]#compensate for scroll and new speed
 
         self.rect.topleft = self.pos.copy()
         self.hitbox.center=self.rect.center
