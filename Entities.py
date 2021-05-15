@@ -131,10 +131,11 @@ class Player(Entity):
 
 
     def change_equipment(self):
-        if self.equip == 'sword':
-            self.equip='bow'
-        else:
-            self.equip='sword'
+        if not self.equipment:
+            if self.equip == 'sword':
+                self.equip='bow'
+            else:
+                self.equip='sword'
 
     def dashing(self):
         self.velocity[0]=20*self.dir[0]#dash
@@ -260,8 +261,10 @@ class Sword(Items):
     def __init__(self):
         super().__init__()
         self.movement=[0,0]
+        self.lifetime=10
 
     def update(self,entity):
+        self.lifetime-=1
         if entity.ac_dir[0]>0 and entity.ac_dir[1]==0:#right
             self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
         elif entity.ac_dir[0]<0 and entity.ac_dir[1]==0:#left
@@ -276,6 +279,7 @@ class Bow(Items):
         super().__init__()
         self.pos=[entity_hitbox[0],entity_hitbox[1]]
         self.velocity=[entity_dir[0]*10,0]
+        self.lifetime=40
 
         self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
         if self.velocity[0]<0:
@@ -286,6 +290,7 @@ class Bow(Items):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def update(self,screen,scroll):
+        self.lifetime-=1
         self.pos=[self.pos[0]+self.velocity[0]+scroll[0],self.pos[1]+self.velocity[1]+ scroll[1]]#compensate for scroll and new speed
 
         self.rect.topleft = self.pos.copy()
