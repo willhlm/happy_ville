@@ -22,7 +22,7 @@ class Tilemap():
         self.bg1_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg1.png")
 
     def scrolling(self,knight):
-        self.true_scroll[0]+=(knight.topleft[0]-1*self.true_scroll[0]-240)/1
+        self.true_scroll[0]+=(knight.topleft[0]-4*self.true_scroll[0]-240)/20
         self.true_scroll[1]+=(knight.topleft[1]-self.true_scroll[1]-180)
 
         #print(self.true_scroll)
