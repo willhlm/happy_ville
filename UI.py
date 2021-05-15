@@ -102,6 +102,17 @@ class Game_UI():
 
         return blit_surface
 
+    def blit_fps(self):
+
+        fps_string = str(int(self.clock.get_fps()))
+        self.font.render(self.screen,fps_string,(400,20))
+
+        #blit_surface = pygame.Surface((50,10),pygame.SRCALPHA,32)
+        #fps_string = str(int(self.clock.get_fps()))
+        #self.font.render(blit_surface,fps_string,(0,0))
+
+        #return blit_surface
+
 
     def input_quit(self):#to exits between option menues
         pygame.display.update()
