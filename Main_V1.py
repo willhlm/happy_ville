@@ -13,12 +13,11 @@ hero = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 npc = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
-weather=pygame.sprite.Group()
+weather = pygame.sprite.Group()
 
 game=UI.Game_UI()#initilise the game
 
 weather_paricles=BG.Background()
-weather.add(weather_paricles)
 
 knight=Entities.Player([200,50])
 hero.add(knight)
@@ -54,13 +53,12 @@ def scrolling():
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=weather_paricles.create_particle('sakura')
-
-    platforms,bg_blocks,enemies,npc,invisible_blocks=map.load_chunks()
+    weather=weather_paricles.create_particle('sakura')#weather effects
+    platforms,bg_blocks,enemies,npc,invisible_blocks=map.load_chunks()#chunks
 
     scrolling()
 
-    game.input(knight)
+    game.input(knight)#game inputs
 
     for entity in enemies.sprites():
         entity.AI(knight)#the enemy Ai movement, based on knight position
@@ -88,8 +86,8 @@ while True:
 
     draw()
 
-    game.screen.blit(game.blit_health(knight),(20,20))#blir hearts
-    game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))
+    game.screen.blit(game.blit_health(knight),(20,20))#blit hearts
+    game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
     Engine.Collisions.check_npc_collision(knight,npc,game.display)#need to be at the end so that the conversation text doesn't get scaled
 

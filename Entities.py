@@ -115,6 +115,7 @@ class Player(Entity):
         self.f_action_cooldown=True#True means you can use it
         self.hitbox_offset = 3
         self.sprites = Read_files.Sprites_player()
+        self.equipment=None#return the sword group
 
         #conversations with villigers
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
@@ -123,9 +124,9 @@ class Player(Entity):
 
     def attack_action(self):
         if self.equip=='sword':
-            return Sword(self)#make a sword
+            self.equipment=Sword()#equip a sword
         elif self.equip=='bow':
-            pass#return Bow(self)
+            self.equipment=Bow()#equip a sword
 
     def dashing(self):
         self.velocity[0]=20*self.dir[0]#dash
@@ -242,3 +243,22 @@ class NPC_1(NPC):
             self.velocity[0] = -self.velocity[0]
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
+
+class Items():
+    def __init__(self):
+        self.hit=False
+
+class Sword(Items):
+    def __init__(self):
+        super().__init__()
+        self.movement=[0,0]
+
+    def update(self,entity):
+        if entity.ac_dir[0]>0 and entity.ac_dir[1]==0:#right
+            self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
+        elif entity.ac_dir[0]<0 and entity.ac_dir[1]==0:#left
+            self.rect=pygame.Rect(entity.hitbox.midleft[0]-40,entity.hitbox.midleft[1]-20,40,40)
+        elif entity.ac_dir[1]>0:#up
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
+        elif entity.ac_dir[1]<0:#down
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
