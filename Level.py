@@ -162,8 +162,12 @@ class Tilemap():
                         if tile=='-1':
                             tile_x+=1
                             continue
-                        new_block = Entities.Interactable(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
-                        interactables.add(new_block)
+                        elif tile == '9':
+                            new_block = Entities.Chest(self.entity_position(tile_x, tile_y, x, y))
+                            interactables.add(new_block)
+                        else:
+                            new_block = Entities.Door(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                            interactables.add(new_block)
                         tile_x+=1
                     tile_y+=1
 
@@ -173,9 +177,6 @@ class Tilemap():
 
                 bg_list = [i for i in bg_blocks.sprites() if i.chunk_key==key]
                 bg_blocks.remove(bg_list)
-
-                inter_list = [i for i in interactables.sprites() if i.chunk_key==key]
-                interactables.remove(inter_list)
 
                 #update key
                 self.keys.remove(key)

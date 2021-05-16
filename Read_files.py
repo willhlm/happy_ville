@@ -115,6 +115,16 @@ class Sprites_evil_knight(Sprites):
         elif dir[0] < 0:
             return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
 
+class Chest(Sprites):
+
+    def __init__(self):
+        super().__init__()
+        self.path = "Sprites/animations/chest.png"
+        self.sprites = self.generic_sheet_reader(self.path,16,21,1,3)
+
+    def get_sprites(self):
+        return self.sprites
+
 class Hearts(Sprites):
 
     def __init__(self):
