@@ -159,7 +159,7 @@ class Animation():
                         else:
                             entity.reset_timer()
                             entity.action[action] = False
-                            #entity.equipment=None
+                            entity.state = 'stand'
                     break
 
                 elif entity.action[action] and action in entity.nonpriority_action:#if the action is nonpriority

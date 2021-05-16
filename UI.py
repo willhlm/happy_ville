@@ -172,8 +172,8 @@ class Game_UI():
                         player_class.jump()
 
                     if event.key==pygame.K_f:
-                        player_class.attack_action()
-
+                        player_class.action[player_class.equip]=True
+                    #    player_class.attack_action()
                     if event.key == pygame.K_LSHIFT:#left shift
                         player_class.dashing()
 

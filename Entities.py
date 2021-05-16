@@ -134,30 +134,27 @@ class Player(Entity):
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
-        self.f_action=['sword','bow']
         self.hitbox_offset = 3
         self.sprites = Read_files.Sprites_player()
-        self.equipment=None#a placeholder for equipemnts: sword and bow
 
         #conversations with villigers
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
         self.text_frame=0#chosing which text to say: woudl ike to move this to NPC class instead
 
-
-    def attack_action(self):
-        if not self.action[self.equip]:#if first swing: making sure you cannot spam action
-            if self.equip=='sword':
-                self.equipment=Sword()#equip a sword
-            elif self.equip=='bow':
-                self.equipment=Bow(self.dir,self.hitbox)#equip a sword
-            self.action[self.equip]=True
+    def attack_action(self,projectiles=False):
+        if self.action[self.equip]:
+            if self.state!='sword' and self.state!='bow':
+                if self.equip=='sword':
+                    projectiles.add(Sword(self))
+                elif self.equip=='bow':
+                    projectiles.add(Bow(self.dir,self.hitbox))
+        return projectiles
 
     def change_equipment(self):#don't change if there are arrows or sword already
-        if not self.equipment:
-            if self.equip == 'sword':
-                self.equip='bow'
-            else:
-                self.equip='sword'
+        if self.equip == 'sword':
+            self.equip='bow'
+        else:
+            self.equip='sword'
 
     def dashing(self):
         self.velocity[0]=20*self.dir[0]#dash
@@ -168,8 +165,7 @@ class Player(Entity):
         self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
-        if self.action['wall']:
-            self.velocity[0]=-self.dir[0]*10
+        self.velocity[0]=-self.dir[0]*10*int(self.action['wall'])+self.velocity[0]
 
     def talk(self):
         self.action['talk']=True
@@ -312,30 +308,44 @@ class NPC_1(NPC):
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
 
-class Items():
-    def __init__(self):
-        self.hit=False
-
-class Sword(Items):
+class Items(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.movement=[0,0]
+        self.hit=False
+
+    def update(self,scroll=0):
+        #remove the equipment if it has expiered
+        print(scroll)
+        self.lifetime-=1
+
+
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]-scroll[0], self.rect.topleft[1] + self.velocity[1]-scroll[1]]
+        self.hitbox.center=self.rect.center
+
+class Sword(Items):
+    def __init__(self,entity):
+        super().__init__()
         self.lifetime=10
         self.dmg=20
+        self.velocity=[0,0]
+        self.type='sword'
 
-    def update(self,entity,screen,scroll):
-        #remove the equipment if it has expiered
+        self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
 
-        self.lifetime-=1
-        if entity.ac_dir[0]>0 and entity.ac_dir[1]==0:#right
-            self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
-        elif entity.ac_dir[0]<0 and entity.ac_dir[1]==0:#left
-            self.rect=pygame.Rect(entity.hitbox.midleft[0]-40,entity.hitbox.midleft[1]-20,40,40)
-        elif entity.ac_dir[1]>0:#up
-            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
-        elif entity.ac_dir[1]<0:#down
-            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
+        pos=[entity.hitbox[0],entity.hitbox[1]]
 
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],10,10)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+        if entity.dir[1] > 0:#up
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-20,entity.hitbox.midtop[1]-20,20,20)
+        elif entity.dir[1] < 0:#down
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-20,entity.hitbox.midtop[1]+60,20,20)
+        elif entity.dir[0] > 0 and entity.dir[1] == 0:#right
+            self.rect=pygame.Rect(entity.hitbox.midright[0]+10,entity.hitbox.midright[1]-20,40,40)
+        elif entity.dir[0] < 0 and entity.dir[1] == 0:#left
+            self.rect=pygame.Rect(entity.hitbox.midleft[0]-50,entity.hitbox.midleft[1]-20,40,40)
 
 class Bow(Items):
     def __init__(self,entity_dir,entity_hitbox):
@@ -344,20 +354,12 @@ class Bow(Items):
         self.velocity=[entity_dir[0]*10,0]
         self.lifetime=40
         self.dmg=10
+        self.type='bow'
 
         self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
         self.rect = self.image.get_rect(center=self.pos)
-        self.hitbox=pygame.Rect(self.pos[0],self.pos[1],20,10)
+        self.hitbox=pygame.Rect(self.pos[0],self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-    def update(self,entity,screen,scroll):
-        self.lifetime-=1
-        self.pos=[self.pos[0]+self.velocity[0]+scroll[0],self.pos[1]+self.velocity[1]+ scroll[1]]#compensate for scroll and new speed
-
-        self.rect.topleft = self.pos.copy()
-        self.hitbox.center=self.rect.center
-
-        screen.blit(self.image,self.pos)#blit the arrow
