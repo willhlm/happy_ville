@@ -19,7 +19,7 @@ projectiles = pygame.sprite.Group()#arrows?
 
 game=UI.Game_UI()#initilise the game
 
-weather_paricles=BG.Background()
+weather_paricles=BG.Weather()
 
 knight=Entities.Player([200,50])
 hero.add(knight)
@@ -52,15 +52,13 @@ def scrolling():
     interactables.update(scroll)
     invisible_blocks.update(scroll)
     weather.update(scroll,game.screen)
-    projectiles.update(scroll,knight)
+    projectiles.update(scroll,knight.ac_dir,knight.hitbox)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
     weather=weather_paricles.create_particle('snow')#weather effects
     platforms,bg_blocks,enemies,npc,invisible_blocks,interactables=map.load_chunks()#chunks
-
-    scrolling()
 
     game.input(knight)#game inputs
 
@@ -77,8 +75,9 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Collisions.check_collisions(npc,platforms)
     Engine.Collisions.check_invisible(npc,invisible_blocks)
-    if knight.interacting:
-        Engine.Collisions.check_interaction(hero,interactables)
+    Engine.Collisions.check_interaction(knight,interactables)
+
+    scrolling()
 
     projectiles=Action.actions(projectiles,hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
     #Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
