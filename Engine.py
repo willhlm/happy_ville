@@ -63,7 +63,6 @@ class Collisions():
             if collision_types['top']:#knock back when hit head
                 entity.velocity[1]=0
 
-
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
     def collide(dynamic_entities,static_enteties):
