@@ -217,6 +217,43 @@ class Invisible_block(Entity):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
 
+class Interactable(Entity):
+
+    def __init__(self):
+        super().__init__()
+        self.interacted = False
+
+class Door(Interactable):
+
+    def __init__(self,img,pos,chunk_key=False):
+        super().__init__()
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+
+class Chest(Interactable):
+    def __init__(self,pos):
+        super().__init__()
+        self.image_sheet = Read_files.Chest().get_sprites()
+        self.image = self.image_sheet[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0],pos[1]-5)
+        self.hitbox = self.rect.inflate(0,0)
+        self.timer = 0
+
+    def update(self,pos):
+        super().update(pos)
+        if self.interacted:
+            if self.timer < 8:
+                self.image = self.image_sheet[1]
+                self.timer += 1
+            else:
+                self.image = self.image_sheet[2]
+                self.interacted = False
+
+
 class NPC(Entity):
     acceleration=[0.3,0.8]
 

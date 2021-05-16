@@ -115,6 +115,16 @@ class Sprites_evil_knight(Sprites):
         elif dir[0] < 0:
             return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
 
+class Chest(Sprites):
+
+    def __init__(self):
+        super().__init__()
+        self.path = "Sprites/animations/chest.png"
+        self.sprites = self.generic_sheet_reader(self.path,16,21,1,3)
+
+    def get_sprites(self):
+        return self.sprites
+
 class Hearts(Sprites):
 
     def __init__(self):
@@ -154,7 +164,7 @@ class Alphabet():#scale needs to be larger than one, for reasons
                 break
             else:
                 if c[0]==238:#check for red color
-                    char_img=Alphabet.clip(sheet,x-current_char_width,0, current_char_width,self.letter_hight)
+                    char_img=Alphabet.clip(sheet,x-current_char_width,0, current_char_width,self.letter_height)
                     self.characters[self.character_order[character_count]]=char_img.copy()
                     character_count+=1
                     current_char_width=0
@@ -167,12 +177,12 @@ class Alphabet():#scale needs to be larger than one, for reasons
         y_offset=0
         for char in text:
             if char!=' ' and char!='\n' and char!='*':
-                scaled_letter=pygame.transform.scale(self.characters[char], (int(self.scale*self.characters[char].get_width()), int(self.scale*self.letter_hight)))
+                scaled_letter=pygame.transform.scale(self.characters[char], (int(self.scale*self.characters[char].get_width()), int(self.scale*self.letter_height)))
                 screen.blit(scaled_letter,(loc[0]+x_offset,loc[1]+y_offset))
                 x_offset+=self.characters[char].get_width()+self.spacing
             elif char=='*':#new line
                 x_offset=0
-                y_offset+=self.letter_hight
+                y_offset+=self.letter_height
             else:#spacing
                 x_offset+=self.space_width+self.spacing
 
