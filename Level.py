@@ -128,6 +128,11 @@ class Tilemap():
                             npc.add(new_npc)
                             tile_x+=1
                             continue
+                        if tile=='e':#temporary NPC
+                            new_enemy = Entities.Enemy_1(self.entity_position(tile_x, tile_y, x, y),1)
+                            Enemies.add(new_enemy)
+                            tile_x+=1
+                            continue
                         new_block = Entities.Block(self.collision_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
                         platforms.add(new_block)
                         tile_x+=1
