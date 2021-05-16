@@ -2,7 +2,7 @@ import pygame, math, random
 
 weather=pygame.sprite.Group()
 
-class Background(pygame.sprite.Sprite):
+class Weather(pygame.sprite.Sprite):
 
     number_of_particles=0
 
@@ -10,7 +10,7 @@ class Background(pygame.sprite.Sprite):
         super().__init__()
         self.pos=[random.randint(-400, 400),random.randint(-400, -100)]
         self.velocity=[0,0]
-        Background.number_of_particles+=1
+        Weather.number_of_particles+=1
         self.phase=random.randint(0, 10)
         self.max=100#max number of partivles
 
@@ -23,7 +23,7 @@ class Background(pygame.sprite.Sprite):
 
         if self.pos[1]>300:#if on the lower side of screen. SHould we do ground collisions?
             weather.remove(self)
-            Background.number_of_particles-=1
+            Weather.number_of_particles-=1
         #continiouse falling, horizontally
         if self.pos[0]<0:
             self.pos[0]+=480
@@ -46,7 +46,7 @@ class Background(pygame.sprite.Sprite):
                 weather.add(particles)
         return weather
 
-class Snow(Background):
+class Snow(Weather):
     def __init__(self):
         super().__init__()
         self.radius=2#size
@@ -58,7 +58,7 @@ class Snow(Background):
         self.velocity=[0.5*math.sin(self.timer//10 + self.phase),0.5]
         self.pos=[self.pos[0]+self.velocity[0],self.pos[1]+self.velocity[1]]
 
-class Sakura(Background):
+class Sakura(Weather):
     def __init__(self):
         super().__init__()
         colors=[[255,192,203],[255,105,180],[255,100,180]]
@@ -77,7 +77,7 @@ class Autumn(Sakura):
         colors=[[178,34,34],[139,69,19],[128,128,0],[255,228,181]]
         self.color=colors[random.randint(0, len(colors)-1)]
 
-class Rain(Background):
+class Rain(Weather):
     def __init__(self):
         super().__init__()
         self.radius=1#size
