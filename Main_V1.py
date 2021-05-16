@@ -15,6 +15,7 @@ npc = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
 weather = pygame.sprite.Group()
 interactables = pygame.sprite.Group()
+projectiles = pygame.sprite.Group()#arrows?
 
 game=UI.Game_UI()#initilise the game
 
@@ -38,6 +39,7 @@ def draw():
     hero.draw(game.screen)
     enemies.draw(game.screen)
     npc.draw(game.screen)
+    projectiles.draw(game.screen)
 
 def scrolling():
     map.scrolling(knight.rect)
@@ -50,11 +52,12 @@ def scrolling():
     interactables.update(scroll)
     invisible_blocks.update(scroll)
     weather.update(scroll,game.screen)
+    projectiles.update(scroll)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=weather_paricles.create_particle('sakura')#weather effects
+    weather=weather_paricles.create_particle('snow')#weather effects
     platforms,bg_blocks,enemies,npc,invisible_blocks,interactables=map.load_chunks()#chunks
 
     scrolling()
@@ -77,6 +80,10 @@ while True:
     if knight.interacting:
         Engine.Collisions.check_interaction(hero,interactables)
 
+
+    projectiles=Action.actions(projectiles,hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
+    #Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
+
     Engine.Animation.set_img(hero)
     Engine.Animation.set_img(enemies)
     Engine.Animation.set_img(npc)
@@ -86,9 +93,6 @@ while True:
 
     draw()
 
-    Action.f_action(hero,platforms,enemies,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
-    Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
-
     game.screen.blit(game.blit_health(knight),(20,20))#blit hearts
     game.blit_fps()
 
@@ -96,6 +100,5 @@ while True:
 
     Engine.Collisions.check_npc_collision(knight,npc,game.display)#need to be at the end so that the conversation text doesn't get scaled
 
-    #print(game.clock.get_fps())
     pygame.display.update()#update after every change
     game.clock.tick(60)#limmit FPS
