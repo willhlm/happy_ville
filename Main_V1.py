@@ -77,7 +77,8 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Collisions.check_collisions(npc,platforms)
     Engine.Collisions.check_invisible(npc,invisible_blocks)
-    Engine.Collisions.check_interaction(hero,interactables)
+    if knight.interacting:
+        Engine.Collisions.check_interaction(hero,interactables)
 
     projectiles=Action.actions(projectiles,hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
     #Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2

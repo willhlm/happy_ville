@@ -172,8 +172,16 @@ class Game_UI():
                         player_class.jump()
 
                     if event.key==pygame.K_f:
+<<<<<<< HEAD
+                        player_class.attack_action()
+
+                    if event.key==pygame.K_g:
+                        player_class.interacting = True
+
+=======
                         player_class.action[player_class.equip]=True
                     #    player_class.attack_action()
+>>>>>>> e2c424ab34c8bdeadc70d70290ac4aa76c60ec04
                     if event.key == pygame.K_LSHIFT:#left shift
                         player_class.dashing()
 
@@ -182,7 +190,7 @@ class Game_UI():
                     player_class.action['stand']=True
                     player_class.action['run']=False
 
-                if event.key == event.key == pygame.K_t:#if release button
+                if event.key == pygame.K_t:#if release button
                     if player_class.state!='talk':#if not in conversation
                         player_class.state='stand'
                         player_class.action['talk']=False
@@ -196,3 +204,6 @@ class Game_UI():
 
                 if event.key == pygame.K_DOWN:
                     player_class.dir[1]=0
+
+                if event.key==pygame.K_g:
+                    player_class.interacting = False
