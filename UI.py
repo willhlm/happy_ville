@@ -182,7 +182,7 @@ class Game_UI():
                     player_class.action['stand']=True
                     player_class.action['run']=False
 
-                if event.key == event.key == pygame.K_t:#if release button
+                if event.key == pygame.K_t:#if release button
                     if player_class.state!='talk':#if not in conversation
                         player_class.state='stand'
                         player_class.action['talk']=False
