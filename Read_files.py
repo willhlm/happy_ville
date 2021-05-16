@@ -150,7 +150,7 @@ class Alphabet():#scale needs to be larger than one, for reasons
     def __init__(self, path,scale=1):
         self.spacing=1
         self.scale=scale
-        self.letter_hight=16*self.scale
+        self.letter_height=16*self.scale
         self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0',',','.','!','?']
         sheet=pygame.image.load(path).convert()
         self.characters={}
