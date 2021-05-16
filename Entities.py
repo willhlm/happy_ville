@@ -138,6 +138,7 @@ class Player(Entity):
         self.hitbox_offset = 3
         self.sprites = Read_files.Sprites_player()
         self.equipment=None#a placeholder for equipemnts: sword and bow
+        self.interacting = False
 
         #conversations with villigers
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead

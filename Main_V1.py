@@ -74,7 +74,8 @@ while True:
     Engine.Collisions.check_collisions(enemies,platforms)
     Engine.Collisions.check_collisions(npc,platforms)
     Engine.Collisions.check_invisible(npc,invisible_blocks)
-    Engine.Collisions.check_interaction(hero,interactables)
+    if knight.interacting:
+        Engine.Collisions.check_interaction(hero,interactables)
 
     Engine.Animation.set_img(hero)
     Engine.Animation.set_img(enemies)

@@ -174,6 +174,9 @@ class Game_UI():
                     if event.key==pygame.K_f:
                         player_class.attack_action()
 
+                    if event.key==pygame.K_g:
+                        player_class.interacting = True
+
                     if event.key == pygame.K_LSHIFT:#left shift
                         player_class.dashing()
 
@@ -196,3 +199,6 @@ class Game_UI():
 
                 if event.key == pygame.K_DOWN:
                     player_class.dir[1]=0
+
+                if event.key==pygame.K_g:
+                    player_class.interacting = False
