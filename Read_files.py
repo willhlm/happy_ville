@@ -125,6 +125,16 @@ class Chest(Sprites):
     def get_sprites(self):
         return self.sprites
 
+class Chest_Big(Sprites):
+
+    def __init__(self):
+        super().__init__()
+        self.path = "Sprites/animations/chest_big.png"
+        self.sprites = self.generic_sheet_reader(self.path,32,29,1,5)
+
+    def get_sprites(self):
+        return self.sprites
+
 class Hearts(Sprites):
 
     def __init__(self):
