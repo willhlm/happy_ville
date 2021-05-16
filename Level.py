@@ -129,6 +129,7 @@ class Tilemap():
                             npc.add(new_npc)
                             tile_x+=1
                             continue
+
                         new_block = Entities.Block(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
                         platforms.add(new_block)
                         tile_x+=1

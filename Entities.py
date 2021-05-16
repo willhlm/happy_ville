@@ -43,7 +43,6 @@ class Enemy_1(Entity):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20}
         self.health=100
-        self.dmg=10
         self.ID=ID
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']
@@ -53,10 +52,10 @@ class Enemy_1(Entity):
         self.distance=[0,0]
         self.equip='sword'#can change to bow
         self.f_action=['sword','bow']
-        self.f_action_cooldown=True
         self.inv=False#flag to check if collision with invisible blocks
         self.friction=[0.2,1]
         self.sprites = Read_files.Sprites_player()
+        self.equipment=None#a placeholder for equipemnts: sword and bow
 
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
@@ -87,10 +86,35 @@ class Enemy_1(Entity):
                 self.action['stand']=True
 
         if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
-            self.action['sword']=True
+            self.attack_action()
+
 
     def attack_action(self):
-        pass
+        if not self.action[self.equip]:#if first swing: making sure you cannot spam action
+            if self.equip=='sword':
+                self.equipment=Sword()#equip a sword
+            elif self.equip=='bow':
+                self.equipment=Bow(self.dir,self.hitbox)#equip a sword
+            self.action[self.equip]=True
+
+    def change_equipment(self):#don't change if there are arrows or sword already
+        if not self.equipment:
+            if self.equip == 'sword':
+                self.equip='bow'
+            else:
+                self.equip='sword'
+
+    def dashing(self):
+        self.velocity[0]=20*self.dir[0]#dash
+        self.action['dash']=True
+        self.action[self.equip]=False#cancel attack_action
+
+    def jump(self):
+        self.friction[1] = 0
+        self.velocity[1]=-11
+        self.action['jump']=True
+        if self.action['wall']:
+            self.velocity[0]=-self.dir[0]*10
 
 class Player(Entity):
 
@@ -104,7 +128,6 @@ class Player(Entity):
         self.health = 76
         self.max_health = 100
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
-        self.dmg=50
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
@@ -129,8 +152,7 @@ class Player(Entity):
                 self.equipment=Bow(self.dir,self.hitbox)#equip a sword
             self.action[self.equip]=True
 
-
-    def change_equipment(self):
+    def change_equipment(self):#don't change if there are arrows or sword already
         if not self.equipment:
             if self.equip == 'sword':
                 self.equip='bow'
@@ -299,8 +321,11 @@ class Sword(Items):
         super().__init__()
         self.movement=[0,0]
         self.lifetime=10
+        self.dmg=20
 
-    def update(self,entity):
+    def update(self,entity,screen,scroll):
+        #remove the equipment if it has expiered
+
         self.lifetime-=1
         if entity.ac_dir[0]>0 and entity.ac_dir[1]==0:#right
             self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
@@ -311,22 +336,24 @@ class Sword(Items):
         elif entity.ac_dir[1]<0:#down
             self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+50,20,20)
 
+
 class Bow(Items):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
         self.pos=[entity_hitbox[0],entity_hitbox[1]]
         self.velocity=[entity_dir[0]*10,0]
         self.lifetime=40
+        self.dmg=10
 
         self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
-        if self.velocity[0]<0:
+        if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
         self.rect = self.image.get_rect(center=self.pos)
         self.hitbox=pygame.Rect(self.pos[0],self.pos[1],20,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-    def update(self,screen,scroll):
+    def update(self,entity,screen,scroll):
         self.lifetime-=1
         self.pos=[self.pos[0]+self.velocity[0]+scroll[0],self.pos[1]+self.velocity[1]+ scroll[1]]#compensate for scroll and new speed
 

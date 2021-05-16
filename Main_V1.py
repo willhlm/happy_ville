@@ -89,8 +89,8 @@ while True:
     Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
 
     game.screen.blit(game.blit_health(knight),(20,20))#blit hearts
-    #game.screen.blit(game.blit_fps(),(400,20))
-    #game.blit_fps() #behöver 0 - 9 fonts implementerat
+    game.blit_fps()
+
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
     Engine.Collisions.check_npc_collision(knight,npc,game.display)#need to be at the end so that the conversation text doesn't get scaled
