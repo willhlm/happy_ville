@@ -52,7 +52,7 @@ def scrolling():
     interactables.update(scroll)
     invisible_blocks.update(scroll)
     weather.update(scroll,game.screen)
-    projectiles.update(scroll)
+    projectiles.update(scroll,knight)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen
@@ -79,7 +79,6 @@ while True:
     Engine.Collisions.check_invisible(npc,invisible_blocks)
     if knight.interacting:
         Engine.Collisions.check_interaction(hero,interactables)
-
 
     projectiles=Action.actions(projectiles,hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
     #Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2

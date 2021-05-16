@@ -142,9 +142,9 @@ class Player(Entity):
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
         self.text_frame=0#chosing which text to say: woudl ike to move this to NPC class instead
 
-    def attack_action(self,projectiles=False):
+    def attack_action(self,projectiles):
         if self.action[self.equip]:
-            if self.state!='sword' and self.state!='bow':
+            if self.state!='sword' and self.state!='bow':#do not create an action if it has been created
                 if self.equip=='sword':
                     projectiles.add(Sword(self))
                 elif self.equip=='bow':
@@ -166,7 +166,8 @@ class Player(Entity):
         self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
-        self.velocity[0]=-self.dir[0]*10*int(self.action['wall'])+self.velocity[0]
+        if self.action['wall']:
+            self.velocity[0]=-self.dir[0]*10
 
     def talk(self):
         self.action['talk']=True
@@ -314,14 +315,11 @@ class Items(pygame.sprite.Sprite):
         super().__init__()
         self.hit=False
 
-    def update(self,scroll=0):
+    def update(self,scroll,entity=None):
         #remove the equipment if it has expiered
-        print(scroll)
         self.lifetime-=1
-
-
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]-scroll[0], self.rect.topleft[1] + self.velocity[1]-scroll[1]]
-        self.hitbox.center=self.rect.center
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.hitbox.center = self.rect.center
 
 class Sword(Items):
     def __init__(self,entity):
@@ -330,7 +328,6 @@ class Sword(Items):
         self.dmg=20
         self.velocity=[0,0]
         self.type='sword'
-
         self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
 
         pos=[entity.hitbox[0],entity.hitbox[1]]
@@ -340,18 +337,32 @@ class Sword(Items):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
         if entity.dir[1] > 0:#up
-            self.rect=pygame.Rect(entity.hitbox.midtop[0]-20,entity.hitbox.midtop[1]-20,20,20)
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
         elif entity.dir[1] < 0:#down
-            self.rect=pygame.Rect(entity.hitbox.midtop[0]-20,entity.hitbox.midtop[1]+60,20,20)
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+40,20,20)
         elif entity.dir[0] > 0 and entity.dir[1] == 0:#right
-            self.rect=pygame.Rect(entity.hitbox.midright[0]+10,entity.hitbox.midright[1]-20,40,40)
+            self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
         elif entity.dir[0] < 0 and entity.dir[1] == 0:#left
-            self.rect=pygame.Rect(entity.hitbox.midleft[0]-50,entity.hitbox.midleft[1]-20,40,40)
+            self.rect=pygame.Rect(entity.hitbox.midleft[0]-40,entity.hitbox.midleft[1]-20,40,40)
+
+
+    def update(self,scroll,entity):
+        #remove the equipment if it has expiered
+        self.lifetime-=1
+
+        if entity.ac_dir[1] > 0:#up
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]-20,20,20)
+        elif entity.ac_dir[1] < 0:#down
+            self.rect=pygame.Rect(entity.hitbox.midtop[0]-10,entity.hitbox.midtop[1]+40,20,20)
+        elif entity.ac_dir[0] > 0 and entity.ac_dir[1] == 0:#right
+            self.rect=pygame.Rect(entity.hitbox.midright[0],entity.hitbox.midright[1]-20,40,40)
+        elif entity.ac_dir[0] < 0 and entity.ac_dir[1] == 0:#left
+            self.rect=pygame.Rect(entity.hitbox.midleft[0]-40,entity.hitbox.midleft[1]-20,40,40)
 
 class Bow(Items):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        self.pos=[entity_hitbox[0],entity_hitbox[1]]
+        pos=[entity_hitbox[0],entity_hitbox[1]]
         self.velocity=[entity_dir[0]*10,0]
         self.lifetime=40
         self.dmg=10
@@ -361,6 +372,6 @@ class Bow(Items):
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
-        self.rect = self.image.get_rect(center=self.pos)
-        self.hitbox=pygame.Rect(self.pos[0],self.pos[1],10,10)
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
