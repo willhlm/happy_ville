@@ -163,6 +163,9 @@ class Tilemap():
                         elif tile == '9':
                             new_block = Entities.Chest(self.entity_position(tile_x, tile_y, x, y))
                             interactables.add(new_block)
+                        elif tile == '10':
+                            new_block = Entities.Chest_Big(self.entity_position(tile_x, tile_y, x, y))
+                            interactables.add(new_block)
                         else:
                             new_block = Entities.Door(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
                             interactables.add(new_block)
