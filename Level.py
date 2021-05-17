@@ -181,6 +181,9 @@ class Tilemap():
                 bg_list = [i for i in bg_blocks.sprites() if i.chunk_key==key]
                 bg_blocks.remove(bg_list)
 
+                #inter_list = [i for i in interactables.sprites() if i.chunk_key==key]
+                #interactables.remove(inter_list)
+
                 #update key
                 self.keys.remove(key)
 
