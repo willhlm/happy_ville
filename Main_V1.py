@@ -17,6 +17,8 @@ weather = pygame.sprite.Group()
 interactables = pygame.sprite.Group()
 projectiles = pygame.sprite.Group()#arrows?
 
+
+
 game=UI.Game_UI()#initilise the game
 
 weather_paricles=BG.Weather()

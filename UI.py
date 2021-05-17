@@ -16,6 +16,10 @@ class Game_UI():
         self.click=False
         self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",2)#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
+        self.state=['start']
+        self.main=Start_menu(self)
+        self.optinos=Options(self)
+        self.resolution=Resolution(self)
 
     def start_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -23,67 +27,17 @@ class Game_UI():
         self.display.fill((207,238,250))#fill game.screen
 
         while self.ESC:
+            self.curr_menu()
 
-            self.font.render(self.display,'Start Game',(200,100))
-            start_rect=pygame.Rect(200,100,100,100)
-            self.font.render(self.display,'Options',(200,200))
-            option_rect=pygame.Rect(200,200,100,100)
-            self.font.render(self.display,'Exit Game',(200,400))
-            exit_rect=pygame.Rect(200,400,100,100)
-
-            if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-                self.ESC=False#exhit the start menue
-                self.click=False
-            elif option_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-                self.click=False
-                self.option=True
-                self.option_menu()#go to option
-            elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-                pygame.quit()
-                sys.exit()
-
-            Game_UI.input_quit(self)
-
-
-    def option_menu(self):
-        #self.screen.blit(self.start_BG,(0,0))
-        #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-        self.display.fill((207,238,250))#fill game.screen
-
-        while self.option:
-
-            self.font.render(self.display,'Resolution',(200,100))
-            Resolution_rect=pygame.Rect(200,100,100,100)
-
-            if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-                self.click=False
-                self.display.fill((207,238,250))#fill game.screen
-                self.resolution=True
-                self.resolution_menu()#go to resolution selections
-
-            Game_UI.input_quit(self)
-
-        self.ESC=True
-
-    def resolution_menu(self):
-#        self.screen.blit(self.start_BG,(0,0))
-    #    self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-        self.display.fill((207,238,250))#fill game.screen
-
-        while self.resolution:
-            self.font.render(self.display,'thousandtimeeithundred',(200,100))
-            Resolution_rect=pygame.Rect(200,100,100,100)
-
-            if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-                self.screen=pygame.display.set_mode((1000,800))
-                #self.start_BG=pygame.transform.scale(self.start_BG,(1000,800))#recale the BG
-                #self.screen.blit(self.start_BG,(0,0))
-                self.display.fill((207,238,250))#fill game.screen
-                self.resolution=False
-
-            Game_UI.input_quit(self)
-
-        self.option=True
+    def curr_menu(self):
+        if self.state[-1] == 'start':
+            self.main.display_menu()
+        elif self.state[-1] == 'option':
+            self.optinos.display_menu()
+        elif self.state[-1] == 'resolution':
+            self.resolution.display_menu()
+        elif self.state[-1] == 'exit':
+            self.main.exit()
 
     def blit_health(self, player):
         #this code is specific to using heart.png sprites
@@ -113,7 +67,6 @@ class Game_UI():
 
         #return blit_surface
 
-
     def input_quit(self):#to exits between option menues
         pygame.display.update()
         for event in pygame.event.get():
@@ -129,9 +82,10 @@ class Game_UI():
                     self.display.fill((207,238,250))#fill game.screen
                     #self.screen.blit(self.start_BG,(0,0))
                     #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-                    self.resolution=False
-                    self.option=False
-                    self.ESC=False
+                    if len(self.state)!=1:
+                        self.state.pop()
+
+                    return False
 
     def input(self,player_class):#input while playing
         #game input
@@ -204,3 +158,82 @@ class Game_UI():
 
                 if event.key==pygame.K_g:
                     player_class.interacting = False
+
+
+
+class Menus():
+    def __init__(self,game):
+        super().__init__()
+        self.game=game
+
+class Start_menu(Menus):
+    def __init__(self,game):
+        super().__init__(self)
+        self.game=game
+
+    def display_menu(self):
+        self.running=True
+        while self.running:
+            self.game.font.render(self.game.display,'Start Game',(200,100))
+            start_rect=pygame.Rect(200,100,100,100)
+            self.game.font.render(self.game.display,'Options',(200,200))
+            option_rect=pygame.Rect(200,200,100,100)
+            self.game.font.render(self.game.display,'Exit Game',(200,400))
+            exit_rect=pygame.Rect(200,400,100,100)
+
+            if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+                self.running=False#exhit the start menue
+                self.game.ESC=False
+                self.game.click=False
+            elif option_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+                self.game.click=False
+                self.running=False
+                self.game.state.append('option')
+            elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+                self.exit()
+
+            self.running=self.game.input_quit()
+
+    def exit(self):
+        pygame.quit()
+        sys.exit()
+
+class Options(Menus):
+    def __init__(self,game):
+        super().__init__(self)
+        self.game=game
+
+    def display_menu(self):
+        self.running=True
+        self.game.display.fill((207,238,250))#fill game.screen
+
+        while self.running:
+            self.game.font.render(self.game.display,'Resolution',(200,100))
+            Resolution_rect=pygame.Rect(200,100,100,100)
+
+            if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+                self.game.click=False
+                self.game.state.append('resolution')
+                self.running=False
+
+            self.running=self.game.input_quit()
+
+class Resolution(Menus):
+    def __init__(self,game):
+        super().__init__(self)
+        self.game=game
+
+    def display_menu(self):
+        self.running=True
+        self.game.display.fill((207,238,250))#fill game.screen
+
+        while self.running:
+            self.game.font.render(self.game.display,'1000x800',(200,100))
+            Resolution_rect=pygame.Rect(200,100,100,100)
+
+            if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+                self.screen=pygame.display.set_mode((1000,800))
+                #self.start_BG=pygame.transform.scale(self.start_BG,(1000,800))#recale the BG
+                #self.screen.blit(self.start_BG,(0,0))
+
+            self.running=self.game.input_quit()

@@ -363,13 +363,13 @@ class Sword(Items):
 
     def spawn(self,entity_dir,entity_hitbox):
         if entity_dir[1] > 0:#up
-            self.rect=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]-20,20,20)
+            self.hitbox=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]-20,20,20)
         elif entity_dir[1] < 0:#down
-            self.rect=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]+40,20,20)
+            self.hitbox=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]+40,20,20)
         elif entity_dir[0] > 0 and entity_dir[1] == 0:#right
-            self.rect=pygame.Rect(entity_hitbox.midright[0],entity_hitbox.midright[1]-20,40,30)
+            self.hitbox=pygame.Rect(entity_hitbox.midright[0],entity_hitbox.midright[1]-20,40,30)
         elif entity_dir[0] < 0 and entity_dir[1] == 0:#left
-            self.rect=pygame.Rect(entity_hitbox.midleft[0]-40,entity_hitbox.midleft[1]-20,40,30)
+            self.hitbox=pygame.Rect(entity_hitbox.midleft[0]-40,entity_hitbox.midleft[1]-20,40,30)
 
 class Bow(Items):
     def __init__(self,entity_dir,entity_hitbox):
@@ -383,7 +383,6 @@ class Bow(Items):
             self.image=pygame.transform.flip(self.image,True,False)
 
         self.original_image=self.image.copy()
-
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],10,10)
@@ -405,4 +404,6 @@ class Bow(Items):
         self.image=pygame.transform.rotate(self.original_image,-self.velocity[0]*self.velocity[1])#fig,angle,scale
         x, y = self.rect.center  # Save its current center.
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
+        self.hitbox=pygame.Rect(x,y,10,10)
+
         self.rect.center = (x, y)  # Put the new rect's center at old center.
