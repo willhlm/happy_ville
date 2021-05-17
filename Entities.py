@@ -354,7 +354,7 @@ class Sword(Items):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-        self.spawn(entity_dir,entity_hitbox)#spawn hitbox based on entity position
+        self.spawn(entity_dir,entity_hitbox)#spawn hitbox based on entity position and direction
 
     def update(self,scroll,entity_ac_dir,entity_hitbox):
         #remove the equipment if it has expiered
@@ -363,26 +363,47 @@ class Sword(Items):
 
     def spawn(self,entity_dir,entity_hitbox):
         if entity_dir[1] > 0:#up
-            self.rect=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]-20,20,20)
+            self.hitbox=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]-20,20,20)
         elif entity_dir[1] < 0:#down
-            self.rect=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]+40,20,20)
+            self.hitbox=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]+40,20,20)
         elif entity_dir[0] > 0 and entity_dir[1] == 0:#right
-            self.rect=pygame.Rect(entity_hitbox.midright[0],entity_hitbox.midright[1]-20,40,30)
+            self.hitbox=pygame.Rect(entity_hitbox.midright[0],entity_hitbox.midright[1]-20,40,30)
         elif entity_dir[0] < 0 and entity_dir[1] == 0:#left
-            self.rect=pygame.Rect(entity_hitbox.midleft[0]-40,entity_hitbox.midleft[1]-20,40,30)
+            self.hitbox=pygame.Rect(entity_hitbox.midleft[0]-40,entity_hitbox.midleft[1]-20,40,30)
 
 class Bow(Items):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        self.velocity=[entity_dir[0]*10,0]
+        self.velocity=[entity_dir[0]*10,-5]
         self.lifetime=40
         self.dmg=10
         self.type='bow'
-
         self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
+        self.original_image=self.image.copy()
+
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def update(self,scroll,entity_ac_dir,entity_hitbox):
+        #remove the equipment if it has expiered
+        self.speed()
+        self.rotate()
+
+        self.lifetime-=1
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.hitbox.center = self.rect.center
+
+    def speed(self):#gravity
+        self.velocity[1]+=0.5
+
+    def rotate(self):
+        self.image=pygame.transform.rotate(self.original_image,-self.velocity[0]*self.velocity[1])#fig,angle,scale
+        x, y = self.rect.center  # Save its current center.
+        self.rect = self.image.get_rect()  # Replace old rect with new rect.
+        self.hitbox=pygame.Rect(x,y,10,10)
+
+        self.rect.center = (x, y)  # Put the new rect's center at old center.

@@ -23,7 +23,6 @@ class Collisions():
 
     @staticmethod
     def check_interaction(player,static_enteties):
-
         if player.interacting:
 
             collided=Collisions.collided #make the hitbox collide and not rect

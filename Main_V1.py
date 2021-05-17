@@ -17,6 +17,8 @@ weather = pygame.sprite.Group()
 interactables = pygame.sprite.Group()
 projectiles = pygame.sprite.Group()#arrows?
 
+
+
 game=UI.Game_UI()#initilise the game
 
 weather_paricles=BG.Weather()
@@ -57,7 +59,7 @@ def scrolling():
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=weather_paricles.create_particle('snow')#weather effects
+    weather=weather_paricles.create_particle('sakura')#weather effects
     platforms,bg_blocks,enemies,npc,invisible_blocks,interactables=map.load_chunks()#chunks
 
     game.input(knight)#game inputs

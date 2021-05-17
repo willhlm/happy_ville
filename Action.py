@@ -6,10 +6,10 @@ def actions(projectiles,sword_enteties,platforms,enemies,screen):
         for projectile in projectiles.sprites():#go through the group
 
             #projectile collision?
-            collision_plat=pygame.sprite.spritecollideany(projectile,platforms)
+            collision_plat=pygame.sprite.spritecollideany(projectile,platforms,collided)
             collision_ene=pygame.sprite.spritecollideany(projectile,enemies,collided)
 
-            pygame.draw.rect(screen, (0,0,255), projectile.rect,2)#draw hitbox
+            pygame.draw.rect(screen, (0,0,255), projectile.hitbox,2)#draw hitbox
 
             #if hit enemy
             if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
@@ -22,8 +22,9 @@ def actions(projectiles,sword_enteties,platforms,enemies,screen):
 
                 if projectile.type=='sword':#knockback if sword is quipped
                     collision_ene.velocity[0]=entity.dir[0]*10#knock back of enemy
-
-                projectiles.remove(projectile)
+                    projectiles.remove(projectile)
+                elif projectile.type=='bow':
+                    projectile.velocity=[0,0]
 
             #hit platform
             elif collision_plat:
@@ -32,8 +33,10 @@ def actions(projectiles,sword_enteties,platforms,enemies,screen):
                         entity.velocity[0]=-entity.dir[0]*10#knock back
                     else:#up or down
                         entity.velocity[1]=entity.dir[1]*10#knock back
-
-                projectiles.remove(projectile)
+                    projectiles.remove(projectile)
+                elif projectile.type=='bow':
+                    projectile.velocity=[0,0]
+                    projectile.rect.inflate(-2,-2)
 
             if projectile.lifetime<0:
                 projectiles.remove(projectile)
@@ -85,5 +88,5 @@ def f_action(sword_enteties,platforms,enemies,screen,scroll):
                 entity.equipment=None#remove the equipment if hit platform
 
 
-def collided(sword,target):
-    return sword.rect.colliderect(target.hitbox)
+def collided(projectile,target):
+    return projectile.hitbox.colliderect(target.hitbox)
