@@ -251,6 +251,26 @@ class Chest(Interactable):
                 self.image = self.image_sheet[2]
                 self.interacted = False
 
+class Chest_Big(Interactable):
+    def __init__(self,pos):
+        super().__init__()
+        self.image_sheet = Read_files.Chest_Big().get_sprites()
+        self.image = self.image_sheet[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0],pos[1]-13)
+        self.hitbox = self.rect.inflate(0,0)
+        self.timer = 0
+
+    def update(self,pos):
+        super().update(pos)
+        if self.interacted:
+            if self.timer < 28:
+                self.image = self.image_sheet[self.timer//7]
+                self.timer += 1
+            else:
+                self.image = self.image_sheet[4]
+                self.interacted = False
+
 
 class NPC(Entity):
     acceleration=[0.3,0.8]

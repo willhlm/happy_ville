@@ -1,6 +1,6 @@
 import pygame, math, random
 
-weather=pygame.sprite.Group()
+weather_paricles=pygame.sprite.Group()
 
 class Weather(pygame.sprite.Sprite):
 
@@ -8,7 +8,7 @@ class Weather(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
-        self.pos=[random.randint(-400, 400),random.randint(-400, -100)]
+        self.pos=[random.randint(1, 479),random.randint(-500, -100)]
         self.velocity=[0,0]
         Weather.number_of_particles+=1
         self.phase=random.randint(0, 10)
@@ -22,8 +22,9 @@ class Weather(pygame.sprite.Sprite):
         self.speed()#modulate the speed according to the particle type
 
         if self.pos[1]>300:#if on the lower side of screen. SHould we do ground collisions?
-            weather.remove(self)
+            weather_paricles.remove(self)
             Weather.number_of_particles-=1
+
         #continiouse falling, horizontally
         if self.pos[0]<0:
             self.pos[0]+=480
@@ -34,17 +35,17 @@ class Weather(pygame.sprite.Sprite):
         for i in range(self.number_of_particles,self.max):
             if particle=='snow':
                 particles=Snow()
-                weather.add(particles)
+                weather_paricles.add(particles)
             elif particle=='sakura':
                 particles=Sakura()
-                weather.add(particles)
+                weather_paricles.add(particles)
             elif particle=='rain':
                 particles=Rain()
-                weather.add(particles)
+                weather_paricles.add(particles)
             elif particle=='autumn':
                 particles=Autumn()
-                weather.add(particles)
-        return weather
+                weather_paricles.add(particles)
+        return weather_paricles
 
 class Snow(Weather):
     def __init__(self):
