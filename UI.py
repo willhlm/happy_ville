@@ -16,10 +16,14 @@ class Game_UI():
         self.click=False
         self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",2)#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
-        self.state=['start']
-        self.main=Start_menu(self)
-        self.optinos=Options(self)
-        self.resolution=Resolution(self)
+        self.state = ['start']
+        self.main = Start_menu(self)
+        self.optinos = Options(self)
+        self.resolution = Resolution(self)
+
+    def game_loop(self):
+        while True:
+            pass
 
     def start_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -36,8 +40,6 @@ class Game_UI():
             self.optinos.display_menu()
         elif self.state[-1] == 'resolution':
             self.resolution.display_menu()
-        elif self.state[-1] == 'exit':
-            self.main.exit()
 
     def blit_health(self, player):
         #this code is specific to using heart.png sprites
@@ -83,9 +85,7 @@ class Game_UI():
                     #self.screen.blit(self.start_BG,(0,0))
                     #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
                     if len(self.state)!=1:
-                        self.state.pop()
-
-                    return False
+                        self.state.pop()#un-remember the last page
 
     def input(self,player_class):#input while playing
         #game input
@@ -172,27 +172,23 @@ class Start_menu(Menus):
         self.game=game
 
     def display_menu(self):
-        self.running=True
-        while self.running:
-            self.game.font.render(self.game.display,'Start Game',(200,100))
-            start_rect=pygame.Rect(200,100,100,100)
-            self.game.font.render(self.game.display,'Options',(200,200))
-            option_rect=pygame.Rect(200,200,100,100)
-            self.game.font.render(self.game.display,'Exit Game',(200,400))
-            exit_rect=pygame.Rect(200,400,100,100)
+        self.game.font.render(self.game.display,'Start Game',(200,100))
+        start_rect=pygame.Rect(200,100,100,100)
+        self.game.font.render(self.game.display,'Options',(200,200))
+        option_rect=pygame.Rect(200,200,100,100)
+        self.game.font.render(self.game.display,'Exit Game',(200,400))
+        exit_rect=pygame.Rect(200,400,100,100)
 
-            if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
-                self.running=False#exhit the start menue
-                self.game.ESC=False
-                self.game.click=False
-            elif option_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
-                self.game.click=False
-                self.running=False
-                self.game.state.append('option')
-            elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
-                self.exit()
+        if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+            self.game.ESC=False
+            self.game.click=False
+        elif option_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+            self.game.click=False
+            self.game.state.append('option')
+        elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+            self.exit()
 
-            self.running=self.game.input_quit()
+        self.game.input_quit()
 
     def exit(self):
         pygame.quit()
@@ -204,19 +200,16 @@ class Options(Menus):
         self.game=game
 
     def display_menu(self):
-        self.running=True
         self.game.display.fill((207,238,250))#fill game.screen
 
-        while self.running:
-            self.game.font.render(self.game.display,'Resolution',(200,100))
-            Resolution_rect=pygame.Rect(200,100,100,100)
+        self.game.font.render(self.game.display,'Resolution',(200,100))
+        Resolution_rect=pygame.Rect(200,100,100,100)
 
-            if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
-                self.game.click=False
-                self.game.state.append('resolution')
-                self.running=False
+        if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+            self.game.click=False
+            self.game.state.append('resolution')
 
-            self.running=self.game.input_quit()
+        self.game.input_quit()
 
 class Resolution(Menus):
     def __init__(self,game):
@@ -224,16 +217,14 @@ class Resolution(Menus):
         self.game=game
 
     def display_menu(self):
-        self.running=True
         self.game.display.fill((207,238,250))#fill game.screen
 
-        while self.running:
-            self.game.font.render(self.game.display,'1000x800',(200,100))
-            Resolution_rect=pygame.Rect(200,100,100,100)
+        self.game.font.render(self.game.display,'1000x800',(200,100))
+        Resolution_rect=pygame.Rect(200,100,100,100)
 
-            if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
-                self.screen=pygame.display.set_mode((1000,800))
-                #self.start_BG=pygame.transform.scale(self.start_BG,(1000,800))#recale the BG
-                #self.screen.blit(self.start_BG,(0,0))
+        if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.game.click==True:
+            self.screen=pygame.display.set_mode((1000,800))
+            #self.start_BG=pygame.transform.scale(self.start_BG,(1000,800))#recale the BG
+            #self.screen.blit(self.start_BG,(0,0))
 
-            self.running=self.game.input_quit()
+        self.game.input_quit()
