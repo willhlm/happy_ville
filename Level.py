@@ -45,10 +45,10 @@ class Tilemap():
 
 
         elif mode=='border':
-            print(self.total_disatnce[0],knight.center[0])
+            self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+
             if -40 < self.total_disatnce[0]<960:#map boundaries
                 self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
-                self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
 
             else:
                 if knight.center[0]<60:
