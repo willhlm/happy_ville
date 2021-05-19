@@ -15,9 +15,8 @@ npc = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
 weather = pygame.sprite.Group()
 interactables = pygame.sprite.Group()
-projectiles = pygame.sprite.Group()#arrows?
-
-
+fprojectiles = pygame.sprite.Group()#arrows?
+eprojectiles = pygame.sprite.Group()#arrows?
 
 game=UI.Game_UI()#initilise the game
 
@@ -41,10 +40,11 @@ def draw():
     hero.draw(game.screen)
     enemies.draw(game.screen)
     npc.draw(game.screen)
-    projectiles.draw(game.screen)
+    fprojectiles.draw(game.screen)
+    eprojectiles.draw(game.screen)
 
 def scrolling():
-    map.scrolling(knight.rect)
+    map.scrolling(knight.rect,'autocap')
     scroll = [-map.scroll[0],-map.scroll[1]]
     platforms.update(scroll)
     bg_blocks.update(scroll)
@@ -54,7 +54,8 @@ def scrolling():
     interactables.update(scroll)
     invisible_blocks.update(scroll)
     weather.update(scroll,game.screen)
-    projectiles.update(scroll,knight.ac_dir,knight.hitbox)
+    fprojectiles.update(scroll,knight.ac_dir,knight.hitbox)
+    eprojectiles.update(scroll)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen
@@ -64,10 +65,10 @@ while True:
 
     game.input(knight)#game inputs
 
-    for entity in enemies.sprites():
-        entity.AI(knight)#the enemy Ai movement, based on knight position
-    for entity in npc.sprites():
-        entity.AI()
+    for enemy in enemies.sprites():
+        enemy.AI(knight)#the enemy Ai movement, based on knight position
+    for npcs in npc.sprites():
+        npcs.AI()
 
     Engine.Physics.movement(hero)
     Engine.Physics.movement(enemies)
@@ -81,8 +82,8 @@ while True:
 
     scrolling()
 
-    projectiles=Action.actions(projectiles,hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
-    #Action.f_action(enemies,platforms,hero,game.screen,[-map.scroll[0],-map.scroll[1]])#f_action swinger, target1,target2
+    fprojectiles=Action.actions(fprojectiles,hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
+    eprojectiles=Action.actions(eprojectiles,enemies,platforms,hero,game.screen)#f_action swinger, target1,target2
 
     Engine.Animation.set_img(hero)
     Engine.Animation.set_img(enemies)
