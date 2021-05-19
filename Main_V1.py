@@ -44,7 +44,7 @@ def draw():
     eprojectiles.draw(game.screen)
 
 def scrolling():
-    map.scrolling(knight.rect,'autocap')
+    map.scrolling(knight.rect,'border')
     scroll = [-map.scroll[0],-map.scroll[1]]
     platforms.update(scroll)
     bg_blocks.update(scroll)

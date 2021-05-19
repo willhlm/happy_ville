@@ -37,7 +37,7 @@ class Enemy_1(Entity):
 
     def __init__(self,pos,ID):
         super().__init__()
-        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png")
+        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
@@ -72,7 +72,7 @@ class Enemy_1(Entity):
             self.action['run']=True
             self.action['stand']=False
 
-            if abs(self.distance[0])<20:#don't get too close
+            if abs(self.distance[0])<40:#don't get too close
                 self.action['run']=False
                 self.action['stand']=True
 
@@ -344,7 +344,7 @@ class Sword(Items):
         self.dmg=10
         self.velocity=[0,0]
         self.type='sword'
-        self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/aseprite/Items/sword.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],10,10)

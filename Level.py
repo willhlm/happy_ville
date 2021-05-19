@@ -28,8 +28,6 @@ class Tilemap():
             self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
             self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
 
-            self.update_scroll()
-
         elif mode=='autocap':
             if knight.center[0]>400:
                 self.true_scroll[0]+=5
@@ -45,7 +43,23 @@ class Tilemap():
             elif knight.center[1]>130 and knight.center[1]<190:
                 self.true_scroll[1]=0
 
-            self.update_scroll()
+
+        elif mode=='border':
+            print(self.total_disatnce[0],knight.center[0])
+            if -40 < self.total_disatnce[0]<960:#map boundaries
+                self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+                self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+
+            else:
+                if knight.center[0]<60:
+                    self.true_scroll[0]-=1
+                elif knight.center[0]>440:
+                    self.true_scroll[0]+=1
+                else:
+                    self.true_scroll[0]=0
+
+
+        self.update_scroll()
 
     def update_scroll(self):
         self.scroll=self.true_scroll.copy()
