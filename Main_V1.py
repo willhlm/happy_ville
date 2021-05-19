@@ -27,7 +27,7 @@ hero.add(knight)
 
 sprites = {'knight': Read_files.Sprites_player()}
 
-map=Level.Tilemap('village1')
+map=Level.Tilemap('village1','border')
 
 #tePlatforms,teEnemies=map.load_tiles('./Tiled/village1_colision.csv')
 #platforms.add(tePlatforms)#whole map
@@ -44,8 +44,8 @@ def draw():
     eprojectiles.draw(game.screen)
 
 def scrolling():
-    map.scrolling(knight.rect,'border')
-    scroll = [-map.scroll[0],-map.scroll[1]]
+    map.scrolling(knight.rect)
+    scroll = [-map.camera.scroll[0],-map.camera.scroll[1]]
     platforms.update(scroll)
     bg_blocks.update(scroll)
     hero.update(scroll)
