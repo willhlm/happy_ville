@@ -28,7 +28,6 @@ class Tilemap():
             self.camera=Border()
 
     def scrolling(self,knight):
-
         self.camera.scrolling(knight,self.total_disatnce)
 
     def read_csv(self, path):
@@ -124,7 +123,7 @@ class Tilemap():
                             tile_x+=1
                             continue
                         if tile=='e':#temporary NPC
-                            new_enemie = Entities.Enemy_1(self.entity_position(tile_x, tile_y, x, y),1)
+                            new_enemie = Entities.Enemy_2(self.entity_position(tile_x, tile_y, x, y),1)
                             Enemies.add(new_enemie)
                             tile_x+=1
                             continue
@@ -234,6 +233,8 @@ class Sprite_sheet():
         return [self.image_at(rect, colorkey) for rect in rects]
 
 
+#scrolling
+
 class Camera():
     def __init__(self):
         self.scroll=[0,0]
@@ -247,7 +248,6 @@ class Camera():
 class Auto(Camera):
     def __init__(self):
         super().__init__()
-
 
     def scrolling(self,knight,distance):
         self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
@@ -281,7 +281,7 @@ class Border(Camera):
 
     def scrolling(self,knight,total_disatnce):
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
-        if -40 < total_disatnce[0]<960:#map boundaries
+        if -40 < total_disatnce[0]<1400:#map boundaries
             self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
         else:
             if knight.center[0]<60:

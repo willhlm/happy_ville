@@ -13,6 +13,13 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir=[0,0]
         self.world_state=0
 
+    def AI(self,knight):
+        pass
+
+    def attack_action(self,projectiles):
+        return projectiles
+
+
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
@@ -33,88 +40,8 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir[0]=self.dir[0]
         self.ac_dir[1]=self.dir[1]
 
-class Enemy_1(Entity):
-
-    def __init__(self,pos,ID):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert()
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health=10
-        self.ID=ID
-        self.priority_action=['death','hurt','dash','sword','bow']
-        self.nonpriority_action=['jump','wall','fall','run','stand']
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False}
-        self.state = 'stand'
-        self.distance=[0,0]
-        self.equip='sword'#can change to bow
-        self.f_action=['sword','bow']
-        self.inv=False#flag to check if collision with invisible blocks
-        self.friction=[0.2,1]
-        self.sprites = Read_files.Sprites_player()
-
-    def AI(self,player):#maybe want different AI types depending on eneymy type
-
-        self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
-        self.distance[1]=(self.rect[1]-player.rect[1])#follow the player
-
-        if abs(self.distance[0])>150 and abs(self.distance[1])>40 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
-            self.action['run']=False
-            self.action['stand']=True
-
-        elif abs(self.distance[0])>500 or abs(self.distance[1])>500:#remove the enmy if far away
-            self.kill()
-
-        elif abs(self.distance[0]<150) and abs(self.distance[1])<40:
-
-            self.dir[0]=-Enemy_1.sign(self.distance[0])
-            self.action['run']=True
-            self.action['stand']=False
-
-            if abs(self.distance[0])<40:#don't get too close
-                self.action['run']=False
-                self.action['stand']=True
-
-        if abs(self.distance[0])<80 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
-            self.action[self.equip] = True
-
-    @staticmethod
-    def sign(x):
-        if x>0: return 1
-        return -1
-
-    def attack_action(self,projectiles):
-        if self.action[self.equip]:
-            if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
-                if self.equip=='sword':
-                    projectiles.add(Sword(self.dir,self.hitbox))
-                elif self.equip=='bow':
-                    projectiles.add(Bow(self.dir,self.hitbox))
-        return projectiles
-
-    def change_equipment(self):#don't change if there are arrows or sword already
-        if not self.equipment:
-            if self.equip == 'sword':
-                self.equip='bow'
-            else:
-                self.equip='sword'
-
-    def dashing(self):
-        self.velocity[0]=20*self.dir[0]#dash
-        self.action['dash']=True
-        self.action[self.equip]=False#cancel attack_action
-
-    def jump(self):
-        self.friction[1] = 0
-        self.velocity[1]=-11
-        self.action['jump']=True
-        if self.action['wall']:
-            self.velocity[0]=-self.dir[0]*10
-
 class Player(Entity):
 
-    friction=[0.2,0]
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert()
@@ -122,9 +49,7 @@ class Player(Entity):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 200
-        self.max_health = 200
-        #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
-        #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
+        self.max_health = 250
         self.priority_action=['death','hurt','dash','sword','bow']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
@@ -133,6 +58,7 @@ class Player(Entity):
         self.hitbox_offset = 3
         self.sprites = Read_files.Sprites_player()
         self.interacting = False
+        self.friction=[0.2,0]
 
         #conversations with villigers
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
@@ -182,6 +108,64 @@ class Player(Entity):
 
     def update_rect(self):
         self.rect.center = [self.hitbox.center[0], self.hitbox.center[1] - self.hitbox_offset]
+
+class Enemy_1(Player):
+    def __init__(self,pos,ID):
+        super().__init__(pos)
+        self.ID=ID
+        self.health=10
+        self.distance=[0,0]
+        self.inv=False#flag to check if collision with invisible blocks
+        self.friction=[0.2,1]
+        self.sprites = Read_files.Sprites_evil_knight()
+
+    def AI(self,player):#maybe want different AI types depending on eneymy type
+
+        self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
+        self.distance[1]=(self.rect[1]-player.rect[1])#follow the player
+
+        if abs(self.distance[0])>150 and abs(self.distance[1])>40 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
+            self.action['run']=False
+            self.action['stand']=True
+
+        elif abs(self.distance[0])>500 or abs(self.distance[1])>500:#remove the enmy if far away
+            self.kill()
+
+        elif abs(self.distance[0]<150) and abs(self.distance[1])<40:
+
+            self.dir[0]=-Enemy_1.sign(self.distance[0])
+            self.action['run']=True
+            self.action['stand']=False
+
+            if abs(self.distance[0])<40:#don't get too close
+                self.action['run']=False
+                self.action['stand']=True
+
+        if abs(self.distance[0])<80 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+            self.action[self.equip] = True
+
+    @staticmethod
+    def sign(x):
+        if x>0: return 1
+        return -1
+
+class Enemy_2(Entity):
+    def __init__(self,pos,ID):
+        super().__init__()
+        self.ID=ID
+        self.image = pygame.image.load("Sprites/enemies/flowy/stand/Stand1.png").convert()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 10
+        self.priority_action=['death','hurt','dash','sword','bow']#animation
+        self.nonpriority_action=['jump','wall','fall','run','stand']#animation
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
+        self.state = 'stand'
+        self.equip='sword'#can change to bow
+        self.sprites = Read_files.Flowy()
+        self.interacting = False
+        self.friction=[0.2,0]
 
 class Block(Entity):
 

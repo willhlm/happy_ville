@@ -102,18 +102,36 @@ class NPC(Sprites):
 
         return len(self.sprite_dict[input])
 
-class Sprites_evil_knight(Sprites):
+class Sprites_evil_knight(Sprites_player):
 
-    player_path = "Sprites/player/"
+    player_path = "Sprites/enemies/evil_knight"
     def __init__(self):
         super().__init__()
-        self.sprite_dict = self.load_all_sprites(self.player_path)
+
+class Flowy(Sprites_player):
+
+    def __init__(self):
+        super().__init__()
+        self.sprite_dict = self.load_all_sprites("Sprites/enemies/flowy")
 
     def get_image(self, input, timer, dir):
+        if input=='sword' and dir[1]>0:
+            input=input+'_up'
+        elif input=='sword' and dir[1]<0:
+            input=input+'_down'
+
         if dir[0] >= 0:
             return self.sprite_dict[input][timer]
         elif dir[0] < 0:
-            return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
+            return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
+
+    def get_frame_number(self, input,dir):
+        if input=='sword' and dir[1]>0:
+            input=input+'_up'
+        elif input=='sword' and dir[1]<0:
+            input=input+'_down'
+
+        return len(self.sprite_dict[input])
 
 class Chest(Sprites):
 
