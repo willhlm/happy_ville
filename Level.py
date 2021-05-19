@@ -22,19 +22,37 @@ class Tilemap():
         self.chunk_render_distance=800
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
 
-    def scrolling(self,knight):
-        self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+    def scrolling(self,knight,mode):
 
+        if mode=='auto':
+            self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+            self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+
+            self.update_scroll()
+
+        elif mode=='autocap':
+            if knight.center[0]>400:
+                self.true_scroll[0]+=5
+            elif knight.center[0]<30:
+                self.true_scroll[0]-=5
+            elif knight.center[0]>150 and knight.center[0]<220:
+                self.true_scroll[0]=0
+
+            if knight.center[1]>200:
+                self.true_scroll[1]+=0.5
+            elif knight.center[1]<70:
+                self.true_scroll[1]-=0.5
+            elif knight.center[1]>130 and knight.center[1]<190:
+                self.true_scroll[1]=0
+
+            self.update_scroll()
+
+    def update_scroll(self):
         self.scroll=self.true_scroll.copy()
         self.scroll[0]=int(self.scroll[0])
         self.scroll[1]=int(self.scroll[1])
 
-        #if knight.action['death']:#if kngiht is dead, don't move game.screen
-        #    self.scroll[0]=0
-        #    self.scroll[1]=0
 
-    #@staticmethod
     def read_csv(self, path):
         tile_map=[]
         with open(path) as data:
@@ -125,6 +143,11 @@ class Tilemap():
                         if tile=='n':#temporary NPC
                             new_npc = Entities.NPC_1(self.entity_position(tile_x, tile_y, x, y))
                             npc.add(new_npc)
+                            tile_x+=1
+                            continue
+                        if tile=='e':#temporary NPC
+                            new_enemie = Entities.Enemy_1(self.entity_position(tile_x, tile_y, x, y),1)
+                            Enemies.add(new_enemie)
                             tile_x+=1
                             continue
 

@@ -41,10 +41,8 @@ class Enemy_1(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20}
-        self.health=100
+        self.health=10
         self.ID=ID
-        #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']
         self.nonpriority_action=['jump','wall','fall','run','stand']
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False}
@@ -55,47 +53,45 @@ class Enemy_1(Entity):
         self.inv=False#flag to check if collision with invisible blocks
         self.friction=[0.2,1]
         self.sprites = Read_files.Sprites_player()
-        self.equipment=None#a placeholder for equipemnts: sword and bow
 
     def AI(self,player):#maybe want different AI types depending on eneymy type
 
         self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
         self.distance[1]=(self.rect[1]-player.rect[1])#follow the player
 
-        if abs(self.distance[0])>200 and abs(self.distance[1])>50 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
+        if abs(self.distance[0])>150 and abs(self.distance[1])>40 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
             self.action['run']=False
             self.action['stand']=True
 
         elif abs(self.distance[0])>500 or abs(self.distance[1])>500:#remove the enmy if far away
             self.kill()
 
-        elif self.distance[0]<0 and not self.action['death'] and abs(self.distance[1])<40:#if player close on right
-            self.dir[0]=1
+        elif abs(self.distance[0]<150) and abs(self.distance[1])<40:
+
+            self.dir[0]=-Enemy_1.sign(self.distance[0])
             self.action['run']=True
             self.action['stand']=False
-            if self.distance[0]>-40:#don't get too close
+
+            if abs(self.distance[0])<20:#don't get too close
                 self.action['run']=False
                 self.action['stand']=True
 
-        elif self.distance[0]>0 and not self.action['death'] and abs(self.distance[1])<40:#if player close on left
-            self.dir[0]=-1
-            self.action['run']=True
-            self.action['stand']=False
-            if self.distance[0]<40:#don't get too close
-                self.action['run']=False
-                self.action['stand']=True
+        if abs(self.distance[0])<80 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+            self.action[self.equip] = True
 
-        if abs(self.distance[0])<40 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
-            self.attack_action()
+    @staticmethod
+    def sign(x):
+        if x>0: return 1
+        return -1
 
-
-    def attack_action(self):
-        if not self.action[self.equip]:#if first swing: making sure you cannot spam action
-            if self.equip=='sword':
-                self.equipment=Sword()#equip a sword
-            elif self.equip=='bow':
-                self.equipment=Bow(self.dir,self.hitbox)#equip a sword
-            self.action[self.equip]=True
+    def attack_action(self,projectiles):
+        if self.action[self.equip]:
+            if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
+                if self.equip=='sword':
+                    projectiles.add(Sword(self.dir,self.hitbox))
+                elif self.equip=='bow':
+                    projectiles.add(Bow(self.dir,self.hitbox))
+        return projectiles
 
     def change_equipment(self):#don't change if there are arrows or sword already
         if not self.equipment:
@@ -125,8 +121,8 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 76
-        self.max_health = 100
+        self.health = 200
+        self.max_health = 200
         #self.frame_timer={'run':40,'sword':18,'jump':21,'death':36,'dmg':20, 'stand':1}
         #self.prioriy_list = ['death','hurt','sword','jump','run','stand']
         self.priority_action=['death','hurt','dash','sword','bow']#animation
@@ -144,7 +140,7 @@ class Player(Entity):
 
     def attack_action(self,projectiles):
         if self.action[self.equip]:
-            if self.state!='sword' and self.state!='bow':#do not create an action if it has been created
+            if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
                 if self.equip=='sword':
                     projectiles.add(Sword(self.dir,self.hitbox))
                 elif self.equip=='bow':
@@ -345,7 +341,7 @@ class Sword(Items):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
         self.lifetime=10
-        self.dmg=20
+        self.dmg=10
         self.velocity=[0,0]
         self.type='sword'
         self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
@@ -356,7 +352,7 @@ class Sword(Items):
 
         self.spawn(entity_dir,entity_hitbox)#spawn hitbox based on entity position and direction
 
-    def update(self,scroll,entity_ac_dir,entity_hitbox):
+    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=0):
         #remove the equipment if it has expiered
         self.lifetime-=1
         self.spawn(entity_ac_dir,entity_hitbox)
@@ -388,7 +384,7 @@ class Bow(Items):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-    def update(self,scroll,entity_ac_dir,entity_hitbox):
+    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
         self.speed()
         self.rotate()
