@@ -1,4 +1,4 @@
-import pygame, Read_files
+import pygame, Read_files, random, sys
 
 class Entity(pygame.sprite.Sprite):
 
@@ -12,13 +12,13 @@ class Entity(pygame.sprite.Sprite):
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.ac_dir=[0,0]
         self.world_state=0
+        self.loot={'coin':1}
 
     def AI(self,knight):
         pass
 
     def attack_action(self,projectiles):
         return projectiles
-
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -40,6 +40,15 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir[0]=self.dir[0]
         self.ac_dir[1]=self.dir[1]
 
+    def loots(self,loot):
+        for key in self.loot.keys():#go through all loot
+            for i in range(0,self.loot[key]):#make that many object for that specific loot and add to gorup
+                #obj=globals()[key]#make a class based on the name of the key: using global stuff
+                obj=getattr(sys.modules[__name__], key)#make a class based on the name of the key: need to import sys
+                #obj=eval(key)#make a class based on the name of the key: apperently not a good solution
+                loot.add(obj(self.hitbox))
+        return loot
+
 class Player(Entity):
 
     def __init__(self,pos):
@@ -59,6 +68,7 @@ class Player(Entity):
         self.sprites = Read_files.Sprites_player()
         self.interacting = False
         self.friction=[0.2,0]
+        self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
 
         #conversations with villigers
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
@@ -69,8 +79,9 @@ class Player(Entity):
             if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
                 if self.equip=='sword':
                     projectiles.add(Sword(self.dir,self.hitbox))
-                elif self.equip=='bow':
+                elif self.equip=='bow' and self.loot['Arrow']>0:
                     projectiles.add(Bow(self.dir,self.hitbox))
+                    self.loot['Arrow']-=1
         return projectiles
 
     def change_equipment(self):#don't change if there are arrows or sword already
@@ -162,10 +173,11 @@ class Enemy_2(Entity):
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
         self.state = 'stand'
-        self.equip='sword'#can change to bow
+        self.equip='sword'
         self.sprites = Read_files.Flowy()
-        self.interacting = False
         self.friction=[0.2,0]
+        self.loot={'Coin':10,'Arrow':2}#the keys need to have the same name as their respective classes
+
 
 class Block(Entity):
 
@@ -251,7 +263,6 @@ class Chest_Big(Interactable):
                 self.image = self.image_sheet[4]
                 self.interacted = False
 
-
 class NPC(Entity):
     acceleration=[0.3,0.8]
 
@@ -310,7 +321,7 @@ class NPC_1(NPC):
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
 
-class Items(pygame.sprite.Sprite):
+class Weapon(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.hit=False
@@ -321,7 +332,7 @@ class Items(pygame.sprite.Sprite):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
-class Sword(Items):
+class Sword(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
         self.lifetime=10
@@ -351,7 +362,7 @@ class Sword(Items):
         elif entity_dir[0] < 0 and entity_dir[1] == 0:#left
             self.hitbox=pygame.Rect(entity_hitbox.midleft[0]-40,entity_hitbox.midleft[1]-20,40,30)
 
-class Bow(Items):
+class Bow(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
         self.velocity=[entity_dir[0]*10,-5]
@@ -387,3 +398,51 @@ class Bow(Items):
         self.hitbox=pygame.Rect(x,y,10,10)
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
+
+class Loot(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        choice=[-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,2,4,6,8,10,12,14,16,18,20]#just not 0
+        self.pos=[random.choice(choice),random.choice(choice)]
+        self.lifetime=200
+        self.movement=[0,0]#for platfform collisions
+        dir=self.pos[0]/abs(self.pos[0])#horizontal direction
+        self.velocity=[dir*random.randint(0, 3),-11]
+
+    def update_hitbox(self):
+        self.hitbox.center = self.rect.center
+
+    def update_rect(self):
+        self.rect.center = self.hitbox.center
+
+    def update(self,scroll):
+        #remove the equipment if it has expiered
+        self.speed()
+
+        self.lifetime-=1
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.hitbox.center = self.rect.center
+
+    def speed(self):
+        self.velocity[1]+=0.9#gravity
+
+        self.velocity[1]=min(self.velocity[1],7)#set a y max speed
+        self.movement[1]=self.velocity[1]#set the vertical velocity
+
+class Coin(Loot):
+    def __init__(self,entity_hitbox):
+        super().__init__()
+
+        self.image = pygame.image.load("Sprites/aseprite/Items/coin.png").convert_alpha()
+        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
+        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+class Arrow(Loot):
+    def __init__(self,entity_hitbox):
+        super().__init__()
+
+        self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
+        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
+        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes

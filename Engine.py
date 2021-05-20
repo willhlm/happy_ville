@@ -4,6 +4,15 @@ class Collisions():
     def __init__(self):
         pass
 
+    #pickup loot
+    @staticmethod
+    def pickup_loot(player,loots):
+        collided=Collisions.collided #make the hitbox collide and not rect
+        collision=pygame.sprite.spritecollide(player,loots,True,collided)#check collision
+        for loot in collision:
+            obj=(loot.__class__.__name__)#get the loot in question
+            player.loot[obj]+=1
+
     #npc player conversation
     @staticmethod
     def check_npc_collision(player,npcs,screen):
@@ -33,6 +42,14 @@ class Collisions():
         #    for dyn_entity, stat_entity in collisions.items():
         #        for stat_ent in stat_entity:
 
+
+    @staticmethod
+    def check_collisions_loot(loots,platforms):
+        collision_types=Collisions.collide(loots,platforms)
+
+        for loot in loots.sprites():#if hit ground
+            if collision_types['bottom']:
+                loot.velocity=[0,0]
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     @staticmethod
@@ -102,7 +119,6 @@ class Collisions():
             if dyn_entity.movement[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[-1].hitbox.top
                 collision_types['bottom'] = True
-
             elif dyn_entity.movement[1]<0:#going up
                 dyn_entity.hitbox.top = stat_entity[-1].hitbox.bottom
                 collision_types['top'] = True
@@ -124,8 +140,9 @@ class Physics():
         for entity in dynamic_entities.sprites():
 
             entity.velocity[1]=entity.velocity[1]+entity.acceleration[1]-entity.velocity[1]*entity.friction[1]#gravity
-            if entity.velocity[1]>7:#set a y max speed
-                entity.velocity[1]=7
+
+            entity.velocity[1]=min(entity.velocity[1],7)#set a y max speed
+
             entity.movement[1]=entity.velocity[1]#set the vertical velocity
 
             if entity.action['run'] and not entity.action['dash']:#accelerate horizontal to direction when not dashing
