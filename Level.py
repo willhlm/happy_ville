@@ -8,11 +8,9 @@ interactables = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
 
 class Tilemap():
-    def __init__(self, level):
+    def __init__(self, level,mode='auto'):
         self.tile_size=16
         self.chunk_size=10
-        self.scroll=[0,0]
-        self.true_scroll=[0,0]
         self.total_disatnce=[0,0]
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
@@ -22,36 +20,15 @@ class Tilemap():
         self.chunk_render_distance=800
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
 
-    def scrolling(self,knight,mode):
-
         if mode=='auto':
-            self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
-            self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
-
-            self.update_scroll()
-
+            self.camera=Auto()
         elif mode=='autocap':
-            if knight.center[0]>400:
-                self.true_scroll[0]+=5
-            elif knight.center[0]<30:
-                self.true_scroll[0]-=5
-            elif knight.center[0]>150 and knight.center[0]<220:
-                self.true_scroll[0]=0
+            self.camera=Autocap()
+        elif mode=='border':
+            self.camera=Border()
 
-            if knight.center[1]>200:
-                self.true_scroll[1]+=0.5
-            elif knight.center[1]<70:
-                self.true_scroll[1]-=0.5
-            elif knight.center[1]>130 and knight.center[1]<190:
-                self.true_scroll[1]=0
-
-            self.update_scroll()
-
-    def update_scroll(self):
-        self.scroll=self.true_scroll.copy()
-        self.scroll[0]=int(self.scroll[0])
-        self.scroll[1]=int(self.scroll[1])
-
+    def scrolling(self,knight):
+        self.camera.scrolling(knight,self.total_disatnce)
 
     def read_csv(self, path):
         tile_map=[]
@@ -102,8 +79,8 @@ class Tilemap():
 
     def chunk_distance(self):
         chunk_distance={}
-        self.total_disatnce[0]+=self.scroll[0]#total distance
-        self.total_disatnce[1]+=self.scroll[1]#total distance
+        self.total_disatnce[0]+=self.camera.scroll[0]#total distance
+        self.total_disatnce[1]+=self.camera.scroll[1]#total distance
 
         for key in self.chunks.keys():
             y=int(key.split(';')[0])#y
@@ -146,7 +123,7 @@ class Tilemap():
                             tile_x+=1
                             continue
                         if tile=='e':#temporary NPC
-                            new_enemie = Entities.Enemy_1(self.entity_position(tile_x, tile_y, x, y),1)
+                            new_enemie = Entities.Enemy_2(self.entity_position(tile_x, tile_y, x, y),1)
                             Enemies.add(new_enemie)
                             tile_x+=1
                             continue
@@ -257,3 +234,63 @@ class Sprite_sheet():
     def images_at(self, rects, colorkey = None):
         #returns list of all images in sheet
         return [self.image_at(rect, colorkey) for rect in rects]
+
+
+#scrolling
+
+class Camera():
+    def __init__(self):
+        self.scroll=[0,0]
+        self.true_scroll=[0,0]
+
+    def update_scroll(self):
+        self.scroll=self.true_scroll.copy()
+        self.scroll[0]=int(self.scroll[0])
+        self.scroll[1]=int(self.scroll[1])
+
+class Auto(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,distance):
+        self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.update_scroll()
+
+class Autocap(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,distance):
+        if knight.center[0]>400:
+            self.true_scroll[0]+=5
+        elif knight.center[0]<30:
+            self.true_scroll[0]-=5
+        elif knight.center[0]>150 and knight.center[0]<220:
+            self.true_scroll[0]=0
+
+        if knight.center[1]>200:
+            self.true_scroll[1]+=0.5
+        elif knight.center[1]<70:
+            self.true_scroll[1]-=0.5
+        elif knight.center[1]>130 and knight.center[1]<190:
+            self.true_scroll[1]=0
+
+        self.update_scroll()
+
+class Border(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,total_disatnce):
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        if -40 < total_disatnce[0]<1400:#map boundaries
+            self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+        else:
+            if knight.center[0]<60:
+                self.true_scroll[0]-=1
+            elif knight.center[0]>440:
+                self.true_scroll[0]+=1
+            else:
+                self.true_scroll[0]=0
+        self.update_scroll()
