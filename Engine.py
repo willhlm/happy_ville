@@ -4,6 +4,15 @@ class Collisions():
     def __init__(self):
         pass
 
+    #pickup loot
+    @staticmethod
+    def pickup_loot(player,loots):
+        collided=Collisions.collided #make the hitbox collide and not rect
+        collision=pygame.sprite.spritecollide(player,loots,True,collided)#check collision
+        for loot in collision:
+            obj=(loot.__class__.__name__)#get the loot in question
+            player.loot[obj]+=1
+
     #npc player conversation
     @staticmethod
     def check_npc_collision(player,npcs,screen):
@@ -35,13 +44,12 @@ class Collisions():
 
 
     @staticmethod
-    def check_collisions_loot(dynamic_entities,platforms):
-        collision_types=Collisions.collide(dynamic_entities,platforms)
+    def check_collisions_loot(loots,platforms):
+        collision_types=Collisions.collide(loots,platforms)
 
-        for entity in dynamic_entities.sprites():#if hit ground
+        for loot in loots.sprites():#if hit ground
             if collision_types['bottom']:
-                entity.velocity=[0,0]
-                entity.dir=0
+                loot.velocity=[0,0]
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     @staticmethod

@@ -83,6 +83,7 @@ while True:
     Engine.Collisions.check_invisible(npc,invisible_blocks)
     Engine.Collisions.check_interaction(knight,interactables)
     Engine.Collisions.check_collisions_loot(loot,platforms)
+    Engine.Collisions.pickup_loot(knight,loot)
 
     scrolling()
 
