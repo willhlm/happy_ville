@@ -1,4 +1,4 @@
-import pygame, Read_files
+import pygame, Read_files, random
 
 class Entity(pygame.sprite.Sprite):
 
@@ -12,13 +12,13 @@ class Entity(pygame.sprite.Sprite):
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.ac_dir=[0,0]
         self.world_state=0
-
+        self.loot=0
+        
     def AI(self,knight):
         pass
 
     def attack_action(self,projectiles):
         return projectiles
-
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -162,10 +162,15 @@ class Enemy_2(Entity):
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
         self.state = 'stand'
-        self.equip='sword'#can change to bow
+        self.equip='sword'
         self.sprites = Read_files.Flowy()
-        self.interacting = False
         self.friction=[0.2,0]
+        self.loot=10
+
+    def loots(self,loot):
+        for i in range(0,self.loot):
+            loot.add(Coin(self.hitbox))
+        return loot
 
 class Block(Entity):
 
@@ -387,3 +392,38 @@ class Bow(Items):
         self.hitbox=pygame.Rect(x,y,10,10)
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
+
+class Coin(Items):
+    def __init__(self,entity_hitbox):
+        super().__init__()
+        choice=[-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,2,4,6,8,10,12,14,16,18,20]
+        pos=[random.choice(choice),random.choice(choice)]
+        self.lifetime=200
+        self.velocity=[0,-11]
+        self.movement=[0,0]#for platfform collisions
+        self.image = pygame.image.load("Sprites/aseprite/Items/coin.png").convert_alpha()
+        self.rect = self.image.get_rect(center=[entity_hitbox[0]+pos[0],entity_hitbox[1]+pos[1]])
+        self.hitbox=pygame.Rect(entity_hitbox[0]+pos[0],entity_hitbox[1]+pos[1],10,10)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.dir=pos[0]/abs(pos[0])
+
+    def update_hitbox(self):
+        self.hitbox.center = self.rect.center
+
+    def update_rect(self):
+        self.rect.center = self.hitbox.center
+
+    def update(self,scroll):
+        #remove the equipment if it has expiered
+        self.speed()
+
+        self.lifetime-=1
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.hitbox.center = self.rect.center
+
+    def speed(self):
+        self.velocity[1]+=0.9
+        self.velocity[0]+=self.dir*0.1
+
+        self.velocity[1]=min(self.velocity[1],7)#set a y max speed
+        self.movement[1]=self.velocity[1]#set the vertical velocity

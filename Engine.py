@@ -34,6 +34,15 @@ class Collisions():
         #        for stat_ent in stat_entity:
 
 
+    @staticmethod
+    def check_collisions_loot(dynamic_entities,platforms):
+        collision_types=Collisions.collide(dynamic_entities,platforms)
+
+        for entity in dynamic_entities.sprites():#if hit ground
+            if collision_types['bottom']:
+                entity.velocity=[0,0]
+                entity.dir=0
+
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     @staticmethod
     def check_collisions(dynamic_entities,platforms):
@@ -102,7 +111,6 @@ class Collisions():
             if dyn_entity.movement[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[-1].hitbox.top
                 collision_types['bottom'] = True
-
             elif dyn_entity.movement[1]<0:#going up
                 dyn_entity.hitbox.top = stat_entity[-1].hitbox.bottom
                 collision_types['top'] = True
@@ -124,8 +132,9 @@ class Physics():
         for entity in dynamic_entities.sprites():
 
             entity.velocity[1]=entity.velocity[1]+entity.acceleration[1]-entity.velocity[1]*entity.friction[1]#gravity
-            if entity.velocity[1]>7:#set a y max speed
-                entity.velocity[1]=7
+
+            entity.velocity[1]=min(entity.velocity[1],7)#set a y max speed
+
             entity.movement[1]=entity.velocity[1]#set the vertical velocity
 
             if entity.action['run'] and not entity.action['dash']:#accelerate horizontal to direction when not dashing

@@ -15,8 +15,9 @@ npc = pygame.sprite.Group()
 invisible_blocks = pygame.sprite.Group()
 weather = pygame.sprite.Group()
 interactables = pygame.sprite.Group()
-fprojectiles = pygame.sprite.Group()#arrows?
-eprojectiles = pygame.sprite.Group()#arrows?
+fprojectiles = pygame.sprite.Group()#arrows
+eprojectiles = pygame.sprite.Group()#arrows
+loot = pygame.sprite.Group()
 
 game=UI.Game_UI()#initilise the game
 
@@ -42,6 +43,7 @@ def draw():
     npc.draw(game.screen)
     fprojectiles.draw(game.screen)
     eprojectiles.draw(game.screen)
+    loot.draw(game.screen)
 
 def scrolling():
     map.scrolling(knight.rect)
@@ -56,6 +58,7 @@ def scrolling():
     weather.update(scroll,game.screen)
     fprojectiles.update(scroll,knight.ac_dir,knight.hitbox)
     eprojectiles.update(scroll)
+    loot.update(scroll)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen
@@ -79,11 +82,12 @@ while True:
     Engine.Collisions.check_collisions(npc,platforms)
     Engine.Collisions.check_invisible(npc,invisible_blocks)
     Engine.Collisions.check_interaction(knight,interactables)
+    Engine.Collisions.check_collisions_loot(loot,platforms)
 
     scrolling()
 
-    fprojectiles=Action.actions(fprojectiles,hero,platforms,enemies,game.screen)#f_action swinger, target1,target2
-    eprojectiles=Action.actions(eprojectiles,enemies,platforms,hero,game.screen)#f_action swinger, target1,target2
+    fprojectiles, loot = Action.actions(fprojectiles,hero,platforms,enemies,game.screen,loot)#f_action swinger, target1,target2
+    eprojectiles, loot = Action.actions(eprojectiles,enemies,platforms,hero,game.screen,loot)#f_action swinger, target1,target2
 
     Engine.Animation.set_img(hero)
     Engine.Animation.set_img(enemies)

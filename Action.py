@@ -1,6 +1,6 @@
 import pygame
 
-def actions(projectiles,projectile_enteties,platforms,enemies,screen):
+def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
     for entity in projectile_enteties.sprites():#go through the group
         projectiles=entity.attack_action(projectiles)
 
@@ -20,6 +20,7 @@ def actions(projectiles,projectile_enteties,platforms,enemies,screen):
                 if collision_ene.health<=0:#if 0 health of enemy
                     collision_ene.action['death']=True
                     collision_ene.action['run']=False
+                    loot=collision_ene.loots(loot)
 
                 if projectile.type=='sword':#knockback if sword is quipped
                     collision_ene.velocity[0]=entity.dir[0]*10#knock back of enemy
@@ -45,7 +46,7 @@ def actions(projectiles,projectile_enteties,platforms,enemies,screen):
             if projectile.lifetime<0:
                 projectiles.remove(projectile)
 
-    return projectiles
+    return projectiles, loot
 
 def collided(projectile,target):
     return projectile.hitbox.colliderect(target.hitbox)
