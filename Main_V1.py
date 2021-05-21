@@ -84,6 +84,7 @@ while True:
     Engine.Collisions.check_interaction(knight,interactables)
     Engine.Collisions.check_collisions_loot(loot,platforms)
     Engine.Collisions.pickup_loot(knight,loot)
+    loot=Engine.Collisions.check_enemy_collision(knight,enemies,loot)
 
     scrolling()
 

@@ -47,6 +47,7 @@ class Entity(pygame.sprite.Sprite):
                 obj=getattr(sys.modules[__name__], key)#make a class based on the name of the key: need to import sys
                 #obj=eval(key)#make a class based on the name of the key: apperently not a good solution
                 loot.add(obj(self.hitbox))
+            self.loot[key]=0
         return loot
 
 class Player(Entity):
@@ -130,7 +131,7 @@ class Enemy_1(Player):
         self.friction=[0.2,1]
         self.sprites = Read_files.Sprites_evil_knight()
 
-    def AI(self,player):#maybe want different AI types depending on eneymy type
+    def AI(self,player):#the AI
 
         self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
         self.distance[1]=(self.rect[1]-player.rect[1])#follow the player
@@ -170,13 +171,30 @@ class Enemy_2(Entity):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 10
         self.priority_action=['death','hurt','dash','sword','bow']#animation
-        self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
+        self.nonpriority_action=['trans','jump','wall','fall','run','stand']#animation
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'trans':False}
         self.state = 'stand'
         self.equip='sword'
         self.sprites = Read_files.Flowy()
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':2}#the keys need to have the same name as their respective classes
+        self.distance=[0,0]
+
+
+    def AI(self,player):#the AI
+
+        self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
+        self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
+
+        if 30 < abs(self.distance[0])<80 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+            self.action['trans'] = True
+
+        elif abs(self.distance[0])<30 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+            self.action[self.equip] = True
+        else:
+            self.action['trans'] = False
+            self.action[self.equip] = False
+
 
 
 class Block(Entity):

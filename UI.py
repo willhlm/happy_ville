@@ -80,6 +80,9 @@ class Game_UI():
 
         self.input_quit()
 
+    def inventory(self):
+        pass
+
     def exit(self):
         pygame.quit()
         sys.exit()
@@ -175,6 +178,9 @@ class Game_UI():
                     if event.key==pygame.K_g:
                         player_class.interacting = True
 
+
+                    if event.key == pygame.K_i:
+                        self.inventory()#open inventort
 
                     if event.key == pygame.K_LSHIFT:#left shift
                         player_class.dashing()

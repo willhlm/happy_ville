@@ -4,6 +4,20 @@ class Collisions():
     def __init__(self):
         pass
 
+    #take damage if collide with enemy
+    @staticmethod
+    def check_enemy_collision(player,enemies,loot):
+        collided=Collisions.collided #make the hitbox collide and not rect
+        collisions=pygame.sprite.spritecollideany(player,enemies,collided)#check collision
+        if collisions:
+            player.health-=10
+            player.velocity[0]=-player.dir[0]*10#knock back of player (will not completly work)
+            player.action['hurt']=True
+            if player.health<=0:
+                player.action['death']=True
+                loot=player.loots(loot)
+        return loot
+
     #pickup loot
     @staticmethod
     def pickup_loot(player,loots):
@@ -30,6 +44,7 @@ class Collisions():
         for dyn_entity, inv_entity in collisions.items():
             dyn_entity.action['inv']=True
 
+    #interact with chests
     @staticmethod
     def check_interaction(player,static_enteties):
         if player.interacting:
@@ -43,6 +58,7 @@ class Collisions():
         #        for stat_ent in stat_entity:
 
 
+    #making the loot fall on platofrm
     @staticmethod
     def check_collisions_loot(loots,platforms):
         collision_types=Collisions.collide(loots,platforms)
