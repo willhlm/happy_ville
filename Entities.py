@@ -13,6 +13,7 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir=[0,0]
         self.world_state=0
         self.loot={'coin':1}
+        self.shake=0
 
     def AI(self,knight):
         pass
@@ -130,11 +131,12 @@ class Enemy_1(Player):
         self.inv=False#flag to check if collision with invisible blocks
         self.friction=[0.2,1]
         self.sprites = Read_files.Sprites_evil_knight()
+        self.shake=10#screen shake duration
 
     def AI(self,player):#the AI
 
-        self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
-        self.distance[1]=(self.rect[1]-player.rect[1])#follow the player
+        self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
+        self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
 
         if abs(self.distance[0])>150 and abs(self.distance[1])>40 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
             self.action['run']=False
@@ -170,31 +172,37 @@ class Enemy_2(Entity):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 10
-        self.priority_action=['death','hurt','dash','sword','bow']#animation
-        self.nonpriority_action=['trans','jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'trans':False}
+        self.priority_action=['death','hurt','sword','bow','trans']#animation
+        self.nonpriority_action=['fall','run','stand']#animation
+        self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'bow':False,'fall':False,'trans':False}
         self.state = 'stand'
         self.equip='sword'
         self.sprites = Read_files.Flowy()
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
+        self.shake=3
 
+    @staticmethod#a function to add glow around the entity
+    def add_white(radius,colour,screen,pos):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
 
-    def AI(self,player):#the AI
+    def AI(self,player,screen):#the AI
+        #light around the entity
+        radius=max(20-abs(self.distance[0])//10,1)
+        Enemy_2.add_white(radius,(20,0,0),screen,self.rect.center)#radius, clolor, screen,position
 
         self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
         self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
 
-        if 30 < abs(self.distance[0])<80 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+        if 30 < abs(self.distance[0])<80 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action['trans'] = True
 
-        elif abs(self.distance[0])<30 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+        elif abs(self.distance[0])<30 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
-        else:
-            self.action['trans'] = False
-            self.action[self.equip] = False
-
 
 
 class Block(Entity):
@@ -440,6 +448,9 @@ class Loot(pygame.sprite.Sprite):
         self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
+
+        if self.lifetime<0:#remove after a while
+            self.kill()
 
     def speed(self):
         self.velocity[1]+=0.9#gravity

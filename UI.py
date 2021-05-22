@@ -17,7 +17,7 @@ class Game_UI():
         self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",2)#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
-
+        self.shake=False
     def game_loop(self):
         while True:
             pass
@@ -135,6 +135,9 @@ class Game_UI():
 
     def input(self,player_class):#input while playing
         #game input
+        player_class.shake-=1
+        player_class.shake=max(-1,player_class.shake)#to not let it go to too low valyes
+        
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 pygame.quit()

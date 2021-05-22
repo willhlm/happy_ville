@@ -1,4 +1,4 @@
-import pygame, math, random
+import pygame, math, random, sys
 
 weather_paricles=pygame.sprite.Group()
 
@@ -16,6 +16,7 @@ class Weather(pygame.sprite.Sprite):
 
     def update(self,pos,screen):
         pygame.draw.circle(screen,self.color,self.pos,self.radius)#draw a circle
+        Light.add_white(10,(30,5,5),screen,self.pos)#light spehre around the particles
 
         self.pos = [self.pos[0] + pos[0], self.pos[1] + pos[1]]#compensate for scroll and new speed
 
@@ -31,20 +32,11 @@ class Weather(pygame.sprite.Sprite):
         elif self.pos[0]>480:
             self.pos[0]-=480
 
+
     def create_particle(self,particle):
         for i in range(self.number_of_particles,self.max):
-            if particle=='snow':
-                particles=Snow()
-                weather_paricles.add(particles)
-            elif particle=='sakura':
-                particles=Sakura()
-                weather_paricles.add(particles)
-            elif particle=='rain':
-                particles=Rain()
-                weather_paricles.add(particles)
-            elif particle=='autumn':
-                particles=Autumn()
-                weather_paricles.add(particles)
+            obj=getattr(sys.modules[__name__], particle)#make a class based on the name
+            weather_paricles.add(obj())
         return weather_paricles
 
 class Snow(Weather):
@@ -89,3 +81,15 @@ class Rain(Weather):
         self.timer-=1
         self.velocity=[0.1,5]
         self.pos=[self.pos[0]+self.velocity[0],self.pos[1]+self.velocity[1]]
+
+class Light():
+    def __init__(self):
+        super().__init__()
+        pass
+
+    @staticmethod
+    def add_white(radius,colour,screen,pos):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
