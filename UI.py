@@ -137,7 +137,7 @@ class Game_UI():
         #game input
         player_class.shake-=1
         player_class.shake=max(-1,player_class.shake)#to not let it go to too low valyes
-        
+
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 pygame.quit()
@@ -180,7 +180,6 @@ class Game_UI():
 
                     if event.key==pygame.K_g:
                         player_class.interacting = True
-
 
                     if event.key == pygame.K_i:
                         self.inventory()#open inventort

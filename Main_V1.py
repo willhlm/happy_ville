@@ -63,7 +63,7 @@ def scrolling():
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=weather_paricles.create_particle('Rain')#weather effects
+    weather=weather_paricles.create_particle('Sakura')#weather effects
     platforms,bg_blocks,enemies,npc,invisible_blocks,interactables=map.load_chunks()#chunks
 
     game.input(knight)#game inputs
