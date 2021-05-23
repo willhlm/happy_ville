@@ -175,10 +175,9 @@ class Hearts_Black(Sprites):
 
 #reading fonts
 class Alphabet():#scale needs to be larger than one, for reasons
-    def __init__(self, path,scale=1):
+    def __init__(self, path):
         self.spacing=1
-        self.scale=scale
-        self.letter_height=16*self.scale
+        self.letter_height=16
         self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0',',','.','!','?','_']
         sheet=pygame.image.load(path).convert()
         self.characters={}
@@ -198,14 +197,14 @@ class Alphabet():#scale needs to be larger than one, for reasons
                     current_char_width=0
                 else:
                     current_char_width+=1
-        self.space_width=self.characters['A'].get_width()*self.scale
+        self.space_width=self.characters['A'].get_width()
 
-    def render(self,screen,text,loc):
+    def render(self,screen,text,loc,scale):
         x_offset=0
         y_offset=0
         for char in text:
             if char!=' ' and char!='\n' and char!='*' and char!='&':
-                scaled_letter=pygame.transform.scale(self.characters[char], (int(self.scale*self.characters[char].get_width()), int(self.scale*self.letter_height)))
+                scaled_letter=pygame.transform.scale(self.characters[char], (int(scale*self.characters[char].get_width()), int(scale*self.letter_height)))
                 screen.blit(scaled_letter,(loc[0]+x_offset,loc[1]+y_offset))
                 x_offset+=self.characters[char].get_width()+self.spacing
             elif char=='*':#new line

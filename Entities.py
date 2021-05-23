@@ -101,10 +101,7 @@ class Player(Entity):
             self.velocity[0]=-self.dir[0]*10
 
     def talk(self):
-        self.action['talk']=True
-        if self.state=='talk':#if finish talking, move on to the next text
-            self.action['talk']=False
-            self.state='stand'
+        self.action['talk']=not self.action['talk']
 
     def update(self,pos):
         super(Player, self).update(pos)
@@ -292,16 +289,17 @@ class NPC(Entity):
         self.priority_action = ['death','hurt']
         self.health = 50
         self.state = 'stand'
-        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",1)#intitilise the alphabet class
-        self.page_frame=0
+        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.page_frame=0#if there are pages of text
         self.text_frame=-1#chosing which text to say: woudl ike to move this to NPC class instead
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
+        self.conv_idx=0
 
     def blit_conversation(self,text,game_screen):#blitting of text from conversation
         self.text_surface.blit(self.portrait,(550,100))#the portait on to the text_surface
         game_screen.blit(self.text_surface,(200,200))#the text BG
-        self.font.render(game_screen,text,(400,300))#call the self made aplhabet blit and blit the conversation
-        self.font.render(game_screen,self.name,(750,400))#blit the name
+        self.font.render(game_screen,text,(400,300),1)#call the self made aplhabet blit and blit the conversation
+        self.font.render(game_screen,self.name,(750,400),1)#blit the name
 
     def new_page(self):
         if '&' in self.conversation.text[self.world_state][self.text_frame//1]:#& means there is a new page
@@ -326,7 +324,7 @@ class NPC(Entity):
         self.action['stand']=True
         self.velocity=[0,0]
 
-    def talk(self,game_screen):
+    def talk(self,game_screen,player):
         if not self.action['talk']:#if first time
             self.page_frame=0
             self.letter_frame=1#reset the letter frame
@@ -336,19 +334,50 @@ class NPC(Entity):
             self.text_frame=0#reset the conversation tree
 
         self.talking()#settign flags
-        conv=self.new_page()#preparing the conversation if new page exits: it only works up to 1 new page, I think
+        conv=self.new_page()#preparing the conversation if new page exits
+        self.blit_conv_action(game_screen)
 
         if self.letter_frame//3!=len(conv):#if not everything has been said.
             text=conv[:self.letter_frame//3+1]
             self.letter_frame+=1
             self.blit_conversation(text,game_screen)
         else:#if everything was said, print the whole text
-            if self.page_frame < self.number_of_pages:
-                self.letter_frame=1#reset the letter frame on new page
-            self.page_frame+=1
             self.page_frame=min(self.number_of_pages,self.page_frame)
-
             self.blit_conversation(conv,game_screen)
+
+        self.input_quit(player)
+
+    def input_quit(self,player):#to exits between option menues
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+
+                #for action conversations
+                if event.key == pygame.K_UP:#up
+                    self.conv_idx-=1
+                if event.key == pygame.K_DOWN:#up
+                    self.conv_idx+=1
+
+                if event.key == pygame.K_RETURN:#enter the option
+                    self.business()
+
+                #exit/skip conversation
+                if event.key == pygame.K_t:
+                    if self.page_frame<self.number_of_pages:
+                        self.page_frame+=1#next page
+                    else:
+                        self.action['talk']=False
+                        player.action['talk']=False
+                        self.page_frame=0#reset page
+                    self.letter_frame=1#reset the letter frame
+
+    def business(self):
+        pass
+
+    def blit_conv_action(self,game_screen):
+        pass
 
 class NPC_1(NPC):
     def __init__(self,pos):
@@ -388,17 +417,40 @@ class MrBanks(NPC):
         self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.friction=[0.2,0]
         self.conv_action=['deposit','withdraw']
+        self.conv_action_BG=pygame.image.load("Sprites/aseprite/conversation/Conv_action_BG.png").convert_alpha()
+        self.conv_possition=[300]
+        self.conv_idx=0
+        self.loot={'Coin':0}#the keys need to have the same name as their respective classes
 
     def AI(self):
         if abs(self.rect[0]+self.rect[1])>800:#if far away
             self.kill()
 
-    def conv_action(self):
-        #deposit money
+    def blit_conv_action(self,game_screen):
+        game_screen.blit(self.conv_action_BG,(850,200))#the text BG
 
-        pass
+        if self.conv_idx<=0:
+            self.conv_idx=0
+        elif self.conv_idx>=len(self.conv_action):
+            self.conv_idx=len(self.conv_action)-1
 
+        self.font.render(game_screen,'o',(930,self.conv_possition[self.conv_idx]),1)#call the self made aplhabet blit and blit the conversation
+        self.conv_possition=[]
 
+        scale=[1]*len(self.conv_action)
+        scale[self.conv_idx]=2
+        i=1
+
+        for conv in self.conv_action:
+            self.font.render(game_screen,conv,(950,250+50*i),scale[i-1])#call the self made aplhabet blit and blit the conversation
+            self.conv_possition.append(250+50*i)
+            i+=1
+
+    def business(self):
+        if self.conv_action[self.conv_idx] == 'deposit':
+            pass
+        elif self.conv_action[self.conv_idx] == 'withdraw':
+            pass
 
 class Weapon(pygame.sprite.Sprite):
     def __init__(self):

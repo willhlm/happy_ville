@@ -14,7 +14,7 @@ class Game_UI():
         self.gameover=False
         self.ESC=False
         self.click=False
-        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",2)#intitilise the alphabet class, scale of alphabet
+        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
         self.shake=False
@@ -36,11 +36,11 @@ class Game_UI():
                 self.resolution_menu()
 
     def start_menu(self):
-        self.font.render(self.display,'Start Game',(200,100))
+        self.font.render(self.display,'Start Game',(200,100),1)
         start_rect=pygame.Rect(200,100,100,100)
-        self.font.render(self.display,'Options',(200,200))
+        self.font.render(self.display,'Options',(200,200),1)
         option_rect=pygame.Rect(200,200,100,100)
-        self.font.render(self.display,'Exit Game',(200,400))
+        self.font.render(self.display,'Exit Game',(200,400),1)
         exit_rect=pygame.Rect(200,400,100,100)
 
         if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
@@ -57,7 +57,7 @@ class Game_UI():
     def option_menu(self):
         self.display.fill((207,238,250))#fill game.screen
 
-        self.font.render(self.display,'Resolution',(200,100))
+        self.font.render(self.display,'Resolution',(200,100),1)
         Resolution_rect=pygame.Rect(200,100,100,100)
 
         if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
@@ -70,7 +70,7 @@ class Game_UI():
     def resolution_menu(self):
         self.display.fill((207,238,250))#fill game.screen
 
-        self.font.render(self.display,'1000x800',(200,100))
+        self.font.render(self.display,'1000x800',(200,100),1)
         Resolution_rect=pygame.Rect(200,100,100,100)
 
         if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
@@ -107,7 +107,7 @@ class Game_UI():
     def blit_fps(self):
 
         fps_string = str(int(self.clock.get_fps()))
-        self.font.render(self.screen,fps_string,(400,20))
+        self.font.render(self.screen,fps_string,(400,20),1)
 
         #blit_surface = pygame.Surface((50,10),pygame.SRCALPHA,32)
         #fps_string = str(int(self.clock.get_fps()))
@@ -138,20 +138,20 @@ class Game_UI():
         player_class.shake-=1
         player_class.shake=max(-1,player_class.shake)#to not let it go to too low valyes
 
-        for event in pygame.event.get():
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+        if player_class.state!='talk':#if not in conversation
 
-            if event.type == pygame.KEYDOWN:
-                if event.key==pygame.K_ESCAPE:#escape button
-                    self.ESC=True
-                    self.main_menu()
+            for event in pygame.event.get():
+                if event.type==pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-                if event.key == pygame.K_t:
-                    player_class.talk()
+                if event.type == pygame.KEYDOWN:
+                    if event.key==pygame.K_ESCAPE:#escape button
+                        self.ESC=True
+                        self.main_menu()
 
-                if player_class.state!='talk':#if not in conversation
+                    if event.key == pygame.K_t:
+                        player_class.talk()
 
                     if event.key == pygame.K_RIGHT:
                         player_class.action['run']=True
@@ -187,25 +187,25 @@ class Game_UI():
                     if event.key == pygame.K_LSHIFT:#left shift
                         player_class.dashing()
 
-            elif event.type == pygame.KEYUP:#lift bottom
-                if event.key == pygame.K_RIGHT and player_class.dir[0]>0:
-                    player_class.action['stand']=True
-                    player_class.action['run']=False
+                elif event.type == pygame.KEYUP:#lift bottom
+                    if event.key == pygame.K_RIGHT and player_class.dir[0]>0:
+                        player_class.action['stand']=True
+                        player_class.action['run']=False
 
-                if event.key == pygame.K_t:#if release button
-                    if player_class.state!='talk':#if not in conversation
-                        player_class.state='stand'
-                        player_class.action['talk']=False
+                    if event.key == pygame.K_t:#if release button
+                        if player_class.state!='talk':#if not in conversation
+                            player_class.state='stand'
+                            player_class.action['talk']=False
 
-                if event.key == pygame.K_LEFT and player_class.dir[0]<0:
-                    player_class.action['stand']=True
-                    player_class.action['run']=False
+                    if event.key == pygame.K_LEFT and player_class.dir[0]<0:
+                        player_class.action['stand']=True
+                        player_class.action['run']=False
 
-                if event.key == pygame.K_UP:
-                    player_class.dir[1]=0
+                    if event.key == pygame.K_UP:
+                        player_class.dir[1]=0
 
-                if event.key == pygame.K_DOWN:
-                    player_class.dir[1]=0
+                    if event.key == pygame.K_DOWN:
+                        player_class.dir[1]=0
 
-                if event.key==pygame.K_g:
-                    player_class.interacting = False
+                    if event.key==pygame.K_g:
+                        player_class.interacting = False
