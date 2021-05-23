@@ -356,15 +356,14 @@ class NPC(Entity):
                 #for action conversations
                 if event.key == pygame.K_UP:#up
                     self.conv_idx-=1*int(not self.business)
-                    self.ammount+=1*int(self.business)
-                    self.ammount=min(player.loot['Coin'],self.ammount)
-
+                    self.upinteger(player)
                 if event.key == pygame.K_DOWN:#up
                     self.conv_idx+=1*int(not self.business)
-                    self.ammount-=1*int(self.business)
-                    self.ammount=max(0,self.ammount)
+                    self.downinteger(player)
 
                 if event.key == pygame.K_RETURN:#enter the option
+                    if self.business:
+                        self.trade(player)
                     self.business = not self.business
 
                 #exit/skip conversation
@@ -380,9 +379,18 @@ class NPC(Entity):
     def business(self):
         pass
 
+    def upinteger(self,player):
+        pass
+
+    def downinteger(self,player):
+        pass
+
     def blit_conv_action(self,game_screen):
         pass
 
+    def trade():
+        pass
+        
 class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
@@ -423,8 +431,7 @@ class MrBanks(NPC):
         self.conv_action=['deposit','withdraw']
         self.conv_action_BG=pygame.image.load("Sprites/aseprite/conversation/Conv_action_BG.png").convert_alpha()
         self.conv_possition=[300]
-        self.conv_idx=0
-        self.loot={'Coin':0}#the keys need to have the same name as their respective classes
+        self.loot={'Coin':2}#the keys need to have the same name as their respective classes
         self.business=False
         self.ammount=0
 
@@ -440,22 +447,40 @@ class MrBanks(NPC):
         elif self.conv_idx>=len(self.conv_action):
             self.conv_idx=len(self.conv_action)-1
 
-        self.font.render(game_screen,'o',(930,self.conv_possition[self.conv_idx]),1)#call the self made aplhabet blit and blit the conversation
-        self.conv_possition=[]
+        if not self.business:
+            self.font.render(game_screen,'o',(930,self.conv_possition[self.conv_idx]),1)#call the self made aplhabet blit and blit the conversation
+            self.conv_possition=[]
 
-        scale=[1]*len(self.conv_action)
-        scale[self.conv_idx]=2
-        i=1
+            scale=[1]*len(self.conv_action)
+            scale[self.conv_idx]=2
+            i=1
 
-        for conv in self.conv_action:
-            self.font.render(game_screen,conv,(950,250+50*i),scale[i-1])#call the self made aplhabet blit and blit the conversation
-            self.conv_possition.append(250+50*i)
-            i+=1
-
-        if self.business:
+            for conv in self.conv_action:
+                self.font.render(game_screen,conv,(950,250+50*i),scale[i-1])#call the self made aplhabet blit and blit the conversation
+                self.conv_possition.append(250+50*i)
+                i+=1
+        else:#if buisness
             game_screen.blit(self.conv_action_BG,(850,200))#the text BG
             self.font.render(game_screen,str(self.ammount),(930,250),1)#call the self made aplhabet blit and blit the conversation
 
+    def trade(self,player):
+        if self.conv_action[self.conv_idx] == 'deposit':
+            self.loot['Coin']+=self.ammount
+            player.loot['Coin']-=self.ammount
+        elif self.conv_action[self.conv_idx] == 'withdraw':
+            player.loot['Coin']+=self.ammount
+            self.loot['Coin']-=self.ammount
+
+    def upinteger(self,player):
+        self.ammount+=1*int(self.business)
+        if self.conv_action[self.conv_idx] == 'deposit':
+            self.ammount=min(player.loot['Coin'],self.ammount)
+        elif self.conv_action[self.conv_idx] == 'withdraw':
+            self.ammount=min(self.loot['Coin'],self.ammount)
+
+    def downinteger(self,player):
+        self.ammount-=1*int(self.business)
+        self.ammount=max(0,self.ammount)#minimum 0
 
 class Weapon(pygame.sprite.Sprite):
     def __init__(self):
