@@ -353,15 +353,19 @@ class NPC(Entity):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-
                 #for action conversations
                 if event.key == pygame.K_UP:#up
-                    self.conv_idx-=1
+                    self.conv_idx-=1*int(not self.business)
+                    self.ammount+=1*int(self.business)
+                    self.ammount=min(player.loot['Coin'],self.ammount)
+
                 if event.key == pygame.K_DOWN:#up
-                    self.conv_idx+=1
+                    self.conv_idx+=1*int(not self.business)
+                    self.ammount-=1*int(self.business)
+                    self.ammount=max(0,self.ammount)
 
                 if event.key == pygame.K_RETURN:#enter the option
-                    self.business()
+                    self.business = not self.business
 
                 #exit/skip conversation
                 if event.key == pygame.K_t:
@@ -421,6 +425,8 @@ class MrBanks(NPC):
         self.conv_possition=[300]
         self.conv_idx=0
         self.loot={'Coin':0}#the keys need to have the same name as their respective classes
+        self.business=False
+        self.ammount=0
 
     def AI(self):
         if abs(self.rect[0]+self.rect[1])>800:#if far away
@@ -446,11 +452,10 @@ class MrBanks(NPC):
             self.conv_possition.append(250+50*i)
             i+=1
 
-    def business(self):
-        if self.conv_action[self.conv_idx] == 'deposit':
-            pass
-        elif self.conv_action[self.conv_idx] == 'withdraw':
-            pass
+        if self.business:
+            game_screen.blit(self.conv_action_BG,(850,200))#the text BG
+            self.font.render(game_screen,str(self.ammount),(930,250),1)#call the self made aplhabet blit and blit the conversation
+
 
 class Weapon(pygame.sprite.Sprite):
     def __init__(self):
