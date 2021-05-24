@@ -293,7 +293,7 @@ class NPC(Entity):
         self.page_frame=0#if there are pages of text
         self.text_frame=-1#chosing which text to say: woudl ike to move this to NPC class instead
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
-        self.conv_idx=0
+        self.conv_idx=[0,0]
 
     def blit_conversation(self,text,game_screen):#blitting of text from conversation
         self.text_surface.blit(self.portrait,(550,100))#the portait on to the text_surface
@@ -335,7 +335,7 @@ class NPC(Entity):
 
         self.talking()#settign flags
         conv=self.new_page()#preparing the conversation if new page exits
-        self.blit_conv_action(game_screen)
+        self.blit_conv_action(game_screen)#if it is a villiager with action
 
         if self.letter_frame//3!=len(conv):#if not everything has been said.
             text=conv[:self.letter_frame//3+1]
@@ -354,12 +354,23 @@ class NPC(Entity):
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 #for action conversations
+                if event.key==pygame.K_ESCAPE:#escape button
+                    self.business = False
+                    self.ammount=0
+
+                    self.action['talk']=False
+                    player.action['talk']=False
                 if event.key == pygame.K_UP:#up
-                    self.conv_idx-=1*int(not self.business)
+                    self.conv_idx[1]-=1*int(not self.business)
                     self.upinteger(player)
                 if event.key == pygame.K_DOWN:#up
-                    self.conv_idx+=1*int(not self.business)
+                    self.conv_idx[1]+=1*int(not self.business)
                     self.downinteger(player)
+                if event.key == pygame.K_LEFT:#left
+                    self.conv_idx[0]-=1*int(self.business)
+
+                if event.key == pygame.K_RIGHT:#right
+                    self.conv_idx[0]+=1*int(self.business)
 
                 if event.key == pygame.K_RETURN:#enter the option
                     if self.business:
@@ -368,10 +379,13 @@ class NPC(Entity):
 
                 #exit/skip conversation
                 if event.key == pygame.K_t:
+                    self.business = not self.business
                     if self.page_frame<self.number_of_pages:
                         self.page_frame+=1#next page
                     else:
                         self.action['talk']=False
+                        self.ammount=0
+
                         player.action['talk']=False
                         self.page_frame=0#reset page
                     self.letter_frame=1#reset the letter frame
@@ -390,7 +404,7 @@ class NPC(Entity):
 
     def trade():
         pass
-        
+
 class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
@@ -430,7 +444,8 @@ class MrBanks(NPC):
         self.friction=[0.2,0]
         self.conv_action=['deposit','withdraw']
         self.conv_action_BG=pygame.image.load("Sprites/aseprite/conversation/Conv_action_BG.png").convert_alpha()
-        self.conv_possition=[300]
+        self.conv_possition=[[400],[300]]
+
         self.loot={'Coin':2}#the keys need to have the same name as their respective classes
         self.business=False
         self.ammount=0
@@ -442,40 +457,58 @@ class MrBanks(NPC):
     def blit_conv_action(self,game_screen):
         game_screen.blit(self.conv_action_BG,(850,200))#the text BG
 
-        if self.conv_idx<=0:
-            self.conv_idx=0
-        elif self.conv_idx>=len(self.conv_action):
-            self.conv_idx=len(self.conv_action)-1
+        if self.conv_idx[1]<=0:
+            self.conv_idx[1]=0
+        elif self.conv_idx[1]>=len(self.conv_action):
+            self.conv_idx[1]=len(self.conv_action)-1
 
-        if not self.business:
-            self.font.render(game_screen,'o',(930,self.conv_possition[self.conv_idx]),1)#call the self made aplhabet blit and blit the conversation
-            self.conv_possition=[]
+        if not self.business:#if not busness
+            self.font.render(game_screen,'o',(930,self.conv_possition[1][self.conv_idx[1]]),1)#call the self made aplhabet blit and blit the conversation
+            self.conv_possition=[[],[]]
 
             scale=[1]*len(self.conv_action)
-            scale[self.conv_idx]=2
+            scale[self.conv_idx[1]]=2
             i=1
 
             for conv in self.conv_action:
                 self.font.render(game_screen,conv,(950,250+50*i),scale[i-1])#call the self made aplhabet blit and blit the conversation
-                self.conv_possition.append(250+50*i)
+                self.conv_possition[1].append(250+50*i)
                 i+=1
         else:#if buisness
             game_screen.blit(self.conv_action_BG,(850,200))#the text BG
-            self.font.render(game_screen,str(self.ammount),(930,250),1)#call the self made aplhabet blit and blit the conversation
+            self.font.render(game_screen,str(self.ammount)+' coins?',(940,300),1)#call the self made aplhabet blit and blit the conversation
+            self.font.render(game_screen,self.conv_action[self.conv_idx[1]]+'?',(930,270),1)#call the self made aplhabet blit and blit the conversation
+
+            self.conv_possition[0]=[920,1020]
+
+            if self.conv_idx[0]<=0:
+                self.conv_idx[0]=0
+            elif self.conv_idx[0]>=2:
+                self.conv_idx[0]=1
+            scale=[1,1]
+            scale[self.conv_idx[0]]=2
+
+            self.font.render(game_screen,'Yes',(940,400),scale[0])#call the self made aplhabet blit and blit the conversation
+            self.font.render(game_screen,'No',(1040,400),scale[1])#call the self made aplhabet blit and blit the conversation
+            self.font.render(game_screen,'o',(self.conv_possition[0][self.conv_idx[0]],400),1)#call the self made aplhabet blit and blit the conversation
 
     def trade(self,player):
-        if self.conv_action[self.conv_idx] == 'deposit':
-            self.loot['Coin']+=self.ammount
-            player.loot['Coin']-=self.ammount
-        elif self.conv_action[self.conv_idx] == 'withdraw':
-            player.loot['Coin']+=self.ammount
-            self.loot['Coin']-=self.ammount
+        if self.conv_idx[0]==0:
+            if self.conv_action[self.conv_idx[1]] == 'deposit':
+                player.loot['Coin']-=self.ammount
+                self.loot['Coin']+=self.ammount
+            elif self.conv_action[self.conv_idx[1]] == 'withdraw':
+                player.loot['Coin']+=self.ammount
+                self.loot['Coin']-=self.ammount
+        else:
+            self.buisness=False
+            self.ammount=0
 
     def upinteger(self,player):
         self.ammount+=1*int(self.business)
-        if self.conv_action[self.conv_idx] == 'deposit':
+        if self.conv_action[self.conv_idx[1]] == 'deposit':
             self.ammount=min(player.loot['Coin'],self.ammount)
-        elif self.conv_action[self.conv_idx] == 'withdraw':
+        elif self.conv_action[self.conv_idx[1]] == 'withdraw':
             self.ammount=min(self.loot['Coin'],self.ammount)
 
     def downinteger(self,player):
