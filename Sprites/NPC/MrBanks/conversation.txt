@@ -1,0 +1,5 @@
+worldstate_1
+I am happy. 
+
+worldstate_2
+I am not happy.

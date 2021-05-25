@@ -34,6 +34,8 @@ class Collisions():
         if npc and player.action['talk']==True:#if player want to talk talks
             npc.talk(screen,player)
             player.state='talk'#the player talks with npc
+            player.action['run']=False
+
 
     #invisible wall collision for NPC and enemy
     @staticmethod

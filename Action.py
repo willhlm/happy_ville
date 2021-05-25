@@ -3,7 +3,6 @@ import pygame
 def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
     for entity in projectile_enteties.sprites():#go through the group
         projectiles=entity.attack_action(projectiles)
-
         for projectile in projectiles.sprites():#go through the group
 
             #projectile collision?
@@ -14,6 +13,9 @@ def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
 
             #if hit enemy
             if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
+
+                entity.shake=collision_ene.shake#screen shake
+
                 collision_ene.health-=projectile.dmg
                 collision_ene.action['hurt']=True
 
@@ -23,11 +25,9 @@ def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
                     loot=collision_ene.loots(loot)
 
                 if projectile.type=='sword':#knockback if sword is quipped
-                    collision_ene.velocity[0]=entity.dir[0]*10#knock back of enemy
+                    #collision_ene.velocity[0]=entity.dir[0]*10#knock back of enemy
                     projectiles.remove(projectile)
-
-                    if entity.dir[1]!=0:##up or down
-                        entity.velocity[1]=entity.dir[1]*10#nail jump
+                    entity.velocity[1]=entity.dir[1]*10#nail jump
 
                 elif projectile.type=='bow':
                     projectile.velocity=[0,0]
@@ -35,10 +35,8 @@ def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
             #hit platform
             elif collision_plat:
                 if projectile.type=='sword':#knockback if sword is quipped
-                    if entity.dir[1]==0:#if horizontal
-                        entity.velocity[0]=-entity.dir[0]*10#knock back
-                    else:#up or down
-                        entity.velocity[1]=entity.dir[1]*10#knock back
+                    entity.velocity[0]=entity.dir[0]*10*(abs(entity.dir[1])-1)#knock back horizontally
+                    entity.velocity[1]=entity.dir[1]*10#nail jump
                     projectiles.remove(projectile)
                 elif projectile.type=='bow':
                     projectile.velocity=[0,0]

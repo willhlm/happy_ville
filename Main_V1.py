@@ -28,7 +28,7 @@ hero.add(knight)
 
 sprites = {'knight': Read_files.Sprites_player()}
 
-map=Level.Tilemap('village1','border')
+map=Level.Tilemap('village1','auto')
 
 #tePlatforms,teEnemies=map.load_tiles('./Tiled/village1_colision.csv')
 #platforms.add(tePlatforms)#whole map
@@ -46,7 +46,7 @@ def draw():
     loot.draw(game.screen)
 
 def scrolling():
-    map.scrolling(knight.rect)
+    map.scrolling(knight.rect,knight.shake)
     scroll = [-map.camera.scroll[0],-map.camera.scroll[1]]
     platforms.update(scroll)
     bg_blocks.update(scroll)
@@ -63,15 +63,10 @@ def scrolling():
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=weather_paricles.create_particle('sakura')#weather effects
+    weather=weather_paricles.create_particle('Sakura')#weather effects
     platforms,bg_blocks,enemies,npc,invisible_blocks,interactables=map.load_chunks()#chunks
 
     game.input(knight)#game inputs
-
-    for enemy in enemies.sprites():
-        enemy.AI(knight)#the enemy Ai movement, based on knight position
-    for npcs in npc.sprites():
-        npcs.AI()
 
     Engine.Physics.movement(hero)
     Engine.Physics.movement(enemies)
@@ -87,6 +82,11 @@ while True:
     loot=Engine.Collisions.check_enemy_collision(knight,enemies,loot)
 
     scrolling()
+
+    for enemy in enemies.sprites():
+        enemy.AI(knight,game.screen)#the enemy Ai movement, based on knight position
+    for npcs in npc.sprites():
+        npcs.AI()
 
     fprojectiles, loot = Action.actions(fprojectiles,hero,platforms,enemies,game.screen,loot)#f_action swinger, target1,target2
     eprojectiles, loot = Action.actions(eprojectiles,enemies,platforms,hero,game.screen,loot)#f_action swinger, target1,target2

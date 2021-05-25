@@ -1,4 +1,4 @@
-import pygame, csv, Entities, math
+import pygame, csv, Entities, math, random
 
 platforms = pygame.sprite.Group()
 bg_blocks = pygame.sprite.Group()
@@ -27,8 +27,8 @@ class Tilemap():
         elif mode=='border':
             self.camera=Border()
 
-    def scrolling(self,knight):
-        self.camera.scrolling(knight,self.total_disatnce)
+    def scrolling(self,knight,shake):
+        self.camera.scrolling(knight,self.total_disatnce,shake)
 
     def read_csv(self, path):
         tile_map=[]
@@ -118,7 +118,7 @@ class Tilemap():
                             tile_x+=1
                             continue
                         if tile=='n':#temporary NPC
-                            new_npc = Entities.NPC_1(self.entity_position(tile_x, tile_y, x, y))
+                            new_npc = Entities.MrBanks(self.entity_position(tile_x, tile_y, x, y))
                             npc.add(new_npc)
                             tile_x+=1
                             continue
@@ -243,25 +243,33 @@ class Camera():
         self.scroll=[0,0]
         self.true_scroll=[0,0]
 
-    def update_scroll(self):
+    def update_scroll(self,shake):
+
+        if shake>0:
+            screen_shake=[random.randint(-4,4),random.randint(-4,4)]
+        else:
+            screen_shake=[0,0]
+
         self.scroll=self.true_scroll.copy()
-        self.scroll[0]=int(self.scroll[0])
-        self.scroll[1]=int(self.scroll[1])
+        self.scroll[0]=int(self.scroll[0])+screen_shake[0]
+        self.scroll[1]=int(self.scroll[1])+screen_shake[1]
+
+
 
 class Auto(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,distance):
+    def scrolling(self,knight,distance,shake):
         self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
-        self.update_scroll()
+        self.update_scroll(shake)
 
 class Autocap(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,distance):
+    def scrolling(self,knight,distance,shake):
         if knight.center[0]>400:
             self.true_scroll[0]+=5
         elif knight.center[0]<30:
@@ -276,13 +284,13 @@ class Autocap(Camera):
         elif knight.center[1]>130 and knight.center[1]<190:
             self.true_scroll[1]=0
 
-        self.update_scroll()
+        self.update_scroll(shake)
 
 class Border(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,total_disatnce):
+    def scrolling(self,knight,total_disatnce,shake):
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
         if -40 < total_disatnce[0]<1400:#map boundaries
             self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
@@ -293,4 +301,4 @@ class Border(Camera):
                 self.true_scroll[0]+=1
             else:
                 self.true_scroll[0]=0
-        self.update_scroll()
+        self.update_scroll(shake)

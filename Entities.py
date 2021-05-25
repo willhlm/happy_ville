@@ -13,6 +13,7 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir=[0,0]
         self.world_state=0
         self.loot={'coin':1}
+        self.shake=0
 
     def AI(self,knight):
         pass
@@ -71,10 +72,6 @@ class Player(Entity):
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
 
-        #conversations with villigers
-        self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
-        self.text_frame=0#chosing which text to say: woudl ike to move this to NPC class instead
-
     def attack_action(self,projectiles):
         if self.action[self.equip]:
             if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
@@ -104,12 +101,7 @@ class Player(Entity):
             self.velocity[0]=-self.dir[0]*10
 
     def talk(self):
-        self.action['talk']=True
-        if self.state=='talk':#if finish talking, move on to the next text
-            self.letter_frame=1#reset the letter frame
-            self.text_frame+=1
-            self.action['talk']=False
-            self.state='stand'
+        self.action['talk']=not self.action['talk']
 
     def update(self,pos):
         super(Player, self).update(pos)
@@ -130,11 +122,12 @@ class Enemy_1(Player):
         self.inv=False#flag to check if collision with invisible blocks
         self.friction=[0.2,1]
         self.sprites = Read_files.Sprites_evil_knight()
+        self.shake=10#screen shake duration
 
     def AI(self,player):#the AI
 
-        self.distance[0]=(self.rect[0]-player.rect[0])#follow the player
-        self.distance[1]=(self.rect[1]-player.rect[1])#follow the player
+        self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
+        self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
 
         if abs(self.distance[0])>150 and abs(self.distance[1])>40 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
             self.action['run']=False
@@ -170,32 +163,37 @@ class Enemy_2(Entity):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 10
-        self.priority_action=['death','hurt','dash','sword','bow']#animation
-        self.nonpriority_action=['trans','jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'trans':False}
+        self.priority_action=['death','hurt','sword','bow','trans']#animation
+        self.nonpriority_action=['fall','run','stand']#animation
+        self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'bow':False,'fall':False,'trans':False}
         self.state = 'stand'
         self.equip='sword'
         self.sprites = Read_files.Flowy()
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
+        self.shake=3
 
+    @staticmethod#a function to add glow around the entity
+    def add_white(radius,colour,screen,pos):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
 
-    def AI(self,player):#the AI
+    def AI(self,player,screen):#the AI
+        #light around the entity
+        radius=max(20-abs(self.distance[0])//10,1)
+        Enemy_2.add_white(radius,(20,0,0),screen,self.rect.center)#radius, clolor, screen,position
 
         self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
         self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
 
-        if 30 < abs(self.distance[0])<80 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+        if 30 < abs(self.distance[0])<80 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action['trans'] = True
 
-        elif abs(self.distance[0])<30 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
+        elif abs(self.distance[0])<30 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
-        else:
-            self.action['trans'] = False
-            self.action[self.equip] = False
-
-
 
 class Block(Entity):
 
@@ -291,41 +289,134 @@ class NPC(Entity):
         self.priority_action = ['death','hurt']
         self.health = 50
         self.state = 'stand'
-        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png",1)#intitilise the alphabet class
+        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.page_frame=0#if there are pages of text
+        self.text_frame=-1#chosing which text to say: woudl ike to move this to NPC class instead
+        self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
+        self.conv_idx=[0,0]
 
-    def talk(self,game_screen,knight):
+    def blit_conversation(self,text,game_screen):#blitting of text from conversation
+        self.text_surface.blit(self.portrait,(550,100))#the portait on to the text_surface
+        game_screen.blit(self.text_surface,(200,200))#the text BG
+        self.font.render(game_screen,text,(400,300),1)#call the self made aplhabet blit and blit the conversation
+        self.font.render(game_screen,self.name,(750,400),1)#blit the name
+
+    def new_page(self):
+        if '&' in self.conversation.text[self.world_state][self.text_frame//1]:#& means there is a new page
+            conversation=self.conversation.text[self.world_state][self.text_frame//1]
+            indices = [i for i, x in enumerate(conversation) if x == "&"]#all indexes for &
+            self.number_of_pages=len(indices)
+
+            for i in range(self.page_frame,self.number_of_pages+1):
+                start=min(indices[self.page_frame-1],self.page_frame*10000)
+                if self.page_frame>=self.number_of_pages:
+                    end=-1
+                else:
+                    end=indices[self.page_frame]
+            return self.conversation.text[self.world_state][self.text_frame//1][start:end]
+        else:
+            self.number_of_pages=0
+            return self.conversation.text[self.world_state][self.text_frame//1]
+
+    def talking(self):
+        self.action['talk']=True
         self.action['run']=False
         self.action['stand']=True
         self.velocity=[0,0]
-        self.action['talk']=True
 
-        if knight.text_frame >= len(self.conversation.text[self.world_state]):
-            knight.text_frame=0
+    def talk(self,game_screen,player):
+        if not self.action['talk']:#if first time
+            self.page_frame=0
+            self.letter_frame=1#reset the letter frame
+            self.text_frame+=1
 
-        if knight.letter_frame//3!=len(self.conversation.text[self.world_state][knight.text_frame//1]):#if not everything has been said.
-            text=self.conversation.text[self.world_state][knight.text_frame//1][:knight.letter_frame//3+1]
-            knight.letter_frame+=1
+        if self.text_frame >= len(self.conversation.text[self.world_state]):
+            self.text_frame=0#reset the conversation tree
+
+        self.talking()#settign flags
+        conv=self.new_page()#preparing the conversation if new page exits
+        self.blit_conv_action(game_screen)#if it is a villiager with action
+
+        if self.letter_frame//3!=len(conv):#if not everything has been said.
+            text=conv[:self.letter_frame//3+1]
+            self.letter_frame+=1
             self.blit_conversation(text,game_screen)
         else:#if everything was said, print the whole text
-            self.blit_conversation(self.conversation.text[self.world_state][knight.text_frame//1],game_screen)
+            self.page_frame=min(self.number_of_pages,self.page_frame)
+            self.blit_conversation(conv,game_screen)
 
-    def blit_conversation(self,text,game_screen):#blitting of text from conversation
-        self.text_surface.blit(self.portrait,(180,20))#the portait on to the text_surface
-        self.font.render(game_screen,text,(20,20))#call the self made aplhabet blit
-        game_screen.blit(self.text_surface,(150,50))#the text BG
+        self.input_quit(player)
+
+    def input_quit(self,player):#to exits between option menues
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                #for action conversations
+                if event.key==pygame.K_ESCAPE:#escape button
+                    self.business = False
+                    self.ammount=0
+
+                    self.action['talk']=False
+                    player.action['talk']=False
+                if event.key == pygame.K_UP:#up
+                    self.conv_idx[1]-=1*int(not self.business)
+                    self.upinteger(player)
+                if event.key == pygame.K_DOWN:#up
+                    self.conv_idx[1]+=1*int(not self.business)
+                    self.downinteger(player)
+                if event.key == pygame.K_LEFT:#left
+                    self.conv_idx[0]-=1*int(self.business)
+
+                if event.key == pygame.K_RIGHT:#right
+                    self.conv_idx[0]+=1*int(self.business)
+
+                if event.key == pygame.K_RETURN:#enter the option
+                    if self.business:
+                        self.trade(player)
+                    self.business = not self.business
+
+                #exit/skip conversation
+                if event.key == pygame.K_t:
+                    self.business = not self.business
+                    if self.page_frame<self.number_of_pages:
+                        self.page_frame+=1#next page
+                    else:
+                        self.action['talk']=False
+                        self.ammount=0
+
+                        player.action['talk']=False
+                        self.page_frame=0#reset page
+                    self.letter_frame=1#reset the letter frame
+
+    def business(self):
+        pass
+
+    def upinteger(self,player):
+        pass
+
+    def downinteger(self,player):
+        pass
+
+    def blit_conv_action(self,game_screen):
+        pass
+
+    def trade():
+        pass
 
 class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
+        self.name = 'NPC_1'
         self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.portrait=pygame.image.load("Sprites/NPC/NPC_1/Woman1.png").convert_alpha()
+        self.portrait=pygame.image.load('Sprites/NPC/'+self.name+ '/Woman1.png').convert_alpha()
         self.text_surface=pygame.image.load("Sprites/aseprite/conversation/Conv_BG.png").convert_alpha()
-        self.name = 'NPC_1'
         self.sprites = Read_files.NPC(self.name)
-        self.conversation=Read_files.Conversations('Sprites/NPC/conversation.txt')#a dictionary with "world state" as keys
+        self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.friction=[0.2,0]
 
     def AI(self):
@@ -333,11 +424,96 @@ class NPC_1(NPC):
 
         if abs(self.rect[0]+self.rect[1])>800:#if far away
             self.kill()
-
         elif self.action['inv']:#collision with invisble block
             self.velocity[0] = -self.velocity[0]
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
+
+class MrBanks(NPC):
+    def __init__(self,pos):
+        super().__init__()
+        self.name = 'MrBanks'
+        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
+        self.rect.center = self.hitbox.center#match the positions of hitboxes
+        self.portrait=pygame.image.load('Sprites/NPC/'+self.name+ '/Woman1.png').convert_alpha()
+        self.text_surface=pygame.image.load("Sprites/aseprite/conversation/Conv_BG.png").convert_alpha()
+        self.sprites = Read_files.NPC(self.name)
+        self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
+        self.friction=[0.2,0]
+        self.conv_action=['deposit','withdraw']
+        self.conv_action_BG=pygame.image.load("Sprites/aseprite/conversation/Conv_action_BG.png").convert_alpha()
+        self.conv_possition=[[400],[300]]
+
+        self.loot={'Coin':2}#the keys need to have the same name as their respective classes
+        self.business=False
+        self.ammount=0
+
+    def AI(self):
+        if abs(self.rect[0]+self.rect[1])>800:#if far away
+            self.kill()
+
+    def blit_conv_action(self,game_screen):
+        game_screen.blit(self.conv_action_BG,(850,200))#the text BG
+
+        if self.conv_idx[1]<=0:
+            self.conv_idx[1]=0
+        elif self.conv_idx[1]>=len(self.conv_action):
+            self.conv_idx[1]=len(self.conv_action)-1
+
+        if not self.business:#if not busness
+            self.font.render(game_screen,'o',(930,self.conv_possition[1][self.conv_idx[1]]),1)#call the self made aplhabet blit and blit the conversation
+            self.conv_possition=[[],[]]
+
+            scale=[1]*len(self.conv_action)
+            scale[self.conv_idx[1]]=2
+            i=1
+
+            for conv in self.conv_action:
+                self.font.render(game_screen,conv,(950,250+50*i),scale[i-1])#call the self made aplhabet blit and blit the conversation
+                self.conv_possition[1].append(250+50*i)
+                i+=1
+        else:#if buisness
+            game_screen.blit(self.conv_action_BG,(850,200))#the text BG
+            self.font.render(game_screen,str(self.ammount)+' coins?',(940,300),1)#call the self made aplhabet blit and blit the conversation
+            self.font.render(game_screen,self.conv_action[self.conv_idx[1]]+'?',(930,270),1)#call the self made aplhabet blit and blit the conversation
+
+            self.conv_possition[0]=[920,1020]
+
+            if self.conv_idx[0]<=0:
+                self.conv_idx[0]=0
+            elif self.conv_idx[0]>=2:
+                self.conv_idx[0]=1
+            scale=[1,1]
+            scale[self.conv_idx[0]]=2
+
+            self.font.render(game_screen,'Yes',(940,400),scale[0])#call the self made aplhabet blit and blit the conversation
+            self.font.render(game_screen,'No',(1040,400),scale[1])#call the self made aplhabet blit and blit the conversation
+            self.font.render(game_screen,'o',(self.conv_possition[0][self.conv_idx[0]],400),1)#call the self made aplhabet blit and blit the conversation
+
+    def trade(self,player):
+        if self.conv_idx[0]==0:
+            if self.conv_action[self.conv_idx[1]] == 'deposit':
+                player.loot['Coin']-=self.ammount
+                self.loot['Coin']+=self.ammount
+            elif self.conv_action[self.conv_idx[1]] == 'withdraw':
+                player.loot['Coin']+=self.ammount
+                self.loot['Coin']-=self.ammount
+        else:
+            self.buisness=False
+            self.ammount=0
+
+    def upinteger(self,player):
+        self.ammount+=1*int(self.business)
+        if self.conv_action[self.conv_idx[1]] == 'deposit':
+            self.ammount=min(player.loot['Coin'],self.ammount)
+        elif self.conv_action[self.conv_idx[1]] == 'withdraw':
+            self.ammount=min(self.loot['Coin'],self.ammount)
+
+    def downinteger(self,player):
+        self.ammount-=1*int(self.business)
+        self.ammount=max(0,self.ammount)#minimum 0
 
 class Weapon(pygame.sprite.Sprite):
     def __init__(self):
@@ -440,6 +616,9 @@ class Loot(pygame.sprite.Sprite):
         self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
+
+        if self.lifetime<0:#remove after a while
+            self.kill()
 
     def speed(self):
         self.velocity[1]+=0.9#gravity
