@@ -1,26 +1,112 @@
 import pygame, sys
 import Read_files#for the fonts
+import Engine
+import Entities
+import Level
+import Action
+import BG
 
 class Game_UI():
+
     def __init__(self):
         pygame.init()#initilise
         self.WINDOW_SIZE = (480,270)
         self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
-        self.screen=pygame.Surface(self.WINDOW_SIZE)
+        self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
-        self.start_BG=pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg'),self.WINDOW_SIZE)
-        self.clock=pygame.time.Clock()
-        self.gameover=False
-        self.ESC=False
-        self.click=False
-        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
+        self.start_BG = pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg'),self.WINDOW_SIZE)
+        self.clock = pygame.time.Clock()
+        self.gameover = False
+        self.ESC = False
+        self.click = False
+        self.font = Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
         self.shake=False
+        self.weather_paricles=BG.Weather()
+
+        #initiate maps
+        self.map = self.load_map('village1')
+
+        #initiate player
+        self.player = Entities.Player([200,50])
+        self.players = pygame.sprite.Group(self.player)
+
+        #initiate all sprite groups
+        self.enemies = pygame.sprite.Group()
+        self.npcs = pygame.sprite.Group()
+        self.platforms = pygame.sprite.Group()
+        self.bg_blocks = pygame.sprite.Group()
+        self.invisible_blocks = pygame.sprite.Group()
+        self.weather = pygame.sprite.Group()
+        self.interactables = pygame.sprite.Group()
+        self.fprojectiles = pygame.sprite.Group()#arrows
+        self.eprojectiles = pygame.sprite.Group()#arrows
+        self.loot = pygame.sprite.Group()
+
+        self.individuals = pygame.sprite.Group(self.player)
+        self.all_entities = pygame.sprite.Group(self.player)
+
     def game_loop(self):
         while True:
-            pass
+            self.screen.fill((207,238,250))#fill game.screen
+
+            self.weather = self.weather_paricles.create_particle('Rain')#weather effects
+
+            # !!--change to load map--!!
+            self.platforms,self.bg_blocks,self.enemies,self.npcs,self.invisible_blocks,self.interactables=self.map.load_chunks()#chunks
+
+            # !!--remove passing knight--!!
+            self.input(self.player)#game inputs
+
+            # !!--change to one group--!!
+            Engine.Physics.movement(self.players)
+            Engine.Physics.movement(self.enemies)
+            Engine.Physics.movement(self.npcs)
+
+
+            Engine.Collisions.check_collisions(self.players,self.platforms)
+            Engine.Collisions.check_collisions(self.enemies,self.platforms)
+            Engine.Collisions.check_collisions(self.npcs,self.platforms)
+            Engine.Collisions.check_invisible(self.npcs,self.invisible_blocks)
+            Engine.Collisions.check_interaction(self.player,self.interactables)
+            Engine.Collisions.check_collisions_loot(self.loot,self.platforms)
+            Engine.Collisions.pickup_loot(self.player,self.loot)
+            loot = Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
+
+
+            for enemy in self.enemies:
+                enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
+            for npc in self.npcs:
+                npc.AI()
+
+
+            # !!--check later--!!
+            fprojectiles, loot = Action.actions(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
+            eprojectiles, loot = Action.actions(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
+
+            # !!--change to one group--!!   eventually change this to set animation image in update
+            Engine.Animation.set_img(self.players)
+            Engine.Animation.set_img(self.enemies)
+            Engine.Animation.set_img(self.npcs)
+
+            pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
+            pygame.draw.rect(self.screen, (0,255,0), self.player.hitbox,2)#checking hitbox
+
+            self.draw()
+            self.scrolling()
+
+            # !!--change to one function, screen info--!!
+            self.screen.blit(self.blit_health(self.player),(20,20))#blit hearts
+            self.blit_fps()
+
+            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
+
+            Engine.Collisions.check_npc_collision(self.player,self.npcs,self.display)#need to be at the end so that the conversation text doesn't get scaled
+
+            pygame.display.update()#update after every change
+            self.clock.tick(60)#limmit FPS
 
     def main_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -79,6 +165,38 @@ class Game_UI():
             #self.screen.blit(self.start_BG,(0,0))
 
         self.input_quit()
+
+    def load_map(self, map_name):
+        return Level.Tilemap(map_name)
+
+    def initiate_groups(self):
+        pass
+
+    def scrolling(self):
+        self.map.scrolling(self.player.rect,self.player.shake)
+        scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
+        self.platforms.update(scroll)
+        self.bg_blocks.update(scroll)
+        self.players.update(scroll)
+        self.enemies.update(scroll)
+        self.npcs.update(scroll)
+        self.interactables.update(scroll)
+        self.invisible_blocks.update(scroll)
+        self.weather.update(scroll,self.screen)
+        self.fprojectiles.update(scroll,self.player.ac_dir,self.player.hitbox)
+        self.eprojectiles.update(scroll)
+        self.loot.update(scroll)
+
+    def draw(self):
+        self.bg_blocks.draw(self.screen)
+        self.platforms.draw(self.screen)
+        self.interactables.draw(self.screen)
+        self.players.draw(self.screen)
+        self.enemies.draw(self.screen)
+        self.npcs.draw(self.screen)
+        self.fprojectiles.draw(self.screen)
+        self.eprojectiles.draw(self.screen)
+        self.loot.draw(self.screen)
 
     def inventory(self):
         pass
