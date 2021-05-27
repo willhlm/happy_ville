@@ -28,7 +28,7 @@ class Game_UI():
 
         #initiate player
         self.player = Entities.Player([200,50])
-        self.players = pygame.sprite.Group(self.player)
+        self.players = pygame.sprite.Group()
 
         #initiate all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -42,8 +42,8 @@ class Game_UI():
         self.eprojectiles = pygame.sprite.Group()#arrows
         self.loot = pygame.sprite.Group()
 
-        self.individuals = pygame.sprite.Group(self.player)
-        self.all_entities = pygame.sprite.Group(self.player)
+        self.individuals = pygame.sprite.Group()
+        self.all_entities = pygame.sprite.Group()
 
         #initiate maps
         self.load_map('village1')
@@ -175,11 +175,13 @@ class Game_UI():
         self.bg.empty()
         self.bg.add(Entities.BG_Block(self.map.load_bg(),(0,0)))
 
+        self.players.empty()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
 
-        self.npcs,self.enemies,self.interactables = self.map.load_statics()
+        self.player, self.npcs, self.enemies, self.interactables = self.map.load_statics()
+        self.players.add(self.player)
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.player.shake)

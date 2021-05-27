@@ -114,6 +114,8 @@ class Tilemap():
                 elif tile == '8':
                     new_door = Entities.Door((col_index * self.tile_size, row_index * self.tile_size))
                     interactables.add(new_door)
+                elif tile == '16':
+                    player = Entities.Player((col_index * self.tile_size, row_index * self.tile_size))
                 elif tile == '17':
                     new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
@@ -124,7 +126,7 @@ class Tilemap():
             row_index += 1
             col_index = 0 #reset column
 
-        return npcs, enemies, interactables
+        return player, npcs, enemies, interactables
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it
