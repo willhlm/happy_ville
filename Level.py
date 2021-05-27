@@ -123,7 +123,7 @@ class Tilemap():
                             tile_x+=1
                             continue
                         if tile=='n':#temporary NPC
-                            new_npc = Entities.MrBanks(self.entity_position(tile_x, tile_y, x, y))
+                            new_npc = Entities.NPC_1(self.entity_position(tile_x, tile_y, x, y))
                             npc.add(new_npc)
                             tile_x+=1
                             continue
@@ -183,6 +183,9 @@ class Tilemap():
 
                 bg_list = [i for i in bg_blocks.sprites() if i.chunk_key==key]
                 bg_blocks.remove(bg_list)
+
+                #inter_list = [i for i in interactables.sprites() if i.chunk_key==key]
+                #interactables.remove(inter_list)
 
                 #update key
                 self.keys.remove(key)
