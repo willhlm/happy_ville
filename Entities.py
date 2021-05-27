@@ -568,9 +568,9 @@ class Sword(Weapon):
 
     def spawn(self,entity_hitbox):
         if self.dir[1] > 0:#up
-            self.hitbox.bottom=entity_hitbox.top
+            self.hitbox.midbottom=entity_hitbox.midtop
         elif self.dir[1] < 0:#down
-            self.hitbox.top=entity_hitbox.bottom
+            self.hitbox.midtop=entity_hitbox.midbottom
         elif self.dir[0] > 0 and self.dir[1] == 0:#right
             self.hitbox.left=entity_hitbox.right
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
