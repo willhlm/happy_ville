@@ -28,7 +28,7 @@ class Game_UI():
 
         #initiate player
         self.player = Entities.Player([200,50])
-        self.players = pygame.sprite.Group(self.player)
+        self.players = pygame.sprite.Group()
 
         #initiate all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -42,14 +42,14 @@ class Game_UI():
         self.eprojectiles = pygame.sprite.Group()#arrows
         self.loot = pygame.sprite.Group()
 
-        self.individuals = pygame.sprite.Group(self.player)
-        self.all_entities = pygame.sprite.Group(self.player)
+        self.individuals = pygame.sprite.Group()
+        self.all_entities = pygame.sprite.Group()
 
         #initiate maps
         self.load_map('village1')
 
         #initiate weather
-        self.weather = self.weather_paricles.create_particle('Rain')#weather effects
+        #self.weather = self.weather_paricles.create_particle('Rain')#weather effects
 
     def game_loop(self):
         while True:
@@ -70,10 +70,14 @@ class Game_UI():
             Engine.Collisions.check_collisions(self.enemies,self.platforms)
             Engine.Collisions.check_collisions(self.npcs,self.platforms)
             Engine.Collisions.check_invisible(self.npcs,self.invisible_blocks)
-            Engine.Collisions.check_interaction(self.player,self.interactables)
             Engine.Collisions.check_collisions_loot(self.loot,self.platforms)
             Engine.Collisions.pickup_loot(self.player,self.loot)
             self.loot = Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
+
+            check_map = Engine.Collisions.check_interaction(self.player,self.interactables)
+            if check_map:
+                self.change_map(check_map)
+
 
             for enemy in self.enemies:
                 enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
@@ -163,21 +167,28 @@ class Game_UI():
         self.input_quit()
 
     def change_map(self, map_name):
-        pass
+        self.load_map(map_name)
+        self.game_loop()
 
     def load_map(self, map_name):
         self.map = Level.Tilemap(map_name)
         self.initiate_groups()
 
     def initiate_groups(self):
+        #clean and load bg
         self.bg.empty()
         self.bg.add(Entities.BG_Block(self.map.load_bg(),(0,0)))
 
+        #clean all groups
+        self.players.empty()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
+        self.platforms.empty()
 
-        self.npcs,self.enemies,self.interactables = self.map.load_statics()
+        #load player and statics
+        self.player, self.npcs, self.enemies, self.interactables = self.map.load_statics()
+        self.players.add(self.player)
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.player.shake)
