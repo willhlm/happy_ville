@@ -81,6 +81,7 @@ class Player(Entity):
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
         self.dashing_cooldown=10
+        self.sword=Sword(self.dir,self.hitbox)
 
     def attack_action(self,projectiles):
         if self.action[self.equip]:
