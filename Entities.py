@@ -160,9 +160,8 @@ class Enemy_1(Player):
         return -1
 
 class Enemy_2(Entity):
-    def __init__(self,pos,ID):
+    def __init__(self,pos):
         super().__init__()
-        self.ID=ID
         self.image = pygame.image.load("Sprites/enemies/flowy/stand/Stand1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
