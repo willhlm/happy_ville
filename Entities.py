@@ -582,9 +582,9 @@ class Sword(Weapon):
         elif self.dir[1] < 0:#down
             self.hitbox.midtop=entity_hitbox.midbottom
         elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.left=entity_hitbox.right
+            self.hitbox.midleft=entity_hitbox.midright
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.right=entity_hitbox.left
+            self.hitbox.midright=entity_hitbox.midleft
 
 
 class Bow(Weapon):

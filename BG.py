@@ -4,13 +4,10 @@ weather_paricles=pygame.sprite.Group()
 
 class Weather(pygame.sprite.Sprite):
 
-    number_of_particles=0
-
     def __init__(self):
         super().__init__()
         self.pos=[random.randint(1, 479),random.randint(-500, -100)]
         self.velocity=[0,0]
-        Weather.number_of_particles+=1
         self.phase=random.randint(0, 10)
         self.max=100#max number of partivles
 
@@ -24,8 +21,7 @@ class Weather(pygame.sprite.Sprite):
         self.speed()#modulate the speed according to the particle type
 
         if self.pos[1]>300:#if on the lower side of screen. SHould we do ground collisions?
-            weather_paricles.remove(self)
-            Weather.number_of_particles-=1
+            self.pos=[random.randint(1, 479),random.randint(-500, -100)]                
 
         #continiouse falling, horizontally
         if self.pos[0]<0:
@@ -35,7 +31,7 @@ class Weather(pygame.sprite.Sprite):
 
 
     def create_particle(self,particle):
-        for i in range(self.number_of_particles,self.max):
+        for i in range(0,self.max):
             obj=getattr(sys.modules[__name__], particle)#make a class based on the name
             weather_paricles.add(obj())
         return weather_paricles

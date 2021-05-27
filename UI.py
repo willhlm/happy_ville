@@ -15,7 +15,7 @@ class Game_UI():
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
-        self.start_BG = pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg'),self.WINDOW_SIZE)
+        self.start_BG = pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg').convert(),self.WINDOW_SIZE)
         self.clock = pygame.time.Clock()
         self.gameover = False
         self.ESC = False
@@ -48,11 +48,12 @@ class Game_UI():
         #initiate maps
         self.load_map('village1')
 
+        #initiate weather
+        self.weather = self.weather_paricles.create_particle('Rain')#weather effects
+
     def game_loop(self):
         while True:
             self.screen.fill((207,238,250))#fill game.screen
-
-            self.weather = self.weather_paricles.create_particle('Rain')#weather effects
 
             # !!--change to load map--!!
             self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
@@ -64,8 +65,6 @@ class Game_UI():
             Engine.Physics.movement(self.players)
             Engine.Physics.movement(self.enemies)
             Engine.Physics.movement(self.npcs)
-
-
 
             Engine.Collisions.check_collisions(self.players,self.platforms)
             Engine.Collisions.check_collisions(self.enemies,self.platforms)
@@ -237,7 +236,6 @@ class Game_UI():
         self.screen.blit(blit_surface,(20, 20))
 
     def blit_fps(self):
-
         fps_string = str(int(self.clock.get_fps()))
         self.font.render(self.screen,fps_string,(400,20),1)
 
