@@ -1,4 +1,4 @@
-import pygame, Read_files, random, sys
+import pygame, Read_files, random, sys, math
 
 class Entity(pygame.sprite.Sprite):
 
@@ -50,6 +50,14 @@ class Entity(pygame.sprite.Sprite):
                 loot.add(obj(self.hitbox))
             self.loot[key]=0
         return loot
+
+    def stay_still(self):
+        self.acceleration=[0,0]
+        self.action['stand']=True
+
+    def move_again(self):
+        self.acceleration=[1,0.8]
+
 
 class Player(Entity):
 
@@ -197,6 +205,11 @@ class Enemy_2(Entity):
 
         elif abs(self.distance[0])<30 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
+
+        elif abs(self.distance[0])>500 or abs(self.distance[1])>500:
+            self.stay_still()
+        else:
+            self.move_again()
 
 class Block(Entity):
 

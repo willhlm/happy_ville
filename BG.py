@@ -10,18 +10,19 @@ class Weather(pygame.sprite.Sprite):
         self.velocity=[0,0]
         self.phase=random.randint(0, 10)
         self.max=100#max number of partivles
+        self.image=pygame.Surface((20,20))
 
     def update(self,pos,screen):
 
         pygame.draw.circle(screen,self.color,self.pos,self.radius)#draw a circle
-        Light.add_white(10,(30,5,5),screen,self.pos)#light spehre around the particles
+    #    Light.add_white(10,(30,5,5),screen,self.pos)#light spehre around the particles
 
         self.pos = [self.pos[0] + pos[0], self.pos[1] + pos[1]]#compensate for scroll and new speed
 
         self.speed()#modulate the speed according to the particle type
 
         if self.pos[1]>300:#if on the lower side of screen. SHould we do ground collisions?
-            self.pos=[random.randint(1, 479),random.randint(-500, -100)]                
+            self.pos=[random.randint(1, 479),random.randint(-500, -100)]
 
         #continiouse falling, horizontally
         if self.pos[0]<0:

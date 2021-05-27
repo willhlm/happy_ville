@@ -5,7 +5,6 @@ import Entities
 import Level
 import Action
 import BG
-
 class Game_UI():
 
     def __init__(self):
@@ -49,7 +48,7 @@ class Game_UI():
         self.load_map('village1')
 
         #initiate weather
-        #self.weather = self.weather_paricles.create_particle('Rain')#weather effects
+        self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
 
     def game_loop(self):
         while True:
@@ -207,6 +206,8 @@ class Game_UI():
 
     def draw(self):
         self.bg.draw(self.screen)
+        #self.weather.draw(self.screen)
+
         self.platforms.draw(self.screen)
         self.interactables.draw(self.screen)
         self.players.draw(self.screen)
