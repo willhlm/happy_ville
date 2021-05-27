@@ -231,13 +231,24 @@ class Interactable(Entity):
 
 class Door(Interactable):
 
-    def __init__(self,img,pos,chunk_key=False):
+    def __init__(self,pos):
         super().__init__()
-        self.image = img
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/door.png",32,48,1,4)
+        self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
+        self.timer = 0
+
+    def update(self,pos):
+        super().update(pos)
+        if self.interacted:
+            if self.timer < 21:
+                self.image = self.image_sheet[self.timer//7]
+                self.timer += 1
+            else:
+                self.image = self.image_sheet[3]
+                self.interacted = False
 
 class Chest(Interactable):
     def __init__(self,pos):

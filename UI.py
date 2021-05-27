@@ -26,9 +26,6 @@ class Game_UI():
         self.shake=False
         self.weather_paricles=BG.Weather()
 
-        #initiate maps
-        self.map = self.load_map('village1')
-
         #initiate player
         self.player = Entities.Player([200,50])
         self.players = pygame.sprite.Group(self.player)
@@ -37,7 +34,7 @@ class Game_UI():
         self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
-        self.bg_blocks = pygame.sprite.Group()
+        self.bg = pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
@@ -48,6 +45,9 @@ class Game_UI():
         self.individuals = pygame.sprite.Group(self.player)
         self.all_entities = pygame.sprite.Group(self.player)
 
+        #initiate maps
+        self.load_map('village1')
+
     def game_loop(self):
         while True:
             self.screen.fill((207,238,250))#fill game.screen
@@ -55,7 +55,7 @@ class Game_UI():
             self.weather = self.weather_paricles.create_particle('Rain')#weather effects
 
             # !!--change to load map--!!
-            self.platforms,self.bg_blocks,self.enemies,self.npcs,self.invisible_blocks,self.interactables=self.map.load_chunks()#chunks
+            self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
 
             # !!--remove passing knight--!!
             self.input(self.player)#game inputs
@@ -66,6 +66,7 @@ class Game_UI():
             Engine.Physics.movement(self.npcs)
 
 
+
             Engine.Collisions.check_collisions(self.players,self.platforms)
             Engine.Collisions.check_collisions(self.enemies,self.platforms)
             Engine.Collisions.check_collisions(self.npcs,self.platforms)
@@ -73,7 +74,7 @@ class Game_UI():
             Engine.Collisions.check_interaction(self.player,self.interactables)
             Engine.Collisions.check_collisions_loot(self.loot,self.platforms)
             Engine.Collisions.pickup_loot(self.player,self.loot)
-            loot = Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
+            self.loot = Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
 
             for enemy in self.enemies:
@@ -83,8 +84,8 @@ class Game_UI():
 
 
             # !!--check later--!!
-            fprojectiles, loot = Action.actions(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
-            eprojectiles, loot = Action.actions(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
+            self.fprojectiles, self.loot = Action.actions(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
+            self.eprojectiles, self.loot = Action.actions(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
 
             # !!--change to one group--!!   eventually change this to set animation image in update
             Engine.Animation.set_img(self.players)
@@ -97,9 +98,7 @@ class Game_UI():
             self.draw()
             self.scrolling()
 
-            # !!--change to one function, screen info--!!
-            self.screen.blit(self.blit_health(self.player),(20,20))#blit hearts
-            self.blit_fps()
+            self.blit_screen_info()
 
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
@@ -166,17 +165,28 @@ class Game_UI():
 
         self.input_quit()
 
+    def change_map(self, map_name):
+        pass
+
     def load_map(self, map_name):
-        return Level.Tilemap(map_name)
+        self.map = Level.Tilemap(map_name)
+        self.initiate_groups()
 
     def initiate_groups(self):
-        pass
+        self.bg.empty()
+        self.bg.add(Entities.BG_Block(self.map.load_bg(),(0,0)))
+
+        self.npcs.empty()
+        self.enemies.empty()
+        self.interactables.empty()
+
+        self.npcs,self.enemies,self.interactables = self.map.load_statics()
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.player.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.platforms.update(scroll)
-        self.bg_blocks.update(scroll)
+        self.bg.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll)
         self.npcs.update(scroll)
@@ -188,7 +198,7 @@ class Game_UI():
         self.loot.update(scroll)
 
     def draw(self):
-        self.bg_blocks.draw(self.screen)
+        self.bg.draw(self.screen)
         self.platforms.draw(self.screen)
         self.interactables.draw(self.screen)
         self.players.draw(self.screen)
@@ -205,13 +215,17 @@ class Game_UI():
         pygame.quit()
         sys.exit()
 
-    def blit_health(self, player):
+    def blit_screen_info(self):
+        self.blit_health()
+        self.blit_fps()
+
+    def blit_health(self):
         #this code is specific to using heart.png sprites
         sprite_dim = [9,8] #width, height specific to sprites used
-        blit_surface = pygame.Surface((int(player.max_health/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
-        health = player.health
+        blit_surface = pygame.Surface((int(self.player.max_health/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
+        health = self.player.health
 
-        for i in range(int(player.max_health/20)):
+        for i in range(int(self.player.max_health/20)):
             health -= 20
             if health >= 0:
                 blit_surface.blit(self.health_sprites[0],(i*(sprite_dim[0] + 1),0))
@@ -220,18 +234,12 @@ class Game_UI():
             else:
                 blit_surface.blit(self.health_sprites[5],(i*(sprite_dim[0] + 1),0))
 
-        return blit_surface
+        self.screen.blit(blit_surface,(20, 20))
 
     def blit_fps(self):
 
         fps_string = str(int(self.clock.get_fps()))
         self.font.render(self.screen,fps_string,(400,20),1)
-
-        #blit_surface = pygame.Surface((50,10),pygame.SRCALPHA,32)
-        #fps_string = str(int(self.clock.get_fps()))
-        #self.font.render(blit_surface,fps_string,(0,0))
-
-        #return blit_surface
 
     def input_quit(self):#to exits between option menues
         pygame.display.update()

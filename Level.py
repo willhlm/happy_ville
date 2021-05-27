@@ -1,12 +1,5 @@
 import pygame, csv, Entities, math, random
 
-platforms = pygame.sprite.Group()
-bg_blocks = pygame.sprite.Group()
-Enemies = pygame.sprite.Group()
-npc = pygame.sprite.Group()
-interactables = pygame.sprite.Group()
-invisible_blocks = pygame.sprite.Group()
-
 class Tilemap():
     def __init__(self, level,mode='auto'):
         self.tile_size=16
@@ -15,10 +8,11 @@ class Tilemap():
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.chunks_bg1=self.define_chunks("bg1") #chunks containg first bg layer
-        self.chunks_interactables=self.define_chunks("interactables")
         self.keys=[]
         self.chunk_render_distance=800
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
+        self.platforms = pygame.sprite.Group()
+        self.invisible_blocks = pygame.sprite.Group()
 
         if mode=='auto':
             self.camera=Auto()
@@ -95,6 +89,65 @@ class Tilemap():
     def test(self):
         print(self.collision_sheet[1])
 
+    def load_statics(self):
+    #load entities that shouldn't despawn with chunks, npc, enemies, interactables etc
+        map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
+
+        npcs = pygame.sprite.Group()
+        interactables = pygame.sprite.Group()
+        enemies = pygame.sprite.Group()
+
+        row_index = 0
+        col_index = 0
+
+        for row in map_statics:
+            for tile in row:
+                if tile == '-1':
+                    col_index += 1
+                    continue
+                elif tile == '0':
+                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size))
+                    interactables.add(new_chest)
+                elif tile == '1':
+                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size))
+                    interactables.add(new_chest)
+                elif tile == '8':
+                    new_door = Entities.Door((col_index * self.tile_size, row_index * self.tile_size))
+                    interactables.add(new_door)
+                elif tile == '16':
+                    new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
+                    npcs.add(new_npc)
+                col_index += 1
+            row_index += 1
+            col_index = 0 #reset column
+
+        return npcs, enemies, interactables
+
+    def load_bg(self):
+    #returns one surface with all backround images blitted onto it
+        map_bg = self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
+        col = len(map_bg[0])
+        row = len(map_bg)
+
+        blit_surface = pygame.Surface((col*self.tile_size,row*self.tile_size), pygame.SRCALPHA, 32)
+        blit_surface = blit_surface.convert_alpha()
+
+        row_index = 0
+        col_index = 0
+
+        for row in map_bg:
+            for tile in row:
+                if tile == '-1':
+                    col_index += 1
+                    continue
+
+                blit_surface.blit(self.sprite_sheet[int(tile)], (col_index * self.tile_size, row_index * self.tile_size))
+                col_index += 1
+            row_index += 1
+            col_index = 0 #reset column
+
+        return blit_surface
+
     def load_chunks(self):
         chunk_distances=self.chunk_distance()
 
@@ -117,75 +170,20 @@ class Tilemap():
                         if tile=='-1':
                             tile_x+=1
                             continue
-                        if tile=='n':#temporary NPC
-                            new_npc = Entities.MrBanks(self.entity_position(tile_x, tile_y, x, y))
-                            npc.add(new_npc)
-                            tile_x+=1
-                            continue
-                        if tile=='e':#temporary NPC
-                            new_enemie = Entities.Enemy_2(self.entity_position(tile_x, tile_y, x, y),1)
-                            Enemies.add(new_enemie)
-                            tile_x+=1
-                            continue
 
                         new_block = Entities.Block(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
-                        platforms.add(new_block)
-                        tile_x+=1
-                    tile_y+=1
-
-                map = self.chunks_bg1[key]
-                tile_x=0
-                tile_y=0
-
-                #add bg blocks for new chunk
-                for row in map:
-                    tile_x=0
-                    for tile in row:
-                        if tile=='-1':
-                            tile_x+=1
-                            continue
-                        new_block = Entities.BG_Block(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
-                        bg_blocks.add(new_block)
-                        tile_x+=1
-                    tile_y+=1
-
-                map = self.chunks_interactables[key]
-                tile_x=0
-                tile_y=0
-
-                #add bg blocks for new chunk
-                for row in map:
-                    tile_x=0
-                    for tile in row:
-                        if tile=='-1':
-                            tile_x+=1
-                            continue
-                        elif tile == '9':
-                            new_block = Entities.Chest(self.entity_position(tile_x, tile_y, x, y))
-                            interactables.add(new_block)
-                        elif tile == '10':
-                            new_block = Entities.Chest_Big(self.entity_position(tile_x, tile_y, x, y))
-                            interactables.add(new_block)
-                        else:
-                            new_block = Entities.Door(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
-                            interactables.add(new_block)
+                        self.platforms.add(new_block)
                         tile_x+=1
                     tile_y+=1
 
             elif chunk_distances[key]>self.chunk_render_distance and key in self.keys:
-                platform_list = [i for i in platforms.sprites() if i.chunk_key==key]
-                platforms.remove(platform_list)
-
-                bg_list = [i for i in bg_blocks.sprites() if i.chunk_key==key]
-                bg_blocks.remove(bg_list)
-
-                #inter_list = [i for i in interactables.sprites() if i.chunk_key==key]
-                #interactables.remove(inter_list)
+                platform_list = [i for i in self.platforms.sprites() if i.chunk_key==key]
+                self.platforms.remove(platform_list)
 
                 #update key
                 self.keys.remove(key)
 
-        return platforms, bg_blocks, Enemies, npc, invisible_blocks, interactables
+        return self.platforms, self.invisible_blocks
 #________________chunks#
 
     def entity_position(self, tile_x, tile_y, x, y):
@@ -203,12 +201,12 @@ class Tilemap():
             for tile in row:
                 if tile=='12':
                     new_block = Entities.Block(1,[x*self.tile_size,y*self.tile_size])
-                    platforms.add(new_block)
+                    self.platforms.add(new_block)
                 x+=1
             y+=1
         self.map_w,self.map_h=x*self.tile_size,y*self.tile_size#map size
 
-        return platforms, Enemies
+        return self.platforms, Enemies
 
 class Sprite_sheet():
 
