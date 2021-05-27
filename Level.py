@@ -247,7 +247,6 @@ class Camera():
         self.true_scroll=[0,0]
 
     def update_scroll(self,shake):
-
         if shake>0:
             screen_shake=[random.randint(-4,4),random.randint(-4,4)]
         else:
@@ -256,8 +255,6 @@ class Camera():
         self.scroll=self.true_scroll.copy()
         self.scroll[0]=int(self.scroll[0])+screen_shake[0]
         self.scroll[1]=int(self.scroll[1])+screen_shake[1]
-
-
 
 class Auto(Camera):
     def __init__(self):

@@ -62,31 +62,31 @@ class Collisions():
 
         return map_change
 
-
-
     #making the loot fall on platofrm
     @staticmethod
     def check_collisions_loot(loots,platforms):
-        collision_types,collision_spike=Collisions.collide(loots,platforms)
+        Collisions.collide(loots,platforms)
 
-        for loot in loots.sprites():#if hit ground
-            if collision_types['bottom']:
+        for loot in loots:#if hit ground
+            if loot.collision_types['bottom']:
                 loot.velocity=[0,0]
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     @staticmethod
     def check_collisions(dynamic_entities,platforms):
-        collision_types,collision_spikes=Collisions.collide(dynamic_entities,platforms)
+        Collisions.collide(dynamic_entities,platforms)
 
         for entity in dynamic_entities.sprites():
 
             entity.friction[1]=0
 
-            if collision_types['bottom']:#if on ground
+            if entity.collision_types['bottom']:#if on ground
+                entity.dashing_cooldown=10
                 entity.velocity[1]=0
                 entity.action['fall']=False
                 entity.action['stand']=True
                 entity.action['wall']=False
+                entity.action['jump']=False
                 if entity.dir[1]<0:#if on ground, cancel sword swing
                     entity.action['sword']=False
             else:#if not on ground
@@ -94,7 +94,7 @@ class Collisions():
                 if entity.velocity[1]>0:#if falling down
                     entity.action['jump']=False
                     entity.action['fall']=True
-                    if collision_types['right'] or collision_types['left']:#on wall and not on ground
+                    if entity.collision_types['right'] or entity.collision_types['left']:#on wall and not on ground
                         entity.action['wall']=True
                         entity.action['fall']=False
                         entity.friction[1]=0.4
@@ -103,30 +103,26 @@ class Collisions():
                 else:#if going up
                     entity.action['jump']=True
 
-            if collision_types['top']:#knock back when hit head
+            if entity.collision_types['top']:#knock back when hit head
                 entity.velocity[1]=0
 
-            if collision_spikes['bottom']:
+            if entity.collision_spikes['bottom']:
                 entity.action['hurt']=True
                 entity.velocity[1]=-6
                 entity.health-=10
                 if entity.health<=0:
                     entity.action['death']=True
 
-
-
-
-
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
     def collide(dynamic_entities,static_enteties):
-        collision_types = {'top':False,'bottom':False,'right':False,'left':False}
-        collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
         #move in x every dynamic sprite
         for entity in dynamic_entities.sprites():
             entity.rect.center = [round(entity.rect.center[0] + entity.movement[0]), entity.rect.center[1]]
             entity.update_hitbox()
+            entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
+            entity.collision_spikes={'top':False,'bottom':False,'right':False,'left':False}
 
         collided=Collisions.collided#make the hitbox collide and not rect
         #check for collisions and get a dictionary of sprites that collides
@@ -134,13 +130,13 @@ class Collisions():
         for dyn_entity, stat_entity in collisions.items():
             if dyn_entity.movement[0]>0:#going to the right
                 dyn_entity.hitbox.right = stat_entity[0].hitbox.left
-                collision_types['right'] = True
-                collision_spikes['right'] = stat_entity[0].spike
+                dyn_entity.collision_types['right'] = True
+                dyn_entity.collision_spikes['right'] = stat_entity[0].spike
 
             elif dyn_entity.movement[0]<0:#going to the left
                 dyn_entity.hitbox.left = stat_entity[0].hitbox.right
-                collision_types['left'] = True
-                collision_spikes['left'] = stat_entity[0].spike
+                dyn_entity.collision_types['left'] = True
+                dyn_entity.collision_spikes['left'] = stat_entity[0].spike
 
             dyn_entity.update_rect()
 
@@ -155,19 +151,17 @@ class Collisions():
         for dyn_entity, stat_entity in collisions.items():
             if dyn_entity.movement[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
-                collision_types['bottom'] = True
-                collision_spikes['bottom'] = stat_entity[0].spike
+                dyn_entity.collision_types['bottom'] = True
+                dyn_entity.collision_spikes['bottom'] = stat_entity[0].spike
 
 
 
             elif dyn_entity.movement[1]<0:#going up
                 dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
-                collision_types['top'] = True
-                collision_spikes['top'] = stat_entity[0].spike
+                dyn_entity.collision_types['top'] = True
+                dyn_entity.collision_spikes['top'] = stat_entity[0].spike
 
             dyn_entity.update_rect()
-
-        return collision_types, collision_spikes
 
     #make the hitbox collide instead of rect
     @staticmethod
@@ -182,15 +176,18 @@ class Physics():
     def movement(dynamic_entities):
         for entity in dynamic_entities.sprites():
 
-            entity.velocity[1]=entity.velocity[1]+entity.acceleration[1]-entity.velocity[1]*entity.friction[1]#gravity
+            entity.velocity[1]=int(not entity.action['dash'])*entity.velocity[1]+entity.acceleration[1]-entity.velocity[1]*entity.friction[1]#gravity
 
             entity.velocity[1]=min(entity.velocity[1],7)#set a y max speed
 
             entity.movement[1]=entity.velocity[1]#set the vertical velocity
 
-            if entity.action['run'] and not entity.action['dash']:#accelerate horizontal to direction when not dashing
+            if entity.action['dash']:
+                entity.dashing_cooldown-=1
+                entity.friction[0]=0.1
+            elif entity.action['run']:#accelerate horizontal to direction when not dashing
                 entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
-
+                entity.friction[0]=0.2
                 if abs(entity.velocity[0])>10:#max horizontal speed
                     entity.velocity[0]=entity.dir[0]*10
 

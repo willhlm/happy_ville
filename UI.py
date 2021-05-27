@@ -5,6 +5,7 @@ import Entities
 import Level
 import Action
 import BG
+
 class Game_UI():
 
     def __init__(self):
@@ -71,7 +72,7 @@ class Game_UI():
             Engine.Collisions.check_invisible(self.npcs,self.invisible_blocks)
             Engine.Collisions.check_collisions_loot(self.loot,self.platforms)
             Engine.Collisions.pickup_loot(self.player,self.loot)
-            self.loot = Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
+            Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
             check_map = Engine.Collisions.check_interaction(self.player,self.interactables)
             if check_map:
@@ -84,8 +85,8 @@ class Game_UI():
                 npc.AI()
 
             # !!--check later--!!
-            self.fprojectiles, self.loot = Action.actions(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
-            self.eprojectiles, self.loot = Action.actions(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
+            Action.actions(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
+            Action.actions(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
 
             # !!--change to one group--!!   eventually change this to set animation image in update
             Engine.Animation.set_img(self.players)
@@ -318,7 +319,7 @@ class Game_UI():
                     if event.key == pygame.K_i:
                         self.inventory()#open inventort
 
-                    if event.key == pygame.K_LSHIFT:#left shift
+                    if event.key == pygame.K_LSHIFT and player_class.dashing_cooldown>9:#left shift
                         player_class.dashing()
 
                 elif event.type == pygame.KEYUP:#lift bottom

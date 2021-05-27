@@ -1,4 +1,4 @@
-import pygame, Read_files, random, sys, math
+import pygame, Read_files, random, sys
 
 class Entity(pygame.sprite.Sprite):
 
@@ -14,6 +14,8 @@ class Entity(pygame.sprite.Sprite):
         self.world_state=0
         self.loot={'coin':1}
         self.shake=0
+        self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
+        self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
     def AI(self,knight):
         pass
@@ -58,7 +60,6 @@ class Entity(pygame.sprite.Sprite):
     def move_again(self):
         self.acceleration=[1,0.8]
 
-
 class Player(Entity):
 
     def __init__(self,pos):
@@ -79,6 +80,7 @@ class Player(Entity):
         self.interacting = False
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
+        self.dashing_cooldown=10
 
     def attack_action(self,projectiles):
         if self.action[self.equip]:
@@ -176,14 +178,14 @@ class Enemy_2(Entity):
         self.health = 10
         self.priority_action=['death','hurt','sword','bow','trans']#animation
         self.nonpriority_action=['fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'bow':False,'fall':False,'trans':False}
+        self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'bow':False,'fall':False,'trans':False,'dash':False}
         self.state = 'stand'
         self.equip='sword'
         self.sprites = Read_files.Flowy()
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
-        self.shake=3
+        self.shake=self.hitbox.height/10
 
     @staticmethod#a function to add glow around the entity
     def add_white(radius,colour,screen,pos):
@@ -200,10 +202,10 @@ class Enemy_2(Entity):
         self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
         self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
 
-        if 30 < abs(self.distance[0])<80 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
+        if 100 < abs(self.distance[0])<200 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action['trans'] = True
 
-        elif abs(self.distance[0])<30 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
+        elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
 
         elif abs(self.distance[0])>500 or abs(self.distance[1])>500:
@@ -417,7 +419,6 @@ class NPC(Entity):
 
                 #exit/skip conversation
                 if event.key == pygame.K_t:
-                    self.business = not self.business
                     if self.page_frame<self.number_of_pages:
                         self.page_frame+=1#next page
                     else:
@@ -629,7 +630,8 @@ class Bow(Weapon):
         self.velocity[1]+=0.5
 
     def rotate(self):
-        self.image=pygame.transform.rotate(self.original_image,-self.velocity[0]*self.velocity[1])#fig,angle,scale
+        angle=max(-self.velocity[0]*self.velocity[1],-60)
+        self.image=pygame.transform.rotate(self.original_image,angle)#fig,angle,scale
         x, y = self.rect.center  # Save its current center.
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
         self.hitbox=pygame.Rect(x,y,10,10)
@@ -650,6 +652,8 @@ class Loot(pygame.sprite.Sprite):
         self.movement=[0,0]#for platfform collisions
         dir=self.pos[0]/abs(self.pos[0])#horizontal direction
         self.velocity=[dir*random.randint(0, 3),-11]
+        self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
+        self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
