@@ -193,7 +193,7 @@ class Game_UI():
         self.interactables.update(scroll)
         self.invisible_blocks.update(scroll)
         self.weather.update(scroll,self.screen)
-        self.fprojectiles.update(scroll,self.player.ac_dir,self.player.hitbox)
+        self.fprojectiles.update(scroll)
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
 
