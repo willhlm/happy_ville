@@ -119,9 +119,8 @@ class Player(Entity):
         self.rect.center = [self.hitbox.center[0], self.hitbox.center[1] - self.hitbox_offset]
 
 class Enemy_1(Player):
-    def __init__(self,pos,ID):
+    def __init__(self,pos):
         super().__init__(pos)
-        self.ID=ID
         self.health=10
         self.distance=[0,0]
         self.inv=False#flag to check if collision with invisible blocks
@@ -160,9 +159,8 @@ class Enemy_1(Player):
         return -1
 
 class Enemy_2(Entity):
-    def __init__(self,pos,ID):
+    def __init__(self,pos):
         super().__init__()
-        self.ID=ID
         self.image = pygame.image.load("Sprites/enemies/flowy/stand/Stand1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
@@ -586,7 +584,6 @@ class Sword(Weapon):
             self.hitbox.midleft=entity_hitbox.midright
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
             self.hitbox.midright=entity_hitbox.midleft
-
 
 class Bow(Weapon):
     def __init__(self,entity_dir,entity_hitbox):

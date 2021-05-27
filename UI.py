@@ -75,12 +75,10 @@ class Game_UI():
             Engine.Collisions.pickup_loot(self.player,self.loot)
             self.loot = Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
-
             for enemy in self.enemies:
                 enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
             for npc in self.npcs:
                 npc.AI()
-
 
             # !!--check later--!!
             self.fprojectiles, self.loot = Action.actions(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
