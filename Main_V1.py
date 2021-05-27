@@ -64,6 +64,10 @@ def scrolling():
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
+<<<<<<< HEAD
+=======
+    weather=weather_paricles.create_particle('Rain')#weather effects
+>>>>>>> dev/UI_migration
     platforms,bg_blocks,enemies,npc,invisible_blocks,interactables=map.load_chunks()#chunks
     weather=weather_paricles.create_particle('Sakura')#weather effects
 
@@ -82,10 +86,13 @@ while True:
     Engine.Collisions.pickup_loot(knight,loot)
     loot=Engine.Collisions.check_enemy_collision(knight,enemies,loot)
 
+<<<<<<< HEAD
     fprojectiles, loot = Action.actions(fprojectiles,hero,platforms,enemies,game.screen,loot)#f_action swinger, target1,target2
     eprojectiles, loot = Action.actions(eprojectiles,enemies,platforms,hero,game.screen,loot)#f_action swinger, target1,target2
 
     scrolling()
+=======
+>>>>>>> dev/UI_migration
 
     for enemy in enemies.sprites():
         enemy.AI(knight,game.screen)#the enemy Ai movement, based on knight position
@@ -100,6 +107,9 @@ while True:
     pygame.draw.rect(game.screen, (0,255,0), knight.hitbox,2)#checking hitbox
 
     draw()
+
+    scrolling()
+
 
     game.screen.blit(game.blit_health(knight),(20,20))#blit hearts
     game.blit_fps()

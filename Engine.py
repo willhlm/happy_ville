@@ -55,9 +55,6 @@ class Collisions():
             collision=pygame.sprite.spritecollideany(player,static_enteties,collided)#check collision
             if collision:
                 collision.interacted = True
-        #    collisions=pygame.sprite.groupcollide(dynamic_entities,static_enteties,False,False,collided)
-        #    for dyn_entity, stat_entity in collisions.items():
-        #        for stat_ent in stat_entity:
 
 
     #making the loot fall on platofrm
