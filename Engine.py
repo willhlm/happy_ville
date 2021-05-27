@@ -49,12 +49,19 @@ class Collisions():
     #interact with chests
     @staticmethod
     def check_interaction(player,static_enteties):
+        map_change = False
         if player.interacting:
-
             collided=Collisions.collided #make the hitbox collide and not rect
             collision=pygame.sprite.spritecollideany(player,static_enteties,collided)#check collision
             if collision:
                 collision.interacted = True
+                try:
+                    map_change = collision.next_map
+                except:
+                    pass
+
+        return map_change
+
 
 
     #making the loot fall on platofrm

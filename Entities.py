@@ -254,6 +254,7 @@ class Door(Interactable):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
+        self.next_map = 'village2'
 
     def update(self,pos):
         super().update(pos)
