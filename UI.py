@@ -4,8 +4,8 @@ import Read_files#for the fonts
 class Game_UI():
     def __init__(self):
         pygame.init()#initilise
-        self.WINDOW_SIZE = (480,270)
-        self.scale = 3
+        self.WINDOW_SIZE = (576,324)
+        self.scale = 2
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen=pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
@@ -17,7 +17,7 @@ class Game_UI():
         self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
-        self.shake=False
+
     def game_loop(self):
         while True:
             pass

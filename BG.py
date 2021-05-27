@@ -15,6 +15,7 @@ class Weather(pygame.sprite.Sprite):
         self.max=100#max number of partivles
 
     def update(self,pos,screen):
+
         pygame.draw.circle(screen,self.color,self.pos,self.radius)#draw a circle
         Light.add_white(10,(30,5,5),screen,self.pos)#light spehre around the particles
 

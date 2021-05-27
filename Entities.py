@@ -76,7 +76,8 @@ class Player(Entity):
         if self.action[self.equip]:
             if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
                 if self.equip=='sword':
-                    projectiles.add(Sword(self.dir,self.hitbox))
+                    self.sword=Sword(self.dir,self.hitbox)
+                    projectiles.add(self.sword)
                 elif self.equip=='bow' and self.loot['Arrow']>0:
                     projectiles.add(Bow(self.dir,self.hitbox))
                     self.loot['Arrow']-=1
@@ -106,6 +107,10 @@ class Player(Entity):
     def update(self,pos):
         super(Player, self).update(pos)
         self.update_hitbox()
+
+        if self.action['sword']:
+            self.sword.updates(self.hitbox)
+
 
     def update_hitbox(self):
         self.hitbox.center = [self.rect.center[0], self.rect.center[1] + self.hitbox_offset]
@@ -204,6 +209,17 @@ class Block(Entity):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.chunk_key=chunk_key
+        self.spike=False
+
+class Spikes(Entity):
+    def __init__(self,img,pos,chunk_key=False):
+        super().__init__()
+        self.image = pygame.image.load("Sprites/aseprite/tile_sheets/Spkies.png").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+        self.spike=True
 
 class BG_Block(Entity):
 
@@ -357,7 +373,6 @@ class NPC(Entity):
                 if event.key==pygame.K_ESCAPE:#escape button
                     self.business = False
                     self.ammount=0
-
                     self.action['talk']=False
                     player.action['talk']=False
                 if event.key == pygame.K_UP:#up
@@ -457,12 +472,13 @@ class MrBanks(NPC):
     def blit_conv_action(self,game_screen):
         game_screen.blit(self.conv_action_BG,(850,200))#the text BG
 
-        if self.conv_idx[1]<=0:
-            self.conv_idx[1]=0
-        elif self.conv_idx[1]>=len(self.conv_action):
-            self.conv_idx[1]=len(self.conv_action)-1
-
         if not self.business:#if not busness
+
+            if self.conv_idx[1]<=0:
+                self.conv_idx[1]=0
+            elif self.conv_idx[1]>=len(self.conv_action):
+                self.conv_idx[1]=len(self.conv_action)-1
+
             self.font.render(game_screen,'o',(930,self.conv_possition[1][self.conv_idx[1]]),1)#call the self made aplhabet blit and blit the conversation
             self.conv_possition=[[],[]]
 
@@ -485,22 +501,22 @@ class MrBanks(NPC):
                 self.conv_idx[0]=0
             elif self.conv_idx[0]>=2:
                 self.conv_idx[0]=1
-            scale=[1,1]
+            scale=[1,1]#yes or no
             scale[self.conv_idx[0]]=2
 
             self.font.render(game_screen,'Yes',(940,400),scale[0])#call the self made aplhabet blit and blit the conversation
             self.font.render(game_screen,'No',(1040,400),scale[1])#call the self made aplhabet blit and blit the conversation
             self.font.render(game_screen,'o',(self.conv_possition[0][self.conv_idx[0]],400),1)#call the self made aplhabet blit and blit the conversation
 
-    def trade(self,player):
-        if self.conv_idx[0]==0:
+    def trade(self,player):#exchane of money
+        if self.conv_idx[0]==0:#if press yes
             if self.conv_action[self.conv_idx[1]] == 'deposit':
                 player.loot['Coin']-=self.ammount
                 self.loot['Coin']+=self.ammount
             elif self.conv_action[self.conv_idx[1]] == 'withdraw':
                 player.loot['Coin']+=self.ammount
                 self.loot['Coin']-=self.ammount
-        else:
+        else:#if press no
             self.buisness=False
             self.ammount=0
 
@@ -536,25 +552,30 @@ class Sword(Weapon):
         self.image = pygame.image.load("Sprites/aseprite/Items/sword.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],10,10)
+        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.height,entity_hitbox.width)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-        self.spawn(entity_dir,entity_hitbox)#spawn hitbox based on entity position and direction
+        self.dir=entity_dir.copy()
+        self.spawn(entity_hitbox)#spawn hitbox based on entity position and direction
 
-    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=0):
+    def update(self,scroll=0):
+        pass
+
+    def updates(self,entity_hitbox):
         #remove the equipment if it has expiered
         self.lifetime-=1
-        self.spawn(entity_ac_dir,entity_hitbox)
+        self.spawn(entity_hitbox)
 
-    def spawn(self,entity_dir,entity_hitbox):
-        if entity_dir[1] > 0:#up
-            self.hitbox=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]-20,20,20)
-        elif entity_dir[1] < 0:#down
-            self.hitbox=pygame.Rect(entity_hitbox.midtop[0]-10,entity_hitbox.midtop[1]+40,20,20)
-        elif entity_dir[0] > 0 and entity_dir[1] == 0:#right
-            self.hitbox=pygame.Rect(entity_hitbox.midright[0],entity_hitbox.midright[1]-20,40,30)
-        elif entity_dir[0] < 0 and entity_dir[1] == 0:#left
-            self.hitbox=pygame.Rect(entity_hitbox.midleft[0]-40,entity_hitbox.midleft[1]-20,40,30)
+    def spawn(self,entity_hitbox):
+        if self.dir[1] > 0:#up
+            self.hitbox.bottom=entity_hitbox.top
+        elif self.dir[1] < 0:#down
+            self.hitbox.top=entity_hitbox.bottom
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.left=entity_hitbox.right
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.right=entity_hitbox.left
+
 
 class Bow(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
@@ -592,6 +613,11 @@ class Bow(Weapon):
         self.hitbox=pygame.Rect(x,y,10,10)
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
+
+class Force(Weapon):
+    def __init__(self,entity_dir,entity_hitbox):
+        super().__init__()
+        pass
 
 class Loot(pygame.sprite.Sprite):
     def __init__(self):

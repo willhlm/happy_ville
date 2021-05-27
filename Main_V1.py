@@ -19,16 +19,16 @@ fprojectiles = pygame.sprite.Group()#arrows
 eprojectiles = pygame.sprite.Group()#arrows
 loot = pygame.sprite.Group()
 
-game=UI.Game_UI()#initilise the game
+game = UI.Game_UI()#initilise the game
 
-weather_paricles=BG.Weather()
+weather_paricles = BG.Weather()
 
 knight=Entities.Player([200,50])
 hero.add(knight)
 
 sprites = {'knight': Read_files.Sprites_player()}
 
-map=Level.Tilemap('village1','auto')
+map = Level.Tilemap('village1','auto')
 
 #tePlatforms,teEnemies=map.load_tiles('./Tiled/village1_colision.csv')
 #platforms.add(tePlatforms)#whole map
@@ -48,6 +48,7 @@ def draw():
 def scrolling():
     map.scrolling(knight.rect,knight.shake)
     scroll = [-map.camera.scroll[0],-map.camera.scroll[1]]
+
     platforms.update(scroll)
     bg_blocks.update(scroll)
     hero.update(scroll)
@@ -56,15 +57,15 @@ def scrolling():
     interactables.update(scroll)
     invisible_blocks.update(scroll)
     weather.update(scroll,game.screen)
-    fprojectiles.update(scroll,knight.ac_dir,knight.hitbox)
     eprojectiles.update(scroll)
     loot.update(scroll)
+    fprojectiles.update(scroll)
 
 while True:
     game.screen.fill((207,238,250))#fill game.screen
 
-    weather=weather_paricles.create_particle('Sakura')#weather effects
     platforms,bg_blocks,enemies,npc,invisible_blocks,interactables=map.load_chunks()#chunks
+    weather=weather_paricles.create_particle('Sakura')#weather effects
 
     game.input(knight)#game inputs
 
@@ -81,15 +82,15 @@ while True:
     Engine.Collisions.pickup_loot(knight,loot)
     loot=Engine.Collisions.check_enemy_collision(knight,enemies,loot)
 
+    fprojectiles, loot = Action.actions(fprojectiles,hero,platforms,enemies,game.screen,loot)#f_action swinger, target1,target2
+    eprojectiles, loot = Action.actions(eprojectiles,enemies,platforms,hero,game.screen,loot)#f_action swinger, target1,target2
+
     scrolling()
 
     for enemy in enemies.sprites():
         enemy.AI(knight,game.screen)#the enemy Ai movement, based on knight position
     for npcs in npc.sprites():
         npcs.AI()
-
-    fprojectiles, loot = Action.actions(fprojectiles,hero,platforms,enemies,game.screen,loot)#f_action swinger, target1,target2
-    eprojectiles, loot = Action.actions(eprojectiles,enemies,platforms,hero,game.screen,loot)#f_action swinger, target1,target2
 
     Engine.Animation.set_img(hero)
     Engine.Animation.set_img(enemies)

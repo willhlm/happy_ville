@@ -63,7 +63,7 @@ class Collisions():
     #making the loot fall on platofrm
     @staticmethod
     def check_collisions_loot(loots,platforms):
-        collision_types=Collisions.collide(loots,platforms)
+        collision_types,collision_spike=Collisions.collide(loots,platforms)
 
         for loot in loots.sprites():#if hit ground
             if collision_types['bottom']:
@@ -72,7 +72,7 @@ class Collisions():
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     @staticmethod
     def check_collisions(dynamic_entities,platforms):
-        collision_types=Collisions.collide(dynamic_entities,platforms)
+        collision_types,collision_spikes=Collisions.collide(dynamic_entities,platforms)
 
         for entity in dynamic_entities.sprites():
 
@@ -102,10 +102,22 @@ class Collisions():
             if collision_types['top']:#knock back when hit head
                 entity.velocity[1]=0
 
+            if collision_spikes['bottom']:
+                entity.action['hurt']=True
+                entity.velocity[1]=-6
+                entity.health-=10
+                if entity.health<=0:
+                    entity.action['death']=True
+
+
+
+
+
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
     def collide(dynamic_entities,static_enteties):
         collision_types = {'top':False,'bottom':False,'right':False,'left':False}
+        collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
         #move in x every dynamic sprite
         for entity in dynamic_entities.sprites():
@@ -119,10 +131,13 @@ class Collisions():
             if dyn_entity.movement[0]>0:#going to the right
                 dyn_entity.hitbox.right = stat_entity[0].hitbox.left
                 collision_types['right'] = True
+                collision_spikes['right'] = stat_entity[0].spike
 
             elif dyn_entity.movement[0]<0:#going to the left
                 dyn_entity.hitbox.left = stat_entity[0].hitbox.right
                 collision_types['left'] = True
+                collision_spikes['left'] = stat_entity[0].spike
+
             dyn_entity.update_rect()
 
         #move in y every dynamic sprite
@@ -135,14 +150,20 @@ class Collisions():
         collisions=pygame.sprite.groupcollide(dynamic_entities,static_enteties,False,False,collided)
         for dyn_entity, stat_entity in collisions.items():
             if dyn_entity.movement[1]>0:#going down
-                dyn_entity.hitbox.bottom = stat_entity[-1].hitbox.top
+                dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
                 collision_types['bottom'] = True
+                collision_spikes['bottom'] = stat_entity[0].spike
+
+
+
             elif dyn_entity.movement[1]<0:#going up
-                dyn_entity.hitbox.top = stat_entity[-1].hitbox.bottom
+                dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
                 collision_types['top'] = True
+                collision_spikes['top'] = stat_entity[0].spike
+
             dyn_entity.update_rect()
 
-        return collision_types
+        return collision_types, collision_spikes
 
     #make the hitbox collide instead of rect
     @staticmethod

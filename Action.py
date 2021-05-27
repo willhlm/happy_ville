@@ -3,6 +3,7 @@ import pygame
 def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
     for entity in projectile_enteties.sprites():#go through the group
         projectiles=entity.attack_action(projectiles)
+
         for projectile in projectiles.sprites():#go through the group
 
             #projectile collision?

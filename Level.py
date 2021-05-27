@@ -117,6 +117,11 @@ class Tilemap():
                         if tile=='-1':
                             tile_x+=1
                             continue
+                        if tile=='-2':#temporary spikes
+                            new_block = Entities.Spikes(3,self.entity_position(tile_x, tile_y, x, y),key)
+                            platforms.add(new_block)
+                            tile_x+=1
+                            continue
                         if tile=='n':#temporary NPC
                             new_npc = Entities.MrBanks(self.entity_position(tile_x, tile_y, x, y))
                             npc.add(new_npc)
