@@ -366,6 +366,7 @@ class NPC(Entity):
         self.text_frame=-1#chosing which text to say: woudl ike to move this to NPC class instead
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
         self.conv_idx=[0,0]
+        self.friction=[0.2,0]
 
     def blit_conversation(self,text,game_screen):#blitting of text from conversation
         self.text_surface.blit(self.portrait,(550,100))#the portait on to the text_surface
@@ -494,7 +495,6 @@ class NPC_1(NPC):
         self.text_surface=pygame.image.load("Sprites/UI/conversation/Conv_BG.png").convert_alpha()
         self.sprites = Read_files.NPC(self.name)
         self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
-        self.friction=[0.2,0]
 
     def AI(self):
         self.action['run']=True
@@ -509,7 +509,6 @@ class NPC_1(NPC):
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
 
-
 class MrBanks(NPC):
     def __init__(self,pos):
         super().__init__()
@@ -522,7 +521,6 @@ class MrBanks(NPC):
         self.text_surface=pygame.image.load("Sprites/UI/conversation/Conv_BG.png").convert_alpha()
         self.sprites = Read_files.NPC(self.name)
         self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
-        self.friction=[0.2,0]
         self.conv_action=['deposit','withdraw']
         self.conv_action_BG=pygame.image.load("Sprites/UI/conversation/Conv_action_BG.png").convert_alpha()
         self.conv_possition=[[400],[300]]

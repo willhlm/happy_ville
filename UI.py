@@ -16,7 +16,6 @@ class Game_UI():
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
         self.start_BG = pygame.transform.scale(pygame.image.load('Sprites/start_menu.jpg').convert(),self.WINDOW_SIZE)
         self.clock = pygame.time.Clock()
-        self.gameover = False
         self.ESC = False
         self.click = False
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
