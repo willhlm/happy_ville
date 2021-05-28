@@ -36,7 +36,7 @@ def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
             #hit platform
             elif collision_plat:
                 if projectile.type=='sword':#knockback if sword is quipped
-                    entity.velocity[0]=entity.dir[0]*10*(abs(entity.dir[1])-1)#knock back horizontally
+                    #entity.velocity[0]=entity.dir[0]*10*(abs(entity.dir[1])-1)#knock back horizontally
                     entity.velocity[1]=entity.dir[1]*10#nail jump
                     projectiles.remove(projectile)
                 elif projectile.type=='bow':
