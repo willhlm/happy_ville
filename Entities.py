@@ -214,36 +214,61 @@ class Enemy_2(Entity):
         else:
             self.move_again()
 
-class Block(Entity):
+class Block(pygame.sprite.Sprite):
 
-    def __init__(self,img,pos,chunk_key=False):
+    def __init__(self,img,pos):
         super().__init__()
         self.image = img
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+
+class Platform(Block):
+
+    def __init__(self,img,pos,chunk_key=False):
+        super().__init__(img,pos)
         self.hitbox = self.rect.inflate(0,0)
         self.chunk_key=chunk_key
         self.spike=False
 
-class Spikes(Entity):
+    def update(self,pos):
+        super().update(pos)
+        self.hitbox.center=self.rect.center
+
+class Spikes(Block):
     def __init__(self,img,pos,chunk_key=False):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/aseprite/tile_sheets/Spkies.png").convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        super().__init__(pygame.image.load("Sprites/aseprite/tile_sheets/Spkies.png").convert_alpha(),pos)
         self.hitbox = self.rect.inflate(0,0)
         self.chunk_key=chunk_key
         self.spike=True
 
-class BG_Block(Entity):
+    def update(self,pos):
+        super().update(pos)
+        self.hitbox.center=self.rect.center
 
-    def __init__(self,img,pos,chunk_key=False):
-        super().__init__()
-        self.image = img
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
+class BG_Block(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+
+class BG_near(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+
+class BG_mid(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+
+class BG_far(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+
+
 
 class Invisible_block(Entity):
 

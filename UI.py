@@ -167,6 +167,23 @@ class Game_UI():
         self.input_quit()
 
     def change_map(self, map_name):
+        timer = 0
+        load_time = 50
+        #fade before loading new map
+        while timer < load_time:
+            self.screen.fill((207,238,250))
+            self.interactables.update((0,0))
+            self.draw()
+            self.blit_screen_info()
+            fade_surface = pygame.Surface(self.WINDOW_SIZE, pygame.SRCALPHA)
+            fade_surface.fill((0,0,0,int(timer*255/load_time)))
+            self.screen.blit(fade_surface,(0,0))
+            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
+            pygame.display.update()#update after every change
+            self.clock.tick(60)#limmit FPS
+            timer += 1
+
+        #actually load the new map
         self.load_map(map_name)
         self.game_loop()
 
