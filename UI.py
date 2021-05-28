@@ -192,6 +192,8 @@ class Game_UI():
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
+        self.enemy_pause.empty()
+        self.npc_pause.empty()
 
         #load all objects
         player_pos, self.npcs, self.enemies, self.interactables = self.map.load_statics()
