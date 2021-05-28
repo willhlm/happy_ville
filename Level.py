@@ -9,7 +9,7 @@ class Tilemap():
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.chunks_bg1=self.define_chunks("bg1") #chunks containg first bg layer
         self.keys=[]
-        self.chunk_render_distance=800
+        self.chunk_render_distance=1000
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
         self.platforms = pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
@@ -115,7 +115,7 @@ class Tilemap():
                     new_door = Entities.Door((col_index * self.tile_size, row_index * self.tile_size))
                     interactables.add(new_door)
                 elif tile == '16':
-                    player = Entities.Player((col_index * self.tile_size, row_index * self.tile_size))
+                    player = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
                     new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)

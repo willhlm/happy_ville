@@ -1,0 +1,27 @@
+{
+    "Levels" :
+    {
+        "LevelName" : "village1",
+        "Pathways"  : {
+            "8"         : {
+                "path"      : "village2",
+                "sprite"    : "door"
+            },
+            "9"         : {
+                "path"      : "village2",
+                "sprite"    : "door"
+            },
+            "10"         : {
+                "path"      : "village2",
+                "sprite"    : "door"
+            }
+        },
+        "LevelName" : "village2",
+        "Pathways"  : {
+            "8"         : {
+                "path"      : "village1",
+                "sprite"    : "door"
+            }
+        }
+    }
+}

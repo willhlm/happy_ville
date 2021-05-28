@@ -54,6 +54,7 @@ class Entity(pygame.sprite.Sprite):
 
     def stay_still(self):
         self.acceleration=[0,0]
+        self.velocity=[0,0]
         self.action['stand']=True
 
     def move_again(self):
@@ -81,6 +82,10 @@ class Player(Entity):
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
         self.dashing_cooldown=10
         self.sword=Sword(self.dir,self.hitbox)
+
+    def set_pos(self, pos):
+        self.rect.center = (pos[0],pos[1])
+        self.hitbox.center = self.rect.center
 
     def attack_action(self,projectiles):
         if self.action[self.equip]:
@@ -208,7 +213,7 @@ class Enemy_2(Entity):
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
 
-        elif abs(self.distance[0])>500 or abs(self.distance[1])>500:
+        elif abs(self.distance[0])>350 or abs(self.distance[1])>250:
             self.stay_still()
         else:
             self.move_again()

@@ -26,7 +26,7 @@ class Game_UI():
 
         #initiate player
         self.player = Entities.Player([200,50])
-        self.players = pygame.sprite.Group()
+        self.players = pygame.sprite.Group(self.player)
 
         #initiate all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -225,15 +225,17 @@ class Game_UI():
         self.bg.add(Entities.BG_Block(self.map.load_bg(),(0,0)))
 
         #clean all groups
-        self.players.empty()
+        #self.players.empty()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
 
-        #load player and statics
-        self.player, self.npcs, self.enemies, self.interactables = self.map.load_statics()
-        self.players.add(self.player)
+        #load all objects
+        player_pos, self.npcs, self.enemies, self.interactables = self.map.load_statics()
+        self.player.set_pos(player_pos)
+        self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
+        #self.players.add(self.player)
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
