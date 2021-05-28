@@ -35,6 +35,7 @@ class Game_UI():
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.bg = pygame.sprite.Group()
+        self.bg_far = pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
@@ -183,7 +184,12 @@ class Game_UI():
     def initiate_groups(self):
         #clean and load bg
         self.bg.empty()
-        self.bg.add(Entities.BG_Block(self.map.load_bg(),(0,0)))
+        self.bg_far.empty()
+        for i, ele in enumerate(self.map.load_bg()):
+            if i == 0:
+                self.bg.add(ele)
+            elif i == 1:
+                self.bg_far.add(ele)
 
         #clean all groups
         #self.players.empty()
@@ -204,6 +210,7 @@ class Game_UI():
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.platforms.update(scroll)
+        self.bg_far.update(scroll)
         self.bg.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll)
@@ -218,6 +225,7 @@ class Game_UI():
         self.enemy_pause.update(scroll)
 
     def draw(self):
+        self.bg_far.draw(self.screen)
         self.bg.draw(self.screen)
         #self.weather.draw(self.screen)
 

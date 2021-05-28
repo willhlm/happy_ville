@@ -161,7 +161,15 @@ class Tilemap():
             row_index += 1
             col_index = 0 #reset column
 
-        return blit_surface
+        BG_norm = Entities.BG_Block(blit_surface,(0,0))
+
+        #read in reast of bgs
+        try:
+            BG_far = Entities.BG_far(pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha(),(0,0))
+        except:
+            BG_far = Entities.BG_far(pygame.Surface((0,0)),(0,0))
+
+        return [BG_norm, BG_far]
 
     def load_chunks(self):
         chunk_distances=self.chunk_distance()
