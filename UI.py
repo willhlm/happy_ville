@@ -14,12 +14,12 @@ class Game_UI():
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
-        self.start_BG = pygame.transform.scale(pygame.image.load('sprites/start_menu.jpg').convert(),self.WINDOW_SIZE)
+        self.start_BG = pygame.transform.scale(pygame.image.load('Sprites/start_menu.jpg').convert(),self.WINDOW_SIZE)
         self.clock = pygame.time.Clock()
         self.gameover = False
         self.ESC = False
         self.click = False
-        self.font = Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
+        self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
 
@@ -42,7 +42,8 @@ class Game_UI():
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
-        self.pause = pygame.sprite.Group() #include all entities that are far away
+        self.enemy_pause = pygame.sprite.Group() #include all entities that are far away
+        self.npc_pause = pygame.sprite.Group() #include all entities that are far away
 
 
         self.individuals = pygame.sprite.Group()
@@ -50,18 +51,6 @@ class Game_UI():
 
         #initiate maps
         self.load_map('village1')
-
-    def group_distance(self):#remove the enemies if it is off screen from the group enemies
-        for entity in self.enemies:
-            if entity.rect[0]>600 or entity.rect[0]<-100 or entity.rect[1]<-100 or entity.rect[1]>350: #or abs(entity.rect[1])>300:#this means it is outside of screen
-                self.enemies.remove(entity)
-                self.pause.add(entity)
-
-        for entity in self.pause:
-            if -100<entity.rect[0]<600 and -100<entity.rect[1]<350: #or abs(entity.rect[1])<300:#this means it is outside of screen
-                self.enemies.add(entity)
-                self.pause.remove(entity)
-
 
     def game_loop(self, initiate_fade_in = False):
 
@@ -89,7 +78,7 @@ class Game_UI():
             self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
             self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
 
-            self.group_distance()
+            self.group_distance()#update the groups beased on if they are on screen or not
 
             check_map = Engine.Collisions.check_interaction(self.player,self.interactables)
             if check_map:
@@ -126,8 +115,7 @@ class Game_UI():
             pygame.display.update()#update after every change
             self.clock.tick(60)#limmit FPS
 
-            #fade if first loop
-    def fade_in(self):
+    def fade_in(self):#fade if first loop
         timer = 0
         fade_time = 20
         while timer < fade_time:
@@ -145,63 +133,28 @@ class Game_UI():
 
         self.game_loop()
 
-    def main_menu(self):
-        #self.screen.blit(self.start_BG,(0,0))
-        #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-        self.display.fill((207,238,250))#fill game.screen
+    def group_distance(self):#remove the eneteies if it is off screen from thir group
+        bounds=[-100,600,-100,350]#-x,+x,-y,+y
 
-        while self.ESC:
-            if self.state[-1] == 'start':
-                self.start_menu()
-            elif self.state[-1] == 'option':
-                self.option_menu()
-            elif self.state[-1] == 'resolution':
-                self.resolution_menu()
+        for entity in self.enemies:
+            if entity.rect[0]<bounds[0] or entity.rect[0]>bounds[1] or entity.rect[1]<bounds[2] or entity.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+                self.enemies.remove(entity)
+                self.enemy_pause.add(entity)
 
-    def start_menu(self):
-        self.font.render(self.display,'Start Game',(200,100),1)
-        start_rect=pygame.Rect(200,100,100,100)
-        self.font.render(self.display,'Options',(200,200),1)
-        option_rect=pygame.Rect(200,200,100,100)
-        self.font.render(self.display,'Exit Game',(200,400),1)
-        exit_rect=pygame.Rect(200,400,100,100)
+        for entity in self.enemy_pause:
+            if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
+                self.enemies.add(entity)
+                self.enemy_pause.remove(entity)
 
-        if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-            self.ESC=False
-            self.click=False
-        elif option_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-            self.click=False
-            self.state.append('option')
-        elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-            self.exit()
+        for entity in self.npcs:
+            if entity.rect[0]<bounds[0] or entity.rect[0]>bounds[1] or entity.rect[1]<bounds[2] or entity.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+                self.npcs.remove(entity)
+                self.npc_pause.add(entity)
 
-        self.input_quit()
-
-    def option_menu(self):
-        self.display.fill((207,238,250))#fill game.screen
-
-        self.font.render(self.display,'Resolution',(200,100),1)
-        Resolution_rect=pygame.Rect(200,100,100,100)
-
-        if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-            self.click=False
-            self.state.append('resolution')
-
-        self.input_quit()
-
-
-    def resolution_menu(self):
-        self.display.fill((207,238,250))#fill game.screen
-
-        self.font.render(self.display,'1000x800',(200,100),1)
-        Resolution_rect=pygame.Rect(200,100,100,100)
-
-        if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
-            self.screen=pygame.display.set_mode((1000,800))
-            #self.start_BG=pygame.transform.scale(self.start_BG,(1000,800))#recale the BG
-            #self.screen.blit(self.start_BG,(0,0))
-
-        self.input_quit()
+        for entity in self.npc_pause:
+            if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
+                self.npcs.add(entity)
+                self.npc_pause.remove(entity)
 
     def change_map(self, map_name):
         timer = 0
@@ -258,7 +211,8 @@ class Game_UI():
         self.fprojectiles.update(scroll)
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
-        self.pause.update(scroll)
+        self.npc_pause.update(scroll)
+        self.enemy_pause.update(scroll)
 
     def draw(self):
         self.bg.draw(self.screen)
@@ -304,6 +258,63 @@ class Game_UI():
     def blit_fps(self):
         fps_string = str(int(self.clock.get_fps()))
         self.font.render(self.screen,fps_string,(400,20),1)
+
+    def main_menu(self):
+        #self.screen.blit(self.start_BG,(0,0))
+        #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
+        self.display.fill((207,238,250))#fill game.screen
+
+        while self.ESC:
+            if self.state[-1] == 'start':
+                self.start_menu()
+            elif self.state[-1] == 'option':
+                self.option_menu()
+            elif self.state[-1] == 'resolution':
+                self.resolution_menu()
+
+    def start_menu(self):
+        self.font.render(self.display,'Start Game',(200,100),1)
+        start_rect=pygame.Rect(200,100,100,100)
+        self.font.render(self.display,'Options',(200,200),1)
+        option_rect=pygame.Rect(200,200,100,100)
+        self.font.render(self.display,'Exit Game',(200,400),1)
+        exit_rect=pygame.Rect(200,400,100,100)
+
+        if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
+            self.ESC=False
+            self.click=False
+        elif option_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
+            self.click=False
+            self.state.append('option')
+        elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
+            self.exit()
+
+        self.input_quit()
+
+    def option_menu(self):
+        self.display.fill((207,238,250))#fill game.screen
+
+        self.font.render(self.display,'Resolution',(200,100),1)
+        Resolution_rect=pygame.Rect(200,100,100,100)
+
+        if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
+            self.click=False
+            self.state.append('resolution')
+
+        self.input_quit()
+
+    def resolution_menu(self):
+        self.display.fill((207,238,250))#fill game.screen
+
+        self.font.render(self.display,'1000x800',(200,100),1)
+        Resolution_rect=pygame.Rect(200,100,100,100)
+
+        if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
+            self.screen=pygame.display.set_mode((1000,800))
+            #self.start_BG=pygame.transform.scale(self.start_BG,(1000,800))#recale the BG
+            #self.screen.blit(self.start_BG,(0,0))
+
+        self.input_quit()
 
     def input_quit(self):#to exits between option menues
         pygame.display.update()

@@ -12,7 +12,7 @@ class Entity(pygame.sprite.Sprite):
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.ac_dir=[0,0]
         self.world_state=0
-        self.loot={'coin':1}
+        self.loot={'coin':0}
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
@@ -51,7 +51,6 @@ class Entity(pygame.sprite.Sprite):
                 loot.add(obj(self.hitbox))
             self.loot[key]=0
         return loot
-
 
 class Player(Entity):
 
@@ -122,6 +121,9 @@ class Player(Entity):
     def update_rect(self):
         self.rect.center = [self.hitbox.center[0], self.hitbox.center[1] - self.hitbox_offset]
 
+    def loots(self,loot):
+        pass
+
 class Enemy_1(Player):
     def __init__(self,pos):
         super().__init__(pos)
@@ -173,7 +175,7 @@ class Enemy_2(Entity):
         self.equip='sword'
         self.sprites = Read_files.Flowy()
         self.friction=[0.2,0]
-        self.loot={'Coin':10,'Arrow':2}#the keys need to have the same name as their respective classes
+        self.loot={'Coin':2,'Arrow':1}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
         self.shake=self.hitbox.height/10
 
@@ -223,7 +225,7 @@ class Platform(Block):
 
 class Spikes(Block):
     def __init__(self,img,pos,chunk_key=False):
-        super().__init__(pygame.image.load("Sprites/aseprite/tile_sheets/Spkies.png").convert_alpha(),pos)
+        super().__init__(pygame.image.load("Sprites/Spkies.png").convert_alpha(),pos)
         self.hitbox = self.rect.inflate(0,0)
         self.chunk_key=chunk_key
         self.spike=True
@@ -350,7 +352,7 @@ class NPC(Entity):
         self.priority_action = ['death','hurt']
         self.health = 50
         self.state = 'stand'
-        self.font=Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class
+        self.font=Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class
         self.page_frame=0#if there are pages of text
         self.text_frame=-1#chosing which text to say: woudl ike to move this to NPC class instead
         self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
@@ -480,7 +482,7 @@ class NPC_1(NPC):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.portrait=pygame.image.load('Sprites/NPC/'+self.name+ '/Woman1.png').convert_alpha()
-        self.text_surface=pygame.image.load("Sprites/aseprite/conversation/Conv_BG.png").convert_alpha()
+        self.text_surface=pygame.image.load("Sprites/UI/conversation/Conv_BG.png").convert_alpha()
         self.sprites = Read_files.NPC(self.name)
         self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.friction=[0.2,0]
@@ -508,12 +510,12 @@ class MrBanks(NPC):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.portrait=pygame.image.load('Sprites/NPC/'+self.name+ '/Woman1.png').convert_alpha()
-        self.text_surface=pygame.image.load("Sprites/aseprite/conversation/Conv_BG.png").convert_alpha()
+        self.text_surface=pygame.image.load("Sprites/UI/conversation/Conv_BG.png").convert_alpha()
         self.sprites = Read_files.NPC(self.name)
         self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.friction=[0.2,0]
         self.conv_action=['deposit','withdraw']
-        self.conv_action_BG=pygame.image.load("Sprites/aseprite/conversation/Conv_action_BG.png").convert_alpha()
+        self.conv_action_BG=pygame.image.load("Sprites/UI/conversation/Conv_action_BG.png").convert_alpha()
         self.conv_possition=[[400],[300]]
 
         self.loot={'Coin':2}#the keys need to have the same name as their respective classes
@@ -608,7 +610,7 @@ class Sword(Weapon):
         self.dmg=10
         self.velocity=[0,0]
         self.type='sword'
-        self.image = pygame.image.load("Sprites/aseprite/Items/sword.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Items/sword.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.height,entity_hitbox.width)
@@ -642,7 +644,7 @@ class Bow(Weapon):
         self.lifetime=40
         self.dmg=10
         self.type='bow'
-        self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Items/arrow.png").convert_alpha()
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
@@ -717,7 +719,7 @@ class Coin(Loot):
     def __init__(self,entity_hitbox):
         super().__init__()
 
-        self.image = pygame.image.load("Sprites/aseprite/Items/coin.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Items/coin.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
@@ -726,7 +728,7 @@ class Arrow(Loot):
     def __init__(self,entity_hitbox):
         super().__init__()
 
-        self.image = pygame.image.load("Sprites/aseprite/Items/arrow.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Items/arrow.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
