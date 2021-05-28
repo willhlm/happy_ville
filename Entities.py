@@ -683,7 +683,7 @@ class Loot(pygame.sprite.Sprite):
         super().__init__()
         choice=[-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,2,4,6,8,10,12,14,16,18,20]#just not 0
         self.pos=[random.choice(choice),random.choice(choice)]
-        self.lifetime=200
+        self.lifetime=300
         self.movement=[0,0]#for platfform collisions
         dir=self.pos[0]/abs(self.pos[0])#horizontal direction
         self.velocity=[dir*random.randint(0, 3),-11]
