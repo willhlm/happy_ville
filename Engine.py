@@ -5,10 +5,8 @@ class Collisions():
         self.shake=0
 
     def action_collision(self,projectiles,projectile_enteties,platforms,enemies,screen,loot):
-
-        #game input
         self.shake-=1
-        self.shake=max(-1,self.shake)#to not let it go to too low valyes
+        self.shake=max(0,self.shake)#to not let it go to too low valyes
 
         for entity in projectile_enteties.sprites():#go through the group
             projectiles=entity.attack_action(projectiles)

@@ -22,7 +22,10 @@ class Game_UI():
         self.font = Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
-        self.weather_paricles=BG.Weather()
+
+        self.weather_paricles=BG.Weather()#initiate whater
+        self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
+        self.collisions = Engine.Collisions()
 
         #initiate player
         self.player = Entities.Player([200,50])
@@ -36,20 +39,29 @@ class Game_UI():
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
-        self.fprojectiles = pygame.sprite.Group()#arrows
-        self.eprojectiles = pygame.sprite.Group()#arrows
+        self.fprojectiles = pygame.sprite.Group()#arrows and sword
+        self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
+        self.pause = pygame.sprite.Group() #include all entities that are far away
+
 
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
 
-        self.collisions=Engine.Collisions()
-
         #initiate maps
         self.load_map('village1')
 
-        #initiate weather
-        self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
+    def group_distance(self):#remove the enemies if it is off screen from the group enemies
+        for entity in self.enemies:
+            if entity.rect[0]>600 or entity.rect[0]<-100 or entity.rect[1]<-100 or entity.rect[1]>350: #or abs(entity.rect[1])>300:#this means it is outside of screen
+                self.enemies.remove(entity)
+                self.pause.add(entity)
+
+        for entity in self.pause:
+            if -100<entity.rect[0]<600 and -100<entity.rect[1]<350: #or abs(entity.rect[1])<300:#this means it is outside of screen
+                self.enemies.add(entity)
+                self.pause.remove(entity)
+
 
     def game_loop(self, initiate_fade_in = False):
 
@@ -77,6 +89,7 @@ class Game_UI():
             self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
             self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
 
+            self.group_distance()
 
             check_map = Engine.Collisions.check_interaction(self.player,self.interactables)
             if check_map:
@@ -114,8 +127,6 @@ class Game_UI():
             self.clock.tick(60)#limmit FPS
 
             #fade if first loop
-
-
     def fade_in(self):
         timer = 0
         fade_time = 20
@@ -133,8 +144,6 @@ class Game_UI():
             timer += 1
 
         self.game_loop()
-
-
 
     def main_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -249,6 +258,7 @@ class Game_UI():
         self.fprojectiles.update(scroll)
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
+        self.pause.update(scroll)
 
     def draw(self):
         self.bg.draw(self.screen)
