@@ -1,27 +1,14 @@
 {
-    "Levels" :
-    {
-        "LevelName" : "village1",
-        "Pathways"  : {
-            "8"         : {
-                "path"      : "village2",
-                "sprite"    : "door"
-            },
-            "9"         : {
-                "path"      : "village2",
-                "sprite"    : "door"
-            },
-            "10"         : {
-                "path"      : "village2",
-                "sprite"    : "door"
-            }
-        },
-        "LevelName" : "village2",
-        "Pathways"  : {
-            "8"         : {
-                "path"      : "village1",
-                "sprite"    : "door"
-            }
+    "village1" : {
+        "pathways" : {
+            "8" : ["village2", "door"],
+            "9" : ["village2", "door"],
+            "10" : ["village2", "door"]
+        }
+    },
+    "village2" : {
+        "pathways" : {
+            "8" : ["village1", "door"]
         }
     }
 }
