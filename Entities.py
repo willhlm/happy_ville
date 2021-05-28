@@ -52,13 +52,6 @@ class Entity(pygame.sprite.Sprite):
             self.loot[key]=0
         return loot
 
-    def stay_still(self):
-        self.acceleration=[0,0]
-        self.velocity=[0,0]
-        self.action['stand']=True
-
-    def move_again(self):
-        self.acceleration=[1,0.8]
 
 class Player(Entity):
 
@@ -139,9 +132,8 @@ class Enemy_1(Player):
         self.health=10
         self.distance=[0,0]
         self.inv=False#flag to check if collision with invisible blocks
-        self.friction=[0.2,1]
         self.sprites = Read_files.Sprites_evil_knight()
-        self.shake=10#screen shake duration
+        self.shake=self.hitbox.height/10
 
     def AI(self,player):#the AI
 
@@ -151,9 +143,6 @@ class Enemy_1(Player):
         if abs(self.distance[0])>150 and abs(self.distance[1])>40 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
             self.action['run']=False
             self.action['stand']=True
-
-        elif abs(self.distance[0])>500 or abs(self.distance[1])>500:#remove the enmy if far away
-            self.kill()
 
         elif abs(self.distance[0]<150) and abs(self.distance[1])<40:
 
@@ -212,11 +201,6 @@ class Enemy_2(Entity):
 
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
-
-        elif abs(self.distance[0])>350 or abs(self.distance[1])>250:
-            self.stay_still()
-        else:
-            self.move_again()
 
 class Block(pygame.sprite.Sprite):
 
@@ -508,7 +492,7 @@ class NPC_1(NPC):
     def AI(self):
         self.action['run']=True
 
-        if abs(self.rect[0]+self.rect[1])>800:#if far away
+        if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
             self.stay_still()
         else:
             self.move_again()
@@ -541,7 +525,7 @@ class MrBanks(NPC):
         self.ammount=0
 
     def AI(self):
-        if abs(self.rect[0])>500 or abs(self.rect[1])>800:#if far away
+        if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
             self.stay_still()
         else:
             self.move_again()
