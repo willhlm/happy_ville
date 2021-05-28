@@ -103,7 +103,7 @@ class Player(Entity):
     def dashing(self):
         self.velocity[0]=20*self.dir[0]#dash
         self.action['dash']=True
-        self.action[self.equip]=False#cancel attack_action
+        #self.action[self.equip]=False#cancel attack_action
 
     def jump(self):
         self.friction[1] = 0
@@ -257,17 +257,30 @@ class BG_near(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
+        self.paralex=0.75
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+
 
 class BG_mid(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
+        self.paralex=0.5
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+
 
 class BG_far(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
+        self.paralex=0.25
 
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
 
 
 class Invisible_block(Entity):
