@@ -51,7 +51,8 @@ class Game_UI():
         #initiate weather
         self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
 
-    def game_loop(self):
+    def game_loop(self, initiate_fade_in = False):
+
         while True:
             self.screen.fill((207,238,250))#fill game.screen
 
@@ -103,8 +104,34 @@ class Game_UI():
 
             Engine.Collisions.check_npc_collision(self.player,self.npcs,self.display)#need to be at the end so that the conversation text doesn't get scaled
 
+            if initiate_fade_in:
+                self.fade_in()
+                first_loop_flag = False
+
             pygame.display.update()#update after every change
             self.clock.tick(60)#limmit FPS
+
+            #fade if first loop
+
+
+    def fade_in(self):
+        timer = 0
+        while timer < 40:
+            self.screen.fill((207,238,250))
+            self.interactables.update((0,0))
+            self.draw()
+            self.blit_screen_info()
+            fade_surface = pygame.Surface(self.WINDOW_SIZE, pygame.SRCALPHA)
+            fade_surface.fill((0,0,0,255-int((timer)*255/40)))
+            self.screen.blit(fade_surface,(0,0))
+            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
+            pygame.display.update()#update after every change
+            self.clock.tick(60)#limmit FPS
+            timer += 1
+
+        self.game_loop()
+
+
 
     def main_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -183,7 +210,7 @@ class Game_UI():
 
         #actually load the new map
         self.load_map(map_name)
-        self.game_loop()
+        self.game_loop(True)
 
     def load_map(self, map_name):
         self.map = Level.Tilemap(map_name)
