@@ -3,7 +3,6 @@ import Read_files#for the fonts
 import Engine
 import Entities
 import Level
-import Action
 import BG
 
 class Game_UI():
@@ -23,7 +22,6 @@ class Game_UI():
         self.font = Read_files.Alphabet("Sprites/aseprite/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
-        self.shake=False
         self.weather_paricles=BG.Weather()
 
         #initiate player
@@ -44,6 +42,8 @@ class Game_UI():
 
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
+
+        self.collisions=Engine.Collisions()
 
         #initiate maps
         self.load_map('village1')
@@ -66,13 +66,17 @@ class Game_UI():
             Engine.Physics.movement(self.enemies)
             Engine.Physics.movement(self.npcs)
 
-            Engine.Collisions.check_collisions(self.players,self.platforms)
-            Engine.Collisions.check_collisions(self.enemies,self.platforms)
-            Engine.Collisions.check_collisions(self.npcs,self.platforms)
-            Engine.Collisions.check_invisible(self.npcs,self.invisible_blocks)
-            Engine.Collisions.check_collisions_loot(self.loot,self.platforms)
-            Engine.Collisions.pickup_loot(self.player,self.loot)
-            Engine.Collisions.check_enemy_collision(self.player,self.enemies,self.loot)
+            self.collisions.check_collisions(self.players,self.platforms)
+            self.collisions.check_collisions(self.enemies,self.platforms)
+            self.collisions.check_collisions(self.npcs,self.platforms)
+            self.collisions.check_invisible(self.npcs,self.invisible_blocks)
+            self.collisions.check_collisions_loot(self.loot,self.platforms)
+            self.collisions.pickup_loot(self.player,self.loot)
+            self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
+
+            self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
+            self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
+
 
             check_map = Engine.Collisions.check_interaction(self.player,self.interactables)
             if check_map:
@@ -84,8 +88,6 @@ class Game_UI():
             for npc in self.npcs:
                 npc.AI()
 
-            Action.actions(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
-            Action.actions(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
 
             # !!--change to one group--!!   eventually change this to set animation image in update
             Engine.Animation.set_img(self.players)
@@ -233,7 +235,7 @@ class Game_UI():
         self.players.add(self.player)
 
     def scrolling(self):
-        self.map.scrolling(self.player.rect,self.player.shake)
+        self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.platforms.update(scroll)
         self.bg.update(scroll)
@@ -311,10 +313,6 @@ class Game_UI():
                         self.state.pop()#un-remember the last page
 
     def input(self):#input while playing
-        #game input
-        self.player.shake-=1
-        self.player.shake=max(-1,self.player.shake)#to not let it go to too low valyes
-
         if self.player.state!='talk':#if not in conversation
 
             for event in pygame.event.get():

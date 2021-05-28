@@ -231,7 +231,7 @@ class Camera():
 
     def update_scroll(self,shake):
         if shake>0:
-            screen_shake=[random.randint(-4,4),random.randint(-4,4)]
+            screen_shake=[random.randint(-shake,shake),random.randint(-shake,shake)]
         else:
             screen_shake=[0,0]
 

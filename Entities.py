@@ -13,7 +13,6 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir=[0,0]
         self.world_state=0
         self.loot={'coin':1}
-        self.shake=0
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
@@ -262,7 +261,6 @@ class BG_near(Block):
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
 
-
 class BG_mid(Block):
 
     def __init__(self,img,pos):
@@ -272,7 +270,6 @@ class BG_mid(Block):
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
 
-
 class BG_far(Block):
 
     def __init__(self,img,pos):
@@ -281,7 +278,6 @@ class BG_far(Block):
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
-
 
 class Invisible_block(Entity):
 
@@ -483,6 +479,13 @@ class NPC(Entity):
     def trade():
         pass
 
+    def stay_still(self):
+        self.acceleration=[0,0]
+        self.action['stand']=True
+
+    def move_again(self):
+        self.acceleration=[1,0.8]
+
 class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
@@ -501,11 +504,15 @@ class NPC_1(NPC):
         self.action['run']=True
 
         if abs(self.rect[0]+self.rect[1])>800:#if far away
-            self.kill()
-        elif self.action['inv']:#collision with invisble block
+            self.stay_still()
+        else:
+            self.move_again()
+
+        if self.action['inv']:#collision with invisble block
             self.velocity[0] = -self.velocity[0]
             self.dir[0] = -self.dir[0]
             self.action['inv'] = False
+
 
 class MrBanks(NPC):
     def __init__(self,pos):
@@ -529,8 +536,12 @@ class MrBanks(NPC):
         self.ammount=0
 
     def AI(self):
-        if abs(self.rect[0]+self.rect[1])>800:#if far away
-            self.kill()
+        if abs(self.rect[0])>500 or abs(self.rect[1])>800:#if far away
+            self.stay_still()
+        else:
+            self.move_again()
+
+
 
     def blit_conv_action(self,game_screen):
         game_screen.blit(self.conv_action_BG,(850,200))#the text BG
