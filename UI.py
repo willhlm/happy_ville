@@ -118,13 +118,14 @@ class Game_UI():
 
     def fade_in(self):
         timer = 0
-        while timer < 40:
+        fade_time = 20
+        while timer < fade_time:
             self.screen.fill((207,238,250))
             self.interactables.update((0,0))
             self.draw()
             self.blit_screen_info()
             fade_surface = pygame.Surface(self.WINDOW_SIZE, pygame.SRCALPHA)
-            fade_surface.fill((0,0,0,255-int((timer)*255/40)))
+            fade_surface.fill((0,0,0,255-int((timer)*255/fade_time)))
             self.screen.blit(fade_surface,(0,0))
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
             pygame.display.update()#update after every change
