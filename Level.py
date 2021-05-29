@@ -168,10 +168,10 @@ class Tilemap():
             BG_far_img = pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha()
             BG_far_width = BG_far_img.get_width()
             BG_far_surface = pygame.Surface((BG_far_width*5,BG_far_img.get_height()),pygame.SRCALPHA).convert_alpha()
-            for i in range(0,4):
+            for i in range(0,8):
                 BG_far_surface.blit(BG_far_img,(BG_far_width*i,0))
 
-            BG_far = Entities.BG_far(BG_far_surface,(-200,0))
+            BG_far = Entities.BG_far(BG_far_surface,(-400,0))
         except IOError:
             BG_far = Entities.BG_far(pygame.Surface((0,0)),(0,0))
             print("Failed to load BG_far image")
@@ -269,7 +269,7 @@ class Auto(Camera):
         super().__init__()
 
     def scrolling(self,knight,distance,shake):
-        self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+        self.true_scroll[0]+=(knight.center[0]-1*self.true_scroll[0]-290)/1
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
         self.update_scroll(shake)
 

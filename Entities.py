@@ -259,16 +259,22 @@ class BG_mid(Block):
         self.paralex=0.5
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + int(self.paralex*pos[0]), self.rect.topleft[1] + int(self.paralex*pos[1])]
 
 class BG_far(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=0.2
+        self.paralex=0.03
+        self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        print(self.rect.topleft[0])
+        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.topleft = self.true_pos
 
 class Invisible_block(Entity):
 
