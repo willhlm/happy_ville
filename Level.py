@@ -163,11 +163,18 @@ class Tilemap():
 
         BG_norm = Entities.BG_Block(blit_surface,(0,0))
 
-        #read in reast of bgs
+        #read in BG_far if it exists
         try:
-            BG_far = Entities.BG_far(pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha(),(0,0))
-        except:
+            BG_far_img = pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha()
+            BG_far_width = BG_far_img.get_width()
+            BG_far_surface = pygame.Surface((BG_far_width*5,BG_far_img.get_height()),pygame.SRCALPHA).convert_alpha()
+            for i in range(0,4):
+                BG_far_surface.blit(BG_far_img,(BG_far_width*i,0))
+
+            BG_far = Entities.BG_far(BG_far_surface,(-200,0))
+        except IOError:
             BG_far = Entities.BG_far(pygame.Surface((0,0)),(0,0))
+            print("Failed to load BG_far image")
 
         return [BG_norm, BG_far]
 
