@@ -265,7 +265,7 @@ class BG_far(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=0.25
+        self.paralex=0.2
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
