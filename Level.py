@@ -1,4 +1,4 @@
-import pygame, csv, Entities, math, random
+import pygame, csv, Entities, math, random, json
 
 class Tilemap():
     def __init__(self, level,mode='auto'):
@@ -9,7 +9,7 @@ class Tilemap():
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.chunks_bg1=self.define_chunks("bg1") #chunks containg first bg layer
         self.keys=[]
-        self.chunk_render_distance=800
+        self.chunk_render_distance=1000
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
         self.platforms = pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
@@ -89,9 +89,18 @@ class Tilemap():
     def test(self):
         print(self.collision_sheet[1])
 
+    def load_pathways(self):
+
+        with open("pathways_config.json") as f:
+            config = json.load(f)
+
+        return config[self.level_name]["pathways"]
+
     def load_statics(self):
     #load entities that shouldn't despawn with chunks, npc, enemies, interactables etc
         map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
+
+        pathways = self.load_pathways()
 
         npcs = pygame.sprite.Group()
         interactables = pygame.sprite.Group()
@@ -111,11 +120,12 @@ class Tilemap():
                 elif tile == '1':
                     new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size))
                     interactables.add(new_chest)
-                elif tile == '8':
-                    new_door = Entities.Door((col_index * self.tile_size, row_index * self.tile_size))
-                    interactables.add(new_door)
+                elif int(tile) in range(8,16):
+                    if pathways[tile][1] == "door":
+                        new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[tile][0])
+                        interactables.add(new_path)
                 elif tile == '16':
-                    player = Entities.Player((col_index * self.tile_size, row_index * self.tile_size))
+                    player = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
                     new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
@@ -151,7 +161,15 @@ class Tilemap():
             row_index += 1
             col_index = 0 #reset column
 
-        return blit_surface
+        BG_norm = Entities.BG_Block(blit_surface,(0,0))
+
+        #read in reast of bgs
+        try:
+            BG_far = Entities.BG_far(pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha(),(0,0))
+        except:
+            BG_far = Entities.BG_far(pygame.Surface((0,0)),(0,0))
+
+        return [BG_norm, BG_far]
 
     def load_chunks(self):
         chunk_distances=self.chunk_distance()

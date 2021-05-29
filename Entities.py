@@ -75,6 +75,10 @@ class Player(Entity):
         self.dashing_cooldown=10
         self.sword=Sword(self.dir,self.hitbox)
 
+    def set_pos(self, pos):
+        self.rect.center = (pos[0],pos[1])
+        self.hitbox.center = self.rect.center
+
     def attack_action(self,projectiles):
         if self.action[self.equip]:
             if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
@@ -261,7 +265,7 @@ class BG_far(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=0.25
+        self.paralex=0.2
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
@@ -280,17 +284,22 @@ class Interactable(Entity):
         super().__init__()
         self.interacted = False
 
-class Door(Interactable):
+class Pathway(Interactable):
 
-    def __init__(self,pos):
+    def __init__(self, destination):
         super().__init__()
+        self.next_map = destination
+
+class Door(Pathway):
+
+    def __init__(self,pos,destination):
+        super().__init__(destination)
         self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/door.png",32,48,1,4)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
-        self.next_map = 'village2'
 
     def update(self,pos):
         super().update(pos)

@@ -28,13 +28,14 @@ class Game_UI():
 
         #initiate player
         self.player = Entities.Player([200,50])
-        self.players = pygame.sprite.Group()
+        self.players = pygame.sprite.Group(self.player)
 
         #initiate all sprite groups
         self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.bg = pygame.sprite.Group()
+        self.bg_far = pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
@@ -183,23 +184,33 @@ class Game_UI():
     def initiate_groups(self):
         #clean and load bg
         self.bg.empty()
-        self.bg.add(Entities.BG_Block(self.map.load_bg(),(0,0)))
+        self.bg_far.empty()
+        for i, ele in enumerate(self.map.load_bg()):
+            if i == 0:
+                self.bg.add(ele)
+            elif i == 1:
+                self.bg_far.add(ele)
 
         #clean all groups
-        self.players.empty()
+        #self.players.empty()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
+        self.enemy_pause.empty()
+        self.npc_pause.empty()
 
-        #load player and statics
-        self.player, self.npcs, self.enemies, self.interactables = self.map.load_statics()
-        self.players.add(self.player)
+        #load all objects
+        player_pos, self.npcs, self.enemies, self.interactables = self.map.load_statics()
+        self.player.set_pos(player_pos)
+        self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
+        #self.players.add(self.player)
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.platforms.update(scroll)
+        self.bg_far.update(scroll)
         self.bg.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll)
@@ -214,6 +225,7 @@ class Game_UI():
         self.enemy_pause.update(scroll)
 
     def draw(self):
+        self.bg_far.draw(self.screen)
         self.bg.draw(self.screen)
         #self.weather.draw(self.screen)
 

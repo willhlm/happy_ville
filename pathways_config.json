@@ -1,0 +1,14 @@
+{
+    "village1" : {
+        "pathways" : {
+            "8" : ["village2", "door"],
+            "9" : ["village2", "door"],
+            "10" : ["village2", "door"]
+        }
+    },
+    "village2" : {
+        "pathways" : {
+            "8" : ["village1", "door"]
+        }
+    }
+}
