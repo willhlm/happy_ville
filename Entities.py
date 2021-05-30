@@ -767,7 +767,7 @@ class Force(Weapon):
         self.action={'fly':True,'hit':False}
         self.state='fly'
 
-        self.image = pygame.image.load("Sprites/Items/force.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Attack/Force/fly/fly1.png").convert_alpha()
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
