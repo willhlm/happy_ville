@@ -123,24 +123,23 @@ class Flowy(Sprites_player):
         super().__init__()
         self.sprite_dict = self.load_all_sprites("Sprites/enemies/flowy")
 
-    def get_image(self, input, timer, dir):
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
+class Sword(Sprites_player):
 
-        if dir[0] >= 0:
-            return self.sprite_dict[input][timer]
-        elif dir[0] < 0:
-            return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
+    def __init__(self):
+        super().__init__()
+        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Sword/swing")
 
-    def get_frame_number(self, input,dir):
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
+class Bow(Sprites_player):
 
-        return len(self.sprite_dict[input])
+    def __init__(self):
+        super().__init__()
+        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Bow/fly")
+
+class Force(Sprites_player):
+
+    def __init__(self):
+        super().__init__()
+        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Force/fly")
 
 class Chest(Sprites):
 

@@ -16,6 +16,14 @@ class Entity(pygame.sprite.Sprite):
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
+    def death(self,loot):
+        if self.health<=0:#if 0 health of enemy
+            self.action['death']=True
+            self.velocity=[0,0]
+            self.loots(loot)
+            return self.shake#screen shake when eneny dies
+        return 0
+
     def AI(self,knight):
         pass
 
@@ -64,9 +72,9 @@ class Player(Entity):
         self.max_health = 250
         self.spirit = 100
         self.max_spirit = 100
-        self.priority_action=['death','hurt','dash','sword','bow']#animation
+        self.priority_action=['death','hurt','dash','sword','bow','force']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
         self.hitbox_offset = 3
@@ -76,6 +84,7 @@ class Player(Entity):
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
         self.dashing_cooldown=10
         self.sword=Sword(self.dir,self.hitbox)
+        self.shake=0
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -90,18 +99,22 @@ class Player(Entity):
                 elif self.equip=='bow' and self.loot['Arrow']>0:
                     projectiles.add(Bow(self.dir,self.hitbox))
                     self.loot['Arrow']-=1
+                elif self.equip == 'force':
+                    projectiles.add(Force(self.dir,self.hitbox))
+
         return projectiles
 
     def change_equipment(self):#don't change if there are arrows or sword already
         if self.equip == 'sword':
-            self.equip='bow'
+            self.equip = 'bow'
+        elif self.equip == 'bow':
+            self.equip = 'force'
         else:
-            self.equip='sword'
+            self.equip = 'sword'
 
     def dashing(self):
         self.velocity[0]=20*self.dir[0]#dash
         self.action['dash']=True
-        #self.action[self.equip]=False#cancel attack_action
 
     def jump(self):
         self.friction[1] = 0
@@ -626,12 +639,20 @@ class Weapon(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.hit=False
+        self.frame=0
 
-    def update(self,scroll,entity_ac_dir,entity_hitbox):
+    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
         self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
+
+    def reset_timer(self):
+        self.frame = 0
+
+    def destroy(self):
+        if self.lifetime<0:
+            self.kill()
 
 class Sword(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
@@ -639,7 +660,13 @@ class Sword(Weapon):
         self.lifetime=10
         self.dmg=10
         self.velocity=[0,0]
-        self.type='sword'
+        self.priority_action=['hit']#animation
+        self.nonpriority_action=['swing']#animation
+        self.action={'swing':True,'hit':False}
+        self.state='swing'
+        self.sprites = Read_files.Sword()
+
+
         self.image = pygame.image.load("Sprites/Items/sword.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
@@ -653,7 +680,6 @@ class Sword(Weapon):
         pass
 
     def updates(self,entity_hitbox):
-        #remove the equipment if it has expiered
         self.lifetime-=1
         self.spawn(entity_hitbox)
 
@@ -667,13 +693,23 @@ class Sword(Weapon):
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
             self.hitbox.midright=entity_hitbox.midleft
 
+    def collision(self,entity=None,collision_ene=None):
+        pass
+        #entity.velocity[1]=entity.dir[1]*10#nail jump
+        #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
 class Bow(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
         self.velocity=[entity_dir[0]*10,-5]
         self.lifetime=40
         self.dmg=10
-        self.type='bow'
+        self.priority_action=['hit']#animation
+        self.nonpriority_action=['fly']#animation
+        self.action={'fly':True,'hit':False}
+        self.state='fly'
+        self.sprites = Read_files.Bow()
+        self.dir=entity_dir.copy()
+
         self.image = pygame.image.load("Sprites/Items/arrow.png").convert_alpha()
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
@@ -705,17 +741,56 @@ class Bow(Weapon):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
+    def collision(self,entity=None,collision_ene=None):
+        self.velocity=[0,0]
+        self.dmg=0
+
 class Force(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        pass
+
+        if entity_dir[1]!=0:#shppting up or down
+            self.velocity=[0,-entity_dir[1]*10]
+        else:#horizontal
+            self.velocity=[entity_dir[0]*10,0]
+
+        self.lifetime=70
+        self.dmg=0
+        self.dir=entity_dir.copy()
+
+        self.sprites = Read_files.Force()
+        self.priority_action=['hit']#animation
+        self.nonpriority_action=['fly']#animation
+        self.action={'fly':True,'hit':False}
+        self.state='fly'
+
+        self.image = pygame.image.load("Sprites/Items/force.png").convert_alpha()
+        if self.velocity[0]<0:#if shoting left
+            self.image=pygame.transform.flip(self.image,True,False)
+
+        self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
+        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],30,30)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def collision(self,entity=None,collision_ene=None):
+
+        if collision_ene:
+            if self.dir[1]!=0:
+                entity.velocity[1]=self.dir[1]*15#force jump
+                self.kill()
+            else:
+                collision_ene.velocity[0]=self.dir[0]*10
+                collision_ene.velocity[1]=-6
+        else:#if hit platform
+            entity.velocity[1]=self.dir[1]*10#force jump
+            self.kill()
 
 class Loot(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         choice=[-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,2,4,6,8,10,12,14,16,18,20]#just not 0
         self.pos=[random.choice(choice),random.choice(choice)]
-        self.lifetime=200
+        self.lifetime=300
         self.movement=[0,0]#for platfform collisions
         dir=self.pos[0]/abs(self.pos[0])#horizontal direction
         self.velocity=[dir*random.randint(0, 3),-11]

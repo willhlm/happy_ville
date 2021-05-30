@@ -22,42 +22,22 @@ class Collisions():
                 #if hit enemy
                 if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
 
-                    self.shake=collision_ene.shake#screen shake
-
                     collision_ene.health-=projectile.dmg
                     collision_ene.action['hurt']=True
 
-                    if collision_ene.health<=0:#if 0 health of enemy
-                        collision_ene.action['death']=True
-                        collision_ene.action['run']=False
-                        loot=collision_ene.loots(loot)
+                    self.shake=collision_ene.death(loot)#check if dead
 
-                    if projectile.type=='sword':#knockback if sword is quipped
-                        #collision_ene.velocity[0]=entity.dir[0]*10#knock back of enemy
-                        projectiles.remove(projectile)
-                        entity.velocity[1]=entity.dir[1]*10#nail jump
-
-                    elif projectile.type=='bow':
-                        projectile.velocity=[0,0]
+                    projectile.collision(entity,collision_ene)#response of projetile hits
 
                 #hit platform
                 elif collision_plat:
-                    if projectile.type=='sword':#knockback if sword is quipped
-                        #entity.velocity[0]=entity.dir[0]*10*(abs(entity.dir[1])-1)#knock back horizontally
-                        entity.velocity[1]=entity.dir[1]*10#nail jump
-                        projectiles.remove(projectile)
-                    elif projectile.type=='bow':
-                        projectile.velocity=[0,0]
+                    projectile.collision(entity)#entity is the guy donig the action
 
-                if projectile.lifetime<0:
-                    projectiles.remove(projectile)
-
-        return projectiles, loot
+                projectile.destroy()#if lifetime expieres
 
     @staticmethod
     def collided(projectile,target):
         return projectile.hitbox.colliderect(target.hitbox)
-
 
     #take damage if collide with enemy
     @staticmethod
@@ -68,9 +48,7 @@ class Collisions():
             player.health-=10
             player.velocity[0]=-player.dir[0]*10#knock back of player (will not completly work)
             player.action['hurt']=True
-            if player.health<=0:
-                player.action['death']=True
-                loot=player.loots(loot)
+            player.death(loot)#check if dead
         return loot
 
     #pickup loot
@@ -90,7 +68,6 @@ class Collisions():
             npc.talk(screen,player)
             player.state='talk'#the player talks with npc
             player.action['run']=False
-
 
     #invisible wall collision for NPC and enemy
     @staticmethod
@@ -118,7 +95,6 @@ class Collisions():
                         pass
                 if type(collision).__name__ in ["Chest", "Chest_Big"]:
                     try:
-                        print('heyo')
                         chest_id = collision.ID
                     except:
                         pass
@@ -262,12 +238,18 @@ class Animation():
         #super().__init__()
         pass
 
+
+    @staticmethod
+    def item_animation(group):
+        pass
+
+
     ### FIX frame rate thingy
     @staticmethod
     def set_img(enteties):
-
         for entity in enteties.sprites():#go through the group
-            for action in entity.priority_action+entity.nonpriority_action:#go through the group
+            all_action=entity.priority_action+entity.nonpriority_action
+            for action in all_action:#go through the actions
                 if entity.action[action] and action in entity.priority_action:#if the action is priority
                     if action != entity.state:
                         entity.state = action
