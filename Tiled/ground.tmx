@@ -6,7 +6,7 @@
  <tileset firstgid="1" name="ground_sheet" tilewidth="16" tileheight="16" tilecount="16" columns="4">
   <image source="../Sprites/ground_sheet.png" width="64" height="64"/>
  </tileset>
- <layer id="2" name="bg1" width="50" height="50">
+ <layer id="2" name="bg" width="50" height="50">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,
