@@ -269,7 +269,6 @@ class BG_far(Block):
         self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        print(self.rect.topleft[0])
         self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
         self.update_pos()
 
@@ -317,7 +316,7 @@ class Door(Pathway):
                 self.image = self.image_sheet[3]
 
 class Chest(Interactable):
-    def __init__(self,pos,id,state):
+    def __init__(self,pos,id,loot,state):
         super().__init__()
         self.image_sheet = Read_files.Chest().get_sprites()
         self.image = self.image_sheet[0]
@@ -326,6 +325,7 @@ class Chest(Interactable):
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
         self.ID = id
+        self.loot = loot
         if state == "opened":
             self.opened()
 
@@ -344,7 +344,7 @@ class Chest(Interactable):
                 self.image = self.image_sheet[2]
 
 class Chest_Big(Interactable):
-    def __init__(self,pos,id,state):
+    def __init__(self,pos,id,loot,state):
         super().__init__()
         self.image_sheet = Read_files.Chest_Big().get_sprites()
         self.image = self.image_sheet[0]
@@ -353,6 +353,7 @@ class Chest_Big(Interactable):
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
         self.ID = id
+        self.loot = loot
         if state == "opened":
             self.opened()
 

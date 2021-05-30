@@ -3,9 +3,9 @@ from os import listdir, walk
 from os.path import isfile, join
 
 
-def read_json():
+def read_json(path):
 
-    with open("map_state.json") as f:
+    with open(path) as f:
         config = json.load(f)
     return config
 

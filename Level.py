@@ -112,11 +112,11 @@ class Tilemap():
                     col_index += 1
                     continue
                 elif tile == '0':
-                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size),chest_index,chests[str(chest_index)][1])
+                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
                     interactables.add(new_chest)
                     chest_index += 1
                 elif tile == '1':
-                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),chest_index,chests[str(chest_index)][1])
+                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
                     interactables.add(new_chest)
                     chest_index += 1
                 elif tile == '8':
