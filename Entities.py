@@ -130,7 +130,8 @@ class Player(Entity):
     def update(self,pos):
         super(Player, self).update(pos)
         self.update_hitbox()
-        self.spirit += 0.1
+        if self.spirit <= self.max_spirit:
+            self.spirit += 0.1
 
         if self.action['sword']:
             self.sword.updates(self.hitbox)

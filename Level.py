@@ -7,7 +7,7 @@ class Tilemap():
         self.total_disatnce=[0,0]
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
-        self.chunks_bg1=self.define_chunks("bg1") #chunks containg first bg layer
+        self.chunks_bg=self.define_chunks("bg") #chunks containg first bg layer
         self.keys=[]
         self.chunk_render_distance=1000
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
@@ -139,41 +139,32 @@ class Tilemap():
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it
-        map_bg = self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
-        col = len(map_bg[0])
-        row = len(map_bg)
+        bg_far_flag = True
+        map_bg = self.read_csv("Tiled/" + self.level_name + "_bg.csv")
+        cols = len(map_bg[0])
+        rows = len(map_bg)
 
-        blit_surface = pygame.Surface((col*self.tile_size,row*self.tile_size), pygame.SRCALPHA, 32)
-        blit_surface = blit_surface.convert_alpha()
+        blit_surface = pygame.Surface((cols*self.tile_size,rows*self.tile_size), pygame.SRCALPHA, 32).convert_alpha()
+        blit_surface_bg_far = pygame.Surface((cols*self.tile_size,rows*self.tile_size), pygame.SRCALPHA, 32).convert_alpha()
 
-        row_index = 0
-        col_index = 0
+        #try loading bg_far
+        try:
+            bg_far_sheet = self.read_spritesheet("Sprites/level_sheets/" + self.level_name + "/bg_far.png")
+            map_bg_far = self.read_csv("Tiled/" + self.level_name + "_bg_far.csv")
+        except:
+            bg_far_flag = False
+            print("failed to read in bg_far")
 
-        for row in map_bg:
-            for tile in row:
-                if tile == '-1':
-                    col_index += 1
-                    continue
-
-                blit_surface.blit(self.sprite_sheet[int(tile)], (col_index * self.tile_size, row_index * self.tile_size))
-                col_index += 1
-            row_index += 1
-            col_index = 0 #reset column
+        for row in range(rows):
+            for col in range(cols):
+                if not map_bg[row][col] == '-1':
+                    blit_surface.blit(self.sprite_sheet[int(map_bg[row][col])], (col * self.tile_size, row * self.tile_size))
+                if bg_far_flag:
+                    if not map_bg_far[row][col] == '-1':
+                        blit_surface_bg_far.blit(bg_far_sheet[int(map_bg_far[row][col])], (col * self.tile_size, row * self.tile_size))
 
         BG_norm = Entities.BG_Block(blit_surface,(0,0))
-
-        #read in BG_far if it exists
-        try:
-            BG_far_img = pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha()
-            BG_far_width = BG_far_img.get_width()
-            BG_far_surface = pygame.Surface((BG_far_width*5,BG_far_img.get_height()),pygame.SRCALPHA).convert_alpha()
-            for i in range(0,8):
-                BG_far_surface.blit(BG_far_img,(BG_far_width*i,0))
-
-            BG_far = Entities.BG_far(BG_far_surface,(-400,0))
-        except IOError:
-            BG_far = Entities.BG_far(pygame.Surface((0,0)),(0,0))
-            print("Failed to load BG_far image")
+        BG_far = Entities.BG_far(blit_surface_bg_far,(0,0))
 
         return [BG_norm, BG_far]
 
