@@ -669,7 +669,7 @@ class Sword(Weapon):
         self.sprites = Read_files.Sword()
 
 
-        self.image = pygame.image.load("Sprites/Items/sword.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Attack/Sword/swing/swing1.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.height,entity_hitbox.width)
