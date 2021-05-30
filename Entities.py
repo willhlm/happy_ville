@@ -771,7 +771,6 @@ class Force(Weapon):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def collision(self,entity=None,collision_ene=None):
-
         if collision_ene:
             if self.dir[1]!=0:
                 entity.velocity[1]=self.dir[1]*15#force jump
@@ -780,7 +779,8 @@ class Force(Weapon):
                 collision_ene.velocity[0]=self.dir[0]*10
                 collision_ene.velocity[1]=-6
         else:#if hit platform
-            entity.velocity[1]=self.dir[1]*10#force jump
+            if self.dir[1]!=0:
+                entity.velocity[1]=self.dir[1]*10#force jump
             self.kill()
 
 class Loot(pygame.sprite.Sprite):
