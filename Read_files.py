@@ -69,7 +69,7 @@ class Sprites():
 #class containing sprites for player
 class Sprites_player(Sprites):
 
-    player_path = "Sprites/player/"
+    player_path = "Sprites/Enteties/player/"
     def __init__(self):
         super().__init__()
         self.sprite_dict = self.load_all_sprites(self.player_path)
@@ -98,7 +98,7 @@ class NPC(Sprites):
     def __init__(self, name):
         super().__init__()
         self.name = name
-        self.sprite_dict = self.load_all_sprites("Sprites/NPC/" + name + "/animation")
+        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/NPC/" + name + "/animation")
 
     def get_image(self, input, timer,dir):
 
@@ -113,7 +113,7 @@ class NPC(Sprites):
 
 class Sprites_evil_knight(Sprites_player):
 
-    player_path = "Sprites/enemies/evil_knight"
+    player_path = "Sprites/Enteties/enemies/evil_knight"
     def __init__(self):
         super().__init__()
 
@@ -121,7 +121,7 @@ class Flowy(Sprites_player):
 
     def __init__(self):
         super().__init__()
-        self.sprite_dict = self.load_all_sprites("Sprites/enemies/flowy")
+        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/enemies/flowy")
 
 class Sword(Sprites_player):
 
@@ -145,7 +145,7 @@ class Chest(Sprites):
 
     def __init__(self):
         super().__init__()
-        self.path = "Sprites/animations/chest.png"
+        self.path = "Sprites/animations/Chest/chest.png"
         self.sprites = self.generic_sheet_reader(self.path,16,21,1,3)
 
     def get_sprites(self):
@@ -155,7 +155,7 @@ class Chest_Big(Sprites):
 
     def __init__(self):
         super().__init__()
-        self.path = "Sprites/animations/chest_big.png"
+        self.path = "Sprites/animations/Chest/chest_big.png"
         self.sprites = self.generic_sheet_reader(self.path,32,29,1,5)
 
     def get_sprites(self):
@@ -165,7 +165,7 @@ class Hearts(Sprites):
 
     def __init__(self):
         super().__init__()
-        self.path = "Sprites/hearts.png"
+        self.path = "Sprites/UI/health/hearts.png"
         self.sprites = self.generic_sheet_reader(self.path,7,6,2,2)
 
     def get_sprites(self):
@@ -175,7 +175,7 @@ class Hearts_Black(Sprites):
 
     def __init__(self):
         super().__init__()
-        self.path = "Sprites/hearts_black.png"
+        self.path = "Sprites/UI/health/hearts_black.png"
         self.sprites = self.generic_sheet_reader(self.path,9,8,2,3)
 
     def get_sprites(self):
@@ -185,7 +185,7 @@ class Spirit(Sprites):
 
     def __init__(self):
         super().__init__()
-        self.path = "Sprites/spirit_orbs.png"
+        self.path = "Sprites/UI/spirit/spirit_orbs.png"
         self.sprites = self.generic_sheet_reader(self.path,9,9,1,3)
 
     def get_sprites(self):

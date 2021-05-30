@@ -14,13 +14,13 @@ class Game_UI():
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
-        self.start_BG = pygame.transform.scale(pygame.image.load('Sprites/start_menu.jpg').convert(),self.WINDOW_SIZE)
+        self.start_BG = pygame.transform.scale(pygame.image.load('Sprites/UI/Menu/Start/start_menu.jpg').convert(),self.WINDOW_SIZE)
         self.clock = pygame.time.Clock()
         self.ESC = False
         self.click = False
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
-        self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/spirit_orbs.png",9,9,1,3)
+        self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['start']
         self.map_state = Read_files.read_json("map_state.json")
 

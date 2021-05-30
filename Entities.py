@@ -64,7 +64,7 @@ class Player(Entity):
 
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert()
+        self.image = pygame.image.load("Sprites/Enteties/player/run/HeroKnight_run_0.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
@@ -185,7 +185,7 @@ class Enemy_1(Player):
 class Enemy_2(Entity):
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/enemies/flowy/stand/Stand1.png").convert()
+        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/stand/Stand1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
@@ -247,7 +247,7 @@ class Platform(Block):
 
 class Spikes(Block):
     def __init__(self,img,pos,chunk_key=False):
-        super().__init__(pygame.image.load("Sprites/Spkies.png").convert_alpha(),pos)
+        super().__init__(pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),pos)
         self.hitbox = self.rect.inflate(0,0)
         self.chunk_key=chunk_key
         self.spike=True
@@ -317,7 +317,7 @@ class Door(Pathway):
 
     def __init__(self,pos,destination):
         super().__init__(destination)
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/door.png",32,48,1,4)
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -526,14 +526,14 @@ class NPC_1(NPC):
     def __init__(self,pos):
         super().__init__()
         self.name = 'NPC_1'
-        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Enteties/player/run/HeroKnight_run_0.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.portrait=pygame.image.load('Sprites/NPC/'+self.name+ '/Woman1.png').convert_alpha()
-        self.text_surface=pygame.image.load("Sprites/UI/conversation/Conv_BG.png").convert_alpha()
+        self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
+        self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conversation/Conv_BG.png").convert_alpha()
         self.sprites = Read_files.NPC(self.name)
-        self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
+        self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
 
     def AI(self):
         self.action['run']=True
@@ -552,16 +552,16 @@ class MrBanks(NPC):
     def __init__(self,pos):
         super().__init__()
         self.name = 'MrBanks'
-        self.image = pygame.image.load("Sprites/player/run/HeroKnight_run_0.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Enteties/player/run/HeroKnight_run_0.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.portrait=pygame.image.load('Sprites/NPC/'+self.name+ '/Woman1.png').convert_alpha()
-        self.text_surface=pygame.image.load("Sprites/UI/conversation/Conv_BG.png").convert_alpha()
+        self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
+        self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conversation/Conv_BG.png").convert_alpha()
         self.sprites = Read_files.NPC(self.name)
-        self.conversation=Read_files.Conversations('Sprites/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
+        self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.conv_action=['deposit','withdraw']
-        self.conv_action_BG=pygame.image.load("Sprites/UI/conversation/Conv_action_BG.png").convert_alpha()
+        self.conv_action_BG=pygame.image.load("Sprites/Enteties/NPC/conversation/Conv_action_BG.png").convert_alpha()
         self.conv_possition=[[400],[300]]
 
         self.loot={'Coin':2}#the keys need to have the same name as their respective classes
@@ -713,7 +713,7 @@ class Bow(Weapon):
         self.sprites = Read_files.Bow()
         self.dir=entity_dir.copy()
 
-        self.image = pygame.image.load("Sprites/Items/arrow.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Enteties/Items/arrow.png").convert_alpha()
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
@@ -827,7 +827,7 @@ class Coin(Loot):
     def __init__(self,entity_hitbox):
         super().__init__()
 
-        self.image = pygame.image.load("Sprites/Items/coin.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Enteties/Items/coin.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
@@ -836,7 +836,7 @@ class Arrow(Loot):
     def __init__(self,entity_hitbox):
         super().__init__()
 
-        self.image = pygame.image.load("Sprites/Items/arrow.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Enteties/Items/arrow.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
