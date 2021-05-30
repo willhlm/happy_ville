@@ -1,9 +1,18 @@
-import pygame
+import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
 
-#sprires and fonts
 
+def read_json(path):
+
+    with open(path) as f:
+        config = json.load(f)
+    return config
+
+def write_json():
+    pass
+
+#sprires and fonts
 class Sprites():
     #use for animation sprites
     def __init__(self):
@@ -89,7 +98,7 @@ class NPC(Sprites):
     def __init__(self, name):
         super().__init__()
         self.name = name
-        self.sprite_dict = self.load_all_sprites("Sprites/NPC/" + name + "/")
+        self.sprite_dict = self.load_all_sprites("Sprites/NPC/" + name + "/animation")
 
     def get_image(self, input, timer,dir):
 
@@ -102,18 +111,56 @@ class NPC(Sprites):
 
         return len(self.sprite_dict[input])
 
-class Sprites_evil_knight(Sprites):
+class Sprites_evil_knight(Sprites_player):
 
-    player_path = "Sprites/player/"
+    player_path = "Sprites/enemies/evil_knight"
     def __init__(self):
         super().__init__()
-        self.sprite_dict = self.load_all_sprites(self.player_path)
+
+class Flowy(Sprites_player):
+
+    def __init__(self):
+        super().__init__()
+        self.sprite_dict = self.load_all_sprites("Sprites/enemies/flowy")
 
     def get_image(self, input, timer, dir):
+        if input=='sword' and dir[1]>0:
+            input=input+'_up'
+        elif input=='sword' and dir[1]<0:
+            input=input+'_down'
+
         if dir[0] >= 0:
             return self.sprite_dict[input][timer]
         elif dir[0] < 0:
-            return pygame.transformation.flip(self.sprite_dict[input][timer], True, False)
+            return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
+
+    def get_frame_number(self, input,dir):
+        if input=='sword' and dir[1]>0:
+            input=input+'_up'
+        elif input=='sword' and dir[1]<0:
+            input=input+'_down'
+
+        return len(self.sprite_dict[input])
+
+class Chest(Sprites):
+
+    def __init__(self):
+        super().__init__()
+        self.path = "Sprites/animations/chest.png"
+        self.sprites = self.generic_sheet_reader(self.path,16,21,1,3)
+
+    def get_sprites(self):
+        return self.sprites
+
+class Chest_Big(Sprites):
+
+    def __init__(self):
+        super().__init__()
+        self.path = "Sprites/animations/chest_big.png"
+        self.sprites = self.generic_sheet_reader(self.path,32,29,1,5)
+
+    def get_sprites(self):
+        return self.sprites
 
 class Hearts(Sprites):
 
@@ -137,11 +184,10 @@ class Hearts_Black(Sprites):
 
 #reading fonts
 class Alphabet():#scale needs to be larger than one, for reasons
-    def __init__(self, path,scale=1):
+    def __init__(self, path):
         self.spacing=1
-        self.scale=scale
-        self.letter_hight=16*self.scale
-        self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        self.letter_height=16
+        self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0',',','.','!','?','_']
         sheet=pygame.image.load(path).convert()
         self.characters={}
         current_char_width=0
@@ -154,25 +200,27 @@ class Alphabet():#scale needs to be larger than one, for reasons
                 break
             else:
                 if c[0]==238:#check for red color
-                    char_img=Alphabet.clip(sheet,x-current_char_width,0, current_char_width,self.letter_hight)
+                    char_img=Alphabet.clip(sheet,x-current_char_width,0, current_char_width,self.letter_height)
                     self.characters[self.character_order[character_count]]=char_img.copy()
                     character_count+=1
                     current_char_width=0
                 else:
                     current_char_width+=1
-        self.space_width=self.characters['A'].get_width()*self.scale
+        self.space_width=self.characters['A'].get_width()
 
-    def render(self,screen,text,loc):
+    def render(self,screen,text,loc,scale):
         x_offset=0
         y_offset=0
         for char in text:
-            if char!=' ' and char!='\n' and char!='*':
-                scaled_letter=pygame.transform.scale(self.characters[char], (int(self.scale*self.characters[char].get_width()), int(self.scale*self.letter_hight)))
+            if char!=' ' and char!='\n' and char!='*' and char!='&':
+                scaled_letter=pygame.transform.scale(self.characters[char], (int(scale*self.characters[char].get_width()), int(scale*self.letter_height)))
                 screen.blit(scaled_letter,(loc[0]+x_offset,loc[1]+y_offset))
                 x_offset+=self.characters[char].get_width()+self.spacing
             elif char=='*':#new line
                 x_offset=0
-                y_offset+=self.letter_hight
+                y_offset+=self.letter_height
+            elif char == '&':
+                continue
             else:#spacing
                 x_offset+=self.space_width+self.spacing
 

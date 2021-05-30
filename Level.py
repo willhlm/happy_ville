@@ -1,41 +1,29 @@
-import pygame, csv, Entities, math
-
-platforms = pygame.sprite.Group()
-bg_blocks = pygame.sprite.Group()
-Enemies = pygame.sprite.Group()
-npc = pygame.sprite.Group()
-invisible_blocks = pygame.sprite.Group()
+import pygame, csv, Entities, math, random, json
 
 class Tilemap():
-    def __init__(self, level):
+    def __init__(self, level,mode='auto'):
         self.tile_size=16
         self.chunk_size=10
-        self.scroll=[0,0]
-        self.true_scroll=[0,0]
         self.total_disatnce=[0,0]
-        self.chunks={}#placeholder to store the chunks containing collision information
-        self.chunks_bg1={} #chunks containg first bg layer
-        self.keys=[]
-        self.chunk_render_distance=800
         self.level_name = level
-        self.collision_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/collision.png")
-        self.bg1_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg1.png")
+        self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
+        self.chunks_bg1=self.define_chunks("bg1") #chunks containg first bg layer
+        self.keys=[]
+        self.chunk_render_distance=1000
+        self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/sprite_sheet.png")
+        self.platforms = pygame.sprite.Group()
+        self.invisible_blocks = pygame.sprite.Group()
 
-    def scrolling(self,knight):
-        self.true_scroll[0]+=(knight.topleft[0]-1*self.true_scroll[0]-240)/1
-        self.true_scroll[1]+=(knight.topleft[1]-self.true_scroll[1]-180)
+        if mode=='auto':
+            self.camera=Auto()
+        elif mode=='autocap':
+            self.camera=Autocap()
+        elif mode=='border':
+            self.camera=Border()
 
-        #print(self.true_scroll)
+    def scrolling(self,knight,shake):
+        self.camera.scrolling(knight,self.total_disatnce,shake)
 
-        self.scroll=self.true_scroll.copy()
-        self.scroll[0]=int(self.scroll[0])
-        self.scroll[1]=int(self.scroll[1])
-
-        #if knight.action['death']:#if kngiht is dead, don't move game.screen
-        #    self.scroll[0]=0
-        #    self.scroll[1]=0
-
-    #@staticmethod
     def read_csv(self, path):
         tile_map=[]
         with open(path) as data:
@@ -66,27 +54,27 @@ class Tilemap():
 
 
 #________________chunks#
-    def define_chunks(self):#devide the data into chunks
-        map=self.read_csv("Tiled/" + self.level_name + "_collision.csv")
-        map_bg=self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
+    def define_chunks(self,path):#devide the data into chunks
+        map=self.read_csv("Tiled/" + self.level_name + "_" + path + ".csv")
+
         columns = len(map[0])//self.chunk_size
         rows = len(map)//self.chunk_size
+        chunks = {}
 
         for k in range(rows):#Row: number of chunks
             for j in range(columns):#Column: number of chunks
                 chunk=[[]*self.chunk_size]*self.chunk_size
-                chunk_bg=[[]*self.chunk_size]*self.chunk_size
                 for i in range(0,self.chunk_size):#extract rows
                     chunk[i]=map[i+k*self.chunk_size][j*self.chunk_size:j*self.chunk_size+self.chunk_size]
-                    chunk_bg[i]=map_bg[i+k*self.chunk_size][j*self.chunk_size:j*self.chunk_size+self.chunk_size]
                 string=str(k)+';'+str(j)
-                self.chunks[string] = chunk#will look like chunks={'0;0':data,'0;1':data...}
-                self.chunks_bg1[string] = chunk_bg
+                chunks[string] = chunk#will look like chunks={'0;0':data,'0;1':data...}
+
+        return chunks
 
     def chunk_distance(self):
         chunk_distance={}
-        self.total_disatnce[0]+=self.scroll[0]#total distance
-        self.total_disatnce[1]+=self.scroll[1]#total distance
+        self.total_disatnce[0]+=self.camera.scroll[0]#total distance
+        self.total_disatnce[1]+=self.camera.scroll[1]#total distance
 
         for key in self.chunks.keys():
             y=int(key.split(';')[0])#y
@@ -100,6 +88,94 @@ class Tilemap():
 
     def test(self):
         print(self.collision_sheet[1])
+
+    def load_statics(self, map_state):
+    #load entities that shouldn't despawn with chunks, npc, enemies, interactables etc
+        map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
+
+        pathways = map_state["pathways"]
+        chests = map_state["chests"]
+
+        npcs = pygame.sprite.Group()
+        interactables = pygame.sprite.Group()
+        enemies = pygame.sprite.Group()
+
+        row_index = 0
+        col_index = 0
+
+        path_index = 0
+        chest_index = 0
+
+        for row in map_statics:
+            for tile in row:
+                if tile == '-1':
+                    col_index += 1
+                    continue
+                elif tile == '0':
+                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
+                    interactables.add(new_chest)
+                    chest_index += 1
+                elif tile == '1':
+                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
+                    interactables.add(new_chest)
+                    chest_index += 1
+                elif tile == '8':
+                    new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    interactables.add(new_path)
+                    path_index += 1
+                elif tile == '16':
+                    player = (col_index * self.tile_size, row_index * self.tile_size)
+                elif tile == '17':
+                    new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
+                    npcs.add(new_npc)
+                elif tile == '24':
+                    new_enemy = Entities.Enemy_2((col_index * self.tile_size, row_index * self.tile_size))
+                    enemies.add(new_enemy)
+                col_index += 1
+            row_index += 1
+            col_index = 0 #reset column
+
+        return player, npcs, enemies, interactables
+
+    def load_bg(self):
+    #returns one surface with all backround images blitted onto it
+        map_bg = self.read_csv("Tiled/" + self.level_name + "_bg1.csv")
+        col = len(map_bg[0])
+        row = len(map_bg)
+
+        blit_surface = pygame.Surface((col*self.tile_size,row*self.tile_size), pygame.SRCALPHA, 32)
+        blit_surface = blit_surface.convert_alpha()
+
+        row_index = 0
+        col_index = 0
+
+        for row in map_bg:
+            for tile in row:
+                if tile == '-1':
+                    col_index += 1
+                    continue
+
+                blit_surface.blit(self.sprite_sheet[int(tile)], (col_index * self.tile_size, row_index * self.tile_size))
+                col_index += 1
+            row_index += 1
+            col_index = 0 #reset column
+
+        BG_norm = Entities.BG_Block(blit_surface,(0,0))
+
+        #read in BG_far if it exists
+        try:
+            BG_far_img = pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha()
+            BG_far_width = BG_far_img.get_width()
+            BG_far_surface = pygame.Surface((BG_far_width*5,BG_far_img.get_height()),pygame.SRCALPHA).convert_alpha()
+            for i in range(0,8):
+                BG_far_surface.blit(BG_far_img,(BG_far_width*i,0))
+
+            BG_far = Entities.BG_far(BG_far_surface,(-400,0))
+        except IOError:
+            BG_far = Entities.BG_far(pygame.Surface((0,0)),(0,0))
+            print("Failed to load BG_far image")
+
+        return [BG_norm, BG_far]
 
     def load_chunks(self):
         chunk_distances=self.chunk_distance()
@@ -123,65 +199,26 @@ class Tilemap():
                         if tile=='-1':
                             tile_x+=1
                             continue
-                        if tile=='n':#temporary NPC
-                            new_npc = Entities.NPC_1(self.entity_position(tile_x, tile_y, x, y))
-                            npc.add(new_npc)
-                            tile_x+=1
-                            continue
-                        new_block = Entities.Block(self.collision_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
-                        platforms.add(new_block)
-                        tile_x+=1
-                    tile_y+=1
 
-                map = self.chunks_bg1[key]
-                tile_x=0
-                tile_y=0
-
-                #add bg blocks for new chunk
-                for row in map:
-                    tile_x=0
-                    for tile in row:
-                        if tile=='-1':
-                            tile_x+=1
-                            continue
-                        new_block = Entities.BG_Block(self.bg1_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
-                        bg_blocks.add(new_block)
+                        new_block = Entities.Platform(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                        self.platforms.add(new_block)
                         tile_x+=1
                     tile_y+=1
 
             elif chunk_distances[key]>self.chunk_render_distance and key in self.keys:
-                platform_list = [i for i in platforms.sprites() if i.chunk_key==key]
-                platforms.remove(platform_list)#need to remove from playforms grup in main
+                platform_list = [i for i in self.platforms.sprites() if i.chunk_key==key]
+                self.platforms.remove(platform_list)
 
-                bg_list = [i for i in bg_blocks.sprites() if i.chunk_key==key]
-                bg_blocks.remove(bg_list)
                 #update key
                 self.keys.remove(key)
 
-        return platforms, bg_blocks, Enemies, npc, invisible_blocks
+        return self.platforms, self.invisible_blocks
 #________________chunks#
 
     def entity_position(self, tile_x, tile_y, x, y):
         x_pos = tile_x * self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0]))
         y_pos = tile_y * self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))
         return [x_pos,y_pos]
-
-    #load everything at once
-    def load_tiles(self,path):
-        map=self.read_csv(path)
-        x=0
-        y=0
-        for row in map:
-            x=0
-            for tile in row:
-                if tile=='12':
-                    new_block = Entities.Block(1,[x*self.tile_size,y*self.tile_size])
-                    platforms.add(new_block)
-                x+=1
-            y+=1
-        self.map_w,self.map_h=x*self.tile_size,y*self.tile_size#map size
-
-        return platforms, Enemies
 
 class Sprite_sheet():
 
@@ -207,3 +244,68 @@ class Sprite_sheet():
     def images_at(self, rects, colorkey = None):
         #returns list of all images in sheet
         return [self.image_at(rect, colorkey) for rect in rects]
+
+
+#scrolling
+
+class Camera():
+    def __init__(self):
+        self.scroll=[0,0]
+        self.true_scroll=[0,0]
+
+    def update_scroll(self,shake):
+        if shake>0:
+            screen_shake=[random.randint(-shake,shake),random.randint(-shake,shake)]
+        else:
+            screen_shake=[0,0]
+
+        self.scroll=self.true_scroll.copy()
+        self.scroll[0]=int(self.scroll[0])+screen_shake[0]
+        self.scroll[1]=int(self.scroll[1])+screen_shake[1]
+
+class Auto(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,distance,shake):
+        self.true_scroll[0]+=(knight.center[0]-1*self.true_scroll[0]-290)/1
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.update_scroll(shake)
+
+class Autocap(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,distance,shake):
+        if knight.center[0]>400:
+            self.true_scroll[0]+=5
+        elif knight.center[0]<30:
+            self.true_scroll[0]-=5
+        elif knight.center[0]>150 and knight.center[0]<220:
+            self.true_scroll[0]=0
+
+        if knight.center[1]>200:
+            self.true_scroll[1]+=0.5
+        elif knight.center[1]<70:
+            self.true_scroll[1]-=0.5
+        elif knight.center[1]>130 and knight.center[1]<190:
+            self.true_scroll[1]=0
+
+        self.update_scroll(shake)
+
+class Border(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,total_disatnce,shake):
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        if -40 < total_disatnce[0]<1400:#map boundaries
+            self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+        else:
+            if knight.center[0]<60:
+                self.true_scroll[0]-=1
+            elif knight.center[0]>440:
+                self.true_scroll[0]+=1
+            else:
+                self.true_scroll[0]=0
+        self.update_scroll(shake)

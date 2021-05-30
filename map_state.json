@@ -1,0 +1,23 @@
+{
+    "village1" : {
+        "pathways" : {
+            "0" : "village2",
+            "1" : "village2",
+            "2" : "village2"
+        },
+        "chests" : {
+            "0" : ["coin", "closed"],
+            "1" : ["coin", "opened"],
+            "2" : ["coin", "closed"],
+            "3" : ["coin", "closed"]
+        }
+    },
+    "village2" : {
+        "pathways" : {
+            "0" : "village1"
+        },
+        "chests" : {
+            "0" : ["coin", "closed"]
+        }
+    }
+}
