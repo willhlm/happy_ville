@@ -16,6 +16,14 @@ class Entity(pygame.sprite.Sprite):
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
+    def death(self,loot):
+        if self.health<=0:#if 0 health of enemy
+            self.action['death']=True
+            self.velocity=[0,0]
+            self.loots(loot)
+            return self.shake#screen shake when eneny dies
+        return 0
+
     def AI(self,knight):
         pass
 
@@ -74,6 +82,7 @@ class Player(Entity):
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
         self.dashing_cooldown=10
         self.sword=Sword(self.dir,self.hitbox)
+        self.shake=0
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -104,7 +113,6 @@ class Player(Entity):
     def dashing(self):
         self.velocity[0]=20*self.dir[0]#dash
         self.action['dash']=True
-        #self.action[self.equip]=False#cancel attack_action
 
     def jump(self):
         self.friction[1] = 0
@@ -631,7 +639,7 @@ class Weapon(pygame.sprite.Sprite):
         self.hit=False
         self.frame=0
 
-    def update(self,scroll,entity_ac_dir,entity_hitbox):
+    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
         self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
@@ -639,6 +647,10 @@ class Weapon(pygame.sprite.Sprite):
 
     def reset_timer(self):
         self.frame = 0
+
+    def destroy(self):
+        if self.lifetime<0:
+            self.kill()
 
 class Sword(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
@@ -666,7 +678,6 @@ class Sword(Weapon):
         pass
 
     def updates(self,entity_hitbox):
-        #remove the equipment if it has expiered
         self.lifetime-=1
         self.spawn(entity_hitbox)
 
@@ -759,11 +770,6 @@ class Force(Weapon):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],30,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
-        self.lifetime-=1
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
-        self.hitbox.center = self.rect.center
-
     def collision(self,entity=None,collision_ene=None):
 
         if collision_ene:
@@ -776,7 +782,6 @@ class Force(Weapon):
         else:#if hit platform
             entity.velocity[1]=self.dir[1]*10#force jump
             self.kill()
-
 
 class Loot(pygame.sprite.Sprite):
     def __init__(self):

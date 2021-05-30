@@ -25,23 +25,15 @@ class Collisions():
                     collision_ene.health-=projectile.dmg
                     collision_ene.action['hurt']=True
 
-                    if collision_ene.health<=0:#if 0 health of enemy
-                        self.shake=collision_ene.shake#screen shake when eneny dies
-                        collision_ene.action['death']=True
-                        collision_ene.action['run']=False
-                        loot=collision_ene.loots(loot)
+                    self.shake=collision_ene.death(loot)#check if dead
 
-                    projectile.collision(entity,collision_ene)#entity is the guy donig the action
-                    #projectiles.remove(projectile)
+                    projectile.collision(entity,collision_ene)#response of projetile hits
 
                 #hit platform
                 elif collision_plat:
                     projectile.collision(entity)#entity is the guy donig the action
 
-                if projectile.lifetime<0:
-                    projectiles.remove(projectile)
-
-        return projectiles, loot
+                projectile.destroy()#if lifetime expieres
 
     @staticmethod
     def collided(projectile,target):
@@ -56,9 +48,7 @@ class Collisions():
             player.health-=10
             player.velocity[0]=-player.dir[0]*10#knock back of player (will not completly work)
             player.action['hurt']=True
-            if player.health<=0:
-                player.action['death']=True
-                loot=player.loots(loot)
+            player.death(loot)#check if dead
         return loot
 
     #pickup loot
@@ -78,7 +68,6 @@ class Collisions():
             npc.talk(screen,player)
             player.state='talk'#the player talks with npc
             player.action['run']=False
-
 
     #invisible wall collision for NPC and enemy
     @staticmethod
