@@ -1,9 +1,18 @@
-import pygame
+import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
 
-#sprires and fonts
 
+def read_json():
+
+    with open("map_state.json") as f:
+        config = json.load(f)
+    return config
+
+def write_json():
+    pass
+
+#sprires and fonts
 class Sprites():
     #use for animation sprites
     def __init__(self):

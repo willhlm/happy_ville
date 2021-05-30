@@ -89,18 +89,12 @@ class Tilemap():
     def test(self):
         print(self.collision_sheet[1])
 
-    def load_pathways(self):
-
-        with open("pathways_config.json") as f:
-            config = json.load(f)
-
-        return config[self.level_name]["pathways"]
-
-    def load_statics(self):
+    def load_statics(self, map_state):
     #load entities that shouldn't despawn with chunks, npc, enemies, interactables etc
         map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
 
-        pathways = self.load_pathways()
+        pathways = map_state["pathways"]
+        chests = map_state["chests"]
 
         npcs = pygame.sprite.Group()
         interactables = pygame.sprite.Group()
@@ -109,21 +103,26 @@ class Tilemap():
         row_index = 0
         col_index = 0
 
+        path_index = 0
+        chest_index = 0
+
         for row in map_statics:
             for tile in row:
                 if tile == '-1':
                     col_index += 1
                     continue
                 elif tile == '0':
-                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size))
+                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size),chest_index,chests[str(chest_index)][1])
                     interactables.add(new_chest)
+                    chest_index += 1
                 elif tile == '1':
-                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size))
+                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),chest_index,chests[str(chest_index)][1])
                     interactables.add(new_chest)
-                elif int(tile) in range(8,16):
-                    if pathways[tile][1] == "door":
-                        new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[tile][0])
-                        interactables.add(new_path)
+                    chest_index += 1
+                elif tile == '8':
+                    new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    interactables.add(new_path)
+                    path_index += 1
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':

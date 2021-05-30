@@ -315,10 +315,9 @@ class Door(Pathway):
                 self.timer += 1
             else:
                 self.image = self.image_sheet[3]
-                self.interacted = False
 
 class Chest(Interactable):
-    def __init__(self,pos):
+    def __init__(self,pos,id,state):
         super().__init__()
         self.image_sheet = Read_files.Chest().get_sprites()
         self.image = self.image_sheet[0]
@@ -326,6 +325,14 @@ class Chest(Interactable):
         self.rect.topleft = (pos[0],pos[1]-5)
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
+        self.ID = id
+        if state == "opened":
+            self.opened()
+
+    def opened(self):
+        self.image = self.image_sheet[2]
+        self.timer = 9
+        self.interacted = True
 
     def update(self,pos):
         super().update(pos)
@@ -335,10 +342,9 @@ class Chest(Interactable):
                 self.timer += 1
             else:
                 self.image = self.image_sheet[2]
-                self.interacted = False
 
 class Chest_Big(Interactable):
-    def __init__(self,pos):
+    def __init__(self,pos,id,state):
         super().__init__()
         self.image_sheet = Read_files.Chest_Big().get_sprites()
         self.image = self.image_sheet[0]
@@ -346,6 +352,14 @@ class Chest_Big(Interactable):
         self.rect.topleft = (pos[0],pos[1]-13)
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
+        self.ID = id
+        if state == "opened":
+            self.opened()
+
+    def opened(self):
+        self.image = self.image_sheet[4]
+        self.timer = 29
+        self.interacted = True
 
     def update(self,pos):
         super().update(pos)
