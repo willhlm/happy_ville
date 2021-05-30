@@ -121,7 +121,7 @@ class Player(Entity):
         self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
-        if self.action['wall']:
+        if self.action['wall'] and not self.action['dash']:
             self.velocity[0]=-self.dir[0]*10
 
     def talk(self):
@@ -757,7 +757,7 @@ class Force(Weapon):
         else:#horizontal
             self.velocity=[entity_dir[0]*10,0]
 
-        self.lifetime=70
+        self.lifetime=20
         self.dmg=0
         self.dir=entity_dir.copy()
 
@@ -777,16 +777,17 @@ class Force(Weapon):
 
     def collision(self,entity=None,collision_ene=None):
         if collision_ene:
+            #spawn spirits
             if self.dir[1]!=0:
                 entity.velocity[1]=self.dir[1]*15#force jump
                 self.kill()
             else:
                 collision_ene.velocity[0]=self.dir[0]*10
                 collision_ene.velocity[1]=-6
-        else:#if hit platform
-            if self.dir[1]!=0:
-                entity.velocity[1]=self.dir[1]*10#force jump
-            self.kill()
+            return
+        if self.dir[1]!=0:
+            entity.velocity[1]=self.dir[1]*10#force jump
+        self.kill()
 
 class Loot(pygame.sprite.Sprite):
     def __init__(self):
@@ -840,3 +841,12 @@ class Arrow(Loot):
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+class Spirits(pygame.sprite.Sprite):
+    def __init__(self,pos):
+        super().__init__()
+        self.image = pygame.image.load("Sprites/animmation/Spirits/Sprites1.png").convert()
+        self.rect = self.image.get_rect(center=[pos[0],pos[1]])
+        self.hitbox=pygame.Rect(pos[0],pos[1],5,5)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.frame=0
