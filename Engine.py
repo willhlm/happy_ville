@@ -135,6 +135,8 @@ class Collisions():
                     entity.action['fall']=True
                     if entity.collision_types['right'] or entity.collision_types['left']:#on wall and not on ground
                         entity.action['wall']=True
+                        entity.action['dash']=False
+
                         entity.action['fall']=False
                         entity.friction[1]=0.4
                     else:
