@@ -181,6 +181,16 @@ class Hearts_Black(Sprites):
     def get_sprites(self):
         return self.sprites
 
+class Spirit(Sprites):
+
+    def __init__(self):
+        super().__init__()
+        self.path = "Sprites/spirit_orbs.png"
+        self.sprites = self.generic_sheet_reader(self.path,9,9,1,3)
+
+    def get_sprites(self):
+        return self.sprites
+
 #reading fonts
 class Alphabet():#scale needs to be larger than one, for reasons
     def __init__(self, path):

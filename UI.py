@@ -20,6 +20,7 @@ class Game_UI():
         self.click = False
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
+        self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/spirit_orbs.png",9,9,1,3)
         self.state = ['start']
         self.map_state = Read_files.read_json("map_state.json")
 
@@ -117,7 +118,8 @@ class Game_UI():
             pygame.display.update()#update after every change
             self.clock.tick(60)#limmit FPS
 
-    def fade_in(self):#fade if first loop
+    def fade_in(self):
+    #fade if first loop
         timer = 0
         fade_time = 20
         while timer < fade_time:
@@ -212,7 +214,7 @@ class Game_UI():
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.platforms.update(scroll)
-        self.bg_far.update([-self.map.camera.true_scroll[0],-self.map.camera.true_scroll[1]])
+        self.bg_far.update(scroll)
         self.bg.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll)
@@ -249,6 +251,7 @@ class Game_UI():
 
     def blit_screen_info(self):
         self.blit_health()
+        self.blit_spirit()
         self.blit_fps()
 
     def blit_health(self):
@@ -267,6 +270,24 @@ class Game_UI():
                 blit_surface.blit(self.health_sprites[5],(i*(sprite_dim[0] + 1),0))
 
         self.screen.blit(blit_surface,(20, 20))
+
+    def blit_spirit(self):
+
+        sprite_dim = [9,9] #width, height specific to sprites used
+        blit_surface = pygame.Surface((int(self.player.max_spirit/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
+        spirit = self.player.spirit
+
+        for i in range(int(self.player.max_spirit/20)):
+            spirit -= 20
+            if spirit > -10:
+                blit_surface.blit(self.spirit_sprites[0],(i*(sprite_dim[0] + 1),0))
+            elif spirit > -20:
+                blit_surface.blit(self.spirit_sprites[1],(i*(sprite_dim[0] + 1),0))
+            else:
+                blit_surface.blit(self.spirit_sprites[2],(i*(sprite_dim[0] + 1),0))
+
+        self.screen.blit(blit_surface,(20, 34))
+
 
     def blit_fps(self):
         fps_string = str(int(self.clock.get_fps()))
