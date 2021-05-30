@@ -190,6 +190,7 @@ class Game_UI():
 
     def load_song(self, path):
         self.mixer = pygame.mixer.Sound(path)
+        self.mixer.set_volume(0.1)
         self.mixer.play(-1)
 
     def initiate_groups(self):
