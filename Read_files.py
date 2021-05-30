@@ -98,7 +98,7 @@ class NPC(Sprites):
     def __init__(self, name):
         super().__init__()
         self.name = name
-        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/NPC/" + name + "/animation")
+        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/NPC/" + name + "/animation/")
 
     def get_image(self, input, timer,dir):
 
@@ -113,7 +113,7 @@ class NPC(Sprites):
 
 class Sprites_evil_knight(Sprites_player):
 
-    player_path = "Sprites/Enteties/enemies/evil_knight"
+    player_path = "Sprites/Enteties/enemies/evil_knight/"
     def __init__(self):
         super().__init__()
 
@@ -121,7 +121,7 @@ class Flowy(Sprites_player):
 
     def __init__(self):
         super().__init__()
-        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/enemies/flowy")
+        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/enemies/flowy/")
 
 class Sword(Sprites_player):
 
