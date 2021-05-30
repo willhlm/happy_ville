@@ -86,7 +86,6 @@ class Game_UI():
                 self.change_map(change_map)
             elif chest_id:
                 self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
-                print (self.map_state[self.map.level_name]["chests"])
 
             for enemy in self.enemies:
                 enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
@@ -97,6 +96,7 @@ class Game_UI():
             Engine.Animation.set_img(self.players)
             Engine.Animation.set_img(self.enemies)
             Engine.Animation.set_img(self.npcs)
+            Engine.Animation.set_img(self.fprojectiles)
 
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
             pygame.draw.rect(self.screen, (0,255,0), self.player.hitbox,2)#checking hitbox
