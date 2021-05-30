@@ -23,6 +23,7 @@ class Game_UI():
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['start']
         self.map_state = Read_files.read_json("map_state.json")
+        self.mixer = None
 
         self.weather_paricles=BG.Weather()#initiate whater
         self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
@@ -163,6 +164,7 @@ class Game_UI():
     def change_map(self, map_name):
         timer = 0
         load_time = 50
+        self.mixer.fadeout(int(1000*load_time/60))
         #fade before loading new map
         while timer < load_time:
             self.screen.fill((207,238,250))
@@ -184,6 +186,11 @@ class Game_UI():
     def load_map(self, map_name):
         self.map = Level.Tilemap(map_name)
         self.initiate_groups()
+        self.load_song("Audio/Music/Yellow.wav")
+
+    def load_song(self, path):
+        self.mixer = pygame.mixer.Sound(path)
+        self.mixer.play(-1)
 
     def initiate_groups(self):
         #clean and load bg
