@@ -90,7 +90,6 @@ class Game_UI():
             for npc in self.npcs:
                 npc.AI()
 
-
             # !!--change to one group--!!   eventually change this to set animation image in update
             Engine.Animation.set_img(self.players)
             Engine.Animation.set_img(self.enemies)
@@ -99,8 +98,8 @@ class Game_UI():
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
             pygame.draw.rect(self.screen, (0,255,0), self.player.hitbox,2)#checking hitbox
 
-            self.draw()
             self.scrolling()
+            self.draw()
 
             self.blit_screen_info()
 
@@ -210,7 +209,7 @@ class Game_UI():
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.platforms.update(scroll)
-        self.bg_far.update(scroll)
+        self.bg_far.update([-self.map.camera.true_scroll[0],-self.map.camera.true_scroll[1]])
         self.bg.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll)
