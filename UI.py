@@ -214,7 +214,7 @@ class Game_UI():
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.platforms.update(scroll)
-        self.bg_far.update([-self.map.camera.true_scroll[0],-self.map.camera.true_scroll[1]])
+        self.bg_far.update(scroll)
         self.bg.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll)
@@ -281,7 +281,7 @@ class Game_UI():
             spirit -= 20
             if spirit > -10:
                 blit_surface.blit(self.spirit_sprites[0],(i*(sprite_dim[0] + 1),0))
-            elif health > -20:
+            elif spirit > -20:
                 blit_surface.blit(self.spirit_sprites[1],(i*(sprite_dim[0] + 1),0))
             else:
                 blit_surface.blit(self.spirit_sprites[2],(i*(sprite_dim[0] + 1),0))

@@ -99,8 +99,9 @@ class Player(Entity):
                 elif self.equip=='bow' and self.loot['Arrow']>0:
                     projectiles.add(Bow(self.dir,self.hitbox))
                     self.loot['Arrow']-=1
-                elif self.equip == 'force':
+                elif self.equip == 'force' and self.spirit >= 10:
                     projectiles.add(Force(self.dir,self.hitbox))
+                    self.spirit -= 10
 
         return projectiles
 
@@ -129,6 +130,7 @@ class Player(Entity):
     def update(self,pos):
         super(Player, self).update(pos)
         self.update_hitbox()
+        self.spirit += 0.1
 
         if self.action['sword']:
             self.sword.updates(self.hitbox)
