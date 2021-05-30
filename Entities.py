@@ -259,16 +259,21 @@ class BG_mid(Block):
         self.paralex=0.5
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + int(self.paralex*pos[0]), self.rect.topleft[1] + int(self.paralex*pos[1])]
 
 class BG_far(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=0.2
+        self.paralex=0.03
+        self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.topleft = self.true_pos
 
 class Invisible_block(Entity):
 
@@ -309,10 +314,9 @@ class Door(Pathway):
                 self.timer += 1
             else:
                 self.image = self.image_sheet[3]
-                self.interacted = False
 
 class Chest(Interactable):
-    def __init__(self,pos):
+    def __init__(self,pos,id,loot,state):
         super().__init__()
         self.image_sheet = Read_files.Chest().get_sprites()
         self.image = self.image_sheet[0]
@@ -320,6 +324,15 @@ class Chest(Interactable):
         self.rect.topleft = (pos[0],pos[1]-5)
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
+        self.ID = id
+        self.loot = loot
+        if state == "opened":
+            self.opened()
+
+    def opened(self):
+        self.image = self.image_sheet[2]
+        self.timer = 9
+        self.interacted = True
 
     def update(self,pos):
         super().update(pos)
@@ -329,10 +342,9 @@ class Chest(Interactable):
                 self.timer += 1
             else:
                 self.image = self.image_sheet[2]
-                self.interacted = False
 
 class Chest_Big(Interactable):
-    def __init__(self,pos):
+    def __init__(self,pos,id,loot,state):
         super().__init__()
         self.image_sheet = Read_files.Chest_Big().get_sprites()
         self.image = self.image_sheet[0]
@@ -340,6 +352,15 @@ class Chest_Big(Interactable):
         self.rect.topleft = (pos[0],pos[1]-13)
         self.hitbox = self.rect.inflate(0,0)
         self.timer = 0
+        self.ID = id
+        self.loot = loot
+        if state == "opened":
+            self.opened()
+
+    def opened(self):
+        self.image = self.image_sheet[4]
+        self.timer = 29
+        self.interacted = True
 
     def update(self,pos):
         super().update(pos)

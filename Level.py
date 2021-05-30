@@ -89,18 +89,12 @@ class Tilemap():
     def test(self):
         print(self.collision_sheet[1])
 
-    def load_pathways(self):
-
-        with open("pathways_config.json") as f:
-            config = json.load(f)
-
-        return config[self.level_name]["pathways"]
-
-    def load_statics(self):
+    def load_statics(self, map_state):
     #load entities that shouldn't despawn with chunks, npc, enemies, interactables etc
         map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
 
-        pathways = self.load_pathways()
+        pathways = map_state["pathways"]
+        chests = map_state["chests"]
 
         npcs = pygame.sprite.Group()
         interactables = pygame.sprite.Group()
@@ -109,21 +103,26 @@ class Tilemap():
         row_index = 0
         col_index = 0
 
+        path_index = 0
+        chest_index = 0
+
         for row in map_statics:
             for tile in row:
                 if tile == '-1':
                     col_index += 1
                     continue
                 elif tile == '0':
-                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size))
+                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
                     interactables.add(new_chest)
+                    chest_index += 1
                 elif tile == '1':
-                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size))
+                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
                     interactables.add(new_chest)
-                elif int(tile) in range(8,16):
-                    if pathways[tile][1] == "door":
-                        new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[tile][0])
-                        interactables.add(new_path)
+                    chest_index += 1
+                elif tile == '8':
+                    new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    interactables.add(new_path)
+                    path_index += 1
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
@@ -168,10 +167,10 @@ class Tilemap():
             BG_far_img = pygame.image.load("Sprites/level_sheets/" + self.level_name + "/BG_far.png").convert_alpha()
             BG_far_width = BG_far_img.get_width()
             BG_far_surface = pygame.Surface((BG_far_width*5,BG_far_img.get_height()),pygame.SRCALPHA).convert_alpha()
-            for i in range(0,4):
+            for i in range(0,8):
                 BG_far_surface.blit(BG_far_img,(BG_far_width*i,0))
 
-            BG_far = Entities.BG_far(BG_far_surface,(-200,0))
+            BG_far = Entities.BG_far(BG_far_surface,(-400,0))
         except IOError:
             BG_far = Entities.BG_far(pygame.Surface((0,0)),(0,0))
             print("Failed to load BG_far image")
@@ -269,8 +268,8 @@ class Auto(Camera):
         super().__init__()
 
     def scrolling(self,knight,distance,shake):
-        self.true_scroll[0]+=(knight.center[0]-1*self.true_scroll[0]-288)/4
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-240)
+        self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-290)/4
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
         self.update_scroll(shake)
 
 class Autocap(Camera):

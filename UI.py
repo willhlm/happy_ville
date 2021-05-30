@@ -21,6 +21,7 @@ class Game_UI():
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.state = ['start']
+        self.map_state = Read_files.read_json("map_state.json")
 
         self.weather_paricles=BG.Weather()#initiate whater
         self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
@@ -80,10 +81,12 @@ class Game_UI():
 
             self.group_distance()#update the groups beased on if they are on screen or not
 
-            check_map = Engine.Collisions.check_interaction(self.player,self.interactables)
-            if check_map:
-                self.change_map(check_map)
-
+            change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
+            if change_map:
+                self.change_map(change_map)
+            elif chest_id:
+                self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
+                print (self.map_state[self.map.level_name]["chests"])
 
             for enemy in self.enemies:
                 enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
@@ -200,7 +203,7 @@ class Game_UI():
         self.npc_pause.empty()
 
         #load all objects
-        player_pos, self.npcs, self.enemies, self.interactables = self.map.load_statics()
+        player_pos, self.npcs, self.enemies, self.interactables = self.map.load_statics(self.map_state[self.map.level_name])
         self.player.set_pos(player_pos)
         self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
         #self.players.add(self.player)
