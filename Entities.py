@@ -62,6 +62,8 @@ class Player(Entity):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 200
         self.max_health = 250
+        self.spirit = 100
+        self.max_spirit = 100
         self.priority_action=['death','hurt','dash','sword','bow']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False}
