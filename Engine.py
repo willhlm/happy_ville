@@ -4,7 +4,7 @@ class Collisions():
     def __init__(self):
         self.shake=0
 
-    def action_collision(self,projectiles,projectile_enteties,platforms,enemies,screen,loot):
+    def action_collision(self,projectiles,projectile_enteties,platforms,enemies,screen,loot,cosmetics):
         self.shake-=1
         self.shake=max(0,self.shake)#to not let it go to too low valyes
 
@@ -27,7 +27,7 @@ class Collisions():
 
                     self.shake=collision_ene.death(loot)#check if dead
 
-                    projectile.collision(entity,collision_ene)#response of projetile hits
+                    projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
 
                 #hit platform
                 elif collision_plat:
@@ -136,7 +136,6 @@ class Collisions():
                     if entity.collision_types['right'] or entity.collision_types['left']:#on wall and not on ground
                         entity.action['wall']=True
                         entity.action['dash']=False
-
                         entity.action['fall']=False
                         entity.friction[1]=0.4
                     else:

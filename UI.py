@@ -1,5 +1,5 @@
 import pygame, sys
-import Read_files#for the fonts
+import Read_files
 import Engine
 import Entities
 import Level
@@ -25,8 +25,6 @@ class Game_UI():
         self.map_state = Read_files.read_json("map_state.json")
         self.mixer = None
 
-        self.weather_paricles=BG.Weather()#initiate whater
-        self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
         self.collisions = Engine.Collisions()
 
         #initiate player
@@ -47,10 +45,14 @@ class Game_UI():
         self.loot = pygame.sprite.Group()
         self.enemy_pause = pygame.sprite.Group() #include all entities that are far away
         self.npc_pause = pygame.sprite.Group() #include all entities that are far away
+        self.cosmetics = pygame.sprite.Group() #spirits
 
 
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
+
+        self.weather_paricles=BG.Weather()#initiate whater
+        self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
 
         #initiate maps
         self.load_map('village1')
@@ -78,8 +80,8 @@ class Game_UI():
             self.collisions.pickup_loot(self.player,self.loot)
             self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
-            self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot)#f_action swinger, target1,target2
-            self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot)#f_action swinger, target1,target2
+            self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
+            self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
 
             self.group_distance()#update the groups beased on if they are on screen or not
 
@@ -234,6 +236,7 @@ class Game_UI():
         self.loot.update(scroll)
         self.npc_pause.update(scroll)
         self.enemy_pause.update(scroll)
+        self.cosmetics.update(scroll)
 
     def draw(self):
         self.bg_far.draw(self.screen)
@@ -248,6 +251,7 @@ class Game_UI():
         self.fprojectiles.draw(self.screen)
         self.eprojectiles.draw(self.screen)
         self.loot.draw(self.screen)
+        self.cosmetics.draw(self.screen)
 
     def inventory(self):
         pass

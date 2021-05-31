@@ -121,7 +121,7 @@ class Player(Entity):
         self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
-        if self.action['wall'] and not self.action['dash']:
+        if self.action['wall']:
             self.velocity[0]=-self.dir[0]*10
 
     def talk(self):
@@ -135,7 +135,6 @@ class Player(Entity):
 
         if self.action['sword']:
             self.sword.updates(self.hitbox)
-
 
     def update_hitbox(self):
         self.hitbox.center = [self.rect.center[0], self.rect.center[1] + self.hitbox_offset]
@@ -641,7 +640,6 @@ class MrBanks(NPC):
 class Weapon(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.hit=False
         self.frame=0
 
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
@@ -696,7 +694,7 @@ class Sword(Weapon):
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
             self.hitbox.midright=entity_hitbox.midleft
 
-    def collision(self,entity=None,collision_ene=None):
+    def collision(self,entity=None,cosmetics=None,collision_ene=None):
         pass
         #entity.velocity[1]=entity.dir[1]*10#nail jump
         #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
@@ -736,7 +734,8 @@ class Bow(Weapon):
         self.velocity[1]+=0.5
 
     def rotate(self):
-        angle=max(-self.velocity[0]*self.velocity[1],-60)
+        angle=self.dir[0]*max(-self.dir[0]*self.velocity[0]*self.velocity[1],-60)
+
         self.image=pygame.transform.rotate(self.original_image,angle)#fig,angle,scale
         x, y = self.rect.center  # Save its current center.
         self.rect = self.image.get_rect()  # Replace old rect with new rect.
@@ -744,7 +743,7 @@ class Bow(Weapon):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
-    def collision(self,entity=None,collision_ene=None):
+    def collision(self,entity=None,cosmetics=None,collision_ene=None):
         self.velocity=[0,0]
         self.dmg=0
 
@@ -775,18 +774,21 @@ class Force(Weapon):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],30,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-    def collision(self,entity=None,collision_ene=None):
+    def collision(self,entity=None,cosmetics=None,collision_ene=None):
+        push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
+
         if collision_ene:
             #spawn spirits
+            cosmetics.add(Spirits([collision_ene.rect[0],collision_ene.rect[1]]))
             if self.dir[1]!=0:
-                entity.velocity[1]=self.dir[1]*15#force jump
+                entity.velocity[1]=self.dir[1]*abs(push_strength[1])#force jump
                 self.kill()
             else:
-                collision_ene.velocity[0]=self.dir[0]*10
-                collision_ene.velocity[1]=-6
+                collision_ene.velocity[0]=self.dir[0]*abs(push_strength[0])
+                #collision_ene.velocity[1]=-6
             return
-        if self.dir[1]!=0:
-            entity.velocity[1]=self.dir[1]*10#force jump
+        if self.dir[1]!=0:#if patform down
+            entity.velocity[1]=self.dir[1]*abs(push_strength[1])*0.75#force jump
         self.kill()
 
 class Loot(pygame.sprite.Sprite):
@@ -843,10 +845,21 @@ class Arrow(Loot):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
 class Spirits(pygame.sprite.Sprite):
+
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/animmation/Spirits/Sprites1.png").convert()
+        self.image = pygame.image.load("Sprites/animations/Spirits/Spirits1.png").convert_alpha()
         self.rect = self.image.get_rect(center=[pos[0],pos[1]])
         self.hitbox=pygame.Rect(pos[0],pos[1],5,5)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.frame=0
+        self.lifetime=10
+
+    def update(self,pos):
+        self.lifetime -= 1
+
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+        if self.lifetime<0:
+            self.kill()
