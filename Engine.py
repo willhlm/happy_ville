@@ -256,10 +256,10 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = entity.sprites.get_image(action,entity.frame//3,entity.ac_dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//4,entity.ac_dir)
                     entity.frame += 1
 
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.ac_dir)*3:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.ac_dir)*4:
                         if action == 'death':
                             entity.kill()
                         else:
@@ -276,9 +276,9 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = entity.sprites.get_image(action,entity.frame//3,entity.dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//7,entity.dir)
                     entity.frame += 1
 
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*3:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*7:
                             entity.reset_timer()
                     break#take only the higest priority of the nonpriority list

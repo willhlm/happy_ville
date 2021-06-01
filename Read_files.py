@@ -69,7 +69,7 @@ class Sprites():
 #class containing sprites for player
 class Sprites_player(Sprites):
 
-    player_path = "Sprites/Enteties/player/"
+    player_path = "Sprites/Enteties/aila/"
     def __init__(self):
         super().__init__()
         self.sprite_dict = self.load_all_sprites(self.player_path)
@@ -80,9 +80,9 @@ class Sprites_player(Sprites):
         elif input=='sword' and dir[1]<0:
             input=input+'_down'
 
-        if dir[0] >= 0:
+        if dir[0] <= 0:
             return self.sprite_dict[input][timer]
-        elif dir[0] < 0:
+        elif dir[0] > 0:
             return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
 
     def get_frame_number(self, input,dir):
