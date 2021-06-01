@@ -276,9 +276,9 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = entity.sprites.get_image(action,entity.frame//7,entity.dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//6,entity.dir)
                     entity.frame += 1
 
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*7:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*6:
                             entity.reset_timer()
                     break#take only the higest priority of the nonpriority list

@@ -64,10 +64,9 @@ class Player(Entity):
 
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/aila/stand/aila_idle_1.png").convert()
+        self.image = pygame.image.load("Sprites/Enteties/aila/stand/aila_idle1.png").convert()
         self.rect = self.image.get_rect(center=pos)
-        #self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
-        self.hitbox = self.rect.inflate(0,0)
+        self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 200
         self.max_health = 250
@@ -78,7 +77,7 @@ class Player(Entity):
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
-        self.hitbox_offset = 0
+        self.hitbox_offset = (0,15)
         self.sprites = Read_files.Sprites_player()
         self.interacting = False
         self.friction=[0.2,0]
@@ -138,10 +137,10 @@ class Player(Entity):
             self.sword.updates(self.hitbox)
 
     def update_hitbox(self):
-        self.hitbox.center = [self.rect.center[0], self.rect.center[1] + self.hitbox_offset]
+        self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
 
     def update_rect(self):
-        self.rect.center = [self.hitbox.center[0], self.hitbox.center[1] - self.hitbox_offset]
+        self.rect.center = [self.hitbox.center[0] - self.hitbox_offset[0], self.hitbox.center[1] - self.hitbox_offset[1]]
 
     def loots(self,loot):
         pass

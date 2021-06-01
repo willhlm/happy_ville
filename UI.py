@@ -240,7 +240,7 @@ class Game_UI():
         self.cosmetics.update(scroll)
 
     def draw(self):
-        self.bg_far.draw(self.screen)
+        #self.bg_far.draw(self.screen)
         self.bg.draw(self.screen)
         #self.weather.draw(self.screen)
 

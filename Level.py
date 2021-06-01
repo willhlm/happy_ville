@@ -260,7 +260,7 @@ class Auto(Camera):
 
     def scrolling(self,knight,distance,shake):
         self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/4
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-200)
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-170)
         self.update_scroll(shake)
 
 class Autocap(Camera):
