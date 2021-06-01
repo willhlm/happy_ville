@@ -240,7 +240,7 @@ class Game_UI():
         self.cosmetics.update(scroll)
 
     def draw(self):
-        #self.bg_far.draw(self.screen)
+        self.bg_far.draw(self.screen)
         self.bg.draw(self.screen)
         #self.weather.draw(self.screen)
 
@@ -303,7 +303,7 @@ class Game_UI():
 
     def blit_fps(self):
         fps_string = str(int(self.clock.get_fps()))
-        self.font.render(self.screen,fps_string,(400,20),1)
+        self.font.render(self.screen,fps_string,(350,20),1)
 
     def main_menu(self):
         #self.screen.blit(self.start_BG,(0,0))

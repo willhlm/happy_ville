@@ -77,7 +77,7 @@ class Player(Entity):
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
-        self.hitbox_offset = (0,15)
+        self.hitbox_offset = (0,13)
         self.sprites = Read_files.Sprites_player()
         self.interacting = False
         self.friction=[0.2,0]
