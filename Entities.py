@@ -15,6 +15,7 @@ class Entity(pygame.sprite.Sprite):
         self.loot={'coin':0}
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
+        #self.sprites = Read_files.Entity_sprites(self.name)
 
     def death(self,loot):
         if self.health<=0:#if 0 health of enemy
@@ -64,10 +65,11 @@ class Player(Entity):
 
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/aila/stand/aila_idle1.png").convert()
+        self.image = pygame.image.load("Sprites/Enteties/aila/main/stand/aila_idle1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.sprites = Read_files.Sprites_Enteties()#Read_files.Sprites_player()
         self.health = 200
         self.max_health = 250
         self.spirit = 100
@@ -77,14 +79,17 @@ class Player(Entity):
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
+        self.sword=Sword(self.dir,self.hitbox)
         self.hitbox_offset = (0,13)
-        self.sprites = Read_files.Sprites_player()
         self.interacting = False
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
         self.dashing_cooldown=10
-        self.sword=Sword(self.dir,self.hitbox)
+        self.action_cooldown=False
         self.shake=0
+        self.phase='pre'
+        #self.frame_limits={'death':10,'hurt':10,'dash':10,'sword':10,'bow':10,'force':10}
+
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -92,7 +97,10 @@ class Player(Entity):
 
     def attack_action(self,projectiles):
         if self.action[self.equip]:
-            if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
+            if self.phase == 'main' and not self.action_cooldown:#produce the things in the main animation
+
+            #if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
+
                 if self.equip=='sword':
                     self.sword=Sword(self.dir,self.hitbox)
                     projectiles.add(self.sword)
@@ -103,15 +111,20 @@ class Player(Entity):
                     projectiles.add(Force(self.dir,self.hitbox))
                     self.spirit -= 10
 
+                self.action_cooldown=True
+
         return projectiles
 
     def change_equipment(self):#don't change if there are arrows or sword already
-        if self.equip == 'sword':
-            self.equip = 'bow'
-        elif self.equip == 'bow':
-            self.equip = 'force'
-        else:
-            self.equip = 'sword'
+
+        if self.state not in self.priority_action:
+
+            if self.equip == 'sword':
+                self.equip = 'bow'
+            elif self.equip == 'bow':
+                self.equip = 'force'
+            else:
+                self.equip = 'sword'
 
     def dashing(self):
         self.velocity[0]=20*self.dir[0]#dash
@@ -135,6 +148,68 @@ class Player(Entity):
 
         if self.action['sword']:
             self.sword.updates(self.hitbox)
+
+        self.set_img()
+
+    def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
+        all_action=self.priority_action+self.nonpriority_action
+
+        for action in all_action:#go through the actions
+
+            #pre and main animations
+            if self.action[action] and action in self.priority_action:#priority actions
+
+                if action != self.state:#changing action
+                    self.state = action
+                    self.reset_timer()
+                    self.phase='pre'
+
+                self.image = self.sprites.get_image(action,self.frame//4,self.ac_dir,self.phase)
+                self.frame += 1
+
+                if self.frame == self.sprites.get_frame_number(action,self.ac_dir,self.phase)*4:
+
+                    if action == 'death':
+                        self.kill()
+                    else:
+                        self.reset_timer()#reset frame
+                        if self.phase == 'pre':
+                            self.phase='main'
+                        elif self.phase == 'main':
+                            self.action[action]=False
+                            self.action_cooldown=False
+
+                            if self.sprites.get_frame_number(self.state,self.ac_dir,'post')==0:#if there is no post animation
+                                self.phase='pre'
+                            else:
+                                self.phase='post'
+                break
+
+            elif self.action[action] and action in self.nonpriority_action:#none-priority actions
+
+                if action != self.state:#changing action
+                    self.state = action
+                    self.reset_timer()
+                    self.phase='pre'
+
+                self.image = self.sprites.get_image(action,self.frame//4,self.dir,self.phase)
+                self.frame += 1
+
+                if self.frame == self.sprites.get_frame_number(action,self.dir,self.phase)*4:
+                    self.reset_timer()#reset frame
+                    if self.phase == 'pre':
+                        self.phase='main'
+                break
+
+            #post animation
+            elif not self.action[self.state] and self.phase=='post':#if we just falsed the action
+                self.image = self.sprites.get_image(self.state,self.frame//4,self.ac_dir,self.phase)
+                self.frame += 1
+                if self.frame == self.sprites.get_frame_number(self.state,self.ac_dir,self.phase)*4:
+                    self.reset_timer()#reset frame
+                    self.phase='pre'
+                    self.action_cooldown=False#allow for new action after post animation
+                break
 
     def update_hitbox(self):
         self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
@@ -567,6 +642,7 @@ class MrBanks(NPC):
         self.business=False
         self.ammount=0
 
+
     def AI(self):
         if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
             self.stay_still()
@@ -648,6 +724,8 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
+        self.destroy()
+
     def reset_timer(self):
         self.frame = 0
 
@@ -658,7 +736,7 @@ class Weapon(pygame.sprite.Sprite):
 class Sword(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        self.lifetime=10
+        self.lifetime=7
         self.dmg=10
         self.velocity=[0,0]
         self.priority_action=['hit']#animation
@@ -666,7 +744,6 @@ class Sword(Weapon):
         self.action={'swing':True,'hit':False}
         self.state='swing'
         self.sprites = Read_files.Sword()
-
 
         self.image = pygame.image.load("Sprites/Attack/Sword/swing/swing1.png").convert_alpha()
 
@@ -683,6 +760,7 @@ class Sword(Weapon):
     def updates(self,entity_hitbox):
         self.lifetime-=1
         self.spawn(entity_hitbox)
+        self.destroy()
 
     def spawn(self,entity_hitbox):
         if self.dir[1] > 0:#up
@@ -729,6 +807,8 @@ class Bow(Weapon):
         self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
+
+        self.destroy()
 
     def speed(self):#gravity
         self.velocity[1]+=0.5

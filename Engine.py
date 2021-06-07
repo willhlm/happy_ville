@@ -33,8 +33,6 @@ class Collisions():
                 elif collision_plat:
                     projectile.collision(entity)#entity is the guy donig the action
 
-                projectile.destroy()#if lifetime expieres
-
     @staticmethod
     def collided(projectile,target):
         return projectile.hitbox.colliderect(target.hitbox)
@@ -244,14 +242,17 @@ class Animation():
     def item_animation(group):
         pass
 
-
     ### FIX frame rate thingy
     @staticmethod
     def set_img(enteties):
+
         for entity in enteties.sprites():#go through the group
             all_action=entity.priority_action+entity.nonpriority_action
+
+
             for action in all_action:#go through the actions
                 if entity.action[action] and action in entity.priority_action:#if the action is priority
+
                     if action != entity.state:
                         entity.state = action
                         entity.reset_timer()
@@ -266,7 +267,9 @@ class Animation():
                             entity.reset_timer()
                             entity.action[action] = False
                             entity.state = 'stand'
+
                             entity.action[entity.equip]=False#to cancel even if you get hurt
+
                     break
 
                 elif entity.action[action] and action in entity.nonpriority_action:#if the action is nonpriority
@@ -276,9 +279,9 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = entity.sprites.get_image(action,entity.frame//6,entity.dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//4,entity.dir)
                     entity.frame += 1
 
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*6:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*4:
                             entity.reset_timer()
                     break#take only the higest priority of the nonpriority list

@@ -80,6 +80,9 @@ class Game_UI():
             self.collisions.pickup_loot(self.player,self.loot)
             self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
+            self.scrolling()#need to be above action_collision
+            self.draw()
+
             self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
             self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
 
@@ -97,16 +100,13 @@ class Game_UI():
                 npc.AI()
 
             # !!--change to one group--!!   eventually change this to set animation image in update
-            Engine.Animation.set_img(self.players)
-            Engine.Animation.set_img(self.enemies)
-            Engine.Animation.set_img(self.npcs)
-            Engine.Animation.set_img(self.fprojectiles)
+            #Engine.Animation.set_img(self.players)
+            #Engine.Animation.set_img(self.enemies)
+            #Engine.Animation.set_img(self.npcs)
+            #Engine.Animation.set_img(self.fprojectiles)
 
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
             pygame.draw.rect(self.screen, (0,255,0), self.player.hitbox,2)#checking hitbox
-
-            self.scrolling()
-            self.draw()
 
             self.blit_screen_info()
 
@@ -418,7 +418,8 @@ class Game_UI():
                         self.player.jump()
 
                     if event.key==pygame.K_f:
-                        self.player.action[self.player.equip]=True
+                        if self.player.phase!='post':#don't set it to true until post animation is finished
+                            self.player.action[self.player.equip]=True
                         #self.player.attack_action()
 
                     if event.key==pygame.K_g:

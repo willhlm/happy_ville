@@ -21,29 +21,24 @@ class Sprites():
 
     def load_all_sprites(self,base_path):
         #loads all sprites in all sub directories in base_path, stores list of sprites with keys corresponding to folder name
-
         sprite_dict = {}
         for subdir in [d[0] for d in walk(base_path)]:
             if subdir == base_path:
                 pass
             sprite_dict[subdir.split("/")[-1]] = self.load_sprites(subdir)
-
         return sprite_dict
 
 
     def load_sprites(self,path_to_folder):
         #use this to load multiple sprites in a path_to_folder
-
         list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
         if join(path_to_folder,'.DS_Store') in list_of_sprites:
             list_of_sprites.remove(join(path_to_folder,'.DS_Store'))
-
         list_of_sprites.sort()
         return [pygame.image.load(file) for file in list_of_sprites]
 
     def load_single_sprite(self,path_to_sprite):
         #use to load single sprite, full path must be provided
-
         return pygame.image.load(path_to_sprite)
 
     def generic_sheet_reader(self, path_to_sheet, w, h, r, c):
@@ -63,8 +58,42 @@ class Sprites():
                 image.blit(sheet,(0,0),rect)
                 sprite_dict[n] = image
                 n+=1
-
         return sprite_dict
+
+
+#class containing sprites for all enteties
+class Sprites_Enteties(Sprites):
+
+    def __init__(self):
+        super().__init__()
+        pre_dict = self.load_all_sprites("Sprites/Enteties/aila/pre/")
+        main_dict = self.load_all_sprites("Sprites/Enteties/aila/main/")
+        post_dict = self.load_all_sprites("Sprites/Enteties/aila/post/")
+
+        self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
+
+    def get_image(self, input, timer, dir,phase):#phase pre, main, post
+        if input=='sword' and dir[1]>0:
+            input=input+'_up'
+        elif input=='sword' and dir[1]<0:
+            input=input+'_down'
+
+        if dir[0] <= 0:
+            return self.sprite_dict[phase][input][timer]
+        elif dir[0] > 0:
+            return pygame.transform.flip(self.sprite_dict[phase][input][timer],True,False)
+
+    def get_frame_number(self, input,dir,phase):
+        if input=='sword' and dir[1]>0:
+            input=input+'_up'
+        elif input=='sword' and dir[1]<0:
+            input=input+'_down'
+
+        return len(self.sprite_dict[phase][input])
+
+
+
+
 
 #class containing sprites for player
 class Sprites_player(Sprites):
