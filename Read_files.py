@@ -64,11 +64,12 @@ class Sprites():
 #class containing sprites for all enteties
 class Sprites_Enteties(Sprites):
 
-    def __init__(self):
+    def __init__(self,path):
         super().__init__()
-        pre_dict = self.load_all_sprites("Sprites/Enteties/aila/pre/")
-        main_dict = self.load_all_sprites("Sprites/Enteties/aila/main/")
-        post_dict = self.load_all_sprites("Sprites/Enteties/aila/post/")
+
+        pre_dict = self.load_all_sprites(path+'pre/')
+        main_dict = self.load_all_sprites(path+'main/')
+        post_dict = self.load_all_sprites(path+'post/')
 
         self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
 
@@ -162,7 +163,7 @@ class Bow(Sprites_player):
 
     def __init__(self):
         super().__init__()
-        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Bow/fly")
+        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Bow/")
 
 class Force(Sprites_player):
 

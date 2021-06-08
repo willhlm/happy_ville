@@ -418,9 +418,8 @@ class Game_UI():
                         self.player.jump()
 
                     if event.key==pygame.K_f:
-                        if self.player.phase!='post':#don't set it to true until post animation is finished
+                        if not self.player.action['dash']:
                             self.player.action[self.player.equip]=True
-                        #self.player.attack_action()
 
                     if event.key==pygame.K_g:
                         self.player.interacting = True

@@ -10,12 +10,12 @@ class Entity(pygame.sprite.Sprite):
         self.velocity=[0,0]
         self.frame = 0
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.ac_dir=[0,0]
-        self.world_state=0
+        self.ac_dir=self.dir.copy()
+        self.world_state=0#state of happyness thingy of the world
         self.loot={'coin':0}
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
-        #self.sprites = Read_files.Entity_sprites(self.name)
+        self.phase='pre'
 
     def death(self,loot):
         if self.health<=0:#if 0 health of enemy
@@ -24,6 +24,43 @@ class Entity(pygame.sprite.Sprite):
             self.loots(loot)
             return self.shake#screen shake when eneny dies
         return 0
+
+    def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
+        all_action=self.priority_action+self.nonpriority_action
+
+        for action in all_action:#go through the actions
+            if self.action[action] and action in self.priority_action:#if the action is priority
+
+                if action != self.state:
+                    self.state = action
+                    self.reset_timer()
+
+                self.image = self.sprites.get_image(action,self.frame//4,self.ac_dir)
+                self.frame += 1
+
+                if self.frame == self.sprites.get_frame_number(action,self.ac_dir)*4:
+                    if action == 'death':
+                        self.kill()
+                    else:
+                        self.reset_timer()
+                        self.action[action] = False
+                        self.state = 'stand'
+                        self.action[self.equip]=False#to cancel even if you get hurt
+                break
+
+            elif self.action[action] and action in self.nonpriority_action:#if the action is nonpriority
+
+                #reset timer if the action is wrong
+                if action != self.state:
+                    self.state = action
+                    self.reset_timer()
+
+                self.image = entity.sprites.get_image(action,self.frame//4,self.dir)
+                self.frame += 1
+
+                if self.frame == self.sprites.get_frame_number(action,self.dir)*4:
+                        self.reset_timer()
+                break#take only the higest priority of the nonpriority list
 
     def AI(self,knight):
         pass
@@ -69,7 +106,7 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites_Enteties()#Read_files.Sprites_player()
+        self.sprites = Read_files.Sprites_Enteties('Sprites/Enteties/aila/')#Read_files.Sprites_player()
         self.health = 200
         self.max_health = 250
         self.spirit = 100
@@ -84,12 +121,78 @@ class Player(Entity):
         self.interacting = False
         self.friction=[0.2,0]
         self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
-        self.dashing_cooldown=10
         self.action_cooldown=False
         self.shake=0
-        self.phase='pre'
-        #self.frame_limits={'death':10,'hurt':10,'dash':10,'sword':10,'bow':10,'force':10}
+        self.dashing_cooldown=10
 
+        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':2,'force':10}
+        self.action_framerate={}
+        for action in self.frame_limit.keys():
+            self.action_framerate[action]=int(self.frame_limit[action]/self.sprites.get_frame_number(action,self.ac_dir,'main'))
+
+
+    def set_img(self):
+        all_action=self.priority_action+self.nonpriority_action
+
+        for action in all_action:#go through the actions
+            if self.action[action]:
+
+                if action != self.state and self.phase!='post':#changing action
+                    self.state = action
+                    self.reset_timer()#reset frame an remember the direction
+                    self.phase = 'pre'
+
+                if self.phase=='pre':
+
+                    self.image = self.sprites.get_image(action,self.frame//4,self.ac_dir,self.phase)
+                    self.frame += 1
+
+                    if self.frame == self.sprites.get_frame_number(action,self.ac_dir,self.phase)*4:
+                        if action == 'death':
+                            self.kill()
+                        else:
+                            self.frame=0
+                            self.phase = 'main'
+                    break
+
+                elif self.phase =='main':
+                    if action in self.priority_action:#priority action
+
+                        self.image = self.sprites.get_image(action,self.frame//self.action_framerate[action],self.ac_dir,self.phase)
+                        self.frame += 1
+
+                        if self.frame == self.frame_limit[action]:
+                            self.frame=0
+
+                            if self.sprites.get_frame_number(action,self.ac_dir,'post') == 0:#if there is no post animation
+                                self.phase = 'pre'
+                                self.action_cooldown = False
+                                self.action[action] = False
+                            else:
+                                self.phase = 'post'
+                        break
+
+                    elif action in self.nonpriority_action:#none-priority actions
+
+                        self.image = self.sprites.get_image(action,self.frame//4,self.dir,self.phase)
+                        self.frame += 1
+
+                        if self.frame == self.sprites.get_frame_number(action,self.dir,self.phase)*4:
+                            self.frame=0
+                            if self.sprites.get_frame_number(self.state,self.ac_dir,'post') != 0:#if there is post animation
+                                self.phase = 'post'
+                        break
+
+                else:#if post animation
+                    self.image = self.sprites.get_image(self.state,self.frame//4,self.ac_dir,'post')
+                    self.frame += 1
+
+                    if self.frame == self.sprites.get_frame_number(self.state,self.ac_dir,'post')*4:
+                        self.frame=0
+                        self.phase = 'pre'
+                        self.action_cooldown = False#allow for new action after post animation
+                        self.action[action] = False
+                    break
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -97,28 +200,28 @@ class Player(Entity):
 
     def attack_action(self,projectiles):
         if self.action[self.equip]:
-            if self.phase == 'main' and not self.action_cooldown:#produce the things in the main animation
 
-            #if self.state not in self.priority_action:#do not create an action if it has been created, until the animation is done
+            if self.phase == 'pre' and not self.action_cooldown:
+
+                if self.equip=='bow' and self.spirit >= 10:
+                    projectiles.add(Bow(self.ac_dir,self.rect))
+                    self.spirit -= 10
+                    self.action_cooldown=True#cooldown flag
+
+
+            elif self.phase == 'main' and not self.action_cooldown:#produce the object in the main animation
 
                 if self.equip=='sword':
-                    self.sword=Sword(self.dir,self.hitbox)
+                    self.sword=Sword(self.ac_dir,self.hitbox)
                     projectiles.add(self.sword)
-                elif self.equip=='bow' and self.loot['Arrow']>0:
-                    projectiles.add(Bow(self.dir,self.hitbox))
-                    self.loot['Arrow']-=1
                 elif self.equip == 'force' and self.spirit >= 10:
-                    projectiles.add(Force(self.dir,self.hitbox))
+                    projectiles.add(Force(self.ac_dir,self.hitbox))
                     self.spirit -= 10
-
-                self.action_cooldown=True
-
+                self.action_cooldown=True#cooldown flag
         return projectiles
 
-    def change_equipment(self):#don't change if there are arrows or sword already
-
-        if self.state not in self.priority_action:
-
+    def change_equipment(self):
+        if self.state not in self.priority_action:#don't change if there are bow or sword already
             if self.equip == 'sword':
                 self.equip = 'bow'
             elif self.equip == 'bow':
@@ -127,8 +230,11 @@ class Player(Entity):
                 self.equip = 'sword'
 
     def dashing(self):
-        self.velocity[0]=20*self.dir[0]#dash
-        self.action['dash']=True
+        if self.spirit>=10:#if we have spirit
+            self.velocity[0] = 30*self.dir[0]
+            self.action['dash'] = True
+            self.spirit -= 10
+            self.action[self.equip]=False#cancel any action
 
     def jump(self):
         self.friction[1] = 0
@@ -150,66 +256,6 @@ class Player(Entity):
             self.sword.updates(self.hitbox)
 
         self.set_img()
-
-    def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
-        all_action=self.priority_action+self.nonpriority_action
-
-        for action in all_action:#go through the actions
-
-            #pre and main animations
-            if self.action[action] and action in self.priority_action:#priority actions
-
-                if action != self.state:#changing action
-                    self.state = action
-                    self.reset_timer()
-                    self.phase='pre'
-
-                self.image = self.sprites.get_image(action,self.frame//4,self.ac_dir,self.phase)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(action,self.ac_dir,self.phase)*4:
-
-                    if action == 'death':
-                        self.kill()
-                    else:
-                        self.reset_timer()#reset frame
-                        if self.phase == 'pre':
-                            self.phase='main'
-                        elif self.phase == 'main':
-                            self.action[action]=False
-                            self.action_cooldown=False
-
-                            if self.sprites.get_frame_number(self.state,self.ac_dir,'post')==0:#if there is no post animation
-                                self.phase='pre'
-                            else:
-                                self.phase='post'
-                break
-
-            elif self.action[action] and action in self.nonpriority_action:#none-priority actions
-
-                if action != self.state:#changing action
-                    self.state = action
-                    self.reset_timer()
-                    self.phase='pre'
-
-                self.image = self.sprites.get_image(action,self.frame//4,self.dir,self.phase)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(action,self.dir,self.phase)*4:
-                    self.reset_timer()#reset frame
-                    if self.phase == 'pre':
-                        self.phase='main'
-                break
-
-            #post animation
-            elif not self.action[self.state] and self.phase=='post':#if we just falsed the action
-                self.image = self.sprites.get_image(self.state,self.frame//4,self.ac_dir,self.phase)
-                self.frame += 1
-                if self.frame == self.sprites.get_frame_number(self.state,self.ac_dir,self.phase)*4:
-                    self.reset_timer()#reset frame
-                    self.phase='pre'
-                    self.action_cooldown=False#allow for new action after post animation
-                break
 
     def update_hitbox(self):
         self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
@@ -724,7 +770,19 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
+        self.set_img()
         self.destroy()
+
+    def set_img(self):
+        self.image = self.sprites.get_image('',self.frame//4,self.dir,self.state)
+        self.frame += 1
+
+        if self.frame == self.sprites.get_frame_number('',self.dir,self.state)*4:
+            self.reset_timer()
+            if self.state=='pre':
+                self.state = 'main'
+            elif self.state=='post':
+                self.kill()
 
     def reset_timer(self):
         self.frame = 0
@@ -736,16 +794,12 @@ class Weapon(pygame.sprite.Sprite):
 class Sword(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        self.lifetime=7
+        self.lifetime=7#need to be changed depending on the animation of sword of player
         self.dmg=10
         self.velocity=[0,0]
-        self.priority_action=['hit']#animation
-        self.nonpriority_action=['swing']#animation
-        self.action={'swing':True,'hit':False}
-        self.state='swing'
-        self.sprites = Read_files.Sword()
+        #self.state='pre'
 
-        self.image = pygame.image.load("Sprites/Attack/Sword/swing/swing1.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Attack/Sword/main/swing/swing1.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.height,entity_hitbox.width)
@@ -754,13 +808,10 @@ class Sword(Weapon):
         self.dir=entity_dir.copy()
         self.spawn(entity_hitbox)#spawn hitbox based on entity position and direction
 
-    def update(self,scroll=0):
-        pass
-
     def updates(self,entity_hitbox):
         self.lifetime-=1
         self.spawn(entity_hitbox)
-        self.destroy()
+        self.destroy()#check lifetime
 
     def spawn(self,entity_hitbox):
         if self.dir[1] > 0:#up
@@ -772,38 +823,33 @@ class Sword(Weapon):
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
             self.hitbox.midright=entity_hitbox.midleft
 
+    def update(self,scroll=0):
+        pass
+
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         pass
         #entity.velocity[1]=entity.dir[1]*10#nail jump
         #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
 class Bow(Weapon):
-    def __init__(self,entity_dir,entity_hitbox):
+    def __init__(self,entity_dir,entity_rect):
         super().__init__()
-        self.velocity=[entity_dir[0]*10,-5]
-        self.lifetime=40
+        self.velocity=[0,0]
+        self.lifetime=100
         self.dmg=10
-        self.priority_action=['hit']#animation
-        self.nonpriority_action=['fly']#animation
-        self.action={'fly':True,'hit':False}
-        self.state='fly'
-        self.sprites = Read_files.Bow()
-        self.dir=entity_dir.copy()
+        self.state='pre'
+        self.sprites = Read_files.Sprites_Enteties('Sprites/Attack/Bow/')
+        self.dir=entity_dir.copy()#direction of the projectile
+        self.image = pygame.image.load("Sprites/Attack/Bow/pre/force_stone1.png").convert_alpha()
 
-        self.image = pygame.image.load("Sprites/Enteties/Items/arrow.png").convert_alpha()
-        if self.velocity[0]<0:#if shoting left
-            self.image=pygame.transform.flip(self.image,True,False)
-
-        self.original_image=self.image.copy()
-
-        self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],10,10)
+        self.rect = self.image.get_rect(center=entity_rect.center)
+        self.hitbox=pygame.Rect(entity_rect.center[0],entity_rect.center[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
+        self.set_img()
         self.speed()
-        self.rotate()
-
+        #self.rotate()
         self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
@@ -811,7 +857,10 @@ class Bow(Weapon):
         self.destroy()
 
     def speed(self):#gravity
-        self.velocity[1]+=0.5
+        if self.state=='main':
+            self.velocity[0]=self.velocity[0]+self.dir[0]*0.5
+        elif self.state=='post':
+            self.velocity[0]=0
 
     def rotate(self):
         angle=self.dir[0]*max(-self.dir[0]*self.velocity[0]*self.velocity[1],-60)
@@ -826,6 +875,8 @@ class Bow(Weapon):
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         self.velocity=[0,0]
         self.dmg=0
+        self.state='post'
+        self.frame=0
 
 class Force(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
@@ -840,13 +891,10 @@ class Force(Weapon):
         self.dmg=0
         self.dir=entity_dir.copy()
 
-        self.sprites = Read_files.Force()
-        self.priority_action=['hit']#animation
-        self.nonpriority_action=['fly']#animation
-        self.action={'fly':True,'hit':False}
-        self.state='fly'
+        self.sprites = Read_files.Sprites_Enteties('Sprites/Attack/Force/')
+        self.state='pre'
 
-        self.image = pygame.image.load("Sprites/Attack/Force/fly/fly1.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Attack/Force/pre/fly3.png").convert_alpha()
         if self.velocity[0]<0:#if shoting left
             self.image=pygame.transform.flip(self.image,True,False)
 
@@ -854,22 +902,23 @@ class Force(Weapon):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],30,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
+    def collision(self,entity=None,cosmetics=None,collision_ene=None):#if hit something
         push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
+        self.state='post'
+        self.frame=0
+        self.velocity=[0,0]
 
         if collision_ene:
             #spawn spirits
             cosmetics.add(Spirits([collision_ene.rect[0],collision_ene.rect[1]]))
             if self.dir[1]!=0:
                 entity.velocity[1]=self.dir[1]*abs(push_strength[1])#force jump
-                self.kill()
             else:
                 collision_ene.velocity[0]=self.dir[0]*abs(push_strength[0])
                 #collision_ene.velocity[1]=-6
             return
         if self.dir[1]!=0:#if patform down
             entity.velocity[1]=self.dir[1]*abs(push_strength[1])*0.75#force jump
-        self.kill()
 
 class Loot(pygame.sprite.Sprite):
     def __init__(self):
