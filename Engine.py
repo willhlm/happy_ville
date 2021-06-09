@@ -33,8 +33,6 @@ class Collisions():
                 elif collision_plat:
                     projectile.collision(entity)#entity is the guy donig the action
 
-                projectile.destroy()#if lifetime expieres
-
     @staticmethod
     def collided(projectile,target):
         return projectile.hitbox.colliderect(target.hitbox)
@@ -121,6 +119,7 @@ class Collisions():
 
             if entity.collision_types['bottom']:#if on ground
                 entity.dashing_cooldown=10
+
                 entity.velocity[1]=0
                 entity.action['fall']=False
                 entity.action['stand']=True
@@ -130,7 +129,7 @@ class Collisions():
                     entity.action['sword']=False
             else:#if not on ground
                 entity.action['stand']=False
-                if entity.velocity[1]>0:#if falling down
+                if entity.velocity[1]>=0:#if falling down
                     entity.action['jump']=False
                     entity.action['fall']=True
                     if entity.collision_types['right'] or entity.collision_types['left']:#on wall and not on ground
@@ -138,6 +137,7 @@ class Collisions():
                         entity.action['dash']=False
                         entity.action['fall']=False
                         entity.friction[1]=0.4
+                        entity.dashing_cooldown=10
                     else:
                         entity.action['wall']=False
                 else:#if going up
@@ -216,20 +216,25 @@ class Physics():
     def movement(dynamic_entities):
         for entity in dynamic_entities.sprites():
 
-            entity.velocity[1]=int(not entity.action['dash'])*entity.velocity[1]+entity.acceleration[1]-entity.velocity[1]*entity.friction[1]#gravity
-
+            entity.velocity[1]=entity.velocity[1]+entity.acceleration[1]-entity.velocity[1]*entity.friction[1]#gravity
             entity.velocity[1]=min(entity.velocity[1],7)#set a y max speed
-
-            entity.movement[1]=entity.velocity[1]#set the vertical velocity
 
             if entity.action['dash']:
                 entity.dashing_cooldown-=1
-                entity.friction[0]=0.1
+                entity.velocity[1]=0
+                entity.velocity[0]=entity.velocity[0]+entity.ac_dir[0]*0.5
+
+                if abs(entity.velocity[0])<10:#max horizontal speed
+                    entity.velocity[0]=entity.ac_dir[0]*10
+                #entity.velocity[0]=max(10,entity.velocity[0])
+
             elif entity.action['run']:#accelerate horizontal to direction when not dashing
                 entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
                 entity.friction[0]=0.2
                 if abs(entity.velocity[0])>10:#max horizontal speed
                     entity.velocity[0]=entity.dir[0]*10
+
+            entity.movement[1]=entity.velocity[1]#set the vertical velocity
 
             entity.velocity[0]=entity.velocity[0]-entity.friction[0]*entity.velocity[0]#friction
             entity.movement[0]=entity.velocity[0]#set the horizontal velocity
@@ -240,18 +245,17 @@ class Animation():
         pass
 
 
-    @staticmethod
-    def item_animation(group):
-        pass
-
-
     ### FIX frame rate thingy
     @staticmethod
     def set_img(enteties):
+
         for entity in enteties.sprites():#go through the group
             all_action=entity.priority_action+entity.nonpriority_action
+
+
             for action in all_action:#go through the actions
                 if entity.action[action] and action in entity.priority_action:#if the action is priority
+
                     if action != entity.state:
                         entity.state = action
                         entity.reset_timer()
@@ -267,6 +271,7 @@ class Animation():
                             entity.action[action] = False
                             entity.state = 'stand'
                             entity.action[entity.equip]=False#to cancel even if you get hurt
+
                     break
 
                 elif entity.action[action] and action in entity.nonpriority_action:#if the action is nonpriority
@@ -276,9 +281,9 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = entity.sprites.get_image(action,entity.frame//6,entity.dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//4,entity.dir)
                     entity.frame += 1
 
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*6:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*4:
                             entity.reset_timer()
                     break#take only the higest priority of the nonpriority list
