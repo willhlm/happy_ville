@@ -454,6 +454,5 @@ class Game_UI():
                     if event.key==pygame.K_g:
                         self.player.interacting = False
 
-
                     if event.key==pygame.K_f:
                         self.player.charging[0]=not self.player.charging[0]
