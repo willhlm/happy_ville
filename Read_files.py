@@ -25,6 +25,7 @@ class Sprites():
         for subdir in [d[0] for d in walk(base_path)]:
             if subdir == base_path:
                 pass
+
             sprite_dict[subdir.split("/")[-1]] = self.load_sprites(subdir)
         return sprite_dict
 
@@ -64,14 +65,18 @@ class Sprites():
 #class containing sprites for all enteties
 class Sprites_Enteties(Sprites):
 
-    def __init__(self,path):
+    def __init__(self,path,charge=False):
         super().__init__()
 
         pre_dict = self.load_all_sprites(path+'pre/')
         main_dict = self.load_all_sprites(path+'main/')
         post_dict = self.load_all_sprites(path+'post/')
 
-        self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
+        if charge:
+            charge_dict = self.load_all_sprites(path+'charge/')
+            self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
+        else:
+            self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
 
     def get_image(self, input, timer, dir,phase):#phase pre, main, post
         if input=='sword' and dir[1]>0:
