@@ -152,7 +152,7 @@ class Player(Entity):
                         if action == 'death':
                             self.kill()
                         else:
-                            if self.charging[0]:
+                            if self.charging[0] and action in self.priority_action:#do not set chagre while standing/running
                                 self.phase='charge'
                                 self.frame=0
                             else:
@@ -859,7 +859,7 @@ class Bow(Weapon):
         self.hitbox=pygame.Rect(entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-        self.charging=charge
+        self.charging=charge#pointed to player charge state
         self.charge_velocity=self.dir[0]
 
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
@@ -881,8 +881,13 @@ class Bow(Weapon):
             if abs(self.charge_velocity)>=10:#increase the ball size when max velocity is reached
                 self.action='medium'
 
+            if not self.charging[0]:#so that you do no stack ball while charging
+                self.frame=0
+                self.state='main'
+
         elif self.state=='main':#main pahse
             self.velocity[0]=self.charge_velocity#self.velocity[0]+self.dir[0]*0.5
+            self.velocity[1]+=0.1#graivity
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         self.velocity=[0,0]
