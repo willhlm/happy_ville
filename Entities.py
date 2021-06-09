@@ -114,8 +114,11 @@ class Player(Entity):
             self.equip = 'sword'
 
     def dashing(self):
-        self.velocity[0]=20*self.dir[0]#dash
-        self.action['dash']=True
+        if self.spirit >= 20:
+            self.velocity[0]=20*self.dir[0]#dash
+            self.action['dash']=True
+            self.spirit -= 20
+
 
     def jump(self):
         self.friction[1] = 0
