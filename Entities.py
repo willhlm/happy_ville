@@ -124,7 +124,7 @@ class Player(Entity):
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
-        self.charging=[False]
+        self.charging=[False]#a list beause to make it a pointer
 
         #frame rates
         self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':2,'force':10}
@@ -210,7 +210,7 @@ class Player(Entity):
 
                 if self.equip=='bow' and self.spirit >= 10:
 
-                    projectiles.add(Bow(self.ac_dir,self.rect,self.charging))
+                    projectiles.add(Bow(self.ac_dir,self.hitbox,self.charging))
                     self.spirit -= 10
                     self.action_cooldown=True#cooldown flag
 
@@ -769,7 +769,7 @@ class Weapon(pygame.sprite.Sprite):
         super().__init__()
         self.frame=0
         self.charging=[False]
-        
+
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
         self.lifetime-=1
@@ -853,10 +853,11 @@ class Bow(Weapon):
         self.dir=entity_dir.copy()#direction of the projectile
         self.image = pygame.image.load("Sprites/Attack/Bow/pre/force_stone1.png").convert_alpha()
 
-        self.rect = self.image.get_rect(center=entity_rect.center)
-        self.hitbox=pygame.Rect(entity_rect.center[0],entity_rect.center[1],10,10)
+        self.rect = self.image.get_rect(center=[entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1]])
+        self.hitbox=pygame.Rect(entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.charging=charge
+        self.charge_velocity=1
 
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
@@ -871,8 +872,12 @@ class Bow(Weapon):
         self.destroy()
 
     def speed(self):#gravity
-        if self.state=='main':
-            self.velocity[0]=self.velocity[0]+self.dir[0]*0.5
+        if self.state=='charge':
+            self.charge_velocity=self.charge_velocity+0.25*self.dir[0]
+            self.charge_velocity=min(10,self.charge_velocity)
+
+        elif self.state=='main':
+            self.velocity[0]=self.dir[0]*self.charge_velocity#self.velocity[0]+self.dir[0]*0.5
         elif self.state=='post':
             self.velocity[0]=0
 
