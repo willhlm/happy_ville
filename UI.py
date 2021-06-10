@@ -420,7 +420,7 @@ class Game_UI():
                     if event.key==pygame.K_f:
                         if not self.player.action['dash']:
                             self.player.action[self.player.equip]=True
-                            self.player.charging[0] = not self.player.charging[0]
+                            self.player.charging[0] = True
 
                     if event.key==pygame.K_g:
                         self.player.interacting = True
@@ -455,4 +455,4 @@ class Game_UI():
                         self.player.interacting = False
 
                     if event.key==pygame.K_f:
-                        self.player.charging[0]=not self.player.charging[0]
+                        self.player.charging[0]=False

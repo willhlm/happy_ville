@@ -152,7 +152,7 @@ class Player(Entity):
                         if action == 'death':
                             self.kill()
                         else:
-                            if self.charging[0] and action in self.priority_action:#do not set chagre while standing/running
+                            if self.charging[0] and action in ['sword','bow','force']:#do not set chagre while standing/running
                                 self.phase='charge'
                                 self.frame=0
                             else:
@@ -207,7 +207,6 @@ class Player(Entity):
         if self.action[self.equip]:
 
             if self.phase == 'pre' and not self.action_cooldown:
-
                 if self.equip=='bow' and self.spirit >= 10:
 
                     projectiles.add(Bow(self.ac_dir,self.hitbox,self.charging))
@@ -215,7 +214,6 @@ class Player(Entity):
                     self.action_cooldown=True#cooldown flag
 
             elif self.phase == 'main' and not self.action_cooldown:#produce the object in the main animation
-
                 if self.equip=='sword':
                     self.sword=Sword(self.ac_dir,self.hitbox)
                     projectiles.add(self.sword)
@@ -235,7 +233,7 @@ class Player(Entity):
                 self.equip = 'sword'
 
     def dashing(self):
-        if self.spirit>=10:#if we have spirit
+        if self.spirit>=10 and not self.charging[0]:#if we have spirit
             self.velocity[0] = 30*self.dir[0]
             self.action['dash'] = True
             self.spirit -= 10
