@@ -25,6 +25,7 @@ class Sprites():
         for subdir in [d[0] for d in walk(base_path)]:
             if subdir == base_path:
                 pass
+            print(subdir)
             sprite_dict[subdir.split("/")[-1]] = self.load_sprites(subdir)
         return sprite_dict
 
@@ -70,6 +71,8 @@ class Sprites_Enteties(Sprites):
         pre_dict = self.load_all_sprites(path+'pre/')
         main_dict = self.load_all_sprites(path+'main/')
         post_dict = self.load_all_sprites(path+'post/')
+        charge_dict = self.load_all_sprites(path+'charge/')
+
 
         self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
 
