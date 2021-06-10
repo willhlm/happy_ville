@@ -106,7 +106,7 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites_Enteties('Sprites/Enteties/aila/')#Read_files.Sprites_player()
+        self.sprites = Read_files.Sprites_Enteties('Sprites/Enteties/aila/',True)#Read_files.Sprites_player()
         self.health = 200
         self.max_health = 250
         self.spirit = 100
@@ -124,12 +124,13 @@ class Player(Entity):
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
+        self.charging=[False]#a list beause to make it a pointer
 
+        #frame rates
         self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':2,'force':10}
         self.action_framerate={}
-        for action in self.frame_limit.keys():
+        for action in self.frame_limit.keys():#framerate for the main phase
             self.action_framerate[action]=int(self.frame_limit[action]/self.sprites.get_frame_number(action,self.ac_dir,'main'))
-
 
     def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
@@ -142,7 +143,7 @@ class Player(Entity):
                     self.reset_timer()#reset frame an remember the direction
                     self.phase = 'pre'
 
-                if self.phase=='pre':
+                if self.phase=='pre' or self.phase=='charge':
 
                     self.image = self.sprites.get_image(action,self.frame//4,self.ac_dir,self.phase)
                     self.frame += 1
@@ -151,8 +152,12 @@ class Player(Entity):
                         if action == 'death':
                             self.kill()
                         else:
-                            self.frame=0
-                            self.phase = 'main'
+                            if self.charging[0] and action in self.priority_action:#do not set chagre while standing/running
+                                self.phase='charge'
+                                self.frame=0
+                            else:
+                                self.frame=0
+                                self.phase = 'main'
                     break
 
                 elif self.phase =='main':
@@ -204,10 +209,10 @@ class Player(Entity):
             if self.phase == 'pre' and not self.action_cooldown:
 
                 if self.equip=='bow' and self.spirit >= 10:
-                    projectiles.add(Bow(self.ac_dir,self.rect))
+
+                    projectiles.add(Bow(self.ac_dir,self.hitbox,self.charging))
                     self.spirit -= 10
                     self.action_cooldown=True#cooldown flag
-
 
             elif self.phase == 'main' and not self.action_cooldown:#produce the object in the main animation
 
@@ -763,6 +768,8 @@ class Weapon(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.frame=0
+        self.charging=[False]
+        self.action=''
 
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
@@ -774,13 +781,18 @@ class Weapon(pygame.sprite.Sprite):
         self.destroy()
 
     def set_img(self):
-        self.image = self.sprites.get_image('',self.frame//4,self.dir,self.state)
+        self.image = self.sprites.get_image(self.action,self.frame//4,self.dir,self.state)
         self.frame += 1
 
-        if self.frame == self.sprites.get_frame_number('',self.dir,self.state)*4:
+        if self.frame == self.sprites.get_frame_number(self.action,self.dir,self.state)*4:
             self.reset_timer()
             if self.state=='pre':
-                self.state = 'main'
+                if self.charging[0]:
+                    self.state='charge'
+                else:
+                    self.state = 'main'
+            elif self.state=='charge' and not self.charging[0]:
+                self.state='main'
             elif self.state=='post':
                 self.kill()
 
@@ -799,7 +811,7 @@ class Sword(Weapon):
         self.velocity=[0,0]
         #self.state='pre'
 
-        self.image = pygame.image.load("Sprites/Attack/Sword/main/swing/swing1.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Attack/Sword/main/swing1.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.height,entity_hitbox.width)
@@ -830,37 +842,57 @@ class Sword(Weapon):
         pass
         #entity.velocity[1]=entity.dir[1]*10#nail jump
         #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
+
 class Bow(Weapon):
-    def __init__(self,entity_dir,entity_rect):
+    def __init__(self,entity_dir,entity_rect,charge):
         super().__init__()
         self.velocity=[0,0]
         self.lifetime=100
         self.dmg=10
         self.state='pre'
-        self.sprites = Read_files.Sprites_Enteties('Sprites/Attack/Bow/')
+        self.action='small'
         self.dir=entity_dir.copy()#direction of the projectile
-        self.image = pygame.image.load("Sprites/Attack/Bow/pre/force_stone1.png").convert_alpha()
+        self.sprites = Read_files.Sprites_Enteties('Sprites/Attack/Bow/',True)
 
-        self.rect = self.image.get_rect(center=entity_rect.center)
-        self.hitbox=pygame.Rect(entity_rect.center[0],entity_rect.center[1],10,10)
+        self.image = pygame.image.load("Sprites/Attack/Bow/pre/small/force_stone1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=[entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1]])
+        self.hitbox=pygame.Rect(entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+        self.charging=charge#pointed to player charge state
+        self.charge_velocity=self.dir[0]
 
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
-        self.set_img()
-        self.speed()
-        #self.rotate()
         self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
-        self.destroy()
+        self.set_img()#set the animation
+        self.speed()#set the speed
+        self.destroy()#if lifetime expires
 
-    def speed(self):#gravity
-        if self.state=='main':
-            self.velocity[0]=self.velocity[0]+self.dir[0]*0.5
-        elif self.state=='post':
-            self.velocity[0]=0
+    def speed(self):
+        if self.state=='charge':#charging
+            self.charge_velocity=self.charge_velocity+0.25*self.dir[0]
+            self.charge_velocity=self.dir[0]*min(10,self.dir[0]*self.charge_velocity)#set max velocity
+            self.lifetime=100#don't change the lifetime while charging
+
+            if abs(self.charge_velocity)>=10:#increase the ball size when max velocity is reached
+                self.action='medium'
+
+            if not self.charging[0]:#so that you do no stack ball while charging
+                self.frame=0
+                self.state='main'
+
+        elif self.state=='main':#main pahse
+            self.velocity[0]=self.charge_velocity#self.velocity[0]+self.dir[0]*0.5
+            self.velocity[1]+=0.1#graivity
+
+    def collision(self,entity=None,cosmetics=None,collision_ene=None):
+        self.velocity=[0,0]
+        self.dmg=0
+        self.state='post'
 
     def rotate(self):
         angle=self.dir[0]*max(-self.dir[0]*self.velocity[0]*self.velocity[1],-60)
@@ -871,12 +903,6 @@ class Bow(Weapon):
         self.hitbox=pygame.Rect(x,y,10,10)
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
-
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
-        self.velocity=[0,0]
-        self.dmg=0
-        self.state='post'
-        self.frame=0
 
 class Force(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
