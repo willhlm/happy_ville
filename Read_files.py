@@ -61,7 +61,6 @@ class Sprites():
                 n+=1
         return sprite_dict
 
-
 #class containing sprites for all enteties
 class Sprites_Enteties(Sprites):
 
@@ -72,7 +71,7 @@ class Sprites_Enteties(Sprites):
         main_dict = self.load_all_sprites(path+'main/')
         post_dict = self.load_all_sprites(path+'post/')
 
-        if charge:
+        if charge:#if there is charge
             charge_dict = self.load_all_sprites(path+'charge/')
             self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
         else:
@@ -96,10 +95,6 @@ class Sprites_Enteties(Sprites):
             input=input+'_down'
 
         return len(self.sprite_dict[phase][input])
-
-
-
-
 
 #class containing sprites for player
 class Sprites_player(Sprites):
@@ -157,24 +152,6 @@ class Flowy(Sprites_player):
     def __init__(self):
         super().__init__()
         self.sprite_dict = self.load_all_sprites("Sprites/Enteties/enemies/flowy/")
-
-class Sword(Sprites_player):
-
-    def __init__(self):
-        super().__init__()
-        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Sword/swing")
-
-class Bow(Sprites_player):
-
-    def __init__(self):
-        super().__init__()
-        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Bow/")
-
-class Force(Sprites_player):
-
-    def __init__(self):
-        super().__init__()
-        self.sprite_dict = self.load_all_sprites("Sprites/Attack/Force/fly")
 
 class Chest(Sprites):
 
