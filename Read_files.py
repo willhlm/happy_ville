@@ -25,11 +25,7 @@ class Sprites():
         for subdir in [d[0] for d in walk(base_path)]:
             if subdir == base_path:
                 pass
-<<<<<<< HEAD
-            print(subdir)
-=======
 
->>>>>>> 40c30125140f17057f3f27336941e54a2706fb5b
             sprite_dict[subdir.split("/")[-1]] = self.load_sprites(subdir)
         return sprite_dict
 
