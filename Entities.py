@@ -127,7 +127,7 @@ class Player(Entity):
         self.charging=[False]#a list beause to make it a pointer
 
         #frame rates
-        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':2,'force':10}
+        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':4,'force':10}
         self.action_framerate={}
         for action in self.frame_limit.keys():#framerate for the main phase
             self.action_framerate[action]=int(self.frame_limit[action]/self.sprites.get_frame_number(action,self.ac_dir,'main'))
@@ -152,15 +152,14 @@ class Player(Entity):
                         if action == 'death':
                             self.kill()
                         else:
+                            self.frame=0
                             if self.charging[0] and action in ['sword','bow','force']:#do not set chagre while standing/running
                                 self.phase='charge'
-                                self.frame=0
                             else:
-                                self.frame=0
                                 self.phase = 'main'
                     break
 
-                elif self.phase =='main':
+                elif self.phase == 'main':
                     if action in self.priority_action:#priority action
 
                         self.image = self.sprites.get_image(action,self.frame//self.action_framerate[action],self.ac_dir,self.phase)
@@ -220,6 +219,7 @@ class Player(Entity):
                 elif self.equip == 'force' and self.spirit >= 10:
                     projectiles.add(Force(self.ac_dir,self.hitbox))
                     self.spirit -= 10
+                    self.force_jump()
                 self.action_cooldown=True#cooldown flag
         return projectiles
 
@@ -231,6 +231,10 @@ class Player(Entity):
                 self.equip = 'force'
             else:
                 self.equip = 'sword'
+
+    def force_jump(self):
+        #if self.dir[1]!=0:
+        self.velocity[1]=self.dir[1]*10#force jump
 
     def dashing(self):
         if self.spirit>=10 and not self.charging[0]:#if we have spirit
@@ -255,8 +259,8 @@ class Player(Entity):
         if self.spirit <= self.max_spirit:
             self.spirit += 0.1
 
-        if self.action['sword']:
-            self.sword.updates(self.hitbox)
+    #    if self.action['sword']:
+        self.sword.updates(self.hitbox)
 
         self.set_img()
 
@@ -789,8 +793,8 @@ class Weapon(pygame.sprite.Sprite):
                     self.state='charge'
                 else:
                     self.state = 'main'
-            elif self.state=='charge' and not self.charging[0]:
-                self.state='main'
+            #elif self.state=='charge' and not self.charging[0]:
+            #    self.state='main'
             elif self.state=='post':
                 self.kill()
 
@@ -862,7 +866,6 @@ class Bow(Weapon):
 
     def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
         #remove the equipment if it has expiered
-        self.lifetime-=1
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
@@ -874,18 +877,19 @@ class Bow(Weapon):
         if self.state=='charge':#charging
             self.charge_velocity=self.charge_velocity+0.25*self.dir[0]
             self.charge_velocity=self.dir[0]*min(10,self.dir[0]*self.charge_velocity)#set max velocity
-            self.lifetime=100#don't change the lifetime while charging
 
             if abs(self.charge_velocity)>=10:#increase the ball size when max velocity is reached
                 self.action='medium'
 
-            if not self.charging[0]:#so that you do no stack ball while charging
+            if not self.charging[0]:#when finish chaging
                 self.frame=0
                 self.state='main'
+                self.velocity[0]=self.charge_velocity#set the velocity
 
         elif self.state=='main':#main pahse
-            self.velocity[0]=self.charge_velocity#self.velocity[0]+self.dir[0]*0.5
+            self.lifetime-=1#affect only the lifetime in main state
             self.velocity[1]+=0.1#graivity
+
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         self.velocity=[0,0]
@@ -927,22 +931,21 @@ class Force(Weapon):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):#if hit something
-        push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
+        #push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
         self.state='post'
         self.frame=0
         self.velocity=[0,0]
 
-        if collision_ene:
-            #spawn spirits
-            cosmetics.add(Spirits([collision_ene.rect[0],collision_ene.rect[1]]))
-            if self.dir[1]!=0:
-                entity.velocity[1]=self.dir[1]*abs(push_strength[1])#force jump
-            else:
-                collision_ene.velocity[0]=self.dir[0]*abs(push_strength[0])
-                #collision_ene.velocity[1]=-6
+        if collision_ene:#if collision with enemy
+            cosmetics.add(Spirits([collision_ene.rect[0],collision_ene.rect[1]]))#spawn cosmetic spirits
+            #if self.dir[1]!=0:
+            #    entity.velocity[1]=self.dir[1]*abs(push_strength[1])#force jump
+            if self.dir[1]==0:#push enemy back
+                collision_ene.velocity[0]=self.dir[0]*10#abs(push_strength[0])
+                collision_ene.velocity[1]=-6
             return
-        if self.dir[1]!=0:#if patform down
-            entity.velocity[1]=self.dir[1]*abs(push_strength[1])*0.75#force jump
+        #if self.dir[1]!=0:#if patform down
+        #    entity.velocity[1]=self.dir[1]*abs(push_strength[1])*0.75#force jump
 
 class Loot(pygame.sprite.Sprite):
     def __init__(self):

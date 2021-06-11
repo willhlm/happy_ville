@@ -228,7 +228,7 @@ class Physics():
                     entity.velocity[0]=entity.ac_dir[0]*10
                 #entity.velocity[0]=max(10,entity.velocity[0])
 
-            elif entity.action['run']:#accelerate horizontal to direction when not dashing
+            elif entity.action['run'] and not entity.charging[0]:#accelerate horizontal to direction when not dashing
                 entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
                 entity.friction[0]=0.2
                 if abs(entity.velocity[0])>10:#max horizontal speed

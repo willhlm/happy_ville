@@ -456,3 +456,5 @@ class Game_UI():
 
                     if event.key==pygame.K_f:
                         self.player.charging[0]=False
+                        self.player.phase='main'
+                        self.player.frame=0
