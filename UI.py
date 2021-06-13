@@ -57,6 +57,10 @@ class Game_UI():
         #initiate maps
         self.load_map('village1')
 
+    def main_menu(self):
+        while True:
+
+
     def game_loop(self, initiate_fade_in = False):
 
         while True:
@@ -305,7 +309,7 @@ class Game_UI():
         fps_string = str(int(self.clock.get_fps()))
         self.font.render(self.screen,fps_string,(350,20),1)
 
-    def main_menu(self):
+    def pause_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
         #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
         self.display.fill((207,238,250))#fill game.screen
@@ -391,7 +395,7 @@ class Game_UI():
                 if event.type == pygame.KEYDOWN:
                     if event.key==pygame.K_ESCAPE:#escape button
                         self.ESC=True
-                        self.main_menu()
+                        self.pause_menu()
 
                     if event.key == pygame.K_t:
                         self.player.talk()
