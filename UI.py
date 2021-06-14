@@ -104,8 +104,8 @@ class Game_UI():
 
             self.blit_screen_info()
 
-            npc_talk = Engine.Collisions.check_npc_collision(self.player,self.npcs,self.display)#need to be at the end so that the conversation text doesn't get scaled
-            if npc_talk:
+            npc = Engine.Collisions.check_npc_collision(self.player,self.npcs,self.display)#need to be at the end so that the conversation text doesn't get scaled
+            if npc:
                 pass
 
 
@@ -117,6 +117,9 @@ class Game_UI():
 
             pygame.display.update()
             self.clock.tick(60) #set FPS to 60
+
+    def blit_conversation(self, npc):
+        pass
 
     def interactions(self):
         change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
