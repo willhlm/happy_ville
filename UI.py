@@ -59,6 +59,7 @@ class Game_UI():
 
     def main_menu(self):
         while True:
+            pass
 
 
     def game_loop(self, initiate_fade_in = False):
@@ -66,7 +67,6 @@ class Game_UI():
         while True:
             self.screen.fill((207,238,250))#fill game.screen
 
-            # !!--change to load map--!!
             self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
 
             self.input()#game inputs
@@ -84,46 +84,46 @@ class Game_UI():
             self.collisions.pickup_loot(self.player,self.loot)
             self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
-            self.scrolling()#need to be above action_collision
+            self.scrolling() #need to be above action_collision
             self.draw()
 
             self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
             self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
 
-            self.group_distance()#update the groups beased on if they are on screen or not
+            self.group_distance() #update the groups beased on if they are on screen or not
+            self.interactions()
 
-            change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
-            if change_map:
-                self.change_map(change_map)
-            elif chest_id:
-                self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
-
+            #!! -- maybe move this to update method in npc/enemy class
             for enemy in self.enemies:
                 enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
             for npc in self.npcs:
                 npc.AI()
 
-            # !!--change to one group--!!   eventually change this to set animation image in update
-            #Engine.Animation.set_img(self.players)
-            #Engine.Animation.set_img(self.enemies)
-            #Engine.Animation.set_img(self.npcs)
-            #Engine.Animation.set_img(self.fprojectiles)
-
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
-            pygame.draw.rect(self.screen, (0,255,0), self.player.hitbox,2)#checking hitbox
+            pygame.draw.rect(self.screen, (0,255,255), self.player.hitbox,2)#checking hitbox
 
             self.blit_screen_info()
 
-            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
+            npc_talk = Engine.Collisions.check_npc_collision(self.player,self.npcs,self.display)#need to be at the end so that the conversation text doesn't get scaled
+            if npc_talk:
+                pass
 
-            Engine.Collisions.check_npc_collision(self.player,self.npcs,self.display)#need to be at the end so that the conversation text doesn't get scaled
+
+            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
             if initiate_fade_in:
                 self.fade_in()
                 first_loop_flag = False
 
-            pygame.display.update()#update after every change
-            self.clock.tick(60)#limmit FPS
+            pygame.display.update()
+            self.clock.tick(60) #set FPS to 60
+
+    def interactions(self):
+        change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
+        if change_map:
+            self.change_map(change_map)
+        elif chest_id:
+            self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
 
     def fade_in(self):
     #fade if first loop

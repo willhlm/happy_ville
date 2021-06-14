@@ -102,7 +102,7 @@ class Player(Entity):
 
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/aila/main/stand/aila_idle1.png").convert()
+        self.image = pygame.image.load("Sprites/Enteties/aila/main/stand/aila_idle_2.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
