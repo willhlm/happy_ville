@@ -134,9 +134,13 @@ class Game_UI():
                         self.player.action['talk'] = False
 
                     if event.key == pygame.K_t:
+                        #finish sentence, or get next sentence if finished
                         nonlocal letter_frame
-                        letter_frame = 0
-                        npc.increase_conv_index()
+                        if letter_frame//print_speed < len(npc.get_conversation('state_1')):
+                            letter_frame = 1000
+                        else:
+                            letter_frame = 0
+                            npc.increase_conv_index()
 
 
         #main loop
