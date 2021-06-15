@@ -19,10 +19,11 @@ class Game_UI():
         self.ESC = False
         self.click = False
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
+        self.text_bg_dict = Read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg.png",16,16,3,3)
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['start']
-        self.map_state = Read_files.read_json("map_state.json")
+        self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
         self.mixer = None
 
         self.collisions = Engine.Collisions()
@@ -46,7 +47,6 @@ class Game_UI():
         self.enemy_pause = pygame.sprite.Group() #include all entities that are far away
         self.npc_pause = pygame.sprite.Group() #include all entities that are far away
         self.cosmetics = pygame.sprite.Group() #spirits
-
 
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
@@ -104,10 +104,9 @@ class Game_UI():
 
             self.blit_screen_info()
 
-            npc = Engine.Collisions.check_npc_collision(self.player,self.npcs,self.display)#need to be at the end so that the conversation text doesn't get scaled
+            npc = Engine.Collisions.check_npc_collision(self.player,self.npcs)#need to be at the end so that the conversation text doesn't get scaled
             if npc:
-                pass
-
+                self.conversation_loop(npc)
 
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
@@ -118,8 +117,27 @@ class Game_UI():
             pygame.display.update()
             self.clock.tick(60) #set FPS to 60
 
-    def blit_conversation(self, npc):
-        pass
+    def conversation_loop(self, npc):
+        letter_frame = 0
+        while(self.player.action['talk']):
+            conv = npc.get_conversation('state_1')
+            text_WINDOW_SIZE = (352, 96)
+            text_window = self.fill_text_bg(text_WINDOW_SIZE)
+            text_window.blit(npc.portrait,(0,10))#the portait on to the text_surface
+
+            text = self.font.render((272,80), conv)
+            text_window.blit(text,(64,8))
+
+            blit_x = int((self.WINDOW_SIZE[0]-text_WINDOW_SIZE[0])/2) #make the text in the center
+            self.screen.blit(text_window,(blit_x,100))
+
+            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
+            pygame.display.update()
+
+            self.clock.tick(1) #set FPS to 60
+            self.input_conv()
+
+        npc.action['talk'] = False
 
     def interactions(self):
         change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
@@ -273,6 +291,7 @@ class Game_UI():
         self.blit_spirit()
         self.blit_fps()
 
+
     def blit_health(self):
         #this code is specific to using heart.png sprites
         sprite_dim = [9,8] #width, height specific to sprites used
@@ -310,7 +329,7 @@ class Game_UI():
 
     def blit_fps(self):
         fps_string = str(int(self.clock.get_fps()))
-        self.font.render(self.screen,fps_string,(350,20),1)
+        self.screen.blit(self.font.render((30,12),'fps ' + fps_string),(350,20))
 
     def pause_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
@@ -369,6 +388,38 @@ class Game_UI():
 
         self.input_quit()
 
+    # returns a surface with correct borders for text/menu bg,
+    # size as input
+    def fill_text_bg(self, surface_size):
+        col = int(surface_size[0]/16)
+        row = int(surface_size[1]/16)
+        surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
+
+        for r in range(0,row):
+            for c in range(0,col):
+                if r==0:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[0],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[2],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[1],(c*16,r*16))
+                elif r==row-1:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[6],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[8],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[7],(c*16,r*16))
+                else:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[3],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[5],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[4],(c*16,r*16))
+        return surface
+
     def input_quit(self):#to exits between option menues
         pygame.display.update()
         for event in pygame.event.get():
@@ -386,6 +437,18 @@ class Game_UI():
                     #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
                     if len(self.state)!=1:
                         self.state.pop()#un-remember the last page
+
+    #inputs to check for whiole talking
+    def input_conv(self):
+        for event in pygame.event.get():
+
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key==pygame.K_ESCAPE:
+                    self.player.action['talk'] = False
 
     def input(self):#input while playing
         if self.player.state!='talk':#if not in conversation
