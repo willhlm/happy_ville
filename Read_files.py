@@ -222,6 +222,7 @@ class Alphabet():
         for i, c in enumerate(self.character_lower):
             self.characters[c] = sheet[i]
 
+    #returns a surface with size of input, and input text. Automatic line change
     def render(self, surface_size, text, limit = 1000):
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
         x, y = 0, 0

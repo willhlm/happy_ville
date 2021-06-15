@@ -385,7 +385,10 @@ class NPC_dev(Entity):
 
     def update(self, pos):
         super().update(pos)
-        self.AI()
+        if self.action['talk']:
+            self.action['run'] = False
+        else:
+            self.AI()
         self.set_img()
 
     def AI(self):
@@ -411,7 +414,7 @@ class Aslat(NPC_dev):
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
         self.sprites = Read_files.NPC(self.name)
         self.load_conversation()
-        self.max_vel = 2
+        self.max_vel = 1.5
 
     def AI(self):
         self.action['run']=True

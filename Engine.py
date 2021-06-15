@@ -66,6 +66,7 @@ class Collisions():
             #npc.talk(screen,player)
             player.state='talk'#the player talks with npc
             player.action['run']=False
+            npc.action['talk'] = True
             return npc
 
         #return None if no interaction

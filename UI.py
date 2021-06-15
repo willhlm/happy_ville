@@ -96,8 +96,7 @@ class Game_UI():
             #!! -- maybe move this to update method in npc/enemy class
             for enemy in self.enemies:
                 enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
-            for npc in self.npcs:
-                npc.AI()
+
 
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
             pygame.draw.rect(self.screen, (0,255,255), self.player.hitbox,2)#checking hitbox
@@ -143,6 +142,11 @@ class Game_UI():
         #main loop
         while(self.player.action['talk']):
 
+            self.screen.fill((207,238,250))
+            self.scrolling()
+            self.draw()
+            self.blit_screen_info()
+
             conv = npc.get_conversation('state_1') #return None if last conv have been had
             if not conv:
                 self.player.action['talk'] = False
@@ -156,7 +160,7 @@ class Game_UI():
             text_window.blit(text,(64,8))
 
             blit_x = int((self.WINDOW_SIZE[0]-text_WINDOW_SIZE[0])/2) #make the text in the center
-            self.screen.blit(text_window,(blit_x,100))
+            self.screen.blit(text_window,(blit_x,60))
 
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
             pygame.display.update()
@@ -164,7 +168,6 @@ class Game_UI():
             self.clock.tick(60) #set FPS to 60
             letter_frame += 1
             input_conv()
-
 
         npc.action['talk'] = False
 
