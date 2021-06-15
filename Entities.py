@@ -16,6 +16,7 @@ class Entity(pygame.sprite.Sprite):
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
         self.phase='pre'
+        self.max_vel = 10
 
     def death(self,loot):
         if self.health<=0:#if 0 health of enemy
@@ -55,7 +56,7 @@ class Entity(pygame.sprite.Sprite):
                     self.state = action
                     self.reset_timer()
 
-                self.image = entity.sprites.get_image(action,self.frame//4,self.dir)
+                self.image = self.sprites.get_image(action,self.frame//4,self.dir)
                 self.frame += 1
 
                 if self.frame == self.sprites.get_frame_number(action,self.dir)*4:
@@ -261,7 +262,6 @@ class Player(Entity):
 
     #    if self.action['sword']:
         self.sword.updates(self.hitbox)
-
         self.set_img()
 
     def update_hitbox(self):
@@ -373,18 +373,20 @@ class NPC_dev(Entity):
         try:
             conv = self.conversation[flag][str(self.conv_index)]
         except:
-            conv = self.conversation[flag][str(self.conv_index - 1)]
+            self.conv_index -= 1
+            return None
         return conv
 
     def reset_conv_index(self):
         self.conv_index = 0
 
-    def increase_conv_index():
+    def increase_conv_index(self):
         self.conv_index += 1
 
     def update(self, pos):
         super().update(pos)
-        #self.AI()
+        self.AI()
+        self.set_img()
 
     def AI(self):
         pass
@@ -401,16 +403,18 @@ class Aslat(NPC_dev):
     def __init__(self, pos):
         super().__init__()
         self.name = 'Aslat'
-        self.image = pygame.image.load("Sprites/Enteties/NPC/Aslat/stand/aslat_idle1.png").convert_alpha()
+        self.sprites = Read_files.NPC(self.name)
+        self.image = self.sprites.get_image('stand', 0, self.dir)
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
-        #self.sprites = Read_files.NPC(self.name)
+        self.sprites = Read_files.NPC(self.name)
         self.load_conversation()
+        self.max_vel = 2
 
     def AI(self):
-        #self.action['run']=True
+        self.action['run']=True
         if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
             self.stay_still()
         else:

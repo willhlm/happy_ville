@@ -231,12 +231,18 @@ class Physics():
                 if abs(entity.velocity[0])<10:#max horizontal speed
                     entity.velocity[0]=entity.ac_dir[0]*10
                 #entity.velocity[0]=max(10,entity.velocity[0])
-
-            elif entity.action['run'] and not entity.charging[0]:#accelerate horizontal to direction when not dashing
-                entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
-                entity.friction[0]=0.2
-                if abs(entity.velocity[0])>10:#max horizontal speed
-                    entity.velocity[0]=entity.dir[0]*10
+            try:
+                if entity.action['run'] and not entity.charging[0]:#accelerate horizontal to direction when not dashing
+                    entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
+                    entity.friction[0]=0.2
+                    if abs(entity.velocity[0])>10:#max horizontal speed
+                        entity.velocity[0]=entity.dir[0]*10
+            except:
+                if entity.action['run']:#accelerate horizontal to direction when not dashing
+                    entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
+                    entity.friction[0]=0.2
+                    if abs(entity.velocity[0])>entity.max_vel:#max horizontal speed
+                        entity.velocity[0]=entity.dir[0]*entity.max_vel
 
             entity.movement[1]=entity.velocity[1]#set the vertical velocity
 
@@ -264,10 +270,10 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = entity.sprites.get_image(action,entity.frame//4,entity.ac_dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//5,entity.ac_dir)
                     entity.frame += 1
 
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.ac_dir)*4:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.ac_dir)*5:
                         if action == 'death':
                             entity.kill()
                         else:
@@ -285,9 +291,9 @@ class Animation():
                         entity.state = action
                         entity.reset_timer()
 
-                    entity.image = entity.sprites.get_image(action,entity.frame//4,entity.dir)
+                    entity.image = entity.sprites.get_image(action,entity.frame//5,entity.dir)
                     entity.frame += 1
 
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*4:
+                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*5:
                             entity.reset_timer()
                     break#take only the higest priority of the nonpriority list

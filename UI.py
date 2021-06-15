@@ -118,14 +118,41 @@ class Game_UI():
             self.clock.tick(60) #set FPS to 60
 
     def conversation_loop(self, npc):
+
         letter_frame = 0
+        print_speed = 3 # higher number gives lower speed
+
+        #convo specific inputs
+        def input_conv():
+            for event in pygame.event.get():
+
+                if event.type==pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key==pygame.K_ESCAPE:
+                        self.player.action['talk'] = False
+
+                    if event.key == pygame.K_t:
+                        nonlocal letter_frame
+                        letter_frame = 0
+                        npc.increase_conv_index()
+
+
+        #main loop
         while(self.player.action['talk']):
-            conv = npc.get_conversation('state_1')
+
+            conv = npc.get_conversation('state_1') #return None if last conv have been had
+            if not conv:
+                self.player.action['talk'] = False
+                break
+
             text_WINDOW_SIZE = (352, 96)
             text_window = self.fill_text_bg(text_WINDOW_SIZE)
-            text_window.blit(npc.portrait,(0,10))#the portait on to the text_surface
+            text_window.blit(npc.portrait,(0,10))
 
-            text = self.font.render((272,80), conv)
+            text = self.font.render((272,80), conv, int(letter_frame//print_speed))
             text_window.blit(text,(64,8))
 
             blit_x = int((self.WINDOW_SIZE[0]-text_WINDOW_SIZE[0])/2) #make the text in the center
@@ -134,8 +161,10 @@ class Game_UI():
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
             pygame.display.update()
 
-            self.clock.tick(1) #set FPS to 60
-            self.input_conv()
+            self.clock.tick(60) #set FPS to 60
+            letter_frame += 1
+            input_conv()
+
 
         npc.action['talk'] = False
 
@@ -271,9 +300,9 @@ class Game_UI():
 
         self.platforms.draw(self.screen)
         self.interactables.draw(self.screen)
-        self.players.draw(self.screen)
         self.enemies.draw(self.screen)
         self.npcs.draw(self.screen)
+        self.players.draw(self.screen)
         self.fprojectiles.draw(self.screen)
         self.eprojectiles.draw(self.screen)
         self.loot.draw(self.screen)
@@ -437,18 +466,6 @@ class Game_UI():
                     #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
                     if len(self.state)!=1:
                         self.state.pop()#un-remember the last page
-
-    #inputs to check for whiole talking
-    def input_conv(self):
-        for event in pygame.event.get():
-
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.KEYDOWN:
-                if event.key==pygame.K_ESCAPE:
-                    self.player.action['talk'] = False
 
     def input(self):#input while playing
         if self.player.state!='talk':#if not in conversation

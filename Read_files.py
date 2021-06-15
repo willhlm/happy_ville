@@ -131,8 +131,8 @@ class NPC(Sprites):
         self.name = name
         self.sprite_dict = self.load_all_sprites("Sprites/Enteties/NPC/" + name + "/animation/")
 
+    #input requires action, timer for animation frames
     def get_image(self, input, timer,dir):
-
         if dir[0] < 0:
             return self.sprite_dict[input][timer]
         elif dir[0] >= 0:
@@ -210,7 +210,7 @@ class Alphabet():
 
         self.char_size = (4,6)
         self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?']
-        self.character_lower=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','x','y','z']
+        self.character_lower=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
         sheet=Sprites().generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))
 
         self.characters={}
@@ -222,52 +222,24 @@ class Alphabet():
         for i, c in enumerate(self.character_lower):
             self.characters[c] = sheet[i]
 
-    def render(self, surface_size, text):
+    def render(self, surface_size, text, limit = 1000):
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
         x, y = 0, 0
         x_max = int(surface_size[0]/self.char_size[0])
         y_max = int(surface_size[1]/self.char_size[1])
         text_l = text.split(" ")
         for word in text_l:
-            #cehck if we need to switch line
+            #check if we need to switch line
             if len(word) + x > x_max:
                 x = 0
                 y += 1
+
             for c in word:
                 pos = (x*self.char_size[0],y*self.char_size[1])
                 text_surface.blit(self.characters[c],pos)
                 x += 1
+                if x_max * y + x > limit: return text_surface #spot printing at limit
 
             x += 1      #add space after each word
 
         return text_surface
-
-class Conversations():#Make a dictinoary of conversations available
-    def __init__(self, path):
-        f = open(path, "r")
-        contents=f.readlines()
-        f.close()
-
-        number_of_worldstates=2
-        w, h = 1, number_of_worldstates;
-        Matrix = [[0 for x in range(w)] for y in range(h)]#place hodlers
-
-        text={}#place holder
-        i=0
-        j=1
-        for line in contents:
-            if line=='\n':#skip these
-                continue
-            elif line == 'worldstate_'+str(j)+'\n':
-                j+=1
-
-            Matrix[j-2].append(line)
-            i+=1
-        for i in range(0,len(Matrix)):
-            Matrix[i]=Matrix[i][2:]#remove the first 0 and world state from list
-
-        #make a dictinoary
-        for key in range(0,number_of_worldstates):
-            text[key]=Matrix[key]
-
-        self.text=text
