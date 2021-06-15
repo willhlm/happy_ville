@@ -143,7 +143,7 @@ class Game_UI():
         while(self.player.action['talk']):
 
             self.screen.fill((207,238,250))
-            self.scrolling()
+            self.update_groups()
             self.draw()
             self.blit_screen_info()
 
@@ -280,6 +280,9 @@ class Game_UI():
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
+        self.update_groups(scroll)
+
+    def update_groups(self, scroll = (0,0)):
         self.platforms.update(scroll)
         self.bg_far.update(scroll)
         self.bg.update(scroll)
