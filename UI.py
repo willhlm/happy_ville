@@ -59,6 +59,7 @@ class Game_UI():
 
     def main_menu(self):
         while True:
+            pass
 
 
     def game_loop(self, initiate_fade_in = False):
