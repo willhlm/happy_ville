@@ -126,9 +126,8 @@ class Tilemap():
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
-                    pass
-                    #new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
-                    #npcs.add(new_npc)
+                    new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
+                    npcs.add(new_npc)
                 elif tile == '24':
                     pass
                     #new_enemy = Entities.Enemy_2((col_index * self.tile_size, row_index * self.tile_size))
@@ -261,8 +260,8 @@ class Auto(Camera):
         super().__init__()
 
     def scrolling(self,knight,distance,shake):
-        self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/4
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-170)
+        self.true_scroll[0]+=(knight.center[0]-10*self.true_scroll[0]-240)/20
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
         self.update_scroll(shake)
 
 class Autocap(Camera):
