@@ -108,13 +108,13 @@ class Player(Entity):
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.sprites = Read_files.Sprites_Enteties('Sprites/Enteties/aila/',True)#Read_files.Sprites_player()
-        self.health = 200
+        self.health = 100
         self.max_health = 250
         self.spirit = 100
         self.max_spirit = 100
-        self.priority_action=['death','hurt','dash','sword','bow','force']#animation
+        self.priority_action=['death','hurt','dash','sword','bow','force','heal']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False}
+        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'bow':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False}
         self.state = 'stand'
         self.equip='sword'#can change to bow
         self.sword=Sword(self.dir,self.hitbox)
@@ -128,7 +128,7 @@ class Player(Entity):
         self.charging=[False]#a list beause to make it a pointer
 
         #frame rates
-        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':4,'force':10}
+        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':4,'force':10,'heal':8}
         self.action_framerate={}
         for action in self.frame_limit.keys():#framerate for the main phase
             self.action_framerate[action]=int(self.frame_limit[action]/self.sprites.get_frame_number(action,self.ac_dir,'main'))
@@ -154,7 +154,7 @@ class Player(Entity):
                             self.kill()
                         else:
                             self.frame=0
-                            if self.charging[0] and action in ['sword','bow','force']:#do not set chagre while standing/running
+                            if self.charging[0] and action in self.priority_action:#do not set chagre while standing/running
                                 self.phase='charge'
                             else:
                                 self.phase = 'main'
@@ -203,7 +203,13 @@ class Player(Entity):
         self.rect.center = (pos[0],pos[1])
         self.hitbox.center = self.rect.center
 
+    def healing(self):
+        if self.spirit>=1:
+            self.health+=1
+            self.spirit-=1
+
     def attack_action(self,projectiles):
+        #only enters upon press
         if self.action[self.equip]:
 
             if self.phase == 'pre' and not self.action_cooldown:
@@ -230,7 +236,9 @@ class Player(Entity):
                 self.equip = 'bow'
             elif self.equip == 'bow':
                 self.equip = 'force'
-            else:
+            elif self.equip == 'force':
+                self.equip='heal'
+            elif self.equip=='heal':
                 self.equip = 'sword'
 
     def force_jump(self):
@@ -260,7 +268,9 @@ class Player(Entity):
         if self.spirit <= self.max_spirit:
             self.spirit += 0.1
 
-    #    if self.action['sword']:
+        if self.action['heal']:
+            self.healing()
+
         self.sword.updates(self.hitbox)
         self.set_img()
 
