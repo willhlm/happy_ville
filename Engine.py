@@ -21,7 +21,7 @@ class Collisions():
 
                 #if hit enemy
                 if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
-
+                    
                     collision_ene.health-=projectile.dmg
                     collision_ene.action['hurt']=True
 

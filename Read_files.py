@@ -71,7 +71,6 @@ class Sprites_Enteties(Sprites):
         post_dict = self.load_all_sprites(path+'post/')
         charge_dict = self.load_all_sprites(path+'charge/')
 
-
         if charge:#if there is charge
             charge_dict = self.load_all_sprites(path+'charge/')
             self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
