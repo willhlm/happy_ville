@@ -16,6 +16,7 @@ class Entity(pygame.sprite.Sprite):
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
         self.phase='pre'
+        self.max_vel = 10
 
     def death(self,loot):
         if self.health<=0:#if 0 health of enemy
@@ -55,7 +56,7 @@ class Entity(pygame.sprite.Sprite):
                     self.state = action
                     self.reset_timer()
 
-                self.image = entity.sprites.get_image(action,self.frame//4,self.dir)
+                self.image = self.sprites.get_image(action,self.frame//4,self.dir)
                 self.frame += 1
 
                 if self.frame == self.sprites.get_frame_number(action,self.dir)*4:
@@ -261,7 +262,6 @@ class Player(Entity):
 
     #    if self.action['sword']:
         self.sword.updates(self.hitbox)
-
         self.set_img()
 
     def update_hitbox(self):
@@ -349,173 +349,85 @@ class Enemy_2(Entity):
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
 
-class Block(pygame.sprite.Sprite):
+#remove dev when working
+class NPC_dev(Entity):
 
-    def __init__(self,img,pos):
-        super().__init__()
-        self.image = img
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-
-class Platform(Block):
-
-    def __init__(self,img,pos,chunk_key=False):
-        super().__init__(img,pos)
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=False
-
-    def update(self,pos):
-        super().update(pos)
-        self.hitbox.center=self.rect.center
-
-class Spikes(Block):
-    def __init__(self,img,pos,chunk_key=False):
-        super().__init__(pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),pos)
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=True
-
-    def update(self,pos):
-        super().update(pos)
-        self.hitbox.center=self.rect.center
-
-class BG_Block(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-
-class BG_near(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.75
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
-
-class BG_mid(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.5
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + int(self.paralex*pos[0]), self.rect.topleft[1] + int(self.paralex*pos[1])]
-
-class BG_far(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.03
-        self.true_pos = self.rect.topleft
-
-    def update(self,pos):
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        self.update_pos()
-
-    def update_pos(self):
-        self.rect.topleft = self.true_pos
-
-class Invisible_block(Entity):
-
-    def __init__(self,pos):
-        super().__init__()
-        self.rect=pygame.Rect(pos[0],pos[1],2,2)
-        self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-
-class Interactable(Entity):
+    acceleration=[0.3,0.8]
 
     def __init__(self):
         super().__init__()
-        self.interacted = False
+        self.name = '<always define name>'
+        self.action = {'stand':True,'run':False,'death':False,'hurt':False,'dash':False,'inv':False,'talk':False}
+        self.nonpriority_action = ['run','stand']
+        self.priority_action = ['death','hurt']
+        self.health = 50
+        self.state = 'stand'
+        self.conv_index = 0
+        self.friction=[0.2,0]
 
-class Pathway(Interactable):
+    def load_conversation(self):
+        self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
 
-    def __init__(self, destination):
-        super().__init__()
-        self.next_map = destination
+    #returns conversation depdening on worldstate input. increases index
+    def get_conversation(self, flag):
+        try:
+            conv = self.conversation[flag][str(self.conv_index)]
+        except:
+            self.conv_index -= 1
+            return None
+        return conv
 
-class Door(Pathway):
+    def reset_conv_index(self):
+        self.conv_index = 0
 
-    def __init__(self,pos,destination):
-        super().__init__(destination)
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
-        self.image = self.image_sheet[0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-        self.timer = 0
+    def increase_conv_index(self):
+        self.conv_index += 1
 
-    def update(self,pos):
+    def update(self, pos):
         super().update(pos)
-        if self.interacted:
-            if self.timer < 21:
-                self.image = self.image_sheet[self.timer//7]
-                self.timer += 1
-            else:
-                self.image = self.image_sheet[3]
+        if self.action['talk']:
+            self.action['run'] = False
+        else:
+            self.AI()
+        self.set_img()
 
-class Chest(Interactable):
-    def __init__(self,pos,id,loot,state):
+    def AI(self):
+        pass
+
+    def stay_still(self):
+        self.acceleration=[0,0]
+        self.action['stand']=True
+
+    def move_again(self):
+        self.acceleration=[1,0.8]
+
+class Aslat(NPC_dev):
+
+    def __init__(self, pos):
         super().__init__()
-        self.image_sheet = Read_files.Chest().get_sprites()
-        self.image = self.image_sheet[0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1]-5)
-        self.hitbox = self.rect.inflate(0,0)
-        self.timer = 0
-        self.ID = id
-        self.loot = loot
-        if state == "opened":
-            self.opened()
+        self.name = 'Aslat'
+        self.sprites = Read_files.NPC(self.name)
+        self.image = self.sprites.get_image('stand', 0, self.dir)
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
+        self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
+        self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
+        self.sprites = Read_files.NPC(self.name)
+        self.load_conversation()
+        self.max_vel = 1.5
 
-    def opened(self):
-        self.image = self.image_sheet[2]
-        self.timer = 9
-        self.interacted = True
+    def AI(self):
+        self.action['run']=True
+        if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
+            self.stay_still()
+        else:
+            self.move_again()
 
-    def update(self,pos):
-        super().update(pos)
-        if self.interacted:
-            if self.timer < 8:
-                self.image = self.image_sheet[1]
-                self.timer += 1
-            else:
-                self.image = self.image_sheet[2]
+        if self.action['inv']:#collision with invisble block
+            self.velocity[0] = -self.velocity[0]
+            self.dir[0] = -self.dir[0]
+            self.action['inv'] = False
 
-class Chest_Big(Interactable):
-    def __init__(self,pos,id,loot,state):
-        super().__init__()
-        self.image_sheet = Read_files.Chest_Big().get_sprites()
-        self.image = self.image_sheet[0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1]-13)
-        self.hitbox = self.rect.inflate(0,0)
-        self.timer = 0
-        self.ID = id
-        self.loot = loot
-        if state == "opened":
-            self.opened()
-
-    def opened(self):
-        self.image = self.image_sheet[4]
-        self.timer = 29
-        self.interacted = True
-
-    def update(self,pos):
-        super().update(pos)
-        if self.interacted:
-            if self.timer < 28:
-                self.image = self.image_sheet[self.timer//7]
-                self.timer += 1
-            else:
-                self.image = self.image_sheet[4]
-                self.interacted = False
 
 class NPC(Entity):
     acceleration=[0.3,0.8]
@@ -684,11 +596,11 @@ class MrBanks(NPC):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
-        self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conversation/Conv_BG.png").convert_alpha()
+        self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_BG.png").convert_alpha()
         self.sprites = Read_files.NPC(self.name)
         self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.conv_action=['deposit','withdraw']
-        self.conv_action_BG=pygame.image.load("Sprites/Enteties/NPC/conversation/Conv_action_BG.png").convert_alpha()
+        self.conv_action_BG=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_action_BG.png").convert_alpha()
         self.conv_possition=[[400],[300]]
 
         self.loot={'Coin':2}#the keys need to have the same name as their respective classes
@@ -765,6 +677,174 @@ class MrBanks(NPC):
     def downinteger(self,player):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
+
+class Block(pygame.sprite.Sprite):
+
+    def __init__(self,img,pos):
+        super().__init__()
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+
+class Platform(Block):
+
+    def __init__(self,img,pos,chunk_key=False):
+        super().__init__(img,pos)
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+        self.spike=False
+
+    def update(self,pos):
+        super().update(pos)
+        self.hitbox.center=self.rect.center
+
+class Spikes(Block):
+    def __init__(self,img,pos,chunk_key=False):
+        super().__init__(pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),pos)
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+        self.spike=True
+
+    def update(self,pos):
+        super().update(pos)
+        self.hitbox.center=self.rect.center
+
+class BG_Block(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+
+class BG_near(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+        self.paralex=0.75
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+
+class BG_mid(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+        self.paralex=0.5
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + int(self.paralex*pos[0]), self.rect.topleft[1] + int(self.paralex*pos[1])]
+
+class BG_far(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+        self.paralex=0.03
+        self.true_pos = self.rect.topleft
+
+    def update(self,pos):
+        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.topleft = self.true_pos
+
+class Invisible_block(Entity):
+
+    def __init__(self,pos):
+        super().__init__()
+        self.rect=pygame.Rect(pos[0],pos[1],2,2)
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+
+class Interactable(Entity):
+
+    def __init__(self):
+        super().__init__()
+        self.interacted = False
+
+class Pathway(Interactable):
+
+    def __init__(self, destination):
+        super().__init__()
+        self.next_map = destination
+
+class Door(Pathway):
+
+    def __init__(self,pos,destination):
+        super().__init__(destination)
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
+        self.image = self.image_sheet[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.timer = 0
+
+    def update(self,pos):
+        super().update(pos)
+        if self.interacted:
+            if self.timer < 21:
+                self.image = self.image_sheet[self.timer//7]
+                self.timer += 1
+            else:
+                self.image = self.image_sheet[3]
+
+class Chest(Interactable):
+    def __init__(self,pos,id,loot,state):
+        super().__init__()
+        self.image_sheet = Read_files.Chest().get_sprites()
+        self.image = self.image_sheet[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0],pos[1]-5)
+        self.hitbox = self.rect.inflate(0,0)
+        self.timer = 0
+        self.ID = id
+        self.loot = loot
+        if state == "opened":
+            self.opened()
+
+    def opened(self):
+        self.image = self.image_sheet[2]
+        self.timer = 9
+        self.interacted = True
+
+    def update(self,pos):
+        super().update(pos)
+        if self.interacted:
+            if self.timer < 8:
+                self.image = self.image_sheet[1]
+                self.timer += 1
+            else:
+                self.image = self.image_sheet[2]
+
+class Chest_Big(Interactable):
+    def __init__(self,pos,id,loot,state):
+        super().__init__()
+        self.image_sheet = Read_files.Chest_Big().get_sprites()
+        self.image = self.image_sheet[0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0],pos[1]-13)
+        self.hitbox = self.rect.inflate(0,0)
+        self.timer = 0
+        self.ID = id
+        self.loot = loot
+        if state == "opened":
+            self.opened()
+
+    def opened(self):
+        self.image = self.image_sheet[4]
+        self.timer = 29
+        self.interacted = True
+
+    def update(self,pos):
+        super().update(pos)
+        if self.interacted:
+            if self.timer < 28:
+                self.image = self.image_sheet[self.timer//7]
+                self.timer += 1
+            else:
+                self.image = self.image_sheet[4]
+                self.interacted = False
 
 class Weapon(pygame.sprite.Sprite):
     def __init__(self):

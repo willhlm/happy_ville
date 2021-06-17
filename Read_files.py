@@ -4,10 +4,9 @@ from os.path import isfile, join
 
 
 def read_json(path):
-
     with open(path) as f:
-        config = json.load(f)
-    return config
+        text = json.load(f)
+    return text
 
 def write_json():
     pass
@@ -132,8 +131,8 @@ class NPC(Sprites):
         self.name = name
         self.sprite_dict = self.load_all_sprites("Sprites/Enteties/NPC/" + name + "/animation/")
 
+    #input requires action, timer for animation frames
     def get_image(self, input, timer,dir):
-
         if dir[0] < 0:
             return self.sprite_dict[input][timer]
         elif dir[0] >= 0:
@@ -205,82 +204,43 @@ class Spirit(Sprites):
     def get_sprites(self):
         return self.sprites
 
-#reading fonts
-class Alphabet():#scale needs to be larger than one, for reasons
+#class for reading and rendering fonts
+class Alphabet():
     def __init__(self, path):
-        self.spacing=1
-        self.letter_height=16
-        self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0',',','.','!','?','_']
-        sheet=pygame.image.load(path).convert()
+
+        self.char_size = (4,6)
+        self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?']
+        self.character_lower=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        sheet=Sprites().generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))
+
         self.characters={}
-        current_char_width=0
-        character_count=0
+        #map sprites to charactersin dict
+        for i, c in enumerate(self.character_order):
+            self.characters[c] = sheet[i]
 
-        for x in range(sheet.get_width()):
-            c=sheet.get_at((x,0))
+        #map lower case to same sprites (change __init__ incase lower case sprites are desired)
+        for i, c in enumerate(self.character_lower):
+            self.characters[c] = sheet[i]
 
-            if character_count>=len(self.character_order):
-                break
-            else:
-                if c[0]==238:#check for red color
-                    char_img=Alphabet.clip(sheet,x-current_char_width,0, current_char_width,self.letter_height)
-                    self.characters[self.character_order[character_count]]=char_img.copy()
-                    character_count+=1
-                    current_char_width=0
-                else:
-                    current_char_width+=1
-        self.space_width=self.characters['A'].get_width()
+    #returns a surface with size of input, and input text. Automatic line change
+    def render(self, surface_size, text, limit = 1000):
+        text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
+        x, y = 0, 0
+        x_max = int(surface_size[0]/self.char_size[0])
+        y_max = int(surface_size[1]/self.char_size[1])
+        text_l = text.split(" ")
+        for word in text_l:
+            #check if we need to switch line
+            if len(word) + x > x_max:
+                x = 0
+                y += 1
 
-    def render(self,screen,text,loc,scale):
-        x_offset=0
-        y_offset=0
-        for char in text:
-            if char!=' ' and char!='\n' and char!='*' and char!='&':
-                scaled_letter=pygame.transform.scale(self.characters[char], (int(scale*self.characters[char].get_width()), int(scale*self.letter_height)))
-                screen.blit(scaled_letter,(loc[0]+x_offset,loc[1]+y_offset))
-                x_offset+=self.characters[char].get_width()+self.spacing
-            elif char=='*':#new line
-                x_offset=0
-                y_offset+=self.letter_height
-            elif char == '&':
-                continue
-            else:#spacing
-                x_offset+=self.space_width+self.spacing
+            for c in word:
+                pos = (x*self.char_size[0],y*self.char_size[1])
+                text_surface.blit(self.characters[c],pos)
+                x += 1
+                if x_max * y + x > limit: return text_surface #spot printing at limit
 
-    @staticmethod
-    def clip(surf,x,y,x_size,y_size):
-        handle_surf=surf.copy()
-        clipR=pygame.Rect(x,y,x_size,y_size)
-        handle_surf.set_clip(clipR)
-        image=surf.subsurface(handle_surf.get_clip())
-        return image.copy()
+            x += 1      #add space after each word
 
-class Conversations():#Make a dictinoary of conversations available
-    def __init__(self, path):
-        f = open(path, "r")
-        contents=f.readlines()
-        f.close()
-
-        number_of_worldstates=2
-        w, h = 1, number_of_worldstates;
-        Matrix = [[0 for x in range(w)] for y in range(h)]#place hodlers
-
-        text={}#place holder
-        i=0
-        j=1
-        for line in contents:
-            if line=='\n':#skip these
-                continue
-            elif line == 'worldstate_'+str(j)+'\n':
-                j+=1
-
-            Matrix[j-2].append(line)
-            i+=1
-        for i in range(0,len(Matrix)):
-            Matrix[i]=Matrix[i][2:]#remove the first 0 and world state from list
-
-        #make a dictinoary
-        for key in range(0,number_of_worldstates):
-            text[key]=Matrix[key]
-
-        self.text=text
+        return text_surface

@@ -126,7 +126,7 @@ class Tilemap():
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
-                    new_npc = Entities.MrBanks((col_index * self.tile_size, row_index * self.tile_size))
+                    new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
                 elif tile == '24':
                     pass
