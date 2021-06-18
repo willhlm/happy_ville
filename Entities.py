@@ -26,6 +26,10 @@ class Entity(pygame.sprite.Sprite):
             return self.shake#screen shake when eneny dies
         return 0
 
+    def take_dmg(self,dmg):
+        self.health-=dmg
+        self.action['hurt']=True
+
     def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
         all_action=self.priority_action+self.nonpriority_action
 
@@ -135,9 +139,8 @@ class Player(Entity):
             self.action_framerate[action]=int(self.frame_limit[action]/self.sprites.get_frame_number(action,self.ac_dir,'main'))
 
     def set_img(self):
-
         all_action=self.priority_action+self.nonpriority_action
-
+        print(self.shield.health)
         for action in all_action:#go through the actions
             if self.action[action]:
 
@@ -210,8 +213,14 @@ class Player(Entity):
             self.health+=1
             self.spirit-=1
 
+    def take_dmg(self,dmg):
+        if self.shield.health<=0 or self.shield.lifetime<0:
+            self.health-=dmg
+            self.action['hurt']=True
+
     def attack_action(self,projectiles):
         #only enters upon press
+
         if self.action[self.equip]:
 
             if self.phase == 'pre' and not self.action_cooldown:
@@ -981,8 +990,6 @@ class Shield(Weapon):
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         self.health-=10#reduce the health of this object
-
-
 
 class Bow(Weapon):
     def __init__(self,entity_dir,entity_rect,charge):
