@@ -478,81 +478,80 @@ class Game_UI():
                         self.state.pop()#un-remember the last page
 
     def input(self):#input while playing
-        if self.player.state!='talk':#if not in conversation
 
-            for event in pygame.event.get():
-                if event.type==pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key==pygame.K_ESCAPE:#escape button
-                        self.ESC=True
-                        self.pause_menu()
+            if event.type == pygame.KEYDOWN:
+                if event.key==pygame.K_ESCAPE:#escape button
+                    self.ESC=True
+                    self.pause_menu()
 
-                    if event.key == pygame.K_t:
-                        self.player.talk()
+                if event.key == pygame.K_t:
+                    self.player.talk()
 
-                    if event.key == pygame.K_RIGHT:
-                        self.player.action['run']=True
-                        self.player.action['stand']=False
-                        self.player.dir[0]=1
+                if event.key == pygame.K_RIGHT:
+                    self.player.action['run']=True
+                    self.player.action['stand']=False
+                    self.player.dir[0]=1
 
-                    if event.key == pygame.K_LEFT:
-                        self.player.action['run']=True
-                        self.player.action['stand']=False
-                        self.player.dir[0]=-1
+                if event.key == pygame.K_LEFT:
+                    self.player.action['run']=True
+                    self.player.action['stand']=False
+                    self.player.dir[0]=-1
 
-                    if event.key == pygame.K_UP:#press up
-                        self.player.dir[1]=1
-                    if event.key == pygame.K_DOWN:#press down
-                        self.player.dir[1]=-1
+                if event.key == pygame.K_UP:#press up
+                    self.player.dir[1]=1
+                if event.key == pygame.K_DOWN:#press down
+                    self.player.dir[1]=-1
 
-                    if event.key == pygame.K_TAB:
-                        self.player.change_equipment()
+                if event.key == pygame.K_TAB:
+                    self.player.change_equipment()
 
-                    if event.key==pygame.K_SPACE and not self.player.action['fall'] and not self.player.action['jump']:#jump
-                        self.player.jump()
+                if event.key==pygame.K_SPACE and not self.player.action['fall'] and not self.player.action['jump']:#jump
+                    self.player.jump()
 
-                    if event.key==pygame.K_f:
-                        if not self.player.action['dash']:
-                            self.player.action[self.player.equip]=True
-                            self.player.charging[0] = True
+                if event.key==pygame.K_f:
+                    if not self.player.action['dash']:
+                        self.player.action[self.player.equip]=True
+                        self.player.charging[0] = True
 
-                    if event.key==pygame.K_g:
-                        self.player.interacting = True
+                if event.key==pygame.K_g:
+                    self.player.interacting = True
 
-                    if event.key == pygame.K_i:
-                        self.inventory()#open inventort
+                if event.key == pygame.K_i:
+                    self.inventory()#open inventort
 
-                    if event.key == pygame.K_LSHIFT and self.player.dashing_cooldown>9:#left shift
-                        self.player.dashing()
+                if event.key == pygame.K_LSHIFT and self.player.dashing_cooldown>9:#left shift
+                    self.player.dashing()
 
-                elif event.type == pygame.KEYUP:#lift bottom
-                    if event.key == pygame.K_RIGHT and self.player.dir[0]>0:
-                        self.player.action['stand']=True
-                        self.player.action['run']=False
+            elif event.type == pygame.KEYUP:#lift bottom
+                if event.key == pygame.K_RIGHT and self.player.dir[0]>0:
+                    self.player.action['stand']=True
+                    self.player.action['run']=False
 
-                    if event.key == pygame.K_t:#if release button
-                        if self.player.state!='talk':#if not in conversation
-                            self.player.state='stand'
-                            self.player.action['talk']=False
+                if event.key == pygame.K_t:#if release button
+                    if self.player.state!='talk':#if not in conversation
+                        self.player.state='stand'
+                        self.player.action['talk']=False
 
-                    if event.key == pygame.K_LEFT and self.player.dir[0]<0:
-                        self.player.action['stand']=True
-                        self.player.action['run']=False
+                if event.key == pygame.K_LEFT and self.player.dir[0]<0:
+                    self.player.action['stand']=True
+                    self.player.action['run']=False
 
-                    if event.key == pygame.K_UP:
-                        self.player.dir[1]=0
+                if event.key == pygame.K_UP:
+                    self.player.dir[1]=0
 
-                    if event.key == pygame.K_DOWN:
-                        self.player.dir[1]=0
+                if event.key == pygame.K_DOWN:
+                    self.player.dir[1]=0
 
-                    if event.key==pygame.K_g:
-                        self.player.interacting = False
+                if event.key==pygame.K_g:
+                    self.player.interacting = False
 
-                    if event.key==pygame.K_f:
-                        if not self.player.action['dash']:
-                            self.player.charging[0]=False
-                            self.player.phase='main'
-                            self.player.frame=0
+                if event.key==pygame.K_f:
+                    if not self.player.action['dash']:
+                        self.player.charging[0]=False
+                        self.player.phase='main'
+                        self.player.frame=0
