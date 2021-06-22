@@ -140,7 +140,7 @@ class Player(Entity):
 
     def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
-        print(self.shield.health)
+
         for action in all_action:#go through the actions
             if self.action[action]:
 
