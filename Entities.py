@@ -131,6 +131,7 @@ class Player(Entity):
         self.shake=0
         self.dashing_cooldown=10
         self.charging=[False]#a list beause to make it a pointer
+        self.abilities=['sword','bow','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates
         self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':4,'force':10,'heal':8,'shield':8}
@@ -140,7 +141,7 @@ class Player(Entity):
 
     def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
-        print(self.shield.health)
+
         for action in all_action:#go through the actions
             if self.action[action]:
 
@@ -159,7 +160,7 @@ class Player(Entity):
                             self.kill()
                         else:
                             self.frame=0
-                            if self.charging[0] and action in self.priority_action:#do not set chagre while standing/running
+                            if self.charging[0] and action in self.abilities:#do not set chagre while standing/running
                                 self.phase='charge'
                             else:
                                 self.phase = 'main'

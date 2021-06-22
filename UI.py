@@ -25,6 +25,7 @@ class Game_UI():
         self.state = ['start']
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
         self.mixer = None
+        self.equipment_menu=False#a flag to enter "abillity changing menue"
 
         self.collisions = Engine.Collisions()
 
@@ -321,6 +322,61 @@ class Game_UI():
     def inventory(self):
         pass
 
+    def change_equipment(self):
+        if self.player.state not in self.player.priority_action:#don't change if you are doing some attack
+            self.ab_index=self.player.abilities.index(self.player.equip)
+
+            #make the player stand still
+            self.player.action['stand']=True
+            self.player.action['run']=False
+            self.player.dir[1]=0
+
+            while(self.equipment_menu):
+
+                self.screen.fill((207,238,250),special_flags=pygame.BLEND_RGB_ADD)
+                self.update_groups()
+                self.draw()
+                self.blit_screen_info()
+
+                positions=[]#placeholder
+                for index,abillity in enumerate(self.player.abilities):
+                    coordinate=[100+50*index,200]
+
+                    self.screen.blit(self.font.render((50,50),abillity),(coordinate))
+                    positions.append(coordinate)
+
+                self.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
+
+                self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
+                pygame.display.update()
+
+                self.clock.tick(60) #set FPS to 60
+                self.input_ability()
+
+    def input_ability(self):
+        for event in pygame.event.get():
+
+            if event.type == pygame.KEYDOWN:
+                if event.type==pygame.QUIT:
+                    self.exit()
+
+                if event.key == pygame.K_RIGHT:
+                    self.ab_index+=1
+                    self.ab_index=min(len(self.player.abilities)-1,self.ab_index)
+                if event.key == pygame.K_LEFT:
+                    self.ab_index-=1
+                    self.ab_index=max(0,self.ab_index)
+
+            #    if event.key == pygame.K_UP:#press up
+            #        self.player.dir[1]=1
+            #    if event.key == pygame.K_DOWN:#press down
+            #        self.player.dir[1]=-1
+
+            elif event.type == pygame.KEYUP:#lift bottom
+                if event.key==pygame.K_TAB:
+                    self.equipment_menu=False
+                    self.player.equip=self.player.abilities[self.ab_index]
+
     def exit(self):
         pygame.quit()
         sys.exit()
@@ -384,11 +440,11 @@ class Game_UI():
                 self.resolution_menu()
 
     def start_menu(self):
-        self.font.render(self.display,'Start Game',(200,100),1)
+        self.display.blit(self.font.render((50,50),'Start Game'),(200,100))
         start_rect=pygame.Rect(200,100,100,100)
-        self.font.render(self.display,'Options',(200,200),1)
+        self.display.blit(self.font.render((50,50),'Options'),(200,200))
         option_rect=pygame.Rect(200,200,100,100)
-        self.font.render(self.display,'Exit Game',(200,400),1)
+        self.display.blit(self.font.render((50,50),'Exit Game'),(200,400))
         exit_rect=pygame.Rect(200,400,100,100)
 
         if start_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
@@ -405,7 +461,7 @@ class Game_UI():
     def option_menu(self):
         self.display.fill((207,238,250))#fill game.screen
 
-        self.font.render(self.display,'Resolution',(200,100),1)
+        self.display.blit(self.font.render((50,50),'Resolution'),(200,100))
         Resolution_rect=pygame.Rect(200,100,100,100)
 
         if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
@@ -417,7 +473,7 @@ class Game_UI():
     def resolution_menu(self):
         self.display.fill((207,238,250))#fill game.screen
 
-        self.font.render(self.display,'1000x800',(200,100),1)
+        self.display.blit(self.font.render((50,50),'1000x800'),(200,100))
         Resolution_rect=pygame.Rect(200,100,100,100)
 
         if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
@@ -478,6 +534,7 @@ class Game_UI():
                         self.state.pop()#un-remember the last page
 
     def input(self):#input while playing
+        #if self.player.state!='talk':#this can be removed
 
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -508,7 +565,9 @@ class Game_UI():
                     self.player.dir[1]=-1
 
                 if event.key == pygame.K_TAB:
-                    self.player.change_equipment()
+                    #self.player.change_equipment()
+                    self.equipment_menu=True
+                    self.change_equipment()
 
                 if event.key==pygame.K_SPACE and not self.player.action['fall'] and not self.player.action['jump']:#jump
                     self.player.jump()
@@ -549,6 +608,9 @@ class Game_UI():
 
                 if event.key==pygame.K_g:
                     self.player.interacting = False
+
+            #    if event.key==pygame.K_TAB:
+            #        self.equipment=False
 
                 if event.key==pygame.K_f:
                     if not self.player.action['dash']:
