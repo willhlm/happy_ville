@@ -19,7 +19,7 @@ class Game_UI():
         self.ESC = False
         self.click = False
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
-        self.text_bg_dict = Read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg.png",16,16,3,3)
+        self.text_bg_dict = Read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
         self.health_sprites = Read_files.Hearts_Black().get_sprites()
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['start']

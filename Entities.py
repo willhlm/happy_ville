@@ -380,7 +380,7 @@ class Enemy_2(Entity):
             self.action[self.equip] = True
 
 #remove dev when working
-class NPC_dev(Entity):
+class NPC(Entity):
 
     acceleration=[0.3,0.8]
 
@@ -431,7 +431,7 @@ class NPC_dev(Entity):
     def move_again(self):
         self.acceleration=[1,0.8]
 
-class Aslat(NPC_dev):
+class Aslat(NPC):
 
     def __init__(self, pos):
         super().__init__()
@@ -448,165 +448,6 @@ class Aslat(NPC_dev):
 
     def AI(self):
         self.action['run']=True
-        if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
-            self.stay_still()
-        else:
-            self.move_again()
-
-        if self.action['inv']:#collision with invisble block
-            self.velocity[0] = -self.velocity[0]
-            self.dir[0] = -self.dir[0]
-            self.action['inv'] = False
-
-
-class NPC(Entity):
-    acceleration=[0.3,0.8]
-
-    def __init__(self):
-        super().__init__()
-        self.action = {'stand':True,'run':False,'death':False,'hurt':False,'dash':False,'inv':False,'talk':False}
-        self.nonpriority_action = ['run','stand']
-        self.priority_action = ['death','hurt']
-        self.health = 50
-        self.state = 'stand'
-        self.font=Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class
-        self.page_frame=0#if there are pages of text
-        self.text_frame=-1#chosing which text to say: woudl ike to move this to NPC class instead
-        self.letter_frame=1#to show one letter at the time: woudl ike to move this to NPC class instead
-        self.conv_idx=[0,0]
-        self.friction=[0.2,0]
-
-    def blit_conversation(self,text,game_screen):#blitting of text from conversation
-        self.text_surface.blit(self.portrait,(550,100))#the portait on to the text_surface
-        game_screen.blit(self.text_surface,(200,200))#the text BG
-        self.font.render(game_screen,text,(400,300),1)#call the self made aplhabet blit and blit the conversation
-        self.font.render(game_screen,self.name,(750,400),1)#blit the name
-
-    def new_page(self):
-        if '&' in self.conversation.text[self.world_state][self.text_frame//1]:#& means there is a new page
-            conversation=self.conversation.text[self.world_state][self.text_frame//1]
-            indices = [i for i, x in enumerate(conversation) if x == "&"]#all indexes for &
-            self.number_of_pages=len(indices)
-
-            for i in range(self.page_frame,self.number_of_pages+1):
-                start=min(indices[self.page_frame-1],self.page_frame*10000)
-                if self.page_frame>=self.number_of_pages:
-                    end=-1
-                else:
-                    end=indices[self.page_frame]
-            return self.conversation.text[self.world_state][self.text_frame//1][start:end]
-        else:
-            self.number_of_pages=0
-            return self.conversation.text[self.world_state][self.text_frame//1]
-
-    def talking(self):
-        self.action['talk']=True
-        self.action['run']=False
-        self.action['stand']=True
-        self.velocity=[0,0]
-
-    def talk(self,game_screen,player):
-        if not self.action['talk']:#if first time
-            self.page_frame=0
-            self.letter_frame=1#reset the letter frame
-            self.text_frame+=1
-
-        if self.text_frame >= len(self.conversation.text[self.world_state]):
-            self.text_frame=0#reset the conversation tree
-
-        self.talking()#settign flags
-        conv=self.new_page()#preparing the conversation if new page exits
-        self.blit_conv_action(game_screen)#if it is a villiager with action
-
-        if self.letter_frame//3!=len(conv):#if not everything has been said.
-            text=conv[:self.letter_frame//3+1]
-            self.letter_frame+=1
-            self.blit_conversation(text,game_screen)
-        else:#if everything was said, print the whole text
-            self.page_frame=min(self.number_of_pages,self.page_frame)
-            self.blit_conversation(conv,game_screen)
-
-        self.input_quit(player)
-
-    def input_quit(self,player):#to exits between option menues
-        for event in pygame.event.get():
-            if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                #for action conversations
-                if event.key==pygame.K_ESCAPE:#escape button
-                    self.business = False
-                    self.ammount=0
-                    self.action['talk']=False
-                    player.action['talk']=False
-                if event.key == pygame.K_UP:#up
-                    self.conv_idx[1]-=1*int(not self.business)
-                    self.upinteger(player)
-                if event.key == pygame.K_DOWN:#up
-                    self.conv_idx[1]+=1*int(not self.business)
-                    self.downinteger(player)
-                if event.key == pygame.K_LEFT:#left
-                    self.conv_idx[0]-=1*int(self.business)
-
-                if event.key == pygame.K_RIGHT:#right
-                    self.conv_idx[0]+=1*int(self.business)
-
-                if event.key == pygame.K_RETURN:#enter the option
-                    if self.business:
-                        self.trade(player)
-                    self.business = not self.business
-
-                #exit/skip conversation
-                if event.key == pygame.K_t:
-                    if self.page_frame<self.number_of_pages:
-                        self.page_frame+=1#next page
-                    else:
-                        self.action['talk']=False
-                        self.ammount=0
-
-                        player.action['talk']=False
-                        self.page_frame=0#reset page
-                    self.letter_frame=1#reset the letter frame
-
-    def business(self):
-        pass
-
-    def upinteger(self,player):
-        pass
-
-    def downinteger(self,player):
-        pass
-
-    def blit_conv_action(self,game_screen):
-        pass
-
-    def trade():
-        pass
-
-    def stay_still(self):
-        self.acceleration=[0,0]
-        self.action['stand']=True
-
-    def move_again(self):
-        self.acceleration=[1,0.8]
-
-class NPC_1(NPC):
-    def __init__(self,pos):
-        super().__init__()
-        self.name = 'NPC_1'
-        self.image = pygame.image.load("Sprites/Enteties/player/run/HeroKnight_run_0.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
-        self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
-        self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conversation/Conv_BG.png").convert_alpha()
-        self.sprites = Read_files.NPC(self.name)
-        self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
-
-    def AI(self):
-        self.action['run']=True
-
         if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
             self.stay_still()
         else:
