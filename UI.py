@@ -26,6 +26,7 @@ class Game_UI():
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
         self.mixer = None
         self.equipment_menu=False#a flag to enter "abillity changing menue"
+        self.ab_index=0
 
         self.collisions = Engine.Collisions()
 
@@ -57,11 +58,6 @@ class Game_UI():
 
         #initiate maps
         self.load_map('village1')
-
-    def main_menu(self):
-        while True:
-            pass
-
 
     def game_loop(self, initiate_fade_in = False):
 
@@ -98,7 +94,6 @@ class Game_UI():
             for enemy in self.enemies:
                 enemy.AI(self.player,self.screen)#the enemy Ai movement, based on knight position
 
-
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
             pygame.draw.rect(self.screen, (0,255,255), self.player.hitbox,2)#checking hitbox
 
@@ -108,11 +103,15 @@ class Game_UI():
             if npc:
                 self.conversation_loop(npc)
 
+            if self.equipment_menu:
+                self.change_equipments()
+
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
             if initiate_fade_in:
                 self.fade_in()
                 first_loop_flag = False
+
 
             pygame.display.update()
             self.clock.tick(60) #set FPS to 60
@@ -322,18 +321,30 @@ class Game_UI():
     def inventory(self):
         pass
 
+    def change_equipments(self):
+        if self.player.state not in self.player.priority_action:#don't change if you are doing some attack
+            #self.ab_index=self.player.abilities.index(self.player.equip)
+
+            self.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
+            pygame.time.wait(100)
+            positions=[]#placeholder
+            for index,abillity in enumerate(self.player.abilities):
+                coordinate=[100+50*index,200]
+
+                self.screen.blit(self.font.render((50,50),abillity),(coordinate))
+                positions.append(coordinate)#coordinates of all blits
+
+            self.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
+
+            #self.input_ability()
+
     def change_equipment(self):
         if self.player.state not in self.player.priority_action:#don't change if you are doing some attack
             self.ab_index=self.player.abilities.index(self.player.equip)
 
-            #make the player stand still
-            self.player.action['stand']=True
-            self.player.action['run']=False
-            self.player.dir[1]=0
-
             while(self.equipment_menu):
 
-                self.screen.fill((207,238,250),special_flags=pygame.BLEND_RGB_ADD)
+                self.screen.fill((207,238,250),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
                 self.update_groups()
                 self.draw()
                 self.blit_screen_info()
@@ -343,7 +354,7 @@ class Game_UI():
                     coordinate=[100+50*index,200]
 
                     self.screen.blit(self.font.render((50,50),abillity),(coordinate))
-                    positions.append(coordinate)
+                    positions.append(coordinate)#coordinates of all blits
 
                 self.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
 
@@ -367,15 +378,18 @@ class Game_UI():
                     self.ab_index-=1
                     self.ab_index=max(0,self.ab_index)
 
-            #    if event.key == pygame.K_UP:#press up
-            #        self.player.dir[1]=1
-            #    if event.key == pygame.K_DOWN:#press down
-            #        self.player.dir[1]=-1
-
             elif event.type == pygame.KEYUP:#lift bottom
                 if event.key==pygame.K_TAB:
                     self.equipment_menu=False
                     self.player.equip=self.player.abilities[self.ab_index]
+
+                if event.key == pygame.K_RIGHT and self.player.dir[0]>0:
+                    self.player.action['stand']=True
+                    self.player.action['run']=False
+
+                if event.key == pygame.K_LEFT and self.player.dir[0]<0:
+                    self.player.action['stand']=True
+                    self.player.action['run']=False
 
     def exit(self):
         pygame.quit()
@@ -550,14 +564,22 @@ class Game_UI():
                     self.player.talk()
 
                 if event.key == pygame.K_RIGHT:
-                    self.player.action['run']=True
-                    self.player.action['stand']=False
-                    self.player.dir[0]=1
+                    if not self.equipment_menu:
+                        self.player.action['run']=True
+                        self.player.action['stand']=False
+                        self.player.dir[0]=1
+                    else:
+                        self.ab_index+=1
+                        self.ab_index=min(len(self.player.abilities)-1,self.ab_index)
 
                 if event.key == pygame.K_LEFT:
-                    self.player.action['run']=True
-                    self.player.action['stand']=False
-                    self.player.dir[0]=-1
+                    if not self.equipment_menu:
+                        self.player.action['run']=True
+                        self.player.action['stand']=False
+                        self.player.dir[0]=-1
+                    else:
+                        self.ab_index-=1
+                        self.ab_index=max(0,self.ab_index)
 
                 if event.key == pygame.K_UP:#press up
                     self.player.dir[1]=1
@@ -566,8 +588,10 @@ class Game_UI():
 
                 if event.key == pygame.K_TAB:
                     #self.player.change_equipment()
+                    self.player.action['stand']=True
+                    self.player.action['run']=False
                     self.equipment_menu=True
-                    self.change_equipment()
+                    #self.change_equipment()
 
                 if event.key==pygame.K_SPACE and not self.player.action['fall'] and not self.player.action['jump']:#jump
                     self.player.jump()
@@ -609,8 +633,9 @@ class Game_UI():
                 if event.key==pygame.K_g:
                     self.player.interacting = False
 
-            #    if event.key==pygame.K_TAB:
-            #        self.equipment=False
+                if event.key==pygame.K_TAB:
+                    self.equipment_menu=False
+                    self.player.equip=self.player.abilities[self.ab_index]
 
                 if event.key==pygame.K_f:
                     if not self.player.action['dash']:
