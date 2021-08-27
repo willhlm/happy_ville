@@ -20,7 +20,6 @@ class Game_UI():
         self.click = False
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.text_bg_dict = Read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
-
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['start']
@@ -394,7 +393,6 @@ class Game_UI():
         self.blit_spirit()
         self.blit_fps()
 
-
     def blit_health(self):
         #this code is specific to using heart.png sprites
         sprite_dim = [9,8] #width, height specific to sprites used
@@ -428,7 +426,6 @@ class Game_UI():
                 blit_surface.blit(self.spirit_sprites[2],(i*(sprite_dim[0] + 1),0))
 
         self.screen.blit(blit_surface,(20, 34))
-
 
     def blit_fps(self):
         fps_string = str(int(self.clock.get_fps()))
