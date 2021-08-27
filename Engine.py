@@ -113,50 +113,6 @@ class Collisions():
                 loot.velocity=[0,0]
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
-    @staticmethod
-    def check_collisions(dynamic_entities,platforms):
-        Collisions.collide(dynamic_entities,platforms)
-
-        for entity in dynamic_entities.sprites():
-
-            entity.friction[1]=0
-
-            if entity.collision_types['bottom']:#if on ground
-                entity.dashing_cooldown=10
-
-                entity.velocity[1]=0
-                entity.action['fall']=False
-                entity.action['stand']=True
-                entity.action['wall']=False
-                entity.action['jump']=False
-                if entity.dir[1]<0:#if on ground, cancel sword swing
-                    entity.action['sword']=False
-            else:#if not on ground
-                entity.action['stand']=False
-                if entity.velocity[1]>=0:#if falling down
-                    entity.action['jump']=False
-                    entity.action['fall']=True
-                    if entity.collision_types['right'] or entity.collision_types['left']:#on wall and not on ground
-                        entity.action['wall']=True
-                        entity.action['dash']=False
-                        entity.action['fall']=False
-                        entity.friction[1]=0.4
-                        entity.dashing_cooldown=10
-                    else:
-                        entity.action['wall']=False
-                else:#if going up
-                    entity.action['jump']=True
-
-            if entity.collision_types['top']:#knock back when hit head
-                entity.velocity[1]=0
-
-            if entity.collision_spikes['bottom']:
-                entity.action['hurt']=True
-                entity.velocity[1]=-6
-                entity.health-=10
-                if entity.health<=0:
-                    entity.action['death']=True
-
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
     def collide(dynamic_entities,static_enteties):
@@ -198,8 +154,6 @@ class Collisions():
                 dyn_entity.collision_types['bottom'] = True
                 dyn_entity.collision_spikes['bottom'] = stat_entity[0].spike
 
-
-
             elif dyn_entity.movement[1]<0:#going up
                 dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
                 dyn_entity.collision_types['top'] = True
@@ -212,6 +166,8 @@ class Collisions():
     def collided(dynamic_entities,static_enteties):
         return dynamic_entities.hitbox.colliderect(static_enteties.hitbox)
 #
+
+#obsolete
 class Physics():
     def __init__(self):
         pass
@@ -249,6 +205,7 @@ class Physics():
             entity.velocity[0]=entity.velocity[0]-entity.friction[0]*entity.velocity[0]#friction
             entity.movement[0]=entity.velocity[0]#set the horizontal velocity
 
+#obsolete
 class Animation():
     def __init__(self):
         #super().__init__()

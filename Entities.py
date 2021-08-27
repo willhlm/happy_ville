@@ -73,9 +73,80 @@ class Entity(pygame.sprite.Sprite):
     def attack_action(self,projectiles):
         return projectiles
 
+    def check_collisions(self):
+        self.friction[1]=0
+
+        if self.collision_types['bottom']:#if on ground
+            self.dashing_cooldown=10
+            self.action['fall']=False
+            self.action['stand']=True
+            self.action['wall']=False
+            self.action['jump']=False
+            if self.dir[1]<0:#if on ground, cancel sword swing
+                self.action['sword']=False
+        else:#if not on ground
+            self.action['stand']=False
+            if self.velocity[1]>=0:#if falling down
+                self.action['jump']=False
+                self.action['fall']=True
+                if self.collision_types['right'] or self.collision_types['left']:#on wall and not on ground
+                    self.action['wall']=True
+                    self.action['dash']=False
+                    self.action['fall']=False
+                    self.friction[1]=0.4
+                    self.dashing_cooldown=10
+                else:
+                    self.action['wall']=False
+            else:#if going up
+                self.action['jump']=True
+
+        if self.collision_types['top']:#knock back when hit head
+            self.velocity[1]=0
+
+        if self.collision_spikes['bottom']:
+            self.action['hurt']=True
+            self.velocity[1]=-6
+            self.health-=10
+            if self.health<=0:
+                self.action['death']=True
+
+    def physics_movement(self):
+        self.velocity[1]=self.velocity[1]+self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[1]=min(self.velocity[1],7)#set a y max speed
+
+        if self.action['dash']:
+            self.dashing_cooldown-=1
+            self.velocity[1]=0
+            self.velocity[0]=self.velocity[0]+self.ac_dir[0]*0.5
+
+            if abs(self.velocity[0])<10:#max horizontal speed
+                self.velocity[0]=self.ac_dir[0]*10
+            #entity.velocity[0]=max(10,entity.velocity[0])
+
+        try:
+            if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
+                self.velocity[0]+=self.dir[0]*self.acceleration[0]
+                self.friction[0]=0.2
+                if abs(self.velocity[0])>10:#max horizontal speed
+                    self.velocity[0]=self.dir[0]*10
+        except:
+            if self.action['run']:#accelerate horizontal to direction when not dashing
+                self.velocity[0]+=self.dir[0]*self.acceleration[0]
+                self.friction[0]=0.2
+                if abs(self.velocity[0])>self.max_vel:#max horizontal speed
+                    self.velocity[0]=self.dir[0]*self.max_vel
+
+        self.movement[1]=self.velocity[1]#set the vertical velocity
+
+        self.velocity[0]=self.velocity[0]-self.friction[0]*self.velocity[0]#friction
+        self.movement[0]=self.velocity[0]#set the horizontal velocity
+
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
+
+        self.physics_movement()
+        self.check_collisions()
 
     def update_action(self, new_action):
         if not self.action[new_action]:
@@ -111,7 +182,7 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites_Enteties('Sprites/Enteties/aila/',True)#Read_files.Sprites_player()
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)#Read_files.Sprites_player()
         self.health = 100
         self.max_health = 250
         self.spirit = 100
@@ -134,14 +205,13 @@ class Player(Entity):
         self.abilities=['sword','bow','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates
-        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':8,'bow':4,'force':10,'heal':8,'shield':8}
+        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':2,'bow':4,'force':10,'heal':8,'shield':8}
         self.action_framerate={}
         for action in self.frame_limit.keys():#framerate for the main phase
             self.action_framerate[action]=int(self.frame_limit[action]/self.sprites.get_frame_number(action,self.ac_dir,'main'))
 
     def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
-
         for action in all_action:#go through the actions
             if self.action[action]:
 
@@ -222,16 +292,15 @@ class Player(Entity):
     def attack_action(self,projectiles):
         #only enters upon press
 
-        if self.action[self.equip]:
-
-            if self.phase == 'pre' and not self.action_cooldown:
-                if self.equip=='bow' and self.spirit >= 10:
+        if self.action[self.equip] and not self.action_cooldown:
+            if self.phase == 'pre':
+                if self.equip=='bow' and self.spirit >= 10:#creates the objct in pre phase
 
                     projectiles.add(Bow(self.ac_dir,self.hitbox,self.charging))
                     self.spirit -= 10
                     self.action_cooldown=True#cooldown flag
 
-            elif self.phase == 'main' and not self.action_cooldown:#produce the object in the main animation
+            elif self.phase == 'main':#produce the object in the main animation
                 if self.equip=='sword':
                     self.sword=Sword(self.ac_dir,self.hitbox)
                     projectiles.add(self.sword)
@@ -239,26 +308,27 @@ class Player(Entity):
                     projectiles.add(Force(self.ac_dir,self.hitbox))
                     self.spirit -= 10
                     self.force_jump()
-                elif self.equip == 'shield' and self.spirit >= 10:
+                elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
                     self.shield=Shield(self.ac_dir,self.hitbox)
                     projectiles.add(self.shield)
                     self.spirit -= 10
 
                 self.action_cooldown=True#cooldown flag
+
         return projectiles
 
-    def change_equipment(self):
-        if self.state not in self.priority_action:#don't change if you are doing some attack
-            if self.equip == 'sword':
-                self.equip = 'bow'
-            elif self.equip == 'bow':
-                self.equip = 'force'
-            elif self.equip == 'force':
-                self.equip='heal'
-            elif self.equip=='heal':
-                self.equip='shield'
-            else:
-                self.equip = 'sword'
+#    def change_equipment(self):
+        #if self.state not in self.priority_action:#don't change if you are doing some attack
+        #    if self.equip == 'sword':
+        #        self.equip = 'bow'
+        #    elif self.equip == 'bow':
+        #        self.equip = 'force'
+        #    elif self.equip == 'force':
+        #        self.equip='heal'
+        #    elif self.equip=='heal':
+        #        self.equip='shield'
+        #    else:
+        #        self.equip = 'sword'
 
     def force_jump(self):
         #if self.dir[1]!=0:
@@ -275,6 +345,8 @@ class Player(Entity):
         self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
+        self.collision_types['bottom']=False
+
         if self.action['wall']:
             self.velocity[0]=-self.dir[0]*10
 
@@ -309,7 +381,7 @@ class Enemy_1(Player):
         self.health=10
         self.distance=[0,0]
         self.inv=False#flag to check if collision with invisible blocks
-        self.sprites = Read_files.Sprites_evil_knight()
+        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/evil_knight/')
         self.shake=self.hitbox.height/10
 
     def AI(self,player):#the AI
@@ -352,7 +424,7 @@ class Enemy_2(Entity):
         self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'bow':False,'fall':False,'trans':False,'dash':False}
         self.state = 'stand'
         self.equip='sword'
-        self.sprites = Read_files.Flowy()
+        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
         self.friction=[0.2,0]
         self.loot={'Coin':2,'Arrow':1}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
@@ -436,13 +508,12 @@ class Aslat(NPC):
     def __init__(self, pos):
         super().__init__()
         self.name = 'Aslat'
-        self.sprites = Read_files.NPC(self.name)
+        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.image = self.sprites.get_image('stand', 0, self.dir)
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
-        self.sprites = Read_files.NPC(self.name)
         self.load_conversation()
         self.max_vel = 1.5
 
@@ -468,7 +539,7 @@ class MrBanks(NPC):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
         self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_BG.png").convert_alpha()
-        self.sprites = Read_files.NPC(self.name)
+        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.conv_action=['deposit','withdraw']
         self.conv_action_BG=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_action_BG.png").convert_alpha()
@@ -620,7 +691,7 @@ class BG_far(Block):
     def update_pos(self):
         self.rect.topleft = self.true_pos
 
-class Invisible_block(Entity):
+class Invisible_block(pygame.sprite.Sprite):
 
     def __init__(self,pos):
         super().__init__()
@@ -628,11 +699,19 @@ class Invisible_block(Entity):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
 
-class Interactable(Entity):
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+class Interactable(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
         self.interacted = False
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
 
 class Pathway(Interactable):
 
@@ -663,7 +742,7 @@ class Door(Pathway):
 class Chest(Interactable):
     def __init__(self,pos,id,loot,state):
         super().__init__()
-        self.image_sheet = Read_files.Chest().get_sprites()
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest.png",16,21,1,3)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1]-5)
@@ -691,7 +770,7 @@ class Chest(Interactable):
 class Chest_Big(Interactable):
     def __init__(self,pos,id,loot,state):
         super().__init__()
-        self.image_sheet = Read_files.Chest_Big().get_sprites()
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest_big.png",32,29,1,5)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1]-13)
@@ -803,7 +882,7 @@ class Shield(Weapon):
         self.health=100
         self.velocity=[0,0]
         self.state='pre'
-        self.sprites = Read_files.Sprites_Enteties('Sprites/Attack/Shield/',True)
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/',True)
         self.dmg=0
 
         self.image = pygame.image.load("Sprites/Attack/Shield/main/water_Shield1.png").convert_alpha()
@@ -842,7 +921,7 @@ class Bow(Weapon):
         self.state='pre'
         self.action='small'
         self.dir=entity_dir.copy()#direction of the projectile
-        self.sprites = Read_files.Sprites_Enteties('Sprites/Attack/Bow/',True)
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Bow/',True)
 
         self.image = pygame.image.load("Sprites/Attack/Bow/pre/small/force_stone1.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1]])
@@ -876,8 +955,8 @@ class Bow(Weapon):
 
         elif self.state=='main':#main pahse
             self.lifetime-=1#affect only the lifetime in main state
-            self.velocity[1]+=0.1#graivity
-
+            if self.action=='small':#only have gravity if small
+                self.velocity[1]+=0.1#graivity
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         self.velocity=[0,0]
@@ -907,7 +986,7 @@ class Force(Weapon):
         self.dmg=0
         self.dir=entity_dir.copy()
 
-        self.sprites = Read_files.Sprites_Enteties('Sprites/Attack/Force/')
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
         self.state='pre'
 
         self.image = pygame.image.load("Sprites/Attack/Force/pre/fly3.png").convert_alpha()
