@@ -20,7 +20,8 @@ class Game_UI():
         self.click = False
         self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.text_bg_dict = Read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
-        self.health_sprites = Read_files.Hearts_Black().get_sprites()
+
+        self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['start']
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object

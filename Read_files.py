@@ -60,8 +60,8 @@ class Sprites():
                 n+=1
         return sprite_dict
 
-#class containing sprites for all enteties
-class Sprites_Enteties(Sprites):
+#class containing sprites for players (pre,post,main charge)
+class Sprites_Player(Sprites):
 
     def __init__(self,path,charge=False):
         super().__init__()
@@ -96,13 +96,12 @@ class Sprites_Enteties(Sprites):
 
         return len(self.sprite_dict[phase][input])
 
-#class containing sprites for player
-class Sprites_player(Sprites):
+#class containing sprites for enemies and NPC (no charge, pre, post or main)
+class Sprites_enteties(Sprites):
 
-    player_path = "Sprites/Enteties/aila/"
-    def __init__(self):
+    def __init__(self,path):
         super().__init__()
-        self.sprite_dict = self.load_all_sprites(self.player_path)
+        self.sprite_dict = self.load_all_sprites(path)
 
     def get_image(self, input, timer, dir):
         if input=='sword' and dir[1]>0:
@@ -122,86 +121,6 @@ class Sprites_player(Sprites):
             input=input+'_down'
 
         return len(self.sprite_dict[input])
-
-class NPC(Sprites):
-
-    def __init__(self, name):
-        super().__init__()
-        self.name = name
-        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/NPC/" + name + "/animation/")
-
-    #input requires action, timer for animation frames
-    def get_image(self, input, timer,dir):
-        if dir[0] < 0:
-            return self.sprite_dict[input][timer]
-        elif dir[0] >= 0:
-            return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
-
-    def get_frame_number(self, input,dir):
-
-        return len(self.sprite_dict[input])
-
-class Sprites_evil_knight(Sprites_player):
-
-    player_path = "Sprites/Enteties/enemies/evil_knight/"
-    def __init__(self):
-        super().__init__()
-
-class Flowy(Sprites_player):
-
-    def __init__(self):
-        super().__init__()
-        self.sprite_dict = self.load_all_sprites("Sprites/Enteties/enemies/flowy/")
-
-class Chest(Sprites):
-
-    def __init__(self):
-        super().__init__()
-        self.path = "Sprites/animations/Chest/chest.png"
-        self.sprites = self.generic_sheet_reader(self.path,16,21,1,3)
-
-    def get_sprites(self):
-        return self.sprites
-
-class Chest_Big(Sprites):
-
-    def __init__(self):
-        super().__init__()
-        self.path = "Sprites/animations/Chest/chest_big.png"
-        self.sprites = self.generic_sheet_reader(self.path,32,29,1,5)
-
-    def get_sprites(self):
-        return self.sprites
-
-class Hearts(Sprites):
-
-    def __init__(self):
-        super().__init__()
-        self.path = "Sprites/UI/health/hearts.png"
-        self.sprites = self.generic_sheet_reader(self.path,7,6,2,2)
-
-    def get_sprites(self):
-        return self.sprites
-
-class Hearts_Black(Sprites):
-
-    def __init__(self):
-        super().__init__()
-        self.path = "Sprites/UI/health/hearts_black.png"
-        self.sprites = self.generic_sheet_reader(self.path,9,8,2,3)
-
-    def get_sprites(self):
-        return self.sprites
-
-class Spirit(Sprites):
-
-    def __init__(self):
-        super().__init__()
-        self.path = "Sprites/UI/spirit/spirit_orbs.png"
-        self.sprites = self.generic_sheet_reader(self.path,9,9,1,3)
-
-    def get_sprites(self):
-        return self.sprites
 
 #class for reading and rendering fonts
 class Alphabet():
