@@ -17,6 +17,7 @@ class Entity(pygame.sprite.Sprite):
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
         self.phase='pre'
         self.max_vel = 10
+        self.charging=[False]#a list beause to make it a pointer
 
     def death(self,loot):
         if self.health<=0:#if 0 health of enemy
@@ -82,8 +83,10 @@ class Entity(pygame.sprite.Sprite):
             self.action['stand']=True
             self.action['wall']=False
             self.action['jump']=False
+
             if self.dir[1]<0:#if on ground, cancel sword swing
                 self.action['sword']=False
+
         else:#if not on ground
             self.action['stand']=False
             if self.velocity[1]>=0:#if falling down
@@ -123,18 +126,11 @@ class Entity(pygame.sprite.Sprite):
                 self.velocity[0]=self.ac_dir[0]*10
             #entity.velocity[0]=max(10,entity.velocity[0])
 
-        try:
-            if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
-                self.velocity[0]+=self.dir[0]*self.acceleration[0]
-                self.friction[0]=0.2
-                if abs(self.velocity[0])>10:#max horizontal speed
-                    self.velocity[0]=self.dir[0]*10
-        except:
-            if self.action['run']:#accelerate horizontal to direction when not dashing
-                self.velocity[0]+=self.dir[0]*self.acceleration[0]
-                self.friction[0]=0.2
-                if abs(self.velocity[0])>self.max_vel:#max horizontal speed
-                    self.velocity[0]=self.dir[0]*self.max_vel
+        if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
+            self.velocity[0]+=self.dir[0]*self.acceleration[0]
+            self.friction[0]=0.2
+            if abs(self.velocity[0])>self.max_vel:#max horizontal speed
+                self.velocity[0]=self.dir[0]*self.max_vel
 
         self.movement[1]=self.velocity[1]#set the vertical velocity
 
@@ -145,8 +141,8 @@ class Entity(pygame.sprite.Sprite):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
 
-        self.physics_movement()
         self.check_collisions()
+        self.physics_movement()
 
     def update_action(self, new_action):
         if not self.action[new_action]:
@@ -201,79 +197,55 @@ class Player(Entity):
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
-        self.charging=[False]#a list beause to make it a pointer
         self.abilities=['sword','bow','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates
-        self.frame_limit={'death':10,'hurt':10,'dash':16,'sword':2,'bow':4,'force':10,'heal':8,'shield':8}
-        self.action_framerate={}
-        for action in self.frame_limit.keys():#framerate for the main phase
-            self.action_framerate[action]=int(self.frame_limit[action]/self.sprites.get_frame_number(action,self.ac_dir,'main'))
+        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':3,'bow':2,'force':2,'heal':2,'shield':2,'fall':2,'stand':3,'run':2,'jump':2}
 
-    def set_img(self):
+    def set_imgs(self):
         all_action=self.priority_action+self.nonpriority_action
+
         for action in all_action:#go through the actions
             if self.action[action]:
-
                 if action != self.state and self.phase!='post':#changing action
                     self.state = action
                     self.reset_timer()#reset frame an remember the direction
                     self.phase = 'pre'
 
-                if self.phase=='pre' or self.phase=='charge':
+                if action in self.nonpriority_action:
+                    dir=self.dir
+                else:#if priority action
+                    dir=self.ac_dir
 
-                    self.image = self.sprites.get_image(action,self.frame//4,self.ac_dir,self.phase)
-                    self.frame += 1
+                self.image = self.sprites.get_image(action,self.frame//self.framerate[action],dir,self.phase)
+                self.frame += 1
 
-                    if self.frame == self.sprites.get_frame_number(action,self.ac_dir,self.phase)*4:
-                        if action == 'death':
-                            self.kill()
+                if self.frame == self.sprites.get_frame_number(action,dir,self.phase)*self.framerate[action]:
+                    self.frame=0
+
+                    if action == 'death':
+                        self.kill()
+
+                    if self.phase=='pre' or self.phase=='charge':
+                        if self.charging[0] and action in self.abilities:#do not set chagre while standing/running
+                            self.phase='charge'
                         else:
-                            self.frame=0
-                            if self.charging[0] and action in self.abilities:#do not set chagre while standing/running
-                                self.phase='charge'
-                            else:
-                                self.phase = 'main'
-                    break
+                            self.phase = 'main'
 
-                elif self.phase == 'main':
-                    if action in self.priority_action:#priority action
-
-                        self.image = self.sprites.get_image(action,self.frame//self.action_framerate[action],self.ac_dir,self.phase)
-                        self.frame += 1
-
-                        if self.frame == self.frame_limit[action]:
-                            self.frame=0
-
-                            if self.sprites.get_frame_number(action,self.ac_dir,'post') == 0:#if there is no post animation
+                    elif self.phase == 'main':
+                        if self.sprites.get_frame_number(action,dir,'post') == 0:#if there is no post animation
+                            if action in self.priority_action:
                                 self.phase = 'pre'
-                                self.action_cooldown = False
+                                self.action_cooldown = False#allow for new action after post animation
                                 self.action[action] = False
-                            else:
-                                self.phase = 'post'
-                        break
+                        else:#if there is post animation
+                            self.phase = 'post'
 
-                    elif action in self.nonpriority_action:#none-priority actions
-
-                        self.image = self.sprites.get_image(action,self.frame//4,self.dir,self.phase)
-                        self.frame += 1
-
-                        if self.frame == self.sprites.get_frame_number(action,self.dir,self.phase)*4:
-                            self.frame=0
-                            if self.sprites.get_frame_number(self.state,self.ac_dir,'post') != 0:#if there is post animation
-                                self.phase = 'post'
-                        break
-
-                else:#if post animation
-                    self.image = self.sprites.get_image(self.state,self.frame//4,self.ac_dir,'post')
-                    self.frame += 1
-
-                    if self.frame == self.sprites.get_frame_number(self.state,self.ac_dir,'post')*4:
-                        self.frame=0
+                    else:#if post animation
                         self.phase = 'pre'
                         self.action_cooldown = False#allow for new action after post animation
                         self.action[action] = False
-                    break
+                break
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -291,7 +263,6 @@ class Player(Entity):
 
     def attack_action(self,projectiles):
         #only enters upon press
-
         if self.action[self.equip] and not self.action_cooldown:
             if self.phase == 'pre':
                 if self.equip=='bow' and self.spirit >= 10:#creates the objct in pre phase
@@ -345,7 +316,6 @@ class Player(Entity):
         self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
-        self.collision_types['bottom']=False
 
         if self.action['wall']:
             self.velocity[0]=-self.dir[0]*10
@@ -364,7 +334,7 @@ class Player(Entity):
 
         self.sword.updates(self.hitbox)
         self.shield.updates(self.hitbox)
-        self.set_img()
+        self.set_imgs()
 
     def update_hitbox(self):
         self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
