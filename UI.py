@@ -69,14 +69,9 @@ class Game_UI():
 
             self.input()#game inputs
 
-            # !!--change to one group--!!
-            Engine.Physics.movement(self.players)
-            Engine.Physics.movement(self.enemies)
-            Engine.Physics.movement(self.npcs)
-
-            self.collisions.check_collisions(self.players,self.platforms)
-            self.collisions.check_collisions(self.enemies,self.platforms)
-            self.collisions.check_collisions(self.npcs,self.platforms)
+            self.collisions.collide(self.players,self.platforms)
+            self.collisions.collide(self.enemies,self.platforms)
+            self.collisions.collide(self.npcs,self.platforms)
             self.collisions.check_invisible(self.npcs,self.invisible_blocks)
             self.collisions.check_collisions_loot(self.loot,self.platforms)
             self.collisions.pickup_loot(self.player,self.loot)

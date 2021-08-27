@@ -73,9 +73,80 @@ class Entity(pygame.sprite.Sprite):
     def attack_action(self,projectiles):
         return projectiles
 
+    def check_collisions(self):
+        self.friction[1]=0
+
+        if self.collision_types['bottom']:#if on ground
+            self.dashing_cooldown=10
+            self.action['fall']=False
+            self.action['stand']=True
+            self.action['wall']=False
+            self.action['jump']=False
+            if self.dir[1]<0:#if on ground, cancel sword swing
+                self.action['sword']=False
+        else:#if not on ground
+            self.action['stand']=False
+            if self.velocity[1]>=0:#if falling down
+                self.action['jump']=False
+                self.action['fall']=True
+                if self.collision_types['right'] or self.collision_types['left']:#on wall and not on ground
+                    self.action['wall']=True
+                    self.action['dash']=False
+                    self.action['fall']=False
+                    self.friction[1]=0.4
+                    self.dashing_cooldown=10
+                else:
+                    self.action['wall']=False
+            else:#if going up
+                self.action['jump']=True
+
+        if self.collision_types['top']:#knock back when hit head
+            self.velocity[1]=0
+
+        if self.collision_spikes['bottom']:
+            self.action['hurt']=True
+            self.velocity[1]=-6
+            self.health-=10
+            if self.health<=0:
+                self.action['death']=True
+
+    def physics_movement(self):
+        self.velocity[1]=self.velocity[1]+self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[1]=min(self.velocity[1],7)#set a y max speed
+
+        if self.action['dash']:
+            self.dashing_cooldown-=1
+            self.velocity[1]=0
+            self.velocity[0]=self.velocity[0]+self.ac_dir[0]*0.5
+
+            if abs(self.velocity[0])<10:#max horizontal speed
+                self.velocity[0]=self.ac_dir[0]*10
+            #entity.velocity[0]=max(10,entity.velocity[0])
+
+        try:
+            if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
+                self.velocity[0]+=self.dir[0]*self.acceleration[0]
+                self.friction[0]=0.2
+                if abs(self.velocity[0])>10:#max horizontal speed
+                    self.velocity[0]=self.dir[0]*10
+        except:
+            if self.action['run']:#accelerate horizontal to direction when not dashing
+                self.velocity[0]+=self.dir[0]*self.acceleration[0]
+                self.friction[0]=0.2
+                if abs(self.velocity[0])>self.max_vel:#max horizontal speed
+                    self.velocity[0]=self.dir[0]*self.max_vel
+
+        self.movement[1]=self.velocity[1]#set the vertical velocity
+
+        self.velocity[0]=self.velocity[0]-self.friction[0]*self.velocity[0]#friction
+        self.movement[0]=self.velocity[0]#set the horizontal velocity
+
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
+
+        self.physics_movement()
+        self.check_collisions()
 
     def update_action(self, new_action):
         if not self.action[new_action]:
@@ -141,7 +212,6 @@ class Player(Entity):
 
     def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
-
         for action in all_action:#go through the actions
             if self.action[action]:
 
@@ -239,12 +309,13 @@ class Player(Entity):
                     projectiles.add(Force(self.ac_dir,self.hitbox))
                     self.spirit -= 10
                     self.force_jump()
-                elif self.equip == 'shield' and self.spirit >= 10:
+                elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
                     self.shield=Shield(self.ac_dir,self.hitbox)
                     projectiles.add(self.shield)
                     self.spirit -= 10
 
                 self.action_cooldown=True#cooldown flag
+
         return projectiles
 
     def change_equipment(self):
@@ -275,6 +346,8 @@ class Player(Entity):
         self.friction[1] = 0
         self.velocity[1]=-11
         self.action['jump']=True
+        self.collision_types['bottom']=False
+
         if self.action['wall']:
             self.velocity[0]=-self.dir[0]*10
 
@@ -620,7 +693,7 @@ class BG_far(Block):
     def update_pos(self):
         self.rect.topleft = self.true_pos
 
-class Invisible_block(Entity):
+class Invisible_block(pygame.sprite.Sprite):
 
     def __init__(self,pos):
         super().__init__()
@@ -628,11 +701,19 @@ class Invisible_block(Entity):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
 
-class Interactable(Entity):
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+class Interactable(pygame.sprite.Sprite):
 
     def __init__(self):
         super().__init__()
         self.interacted = False
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
 
 class Pathway(Interactable):
 
