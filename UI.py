@@ -588,9 +588,10 @@ class Game_UI():
                     self.player.jump()
 
                 if event.key==pygame.K_f:
-                    if not self.player.action['dash']:
+                    if not self.player.action['dash']:                
                         self.player.action[self.player.equip]=True
                         self.player.charging[0] = True
+
 
                 if event.key==pygame.K_g:
                     self.player.interacting = True
@@ -631,5 +632,3 @@ class Game_UI():
                 if event.key==pygame.K_f:
                     if not self.player.action['dash']:
                         self.player.charging[0]=False
-                        self.player.phase='main'
-                        self.player.frame=0

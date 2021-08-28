@@ -26,11 +26,11 @@ class Collisions():
 
                     self.shake=collision_ene.death(loot)#check if dead
 
-                    projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
+                    self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
 
                 #hit platform
                 elif collision_plat:
-                    projectile.collision(entity)#entity is the guy donig the action
+                    self.shake=projectile.collision(entity)#entity is the guy donig the action
 
     @staticmethod
     def collided(projectile,target):
@@ -107,7 +107,6 @@ class Collisions():
     @staticmethod
     def check_collisions_loot(loots,platforms):
         Collisions.collide(loots,platforms)
-
         for loot in loots:#if hit ground
             if loot.collision_types['bottom']:
                 loot.velocity=[0,0]
