@@ -126,7 +126,7 @@ class Entity(pygame.sprite.Sprite):
                 self.velocity[0]=self.ac_dir[0]*10
             #entity.velocity[0]=max(10,entity.velocity[0])
 
-        if self.action['run'] and not self.phase=='charge':#accelerate horizontal to direction when not dashing
+        if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
             self.velocity[0]+=self.dir[0]*self.acceleration[0]
             self.friction[0]=0.2
             if abs(self.velocity[0])>self.max_vel:#max horizontal speed
@@ -202,9 +202,23 @@ class Player(Entity):
         #frame rates per action
         self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':3,'stone':3,'force':2,'heal':2,'shield':2,'fall':3,'stand':3,'run':3,'jump':2}
 
+    def combined_action(self,action):
+        if action=='sword':
+            if self.action['run']:
+                action='sword_run'
+            elif self.action['stand']:
+                action='sword_stand'
+        elif action=='jump':
+            if self.action['run']:
+                action='jump_run'
+            elif self.action['stand']:
+                action='jump_stand'
+        return action
+
+
     def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
-        print(self.phase)
+
         for action in all_action:#go through the actions
             if self.action[action]:
 
@@ -217,6 +231,8 @@ class Player(Entity):
                     dir=self.dir
                 else:#if priority action
                     dir=self.ac_dir
+
+                #action=self.combined_action(action)
 
                 self.image = self.sprites.get_image(action,self.frame//self.framerate[action],dir,self.phase)
                 self.frame += 1
