@@ -126,7 +126,7 @@ class Entity(pygame.sprite.Sprite):
                 self.velocity[0]=self.ac_dir[0]*10
             #entity.velocity[0]=max(10,entity.velocity[0])
 
-        if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
+        if self.action['run'] and not self.phase=='charge':#accelerate horizontal to direction when not dashing
             self.velocity[0]+=self.dir[0]*self.acceleration[0]
             self.friction[0]=0.2
             if abs(self.velocity[0])>self.max_vel:#max horizontal speed
@@ -187,7 +187,7 @@ class Player(Entity):
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
         self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'stone':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False,'shield':False}
         self.state = 'stand'
-        self.equip='sword'#can change to stone
+        self.equip='sword'#start with sword
         self.sword=Sword(self.dir,self.hitbox)
         self.shield=Shield(self.ac_dir,self.hitbox)
         self.hitbox_offset = (0,13)
@@ -200,11 +200,11 @@ class Player(Entity):
         self.abilities=['sword','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates per action
-        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':3,'stone':2,'force':2,'heal':2,'shield':2,'fall':2,'stand':3,'run':2,'jump':2}
+        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':3,'stone':3,'force':2,'heal':2,'shield':2,'fall':3,'stand':3,'run':3,'jump':2}
 
-    def set_imgs(self):
+    def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
-
+        print(self.phase)
         for action in all_action:#go through the actions
             if self.action[action]:
 
@@ -335,7 +335,7 @@ class Player(Entity):
 
         self.sword.updates(self.hitbox)
         self.shield.updates(self.hitbox)
-        self.set_imgs()
+        self.set_img()
 
     def update_hitbox(self):
         self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
