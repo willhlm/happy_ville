@@ -588,10 +588,9 @@ class Game_UI():
                     self.player.jump()
 
                 if event.key==pygame.K_f:
-                    if not self.player.action['dash']:                
+                    if not self.player.action['dash']:
                         self.player.action[self.player.equip]=True
                         self.player.charging[0] = True
-
 
                 if event.key==pygame.K_g:
                     self.player.interacting = True
@@ -627,7 +626,7 @@ class Game_UI():
 
                 if event.key==pygame.K_TAB:
                     self.ability_menu=False
-                    self.player.equip=self.player.abilities[self.ab_index]
+                    self.player.equip=self.player.abilities[self.ab_index]#select ability
 
                 if event.key==pygame.K_f:
                     if not self.player.action['dash']:
