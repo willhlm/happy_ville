@@ -24,9 +24,8 @@ class Collisions():
 
                     collision_ene.take_dmg(projectile.dmg)
 
-                    self.shake=collision_ene.death(loot)#check if dead
-
                     self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
+                    self.shake+=collision_ene.death(loot)#check if dead
 
                 #hit platform
                 elif collision_plat:
