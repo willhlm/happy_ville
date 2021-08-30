@@ -88,7 +88,7 @@ class Entity(pygame.sprite.Sprite):
                 self.action['sword']=False
 
         else:#if not on ground
-            self.action['stand']=False
+            #self.action['stand']=False
             if self.velocity[1]>=0:#if falling down
                 self.action['jump']=False
                 self.action['fall']=True
@@ -200,21 +200,16 @@ class Player(Entity):
         self.abilities=['sword','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates per action
-        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':3,'stone':3,'force':2,'heal':2,'shield':2,'fall':3,'stand':3,'run':3,'jump':2}
+        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':5,'heal':4,'shield':2,'fall':3,'stand':4,'run':5,'jump':2}
 
     def combined_action(self,action):
-        if action=='sword':
+        actions=['sword','jump']#the animations in which should change if runnig or standing
+        if action in actions:
             if self.action['run']:
-                action='sword_run'
+                action=action+'_run'
             elif self.action['stand']:
-                action='sword_stand'
-        elif action=='jump':
-            if self.action['run']:
-                action='jump_run'
-            elif self.action['stand']:
-                action='jump_stand'
+                action=action+'_stand'
         return action
-
 
     def set_img(self):
         all_action=self.priority_action+self.nonpriority_action
@@ -232,12 +227,12 @@ class Player(Entity):
                 else:#if priority action
                     dir=self.ac_dir
 
-                #action=self.combined_action(action)
+                comb_action=self.combined_action(action)
 
-                self.image = self.sprites.get_image(action,self.frame//self.framerate[action],dir,self.phase)
+                self.image = self.sprites.get_image(comb_action,self.frame//self.framerate[action],dir,self.phase)
                 self.frame += 1
 
-                if self.frame == self.sprites.get_frame_number(action,dir,self.phase)*self.framerate[action]:
+                if self.frame == self.sprites.get_frame_number(comb_action,dir,self.phase)*self.framerate[action]:
                     self.frame=0
 
                     if action == 'death':
@@ -250,7 +245,7 @@ class Player(Entity):
                             self.phase = 'main'
 
                     elif self.phase == 'main':
-                        if self.sprites.get_frame_number(action,dir,'post') == 0:#if there is no post animation
+                        if self.sprites.get_frame_number(comb_action,dir,'post') == 0:#if there is no post animation
                             if action in self.priority_action:
                                 self.phase = 'pre'
                                 self.action_cooldown = False#allow for new action after post animation
@@ -397,6 +392,58 @@ class Enemy_1(Player):
     def sign(x):
         if x>0: return 1
         return -1
+
+class Woopie(Entity):
+    def __init__(self,pos):
+        super().__init__()
+        self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/stand/Kodama_stand1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 1
+        self.priority_action=['death','pick']#animation
+        self.nonpriority_action=['run','stand']#animation
+        self.action={'stand':True,'run':False,'death':False,'pick':False,'fall':False,'dash':False,'hurt':False}
+        self.state = 'stand'
+        self.equip='sword'
+        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.friction=[0.2,0]
+        self.loot={'Coin':2,'Arrow':1}#the keys need to have the same name as their respective classes
+        self.shake=10
+        self.counter=0
+        self.acceleration=[1,0.2]
+        self.max_vel = 1
+
+    @staticmethod#a function to add glow around the entity
+    def add_white(radius,colour,screen,pos):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
+
+    def update(self,pos):
+        super().update(pos)
+        self.set_img()
+
+    def AI(self,player,screen):#the AI
+        #light around the entity
+        Woopie.add_white(20,(20,20,20),screen,self.rect.center)#radius, clolor, screen,position
+        self.counter+=1
+
+        choice=self.priority_action+self.nonpriority_action
+        choice.remove('death')
+
+        if self.counter>=100:
+            action=random.choice(choice)
+            self.action[action]=True
+            self.counter=0
+
+            if self.action['run']:
+                self.dir[0]=-self.dir[0]
+
+                self.action['run']=random.choice([False,True])
+
+
 
 class Enemy_2(Entity):
     def __init__(self,pos):

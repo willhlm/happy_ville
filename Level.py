@@ -128,6 +128,9 @@ class Tilemap():
                 elif tile == '17':
                     new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
+                elif tile == '25':
+                    new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size))
+                    enemies.add(new_enemy)
                 elif tile == '24':
                     pass
                     #new_enemy = Entities.Enemy_2((col_index * self.tile_size, row_index * self.tile_size))

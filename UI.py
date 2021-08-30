@@ -630,5 +630,5 @@ class Game_UI():
                     self.player.equip=self.player.abilities[self.ab_index]#select ability
 
                 if event.key==pygame.K_f:
-                    if not self.player.action['dash']:                    
+                    if not self.player.action['dash']:
                         self.player.charging[0]=False
