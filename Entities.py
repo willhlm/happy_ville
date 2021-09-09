@@ -18,6 +18,7 @@ class Entity(pygame.sprite.Sprite):
         self.phase='pre'
         self.max_vel = 10
         self.charging=[False]#a list beause to make it a pointer
+        self.hitbox_offset=(0,0)
 
     def death(self,loot):
         if self.health<=0:#if 0 health of enemy
@@ -29,7 +30,8 @@ class Entity(pygame.sprite.Sprite):
 
     def take_dmg(self,dmg):
         self.health-=dmg
-        self.action['hurt']=True
+        if dmg>0:
+            self.action['hurt']=True
 
     def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
         all_action=self.priority_action+self.nonpriority_action
@@ -82,7 +84,7 @@ class Entity(pygame.sprite.Sprite):
             self.action['fall']=False
             self.action['stand']=True
             self.action['wall']=False
-            self.action['jump']=False
+            #self.action['jump']=False
 
             if self.dir[1]<0:#if on ground, cancel sword swing
                 self.action['sword']=False
@@ -200,10 +202,10 @@ class Player(Entity):
         self.abilities=['sword','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates per action
-        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':5,'heal':4,'shield':2,'fall':3,'stand':4,'run':5,'jump':2}
+        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':5,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
 
     def combined_action(self,action):
-        actions=['sword','jump']#the animations in which should change if runnig or standing
+        actions=['sword','jump','fall']#the animations in which should change if runnig or standing
         if action in actions:
             if self.action['run']:
                 action=action+'_run'
@@ -221,18 +223,17 @@ class Player(Entity):
                     self.state = action
                     self.reset_timer()#reset frame an remember the direction
                     self.phase = 'pre'
+                    self.comb_action=self.combined_action(action)
 
                 if action in self.nonpriority_action:
                     dir=self.dir
                 else:#if priority action
                     dir=self.ac_dir
 
-                comb_action=self.combined_action(action)
-
-                self.image = self.sprites.get_image(comb_action,self.frame//self.framerate[action],dir,self.phase)
+                self.image = self.sprites.get_image(self.comb_action,self.frame//self.framerate[action],dir,self.phase)
                 self.frame += 1
 
-                if self.frame == self.sprites.get_frame_number(comb_action,dir,self.phase)*self.framerate[action]:
+                if self.frame == self.sprites.get_frame_number(self.comb_action,dir,self.phase)*self.framerate[action]:
                     self.frame=0
 
                     if action == 'death':
@@ -245,11 +246,12 @@ class Player(Entity):
                             self.phase = 'main'
 
                     elif self.phase == 'main':
-                        if self.sprites.get_frame_number(comb_action,dir,'post') == 0:#if there is no post animation
+                        if self.sprites.get_frame_number(self.comb_action,dir,'post') == 0:#if there is no post animation
                             if action in self.priority_action:
                                 self.phase = 'pre'
                                 self.action_cooldown = False#allow for new action after post animation
                                 self.action[action] = False
+                                self.action[self.equip] = False#cancel abillity in case hurt
                         else:#if there is post animation
                             self.phase = 'post'
 
@@ -331,6 +333,7 @@ class Player(Entity):
 
         if self.action['wall']:
             self.velocity[0]=-self.dir[0]*10
+
 
     def talk(self):
         self.action['talk']=not self.action['talk']
@@ -440,10 +443,7 @@ class Woopie(Entity):
 
             if self.action['run']:
                 self.dir[0]=-self.dir[0]
-
                 self.action['run']=random.choice([False,True])
-
-
 
 class Enemy_2(Entity):
     def __init__(self,pos):
@@ -881,7 +881,7 @@ class Sword(Weapon):
         self.image = pygame.image.load("Sprites/Attack/Sword/main/swing1.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.height,entity_hitbox.width)
+        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.width+5,entity_hitbox.height)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
         self.dir=entity_dir.copy()
@@ -1071,6 +1071,10 @@ class Loot(pygame.sprite.Sprite):
     def update_rect(self):
         self.rect.center = self.hitbox.center
 
+    def platform_int(self):
+        if self.collision_types['bottom']:
+            self.velocity=[0,0]
+
     def update(self,scroll):
         #remove the equipment if it has expiered
         self.speed()
@@ -1081,6 +1085,8 @@ class Loot(pygame.sprite.Sprite):
 
         if self.lifetime<0:#remove after a while
             self.kill()
+
+        self.platform_int()
 
     def speed(self):
         self.velocity[1]+=0.9#gravity

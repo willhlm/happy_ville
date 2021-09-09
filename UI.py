@@ -585,6 +585,7 @@ class Game_UI():
                     #self.change_equipment()
 
                 if event.key==pygame.K_SPACE and not self.player.action['fall'] and not self.player.action['jump']:#jump
+                    #self.player.action['jump']=True
                     self.player.jump()
 
                 if event.key==pygame.K_f:
