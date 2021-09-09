@@ -23,7 +23,6 @@ class Collisions():
                 if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
 
                     collision_ene.take_dmg(projectile.dmg)
-
                     self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
                     self.shake+=collision_ene.death(loot)#check if dead
 
@@ -106,9 +105,6 @@ class Collisions():
     @staticmethod
     def check_collisions_loot(loots,platforms):
         Collisions.collide(loots,platforms)
-        for loot in loots:#if hit ground
-            if loot.collision_types['bottom']:
-                loot.velocity=[0,0]
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between enteties-groups: a dynamic and a static one
