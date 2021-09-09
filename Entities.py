@@ -205,7 +205,7 @@ class Player(Entity):
         self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':5,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
 
     def combined_action(self,action):
-        actions=['sword','jump']#the animations in which should change if runnig or standing
+        actions=['sword','jump','fall']#the animations in which should change if runnig or standing
         if action in actions:
             if self.action['run']:
                 action=action+'_run'
