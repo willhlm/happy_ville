@@ -19,10 +19,12 @@ class Entity(pygame.sprite.Sprite):
         self.max_vel = 10
         self.charging=[False]#a list beause to make it a pointer
         self.hitbox_offset=(0,0)
+        self.framerate=4
 
     def death(self,loot):
         if self.health<=0:#if 0 health of enemy
             self.action['death']=True
+            self.action['run']=False
             self.velocity=[0,0]
             self.loots(loot)
             return self.shake#screen shake when eneny dies
@@ -43,10 +45,10 @@ class Entity(pygame.sprite.Sprite):
                     self.state = action
                     self.reset_timer()
 
-                self.image = self.sprites.get_image(action,self.frame//4,self.ac_dir)
+                self.image = self.sprites.get_image(action,self.frame//self.framerate,self.ac_dir)
                 self.frame += 1
 
-                if self.frame == self.sprites.get_frame_number(action,self.ac_dir)*4:
+                if self.frame == self.sprites.get_frame_number(action,self.ac_dir)*self.framerate:
                     if action == 'death':
                         self.kill()
                     else:
@@ -63,10 +65,10 @@ class Entity(pygame.sprite.Sprite):
                     self.state = action
                     self.reset_timer()
 
-                self.image = self.sprites.get_image(action,self.frame//4,self.dir)
+                self.image = self.sprites.get_image(action,self.frame//self.framerate,self.dir)
                 self.frame += 1
 
-                if self.frame == self.sprites.get_frame_number(action,self.dir)*4:
+                if self.frame == self.sprites.get_frame_number(action,self.dir)*self.framerate:
                         self.reset_timer()
                 break#take only the higest priority of the nonpriority list
 
@@ -202,7 +204,7 @@ class Player(Entity):
         self.abilities=['sword','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates per action
-        self.framerate={'wall':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':5,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
+        self.framerate={'wall':4,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':5,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
 
     def combined_action(self,action):
         actions=['sword','jump','fall']#the animations in which should change if runnig or standing
@@ -416,6 +418,7 @@ class Woopie(Entity):
         self.counter=0
         self.acceleration=[1,0.2]
         self.max_vel = 1
+        self.framerate=6
 
     @staticmethod#a function to add glow around the entity
     def add_white(radius,colour,screen,pos):
@@ -484,7 +487,7 @@ class Enemy_2(Entity):
 
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
-
+            
 #remove dev when working
 class NPC(Entity):
 

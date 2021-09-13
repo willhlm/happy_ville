@@ -34,6 +34,8 @@ class Sprites():
         list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
         if join(path_to_folder,'.DS_Store') in list_of_sprites:
             list_of_sprites.remove(join(path_to_folder,'.DS_Store'))
+        if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
+            list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
         list_of_sprites.sort()
         return [pygame.image.load(file) for file in list_of_sprites]
 
