@@ -88,8 +88,8 @@ class Entity(pygame.sprite.Sprite):
             self.action['wall']=False
             #self.action['jump']=False
 
-            if self.dir[1]<0:#if on ground, cancel sword swing
-                self.action['sword']=False
+            #if self.dir[1]<0:#if on ground, cancel sword swing
+            #    self.action['sword']=False
 
         else:#if not on ground
             #self.action['stand']=False
@@ -175,7 +175,6 @@ class Entity(pygame.sprite.Sprite):
         return loot
 
 class Player(Entity):
-
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/Enteties/aila/main/stand/aila_idle_2.png").convert()
@@ -187,13 +186,16 @@ class Player(Entity):
         self.max_health = 250
         self.spirit = 100
         self.max_spirit = 100
-        self.priority_action=['death','hurt','dash','sword','stone','force','heal','shield']#animation
+        self.priority_action=['death','hurt','dash','sword','hammer','stone','force','heal','shield']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'jump':False,'death':False,'hurt':False,'stone':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False,'shield':False}
+        self.action={'stand':True,'run':False,'hammer':False,'sword':False,'jump':False,'death':False,'hurt':False,'stone':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False,'shield':False}
         self.state = 'stand'
-        self.equip='sword'#start with sword
+        self.equip='hammer'#starting abillity
         self.sword=Sword(self.dir,self.hitbox)
+        self.hammer=Sword(self.dir,self.hitbox)
         self.shield=Shield(self.ac_dir,self.hitbox)
+        self.force=Force(self.ac_dir,self.hitbox)
+
         self.hitbox_offset = (0,13)
         self.interacting = False
         self.friction=[0.2,0]
@@ -201,10 +203,10 @@ class Player(Entity):
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
-        self.abilities=['sword','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
+        self.abilities=['hammer','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
         #frame rates per action
-        self.framerate={'wall':4,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':5,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
+        self.framerate={'wall':4,'hammer':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':6,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
 
     def combined_action(self,action):
         actions=['sword','jump','fall']#the animations in which should change if runnig or standing
@@ -277,6 +279,46 @@ class Player(Entity):
             self.health-=dmg
             self.action['hurt']=True
 
+    def spawn_sword(self):
+        self.sword.dir=self.dir
+        self.sword.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
+        self.sword.lifetime=7
+        self.state='pre'
+
+    def spawn_hammer(self):
+        self.hammer.dir=self.dir
+        self.hammer.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
+        self.hammer.lifetime=7
+        self.state='pre'
+
+    def spawn_shield(self):
+        self.shield.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
+        self.shield.lifetime=200
+        self.shield.health=100
+        self.state='pre'
+
+    def spawn_force(self):
+        self.force.lifetime=20
+
+        if self.dir[1]!=0:#shppting up or down
+            self.force.velocity=[0,-self.dir[1]*10]
+        else:#horizontal
+            self.force.velocity=[self.dir[0]*10,0]
+
+        self.force.state='pre'
+        self.force.rect=self.force.image.get_rect(center=[self.hitbox[0],self.hitbox[1]])
+        self.force.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],30,30)
+        self.force.rect.center=self.force.hitbox.center#match the positions of hitboxes
+
+    def quick_attack(self,projectiles):
+        if not self.action_cooldown:
+            self.action['sword']=True
+            self.action_cooldown=True#cooldown flag
+            self.spawn_sword()
+            #self.sword=Sword(self.ac_dir,self.hitbox)
+            return self.sword
+        return projectiles
+
     def attack_action(self,projectiles):
         #only enters upon press
         if self.action[self.equip] and not self.action_cooldown:
@@ -288,34 +330,24 @@ class Player(Entity):
                     self.action_cooldown=True#cooldown flag
 
             elif self.phase == 'main':#produce the object in the main animation
-                if self.equip=='sword':
-                    self.sword=Sword(self.ac_dir,self.hitbox)
-                    projectiles.add(self.sword)
+                if self.equip=='hammer':
+                    self.spawn_hammer()
+                    projectiles.add(self.hammer)
                 elif self.equip == 'force' and self.spirit >= 10:
-                    projectiles.add(Force(self.ac_dir,self.hitbox))
+                    self.spawn_force()
+                    projectiles.add(self.force)
+                    #projectiles.add(Force(self.ac_dir,self.hitbox))
                     self.spirit -= 10
                     self.force_jump()
                 elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
-                    self.shield=Shield(self.ac_dir,self.hitbox)
+                    #self.shield=Shield(self.ac_dir,self.hitbox)
+                    self.spawn_shield()
                     projectiles.add(self.shield)
                     self.spirit -= 10
 
                 self.action_cooldown=True#cooldown flag
 
         return projectiles
-
-#    def change_equipment(self):
-        #if self.state not in self.priority_action:#don't change if you are doing some attack
-        #    if self.equip == 'sword':
-        #        self.equip = 'stone'
-        #    elif self.equip == 'stone':
-        #        self.equip = 'force'
-        #    elif self.equip == 'force':
-        #        self.equip='heal'
-        #    elif self.equip=='heal':
-        #        self.equip='shield'
-        #    else:
-        #        self.equip = 'sword'
 
     def force_jump(self):
         #if self.dir[1]!=0:
@@ -336,7 +368,6 @@ class Player(Entity):
         if self.action['wall']:
             self.velocity[0]=-self.dir[0]*10
 
-
     def talk(self):
         self.action['talk']=not self.action['talk']
 
@@ -350,6 +381,7 @@ class Player(Entity):
             self.healing()
 
         self.sword.updates(self.hitbox)
+        self.hammer.updates(self.hitbox)
         self.shield.updates(self.hitbox)
         self.set_img()
 
@@ -487,7 +519,7 @@ class Enemy_2(Entity):
 
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
-            
+
 #remove dev when working
 class NPC(Entity):
 

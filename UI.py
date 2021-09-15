@@ -55,7 +55,7 @@ class Game_UI():
         self.all_entities = pygame.sprite.Group()
 
         self.weather_paricles=BG.Weather()#initiate whater
-        self.weather = self.weather_paricles.create_particle('Sakura')#weather effects
+        self.weather = self.weather_paricles.create_particle('Snow')#weather effects
 
         #initiate maps
         self.load_map('village1')
@@ -588,11 +588,14 @@ class Game_UI():
                     #self.player.action['jump']=True
                     self.player.jump()
 
-                if event.key==pygame.K_f:
+                if event.key==pygame.K_e:#aillities
                     if not self.player.action['dash']:
                         self.player.action[self.player.equip]=True
-                        if self.player.equip!='sword':
-                            self.player.charging[0] = True
+                        self.player.charging[0] = True
+
+                if event.key==pygame.K_f:
+                    if not self.player.action['dash']:
+                        self.fprojectiles.add(self.player.quick_attack(self.fprojectiles))
 
                 if event.key==pygame.K_g:
                     self.player.interacting = True
@@ -630,6 +633,6 @@ class Game_UI():
                     self.ability_menu=False
                     self.player.equip=self.player.abilities[self.ab_index]#select ability
 
-                if event.key==pygame.K_f:
+                if event.key==pygame.K_e:
                     if not self.player.action['dash']:
                         self.player.charging[0]=False
