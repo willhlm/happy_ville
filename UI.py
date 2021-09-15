@@ -77,7 +77,7 @@ class Game_UI():
             self.collisions.pickup_loot(self.player,self.loot)
             self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
-            self.scrolling() #need to be above action_collision
+            self.scrolling() #need to be above action_collision, also includes group updates
             self.draw()
 
             self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
