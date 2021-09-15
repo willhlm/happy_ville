@@ -6,10 +6,10 @@
             "2" : "village2"
         },
         "chests" : {
-            "0" : ["coin", "closed"],
-            "1" : ["coin", "opened"],
-            "2" : ["coin", "closed"],
-            "3" : ["coin", "closed"]
+            "0" : ["Amber_Droplet", "closed"],
+            "1" : ["Amber_Droplet", "opened"],
+            "2" : ["Amber_Droplet", "closed"],
+            "3" : ["Amber_Droplet", "closed"]
         }
     },
     "village2" : {
@@ -17,7 +17,7 @@
             "0" : "village1"
         },
         "chests" : {
-            "0" : ["coin", "closed"]
+            "0" : ["amber_droplet", "closed"]
         }
     }
 }
