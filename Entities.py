@@ -283,13 +283,13 @@ class Player(Entity):
         self.sword.dir=self.dir
         self.sword.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.sword.lifetime=7
-        self.state='pre'
+        self.sword.spawn(self.hitbox)
 
     def spawn_hammer(self):
         self.hammer.dir=self.dir
         self.hammer.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.hammer.lifetime=7
-        self.state='pre'
+        self.hammer.spawn(self.hitbox)
 
     def spawn_shield(self):
         self.shield.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
