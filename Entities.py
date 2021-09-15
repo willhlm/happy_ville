@@ -197,7 +197,7 @@ class Player(Entity):
         self.hitbox_offset = (0,13)
         self.interacting = False
         self.friction=[0.2,0]
-        self.loot={'Coin':10,'Arrow':20}#the keys need to have the same name as their respective classes
+        self.loot={'Amber_Droplet':10,'Arrow':20}#the keys need to have the same name as their respective classes
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
@@ -413,7 +413,7 @@ class Woopie(Entity):
         self.equip='sword'
         self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.friction=[0.2,0]
-        self.loot={'Coin':2,'Arrow':1}#the keys need to have the same name as their respective classes
+        self.loot={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
         self.shake=10
         self.counter=0
         self.acceleration=[1,0.2]
@@ -487,7 +487,7 @@ class Enemy_2(Entity):
 
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
-            
+
 #remove dev when working
 class NPC(Entity):
 
@@ -1102,6 +1102,15 @@ class Coin(Loot):
         super().__init__()
 
         self.image = pygame.image.load("Sprites/Enteties/Items/coin.png").convert_alpha()
+        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
+        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+class Amber_Droplet(Loot):
+    def __init__(self,entity_hitbox):
+        super().__init__()
+
+        self.image = pygame.image.load("Sprites/Enteties/Items/amber_droplet/amber_droplet1.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
