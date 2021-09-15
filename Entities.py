@@ -280,13 +280,13 @@ class Player(Entity):
             self.action['hurt']=True
 
     def spawn_sword(self):
-        self.sword.dir=self.dir
+        self.sword.dir=self.ac_dir
         self.sword.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.sword.lifetime=7
         self.sword.spawn(self.hitbox)
 
     def spawn_hammer(self):
-        self.hammer.dir=self.dir
+        self.hammer.dir=self.ac_dir
         self.hammer.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.hammer.lifetime=7
         self.hammer.spawn(self.hitbox)
@@ -299,11 +299,12 @@ class Player(Entity):
 
     def spawn_force(self):
         self.force.lifetime=20
+        self.force.dir=self.ac_dir.copy()
 
-        if self.dir[1]!=0:#shppting up or down
-            self.force.velocity=[0,-self.dir[1]*10]
+        if self.ac_dir[1]!=0:#shppting up or down
+            self.force.velocity=[0,-self.force.dir[1]*10]
         else:#horizontal
-            self.force.velocity=[self.dir[0]*10,0]
+            self.force.velocity=[self.force.dir[0]*10,0]
 
         self.force.state='pre'
         self.force.rect=self.force.image.get_rect(center=[self.hitbox[0],self.hitbox[1]])
@@ -333,6 +334,7 @@ class Player(Entity):
                 if self.equip=='hammer':
                     self.spawn_hammer()
                     projectiles.add(self.hammer)
+                    #projectiles.add(Sword(self.ac_dir,self.hitbox))
                 elif self.equip == 'force' and self.spirit >= 10:
                     self.spawn_force()
                     projectiles.add(self.force)
