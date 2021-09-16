@@ -730,14 +730,34 @@ class BG_Block(Block):
     def __init__(self,img,pos):
         super().__init__(img,pos)
 
+class FG_fixed(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+
+class FG_paralex(Block):
+
+    def __init__(self,img,pos):
+        super().__init__(img,pos)
+        self.paralex=1.25
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+
 class BG_near(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
         self.paralex=0.75
+        self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.topleft = self.true_pos
 
 class BG_mid(Block):
 
@@ -757,6 +777,7 @@ class BG_far(Block):
 
     def update(self,pos):
         self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
         self.update_pos()
 
     def update_pos(self):
@@ -1135,7 +1156,7 @@ class Loot(pygame.sprite.Sprite):
 
 
     def speed(self):
-        self.velocity[1]+=0.25#gravity
+        self.velocity[1]+=0.3#gravity
 
         self.velocity[1]=min(self.velocity[1],4)#set a y max speed
         self.movement[1]=self.velocity[1]#set the vertical velocity

@@ -10,7 +10,7 @@ class Game_UI():
     def __init__(self):
         pygame.init()#initilise
         self.WINDOW_SIZE = (432,243)
-        self.scale = 3
+        self.scale = 4
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
@@ -39,8 +39,13 @@ class Game_UI():
         self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
-        self.bg = pygame.sprite.Group()
+        self.bg_fixed = pygame.sprite.Group()
         self.bg_far = pygame.sprite.Group()
+        self.bg_mid = pygame.sprite.Group()
+        self.bg_near = pygame.sprite.Group()
+        self.fg_fixed = pygame.sprite.Group()
+        self.fg_paralex = pygame.sprite.Group()
+        self.bgs = [self.bg_fixed,self.bg_far,self.bg_mid,self.bg_near,self.fg_fixed,self.fg_paralex]
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
@@ -253,13 +258,10 @@ class Game_UI():
 
     def initiate_groups(self):
         #clean and load bg
-        self.bg.empty()
-        self.bg_far.empty()
-        for i, ele in enumerate(self.map.load_bg()):
-            if i == 0:
-                self.bg.add(ele)
-            elif i == 1:
-                self.bg_far.add(ele)
+        for bg in self.bgs:
+            bg.empty()
+        for i, bg in enumerate(self.map.load_bg()):
+            self.bgs[i].add(bg)
 
         #clean all groups
         #self.players.empty()
@@ -283,8 +285,8 @@ class Game_UI():
 
     def update_groups(self, scroll = (0,0)):
         self.platforms.update(scroll)
-        self.bg_far.update(scroll)
-        self.bg.update(scroll)
+        for bg in self.bgs:
+            bg.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll)
         self.npcs.update(scroll)
@@ -299,8 +301,9 @@ class Game_UI():
         self.cosmetics.update(scroll)
 
     def draw(self):
-        self.bg_far.draw(self.screen)
-        self.bg.draw(self.screen)
+        for i in range(1,4):
+            self.bgs[i].draw(self.screen)
+        self.bg_fixed.draw(self.screen)
         #self.weather.draw(self.screen)
 
         self.platforms.draw(self.screen)
@@ -312,6 +315,8 @@ class Game_UI():
         self.eprojectiles.draw(self.screen)
         self.loot.draw(self.screen)
         self.cosmetics.draw(self.screen)
+        for i in range(4,6):
+            self.bgs[i].draw(self.screen)
 
     def inventory(self):
         pass

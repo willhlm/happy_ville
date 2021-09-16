@@ -2,7 +2,7 @@
     "village1" : {
         "pathways" : {
             "0" : "village2",
-            "1" : "village2",
+            "1" : "light_forest",
             "2" : "village2"
         },
         "chests" : {
@@ -18,6 +18,18 @@
         },
         "chests" : {
             "0" : ["amber_droplet", "closed"]
+        }
+    },
+    "light_forest" : {
+        "pathways" : {
+            "0" : "village1"
+        },
+        "chests" : {
+            "0" : ["amber_droplet", "closed"],
+            "1" : ["amber_droplet", "closed"],
+            "2" : ["amber_droplet", "closed"],
+            "3" : ["amber_droplet", "opened"],
+            "4" : ["amber_droplet", "opened"]
         }
     }
 }
