@@ -10,7 +10,7 @@ class Game_UI():
     def __init__(self):
         pygame.init()#initilise
         self.WINDOW_SIZE = (432,243)
-        self.scale = 4
+        self.scale = 2
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
@@ -249,10 +249,10 @@ class Game_UI():
     def load_map(self, map_name):
         self.map = Level.Tilemap(map_name)
         self.initiate_groups()
-        self.load_song("Audio/Music/Yellow.wav")
+        self.load_music()
 
-    def load_song(self, path):
-        self.mixer = pygame.mixer.Sound(path)
+    def load_music(self):
+        self.mixer = self.map.load_bg_music()
         self.mixer.set_volume(0.1)
         self.mixer.play(-1)
 
