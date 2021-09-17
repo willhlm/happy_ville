@@ -88,6 +88,9 @@ class Tilemap():
     def test(self):
         print(self.collision_sheet[1])
 
+    def load_bg_music(self):
+        return pygame.mixer.Sound("Audio/" + self.level_name + "/default.wav")
+
     def load_statics(self, map_state):
     #load entities that shouldn't despawn with chunks, npc, enemies, interactables etc
         map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")

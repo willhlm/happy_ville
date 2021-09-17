@@ -485,7 +485,7 @@ class Woopie(Entity):
 class Enemy_2(Entity):
     def __init__(self,pos):
         super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/stand/Stand1.png").convert()
+        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/stand/Stand1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
@@ -497,7 +497,7 @@ class Enemy_2(Entity):
         self.equip='sword'
         self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
         self.friction=[0.2,0]
-        self.loot={'Coin':2,'Arrow':1}#the keys need to have the same name as their respective classes
+        self.loot={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
         self.shake=self.hitbox.height/10
 
