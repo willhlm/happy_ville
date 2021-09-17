@@ -600,7 +600,8 @@ class Game_UI():
 
                 if event.key==pygame.K_f:
                     if not self.player.action['dash']:
-                        self.fprojectiles.add(self.player.quick_attack(self.fprojectiles))
+                        self.player.action['sword']=True
+                        #self.fprojectiles.add(self.player.quick_attack(self.fprojectiles))
 
                 if event.key==pygame.K_g:
                     self.player.interacting = True

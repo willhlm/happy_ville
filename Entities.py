@@ -234,6 +234,9 @@ class Player(Entity):
                 else:#if priority action
                     dir=self.ac_dir
 
+                if self.sprites.get_frame_number(self.comb_action,dir,'pre') == 0:#if there is no pre animation
+                    self.phase='main'
+
                 self.image = self.sprites.get_image(self.comb_action,self.frame//self.framerate[action],dir,self.phase)
                 self.frame += 1
 
@@ -245,7 +248,10 @@ class Player(Entity):
 
                     if self.phase=='pre' or self.phase=='charge':
                         if self.charging[0] and action in self.abilities:#do not set chagre while standing/running
-                            self.phase='charge'
+                            if action=='heal' and self.phase=='charge':#special for heal. After charge is finished, enter main phase
+                                self.phase='main'
+                            else:
+                                self.phase='charge'
                         else:
                             self.phase = 'main'
 
@@ -253,7 +259,7 @@ class Player(Entity):
                         if self.sprites.get_frame_number(self.comb_action,dir,'post') == 0:#if there is no post animation
                             if action in self.priority_action:
                                 self.phase = 'pre'
-                                self.action_cooldown = False#allow for new action after post animation
+                                self.action_cooldown = False#allow for new action after animation
                                 self.action[action] = False
                                 self.action[self.equip] = False#cancel abillity in case hurt
                         else:#if there is post animation
@@ -271,8 +277,8 @@ class Player(Entity):
 
     def healing(self):
         if self.spirit>=1:
-            self.health+=1
-            self.spirit-=1
+            self.health+=20
+            self.spirit-=20
 
     def take_dmg(self,dmg):
         if self.shield.health<=0 or self.shield.lifetime<0:
@@ -281,48 +287,57 @@ class Player(Entity):
 
     def spawn_sword(self):
         self.sword.dir=self.ac_dir
-        self.sword.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.sword.lifetime=7
         self.sword.spawn(self.hitbox)
 
     def spawn_hammer(self):
         self.hammer.dir=self.ac_dir
-        self.hammer.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.hammer.lifetime=7
         self.hammer.spawn(self.hitbox)
+        self.spirit -= 10
+        self.hammer.state='pre'
 
     def spawn_shield(self):
         self.shield.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.shield.lifetime=200
         self.shield.health=100
         self.state='pre'
+        self.spirit -= 10
 
     def spawn_force(self):
         self.force.lifetime=20
-        self.force.dir=self.ac_dir.copy()
+        self.force.dir=self.ac_dir
 
-        if self.ac_dir[1]!=0:#shppting up or down
+        if self.force.dir[1]!=0:#shooting up or down
             self.force.velocity=[0,-self.force.dir[1]*10]
         else:#horizontal
             self.force.velocity=[self.force.dir[0]*10,0]
 
         self.force.state='pre'
-        self.force.rect=self.force.image.get_rect(center=[self.hitbox[0],self.hitbox[1]])
         self.force.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],30,30)
         self.force.rect.center=self.force.hitbox.center#match the positions of hitboxes
+        self.spirit -= 10
+        self.force_jump()
 
-    def quick_attack(self,projectiles):
-        if not self.action_cooldown:
-            self.action['sword']=True
-            self.action_cooldown=True#cooldown flag
-            self.spawn_sword()
+    #def quick_attack(self,projectiles):
+    #    if not self.action_cooldown:
+    #        self.action['sword']=True
+    #        self.action_cooldown=True#cooldown flag
+    #        self.spawn_sword()
             #self.sword=Sword(self.ac_dir,self.hitbox)
-            return self.sword
-        return projectiles
+    #        return self.sword
+    #    return projectiles
 
     def attack_action(self,projectiles):
-        #only enters upon press
-        if self.action[self.equip] and not self.action_cooldown:
+        #always eneters in every iteration
+        if self.action['sword'] and not self.action_cooldown:
+            if self.phase == 'main':#produce the object in the main animation
+                self.spawn_sword()
+                projectiles.add(self.sword)
+                self.action_cooldown=True#cooldown flag
+
+        elif self.action[self.equip] and not self.action_cooldown:
+
             if self.phase == 'pre':
                 if self.equip=='stone' and self.spirit >= 10:#creates the objct in pre phase
 
@@ -339,14 +354,14 @@ class Player(Entity):
                     self.spawn_force()
                     projectiles.add(self.force)
                     #projectiles.add(Force(self.ac_dir,self.hitbox))
-                    self.spirit -= 10
-                    self.force_jump()
+
                 elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
                     #self.shield=Shield(self.ac_dir,self.hitbox)
                     self.spawn_shield()
                     projectiles.add(self.shield)
-                    self.spirit -= 10
 
+                elif self.equip=='heal':
+                    self.healing()
                 self.action_cooldown=True#cooldown flag
 
         return projectiles
@@ -361,6 +376,7 @@ class Player(Entity):
             self.action['dash'] = True
             self.spirit -= 10
             self.action[self.equip]=False#cancel any action
+            self.action['sword']=False#cancel any action
 
     def jump(self):
         self.friction[1] = 0
@@ -378,9 +394,6 @@ class Player(Entity):
         #self.update_hitbox()
         if self.spirit <= self.max_spirit:
             self.spirit += 0.1
-
-        if self.action['heal']:
-            self.healing()
 
         self.sword.updates(self.hitbox)
         self.hammer.updates(self.hitbox)
@@ -971,7 +984,7 @@ class Sword(Weapon):
 class Shield(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        self.lifetime=200#need to be changed depending on the animation of sword of player
+        self.lifetime=1#need to be changed depending on the animation of sword of player
         self.health=100
         self.velocity=[0,0]
         self.state='pre'
