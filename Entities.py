@@ -199,7 +199,7 @@ class Player(Entity):
         self.hitbox_offset = (0,13)
         self.interacting = False
         self.friction=[0.2,0]
-        self.loot={'Amber_Droplet':10,'Arrow':20}#the keys need to have the same name as their respective classes
+        self.loot={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
@@ -248,6 +248,7 @@ class Player(Entity):
 
                     if self.phase=='pre' or self.phase=='charge':
                         if self.charging[0] and action in self.abilities:#do not set chagre while standing/running
+
                             if action=='heal' and self.phase=='charge':#special for heal. After charge is finished, enter main phase
                                 self.phase='main'
                             else:
@@ -1167,7 +1168,6 @@ class Loot(pygame.sprite.Sprite):
             self.animation_timer = 0
         self.animation_timer += frame_rate
 
-
     def speed(self):
         self.velocity[1]+=0.3#gravity
 
@@ -1193,12 +1193,11 @@ class Amber_Droplet(Loot):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
 
-
 class Arrow(Loot):
     def __init__(self,entity_hitbox):
         super().__init__()
 
-        self.image = pygame.image.load("Sprites/Enteties/Items/arrow.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Enteties/Items/arrow/idle/arrow.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes

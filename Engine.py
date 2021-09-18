@@ -39,11 +39,16 @@ class Collisions():
     def check_enemy_collision(player,enemies,loot):
         collided=Collisions.collided #make the hitbox collide and not rect
         collisions=pygame.sprite.spritecollideany(player,enemies,collided)#check collision
+
         if collisions and not player.action['hurt']:
-            player.health-=10
-            player.velocity[0]=-player.dir[0]*10#knock back of player (will not completly work)
             player.action['hurt']=True
+            player.health-=10
             player.death(loot)#check if dead
+
+            if abs(player.velocity[0])>0.1:#if not standing still
+                player.velocity[0]=-10*player.dir[0]#knock back of player
+            else:#if standing still
+                player.velocity[0]=10*collisions.dir[0]
         return loot
 
     #pickup loot
