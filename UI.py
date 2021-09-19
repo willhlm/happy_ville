@@ -10,7 +10,7 @@ class Game_UI():
     def __init__(self):
         pygame.init()#initilise
         self.WINDOW_SIZE = (432,243)
-        self.scale = 2
+        self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
@@ -24,7 +24,8 @@ class Game_UI():
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['start']
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
-        self.mixer = None
+        pygame.mixer.init
+        self.bg_music = pygame.mixer.Channel(0)
 
         self.ability_menu=False#a flag to enter "abillity changing menue"
         self.ab_index=0#index for the ability selection
@@ -227,7 +228,7 @@ class Game_UI():
     def change_map(self, map_name):
         timer = 0
         load_time = 50
-        self.mixer.fadeout(int(1000*load_time/60))
+        self.bg_music.fadeout(int(1000*load_time/60))
         #fade before loading new map
         while timer < load_time:
             self.screen.fill((207,238,250))
@@ -252,9 +253,8 @@ class Game_UI():
         self.load_music()
 
     def load_music(self):
-        self.mixer = self.map.load_bg_music()
-        self.mixer.set_volume(0.1)
-        self.mixer.play(-1)
+        self.bg_music.play(self.map.load_bg_music(),-1)
+        self.bg_music.set_volume(0.1)
 
     def initiate_groups(self):
         #clean and load bg
