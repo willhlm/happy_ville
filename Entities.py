@@ -195,6 +195,10 @@ class Player(Entity):
         self.hammer=Sword(self.dir,self.hitbox)
         self.shield=Shield(self.ac_dir,self.hitbox)
         self.force=Force(self.ac_dir,self.hitbox)
+        self.action_sfx_player = pygame.mixer.Channel(1)
+        self.action_sfx_player.set_volume(0.3)
+        self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
+        self.movement_sfx_timer = 110
 
         self.hitbox_offset = (0,13)
         self.interacting = False
@@ -207,6 +211,12 @@ class Player(Entity):
 
         #frame rates per action
         self.framerate={'wall':4,'hammer':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':6,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
+
+    def load_sfx(self):
+        if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
+            self.action_sfx_player.play(self.action_sfx['run'])
+            self.movement_sfx_timer = 0
+        self.movement_sfx_timer += 1
 
     def combined_action(self,action):
         actions=['sword','jump','fall']#the animations in which should change if runnig or standing
@@ -400,6 +410,7 @@ class Player(Entity):
         self.hammer.updates(self.hitbox)
         self.shield.updates(self.hitbox)
         self.set_img()
+        self.load_sfx()
 
     def update_hitbox(self):
         self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
