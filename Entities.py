@@ -196,7 +196,7 @@ class Player(Entity):
         self.shield=Shield(self.ac_dir,self.hitbox)
         self.force=Force(self.ac_dir,self.hitbox)
         self.action_sfx_player = pygame.mixer.Channel(1)
-        self.action_sfx_player.set_volume(0.3)
+        self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
         self.movement_sfx_timer = 110
 
