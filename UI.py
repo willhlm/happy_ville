@@ -143,7 +143,6 @@ class Game_UI():
                             letter_frame = 0
                             npc.increase_conv_index()
 
-
         #main loop
         while(self.player.action['talk']):
 
@@ -318,8 +317,47 @@ class Game_UI():
         for i in range(4,6):
             self.bgs[i].draw(self.screen)
 
-    def inventory(self):
-        pass
+    def inventoryscreen(self):
+        inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
+
+        temp=[]#a list of loot objects
+        for item in self.player.loot.keys():
+            #temp=Entities.Amber_Droplet(self.player.hitbox).image
+            temp.append(getattr(sys.modules[Entities.__name__], item)(self.player.hitbox))#make the object based on the string
+
+        frame=0
+        while self.inventory:
+            self.display.blit(inventory_BG,(200,100))
+
+            self.player.phase='main'
+            #self.player.set_img()
+            self.player.image = self.player.sprites.get_image('stand',frame//self.player.framerate['stand'],self.player.dir,'main')
+            frame += 1
+            if frame == self.player.sprites.get_frame_number('stand',self.player.dir,'main')*self.player.framerate['stand']:
+                frame=0
+
+            width=self.player.image.get_size()[0]
+            height=self.player.image.get_size()[1]
+            scale=2
+            self.display.blit(pygame.transform.scale(self.player.image,(scale*width,scale*height)),(180,120))
+
+            for index, item in enumerate(self.player.loot.keys()):
+                self.display.blit(pygame.transform.scale(temp[index].image,(int(width/scale),int(height/scale))),(250+50*index,285))
+                temp[index].set_img()
+
+            self.inventory_quit()
+
+    def inventory_quit(self):
+        pygame.display.update()
+        self.clock.tick(60) #set FPS to 60
+
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_i:
+                    self.inventory=False
 
     def change_abilities(self):
         if self.player.state not in self.player.priority_action:#don't change if you are doing some attack
@@ -357,7 +395,6 @@ class Game_UI():
                 self.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
 
                 self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-                pygame.display.update()
 
                 self.clock.tick(60) #set FPS to 60
                 self.input_ability()
@@ -598,15 +635,18 @@ class Game_UI():
                         self.player.action[self.player.equip]=True
                         self.player.charging[0] = True
 
-                if event.key==pygame.K_f:
+                if event.key==pygame.K_f:#quick attack
                     if not self.player.action['dash']:
-                        self.fprojectiles.add(self.player.quick_attack(self.fprojectiles))
+                        self.player.action['sword']=True
+                        #self.fprojectiles.add(self.player.quick_attack(self.fprojectiles))
 
                 if event.key==pygame.K_g:
                     self.player.interacting = True
 
                 if event.key == pygame.K_i:
-                    self.inventory()#open inventort
+                    #self.player.action['run']=False
+                    self.inventory=True
+                    self.inventoryscreen()#open inventort
 
                 if event.key == pygame.K_LSHIFT and self.player.dashing_cooldown>9:#left shift
                     self.player.dashing()
@@ -637,6 +677,9 @@ class Game_UI():
                 if event.key==pygame.K_TAB:
                     self.ability_menu=False
                     self.player.equip=self.player.abilities[self.ab_index]#select ability
+
+                if event.key == pygame.K_i:
+                    self.player.action['run']=False
 
                 if event.key==pygame.K_e:
                     if not self.player.action['dash']:
