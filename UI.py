@@ -13,7 +13,7 @@ class Game_UI():
         self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
-        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, vsync = 1)
+        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
         self.start_BG = pygame.transform.scale(pygame.image.load('Sprites/UI/Menu/Start/start_menu.jpg').convert(),self.WINDOW_SIZE)
         self.clock = pygame.time.Clock()
         self.ESC = False
@@ -329,11 +329,10 @@ class Game_UI():
         while self.inventory:
             self.display.blit(inventory_BG,(200,100))
 
-            self.player.phase='main'
             #self.player.set_img()
-            self.player.image = self.player.sprites.get_image('stand',frame//self.player.framerate['stand'],self.player.dir,'main')
+            self.player.image = self.player.sprites.get_image('stand',frame//self.player.framerate['stand'],[1,0],'main')
             frame += 1
-            if frame == self.player.sprites.get_frame_number('stand',self.player.dir,'main')*self.player.framerate['stand']:
+            if frame == self.player.sprites.get_frame_number('stand',[1,0],'main')*self.player.framerate['stand']:
                 frame=0
 
             width=self.player.image.get_size()[0]

@@ -507,7 +507,7 @@ class Woopie(Entity):
                 self.dir[0]=-self.dir[0]
                 self.action['run']=random.choice([False,True])
 
-class Enemy_2(Entity):
+class Flowy(Entity):
     def __init__(self,pos):
         super().__init__()
         self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/stand/Stand1.png").convert_alpha()
