@@ -135,7 +135,7 @@ class Tilemap():
                     enemies.add(new_enemy)
                 elif tile == '24':
                     pass
-                    #new_enemy = Entities.Enemy_2((col_index * self.tile_size, row_index * self.tile_size))
+                    #new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
                     #enemies.add(new_enemy)
                 col_index += 1
             row_index += 1
