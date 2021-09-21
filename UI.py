@@ -636,7 +636,15 @@ class Game_UI():
 
                 if event.key==pygame.K_f:#quick attack
                     if not self.player.action['dash']:
-                        self.player.action['sword']=True
+                        if not self.player.action['sword1']:
+                            self.player.action['sword']=True
+                        if self.player.timer<20:
+                            self.player.action['sword1']=True
+
+                        self.player.timer=0
+                        #self.comb_action='sword1'
+
+
                         #self.fprojectiles.add(self.player.quick_attack(self.fprojectiles))
 
                 if event.key==pygame.K_g:
