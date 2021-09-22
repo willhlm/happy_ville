@@ -186,9 +186,9 @@ class Player(Entity):
         self.max_health = 250
         self.spirit = 100
         self.max_spirit = 100
-        self.priority_action=['death','hurt','dash','sword','hammer','stone','force','heal','shield']#animation
+        self.priority_action=['death','hurt','dash','sword','sword1','hammer','stone','force','heal','shield']#animation
         self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'hammer':False,'sword':False,'jump':False,'death':False,'hurt':False,'stone':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False,'shield':False}
+        self.action={'stand':True,'run':False,'hammer':False,'sword1':False,'sword':False,'jump':False,'death':False,'hurt':False,'stone':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False,'shield':False}
         self.state = 'stand'
         self.equip='hammer'#starting abillity
         self.sword=Sword(self.dir,self.hitbox)
@@ -209,8 +209,9 @@ class Player(Entity):
         self.dashing_cooldown=10
         self.abilities=['hammer','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
+        self.timer=30#second sword swing
         #frame rates per action
-        self.framerate={'wall':4,'hammer':2,'death':2,'hurt':2,'dash':2,'sword':4,'stone':6,'force':6,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
+        self.framerate={'wall':4,'hammer':2,'death':2,'hurt':2,'dash':2,'sword1':4,'sword':4,'stone':6,'force':6,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
 
     def load_sfx(self):
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
@@ -235,7 +236,7 @@ class Player(Entity):
 
                 if action != self.state and self.phase!='post':#changing action
                     self.state = action
-                    self.reset_timer()#reset frame an remember the direction
+                    self.reset_timer()#reset frame and remember the direction
                     self.phase = 'pre'
                     self.comb_action=self.combined_action(action)
 
@@ -265,7 +266,6 @@ class Player(Entity):
                                 self.phase='charge'
                         else:
                             self.phase = 'main'
-
                     elif self.phase == 'main':
                         if self.sprites.get_frame_number(self.comb_action,dir,'post') == 0:#if there is no post animation
                             if action in self.priority_action:
@@ -273,6 +273,7 @@ class Player(Entity):
                                 self.action_cooldown = False#allow for new action after animation
                                 self.action[action] = False
                                 self.action[self.equip] = False#cancel abillity in case hurt
+
                         else:#if there is post animation
                             self.phase = 'post'
 
@@ -298,7 +299,7 @@ class Player(Entity):
 
     def spawn_sword(self):
         self.sword.dir=self.ac_dir
-        self.sword.lifetime=7
+        self.sword.lifetime=3
         self.sword.spawn(self.hitbox)
 
     def spawn_hammer(self):
@@ -341,39 +342,41 @@ class Player(Entity):
 
     def attack_action(self,projectiles):
         #always eneters in every iteration
-        if self.action['sword'] and not self.action_cooldown:
-            if self.phase == 'main':#produce the object in the main animation
-                self.spawn_sword()
-                projectiles.add(self.sword)
-                self.action_cooldown=True#cooldown flag
-
-        elif self.action[self.equip] and not self.action_cooldown:
-
-            if self.phase == 'pre':
-                if self.equip=='stone' and self.spirit >= 10:#creates the objct in pre phase
-
-                    projectiles.add(Stone(self.ac_dir,self.hitbox,self.charging))
-                    self.spirit -= 10
+        self.timer+=1
+        if not self.action_cooldown:
+            if self.action['sword'] or self.action['sword1']:
+                if self.phase == 'main':#produce the object in the main animation
+                    self.spawn_sword()
+                    projectiles.add(self.sword)
                     self.action_cooldown=True#cooldown flag
 
-            elif self.phase == 'main':#produce the object in the main animation
-                if self.equip=='hammer':
-                    self.spawn_hammer()
-                    projectiles.add(self.hammer)
-                    #projectiles.add(Sword(self.ac_dir,self.hitbox))
-                elif self.equip == 'force' and self.spirit >= 10:
-                    self.spawn_force()
-                    projectiles.add(self.force)
-                    #projectiles.add(Force(self.ac_dir,self.hitbox))
+            elif self.action[self.equip]:
 
-                elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
-                    #self.shield=Shield(self.ac_dir,self.hitbox)
-                    self.spawn_shield()
-                    projectiles.add(self.shield)
+                if self.phase == 'pre':
+                    if self.equip=='stone' and self.spirit >= 10:#creates the objct in pre phase
 
-                elif self.equip=='heal':
-                    self.healing()
-                self.action_cooldown=True#cooldown flag
+                        projectiles.add(Stone(self.ac_dir,self.hitbox,self.charging))
+                        self.spirit -= 10
+                        self.action_cooldown=True#cooldown flag
+
+                elif self.phase == 'main':#produce the object in the main animation
+                    if self.equip=='hammer':
+                        self.spawn_hammer()
+                        projectiles.add(self.hammer)
+                        #projectiles.add(Sword(self.ac_dir,self.hitbox))
+                    elif self.equip == 'force' and self.spirit >= 10:
+                        self.spawn_force()
+                        projectiles.add(self.force)
+                        #projectiles.add(Force(self.ac_dir,self.hitbox))
+
+                    elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
+                        #self.shield=Shield(self.ac_dir,self.hitbox)
+                        self.spawn_shield()
+                        projectiles.add(self.shield)
+
+                    elif self.equip=='heal':
+                        self.healing()
+                    self.action_cooldown=True#cooldown flag
 
         return projectiles
 
@@ -956,7 +959,7 @@ class Weapon(pygame.sprite.Sprite):
 class Sword(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        self.lifetime=7#need to be changed depending on the animation of sword of player
+        self.lifetime=3#need to be changed depending on the animation of sword of player
         self.dmg=10
         self.velocity=[0,0]
         #self.state='pre'
