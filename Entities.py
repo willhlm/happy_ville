@@ -344,6 +344,7 @@ class Player(Entity):
         #always eneters in every iteration
         self.timer+=1
         if not self.action_cooldown:
+            
             if self.action['sword'] or self.action['sword1']:
                 if self.phase == 'main':#produce the object in the main animation
                     self.spawn_sword()
@@ -351,7 +352,6 @@ class Player(Entity):
                     self.action_cooldown=True#cooldown flag
 
             elif self.action[self.equip]:
-
                 if self.phase == 'pre':
                     if self.equip=='stone' and self.spirit >= 10:#creates the objct in pre phase
 
@@ -373,7 +373,6 @@ class Player(Entity):
                         #self.shield=Shield(self.ac_dir,self.hitbox)
                         self.spawn_shield()
                         projectiles.add(self.shield)
-
                     elif self.equip=='heal':
                         self.healing()
                     self.action_cooldown=True#cooldown flag

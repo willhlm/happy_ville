@@ -20,9 +20,18 @@
             "0" : ["amber_droplet", "closed"]
         }
     },
+    "mine" : {
+        "pathways" : {
+            "0" : "light_forest"
+        },
+        "chests" : {
+            "0" : ["amber_droplet", "closed"]
+        }
+    },
     "light_forest" : {
         "pathways" : {
-            "0" : "village1"
+            "0" : "mine",
+            "1" : "village1"
         },
         "chests" : {
             "0" : ["amber_droplet", "closed"],
