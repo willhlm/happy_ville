@@ -344,7 +344,7 @@ class Player(Entity):
         #always eneters in every iteration
         self.timer+=1
         if not self.action_cooldown:
-            
+
             if self.action['sword'] or self.action['sword1']:
                 if self.phase == 'main':#produce the object in the main animation
                     self.spawn_sword()
@@ -779,8 +779,8 @@ class BG_near(Block):
         self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
+        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
         self.update_pos()
 
     def update_pos(self):

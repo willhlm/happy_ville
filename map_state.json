@@ -1,7 +1,7 @@
 {
     "village1" : {
         "pathways" : {
-            "0" : "village2",
+            "0" : "light_forest",
             "1" : "light_forest",
             "2" : "village2"
         },
