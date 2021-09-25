@@ -195,19 +195,15 @@ class Tilemap():
             if bg == 'bg_fixed':
                 backgrounds.append(Entities.BG_Block(blit_surfaces[bg],(0,0)))
             elif bg == 'bg_far':
-                base = (8 + top_left[i][0] - top_left[0][0],top_left[i][1] - top_left[0][1])
-                print(base)
-                backgrounds.append(Entities.BG_far(blit_surfaces[bg],(-base[0]-int(0.97*new_map_diff[0]),-base[1]-int(0.97*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_far(blit_surfaces[bg],(-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1]))))
             elif bg == 'bg_mid':
-                base = (8 + top_left[i][0] - top_left[0][0],top_left[i][1] - top_left[0][1])
-                backgrounds.append(Entities.BG_mid(blit_surfaces[bg],(-base[0]-int(0.5*new_map_diff[0]),-base[1]-int(0.5*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_mid(blit_surfaces[bg],(-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1]))))
             elif bg == 'bg_near':
-                base = (8 + top_left[i][0] - top_left[0][0],top_left[i][1] - top_left[0][1])
-                backgrounds.append(Entities.BG_near(blit_surfaces[bg],(-base[0]-int(0.25*new_map_diff[0]),-base[1]-int(0.25*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_near(blit_surfaces[bg],(-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1]))))
             elif bg == 'fg_fixed':
                 backgrounds.append(Entities.FG_fixed(blit_surfaces[bg],(0,0)))
             elif bg == 'fg_paralex':
-                backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],top_left[i]))
+                backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
 
         return backgrounds
 
