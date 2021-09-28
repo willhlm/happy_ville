@@ -2,17 +2,17 @@ import pygame, Read_files, random, sys
 
 class Entity(pygame.sprite.Sprite):
 
-    acceleration=[1,0.8]
-
     def __init__(self):
         super().__init__()
+        self.acceleration=[1,0.8]
         self.movement=[0,0]
         self.velocity=[0,0]
         self.frame = 0
         self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.ac_dir=self.dir.copy()
+        self.state = 'stand'
         self.world_state=0#state of happyness thingy of the world
-        self.loot={'coin':0}
+        self.loot={'Amber_Droplet':0}
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
         self.phase='pre'
@@ -344,7 +344,7 @@ class Player(Entity):
         #always eneters in every iteration
         self.timer+=1
         if not self.action_cooldown:
-            
+
             if self.action['sword'] or self.action['sword1']:
                 if self.phase == 'main':#produce the object in the main animation
                     self.spawn_sword()
@@ -470,7 +470,6 @@ class Woopie(Entity):
         self.priority_action=['death','pick']#animation
         self.nonpriority_action=['run','stand']#animation
         self.action={'stand':True,'run':False,'death':False,'pick':False,'fall':False,'dash':False,'hurt':False}
-        self.state = 'stand'
         self.equip='sword'
         self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.friction=[0.2,0]
@@ -520,7 +519,6 @@ class Flowy(Entity):
         self.priority_action=['death','hurt','sword','stone','trans']#animation
         self.nonpriority_action=['fall','run','stand']#animation
         self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'stone':False,'fall':False,'trans':False,'dash':False}
-        self.state = 'stand'
         self.equip='sword'
         self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
         self.friction=[0.2,0]
@@ -561,7 +559,6 @@ class NPC(Entity):
         self.nonpriority_action = ['run','stand']
         self.priority_action = ['death','hurt']
         self.health = 50
-        self.state = 'stand'
         self.conv_index = 0
         self.friction=[0.2,0]
 
