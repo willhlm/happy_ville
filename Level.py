@@ -12,6 +12,7 @@ class Tilemap():
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg_fixed.png")
         self.platforms = pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
+        self.init_player_pos = (0,0)
 
         if mode=='auto':
             self.camera=Auto()
@@ -127,6 +128,7 @@ class Tilemap():
                     path_index += 1
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
+                    self.init_player_pos = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
                     new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
@@ -144,11 +146,16 @@ class Tilemap():
         return player, npcs, enemies, interactables
 
     def load_bg(self):
-    #returns one surface with all backround images blitted onto it
+    #returns one surface with all backround images blitted onto it, for each bg/fg layer
         bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex']
+        top_left = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
         bg_flags = {}
         for bg in bg_list:
             bg_flags[bg] = True
+
+        #all these figures below should be passed and not hardcoded, will break if we change UI etc.
+        screen_center = (216, 180)
+        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1])
 
         map_bg = self.read_csv("Tiled/" + self.level_name + "_bg_fixed.csv")
         cols = len(map_bg[0])
@@ -173,26 +180,30 @@ class Tilemap():
 
         for row in range(rows):
             for col in range(cols):
-                for bg in bg_list:
+                for i, bg in enumerate(bg_list):
                     if bg_flags[bg]:
                         if not bg_maps[bg][row][col] == '-1':
                             blit_surfaces[bg].blit(bg_sheets[bg][int(bg_maps[bg][row][col])], (col * self.tile_size, row * self.tile_size))
+                            if top_left[i] == (0,0):
+                                #get inital position for blit
+                                top_left[i] = (col * self.tile_size, row * self.tile_size)
 
 
+        print(top_left)
         backgrounds = []
-        for bg in bg_list:
+        for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
                 backgrounds.append(Entities.BG_Block(blit_surfaces[bg],(0,0)))
             elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_far(blit_surfaces[bg],(0,-100)))
+                backgrounds.append(Entities.BG_far(blit_surfaces[bg],(-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1]))))
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_mid(blit_surfaces[bg],(0,0)))
+                backgrounds.append(Entities.BG_mid(blit_surfaces[bg],(-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1]))))
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_near(blit_surfaces[bg],(0,0)))
+                backgrounds.append(Entities.BG_near(blit_surfaces[bg],(-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1]))))
             elif bg == 'fg_fixed':
                 backgrounds.append(Entities.FG_fixed(blit_surfaces[bg],(0,0)))
             elif bg == 'fg_paralex':
-                backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],(0,0)))
+                backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
 
         return backgrounds
 
@@ -287,7 +298,7 @@ class Auto(Camera):
         super().__init__()
 
     def scrolling(self,knight,distance,shake):
-        self.true_scroll[0]+=(knight.center[0]-10*self.true_scroll[0]-240)/20
+        self.true_scroll[0]+=(knight.center[0]-10*self.true_scroll[0]-216)/20
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
         self.update_scroll(shake)
 

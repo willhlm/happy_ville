@@ -256,11 +256,6 @@ class Game_UI():
         self.bg_music.set_volume(0.1)
 
     def initiate_groups(self):
-        #clean and load bg
-        for bg in self.bgs:
-            bg.empty()
-        for i, bg in enumerate(self.map.load_bg()):
-            self.bgs[i].add(bg)
 
         #clean all groups
         #self.players.empty()
@@ -276,6 +271,12 @@ class Game_UI():
         self.player.set_pos(player_pos)
         self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
         #self.players.add(self.player)
+
+        #clean and load bg
+        for bg in self.bgs:
+            bg.empty()
+        for i, bg in enumerate(self.map.load_bg()):
+            self.bgs[i].add(bg)
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)

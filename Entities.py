@@ -776,8 +776,8 @@ class BG_near(Block):
         self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
+        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
         self.update_pos()
 
     def update_pos(self):
