@@ -90,7 +90,7 @@ class Game_UI():
             self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
 
             self.group_distance() #update the groups beased on if they are on screen or not
-            self.interactions()
+#            self.interactions() -> moved it to uopn botton press
 
             #!! -- maybe move this to update method in npc/enemy class
             for enemy in self.enemies:
@@ -650,6 +650,7 @@ class Game_UI():
 
                 if event.key==pygame.K_g:
                     self.player.interacting = True
+                    self.interactions()
 
                 if event.key == pygame.K_i:
                     #self.player.action['run']=False
