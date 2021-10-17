@@ -56,6 +56,8 @@ class Game_UI():
         self.enemy_pause = pygame.sprite.Group() #include all entities that are far away
         self.npc_pause = pygame.sprite.Group() #include all entities that are far away
         self.cosmetics = pygame.sprite.Group() #spirits
+        self.camera_blocks = pygame.sprite.Group()
+        self.triggers = pygame.sprite.Group()
 
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
@@ -91,6 +93,7 @@ class Game_UI():
 
             self.group_distance() #update the groups beased on if they are on screen or not
             self.interactions()
+            self.trigger_event()
 
             #!! -- maybe move this to update method in npc/enemy class
             for enemy in self.enemies:
@@ -182,6 +185,11 @@ class Game_UI():
         elif chest_id:
             self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
 
+    def trigger_event(self):
+        change_map = self.collisions.check_trigger(self.player,self.triggers)
+        if change_map:
+            self.change_map(change_map)
+
     def fade_in(self):
     #fade if first loop
         timer = 0
@@ -267,7 +275,7 @@ class Game_UI():
         self.npc_pause.empty()
 
         #load all objects
-        player_pos, self.npcs, self.enemies, self.interactables = self.map.load_statics(self.map_state[self.map.level_name])
+        player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name])
         self.player.set_pos(player_pos)
         self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
         #self.players.add(self.player)
@@ -299,6 +307,8 @@ class Game_UI():
         self.npc_pause.update(scroll)
         self.enemy_pause.update(scroll)
         self.cosmetics.update(scroll)
+        self.camera_blocks.update(scroll)
+        self.triggers.update(scroll)
 
     def draw(self):
         for i in range(1,4):
@@ -317,6 +327,7 @@ class Game_UI():
         self.cosmetics.draw(self.screen)
         for i in range(4,6):
             self.bgs[i].draw(self.screen)
+
 
     def inventoryscreen(self):
         inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()

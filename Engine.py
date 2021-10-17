@@ -101,6 +101,20 @@ class Collisions():
 
         return map_change, chest_id
 
+    @staticmethod
+    def check_trigger(player,triggers):
+        map_change = False
+        collided = Collisions.collided
+        collision = pygame.sprite.spritecollideany(player,triggers,collided)
+        if collision:
+            if type(collision).__name__ == "Path_Col":
+                try:
+                    map_change = collision.next_map
+                except:
+                    pass
+
+        return map_change
+
     #making the loot fall on platofrm
     @staticmethod
     def check_collisions_loot(loots,platforms):

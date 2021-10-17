@@ -1,15 +1,17 @@
 {
     "village1" : {
         "pathways" : {
-            "0" : "light_forest",
+            "0" : "mine",
             "1" : "light_forest",
-            "2" : "village2"
+            "2" : "village2",
+            "3" : "village2"
         },
         "chests" : {
             "0" : ["Amber_Droplet", "closed"],
             "1" : ["Amber_Droplet", "opened"],
             "2" : ["Amber_Droplet", "closed"],
-            "3" : ["Amber_Droplet", "closed"]
+            "3" : ["Amber_Droplet", "closed"],
+            "4" : ["Amber_Droplet", "closed"]
         }
     },
     "village2" : {
@@ -22,7 +24,8 @@
     },
     "mine" : {
         "pathways" : {
-            "0" : "light_forest"
+            "0" : "light_forest",
+            "1" : "village2"
         },
         "chests" : {
             "0" : ["amber_droplet", "closed"]

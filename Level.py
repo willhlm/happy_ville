@@ -102,6 +102,8 @@ class Tilemap():
         npcs = pygame.sprite.Group()
         interactables = pygame.sprite.Group()
         enemies = pygame.sprite.Group()
+        camera_blocks = pygame.sprite.Group()
+        triggers = pygame.sprite.Group()
 
         row_index = 0
         col_index = 0
@@ -126,6 +128,11 @@ class Tilemap():
                     new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
                     interactables.add(new_path)
                     path_index += 1
+                elif tile == '13':
+                    new_path = Entities.Path_Col((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    triggers.add(new_path)
+                    print('read Path_Col successfully')
+                    path_index += 1
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                     self.init_player_pos = (col_index * self.tile_size, row_index * self.tile_size)
@@ -139,11 +146,14 @@ class Tilemap():
                     pass
                     #new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
                     #enemies.add(new_enemy)
+                elif tile == '32':
+                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size))
+                    camera_blocks.add(new_stop)
                 col_index += 1
             row_index += 1
             col_index = 0 #reset column
 
-        return player, npcs, enemies, interactables
+        return player, npcs, enemies, interactables, triggers, camera_blocks
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
