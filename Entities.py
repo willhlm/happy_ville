@@ -726,12 +726,28 @@ class Trigger(pygame.sprite.Sprite):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
 
-class Path_Col(Trigger):
+class Path_Col_v(Trigger):
+
 
     def __init__(self,pos,destination):
         super().__init__(pos)
+        ext = 32
+        self.rect = pygame.Rect((pos[0],pos[1]-ext), (16,16+(2*ext)))
+        self.hitbox = self.rect.inflate(0,0)
         self.next_map = destination
-        self.image = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest.png",16,21,1,3)[0]
+        self.image = pygame.Surface((16,16+(2*ext)))
+        self.image.fill((0,0,0))
+
+class Path_Col_h(Trigger):
+
+    def __init__(self,pos,destination):
+        super().__init__(pos)
+        ext = 32
+        self.rect = pygame.Rect((pos[0]-ext,pos[1]), (16+(2*ext),16))
+        self.hitbox = self.rect.inflate(0,0)
+        self.next_map = destination
+        self.image = pygame.Surface((16+(2*ext),16))
+        self.image.fill((0,0,0))
 
 
 class Block(pygame.sprite.Sprite):

@@ -327,6 +327,7 @@ class Game_UI():
         self.cosmetics.draw(self.screen)
         for i in range(4,6):
             self.bgs[i].draw(self.screen)
+        self.triggers.draw(self.screen)
 
 
     def inventoryscreen(self):

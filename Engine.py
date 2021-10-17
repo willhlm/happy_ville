@@ -107,7 +107,7 @@ class Collisions():
         collided = Collisions.collided
         collision = pygame.sprite.spritecollideany(player,triggers,collided)
         if collision:
-            if type(collision).__name__ == "Path_Col":
+            if type(collision).__name__ in ["Path_Col_h","Path_Col_v"]:
                 try:
                     map_change = collision.next_map
                 except:

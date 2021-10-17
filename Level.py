@@ -129,9 +129,12 @@ class Tilemap():
                     interactables.add(new_path)
                     path_index += 1
                 elif tile == '13':
-                    new_path = Entities.Path_Col((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    new_path = Entities.Path_Col_v((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
                     triggers.add(new_path)
-                    print('read Path_Col successfully')
+                    path_index += 1
+                elif tile == '14':
+                    new_path = Entities.Path_Col_h((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    triggers.add(new_path)
                     path_index += 1
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
