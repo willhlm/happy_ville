@@ -856,15 +856,18 @@ class Invisible_block(pygame.sprite.Sprite):
 
 class Camera_Stop(pygame.sprite.Sprite):
 
-    def __init__(self,pos):
+    def __init__(self,pos,dir):
         super().__init__()
-        self.rect=pygame.Rect(0,0,16,16)
-        self.rect.topleft = pos
+        self.rect=pygame.Rect((pos),(16,16))
         self.hitbox = self.rect.inflate(0,0)
+        self.dir = dir
+        self.image = pygame.Surface((16,16))
+        self.image.fill((0,0,0))
 
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
+
 
 class Interactable(pygame.sprite.Sprite):
 

@@ -4,7 +4,8 @@
             "0" : "light_forest",
             "1" : "light_forest",
             "2" : "village2",
-            "3" : "village2"
+            "3" : "light_forest",
+            "4" : "village2"
         },
         "chests" : {
             "0" : ["Amber_Droplet", "closed"],

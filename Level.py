@@ -1,10 +1,10 @@
 import pygame, csv, Entities, math, random, json
 
 class Tilemap():
-    def __init__(self, level,mode='auto'):
+    def __init__(self, level):
         self.tile_size=16
         self.chunk_size=10
-        self.total_disatnce=[0,0]
+        self.total_distance=[0,0]
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.keys=[]
@@ -13,16 +13,15 @@ class Tilemap():
         self.platforms = pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
         self.init_player_pos = (0,0)
+        self.cameras=[Auto(),Auto_CapX(),Auto_CapY(),Fixed()]
+        self.camera = self.cameras[0]
 
-        if mode=='auto':
-            self.camera=Auto()
-        elif mode=='autocap':
-            self.camera=Autocap()
-        elif mode=='border':
-            self.camera=Border()
+
+    def set_camera(self, camera_number):
+        self.camera = self.cameras[camera_number]
 
     def scrolling(self,knight,shake):
-        self.camera.scrolling(knight,self.total_disatnce,shake)
+        self.camera.scrolling(knight,shake)
 
     def read_csv(self, path):
         tile_map=[]
@@ -73,15 +72,15 @@ class Tilemap():
 
     def chunk_distance(self):
         chunk_distance={}
-        self.total_disatnce[0]+=self.camera.scroll[0]#total distance
-        self.total_disatnce[1]+=self.camera.scroll[1]#total distance
+        self.total_distance[0]+=self.camera.scroll[0]#total distance
+        self.total_distance[1]+=self.camera.scroll[1]#total distance
 
         for key in self.chunks.keys():
             y=int(key.split(';')[0])#y
             x=int(key.split(';')[1])#x
 
-            chunk_distance_x=self.chunk_size*self.tile_size*x-240-self.total_disatnce[0]+self.chunk_size*self.tile_size/2#from middle
-            chunk_distance_y=self.chunk_size*self.tile_size*y-180-self.total_disatnce[1]+self.chunk_size*self.tile_size/2#from middle
+            chunk_distance_x=self.chunk_size*self.tile_size*x-240-self.total_distance[0]+self.chunk_size*self.tile_size/2#from middle
+            chunk_distance_y=self.chunk_size*self.tile_size*y-180-self.total_distance[1]+self.chunk_size*self.tile_size/2#from middle
 
             chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
         return chunk_distance
@@ -149,8 +148,17 @@ class Tilemap():
                     pass
                     #new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
                     #enemies.add(new_enemy)
-                elif tile == '32':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size))
+                elif tile == '33':
+                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'right')
+                    camera_blocks.add(new_stop)
+                elif tile == '34':
+                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'top')
+                    camera_blocks.add(new_stop)
+                elif tile == '35':
+                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'left')
+                    camera_blocks.add(new_stop)
+                elif tile == '36':
+                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'bottom')
                     camera_blocks.add(new_stop)
                 col_index += 1
             row_index += 1
@@ -259,8 +267,8 @@ class Tilemap():
 #________________chunks#
 
     def entity_position(self, tile_x, tile_y, x, y):
-        x_pos = tile_x * self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_disatnce[0]))
-        y_pos = tile_y * self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_disatnce[1]))
+        x_pos = tile_x * self.tile_size+self.chunk_size*self.tile_size*x-int(round(self.total_distance[0]))
+        y_pos = tile_y * self.tile_size+self.chunk_size*self.tile_size*y-int(round(self.total_distance[1]))
         return [x_pos,y_pos]
 
 class Sprite_sheet():
@@ -310,9 +318,32 @@ class Auto(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,distance,shake):
+    def scrolling(self,knight,shake):
         self.true_scroll[0]+=(knight.center[0]-10*self.true_scroll[0]-216)/20
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.update_scroll(shake)
+
+class Auto_CapX(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,shake):
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.update_scroll(shake)
+
+class Auto_CapY(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,shake):
+        self.true_scroll[0]+=(knight.center[0]-10*self.true_scroll[0]-216)/20
+        self.update_scroll(shake)
+
+class Fixed(Camera):
+    def __init__(self):
+        super().__init__()
+
+    def scrolling(self,knight,shake):
         self.update_scroll(shake)
 
 class Autocap(Camera):
@@ -340,9 +371,9 @@ class Border(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,total_disatnce,shake):
+    def scrolling(self,knight,total_distance,shake):
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
-        if -40 < total_disatnce[0]<1400:#map boundaries
+        if -40 < total_distance[0]<1400:#map boundaries
             self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
         else:
             if knight.center[0]<60:
