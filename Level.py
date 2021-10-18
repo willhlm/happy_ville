@@ -11,6 +11,7 @@ class Tilemap():
         self.chunk_render_distance=1000
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg_fixed.png")
         self.platforms = pygame.sprite.Group()
+        self.platforms_pause=pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
         self.init_player_pos = (0,0)
         self.cameras=[Auto(),Auto_CapX(),Auto_CapY(),Fixed()]
@@ -228,41 +229,57 @@ class Tilemap():
 
         return backgrounds
 
-    def load_chunks(self):
+    def load_map(self):#load the whole map
+        chunk_distances=self.chunk_distance()
 
+        for key in chunk_distances.keys():
+
+            self.keys.append(key)#store all keys already loaded
+
+            map=self.chunks[key]
+            tile_x=0
+            tile_y=0
+            y=int(key.split(';')[0])#y
+            x=int(key.split(';')[1])#x
+
+            #add collision blocks for new chunk
+            for row in map:
+                tile_x=0
+                for tile in row:
+                    if tile=='-1':
+                        tile_x+=1
+                        continue
+
+                    new_block = Entities.Platform(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                    self.platforms.add(new_block)
+                    tile_x+=1
+                tile_y+=1
+
+        return self.platforms, self.platforms_pause
+
+    def load_chunks(self):
         chunk_distances=self.chunk_distance()
         for key in chunk_distances.keys():
-            if chunk_distances[key]<self.chunk_render_distance and key not in self.keys:
 
-                self.keys.append(key)#store all keys already loaded
-
-                map=self.chunks[key]
-                tile_x=0
-                tile_y=0
-                y=int(key.split(';')[0])#y
-                x=int(key.split(';')[1])#x
-
-                #add collision blocks for new chunk
-                for row in map:
-                    tile_x=0
-                    for tile in row:
-                        if tile=='-1':
-                            tile_x+=1
-                            continue
-
-                        new_block = Entities.Platform(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
-                        self.platforms.add(new_block)
-                        tile_x+=1
-                    tile_y+=1
-
-            elif chunk_distances[key]>self.chunk_render_distance and key in self.keys:
+            if chunk_distances[key]>self.chunk_render_distance and key in self.keys:#if outside chunk distance
                 platform_list = [i for i in self.platforms.sprites() if i.chunk_key==key]
+                print(chunk_distances[key],key)
+
                 self.platforms.remove(platform_list)
+                self.platforms_pause.add(platform_list)
 
                 #update key
                 self.keys.remove(key)
 
-        return self.platforms, self.invisible_blocks
+            elif chunk_distances[key]<self.chunk_render_distance and key not in self.keys:#inside chunk distance
+
+                self.keys.append(key)#store all keys already loaded
+
+                platform_list2 = [i for i in self.platforms_pause.sprites() if i.chunk_key==key]
+                self.platforms.add(platform_list2)
+                self.platforms_pause.remove(platform_list2)
+
+        return self.platforms, self.platforms_pause
 #________________chunks#
 
     def entity_position(self, tile_x, tile_y, x, y):

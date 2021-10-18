@@ -62,7 +62,7 @@ class Game_UI():
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
-
+        self.platforms_pause=pygame.sprite.Group()
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
 
@@ -72,20 +72,23 @@ class Game_UI():
         #initiate maps
         self.load_map('village1')
 
+        self.platforms,self.invisible_blocks=self.map.load_map()#chunks
+
+
     def game_loop(self, initiate_fade_in = False):
 
         while True:
             self.screen.fill((207,238,250))#fill game.screen
 
-            self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
+            #self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
 
             self.input()#game inputs
 
             self.collisions.collide(self.players,self.platforms)
             self.collisions.collide(self.enemies,self.platforms)
             self.collisions.collide(self.npcs,self.platforms)
+            self.collisions.collide(self.loot,self.platforms)
             self.collisions.check_invisible(self.npcs,self.invisible_blocks)
-            self.collisions.check_collisions_loot(self.loot,self.platforms)
             self.collisions.pickup_loot(self.player,self.loot)
             self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
@@ -263,6 +266,8 @@ class Game_UI():
                 self.npcs.add(entity)
                 self.npc_pause.remove(entity)
 
+        self.platforms,self.platforms_pause=self.map.load_chunks()#update the rellavant pltforms
+
     def change_map(self, map_name):
         timer = 0
         load_time = 50
@@ -302,13 +307,14 @@ class Game_UI():
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
+        self.platforms_pause.empty()
         self.enemy_pause.empty()
         self.npc_pause.empty()
 
         #load all objects
         player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name])
         self.player.set_pos(player_pos)
-        self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
+        self.platforms,self.platforms_pause=self.map.load_map()#load all map
         #self.players.add(self.player)
 
         #clean and load bg
