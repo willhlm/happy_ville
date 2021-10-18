@@ -101,8 +101,6 @@ class Collisions():
 
         return map_change, chest_id
 
-<<<<<<< HEAD
-=======
     @staticmethod
     def check_trigger(player,triggers):
         map_change = False
@@ -117,12 +115,6 @@ class Collisions():
 
         return map_change
 
-    #making the loot fall on platofrm
-    @staticmethod
-    def check_collisions_loot(loots,platforms):
-        Collisions.collide(loots,platforms)
-
->>>>>>> 3e535a267a374e1790a74ac3ed059f98ebb372e7
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
@@ -142,12 +134,12 @@ class Collisions():
             if dyn_entity.movement[0]>0:#going to the right
                 dyn_entity.hitbox.right = stat_entity[0].hitbox.left
                 dyn_entity.collision_types['right'] = True
-                dyn_entity.collision_spikes['right'] = stat_entity[0].spike
+                #dyn_entity.collision_spikes['right'] = stat_entity[0].spike
 
             elif dyn_entity.movement[0]<0:#going to the left
                 dyn_entity.hitbox.left = stat_entity[0].hitbox.right
                 dyn_entity.collision_types['left'] = True
-                dyn_entity.collision_spikes['left'] = stat_entity[0].spike
+                #dyn_entity.collision_spikes['left'] = stat_entity[0].spike
 
             dyn_entity.update_rect()
 
@@ -163,12 +155,12 @@ class Collisions():
             if dyn_entity.movement[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
                 dyn_entity.collision_types['bottom'] = True
-                dyn_entity.collision_spikes['bottom'] = stat_entity[0].spike
+                #dyn_entity.collision_spikes['bottom'] = stat_entity[0].spike
 
             elif dyn_entity.movement[1]<0:#going up
                 dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
                 dyn_entity.collision_types['top'] = True
-                dyn_entity.collision_spikes['top'] = stat_entity[0].spike
+                #dyn_entity.collision_spikes['top'] = stat_entity[0].spike
 
             dyn_entity.update_rect()
 
