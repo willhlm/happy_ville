@@ -222,13 +222,13 @@ class Game_UI():
                 if (stop.rect.centerx - self.player.rect.centerx) < self.WINDOW_SIZE[0]/2:
                     xflag = True
             elif stop.dir == 'left':
-                if (self.player.rect.centerx - stop.rect.centerx) < self.WINDOW_SIZE[0]/2:
+                if stop.rect.right >= 0 and self.player.rect.centerx < self.WINDOW_SIZE[0]/2:
                     xflag = True
             elif stop.dir == 'bottom':
                 if (stop.rect.centery - self.player.rect.centery) < (self.WINDOW_SIZE[1] - 180):
                     yflag = True
             elif stop.dir == 'top':
-                if (self.player.rect.centery - stop.rect.centery) < 180:
+                if self.player.rect.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
                     yflag = True
 
         if xflag and yflag:

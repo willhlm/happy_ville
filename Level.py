@@ -229,9 +229,8 @@ class Tilemap():
         return backgrounds
 
     def load_chunks(self):
+
         chunk_distances=self.chunk_distance()
-
-
         for key in chunk_distances.keys():
             if chunk_distances[key]<self.chunk_render_distance and key not in self.keys:
 
