@@ -101,11 +101,6 @@ class Collisions():
 
         return map_change, chest_id
 
-    #making the loot fall on platofrm
-    @staticmethod
-    def check_collisions_loot(loots,platforms):
-        Collisions.collide(loots,platforms)
-
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod

@@ -78,8 +78,8 @@ class Game_UI():
             self.collisions.collide(self.players,self.platforms)
             self.collisions.collide(self.enemies,self.platforms)
             self.collisions.collide(self.npcs,self.platforms)
+            self.collisions.collide(self.loot,self.platforms)
             self.collisions.check_invisible(self.npcs,self.invisible_blocks)
-            self.collisions.check_collisions_loot(self.loot,self.platforms)
             self.collisions.pickup_loot(self.player,self.loot)
             self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
 
