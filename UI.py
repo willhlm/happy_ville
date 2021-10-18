@@ -5,8 +5,12 @@ import Entities
 import Level
 import BG
 
+#TODO:
+#Add camera blocks to chunkloading, so they dont they check outside of reasonable range,
+
 class Game_UI():
 
+    #current player pos: 216,180
     def __init__(self):
         pygame.init()#initilise
         self.WINDOW_SIZE = (432,243)
@@ -56,6 +60,8 @@ class Game_UI():
         self.enemy_pause = pygame.sprite.Group() #include all entities that are far away
         self.npc_pause = pygame.sprite.Group() #include all entities that are far away
         self.cosmetics = pygame.sprite.Group() #spirits
+        self.camera_blocks = pygame.sprite.Group()
+        self.triggers = pygame.sprite.Group()
 
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
@@ -91,6 +97,8 @@ class Game_UI():
 
             self.group_distance() #update the groups beased on if they are on screen or not
 #            self.interactions() -> moved it to uopn botton press
+            self.trigger_event()
+            self.check_camera_border()
 
             #!! -- maybe move this to update method in npc/enemy class
             for enemy in self.enemies:
@@ -182,6 +190,11 @@ class Game_UI():
         elif chest_id:
             self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
 
+    def trigger_event(self):
+        change_map = self.collisions.check_trigger(self.player,self.triggers)
+        if change_map:
+            self.change_map(change_map)
+
     def fade_in(self):
     #fade if first loop
         timer = 0
@@ -200,6 +213,32 @@ class Game_UI():
             timer += 1
 
         self.game_loop()
+
+    def check_camera_border(self):
+
+        xflag, yflag = False, False
+        for stop in self.camera_blocks:
+            if stop.dir == 'right':
+                if (stop.rect.centerx - self.player.rect.centerx) < self.WINDOW_SIZE[0]/2:
+                    xflag = True
+            elif stop.dir == 'left':
+                if (self.player.rect.centerx - stop.rect.centerx) < self.WINDOW_SIZE[0]/2:
+                    xflag = True
+            elif stop.dir == 'bottom':
+                if (stop.rect.centery - self.player.rect.centery) < (self.WINDOW_SIZE[1] - 180):
+                    yflag = True
+            elif stop.dir == 'top':
+                if (self.player.rect.centery - stop.rect.centery) < 180:
+                    yflag = True
+
+        if xflag and yflag:
+            self.map.set_camera(3)
+        elif xflag:
+            self.map.set_camera(1)
+        elif yflag:
+            self.map.set_camera(2)
+        else:
+            self.map.set_camera(0)
 
     def group_distance(self):#remove the eneteies if it is off screen from thir group
         bounds=[-100,600,-100,350]#-x,+x,-y,+y
@@ -267,7 +306,7 @@ class Game_UI():
         self.npc_pause.empty()
 
         #load all objects
-        player_pos, self.npcs, self.enemies, self.interactables = self.map.load_statics(self.map_state[self.map.level_name])
+        player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name])
         self.player.set_pos(player_pos)
         self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
         #self.players.add(self.player)
@@ -299,6 +338,8 @@ class Game_UI():
         self.npc_pause.update(scroll)
         self.enemy_pause.update(scroll)
         self.cosmetics.update(scroll)
+        self.camera_blocks.update(scroll)
+        self.triggers.update(scroll)
 
     def draw(self):
         for i in range(1,4):
@@ -317,6 +358,9 @@ class Game_UI():
         self.cosmetics.draw(self.screen)
         for i in range(4,6):
             self.bgs[i].draw(self.screen)
+        self.triggers.draw(self.screen)
+        #self.camera_blocks.draw(self.screen)
+
 
     def inventoryscreen(self):
         inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()

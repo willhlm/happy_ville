@@ -715,6 +715,41 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
+class Trigger(pygame.sprite.Sprite):
+
+    def __init__(self,pos):
+        super().__init__()
+        self.rect = pygame.Rect(pos, (16,16))
+        self.hitbox = self.rect.inflate(0,0)
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+class Path_Col_v(Trigger):
+
+
+    def __init__(self,pos,destination):
+        super().__init__(pos)
+        ext = 32
+        self.rect = pygame.Rect((pos[0],pos[1]-ext), (16,16+(2*ext)))
+        self.hitbox = self.rect.inflate(0,0)
+        self.next_map = destination
+        self.image = pygame.Surface((16,16+(2*ext)))
+        self.image.fill((0,0,0))
+
+class Path_Col_h(Trigger):
+
+    def __init__(self,pos,destination):
+        super().__init__(pos)
+        ext = 32
+        self.rect = pygame.Rect((pos[0]-ext,pos[1]), (16+(2*ext),16))
+        self.hitbox = self.rect.inflate(0,0)
+        self.next_map = destination
+        self.image = pygame.Surface((16+(2*ext),16))
+        self.image.fill((0,0,0))
+
+
 class Block(pygame.sprite.Sprite):
 
     def __init__(self,img,pos):
@@ -818,6 +853,21 @@ class Invisible_block(pygame.sprite.Sprite):
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
+
+class Camera_Stop(pygame.sprite.Sprite):
+
+    def __init__(self,pos,dir):
+        super().__init__()
+        self.rect=pygame.Rect((pos),(16,16))
+        self.hitbox = self.rect.inflate(0,0)
+        self.dir = dir
+        self.image = pygame.Surface((16,16))
+        self.image.fill((0,0,0))
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
 
 class Interactable(pygame.sprite.Sprite):
 
