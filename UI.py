@@ -65,14 +65,13 @@ class Game_UI():
         self.platforms_pause=pygame.sprite.Group()
         self.individuals = pygame.sprite.Group()
         self.all_entities = pygame.sprite.Group()
-
         self.weather_paricles=BG.Weather()#initiate whater
         self.weather = self.weather_paricles.create_particle('Snow')#weather effects
 
         #initiate maps
         self.load_map('village1')
 
-        self.platforms,self.invisible_blocks=self.map.load_map()#chunks
+        self.platforms,self.platforms_pause=self.map.load_map()#load whole map
 
 
     def game_loop(self, initiate_fade_in = False):
@@ -266,6 +265,7 @@ class Game_UI():
                 self.npcs.add(entity)
                 self.npc_pause.remove(entity)
 
+
         self.platforms,self.platforms_pause=self.map.load_chunks()#update the rellavant pltforms
 
     def change_map(self, map_name):
@@ -330,6 +330,8 @@ class Game_UI():
 
     def update_groups(self, scroll = (0,0)):
         self.platforms.update(scroll)
+        self.platforms_pause.update(scroll)
+
         for bg in self.bgs:
             bg.update(scroll)
         self.players.update(scroll)
