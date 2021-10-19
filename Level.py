@@ -8,7 +8,7 @@ class Tilemap():
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.keys=[]
-        self.chunk_render_distance=1000
+        self.chunk_render_distance=700
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg_fixed.png")
         self.platforms = pygame.sprite.Group()
         self.platforms_pause=pygame.sprite.Group()
@@ -80,7 +80,7 @@ class Tilemap():
             y=int(key.split(';')[0])#y
             x=int(key.split(';')[1])#x
 
-            chunk_distance_x=self.chunk_size*self.tile_size*x-240-self.total_distance[0]+self.chunk_size*self.tile_size/2#from middle
+            chunk_distance_x=self.chunk_size*self.tile_size*x-216-self.total_distance[0]+self.chunk_size*self.tile_size/2#from middle
             chunk_distance_y=self.chunk_size*self.tile_size*y-180-self.total_distance[1]+self.chunk_size*self.tile_size/2#from middle
 
             chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))

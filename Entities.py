@@ -749,7 +749,6 @@ class Path_Col_h(Trigger):
         self.image = pygame.Surface((16+(2*ext),16))
         self.image.fill((0,0,0))
 
-
 class Block(pygame.sprite.Sprite):
 
     def __init__(self,img,pos):
@@ -867,7 +866,6 @@ class Camera_Stop(pygame.sprite.Sprite):
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
-
 
 class Interactable(pygame.sprite.Sprite):
 
