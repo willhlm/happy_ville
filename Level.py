@@ -261,18 +261,13 @@ class Tilemap():
         chunk_distances=self.chunk_distance()
         for key in chunk_distances.keys():
 
-            if chunk_distances[key]>self.chunk_render_distance and key in self.keys:#if outside chunk distance
+            if chunk_distances[key]>self.chunk_render_distance:#if outside chunk distance
                 platform_list = [i for i in self.platforms.sprites() if i.chunk_key==key]
 
                 self.platforms.remove(platform_list)
                 self.platforms_pause.add(platform_list)
 
-                #update key
-                self.keys.remove(key)
-
-            elif chunk_distances[key]<self.chunk_render_distance and key not in self.keys:#inside chunk distance
-
-                self.keys.append(key)#store all keys already loaded
+            elif chunk_distances[key]<self.chunk_render_distance:#inside chunk distance
 
                 platform_list = [i for i in self.platforms_pause.sprites() if i.chunk_key==key]
                 self.platforms.add(platform_list)
