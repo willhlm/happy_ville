@@ -73,7 +73,6 @@ class Game_UI():
 
         self.platforms,self.platforms_pause=self.map.load_map()#load whole map
 
-
     def game_loop(self, initiate_fade_in = False):
 
         while True:
@@ -264,7 +263,6 @@ class Game_UI():
             if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
                 self.npcs.add(entity)
                 self.npc_pause.remove(entity)
-
 
         self.platforms,self.platforms_pause=self.map.load_chunks()#update the rellavant pltforms
 
