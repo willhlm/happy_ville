@@ -264,7 +264,7 @@ class Game_UI():
                 self.npcs.add(entity)
                 self.npc_pause.remove(entity)
 
-        self.platforms,self.platforms_pause=self.map.load_chunks()#update the rellavant pltforms
+        self.platforms,self.platforms_pause=self.map.update_chunks()#update the rellavant pltforms
 
     def change_map(self, map_name):
         timer = 0
