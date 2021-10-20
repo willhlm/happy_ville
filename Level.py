@@ -3,12 +3,12 @@ import pygame, csv, Entities, math, random, json
 class Tilemap():
     def __init__(self, level):
         self.tile_size=16
-        self.chunk_size=10
+        self.chunk_size=11
         self.total_distance=[0,0]
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.keys=[]
-        self.chunk_render_distance=700
+        self.chunk_render_distance=1000
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg_fixed.png")
         self.platforms = pygame.sprite.Group()
         self.platforms_pause=pygame.sprite.Group()
@@ -16,7 +16,6 @@ class Tilemap():
         self.init_player_pos = (0,0)
         self.cameras=[Auto(),Auto_CapX(),Auto_CapY(),Fixed()]
         self.camera = self.cameras[0]
-
 
     def set_camera(self, camera_number):
         self.camera = self.cameras[camera_number]
@@ -84,6 +83,7 @@ class Tilemap():
             chunk_distance_y=self.chunk_size*self.tile_size*y-180-self.total_distance[1]+self.chunk_size*self.tile_size/2#from middle
 
             chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
+
         return chunk_distance
 
     def test(self):
@@ -321,7 +321,7 @@ class Camera():
         self.true_scroll=[0,0]
 
     def update_scroll(self,shake):
-        if shake>0:
+        if shake>0:#inprinciple we do not need this if
             screen_shake=[random.randint(-shake,shake),random.randint(-shake,shake)]
         else:
             screen_shake=[0,0]
