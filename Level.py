@@ -8,7 +8,7 @@ class Tilemap():
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.keys=[]
-        self.chunk_render_distance=700
+        self.chunk_render_distance=1000
         self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg_fixed.png")
         self.platforms = pygame.sprite.Group()
         self.platforms_pause=pygame.sprite.Group()
@@ -83,7 +83,8 @@ class Tilemap():
             chunk_distance_x=self.chunk_size*self.tile_size*x-216-self.total_distance[0]+self.chunk_size*self.tile_size/2#from middle
             chunk_distance_y=self.chunk_size*self.tile_size*y-180-self.total_distance[1]+self.chunk_size*self.tile_size/2#from middle
 
-            chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
+            #chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
+            chunk_distance[key]=math.hypot(chunk_distance_x,chunk_distance_y)
         return chunk_distance
 
     def test(self):
@@ -259,10 +260,11 @@ class Tilemap():
 
     def update_chunks(self):
         chunk_distances=self.chunk_distance()
+        print(self.total_distance)
 
         for key in chunk_distances.keys():
 
-            if chunk_distances[key]>self.chunk_render_distance and key in self.keys:#if outside chunk distance
+            if chunk_distances[key]>=self.chunk_render_distance and key in self.keys:#if outside chunk distance
                 platform_list = [i for i in self.platforms.sprites() if i.chunk_key==key]
 
                 self.platforms.remove(platform_list)
@@ -271,7 +273,7 @@ class Tilemap():
                 #update key
                 self.keys.remove(key)
 
-            elif chunk_distances[key]<=self.chunk_render_distance and key not in self.keys:#inside chunk distance
+            elif chunk_distances[key]<self.chunk_render_distance and key not in self.keys:#inside chunk distance
                 platform_list = [i for i in self.platforms_pause.sprites() if i.chunk_key==key]
 
                 self.platforms.add(platform_list)
@@ -335,7 +337,7 @@ class Auto(Camera):
         super().__init__()
 
     def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-10*self.true_scroll[0]-216)/20
+        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-216)/15
         self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
         self.update_scroll(shake)
 
@@ -352,7 +354,7 @@ class Auto_CapY(Camera):
         super().__init__()
 
     def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-10*self.true_scroll[0]-216)/20
+        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-216)/15
         self.update_scroll(shake)
 
 class Fixed(Camera):
