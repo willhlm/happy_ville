@@ -1,7 +1,8 @@
 import pygame, csv, Entities, math, random, json
 
 class Tilemap():
-    def __init__(self, level):
+    def __init__(self, level, player_pos):
+        self.player_center = player_pos
         self.tile_size=16
         self.chunk_size=11
         self.total_distance=[0,0]
@@ -82,13 +83,8 @@ class Tilemap():
             chunk_distance_x=self.chunk_size*self.tile_size*x-216-self.total_distance[0]+self.chunk_size*self.tile_size/2#from middle
             chunk_distance_y=self.chunk_size*self.tile_size*y-180-self.total_distance[1]+self.chunk_size*self.tile_size/2#from middle
 
-<<<<<<< HEAD
             #chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
             chunk_distance[key]=math.hypot(chunk_distance_x,chunk_distance_y)
-=======
-            chunk_distance[key]=int(round(math.sqrt(chunk_distance_x**2+chunk_distance_y**2)))
-
->>>>>>> 52aa1655c6cdf351986f1542b89fefb8a36d78d4
         return chunk_distance
 
     def test(self):
@@ -181,7 +177,7 @@ class Tilemap():
             bg_flags[bg] = True
 
         #all these figures below should be passed and not hardcoded, will break if we change UI etc.
-        screen_center = (216, 180)
+        screen_center = self.player_center
         new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1])
 
         map_bg = self.read_csv("Tiled/" + self.level_name + "_bg_fixed.csv")
@@ -264,7 +260,7 @@ class Tilemap():
 
     def update_chunks(self):
         chunk_distances=self.chunk_distance()
-        print(self.total_distance)
+        #print(self.total_distance)
 
         for key in chunk_distances.keys():
 

@@ -39,6 +39,7 @@ class Game_UI():
         #initiate player
         self.player = Entities.Player([200,50])
         self.players = pygame.sprite.Group(self.player)
+        self.player_center = (216,180)
 
         #initiate all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -289,7 +290,7 @@ class Game_UI():
         self.game_loop(True)
 
     def load_map(self, map_name):
-        self.map = Level.Tilemap(map_name)
+        self.map = Level.Tilemap(map_name, self.player_center)
         self.initiate_groups()
         self.load_music()
 
