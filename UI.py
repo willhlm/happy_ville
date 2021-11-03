@@ -41,7 +41,7 @@ class Game_UI():
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (216,180)
 
-        #initiate all sprite groups
+        #define all sprite groups
         self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()

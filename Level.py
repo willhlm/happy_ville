@@ -170,8 +170,8 @@ class Tilemap():
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex']
-        top_left = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
+        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex','bg_fixed_deco','fg_fixed_deco']
+        top_left = {}
         bg_flags = {}
         for bg in bg_list:
             bg_flags[bg] = True
@@ -197,20 +197,30 @@ class Tilemap():
             try:
                 bg_sheets[bg] = self.read_spritesheet("Sprites/level_sheets/" + self.level_name + "/%s.png" % bg)
                 bg_maps[bg] = self.read_csv("Tiled/" + self.level_name + "_%s.csv" % bg)
+                top_left[bg] = (0,0)
             except:
                 bg_flags[bg] = False
                 print("Failed to read %s" % bg)
 
-        for row in range(rows):
-            for col in range(cols):
-                for i, bg in enumerate(bg_list):
-                    if bg_flags[bg]:
+        for bg in bg_list:
+            if bg_flags[bg]:
+                for row in range(rows):
+                    for col in range(cols):
                         if not bg_maps[bg][row][col] == '-1':
+                            print(bg + " " + bg_maps[bg][row][col])
                             blit_surfaces[bg].blit(bg_sheets[bg][int(bg_maps[bg][row][col])], (col * self.tile_size, row * self.tile_size))
-                            if top_left[i] == (0,0):
+                            if top_left[bg] == (0,0):
                                 #get inital position for blit
-                                top_left[i] = (col * self.tile_size, row * self.tile_size)
+                                top_left[bg] = (col * self.tile_size, row * self.tile_size)
 
+
+
+
+        #blit deco over corresponding layer
+        if bg_flags['bg_fixed_deco']:
+            blit_surfaces['bg_fixed'].blit(blit_surfaces['bg_fixed_deco'],(0,0))
+        if bg_flags['fg_fixed_deco']:
+            blit_surfaces['fg_fixed'].blit(blit_surfaces['fg_fixed_deco'],(0,0))
 
         print(top_left)
         backgrounds = []
@@ -228,6 +238,7 @@ class Tilemap():
             elif bg == 'fg_paralex':
                 backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
 
+        del blit_surfaces, bg_sheets, bg_maps
         return backgrounds
 
     def load_map(self):#load the whole map
