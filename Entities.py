@@ -749,6 +749,18 @@ class Path_Col_h(Trigger):
         self.image = pygame.Surface((16+(2*ext),16))
         self.image.fill((0,0,0))
 
+class Collision_block(pygame.sprite.Sprite):
+
+    def __init__(self,pos,chunk_key=False):
+        super().__init__()
+        self.rect = pygame.Rect(pos,(16,16))
+        self.chunk_key=chunk_key
+        self.hitbox = self.rect.inflate(0,0)
+
+    def update(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
 class Block(pygame.sprite.Sprite):
 
     def __init__(self,img,pos):

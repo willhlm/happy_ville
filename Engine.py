@@ -125,7 +125,6 @@ class Collisions():
             entity.rect.center = [round(entity.rect.center[0] + entity.movement[0]), entity.rect.center[1]]
             entity.update_hitbox()
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
-            entity.collision_spikes={'top':False,'bottom':False,'right':False,'left':False}
 
         collided=Collisions.collided#make the hitbox collide and not rect
         #check for collisions and get a dictionary of sprites that collides
@@ -134,12 +133,10 @@ class Collisions():
             if dyn_entity.movement[0]>0:#going to the right
                 dyn_entity.hitbox.right = stat_entity[0].hitbox.left
                 dyn_entity.collision_types['right'] = True
-                dyn_entity.collision_spikes['right'] = stat_entity[0].spike
 
             elif dyn_entity.movement[0]<0:#going to the left
                 dyn_entity.hitbox.left = stat_entity[0].hitbox.right
                 dyn_entity.collision_types['left'] = True
-                dyn_entity.collision_spikes['left'] = stat_entity[0].spike
 
             dyn_entity.update_rect()
 
@@ -155,12 +152,10 @@ class Collisions():
             if dyn_entity.movement[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
                 dyn_entity.collision_types['bottom'] = True
-                dyn_entity.collision_spikes['bottom'] = stat_entity[0].spike
 
             elif dyn_entity.movement[1]<0:#going up
                 dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
                 dyn_entity.collision_types['top'] = True
-                dyn_entity.collision_spikes['top'] = stat_entity[0].spike
 
             dyn_entity.update_rect()
 
