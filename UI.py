@@ -357,7 +357,7 @@ class Game_UI():
         self.bg_fixed.draw(self.screen)
         #self.weather.draw(self.screen)
 
-        self.platforms.draw(self.screen)
+        #self.platforms.draw(self.screen)
         self.interactables.draw(self.screen)
         self.enemies.draw(self.screen)
         self.npcs.draw(self.screen)

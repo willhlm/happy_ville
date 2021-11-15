@@ -10,7 +10,6 @@ class Tilemap():
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
         self.keys=[]
         self.chunk_render_distance=1000
-        self.sprite_sheet = self.read_spritesheet("Sprites/level_sheets/" + level + "/bg_fixed.png")
         self.platforms = pygame.sprite.Group()
         self.platforms_pause=pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
@@ -262,7 +261,7 @@ class Tilemap():
                         tile_x+=1
                         continue
 
-                    new_block = Entities.Platform(self.sprite_sheet[int(tile)],self.entity_position(tile_x, tile_y, x, y),key)
+                    new_block = Entities.Collision_block(self.entity_position(tile_x, tile_y, x, y),key)
                     self.platforms.add(new_block)
                     tile_x+=1
                 tile_y+=1
