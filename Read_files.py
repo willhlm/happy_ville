@@ -164,3 +164,20 @@ class Alphabet():
             x += 1      #add space after each word
 
         return text_surface
+
+class controller():
+    def __init__(self,type):
+
+        pygame.joystick.init()#initialise joysticks
+        joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+        for sticks in joysticks:#initialse all controllers
+            sticks.init()
+
+        self.joystick=joysticks[0]#save the the main controller. This will not work if multicontrller are connected I guess
+
+        file=type+'_keys.jason'
+        with open(join(file),'r+') as file:
+            self.bottons=json.load(file)
+
+        #left hori:1, left vert:0, right hori: 3, right vert: 2, left trigger:5, right trigger:4
+        self.analogs={'lv':1,'lh':0,'rh':3,'rv':2,'lt':5,'rt':4}
