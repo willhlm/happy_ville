@@ -642,13 +642,12 @@ class Game_UI():
                 pygame.quit()
                 sys.exit()
 
-            if event.type==pygame.JOYDEVICEADDED:
-                self.controller=Read_files.controller('xbox')#initillise and things
+            if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
+                self.controller.update_controlls()
+            if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
+                self.controller.update_controlls()
 
-            if event.type==pygame.JOYDEVICEREMOVED:
-                self.controller=Read_files.controller('xbox')#initillise and things
-
-            if event.type==pygame.JOYBUTTONDOWN:
+            if event.type==pygame.JOYBUTTONDOWN:#press a botton
                 if event.button==self.controller.bottons['rb']:
                     self.player.dashing()
                 if event.button==self.controller.bottons['a'] and not self.player.action['fall'] and not self.player.action['jump']:
@@ -658,12 +657,12 @@ class Game_UI():
                     self.player.action['run']=False
                     self.ability_menu=True
 
-                if event.button==self.controller.bottons['b']:
+                if event.button==self.controller.bottons['b']:#abillity
                     if not self.player.action['dash']:
                         self.player.action[self.player.equip]=True
                         self.player.charging[0] = True
 
-                if event.button==self.controller.bottons['x']:
+                if event.button==self.controller.bottons['x']:#attack
                     if not self.player.action['dash']:
                         if not self.player.action['sword1']:
                             self.player.action['sword']=True
@@ -673,8 +672,7 @@ class Game_UI():
                         self.player.timer=0
                         #self.comb_action='sword1'
 
-
-            if event.type==pygame.JOYBUTTONUP:
+            if event.type==pygame.JOYBUTTONUP:#release a botton
 
                 if event.button==self.controller.bottons['lb']:
                     self.ability_menu=False
@@ -685,6 +683,7 @@ class Game_UI():
                         self.player.charging[0]=False
 
             if event.type==pygame.JOYAXISMOTION:#analog stick
+
                 if event.axis==self.controller.analogs['lh']:#left horizontal
                     self.player.action['run']=True
                     self.player.action['stand']=False
@@ -694,16 +693,28 @@ class Game_UI():
                         self.player.action['run']=False
                     elif event.value>0.2:
                         self.player.dir[0]=1
-                    else:
+                    else:#if negative
                         self.player.dir[0]=-1
 
                 if event.axis==self.controller.analogs['lv']:#left vertical
+
                     if abs(event.value)<0.2:
                         self.player.dir[1]=0
                     elif event.value>0.2:
                         self.player.dir[1]=-1
-                    else:
+                    else:#if negative
                         self.player.dir[1]=1
+
+                if event.axis==self.controller.analogs['rh']:#right horizonal
+
+                    if abs(event.value)<0.5:
+                        pass
+                    elif event.value>0.5:
+                        self.ab_index+=1
+                        self.ab_index=min(len(self.player.abilities)-1,self.ab_index)
+                    else:#if negative
+                        self.ab_index-=1
+                        self.ab_index=max(0,self.ab_index)
 
             if event.type==pygame.JOYHATMOTION:
                 print(event)
