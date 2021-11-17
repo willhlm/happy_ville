@@ -144,6 +144,7 @@ class Game_UI():
                     sys.exit()
 
                 if event.type == pygame.KEYDOWN:
+
                     if event.key==pygame.K_ESCAPE:
                         self.player.action['talk'] = False
 
@@ -155,6 +156,17 @@ class Game_UI():
                         else:
                             letter_frame = 0
                             npc.increase_conv_index()
+
+                elif event.type==pygame.JOYBUTTONDOWN:
+                    if event.button==self.controller.bottons['y']:
+
+                        #nonlocal letter_frame
+                        if letter_frame//print_speed < len(npc.get_conversation('state_1')):
+                            letter_frame = 1000
+                        else:
+                            letter_frame = 0
+                            npc.increase_conv_index()
+
 
         #main loop
         while(self.player.action['talk']):
@@ -370,7 +382,6 @@ class Game_UI():
             self.bgs[i].draw(self.screen)
         self.triggers.draw(self.screen)
         #self.camera_blocks.draw(self.screen)
-
 
     def inventoryscreen(self):
         inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
@@ -633,9 +644,17 @@ class Game_UI():
                     #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
                     if len(self.state)!=1:
                         self.state.pop()#un-remember the last page
-
+            elif event.type==pygame.JOYBUTTONDOWN:#press a botton
+                if event.button==self.controller.bottons['start']:#escape button
+                    self.display.fill((207,238,250))#fill game.screen
+                    if len(self.state)!=1:
+                        self.state.pop()#un-remember the last page
 
     def input_joy(self):
+        #not implemented in controller mode yet
+        #    if event.key == pygame.K_i:
+        #        self.inventory=True
+        #        self.inventoryscreen()#open inventort
 
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -648,14 +667,23 @@ class Game_UI():
                 self.controller.update_controlls()
 
             if event.type==pygame.JOYBUTTONDOWN:#press a botton
-                if event.button==self.controller.bottons['rb']:
+                if event.button==self.controller.bottons['start']:#escape button
+                    self.ESC=True
+                    self.pause_menu()
+
+
+                if event.button==self.controller.bottons['rb'] and self.player.dashing_cooldown>9:
                     self.player.dashing()
                 if event.button==self.controller.bottons['a'] and not self.player.action['fall'] and not self.player.action['jump']:
                     self.player.jump()
                 if event.button==self.controller.bottons['lb']:
-                    self.player.action['stand']=True
-                    self.player.action['run']=False
                     self.ability_menu=True
+
+                if event.button==self.controller.bottons['y']:#interact
+                    self.player.interacting = True
+                    self.interactions()
+                    self.player.talk()
+
 
                 if event.button==self.controller.bottons['b']:#abillity
                     if not self.player.action['dash']:
@@ -682,19 +710,27 @@ class Game_UI():
                     if not self.player.action['dash']:
                         self.player.charging[0]=False
 
+                if event.button==self.controller.bottons['y']:
+                    self.player.interacting = False
+                    if self.player.state!='talk':#if not in conversation
+                        self.player.state='stand'
+                        self.player.action['talk']=False
+
             if event.type==pygame.JOYAXISMOTION:#analog stick
 
                 if event.axis==self.controller.analogs['lh']:#left horizontal
                     self.player.action['run']=True
-                    self.player.action['stand']=False
 
                     if abs(event.value)<0.2:
-                        self.player.action['stand']=True
+                        #self.player.action['stand']=True
                         self.player.action['run']=False
                     elif event.value>0.2:
                         self.player.dir[0]=1
+                        self.player.acceleration[0]=event.value
                     else:#if negative
                         self.player.dir[0]=-1
+                        self.player.acceleration[0]=abs(event.value)
+
 
                 if event.axis==self.controller.analogs['lv']:#left vertical
 

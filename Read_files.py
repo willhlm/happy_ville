@@ -184,3 +184,6 @@ class controller():
         #xbox
         #left hori:1, left vert:0, right hori: 3, right vert: 2, left trigger:5, right trigger:4
         self.analogs={'lv':1,'lh':0,'rv':3,'rh':2,'lt':5,'rt':4}
+
+    def inputs(self):
+        pass

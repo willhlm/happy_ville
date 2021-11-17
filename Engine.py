@@ -6,7 +6,7 @@ class Collisions():
 
     def action_collision(self,projectiles,projectile_enteties,platforms,enemies,screen,loot,cosmetics):
         self.shake-=1
-        self.shake=max(0,self.shake)#to not let it go to too low valyes
+        self.shake=max(0,self.shake)#to not let it go to too low values
 
         for entity in projectile_enteties.sprites():#go through the group
             projectiles=entity.attack_action(projectiles)
@@ -22,9 +22,11 @@ class Collisions():
                 #if hit enemy
                 if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
 
-                    collision_ene.take_dmg(projectile.dmg)
                     self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
-                    self.shake+=collision_ene.death(loot)#check if dead
+                    #self.shake+=collision_ene.death(loot)#check if dead
+                    collision_ene.take_dmg(projectile.dmg)                    
+                    if collision_ene.action['death']:
+                        self.shake+=collision_ene.shake
 
                 #hit platform
                 elif collision_plat:
@@ -39,12 +41,15 @@ class Collisions():
     def check_enemy_collision(player,enemies,loot):
         collided=Collisions.collided #make the hitbox collide and not rect
         collisions=pygame.sprite.spritecollideany(player,enemies,collided)#check collision
-        if collisions and not player.action['hurt']:
-            player.health-=10
-            player.velocity[0]=-player.dir[0]*10#knock back of player (will not completly work)
-            player.action['hurt']=True
-            player.death(loot)#check if dead
-        return loot
+
+        if collisions and not player.action['hurt'] and not collisions.action['death']:
+            player.take_dmg(10)
+
+            sign=(player.hitbox.center[0]-collisions.hitbox.center[0])/(abs(player.hitbox.center[0]-collisions.hitbox.center[0]))
+            #if player.hitbox.center[0] > collisions.hitbox.center[0]:#player on right
+            player.velocity[0]=sign*10#knock back of player
+        #    else:#player on left
+            #    player.velocity[0]=-10#knock back of player
 
     #pickup loot
     @staticmethod
