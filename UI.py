@@ -4,6 +4,7 @@ import Engine
 import Entities
 import Level
 import BG
+#import States
 
 #TODO:
 #Add camera blocks to chunkloading, so they dont they check outside of reasonable range,
@@ -31,7 +32,8 @@ class Game_UI():
         pygame.mixer.init
         self.bg_music = pygame.mixer.Channel(0)
 
-        self.controller=Read_files.controller('xbox')#initillise and things
+        #self.states=States.title(self.display,self.font)
+        self.controller=Read_files.Controller('xbox')#initillise and things
 
         self.ability_menu=False#a flag to enter "abillity changing menue"
         self.ab_index=0#index for the ability selection
@@ -92,18 +94,18 @@ class Game_UI():
             self.collisions.collide(self.loot,self.platforms)
             self.collisions.check_invisible(self.npcs,self.invisible_blocks)
             self.collisions.pickup_loot(self.player,self.loot)
-            self.collisions.check_enemy_collision(self.player,self.enemies,self.loot)
+            self.collisions.check_enemy_collision(self.player,self.enemies)
 
-            self.scrolling() #need to be above action_collision, also includes group updates
+            self.scrolling()
             self.draw()
+            self.group_distance() #update the groups beased on if they are on screen or not
+            self.trigger_event()
+            self.check_camera_border()
+            self.blit_screen_info()
+            self.change_abilities()#need to be after self.draw()
 
             self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
             self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
-
-            self.group_distance() #update the groups beased on if they are on screen or not
-#            self.interactions() -> moved it to uopn botton press
-            self.trigger_event()
-            self.check_camera_border()
 
             #!! -- maybe move this to update method in npc/enemy class
             for enemy in self.enemies:
@@ -112,14 +114,9 @@ class Game_UI():
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
             pygame.draw.rect(self.screen, (0,255,255), self.player.hitbox,2)#checking hitbox
 
-            self.blit_screen_info()
-
             npc = Engine.Collisions.check_npc_collision(self.player,self.npcs)#need to be at the end so that the conversation text doesn't get scaled
             if npc:
                 self.conversation_loop(npc)
-
-            if self.ability_menu:
-                self.change_abilities()#chaning ability menue
 
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
@@ -127,8 +124,8 @@ class Game_UI():
                 self.fade_in()
                 first_loop_flag = False
 
-            pygame.display.update()
             self.clock.tick(60) #set FPS to 60
+            pygame.display.update()
 
     def conversation_loop(self, npc):
 
@@ -199,6 +196,38 @@ class Game_UI():
             input_conv()
 
         npc.action['talk'] = False
+
+    # returns a surface with correct borders for text/menu bg,
+    # size as input
+    def fill_text_bg(self, surface_size):
+        col = int(surface_size[0]/16)
+        row = int(surface_size[1]/16)
+        surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
+
+        for r in range(0,row):
+            for c in range(0,col):
+                if r==0:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[0],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[2],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[1],(c*16,r*16))
+                elif r==row-1:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[6],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[8],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[7],(c*16,r*16))
+                else:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[3],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[5],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[4],(c*16,r*16))
+        return surface
 
     def interactions(self):
         change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
@@ -425,7 +454,7 @@ class Game_UI():
                     self.inventory=False
 
     def change_abilities(self):
-        if self.player.state not in self.player.priority_action:#don't change if you are doing some attack
+        if self.ability_menu:
 
             self.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
             pygame.time.wait(100)#slow motion
@@ -438,62 +467,6 @@ class Game_UI():
                 positions.append(coordinate)#coordinates of all blits
 
             self.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
-
-    def change_equipment(self):
-        if self.player.state not in self.player.priority_action:#don't change if you are doing some attack
-            self.ab_index=self.player.abilities.index(self.player.equip)
-
-            while(self.ability_menu):
-
-                self.screen.fill((207,238,250),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
-                self.update_groups()
-                self.draw()
-                self.blit_screen_info()
-
-                positions=[]#placeholder
-                for index,abillity in enumerate(self.player.abilities):
-                    coordinate=[100+50*index,200]
-
-                    self.screen.blit(self.font.render((50,50),abillity),(coordinate))
-                    positions.append(coordinate)#coordinates of all blits
-
-                self.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
-
-                self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-
-                self.clock.tick(60) #set FPS to 60
-                self.input_ability()
-
-    def input_ability(self):
-        for event in pygame.event.get():
-
-            if event.type == pygame.KEYDOWN:
-                if event.type==pygame.QUIT:
-                    self.exit()
-
-                if event.key == pygame.K_RIGHT:
-                    self.ab_index+=1
-                    self.ab_index=min(len(self.player.abilities)-1,self.ab_index)
-                if event.key == pygame.K_LEFT:
-                    self.ab_index-=1
-                    self.ab_index=max(0,self.ab_index)
-
-            elif event.type == pygame.KEYUP:#lift bottom
-                if event.key==pygame.K_TAB:
-                    self.ability_menu=False
-                    self.player.equip=self.player.abilities[self.ab_index]
-
-                if event.key == pygame.K_RIGHT and self.player.dir[0]>0:
-                    self.player.action['stand']=True
-                    self.player.action['run']=False
-
-                if event.key == pygame.K_LEFT and self.player.dir[0]<0:
-                    self.player.action['stand']=True
-                    self.player.action['run']=False
-
-    def exit(self):
-        pygame.quit()
-        sys.exit()
 
     def blit_screen_info(self):
         self.blit_health()
@@ -538,10 +511,16 @@ class Game_UI():
         fps_string = str(int(self.clock.get_fps()))
         self.screen.blit(self.font.render((30,12),'fps ' + fps_string),(350,20))
 
+<<<<<<< HEAD
     def ESC_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
         #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
         self.display.fill((0,0,0,200))#fill game.screen
+=======
+    def pause_menu(self):
+        #self.states.update()
+        self.display.fill((207,238,250))#fill game.screen
+>>>>>>> 41b5d31fb9b04246c1cb6a8528c2034eb2be35fe
 
         while self.ESC:
             if self.state[-1] == 'pause':
@@ -550,6 +529,7 @@ class Game_UI():
                 self.option_menu()
             elif self.state[-1] == 'resolution':
                 self.resolution_menu()
+            self.input_quit()
 
     def pause_menu(self):
         self.display.blit(self.font.render((50,50),'Start Game'),(200,100))
@@ -568,8 +548,6 @@ class Game_UI():
         elif exit_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
             self.exit()
 
-        self.input_quit()
-
     def option_menu(self):
         self.display.fill((207,238,250))#fill game.screen
 
@@ -579,8 +557,6 @@ class Game_UI():
         if Resolution_rect.collidepoint((pygame.mouse.get_pos())) ==True and self.click==True:
             self.click=False
             self.state.append('resolution')
-
-        self.input_quit()
 
     def resolution_menu(self):
         self.display.fill((207,238,250))#fill game.screen
@@ -593,46 +569,11 @@ class Game_UI():
             #self.start_BG=pygame.transform.scale(self.start_BG,(1000,800))#recale the BG
             #self.screen.blit(self.start_BG,(0,0))
 
-        self.input_quit()
-
-    # returns a surface with correct borders for text/menu bg,
-    # size as input
-    def fill_text_bg(self, surface_size):
-        col = int(surface_size[0]/16)
-        row = int(surface_size[1]/16)
-        surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
-
-        for r in range(0,row):
-            for c in range(0,col):
-                if r==0:
-                    if c==0:
-                        surface.blit(self.text_bg_dict[0],(c*16,r*16))
-                    elif c==col-1:
-                        surface.blit(self.text_bg_dict[2],(c*16,r*16))
-                    else:
-                        surface.blit(self.text_bg_dict[1],(c*16,r*16))
-                elif r==row-1:
-                    if c==0:
-                        surface.blit(self.text_bg_dict[6],(c*16,r*16))
-                    elif c==col-1:
-                        surface.blit(self.text_bg_dict[8],(c*16,r*16))
-                    else:
-                        surface.blit(self.text_bg_dict[7],(c*16,r*16))
-                else:
-                    if c==0:
-                        surface.blit(self.text_bg_dict[3],(c*16,r*16))
-                    elif c==col-1:
-                        surface.blit(self.text_bg_dict[5],(c*16,r*16))
-                    else:
-                        surface.blit(self.text_bg_dict[4],(c*16,r*16))
-        return surface
-
     def input_quit(self):#to exits between option menues
         pygame.display.update()
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                self.exit()
             if event.type==pygame.MOUSEBUTTONDOWN:
                 self.click=True
             if event.type==pygame.MOUSEBUTTONUP:
@@ -650,12 +591,15 @@ class Game_UI():
                     if len(self.state)!=1:
                         self.state.pop()#un-remember the last page
 
-    def input_joy(self):
-        #not implemented in controller mode yet
-        #    if event.key == pygame.K_i:
-        #        self.inventory=True
-        #        self.inventoryscreen()#open inventort
+    def exit(self):
+        pygame.quit()
+        sys.exit()
 
+    def input(self):
+        #self.input_joy()
+        self.input_keyboard()
+
+    def input_joy(self):
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
                 pygame.quit()
@@ -671,6 +615,9 @@ class Game_UI():
                     self.ESC=True
                     self.pause_menu()
 
+                if event.button==self.controller.bottons['select']:#escape button
+                    self.inventory=True
+                    self.inventoryscreen()#open inventort
 
                 if event.button==self.controller.bottons['rb'] and self.player.dashing_cooldown>9:
                     self.player.dashing()
@@ -678,12 +625,10 @@ class Game_UI():
                     self.player.jump()
                 if event.button==self.controller.bottons['lb']:
                     self.ability_menu=True
-
                 if event.button==self.controller.bottons['y']:#interact
                     self.player.interacting = True
                     self.interactions()
                     self.player.talk()
-
 
                 if event.button==self.controller.bottons['b']:#abillity
                     if not self.player.action['dash']:
@@ -700,7 +645,7 @@ class Game_UI():
                         self.player.timer=0
                         #self.comb_action='sword1'
 
-            if event.type==pygame.JOYBUTTONUP:#release a botton
+            elif event.type==pygame.JOYBUTTONUP:#release a botton
 
                 if event.button==self.controller.bottons['lb']:
                     self.ability_menu=False
@@ -755,10 +700,11 @@ class Game_UI():
             if event.type==pygame.JOYHATMOTION:
                 print(event)
 
-    def input(self):#input while playing
+    def input_keyboard(self):#input while playing
         #if self.player.state!='talk':#this can be removed
 
         for event in pygame.event.get():
+
             if event.type==pygame.QUIT:
                 pygame.quit()
                 sys.exit()

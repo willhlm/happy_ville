@@ -12,7 +12,7 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir=self.dir.copy()
         self.state = 'stand'
         self.world_state=0#state of happyness thingy of the world
-        self.loot={'Amber_Droplet':0}
+        self.inventory={'Amber_Droplet':0}
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
         self.phase='pre'
@@ -156,15 +156,14 @@ class Entity(pygame.sprite.Sprite):
         self.ac_dir[0]=self.dir[0]
         self.ac_dir[1]=self.dir[1]
 
-    def loots(self,loot):
-        for key in self.loot.keys():#go through all loot
-            for i in range(0,self.loot[key]):#make that many object for that specific loot and add to gorup
-                #obj=globals()[key]#make a class based on the name of the key: using global stuff
+    def loots(self):
+        drops=[]
+        for key in self.inventory.keys():#go through all loot
+            for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
                 obj=getattr(sys.modules[__name__], key)#make a class based on the name of the key: need to import sys
-                #obj=eval(key)#make a class based on the name of the key: apperently not a good solution
-                loot.add(obj(self.hitbox))
-            self.loot[key]=0
-        return loot
+                drops.append(obj(self.hitbox))
+            self.inventory[key]=0
+        return drops
 
 class Player(Entity):
     def __init__(self,pos):
@@ -194,7 +193,7 @@ class Player(Entity):
         self.hitbox_offset = (0,13)
         self.interacting = False
         self.friction=[0.2,0]
-        self.loot={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
+        self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
@@ -285,8 +284,7 @@ class Player(Entity):
 
     def take_dmg(self,dmg):
         if self.shield.health<=0 or self.shield.lifetime<0:
-            self.health-=dmg
-            self.action['hurt']=True
+            super().take_dmg(dmg)
 
     def spawn_sword(self):
         self.sword.dir=self.ac_dir
@@ -464,7 +462,7 @@ class Woopie(Entity):
         self.equip='sword'
         self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.friction=[0.2,0]
-        self.loot={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
+        self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.shake=10
         self.counter=0
         self.acceleration=[1,0.2]
@@ -537,11 +535,8 @@ class Flowy(Entity):
 
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
             self.action[self.equip] = True
-
 #remove dev when working
 class NPC(Entity):
-
-    acceleration=[0.3,0.8]
 
     def __init__(self):
         super().__init__()
@@ -552,6 +547,8 @@ class NPC(Entity):
         self.health = 50
         self.conv_index = 0
         self.friction=[0.2,0]
+        self.acceleration=[0.3,0.8]
+
 
     def load_conversation(self):
         self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
