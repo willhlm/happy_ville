@@ -83,8 +83,8 @@ class Game_UI():
 
             #self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
 
-            self.input_joy()#game inputs controllers
-            #self.input()#game inputs keybord
+            #self.input_joy()#game inputs controllers
+            self.input()#game inputs keybord
 
             self.collisions.collide(self.players,self.platforms)
             self.collisions.collide(self.enemies,self.platforms)
