@@ -14,7 +14,7 @@ class Game_UI():
     #current player pos: 216,180
     def __init__(self):
         pygame.init()#initilise
-        self.WINDOW_SIZE = (432,243)
+        self.WINDOW_SIZE = (480,270)
         self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
@@ -511,16 +511,14 @@ class Game_UI():
         fps_string = str(int(self.clock.get_fps()))
         self.screen.blit(self.font.render((30,12),'fps ' + fps_string),(350,20))
 
-<<<<<<< HEAD
     def ESC_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
         #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
         self.display.fill((0,0,0,200))#fill game.screen
-=======
+
     def pause_menu(self):
         #self.states.update()
         self.display.fill((207,238,250))#fill game.screen
->>>>>>> 41b5d31fb9b04246c1cb6a8528c2034eb2be35fe
 
         while self.ESC:
             if self.state[-1] == 'pause':

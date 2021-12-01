@@ -1,19 +1,26 @@
 import pygame
-import States
+import states
+import game_objects
 
 class Game():
     def __init__(self):
-        self.WINDOW_SIZE = (432,243)
+
+        #set all screens
+        self.WINDOW_SIZE = (480,270)
         self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
-        self.display=pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
-        self.clock=pygame.time.Clock()
-        self.fps=60
-        self.stack_states=[States.Splash(self)]#,'Menu':States.Menu:,'Gameplay':States.Gameplay}
+        self.screen = pygame.Surface(self.WINDOW_SIZE)
+        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
+
+        #misc
+        self.game_objects = game_objects.Game_Objects(self)
+        self.clock = pygame.time.Clock()
+        self.fps = 60
+        self.state_stack = [states.Title_Menu(self)]#,'Menu':States.Menu:,'Gameplay':States.Gameplay}
 
     def event_loop(self):
         for event in pygame.event.get():
-            self.stack_states[-1].handle_events(event)
+            self.state_stack[-1].handle_events(event)
 
     def run(self):
         while True:
@@ -24,10 +31,11 @@ class Game():
             self.event_loop()
 
             #update
-            self.stack_states[-1].update()
+            self.state_stack[-1].update()
 
             #render
-            self.stack_states[-1].render(self.display)
+            self.state_stack[-1].render()
+            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
             #update display
             pygame.display.update()
