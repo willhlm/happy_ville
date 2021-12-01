@@ -28,7 +28,6 @@ class Sprites():
             sprite_dict[subdir.split("/")[-1]] = self.load_sprites(subdir)
         return sprite_dict
 
-
     def load_sprites(self,path_to_folder):
         #use this to load multiple sprites in a path_to_folder
         list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
@@ -165,7 +164,7 @@ class Alphabet():
 
         return text_surface
 
-class controller():
+class Controller():
     def __init__(self,type):
 
         pygame.joystick.init()#initialise joystick module

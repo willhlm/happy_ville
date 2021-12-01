@@ -22,11 +22,13 @@ class Collisions():
                 #if hit enemy
                 if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
 
-                    self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
                     #self.shake+=collision_ene.death(loot)#check if dead
-                    collision_ene.take_dmg(projectile.dmg)                    
+                    collision_ene.take_dmg(projectile.dmg)
+                    self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
+
                     if collision_ene.action['death']:
                         self.shake+=collision_ene.shake
+                        loot.add(collision_ene.loots())
 
                 #hit platform
                 elif collision_plat:
@@ -38,7 +40,7 @@ class Collisions():
 
     #take damage if collide with enemy
     @staticmethod
-    def check_enemy_collision(player,enemies,loot):
+    def check_enemy_collision(player,enemies):
         collided=Collisions.collided #make the hitbox collide and not rect
         collisions=pygame.sprite.spritecollideany(player,enemies,collided)#check collision
 
@@ -58,7 +60,7 @@ class Collisions():
         collision=pygame.sprite.spritecollide(player,loots,True,collided)#check collision
         for loot in collision:
             obj=(loot.__class__.__name__)#get the loot in question
-            player.loot[obj]+=1
+            player.inventory[obj]+=1
 
     #npc player conversation
     @staticmethod
