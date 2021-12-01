@@ -26,7 +26,7 @@ class Game_UI():
         self.text_bg_dict = Read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
-        self.state = ['start']
+        self.state = ['pause']
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
         pygame.mixer.init
         self.bg_music = pygame.mixer.Channel(0)
@@ -524,20 +524,20 @@ class Game_UI():
         fps_string = str(int(self.clock.get_fps()))
         self.screen.blit(self.font.render((30,12),'fps ' + fps_string),(350,20))
 
-    def pause_menu(self):
+    def ESC_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
         #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-        self.display.fill((207,238,250))#fill game.screen
+        self.display.fill((0,0,0,200))#fill game.screen
 
         while self.ESC:
-            if self.state[-1] == 'start':
-                self.start_menu()
+            if self.state[-1] == 'pause':
+                self.pause_menu()
             elif self.state[-1] == 'option':
                 self.option_menu()
             elif self.state[-1] == 'resolution':
                 self.resolution_menu()
 
-    def start_menu(self):
+    def pause_menu(self):
         self.display.blit(self.font.render((50,50),'Start Game'),(200,100))
         start_rect=pygame.Rect(200,100,100,100)
         self.display.blit(self.font.render((50,50),'Options'),(200,200))
@@ -642,7 +642,7 @@ class Game_UI():
             if event.type == pygame.KEYDOWN:
                 if event.key==pygame.K_ESCAPE:#escape button
                     self.ESC=True
-                    self.pause_menu()
+                    self.ESC_menu()
 
                 if event.key == pygame.K_t:
                     self.player.talk()

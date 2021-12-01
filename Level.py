@@ -169,7 +169,8 @@ class Tilemap():
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex','bg_fixed_deco','fg_fixed_deco']
+        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex','bg_fixed_deco','bg_far_deco','bg_mid_deco','bg_near_deco','fg_fixed_deco','fg_paralex_deco']
+        deco_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex']
         top_left = {}
         bg_flags = {}
         for bg in bg_list:
@@ -206,7 +207,7 @@ class Tilemap():
                 for row in range(rows):
                     for col in range(cols):
                         if not bg_maps[bg][row][col] == '-1':
-                            print(bg + " " + bg_maps[bg][row][col])
+                            #print(bg + " " + bg_maps[bg][row][col])
                             blit_surfaces[bg].blit(bg_sheets[bg][int(bg_maps[bg][row][col])], (col * self.tile_size, row * self.tile_size))
                             if top_left[bg] == (0,0):
                                 #get inital position for blit
@@ -216,12 +217,10 @@ class Tilemap():
 
 
         #blit deco over corresponding layer
-        if bg_flags['bg_fixed_deco']:
-            blit_surfaces['bg_fixed'].blit(blit_surfaces['bg_fixed_deco'],(0,0))
-        if bg_flags['fg_fixed_deco']:
-            blit_surfaces['fg_fixed'].blit(blit_surfaces['fg_fixed_deco'],(0,0))
+        for bg in deco_list:
+            if bg_flags[bg + '_deco']:
+                blit_surfaces[bg].blit(blit_surfaces[bg + '_deco'],(0,0))
 
-        print(top_left)
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
