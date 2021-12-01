@@ -200,7 +200,7 @@ class Tilemap():
                 top_left[bg] = (0,0)
             except:
                 bg_flags[bg] = False
-                print("Failed to read %s" % bg)
+                #print("Failed to read %s" % bg)
 
         for bg in bg_list:
             if bg_flags[bg]:
@@ -221,6 +221,7 @@ class Tilemap():
             if bg_flags[bg + '_deco']:
                 blit_surfaces[bg].blit(blit_surfaces[bg + '_deco'],(0,0))
 
+        #print(top_left)
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
@@ -304,7 +305,7 @@ class Sprite_sheet():
         try:
             self.sheet =  pygame.image.load(filename).convert()
         except:
-            print(f"Unable to load spritesheet image: {filename}")
+            #print(f"Unable to load spritesheet image: {filename}")
             raise SystemExit(e)
 
     def image_at(self, rectangle, colorkey = None):

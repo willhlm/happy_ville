@@ -21,19 +21,14 @@ class Entity(pygame.sprite.Sprite):
         self.hitbox_offset=(0,0)
         self.framerate=4
 
-    def death(self,loot):
-        if self.health<=0:#if 0 health of enemy
-            self.action['death']=True
-            self.action['run']=False
-            self.velocity=[0,0]
-            self.loots(loot)
-            return self.shake#screen shake when eneny dies
-        return 0
-
     def take_dmg(self,dmg):
-        self.health-=dmg
         if dmg>0:
+            self.health-=dmg
             self.action['hurt']=True
+            if self.health<=0:#check if dead
+                self.action['death']=True
+                self.action['run']=False
+                self.velocity=[0,0]
 
     def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
         all_action=self.priority_action+self.nonpriority_action
@@ -111,11 +106,8 @@ class Entity(pygame.sprite.Sprite):
             self.velocity[1]=0
 
         if self.collision_spikes['bottom']:
-            self.action['hurt']=True
-            self.velocity[1]=-6
-            self.health-=10
-            if self.health<=0:
-                self.action['death']=True
+            self.velocity[1]=-6#knock back
+            self.take_dmg(10)
 
     def physics_movement(self):
         self.velocity[1]=self.velocity[1]+self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity

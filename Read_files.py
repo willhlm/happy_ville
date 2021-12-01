@@ -172,3 +172,26 @@ class Alphabet():
             text_surface.blit(color_surface, (0,0), special_flags = pygame.BLEND_RGB_MAX)
 
         return text_surface
+
+class controller():
+    def __init__(self,type):
+
+        pygame.joystick.init()#initialise joystick module
+        self.update_controlls()#initialise joysticks and add to list
+
+        self.buttonmapping(type)
+
+    def update_controlls(self):
+        self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controllers.
+
+    def buttonmapping(self,type):
+        file=type+'_keys.jason'
+        with open(join(file),'r+') as file:
+            self.bottons=json.load(file)
+
+        #xbox
+        #left hori:1, left vert:0, right hori: 3, right vert: 2, left trigger:5, right trigger:4
+        self.analogs={'lv':1,'lh':0,'rv':3,'rh':2,'lt':5,'rt':4}
+
+    def inputs(self):
+        pass

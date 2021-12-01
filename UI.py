@@ -31,6 +31,8 @@ class Game_UI():
         pygame.mixer.init
         self.bg_music = pygame.mixer.Channel(0)
 
+        self.controller=Read_files.controller('xbox')#initillise and things
+
         self.ability_menu=False#a flag to enter "abillity changing menue"
         self.ab_index=0#index for the ability selection
 
@@ -81,7 +83,8 @@ class Game_UI():
 
             #self.platforms,self.invisible_blocks=self.map.load_chunks()#chunks
 
-            self.input()#game inputs
+            self.input_joy()#game inputs controllers
+            #self.input()#game inputs keybord
 
             self.collisions.collide(self.players,self.platforms)
             self.collisions.collide(self.enemies,self.platforms)
@@ -141,6 +144,7 @@ class Game_UI():
                     sys.exit()
 
                 if event.type == pygame.KEYDOWN:
+
                     if event.key==pygame.K_ESCAPE:
                         self.player.action['talk'] = False
 
@@ -152,6 +156,17 @@ class Game_UI():
                         else:
                             letter_frame = 0
                             npc.increase_conv_index()
+
+                elif event.type==pygame.JOYBUTTONDOWN:
+                    if event.button==self.controller.bottons['y']:
+
+                        #nonlocal letter_frame
+                        if letter_frame//print_speed < len(npc.get_conversation('state_1')):
+                            letter_frame = 1000
+                        else:
+                            letter_frame = 0
+                            npc.increase_conv_index()
+
 
         #main loop
         while(self.player.action['talk']):
@@ -367,7 +382,6 @@ class Game_UI():
             self.bgs[i].draw(self.screen)
         self.triggers.draw(self.screen)
         #self.camera_blocks.draw(self.screen)
-
 
     def inventoryscreen(self):
         inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
@@ -630,6 +644,116 @@ class Game_UI():
                     #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
                     if len(self.state)!=1:
                         self.state.pop()#un-remember the last page
+            elif event.type==pygame.JOYBUTTONDOWN:#press a botton
+                if event.button==self.controller.bottons['start']:#escape button
+                    self.display.fill((207,238,250))#fill game.screen
+                    if len(self.state)!=1:
+                        self.state.pop()#un-remember the last page
+
+    def input_joy(self):
+        #not implemented in controller mode yet
+        #    if event.key == pygame.K_i:
+        #        self.inventory=True
+        #        self.inventoryscreen()#open inventort
+
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
+                self.controller.update_controlls()
+            if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
+                self.controller.update_controlls()
+
+            if event.type==pygame.JOYBUTTONDOWN:#press a botton
+                if event.button==self.controller.bottons['start']:#escape button
+                    self.ESC=True
+                    self.pause_menu()
+
+
+                if event.button==self.controller.bottons['rb'] and self.player.dashing_cooldown>9:
+                    self.player.dashing()
+                if event.button==self.controller.bottons['a'] and not self.player.action['fall'] and not self.player.action['jump']:
+                    self.player.jump()
+                if event.button==self.controller.bottons['lb']:
+                    self.ability_menu=True
+
+                if event.button==self.controller.bottons['y']:#interact
+                    self.player.interacting = True
+                    self.interactions()
+                    self.player.talk()
+
+
+                if event.button==self.controller.bottons['b']:#abillity
+                    if not self.player.action['dash']:
+                        self.player.action[self.player.equip]=True
+                        self.player.charging[0] = True
+
+                if event.button==self.controller.bottons['x']:#attack
+                    if not self.player.action['dash']:
+                        if not self.player.action['sword1']:
+                            self.player.action['sword']=True
+                        if self.player.timer<20:
+                            self.player.action['sword1']=True
+
+                        self.player.timer=0
+                        #self.comb_action='sword1'
+
+            if event.type==pygame.JOYBUTTONUP:#release a botton
+
+                if event.button==self.controller.bottons['lb']:
+                    self.ability_menu=False
+                    self.player.equip=self.player.abilities[self.ab_index]#select ability
+
+                if event.button==self.controller.bottons['b']:
+                    if not self.player.action['dash']:
+                        self.player.charging[0]=False
+
+                if event.button==self.controller.bottons['y']:
+                    self.player.interacting = False
+                    if self.player.state!='talk':#if not in conversation
+                        self.player.state='stand'
+                        self.player.action['talk']=False
+
+            if event.type==pygame.JOYAXISMOTION:#analog stick
+
+                if event.axis==self.controller.analogs['lh']:#left horizontal
+                    self.player.action['run']=True
+
+                    if abs(event.value)<0.2:
+                        #self.player.action['stand']=True
+                        self.player.action['run']=False
+                    elif event.value>0.2:
+                        self.player.dir[0]=1
+                        self.player.acceleration[0]=event.value
+                    else:#if negative
+                        self.player.dir[0]=-1
+                        self.player.acceleration[0]=abs(event.value)
+
+
+                if event.axis==self.controller.analogs['lv']:#left vertical
+
+                    if abs(event.value)<0.2:
+                        self.player.dir[1]=0
+                    elif event.value>0.2:
+                        self.player.dir[1]=-1
+                    else:#if negative
+                        self.player.dir[1]=1
+
+                if event.axis==self.controller.analogs['rh']:#right horizonal
+
+                    if abs(event.value)<0.5:
+                        pass
+                    elif event.value>0.5:
+                        self.ab_index+=1
+                        self.ab_index=min(len(self.player.abilities)-1,self.ab_index)
+                    else:#if negative
+                        self.ab_index-=1
+                        self.ab_index=max(0,self.ab_index)
+
+            if event.type==pygame.JOYHATMOTION:
+                print(event)
 
     def input(self):#input while playing
         #if self.player.state!='talk':#this can be removed
@@ -710,6 +834,7 @@ class Game_UI():
 
                 if event.key == pygame.K_LSHIFT and self.player.dashing_cooldown>9:#left shift
                     self.player.dashing()
+
 
             elif event.type == pygame.KEYUP:#lift bottom
                 if event.key == pygame.K_RIGHT and self.player.dir[0]>0:
