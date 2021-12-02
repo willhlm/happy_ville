@@ -142,7 +142,7 @@ class Alphabet():
             self.characters[c] = sheet[i]
 
     #returns a surface with size of input, and input text. Automatic line change
-    def render(self, surface_size, text, limit = 1000):
+    def render(self, surface_size, text, limit = 1000, inverse_color = False):
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
         x, y = 0, 0
         x_max = int(surface_size[0]/self.char_size[0])
@@ -156,11 +156,19 @@ class Alphabet():
 
             for c in word:
                 pos = (x*self.char_size[0],y*self.char_size[1])
-                text_surface.blit(self.characters[c],pos)
+                if not inverse_color:
+                    text_surface.blit(self.characters[c],pos)
+                else:
+                    text_surface.blit(self.characters[c],pos)
                 x += 1
                 if x_max * y + x > limit: return text_surface #spot printing at limit
 
             x += 1      #add space after each word
+
+        if inverse_color:
+            color_surface = pygame.Surface(text_surface.get_size()).convert_alpha()
+            color_surface.fill((255,255,255))
+            text_surface.blit(color_surface, (0,0), special_flags = pygame.BLEND_RGB_MAX)
 
         return text_surface
 

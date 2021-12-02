@@ -190,7 +190,6 @@ class Player(Entity):
         self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
         self.movement_sfx_timer = 110
-
         self.hitbox_offset = (0,13)
         self.interacting = False
         self.friction=[0.2,0]
