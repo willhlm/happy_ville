@@ -10,10 +10,12 @@ class Game():
         self.clock=pygame.time.Clock()
         self.fps=60
         self.stack_states=[States.Splash(self)]#,'Menu':States.Menu:,'Gameplay':States.Gameplay}
+        self.controller=Controller()
 
     def event_loop(self):
         for event in pygame.event.get():
-            self.stack_states[-1].handle_events(event)
+            self.controller.translate_inputs(event)
+            self.stack_states[-1].handle_events(self.controller.output)
 
     def run(self):
         while True:
