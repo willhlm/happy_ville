@@ -1,5 +1,6 @@
 import pygame, sys
 import Read_files
+import Engine
 
 class Game_State():
     def __init__(self,game):
@@ -27,6 +28,9 @@ class Title_Menu(Game_State):
         self.time_active = 0
         self.initiate_buttons()
 
+        #
+        self.current_button = 0
+
     def update(self):
         self.time_active += 1
         if self.time_active > 300:
@@ -51,6 +55,10 @@ class Title_Menu(Game_State):
         self.rect_load_game = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.load_game.get_width()/2, 110),self.load_game.get_size())
         self.rect_options = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.options.get_width()/2, 130),self.options.get_size())
         self.rect_quit_game = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.quit_game.get_width()/2, 150),self.quit_game.get_size())
+
+    def handle_events(self):
+
+        if event
 
 
 class Gameplay(Game_State):
