@@ -142,9 +142,7 @@ class Alphabet():
             self.characters[c] = sheet[i]
 
     #returns a surface with size of input, and input text. Automatic line change
-    def render(self, surface_size = [0,0], text = "", limit = 1000, inverse_color = False):
-        if surface_size[0] == 0:
-            surface_size = [len(text)*4,5]
+    def render(self, surface_size, text, limit = 1000, inverse_color = False):
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
         x, y = 0, 0
         x_max = int(surface_size[0]/self.char_size[0])
@@ -176,11 +174,16 @@ class Alphabet():
 
 class Controller():
     def __init__(self,type):
+        self.keydown=False
+        self.keyup=False
+        self.value=[0,0]
+        self.key=False
+        self.outputs=[self.keydown,self.keyup,self.value,self.key]
 
         pygame.joystick.init()#initialise joystick module
         self.update_controlls()#initialise joysticks and add to list
 
-        self.buttonmapping(type)
+        self.buttonmapping(type)#read in controller configuration file
 
     def update_controlls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controllers.
@@ -188,11 +191,143 @@ class Controller():
     def buttonmapping(self,type):
         file=type+'_keys.jason'
         with open(join(file),'r+') as file:
-            self.bottons=json.load(file)
+            mapping=json.load(file)
+            self.bottons=mapping['bottons']
+            self.analogs=mapping['analogs']
 
-        #xbox
-        #left hori:1, left vert:0, right hori: 3, right vert: 2, left trigger:5, right trigger:4
-        self.analogs={'lv':1,'lh':0,'rv':3,'rh':2,'lt':5,'rt':4}
+    def translate_inputs(self,event):
+        self.quit(self,event)
+        self.keybord(self,event)
+        self.joystick(self,event)
 
-    def inputs(self):
-        pass
+        self.output(self)
+
+    def quit(self,event):
+        if event.type==pygame.QUIT:
+            self.key='quit'
+
+    def keybord(self,event):
+        self.keyup=False
+        self.keydown=False
+        self.value=[0,0]
+
+        if event.type == pygame.KEYDOWN:
+            self.keydown=True
+            self.value=[1,1]
+            if event.key==pygame.K_ESCAPE:#escape button
+                self.key='start'
+            if event.key == pygame.K_t:
+                self.key='y'
+            if event.key == pygame.K_RIGHT:
+                self.key='right'
+            if event.key == pygame.K_LEFT:
+                self.key='left'
+            if event.key == pygame.K_UP:#press up
+                self.key='up'
+            if event.key == pygame.K_DOWN:#press down
+                self.key='down'
+            if event.key == pygame.K_TAB:
+                self.key='lb'
+            if event.key==pygame.K_SPACE:#jump
+                self.key='a'
+            if event.key==pygame.K_e:#aillities
+                self.key='b'
+            if event.key==pygame.K_f:#quick attack
+                self.key='x'
+            if event.key==pygame.K_g:
+                self.key='y'
+            if event.key == pygame.K_i:
+                self.key='select'
+            if event.key == pygame.K_LSHIFT:#left shift
+                self.key='rb'
+
+        elif event.type == pygame.KEYUP:#lift bottom
+            self.keyup=True
+            if event.key == pygame.K_RIGHT:
+                self.key='right'
+            if event.key == pygame.K_t:#if release button
+                self.key='y'
+            if event.key == pygame.K_LEFT:
+                self.key='left'
+            if event.key == pygame.K_UP:
+                self.key='up'
+            if event.key == pygame.K_DOWN:
+                self.key='down'
+            if event.key==pygame.K_g:
+                self.key='y'
+            if event.key==pygame.K_TAB:
+                self.key='lb'
+            if event.key == pygame.K_i:
+                self.key='select'
+            if event.key==pygame.K_e:
+                self.key='b'
+
+    def joystick(self,event):
+        if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
+            self.controller.update_controlls()
+        if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
+            self.controller.update_controlls()
+
+        if event.type==pygame.JOYBUTTONDOWN:#press a botton
+            self.keydown=True
+            if event.button==self.controller.bottons['start']:#escape button
+                self.key='start'
+            if event.button==self.controller.bottons['select']:#escape button
+                self.key='select'
+            if event.button==self.controller.bottons['rb']:
+                self.key='rb'
+            if event.button==self.controller.bottons['a']:
+                self.key='a'
+            if event.button==self.controller.bottons['lb']:
+                self.key='lb'
+            if event.button==self.controller.bottons['y']:#interact
+                self.key='y'
+            if event.button==self.controller.bottons['b']:#abillity
+                self.key='b'
+            if event.button==self.controller.bottons['x']:#attack
+                self.key='x'
+
+        if event.type==pygame.JOYBUTTONUP:#release a botton
+            self.keyup=True
+            if event.button==self.controller.bottons['lb']:
+                self.key='lb'
+            if event.button==self.controller.bottons['b']:
+                self.key='b'
+            if event.button==self.controller.bottons['y']:
+                self.key='y'
+
+        if event.type==pygame.JOYAXISMOTION:#analog stick
+            self.keydown=True
+            if event.axis==self.controller.analogs['lh']:#left horizontal
+                self.value=[event.value,0]
+                if abs(event.value)<0.2:
+                    self.keydown=False
+                    self.value=[0,0]
+                elif event.value>0.2:
+                    self.key='right'
+                else:#if negative
+                    self.key='left'
+            if event.axis==self.controller.analogs['lv']:#left vertical
+                self.value=[0,event.value]
+                if abs(event.value)<0.2:
+                    self.keydown=False
+                    self.value=[0,0]
+                elif event.value>0.2:
+                    self.key='right'
+                else:#if negative
+                    self.key='left'
+            if event.axis==self.controller.analogs['rh']:#right horizonal
+                self.value=[event.value,0]
+                if abs(event.value)<0.5:
+                    self.keydown=False
+                    self.value=[0,0]
+                elif event.value>0.5:
+                    self.key='right_rh'
+                else:#if negative
+                    self.key='left_rh'
+
+        if event.type==pygame.JOYHATMOTION:
+            pass
+
+    def output(self):
+        self.outputs=[self.keydown,self.keyup,self.value,self.key]
