@@ -1,10 +1,10 @@
 import pygame
-import Engine
-import Entities
+import engine
+import entities
 import Level
 import Action
 import UI
-import Read_files
+import read_files
 import BG
 
 platforms = pygame.sprite.Group()
@@ -23,10 +23,10 @@ game = UI.Game_UI()#initilise the game
 
 weather_paricles = BG.Weather()
 
-knight=Entities.Player([200,50])
+knight=entities.Player([200,50])
 hero.add(knight)
 
-sprites = {'knight': Read_files.Sprites_player()}
+sprites = {'knight': read_files.Sprites_player()}
 
 map = Level.Tilemap('village1','auto')
 
@@ -72,18 +72,18 @@ while True:
 
     game.input(knight)#game inputs
 
-    Engine.Physics.movement(hero)
-    Engine.Physics.movement(enemies)
-    Engine.Physics.movement(npc)
+    engine.Physics.movement(hero)
+    engine.Physics.movement(enemies)
+    engine.Physics.movement(npc)
 
-    Engine.Collisions.check_collisions(hero,platforms)
-    Engine.Collisions.check_collisions(enemies,platforms)
-    Engine.Collisions.check_collisions(npc,platforms)
-    Engine.Collisions.check_invisible(npc,invisible_blocks)
-    Engine.Collisions.check_interaction(knight,interactables)
-    Engine.Collisions.check_collisions_loot(loot,platforms)
-    Engine.Collisions.pickup_loot(knight,loot)
-    loot=Engine.Collisions.check_enemy_collision(knight,enemies,loot)
+    engine.Collisions.check_collisions(hero,platforms)
+    engine.Collisions.check_collisions(enemies,platforms)
+    engine.Collisions.check_collisions(npc,platforms)
+    engine.Collisions.check_invisible(npc,invisible_blocks)
+    engine.Collisions.check_interaction(knight,interactables)
+    engine.Collisions.check_collisions_loot(loot,platforms)
+    engine.Collisions.pickup_loot(knight,loot)
+    loot=engine.Collisions.check_enemy_collision(knight,enemies,loot)
 
 <<<<<<< HEAD
     fprojectiles, loot = Action.actions(fprojectiles,hero,platforms,enemies,game.screen,loot)#f_action swinger, target1,target2
@@ -98,9 +98,9 @@ while True:
     for npcs in npc.sprites():
         npcs.AI()
 
-    Engine.Animation.set_img(hero)
-    Engine.Animation.set_img(enemies)
-    Engine.Animation.set_img(npc)
+    engine.Animation.set_img(hero)
+    engine.Animation.set_img(enemies)
+    engine.Animation.set_img(npc)
 
     pygame.draw.rect(game.screen, (255,0,0), knight.rect,2)#checking hitbox
     pygame.draw.rect(game.screen, (0,255,0), knight.hitbox,2)#checking hitbox
@@ -115,7 +115,7 @@ while True:
 
     game.display.blit(pygame.transform.scale(game.screen,game.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
-    Engine.Collisions.check_npc_collision(knight,npc,game.display)#need to be at the end so that the conversation text doesn't get scaled
+    engine.Collisions.check_npc_collision(knight,npc,game.display)#need to be at the end so that the conversation text doesn't get scaled
 
     pygame.display.update()#update after every change
     game.clock.tick(60)#limmit FPS

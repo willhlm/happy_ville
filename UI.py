@@ -1,7 +1,7 @@
 import pygame, sys
-import Read_files
-import Engine
-import Entities
+import read_files
+import engine
+import entities
 import Level
 import BG
 #import States
@@ -23,25 +23,25 @@ class Game_UI():
         self.clock = pygame.time.Clock()
         self.ESC = False
         self.click = False
-        self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
-        self.text_bg_dict = Read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
-        self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
-        self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
+        self.font = read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
+        self.text_bg_dict = read_files.Sprites().generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
+        self.health_sprites = read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
+        self.spirit_sprites = read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.state = ['pause']
-        self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
+        self.map_state = read_files.read_json("map_state.json") #check this file for structure of object
         pygame.mixer.init
         self.bg_music = pygame.mixer.Channel(0)
 
         #self.states=States.title(self.display,self.font)
-        self.controller=Read_files.Controller('xbox')#initillise and things
+        self.controller=read_files.Controller('xbox')#initillise and things
 
         self.ability_menu=False#a flag to enter "abillity changing menue"
         self.ab_index=0#index for the ability selection
 
-        self.collisions = Engine.Collisions()
+        self.collisions = engine.Collisions()
 
         #initiate player
-        self.player = Entities.Player([200,50])
+        self.player = entities.Player([200,50])
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (216,180)
 
@@ -114,7 +114,7 @@ class Game_UI():
             pygame.draw.rect(self.screen, (255,0,0), self.player.rect,2)#checking hitbox
             pygame.draw.rect(self.screen, (0,255,255), self.player.hitbox,2)#checking hitbox
 
-            npc = Engine.Collisions.check_npc_collision(self.player,self.npcs)#need to be at the end so that the conversation text doesn't get scaled
+            npc = engine.Collisions.check_npc_collision(self.player,self.npcs)#need to be at the end so that the conversation text doesn't get scaled
             if npc:
                 self.conversation_loop(npc)
 
@@ -417,8 +417,8 @@ class Game_UI():
 
         temp=[]#a list of loot objects
         for item in self.player.loot.keys():
-            #temp=Entities.Amber_Droplet(self.player.hitbox).image
-            temp.append(getattr(sys.modules[Entities.__name__], item)(self.player.hitbox))#make the object based on the string
+            #temp=entities.Amber_Droplet(self.player.hitbox).image
+            temp.append(getattr(sys.modules[entities.__name__], item)(self.player.hitbox))#make the object based on the string
 
         frame=0
         while self.inventory:

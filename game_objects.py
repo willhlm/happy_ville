@@ -1,7 +1,7 @@
 import pygame, sys
-import Read_files
-import Engine
-import Entities
+import read_files
+import engine
+import entities
 import Level
 import BG
 
@@ -15,7 +15,7 @@ class Game_Objects():
     def create_groups(self):
 
         #initiate player
-        self.player = Entities.Player([200,50])
+        self.player = entities.Player([200,50])
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (216,180)
 

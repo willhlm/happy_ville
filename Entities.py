@@ -1,4 +1,4 @@
-import pygame, Read_files, random, sys
+import pygame, read_files, random, sys
 
 class Entity(pygame.sprite.Sprite):
 
@@ -172,7 +172,7 @@ class Player(Entity):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)
+        self.sprites = read_files.Sprites_Player('Sprites/Enteties/aila/',True)
         self.health = 100
         self.max_health = 250
         self.spirit = 100
@@ -418,7 +418,7 @@ class Enemy_1(Player):
         self.health=10
         self.distance=[0,0]
         self.inv=False#flag to check if collision with invisible blocks
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/evil_knight/')
+        self.sprites = read_files.Sprites_enteties('Sprites/Enteties/enemies/evil_knight/')
         self.shake=self.hitbox.height/10
 
     def AI(self,player):#the AI
@@ -460,7 +460,7 @@ class Woopie(Entity):
         self.nonpriority_action=['run','stand']#animation
         self.action={'stand':True,'run':False,'death':False,'pick':False,'fall':False,'dash':False,'hurt':False}
         self.equip='sword'
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.friction=[0.2,0]
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.shake=10
@@ -509,7 +509,7 @@ class Flowy(Entity):
         self.nonpriority_action=['fall','run','stand']#animation
         self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'stone':False,'fall':False,'trans':False,'dash':False}
         self.equip='sword'
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
+        self.sprites = read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
         self.friction=[0.2,0]
         self.loot={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
@@ -551,7 +551,7 @@ class NPC(Entity):
 
 
     def load_conversation(self):
-        self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
+        self.conversation = read_files.read_json("Text/NPC/" + self.name + ".json")
 
     #returns conversation depdening on worldstate input. increases index
     def get_conversation(self, flag):
@@ -591,7 +591,7 @@ class Aslat(NPC):
     def __init__(self, pos):
         super().__init__()
         self.name = 'Aslat'
-        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.sprites = read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.image = self.sprites.get_image('stand', 0, self.dir)
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
@@ -622,8 +622,8 @@ class MrBanks(NPC):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
         self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_BG.png").convert_alpha()
-        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
+        self.sprites = read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.conversation=read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.conv_action=['deposit','withdraw']
         self.conv_action_BG=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_action_BG.png").convert_alpha()
         self.conv_possition=[[400],[300]]
@@ -736,6 +736,20 @@ class Path_Col_h(Trigger):
         self.next_map = destination
         self.image = pygame.Surface((16+(2*ext),16))
         self.image.fill((0,0,0))
+
+class Menu_Arrow(pygame.sprite.Sprite):
+
+    def __init__(self):
+        super().__init__()
+        self.img = pygame.image.load("Sprites/utils/arrow.png")
+        self.rect = self.img.get_rect()
+
+    #note: sets pos to input, doesn't update with an increment of pos like other entities
+    def update(self,pos):
+        self.rect.topleft = pos
+
+    def draw(self,screen):
+        screen.blit(self.img, self.rect.topleft)
 
 class Collision_block(pygame.sprite.Sprite):
 
@@ -887,7 +901,7 @@ class Door(Pathway):
 
     def __init__(self,pos,destination):
         super().__init__(destination)
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
+        self.image_sheet = read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -906,7 +920,7 @@ class Door(Pathway):
 class Chest(Interactable):
     def __init__(self,pos,id,loot,state):
         super().__init__()
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest.png",16,21,1,3)
+        self.image_sheet = read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest.png",16,21,1,3)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1]-5)
@@ -934,7 +948,7 @@ class Chest(Interactable):
 class Chest_Big(Interactable):
     def __init__(self,pos,id,loot,state):
         super().__init__()
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest_big.png",32,29,1,5)
+        self.image_sheet = read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest_big.png",32,29,1,5)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1]-13)
@@ -1047,7 +1061,7 @@ class Shield(Weapon):
         self.health=100
         self.velocity=[0,0]
         self.state='pre'
-        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/',True)
+        self.sprites = read_files.Sprites_Player('Sprites/Attack/Shield/',True)
         self.dmg=0
 
         self.image = pygame.image.load("Sprites/Attack/Shield/main/water_Shield1.png").convert_alpha()
@@ -1087,7 +1101,7 @@ class Stone(Weapon):
         self.state='pre'
         self.action='small'
         self.dir=entity_dir.copy()#direction of the projectile
-        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
+        self.sprites = read_files.Sprites_Player('Sprites/Attack/Stone/',True)
 
         self.image = pygame.image.load("Sprites/Attack/Stone/pre/small/force_stone1.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1]])
@@ -1154,7 +1168,7 @@ class Force(Weapon):
         self.dmg=0
         self.dir=entity_dir.copy()
 
-        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
+        self.sprites = read_files.Sprites_Player('Sprites/Attack/Force/')
         self.state='pre'
 
         self.image = pygame.image.load("Sprites/Attack/Force/pre/fly3.png").convert_alpha()
@@ -1249,7 +1263,7 @@ class Amber_Droplet(Loot):
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
+        self.sprites = read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
 
 class Arrow(Loot):
     def __init__(self,entity_hitbox):
@@ -1259,7 +1273,7 @@ class Arrow(Loot):
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
+        self.sprites = read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
 
 class Spirits(pygame.sprite.Sprite):
 

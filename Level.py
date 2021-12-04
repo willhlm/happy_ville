@@ -1,4 +1,4 @@
-import pygame, csv, Entities, math, random, json
+import pygame, csv, entities, math, random, json
 
 class Tilemap():
     def __init__(self, level, player_pos):
@@ -117,49 +117,49 @@ class Tilemap():
                     col_index += 1
                     continue
                 elif tile == '0':
-                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
+                    new_chest = entities.Chest((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
                     interactables.add(new_chest)
                     chest_index += 1
                 elif tile == '1':
-                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
+                    new_chest = entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
                     interactables.add(new_chest)
                     chest_index += 1
                 elif tile == '8':
-                    new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    new_path = entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
                     interactables.add(new_path)
                     path_index += 1
                 elif tile == '13':
-                    new_path = Entities.Path_Col_v((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    new_path = entities.Path_Col_v((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
                     triggers.add(new_path)
                     path_index += 1
                 elif tile == '14':
-                    new_path = Entities.Path_Col_h((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
+                    new_path = entities.Path_Col_h((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
                     triggers.add(new_path)
                     path_index += 1
                 elif tile == '16':
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                     self.init_player_pos = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
-                    new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
+                    new_npc = entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
                 elif tile == '25':
-                    new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size))
+                    new_enemy = entities.Woopie((col_index * self.tile_size, row_index * self.tile_size))
                     enemies.add(new_enemy)
                 elif tile == '24':
                     pass
-                    #new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
+                    #new_enemy = entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
                     #enemies.add(new_enemy)
                 elif tile == '33':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'right')
+                    new_stop = entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'right')
                     camera_blocks.add(new_stop)
                 elif tile == '34':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'top')
+                    new_stop = entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'top')
                     camera_blocks.add(new_stop)
                 elif tile == '35':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'left')
+                    new_stop = entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'left')
                     camera_blocks.add(new_stop)
                 elif tile == '36':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'bottom')
+                    new_stop = entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'bottom')
                     camera_blocks.add(new_stop)
                 col_index += 1
             row_index += 1
@@ -225,17 +225,17 @@ class Tilemap():
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
-                backgrounds.append(Entities.BG_Block(blit_surfaces[bg],(0,0)))
+                backgrounds.append(entities.BG_Block(blit_surfaces[bg],(0,0)))
             elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_far(blit_surfaces[bg],(-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1]))))
+                backgrounds.append(entities.BG_far(blit_surfaces[bg],(-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1]))))
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_mid(blit_surfaces[bg],(-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1]))))
+                backgrounds.append(entities.BG_mid(blit_surfaces[bg],(-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1]))))
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_near(blit_surfaces[bg],(-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1]))))
+                backgrounds.append(entities.BG_near(blit_surfaces[bg],(-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1]))))
             elif bg == 'fg_fixed':
-                backgrounds.append(Entities.FG_fixed(blit_surfaces[bg],(0,0)))
+                backgrounds.append(entities.FG_fixed(blit_surfaces[bg],(0,0)))
             elif bg == 'fg_paralex':
-                backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
+                backgrounds.append(entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
 
         del blit_surfaces, bg_sheets, bg_maps
         return backgrounds
@@ -261,7 +261,7 @@ class Tilemap():
                         tile_x+=1
                         continue
 
-                    new_block = Entities.Collision_block(self.entity_position(tile_x, tile_y, x, y),key)
+                    new_block = entities.Collision_block(self.entity_position(tile_x, tile_y, x, y),key)
                     self.platforms.add(new_block)
                     tile_x+=1
                 tile_y+=1

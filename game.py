@@ -1,6 +1,7 @@
 import pygame
 import states
 import game_objects
+import read_files
 
 class Game():
     def __init__(self):
@@ -17,10 +18,16 @@ class Game():
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.state_stack = [states.Title_Menu(self)]#,'Menu':States.Menu:,'Gameplay':States.Gameplay}
+        self.controller = read_files.Controller()
 
     def event_loop(self):
         for event in pygame.event.get():
-            self.state_stack[-1].handle_events(event)
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            else:
+                self.controller.translate_inputs(event)
+                self.state_stack[-1].handle_events(self.controller.output())
 
     def run(self):
         while True:

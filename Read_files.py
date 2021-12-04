@@ -142,7 +142,9 @@ class Alphabet():
             self.characters[c] = sheet[i]
 
     #returns a surface with size of input, and input text. Automatic line change
-    def render(self, surface_size, text, limit = 1000, inverse_color = False):
+    def render(self, surface_size = False, text = "", limit = 1000, inverse_color = False):
+        if not surface_size:
+            surface_size = (4*len(text),5)
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
         x, y = 0, 0
         x_max = int(surface_size[0]/self.char_size[0])
@@ -173,7 +175,7 @@ class Alphabet():
         return text_surface
 
 class Controller():
-    def __init__(self,type):
+    def __init__(self, controller_type = False):
         self.keydown=False
         self.keyup=False
         self.value=[0,0]
@@ -183,28 +185,22 @@ class Controller():
         pygame.joystick.init()#initialise joystick module
         self.update_controlls()#initialise joysticks and add to list
 
-        self.buttonmapping(type)#read in controller configuration file
+        if controller_type:
+            self.buttonmapping(controller_type)#read in controller configuration file
 
     def update_controlls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controllers.
 
-    def buttonmapping(self,type):
-        file=type+'_keys.jason'
+    def buttonmapping(self,controller_type):
+        file = controller_type+'_keys.jason'
         with open(join(file),'r+') as file:
             mapping=json.load(file)
             self.bottons=mapping['bottons']
             self.analogs=mapping['analogs']
 
     def translate_inputs(self,event):
-        self.quit(self,event)
-        self.keybord(self,event)
-        self.joystick(self,event)
-
-        self.output(self)
-
-    def quit(self,event):
-        if event.type==pygame.QUIT:
-            self.key='quit'
+        self.keybord(event)
+        self.joystick(event)
 
     def keybord(self,event):
         self.keyup=False
@@ -240,6 +236,8 @@ class Controller():
                 self.key='select'
             if event.key == pygame.K_LSHIFT:#left shift
                 self.key='rb'
+            if event.key == pygame.K_RETURN:
+                self.key='return'
 
         elif event.type == pygame.KEYUP:#lift bottom
             self.keyup=True
@@ -261,6 +259,8 @@ class Controller():
                 self.key='select'
             if event.key==pygame.K_e:
                 self.key='b'
+            if event.key == pygame.K_RETURN:
+                self.key='return'
 
     def joystick(self,event):
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
@@ -313,9 +313,9 @@ class Controller():
                     self.keydown=False
                     self.value=[0,0]
                 elif event.value>0.2:
-                    self.key='right'
+                    self.key='up'
                 else:#if negative
-                    self.key='left'
+                    self.key='down'
             if event.axis==self.controller.analogs['rh']:#right horizonal
                 self.value=[event.value,0]
                 if abs(event.value)<0.5:
@@ -330,4 +330,4 @@ class Controller():
             pass
 
     def output(self):
-        self.outputs=[self.keydown,self.keyup,self.value,self.key]
+        return [self.keydown,self.keyup,self.value,self.key]
