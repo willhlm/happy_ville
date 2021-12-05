@@ -201,6 +201,76 @@ class Option_Menu(Game_State):
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
+class Pause_Menu(Game_State):
+
+    def __init__(self,game):
+        super().__init__(game)
+        self.arrow = entities.Menu_Arrow()
+        self.title = self.font.render(text = 'PAUSE') #temporary
+
+        #create buttons
+        self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
+        self.current_button = 0
+        self.initiate_buttons()
+
+    def update(self):
+        #update menu arrow position
+        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
+        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
+
+    def render(self):
+        #fill game.screen
+        self.game.screen.fill((255,255,255,128))
+
+        #blit title
+        self.game.screen.blit(self.title, (self.game.WINDOW_SIZE[0]/2 - self.title.get_width()/2,50))
+
+        #blit buttons
+        for b in self.buttons:
+            self.game.screen.blit(self.button_surfaces[b], self.button_rects[b].topleft)
+
+        #blit arrow
+        self.arrow.draw(self.game.screen)
+
+    def handle_events(self, event):
+        if event[0]:
+            if event[-1] == 'up':
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.buttons) - 1
+            elif event[-1] == 'down':
+                self.current_button += 1
+                if self.current_button >= len(self.buttons):
+                    self.current_button = 0
+            elif event[-1] in ('return', 'a'):
+                self.change_state()
+            elif event[-1] == 'start':
+                self.exit_state()
+
+    def initiate_buttons(self):
+        y_pos = 90
+        self.button_surfaces = {}
+        self.button_rects = {}
+        for b in self.buttons:
+            self.button_surfaces[b] = (self.font.render(text = b))
+            self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
+            y_pos += 20
+
+    def change_state(self):
+        if self.current_button == 0:
+            self.exit_state()
+
+        elif self.current_button == 1:
+            new_state = Option_Menu(self.game)
+            new_state.enter_state()
+
+        elif self.current_button == 2:
+            self.game.state_stack = [self.game.state_stack[0]]
+
+        elif self.current_button == 3:
+            pygame.quit()
+            sys.exit()
+
 class Gameplay(Game_State):
     def __init__(self,game):
         super().__init__(game)
@@ -222,8 +292,8 @@ class Gameplay(Game_State):
     def handle_events(self, input):
         if input[0]:
             if input[-1]=='start':#escape button
-                self.ESC=True
-                self.ESC_menu()
+                new_state = Pause_Menu(self.game)
+                new_state.enter_state()
 
             if input[-1] == 'y':
                 self.game.game_objects.player.talk()
@@ -266,10 +336,8 @@ class Gameplay(Game_State):
                 self.game.game_objects.player.interacting = True
                 self.game.game_objects.interactions()
 
-            if input[-1] == 'select':
+            #if input[-1] == 'select':
                 #self.game.game_objects.player.action['run']=False
-                self.inventory=True
-                self.inventoryscreen()#open inventort
 
             if input[-1] == 'rb' and self.game.game_objects.player.dashing_cooldown>9:#left shift
                 self.game.game_objects.player.dashing()
