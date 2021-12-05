@@ -189,7 +189,7 @@ class Controller():
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controllers.
 
     def buttonmapping(self,type):
-        file=type+'_keys.jason'
+        file=type+'keys.jason'
         with open(join(file),'r+') as file:
             mapping=json.load(file)
             self.bottons=mapping['bottons']
@@ -270,34 +270,15 @@ class Controller():
 
         if event.type==pygame.JOYBUTTONDOWN:#press a botton
             self.keydown=True
-            if event.button==self.controller.bottons['start']:#escape button
-                self.key='start'
-            if event.button==self.controller.bottons['select']:#escape button
-                self.key='select'
-            if event.button==self.controller.bottons['rb'] and self.player.dashing_cooldown>9:
-                self.key='rb'
-            if event.button==self.controller.bottons['a'] and not self.player.action['fall'] and not self.player.action['jump']:
-                self.key='a'
-            if event.button==self.controller.bottons['lb']:
-                self.key='lb'
-            if event.button==self.controller.bottons['y']:#interact
-                self.key='y'
-            if event.button==self.controller.bottons['b']:#abillity
-                self.key='b'
-            if event.button==self.controller.bottons['x']:#attack
-                self.key='x'
+            self.key=self.controller.bottons[event.button]
 
-        if event.type==pygame.JOYBUTTONUP:#release a botton
+        elif event.type==pygame.JOYBUTTONUP:#release a botton
             self.keyup=True
-            if event.button==self.controller.bottons['lb']:
-                self.key='lb'
-            if event.button==self.controller.bottons['b']:
-                self.key='b'
-            if event.button==self.controller.bottons['y']:
-                self.key='y'
+            self.key=self.controller.bottons[event.button]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
             self.keydown=True
+
             if event.axis==self.controller.analogs['lh']:#left horizontal
                 self.value=[event.value,0]
                 if abs(event.value)<0.2:
@@ -307,15 +288,17 @@ class Controller():
                     self.key='right'
                 else:#if negative
                     self.key='left'
+
             if event.axis==self.controller.analogs['lv']:#left vertical
                 self.value=[0,event.value]
                 if abs(event.value)<0.2:
                     self.keydown=False
                     self.value=[0,0]
                 elif event.value>0.2:
-                    self.key='right'
+                    self.key='up'
                 else:#if negative
-                    self.key='left'
+                    self.key='down'
+
             if event.axis==self.controller.analogs['rh']:#right horizonal
                 self.value=[event.value,0]
                 if abs(event.value)<0.5:

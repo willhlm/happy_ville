@@ -511,16 +511,13 @@ class Game_UI():
         fps_string = str(int(self.clock.get_fps()))
         self.screen.blit(self.font.render((30,12),'fps ' + fps_string),(350,20))
 
-<<<<<<< HEAD
     def ESC_menu(self):
         #self.screen.blit(self.start_BG,(0,0))
         #self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
         self.display.fill((0,0,0,200))#fill game.screen
-=======
     def pause_menu(self):
         #self.states.update()
         self.display.fill((207,238,250))#fill game.screen
->>>>>>> 41b5d31fb9b04246c1cb6a8528c2034eb2be35fe
 
         while self.ESC:
             if self.state[-1] == 'pause':
