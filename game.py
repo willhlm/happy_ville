@@ -26,7 +26,8 @@ class Game():
                 pygame.quit()
                 sys.exit()
             else:
-                self.controller.translate_inputs(event)
+                print(event)
+                self.controller.map_inputs(event)
                 self.state_stack[-1].handle_events(self.controller.output())
 
     def run(self):

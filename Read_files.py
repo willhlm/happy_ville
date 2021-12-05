@@ -198,7 +198,7 @@ class Controller():
             self.bottons=mapping['bottons']
             self.analogs=mapping['analogs']
 
-    def translate_inputs(self,event):
+    def map_inputs(self,event):
         self.keybord(event)
         self.joystick(event)
 

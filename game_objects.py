@@ -11,6 +11,10 @@ class Game_Objects():
 
         self.create_groups()
         self.game = game
+        self.map_state = read_files.read_json("map_state.json") #check this file for structure of object
+        pygame.mixer.init
+        self.bg_music = pygame.mixer.Channel(0)
+        self.collisions = engine.Collisions()
 
     def create_groups(self):
 
@@ -47,17 +51,10 @@ class Game_Objects():
         self.weather_paricles=BG.Weather()#initiate whater
         self.weather = self.weather_paricles.create_particle('Snow')#weather effects
 
-    def interactions(self):
-        change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
-        if change_map:
-            self.change_map(change_map)
-        elif chest_id:
-            self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
-
-    def trigger_event(self):
-        change_map = self.collisions.check_trigger(self.player,self.triggers)
-        if change_map:
-            self.change_map(change_map)
+    def load_map(self, map_name):
+        self.map = Level.Tilemap(map_name, self.player_center)
+        self.initiate_groups()
+        self.load_music()
 
     def change_map(self, map_name):
         timer = 0
@@ -69,10 +66,10 @@ class Game_Objects():
             self.interactables.update((0,0))
             self.draw()
             self.blit_screen_info()
-            fade_surface = pygame.Surface(self.WINDOW_SIZE, pygame.SRCALPHA)
+            fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA)
             fade_surface.fill((0,0,0,int(timer*255/load_time)))
             self.game.screen.blit(fade_surface,(0,0))
-            self.display.blit(pygame.transform.scale(self.game.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
+            self.display.blit(pygame.transform.scale(self.game.screen,self.game.WINDOW_SIZE_scaled),(0,0))#scale the screen
             pygame.display.update()#update after every change
             self.clock.tick(60)#limmit FPS
             timer += 1
@@ -80,11 +77,6 @@ class Game_Objects():
         #actually load the new map
         self.load_map(map_name)
         self.game_loop(True)
-
-    def load_map(self, map_name):
-        self.map = Level.Tilemap(map_name, self.player_center)
-        self.initiate_groups()
-        self.load_music()
 
     def load_music(self):
         self.bg_music.play(self.map.load_bg_music(),-1)
@@ -113,6 +105,15 @@ class Game_Objects():
             bg.empty()
         for i, bg in enumerate(self.map.load_bg()):
             self.bgs[i].add(bg)
+
+    def collide_all(self):
+        self.collisions.collide(self.players,self.platforms)
+        self.collisions.collide(self.enemies,self.platforms)
+        self.collisions.collide(self.npcs,self.platforms)
+        self.collisions.collide(self.loot,self.platforms)
+        self.collisions.check_invisible(self.npcs,self.invisible_blocks)
+        self.collisions.pickup_loot(self.player,self.loot)
+        self.collisions.check_enemy_collision(self.player,self.enemies)
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
@@ -159,3 +160,66 @@ class Game_Objects():
             self.bgs[i].draw(self.game.screen)
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
+
+    def interactions(self):
+        change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
+        if change_map:
+            self.change_map(change_map)
+        elif chest_id:
+            self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
+
+    def trigger_event(self):
+        change_map = self.collisions.check_trigger(self.player,self.triggers)
+        if change_map:
+            self.change_map(change_map)
+
+    def group_distance(self):#remove the eneteies if it is off screen from thir group
+        bounds=[-100,600,-100,350]#-x,+x,-y,+y
+
+        for entity in self.enemies:
+            if entity.rect[0]<bounds[0] or entity.rect[0]>bounds[1] or entity.rect[1]<bounds[2] or entity.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+                self.enemies.remove(entity)
+                self.enemy_pause.add(entity)
+
+        for entity in self.enemy_pause:
+            if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
+                self.enemies.add(entity)
+                self.enemy_pause.remove(entity)
+
+        for entity in self.npcs:
+            if entity.rect[0]<bounds[0] or entity.rect[0]>bounds[1] or entity.rect[1]<bounds[2] or entity.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+                self.npcs.remove(entity)
+                self.npc_pause.add(entity)
+
+        for entity in self.npc_pause:
+            if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
+                self.npcs.add(entity)
+                self.npc_pause.remove(entity)
+
+        self.platforms,self.platforms_pause=self.map.update_chunks()#update the rellavant pltforms
+
+    def check_camera_border(self):
+
+        xflag, yflag = False, False
+        for stop in self.camera_blocks:
+            if stop.dir == 'right':
+                if (stop.rect.centerx - self.player.rect.centerx) < self.game.WINDOW_SIZE[0]/2:
+                    xflag = True
+            elif stop.dir == 'left':
+                if stop.rect.right >= 0 and self.player.rect.centerx < self.game.WINDOW_SIZE[0]/2:
+                    xflag = True
+            elif stop.dir == 'bottom':
+                if (stop.rect.centery - self.player.rect.centery) < (self.game.WINDOW_SIZE[1] - 180):
+                    yflag = True
+            elif stop.dir == 'top':
+                if self.player.rect.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
+                    yflag = True
+
+        if xflag and yflag:
+            self.map.set_camera(3)
+        elif xflag:
+            self.map.set_camera(1)
+        elif yflag:
+            self.map.set_camera(2)
+        else:
+            self.map.set_camera(0)
