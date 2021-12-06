@@ -140,11 +140,13 @@ class Tilemap():
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                     self.init_player_pos = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
-                    new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
-                    npcs.add(new_npc)
+                    pass
+                    #new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
+                    #npcs.add(new_npc)
                 elif tile == '25':
-                    new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size))
-                    enemies.add(new_enemy)
+                    pass
+                    #new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size))
+                    #enemies.add(new_enemy)
                 elif tile == '24':
                     pass
                     #new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
@@ -225,17 +227,17 @@ class Tilemap():
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
-                backgrounds.append(Entities.BG_Block(blit_surfaces[bg],(0,0)))
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))
             elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_far(blit_surfaces[bg],(-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_far((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg]))
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_mid(blit_surfaces[bg],(-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_mid((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg]))
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_near(blit_surfaces[bg],(-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_near((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg]))
             elif bg == 'fg_fixed':
-                backgrounds.append(Entities.FG_fixed(blit_surfaces[bg],(0,0)))
+                backgrounds.append(Entities.FG_fixed((0,0),blit_surfaces[bg]))
             elif bg == 'fg_paralex':
-                backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
+                backgrounds.append(Entities.FG_paralex((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],))
 
         del blit_surfaces, bg_sheets, bg_maps
         return backgrounds

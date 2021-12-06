@@ -715,18 +715,21 @@ class Game_UI():
                     self.player.talk()
 
                 if event.key == pygame.K_RIGHT:
+                    self.player.pressed=True
+
                     if not self.ability_menu:
-                        self.player.action['run']=True
-                        self.player.action['stand']=False
+                        self.player.state='run'
                         self.player.dir[0]=1
                     else:
                         self.ab_index+=1
                         self.ab_index=min(len(self.player.abilities)-1,self.ab_index)
 
                 if event.key == pygame.K_LEFT:
+                    self.player.pressed=True
+
                     if not self.ability_menu:
-                        self.player.action['run']=True
-                        self.player.action['stand']=False
+                        self.player.state='run'
+
                         self.player.dir[0]=-1
                     else:
                         self.ab_index-=1
@@ -744,9 +747,9 @@ class Game_UI():
                     self.ability_menu=True
                     #self.change_equipment()
 
-                if event.key==pygame.K_SPACE and not self.player.action['fall'] and not self.player.action['jump']:#jump
+                if event.key==pygame.K_SPACE:# and not self.player.action['fall'] and not self.player.action['jump']:#jump
                     #self.player.action['jump']=True
-                    self.player.jump()
+                    self.player.state='jump'
 
                 if event.key==pygame.K_e:#aillities
                     if not self.player.action['dash']:
@@ -776,22 +779,26 @@ class Game_UI():
                     self.inventoryscreen()#open inventort
 
                 if event.key == pygame.K_LSHIFT and self.player.dashing_cooldown>9:#left shift
-                    self.player.dashing()
+                    self.player.state='dash'
 
 
             elif event.type == pygame.KEYUP:#lift bottom
-                if event.key == pygame.K_RIGHT and self.player.dir[0]>0:
-                    self.player.action['stand']=True
-                    self.player.action['run']=False
+                if event.key == pygame.K_RIGHT:
+                    self.player.pressed=False
+
+                    self.player.state='stand'
+
 
                 if event.key == pygame.K_t:#if release button
                     if self.player.state!='talk':#if not in conversation
                         self.player.state='stand'
                         self.player.action['talk']=False
 
-                if event.key == pygame.K_LEFT and self.player.dir[0]<0:
-                    self.player.action['stand']=True
-                    self.player.action['run']=False
+                if event.key == pygame.K_LEFT:
+                    self.player.pressed=False
+
+                    self.player.state='stand'
+
 
                 if event.key == pygame.K_UP:
                     self.player.dir[1]=0

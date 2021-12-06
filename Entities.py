@@ -1,107 +1,124 @@
-import pygame, Read_files, random, sys
+import pygame, Read_files, random, sys, Entity_states
 
-class Entity(pygame.sprite.Sprite):
-
-    def __init__(self):
+class Staticentity(pygame.sprite.Sprite):
+    def __init__(self,pos,img=pygame.Surface((16,16))):
         super().__init__()
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+
+    def update(self,pos):
+        self.update_pos(pos)
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+
+class Platform(Staticentity):#has hitbox
+    def __init__(self,pos,img=pygame.Surface((16,16)),chunk_key=False):
+        super().__init__(pos,img=pygame.Surface((16,16)))
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+        self.spike=False
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+class Invisible_block(Platform):
+    def __init__(self,pos,img=pygame.Surface((16,16)),chunk_key=False):
+        super().__init__(pos,img=pygame.Surface((16,16)),chunk_key=False)
+        self.rect=pygame.Rect(pos[0],pos[1],2,2)
+
+class Collision_block(Platform):
+    def __init__(self,pos,img,chunk_key=False):
+        super().__init__(pos,img,chunk_key=False)
+        self.rect = pygame.Rect(pos,(16,16))
+
+class Spikes(Platform):
+    def __init__(self,pos,img,chunk_key=False):
+        super().__init__(pos,pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),chunk_key=False)
+        self.spike=True
+
+class BG_Block(Staticentity):
+    def __init__(self,pos,img):
+        super().__init__(pos,img)
+
+class FG_fixed(Staticentity):
+    def __init__(self,pos,img):
+        super().__init__(pos,img)
+
+class FG_paralex(Staticentity):
+    def __init__(self,pos,img):
+        super().__init__(pos,img)
+        self.true_pos = self.rect.topleft
+        self.paralex=1.25
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        self.rect.topleft = self.true_pos
+
+class BG_near(FG_paralex):
+    def __init__(self,pos,img):
+        super().__init__(pos,img)
+        self.paralex=0.75
+
+class BG_mid(FG_paralex):
+    def __init__(self,pos,img):
+        super().__init__(pos,img)
+        self.paralex=0.5
+
+class BG_far(FG_paralex):
+    def __init__(self,pos,img):
+        super().__init__(pos,img)
+        self.paralex=0.03
+
+class Dynamicentity(Staticentity):
+    def __init__(self,pos,img):
+        super().__init__(pos,img)
+        self.frame = 0
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
+        self.ac_dir = self.dir.copy()
+        self.state = 'Idle'
+        self.state_stack = [Entity_states.Idle(self)]
+
+    def update(self,pos):
+        self.update_pos(pos)
+        self.state_stack[-1].update_state()
+        self.state_stack[-1].update_animation()
+
+    def reset_timer(self):
+        self.frame = 0
+        self.ac_dir[0] = self.dir[0]
+        self.ac_dir[1] = self.dir[1]
+
+class Character(Dynamicentity):
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
         self.acceleration=[1,0.8]
         self.movement=[0,0]
         self.velocity=[0,0]
-        self.frame = 0
-        self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.ac_dir=self.dir.copy()
-        self.state = 'stand'
-        self.world_state=0#state of happyness thingy of the world
-        self.inventory={'Amber_Droplet':0}
+        self.health = 100
+        self.spirit = 100
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
-        self.phase='pre'
+        self.inventory = {'Amber_Droplet':0}
         self.max_vel = 10
-        self.charging=[False]#a list beause to make it a pointer
-        self.hitbox_offset=(0,0)
-        self.framerate=4
+        self.hitbox_offset = (0,0)
+        self.friction=[0.2,0]
 
     def take_dmg(self,dmg):
         if dmg>0:
             self.health-=dmg
-            self.action['hurt']=True
-            if self.health<=0:#check if dead
-                self.action['death']=True
-                self.action['run']=False
-                self.velocity=[0,0]
-
-    def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
-        all_action=self.priority_action+self.nonpriority_action
-
-        for action in all_action:#go through the actions
-            if self.action[action] and action in self.priority_action:#if the action is priority
-
-                if action != self.state:
-                    self.state = action
-                    self.reset_timer()
-
-                self.image = self.sprites.get_image(action,self.frame//self.framerate,self.ac_dir)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(action,self.ac_dir)*self.framerate:
-                    if action == 'death':
-                        self.kill()
-                    else:
-                        self.reset_timer()
-                        self.action[action] = False
-                        self.state = 'stand'
-                        self.action[self.equip]=False#to cancel even if you get hurt
-                break
-
-            elif self.action[action] and action in self.nonpriority_action:#if the action is nonpriority
-
-                #reset timer if the action is wrong
-                if action != self.state:
-                    self.state = action
-                    self.reset_timer()
-
-                self.image = self.sprites.get_image(action,self.frame//self.framerate,self.dir)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(action,self.dir)*self.framerate:
-                        self.reset_timer()
-                break#take only the higest priority of the nonpriority list
-
-    def AI(self,knight):
-        pass
+            self.state='hurt'
+            self.state_stack.append(Entity_states.Hurt(self))
+            if self.health<=0:#check if dead¨
+                self.state='death'
+                self.state_stack.append(Entity_states.Death(self))
 
     def attack_action(self,projectiles):
         return projectiles
 
     def check_collisions(self):
-        self.friction[1]=0
-
-        if self.collision_types['bottom']:#if on ground
-            self.dashing_cooldown=10
-            self.action['fall']=False
-            self.action['stand']=True
-            self.action['wall']=False
-            #self.action['jump']=False
-
-            #if self.dir[1]<0:#if on ground, cancel sword swing
-            #    self.action['sword']=False
-
-        else:#if not on ground
-            #self.action['stand']=False
-            if self.velocity[1]>=0:#if falling down
-                self.action['jump']=False
-                self.action['fall']=True
-                if self.collision_types['right'] or self.collision_types['left']:#on wall and not on ground
-                    self.action['wall']=True
-                    self.action['dash']=False
-                    self.action['fall']=False
-                    self.friction[1]=0.4
-                    self.dashing_cooldown=10
-                else:
-                    self.action['wall']=False
-            else:#if going up
-                self.action['jump']=True
-
         if self.collision_types['top']:#knock back when hit head
             self.velocity[1]=0
 
@@ -113,48 +130,27 @@ class Entity(pygame.sprite.Sprite):
         self.velocity[1]=self.velocity[1]+self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
         self.velocity[1]=min(self.velocity[1],7)#set a y max speed
 
-        if self.action['dash']:
-            self.dashing_cooldown-=1
-            self.velocity[1]=0
-            self.velocity[0]=self.velocity[0]+self.ac_dir[0]*0.5
+        self.movement[1]=self.velocity[1]#set the vertical velocity
 
-            if abs(self.velocity[0])<10:#max horizontal speed
-                self.velocity[0]=self.ac_dir[0]*10
-            #entity.velocity[0]=max(10,entity.velocity[0])
-
-        if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
+        if self.pressed and not self.charging[0]:#accelerate horizontal to direction when not dashing
             self.velocity[0]+=self.dir[0]*self.acceleration[0]
-            self.friction[0]=0.2
             if abs(self.velocity[0])>self.max_vel:#max horizontal speed
                 self.velocity[0]=self.dir[0]*self.max_vel
-
-        self.movement[1]=self.velocity[1]#set the vertical velocity
 
         self.velocity[0]=self.velocity[0]-self.friction[0]*self.velocity[0]#friction
         self.movement[0]=self.velocity[0]#set the horizontal velocity
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
+        super().update(pos)
 
         self.check_collisions()
         self.physics_movement()
 
-    def update_action(self, new_action):
-        if not self.action[new_action]:
-            self.action[new_action] = True
-            self.timer = 0
-
     def update_hitbox(self):
-        self.hitbox.center = self.rect.center
+        self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
 
     def update_rect(self):
-        self.rect.center = self.hitbox.center
-
-    def reset_timer(self):
-        self.frame = 0
-        self.ac_dir[0]=self.dir[0]
-        self.ac_dir[1]=self.dir[1]
+        self.rect.center = [self.hitbox.center[0] - self.hitbox_offset[0], self.hitbox.center[1] - self.hitbox_offset[1]]
 
     def loots(self):
         drops=[]
@@ -165,22 +161,106 @@ class Entity(pygame.sprite.Sprite):
             self.inventory[key]=0
         return drops
 
-class Player(Entity):
-    def __init__(self,pos):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/aila/main/stand/aila_idle_2.png").convert()
+    def set_pos(self, pos):
+        self.rect.center = (pos[0],pos[1])
+        self.hitbox.center = self.rect.center
+
+class Woopie(Character):
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
+        #self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/stand/Kodama_stand1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 1
+        self.equip='sword'
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/',True)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.friction=[0.2,0]
+        self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
+        self.shake=10
+        self.counter=0
+        self.acceleration=[1,0.2]
+        self.max_vel = 1
+        self.framerate=6
+
+    @staticmethod#a function to add glow around the entity
+    def add_white(radius,colour,screen,pos):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
+
+    def update(self,pos):
+        super().update(pos)
+        self.set_img()
+
+    def AI(self,player,screen):#the AI
+        #light around the entity
+        Woopie.add_white(20,(20,20,20),screen,self.rect.center)#radius, clolor, screen,position
+        self.counter+=1
+
+        choice=self.priority_action+self.nonpriority_action
+        choice.remove('death')
+
+        if self.counter>=100:
+            action=random.choice(choice)
+            self.action[action]=True
+            self.counter=0
+
+            if self.action['run']:
+                self.dir[0]=-self.dir[0]
+                self.action['run']=random.choice([False,True])
+
+class Flowy(Character):
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
+        #self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/stand/Stand1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 10
+        self.priority_action=['death','hurt','sword','stone','trans']#animation
+        self.nonpriority_action=['fall','run','stand']#animation
+        self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'stone':False,'fall':False,'trans':False,'dash':False}
+        self.equip='sword'
+        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
+        self.friction=[0.2,0]
+        self.loot={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
+        self.distance=[0,0]
+        self.shake=self.hitbox.height/10
+
+    @staticmethod#a function to add glow around the entity
+    def add_white(radius,colour,screen,pos):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
+
+    def AI(self,player,screen):#the AI
+        #light around the entity
+        radius=max(20-abs(self.distance[0])//10,1)
+        Enemy_2.add_white(radius,(20,0,0),screen,self.rect.center)#radius, clolor, screen,position
+
+        self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
+        self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
+
+        if 100 < abs(self.distance[0])<200 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
+            self.action['trans'] = True
+
+        elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
+            self.action[self.equip] = True
+
+class Player(Character):
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
+        self.image = pygame.image.load("Sprites/Enteties/aila/main/idle/aila_idle_2.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)
-        self.health = 100
+        self.charging=[False]#a list beause to make it a pointer
         self.max_health = 250
-        self.spirit = 100
         self.max_spirit = 100
-        self.priority_action=['death','hurt','dash','sword','sword1','hammer','stone','force','heal','shield']#animation
-        self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'hammer':False,'sword1':False,'sword':False,'jump':False,'death':False,'hurt':False,'stone':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False,'shield':False}
-        self.state = 'stand'
         self.equip='hammer'#starting abillity
         self.sword=Sword(self.dir,self.hitbox)
         self.hammer=Sword(self.dir,self.hitbox)
@@ -192,90 +272,19 @@ class Player(Entity):
         self.movement_sfx_timer = 110
         self.hitbox_offset = (0,13)
         self.interacting = False
-        self.friction=[0.2,0]
         self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.action_cooldown=False
         self.shake=0
         self.dashing_cooldown=10
         self.abilities=['hammer','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
-
         self.timer=30#second sword swing
-        #frame rates per action
-        self.framerate={'wall':4,'hammer':2,'death':2,'hurt':2,'dash':2,'sword1':4,'sword':4,'stone':6,'force':6,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
+        self.pressed=False
 
     def load_sfx(self):
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
             self.action_sfx_player.play(self.action_sfx['run'])
             self.movement_sfx_timer = 0
         self.movement_sfx_timer += 1
-
-    def combined_action(self,action):
-        actions=['sword','jump','fall']#the animations in which should change if runnig or standing
-        if action in actions:
-            if self.action['run']:
-                action=action+'_run'
-            elif self.action['stand']:
-                action=action+'_stand'
-        return action
-
-    def set_img(self):
-        all_action=self.priority_action+self.nonpriority_action
-
-        for action in all_action:#go through the actions
-            if self.action[action]:
-
-                if action != self.state and self.phase!='post':#changing action
-                    self.state = action
-                    self.reset_timer()#reset frame and remember the direction
-                    self.phase = 'pre'
-                    self.comb_action=self.combined_action(action)
-
-                if action in self.nonpriority_action:
-                    dir=self.dir
-                else:#if priority action
-                    dir=self.ac_dir
-
-                if self.sprites.get_frame_number(self.comb_action,dir,'pre') == 0:#if there is no pre animation
-                    self.phase='main'
-
-                self.image = self.sprites.get_image(self.comb_action,self.frame//self.framerate[action],dir,self.phase)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(self.comb_action,dir,self.phase)*self.framerate[action]:
-                    self.frame=0
-
-                    if action == 'death':
-                        self.kill()
-
-                    if self.phase=='pre' or self.phase=='charge':
-                        if self.charging[0] and action in self.abilities:#do not set chagre while standing/running
-
-                            if action=='heal' and self.phase=='charge':#special for heal. After charge is finished, enter main phase
-                                self.phase='main'
-                            else:
-                                self.phase='charge'
-                        else:
-                            self.phase = 'main'
-                    elif self.phase == 'main':
-                        if self.sprites.get_frame_number(self.comb_action,dir,'post') == 0:#if there is no post animation
-                            if action in self.priority_action:
-                                self.phase = 'pre'
-                                self.action_cooldown = False#allow for new action after animation
-                                self.action[action] = False
-                                self.action[self.equip] = False#cancel abillity in case hurt
-
-                        else:#if there is post animation
-                            self.phase = 'post'
-
-                    else:#if post animation
-                        self.phase = 'pre'
-                        self.action_cooldown = False#allow for new action after post animation
-                        self.action[action] = False
-                break
-
-    def set_pos(self, pos):
-        self.rect.center = (pos[0],pos[1])
-        self.hitbox.center = self.rect.center
 
     def healing(self):
         if self.spirit>=1:
@@ -320,16 +329,8 @@ class Player(Entity):
         self.spirit -= 10
         self.force_jump()
 
-    #def quick_attack(self,projectiles):
-    #    if not self.action_cooldown:
-    #        self.action['sword']=True
-    #        self.action_cooldown=True#cooldown flag
-    #        self.spawn_sword()
-            #self.sword=Sword(self.ac_dir,self.hitbox)
-    #        return self.sword
-    #    return projectiles
-
     def attack_action(self,projectiles):
+        return projectiles
         #always eneters in every iteration
         self.timer+=1
         if not self.action_cooldown:
@@ -372,22 +373,6 @@ class Player(Entity):
         #if self.dir[1]!=0:
         self.velocity[1]=self.dir[1]*10#force jump
 
-    def dashing(self):
-        if self.spirit>=10 and not self.charging[0]:#if we have spirit
-            self.velocity[0] = 30*self.dir[0]
-            self.action['dash'] = True
-            self.spirit -= 10
-            self.action[self.equip]=False#cancel any action
-            self.action['sword']=False#cancel any action
-
-    def jump(self):
-        self.friction[1] = 0
-        self.velocity[1]=-11
-        self.action['jump']=True
-
-        if self.action['wall']:
-            self.velocity[0]=-self.dir[0]*10
-
     def talk(self):
         self.action['talk']=not self.action['talk']
 
@@ -400,21 +385,15 @@ class Player(Entity):
         self.sword.updates(self.hitbox)
         self.hammer.updates(self.hitbox)
         self.shield.updates(self.hitbox)
-        self.set_img()
-        self.load_sfx()
-
-    def update_hitbox(self):
-        self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
-
-    def update_rect(self):
-        self.rect.center = [self.hitbox.center[0] - self.hitbox_offset[0], self.hitbox.center[1] - self.hitbox_offset[1]]
+        #self.set_img()
+        #self.load_sfx()
 
     def loots(self,loot):
         pass
 
 class Enemy_1(Player):
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
         self.health=10
         self.distance=[0,0]
         self.inv=False#flag to check if collision with invisible blocks
@@ -448,98 +427,9 @@ class Enemy_1(Player):
         if x>0: return 1
         return -1
 
-class Woopie(Entity):
-    def __init__(self,pos):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/stand/Kodama_stand1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 1
-        self.priority_action=['death','pick']#animation
-        self.nonpriority_action=['run','stand']#animation
-        self.action={'stand':True,'run':False,'death':False,'pick':False,'fall':False,'dash':False,'hurt':False}
-        self.equip='sword'
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.friction=[0.2,0]
-        self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
-        self.shake=10
-        self.counter=0
-        self.acceleration=[1,0.2]
-        self.max_vel = 1
-        self.framerate=6
-
-    @staticmethod#a function to add glow around the entity
-    def add_white(radius,colour,screen,pos):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
-
-    def update(self,pos):
-        super().update(pos)
-        self.set_img()
-
-    def AI(self,player,screen):#the AI
-        #light around the entity
-        Woopie.add_white(20,(20,20,20),screen,self.rect.center)#radius, clolor, screen,position
-        self.counter+=1
-
-        choice=self.priority_action+self.nonpriority_action
-        choice.remove('death')
-
-        if self.counter>=100:
-            action=random.choice(choice)
-            self.action[action]=True
-            self.counter=0
-
-            if self.action['run']:
-                self.dir[0]=-self.dir[0]
-                self.action['run']=random.choice([False,True])
-
-class Flowy(Entity):
-    def __init__(self,pos):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/stand/Stand1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 10
-        self.priority_action=['death','hurt','sword','stone','trans']#animation
-        self.nonpriority_action=['fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'stone':False,'fall':False,'trans':False,'dash':False}
-        self.equip='sword'
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
-        self.friction=[0.2,0]
-        self.loot={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
-        self.distance=[0,0]
-        self.shake=self.hitbox.height/10
-
-    @staticmethod#a function to add glow around the entity
-    def add_white(radius,colour,screen,pos):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
-
-    def AI(self,player,screen):#the AI
-        #light around the entity
-        radius=max(20-abs(self.distance[0])//10,1)
-        Enemy_2.add_white(radius,(20,0,0),screen,self.rect.center)#radius, clolor, screen,position
-
-        self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
-        self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
-
-        if 100 < abs(self.distance[0])<200 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
-            self.action['trans'] = True
-
-        elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
-            self.action[self.equip] = True
-#remove dev when working
-class NPC(Entity):
-
-    def __init__(self):
-        super().__init__()
+class NPC(Character):
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
         self.name = '<always define name>'
         self.action = {'stand':True,'run':False,'death':False,'hurt':False,'dash':False,'inv':False,'talk':False}
         self.nonpriority_action = ['run','stand']
@@ -548,7 +438,6 @@ class NPC(Entity):
         self.conv_index = 0
         self.friction=[0.2,0]
         self.acceleration=[0.3,0.8]
-
 
     def load_conversation(self):
         self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
@@ -588,11 +477,11 @@ class NPC(Entity):
 
 class Aslat(NPC):
 
-    def __init__(self, pos):
-        super().__init__()
+    def __init__(self, pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
         self.name = 'Aslat'
-        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('stand', 0, self.dir)
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/",True)#Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        #self.image = self.sprites.get_image('stand', 0, self.dir,self.phase)
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
@@ -613,10 +502,9 @@ class Aslat(NPC):
             self.action['inv'] = False
 
 class MrBanks(NPC):
-    def __init__(self,pos):
-        super().__init__()
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
         self.name = 'MrBanks'
-        self.image = pygame.image.load("Sprites/Enteties/player/run/HeroKnight_run_0.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
@@ -736,122 +624,6 @@ class Path_Col_h(Trigger):
         self.next_map = destination
         self.image = pygame.Surface((16+(2*ext),16))
         self.image.fill((0,0,0))
-
-class Collision_block(pygame.sprite.Sprite):
-
-    def __init__(self,pos,chunk_key=False):
-        super().__init__()
-        self.rect = pygame.Rect(pos,(16,16))
-        self.chunk_key=chunk_key
-        self.hitbox = self.rect.inflate(0,0)
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
-
-class Block(pygame.sprite.Sprite):
-
-    def __init__(self,img,pos):
-        super().__init__()
-        self.image = img
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-
-class Platform(Block):
-
-    def __init__(self,img,pos,chunk_key=False):
-        super().__init__(img,pos)
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=False
-
-    def update(self,pos):
-        super().update(pos)
-        self.hitbox.center=self.rect.center
-
-class Spikes(Block):
-    def __init__(self,img,pos,chunk_key=False):
-        super().__init__(pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),pos)
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=True
-
-    def update(self,pos):
-        super().update(pos)
-        self.hitbox.center=self.rect.center
-
-class BG_Block(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-
-class FG_fixed(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-
-class FG_paralex(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=1.25
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
-
-class BG_near(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.75
-        self.true_pos = self.rect.topleft
-
-    def update(self,pos):
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
-        self.update_pos()
-
-    def update_pos(self):
-        self.rect.topleft = self.true_pos
-
-class BG_mid(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.5
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + int(self.paralex*pos[0]), self.rect.topleft[1] + int(self.paralex*pos[1])]
-
-class BG_far(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.03
-        self.true_pos = self.rect.topleft
-
-    def update(self,pos):
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
-        self.update_pos()
-
-    def update_pos(self):
-        self.rect.topleft = self.true_pos
-
-class Invisible_block(pygame.sprite.Sprite):
-
-    def __init__(self,pos):
-        super().__init__()
-        self.rect=pygame.Rect(pos[0],pos[1],2,2)
-        self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
 
 class Camera_Stop(pygame.sprite.Sprite):
 
