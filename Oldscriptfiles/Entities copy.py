@@ -1,4 +1,4 @@
-import pygame, Read_files, random, sys, Entity_states_V2
+import pygame, Read_files, random, sys, Entity_states
 
 class Staticentity(pygame.sprite.Sprite):
     def __init__(self,pos,img=pygame.Surface((16,16))):
@@ -77,13 +77,14 @@ class Dynamicentity(Staticentity):
         super().__init__(pos,img)
         self.frame = 0
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.currentstate = Entity_states_V2.Idle(self)
         self.ac_dir = self.dir.copy()
+        self.state = 'Idle'
+        self.state_stack = [Entity_states.Idle(self)]
 
     def update(self,pos):
         self.update_pos(pos)
-        self.currentstate.update_state()
-        self.currentstate.update_animation()
+        self.state_stack[-1].update_state()
+        self.state_stack[-1].update_animation()
 
     def reset_timer(self):
         self.frame = 0
@@ -108,9 +109,11 @@ class Character(Dynamicentity):
     def take_dmg(self,dmg):
         if dmg>0:
             self.health-=dmg
-            self.currentstate = Entity_states_V2.Hurt(self)
+            self.state='hurt'
+            self.state_stack.append(Entity_states.Hurt(self))
             if self.health<=0:#check if dead¨
-                self.currentstate = Entity_states_V2.Death(self)
+                self.state='death'
+                self.state_stack.append(Entity_states.Death(self))
 
     def attack_action(self,projectiles):
         return projectiles
@@ -124,7 +127,17 @@ class Character(Dynamicentity):
             self.take_dmg(10)
 
     def physics_movement(self):
+        self.velocity[1]=self.velocity[1]+self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[1]=min(self.velocity[1],7)#set a y max speed
+
         self.movement[1]=self.velocity[1]#set the vertical velocity
+
+        if self.state=='Walk' and not self.charging[0] and not self.state=='Dash':#accelerate horizontal to direction when not dashing
+            self.velocity[0]+=self.dir[0]*self.acceleration[0]
+            if abs(self.velocity[0])>self.max_vel:#max horizontal speed
+                self.velocity[0]=self.dir[0]*self.max_vel
+
+        self.velocity[0]=self.velocity[0]-self.friction[0]*self.velocity[0]#friction
         self.movement[0]=self.velocity[0]#set the horizontal velocity
 
     def update(self,pos):
@@ -247,7 +260,6 @@ class Player(Character):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)
         self.max_health = 250
         self.max_spirit = 100
-        self.projectiles = pygame.sprite.Group()
         self.equip='hammer'#starting abillity
         self.sword=Sword(self.dir,self.hitbox)
         self.hammer=Sword(self.dir,self.hitbox)
@@ -262,9 +274,11 @@ class Player(Character):
         self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.action_cooldown=False
         self.shake=0
+        self.dashing_cooldown=10
 
         self.abilities=['hammer','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
         self.timer=30#second sword swing
+        self.pressed=False
         self.charging=[False]#a list beause to make it a pointer
 
     def load_sfx(self):
@@ -369,10 +383,9 @@ class Player(Character):
         if self.spirit <= self.max_spirit:
             self.spirit += 0.1
 
-        #self.sword.updates(self.hitbox)
+        self.sword.updates(self.hitbox)
         self.hammer.updates(self.hitbox)
         self.shield.updates(self.hitbox)
-
         #self.set_img()
         #self.load_sfx()
 
