@@ -1,7 +1,37 @@
 import pygame, Read_files, random, sys, Entity_states_V2
 
-class Staticentity(pygame.sprite.Sprite):
-    def __init__(self,pos,img=pygame.Surface((16,16))):
+class Platform(pygame.sprite.Sprite):#has hitbox
+    def __init__(self,pos,chunk_key=False):
+        super().__init__()
+        self.rect = pygame.Rect(pos,(16,16))
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+        self.spike=False
+
+    def update(self,pos):
+        self.update_pos(pos)
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+class Invisible_block(Platform):
+    def __init__(self,pos,chunk_key=False):
+        super().__init__(pos,chunk_key=False)
+
+class Collision_block(Platform):
+    def __init__(self,pos,chunk_key=False):
+        super().__init__(pos,chunk_key=False)
+
+class Spikes(Platform):
+    def __init__(self,pos,chunk_key=False):
+        super().__init__(pos,chunk_key=False)
+        self.image=pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha()
+        self.spike=True
+
+class Staticentity(pygame.sprite.Sprite):#no hitbox but image
+    def __init__(self,pos,img):
         super().__init__()
         self.image = img
         self.rect = self.image.get_rect()
@@ -12,32 +42,6 @@ class Staticentity(pygame.sprite.Sprite):
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-
-class Platform(Staticentity):#has hitbox
-    def __init__(self,pos,img=pygame.Surface((16,16)),chunk_key=False):
-        super().__init__(pos,img=pygame.Surface((16,16)))
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=False
-
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
-
-class Invisible_block(Platform):
-    def __init__(self,pos,img=pygame.Surface((16,16)),chunk_key=False):
-        super().__init__(pos,img=pygame.Surface((16,16)),chunk_key=False)
-        self.rect=pygame.Rect(pos[0],pos[1],2,2)
-
-class Collision_block(Platform):
-    def __init__(self,pos,img,chunk_key=False):
-        super().__init__(pos,img,chunk_key=False)
-        self.rect = pygame.Rect(pos,(16,16))
-
-class Spikes(Platform):
-    def __init__(self,pos,img,chunk_key=False):
-        super().__init__(pos,pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),chunk_key=False)
-        self.spike=True
 
 class BG_Block(Staticentity):
     def __init__(self,pos,img):
@@ -104,6 +108,10 @@ class Character(Dynamicentity):
         self.max_vel = 10
         self.hitbox_offset = (0,0)
         self.friction=[0.2,0]
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.bottom=self.rect.bottom
 
     def take_dmg(self,dmg):
         if dmg>0:
@@ -249,8 +257,8 @@ class Player(Character):
         self.max_spirit = 100
         self.projectiles = pygame.sprite.Group()
         self.equip='hammer'#starting abillity
-        self.sword=Sword(self.dir,self.hitbox)
-        self.hammer=Sword(self.dir,self.hitbox)
+        self.sword=Sword(self.hitbox)
+        self.hammer=Sword(self.hitbox)
         self.shield=Shield(self.ac_dir,self.hitbox)
         self.force=Force(self.ac_dir,self.hitbox)
         self.action_sfx_player = pygame.mixer.Channel(1)
@@ -281,11 +289,6 @@ class Player(Character):
     def take_dmg(self,dmg):
         if self.shield.health<=0 or self.shield.lifetime<0:
             super().take_dmg(dmg)
-
-    def spawn_sword(self):
-        self.sword.dir=self.ac_dir
-        self.sword.lifetime=3
-        self.sword.spawn(self.hitbox)
 
     def spawn_hammer(self):
         self.hammer.dir=self.ac_dir
@@ -370,8 +373,8 @@ class Player(Character):
             self.spirit += 0.1
 
         #self.sword.updates(self.hitbox)
-        self.hammer.updates(self.hitbox)
-        self.shield.updates(self.hitbox)
+        #self.hammer.updates(self.hitbox)
+        #self.shield.updates(self.hitbox)
 
         #self.set_img()
         #self.load_sfx()
@@ -761,9 +764,9 @@ class Weapon(pygame.sprite.Sprite):
             self.kill()
 
 class Sword(Weapon):
-    def __init__(self,entity_dir,entity_hitbox):
+    def __init__(self,entity_hitbox):
         super().__init__()
-        self.lifetime=3#need to be changed depending on the animation of sword of player
+        self.lifetime=10
         self.dmg=10
         self.velocity=[0,0]
         #self.state='pre'
@@ -774,8 +777,7 @@ class Sword(Weapon):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.width+5,entity_hitbox.height)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-        self.dir=entity_dir.copy()
-        self.spawn(entity_hitbox)#spawn hitbox based on entity position and direction
+        #self.spawn(entity_hitbox)#spawn hitbox based on entity position and direction
 
     def updates(self,entity_hitbox):
         self.lifetime-=1

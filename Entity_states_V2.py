@@ -3,7 +3,7 @@ class Entity_states():
         self.entity=entity
         self.framerate=4
         self.dir=self.entity.dir
-        self.states={'Idle':Idle,'Walk':Walk,'Fall_stand':Fall_stand,'Fall_run':Fall_run,'Jump_run':Jump_run,'Jump_stand':Jump_stand,'Wall':Wall,'Dash':Dash,'Sword_stand':Sword_stand}
+        self.states={'Idle':Idle,'Walk':Walk,'Fall_stand':Fall_stand,'Fall_run':Fall_run,'Jump_run':Jump_run,'Jump_stand':Jump_stand,'Wall':Wall,'Dash':Dash,'Sword_stand':Sword_stand,'Sword1_stand':Sword1_stand,'Sword_run':Sword_run}
 
     def update_state(self):
         self.entity.velocity[1]=self.entity.velocity[1]+self.entity.acceleration[1]-self.entity.velocity[1]*self.entity.friction[1]#gravity
@@ -82,7 +82,7 @@ class Walk(Entity_states):
         elif input=='lb':
             self.enter_state('Dash')
         elif input=='x':
-            self.enter_state('Sword')
+            self.enter_state('Sword_run')
 
 class Jump_stand(Entity_states):
     def __init__(self,entity):
@@ -101,7 +101,7 @@ class Jump_stand(Entity_states):
         if input=='lb':
             self.enter_state('Dash')
         elif input=='x':
-            self.enter_state('Sword')
+            self.enter_state('Sword_stand')
         elif input=='Left' or input=='Right':
             self.enter_state('Jump_run')
 
@@ -120,7 +120,7 @@ class Jump_run(Jump_stand):
         if input=='lb':
             self.enter_state('Dash')
         elif input=='x':
-            self.enter_state('Sword')
+            self.enter_state('Sword_run')
         elif input==False:
             self.enter_state('Fall_stand')
 
@@ -198,21 +198,24 @@ class Dash(Entity_states):
         self.phase=self.phases[0]
         self.entity.velocity[0] = 30*self.dir[0]
         self.entity.spirit -= 10
-        self.lifetime=10
+        self.done=False#animation flag
 
     def update_state(self):
         super().update_state()
 
-        self.lifetime-=1
         self.entity.velocity[1]=0
-
         self.entity.velocity[0]=self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
 
-        if self.lifetime<0:
+        if self.done:
             self.enter_state('Idle')
 
         if self.entity.collision_types['right'] or self.entity.collision_types['left']:
             self.enter_state('Wall')
+
+    def increase_phase(self):
+        if self.phase==self.phases[-1]:
+            self.done=True
+        super().increase_phase()
 
 class Death(Entity_states):
     def __init__(self,entity):
@@ -224,24 +227,76 @@ class Death(Entity_states):
         self.entity.loot()
         self.kill()
 
-class Sword_stand(Entity_states):
+class Sword(Entity_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.sword1=False#flag to check if we shoudl go to next sword attack
+        self.done=False#animation flag
+        self.sword2=False#flag to check if we shoudl go to third sword attack
+        self.dir=self.entity.dir.copy()#animation direction
+        self.entity.sword.dir=self.dir#sword direction
+
+    def update_state(self):
+        super().update_state()
+        self.entity.sword.updates(self.entity.hitbox)#make the sword hitbox follow the player
+
+    def increase_phase(self):
+        if self.phase==self.phases[-1]:
+            self.done=True
+        elif self.phase=='pre':
+            self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+
+        super().increase_phase()
+
+class Sword_stand(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.phases=['main']
         self.phase=self.phases[0]
-        self.dir=self.entity.dir.copy()
-        self.entity.sword.spawn(self.entity.hitbox)
-        self.entity.projectiles.add(self.entity.sword)
-        self.entity.sword.lifetime=10
-
+        self.entity.sword.lifetime=10#swrod hitbox duration
+        self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def update_state(self):
         super().update_state()
-        self.entity.sword.lifetime-=1
 
-        if self.entity.sword.lifetime<0:
-            self.entity.projectiles.remove(self.entity.sword)
+        if self.done and self.sword1:
+            self.enter_state('Sword1_stand')
+        elif self.done:#if animation is done
             self.enter_state('Idle')
 
     def change_state(self,input):
-        pass
+        if input=='x':
+            self.sword1=True
+
+
+class Sword1_stand(Sword):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
+        self.entity.sword.lifetime=15#swrod hitbox duration
+
+    def update_state(self):
+        super().update_state()
+        if self.done and self.sword2:
+            self.enter_state('Sword2_stand')
+        elif self.done:#if animation is done
+            self.enter_state('Idle')
+
+    def change_state(self,input):
+        if input=='x':
+            self.sword2=True
+
+class Sword_run(Sword_stand):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update_state(self):
+        super().update_state()
+        self.horizontal_velocity()
+
+        if self.done and self.sword1:
+            self.enter_state('Sword1_stand')
+
+        elif self.done:#if animation is done
+            self.enter_state('Walk')
