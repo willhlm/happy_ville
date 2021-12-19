@@ -79,20 +79,13 @@ class BG_far(FG_paralex):
 class Dynamicentity(Staticentity):
     def __init__(self,pos,img):
         super().__init__(pos,img)
-        self.frame = 0
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.currentstate = Entity_states_V2.Idle(self)
-        self.ac_dir = self.dir.copy()
 
     def update(self,pos):
         self.update_pos(pos)
-        self.currentstate.update_state()
-        self.currentstate.update_animation()
-
-    def reset_timer(self):
-        self.frame = 0
-        self.ac_dir[0] = self.dir[0]
-        self.ac_dir[1] = self.dir[1]
+        self.currentstate.update()
+        self.currentstate.update_animation()#has to be here
 
 class Character(Dynamicentity):
     def __init__(self,pos,img=pygame.Surface((16,16))):
@@ -116,9 +109,11 @@ class Character(Dynamicentity):
     def take_dmg(self,dmg):
         if dmg>0:
             self.health-=dmg
-            self.currentstate = Entity_states_V2.Hurt(self)
-            if self.health<=0:#check if dead¨
+            if self.health>0:#check if dead¨
+                self.currentstate = Entity_states_V2.Hurt(self)
+            else:
                 self.currentstate = Entity_states_V2.Death(self)
+
 
     def attack_action(self,projectiles):
         return projectiles
@@ -256,11 +251,11 @@ class Player(Character):
         self.max_health = 250
         self.max_spirit = 100
         self.projectiles = pygame.sprite.Group()
-        self.equip='hammer'#starting abillity
+        self.equip='Hammer'#starting abillity
         self.sword=Sword(self.hitbox)
         self.hammer=Sword(self.hitbox)
-        self.shield=Shield(self.ac_dir,self.hitbox)
-        self.force=Force(self.ac_dir,self.hitbox)
+        self.shield=Shield(self.hitbox)
+        self.force=Force(self.dir,self.hitbox)
         self.action_sfx_player = pygame.mixer.Channel(1)
         self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
@@ -271,9 +266,11 @@ class Player(Character):
         self.action_cooldown=False
         self.shake=0
 
-        self.abilities=['hammer','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
-        self.timer=30#second sword swing
-        self.charging=[False]#a list beause to make it a pointer
+        self.abilities=['Hammer','Stone','Force','Heal','Shield']#a list of abillities the player can do (should be updated as the game evolves)
+
+    def take_dmg(self,dmg):
+        if self.shield.health<=0 or self.shield.lifetime<0:
+            super().take_dmg(dmg)
 
     def load_sfx(self):
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
@@ -286,17 +283,6 @@ class Player(Character):
             self.health+=20
             self.spirit-=20
 
-    def take_dmg(self,dmg):
-        if self.shield.health<=0 or self.shield.lifetime<0:
-            super().take_dmg(dmg)
-
-    def spawn_hammer(self):
-        self.hammer.dir=self.ac_dir
-        self.hammer.lifetime=7
-        self.hammer.spawn(self.hitbox)
-        self.spirit -= 10
-        self.hammer.state='pre'
-
     def spawn_shield(self):
         self.shield.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.shield.lifetime=200
@@ -306,7 +292,6 @@ class Player(Character):
 
     def spawn_force(self):
         self.force.lifetime=20
-        self.force.dir=self.ac_dir
 
         if self.force.dir[1]!=0:#shooting up or down
             self.force.velocity=[0,-self.force.dir[1]*10]
@@ -372,11 +357,7 @@ class Player(Character):
         if self.spirit <= self.max_spirit:
             self.spirit += 0.1
 
-        #self.sword.updates(self.hitbox)
-        #self.hammer.updates(self.hitbox)
         #self.shield.updates(self.hitbox)
-
-        #self.set_img()
         #self.load_sfx()
 
     def loots(self,loot):
@@ -768,16 +749,12 @@ class Sword(Weapon):
         super().__init__()
         self.lifetime=10
         self.dmg=10
-        self.velocity=[0,0]
-        #self.state='pre'
 
         self.image = pygame.image.load("Sprites/Attack/Sword/main/swing1.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.width+5,entity_hitbox.height)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-        #self.spawn(entity_hitbox)#spawn hitbox based on entity position and direction
 
     def updates(self,entity_hitbox):
         self.lifetime-=1
@@ -803,7 +780,7 @@ class Sword(Weapon):
         #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
 
 class Shield(Weapon):
-    def __init__(self,entity_dir,entity_hitbox):
+    def __init__(self,entity_hitbox):
         super().__init__()
         self.lifetime=1#need to be changed depending on the animation of sword of player
         self.health=100
@@ -818,7 +795,6 @@ class Shield(Weapon):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],20,20)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-        self.dir=entity_dir.copy()
         self.hitbox.center=entity_hitbox.center#spawn hitbox based on entity position and direction
 
     def update(self,scroll=0):

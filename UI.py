@@ -752,9 +752,10 @@ class Game_UI():
                     input='a'
 
                 if event.key==pygame.K_e:#aillities
-                    if not self.player.action['dash']:
-                        self.player.action[self.player.equip]=True
-                        self.player.charging[0] = True
+                    input='e'
+                    #if not self.player.action['dash']:
+                    #    self.player.action[self.player.equip]=True
+                    #    self.player.charging[0] = True
 
                 if event.key==pygame.K_f:#quick attack
                     input='x'
@@ -818,7 +819,7 @@ class Game_UI():
                 if event.key == pygame.K_i:
                     self.player.action['run']=False
 
-                if event.key==pygame.K_e:
-                    if not self.player.action['dash']:
-                        self.player.charging[0]=False
+                #if event.key==pygame.K_e:
+                    #if not self.player.action['dash']:
+                    #    self.player.charging[0]=False
                 self.player.currentstate.change_state(input)
