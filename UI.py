@@ -104,7 +104,7 @@ class Game_UI():
             self.blit_screen_info()
             self.change_abilities()#need to be after self.draw()
 
-            self.collisions.action_collision(self.fprojectiles,self.players,self.platforms,self.enemies,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
+            self.collisions.action_collision(self.player.projectiles,self.players,self.platforms,self.enemies,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
             self.collisions.action_collision(self.eprojectiles,self.enemies,self.platforms,self.players,self.screen,self.loot,self.cosmetics)#f_action swinger, target1,target2
 
             #!! -- maybe move this to update method in npc/enemy class
@@ -656,7 +656,6 @@ class Game_UI():
                 if event.button==self.controller.bottons['y']:
                     self.player.interacting = False
                     if self.player.state!='talk':#if not in conversation
-                        self.player.state='stand'
                         self.player.action['talk']=False
 
             if event.type==pygame.JOYAXISMOTION:#analog stick
@@ -708,6 +707,8 @@ class Game_UI():
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
+                input=True
+
                 if event.key==pygame.K_ESCAPE:#escape button
                     self.ESC=True
                     self.ESC_menu()
@@ -716,18 +717,20 @@ class Game_UI():
                     self.player.talk()
 
                 if event.key == pygame.K_RIGHT:
+                    input='Right'
+                    self.player.pressed=True
                     if not self.ability_menu:
-                        self.player.action['run']=True
-                        self.player.action['stand']=False
                         self.player.dir[0]=1
                     else:
                         self.ab_index+=1
                         self.ab_index=min(len(self.player.abilities)-1,self.ab_index)
 
                 if event.key == pygame.K_LEFT:
+                    input='Left'
+                    self.player.pressed=True
+
                     if not self.ability_menu:
-                        self.player.action['run']=True
-                        self.player.action['stand']=False
+
                         self.player.dir[0]=-1
                     else:
                         self.ab_index-=1
@@ -745,23 +748,26 @@ class Game_UI():
                     self.ability_menu=True
                     #self.change_equipment()
 
-                if event.key==pygame.K_SPACE and not self.player.action['fall'] and not self.player.action['jump']:#jump
+                if event.key==pygame.K_SPACE:# and not self.player.action['fall'] and not self.player.action['jump']:#jump
                     #self.player.action['jump']=True
-                    self.player.jump()
+                    input='a'
 
                 if event.key==pygame.K_e:#aillities
-                    if not self.player.action['dash']:
-                        self.player.action[self.player.equip]=True
-                        self.player.charging[0] = True
+                    input='e'
+                    #if not self.player.action['dash']:
+                    #    self.player.action[self.player.equip]=True
+                    #    self.player.charging[0] = True
 
                 if event.key==pygame.K_f:#quick attack
-                    if not self.player.action['dash']:
-                        if not self.player.action['sword1']:
-                            self.player.action['sword']=True
-                        if self.player.timer<20:
-                            self.player.action['sword1']=True
+                    input='x'
 
-                        self.player.timer=0
+                    #if not self.player.action['dash']:
+                    #    if not self.player.action['sword1']:
+                    #        self.player.action['sword']=True
+                    #    if self.player.timer<20:
+                    #        self.player.action['sword1']=True
+
+                    #    self.player.timer=0
                         #self.comb_action='sword1'
 
 
@@ -776,23 +782,27 @@ class Game_UI():
                     self.inventory=True
                     self.inventoryscreen()#open inventort
 
-                if event.key == pygame.K_LSHIFT and self.player.dashing_cooldown>9:#left shift
-                    self.player.dashing()
+                if event.key == pygame.K_LSHIFT:#left shift
+                    input='lb'
 
+                self.player.currentstate.change_state(input)
 
             elif event.type == pygame.KEYUP:#lift bottom
-                if event.key == pygame.K_RIGHT and self.player.dir[0]>0:
-                    self.player.action['stand']=True
-                    self.player.action['run']=False
+                input=True
+                if event.key == pygame.K_RIGHT:
+                    input=False
+                    self.player.pressed=False
+
 
                 if event.key == pygame.K_t:#if release button
                     if self.player.state!='talk':#if not in conversation
-                        self.player.state='stand'
                         self.player.action['talk']=False
 
-                if event.key == pygame.K_LEFT and self.player.dir[0]<0:
-                    self.player.action['stand']=True
-                    self.player.action['run']=False
+                if event.key == pygame.K_LEFT:
+                    input=False
+
+                    self.player.pressed=False
+
 
                 if event.key == pygame.K_UP:
                     self.player.dir[1]=0
@@ -810,6 +820,7 @@ class Game_UI():
                 if event.key == pygame.K_i:
                     self.player.action['run']=False
 
-                if event.key==pygame.K_e:
-                    if not self.player.action['dash']:
-                        self.player.charging[0]=False
+                #if event.key==pygame.K_e:
+                    #if not self.player.action['dash']:
+                    #    self.player.charging[0]=False
+                self.player.currentstate.change_state(input)

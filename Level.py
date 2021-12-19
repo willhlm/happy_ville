@@ -143,8 +143,8 @@ class Tilemap():
                     new_npc = entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
                 elif tile == '25':
-                    new_enemy = entities.Woopie((col_index * self.tile_size, row_index * self.tile_size))
-                    enemies.add(new_enemy)
+                    pass
+                    #woopie
                 elif tile == '24':
                     pass
                     #new_enemy = entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
@@ -236,7 +236,6 @@ class Tilemap():
                 backgrounds.append(entities.FG_fixed(blit_surfaces[bg],(0,0)))
             elif bg == 'fg_paralex':
                 backgrounds.append(entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
-
         del blit_surfaces, bg_sheets, bg_maps
         return backgrounds
 

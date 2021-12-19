@@ -1,3 +1,4 @@
+
 import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
@@ -244,34 +245,15 @@ class Controller():
 
         if event.type==pygame.JOYBUTTONDOWN:#press a botton
             self.keydown=True
-            if event.button==self.controller.bottons['start']:#escape button
-                self.key='start'
-            if event.button==self.controller.bottons['select']:#escape button
-                self.key='select'
-            if event.button==self.controller.bottons['rb']:
-                self.key='rb'
-            if event.button==self.controller.bottons['a']:
-                self.key='a'
-            if event.button==self.controller.bottons['lb']:
-                self.key='lb'
-            if event.button==self.controller.bottons['y']:#interact
-                self.key='y'
-            if event.button==self.controller.bottons['b']:#abillity
-                self.key='b'
-            if event.button==self.controller.bottons['x']:#attack
-                self.key='x'
+            self.key=self.controller.bottons[event.button]
 
-        if event.type==pygame.JOYBUTTONUP:#release a botton
+        elif event.type==pygame.JOYBUTTONUP:#release a botton
             self.keyup=True
-            if event.button==self.controller.bottons['lb']:
-                self.key='lb'
-            if event.button==self.controller.bottons['b']:
-                self.key='b'
-            if event.button==self.controller.bottons['y']:
-                self.key='y'
+            self.key=self.controller.bottons[event.button]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
             self.keydown=True
+
             if event.axis==self.controller.analogs['lh']:#left horizontal
                 self.value=[event.value,0]
                 if abs(event.value)<0.2:

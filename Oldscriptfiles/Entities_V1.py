@@ -1,37 +1,7 @@
-import pygame, Read_files, random, sys, Entity_states_V2
+import pygame, Read_files, random, sys, Entity_states
 
-class Platform(pygame.sprite.Sprite):#has hitbox
-    def __init__(self,pos,chunk_key=False):
-        super().__init__()
-        self.rect = pygame.Rect(pos,(16,16))
-        self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=False
-
-    def update(self,pos):
-        self.update_pos(pos)
-
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
-
-class Invisible_block(Platform):
-    def __init__(self,pos,chunk_key=False):
-        super().__init__(pos,chunk_key=False)
-
-class Collision_block(Platform):
-    def __init__(self,pos,chunk_key=False):
-        super().__init__(pos,chunk_key=False)
-
-class Spikes(Platform):
-    def __init__(self,pos,chunk_key=False):
-        super().__init__(pos,chunk_key=False)
-        self.image=pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha()
-        self.spike=True
-
-class Staticentity(pygame.sprite.Sprite):#no hitbox but image
-    def __init__(self,pos,img):
+class Staticentity(pygame.sprite.Sprite):
+    def __init__(self,pos,img=pygame.Surface((16,16))):
         super().__init__()
         self.image = img
         self.rect = self.image.get_rect()
@@ -42,6 +12,32 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+
+class Platform(Staticentity):#has hitbox
+    def __init__(self,pos,img=pygame.Surface((16,16)),chunk_key=False):
+        super().__init__(pos,img=pygame.Surface((16,16)))
+        self.hitbox = self.rect.inflate(0,0)
+        self.chunk_key=chunk_key
+        self.spike=False
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+class Invisible_block(Platform):
+    def __init__(self,pos,img=pygame.Surface((16,16)),chunk_key=False):
+        super().__init__(pos,img=pygame.Surface((16,16)),chunk_key=False)
+        self.rect=pygame.Rect(pos[0],pos[1],2,2)
+
+class Collision_block(Platform):
+    def __init__(self,pos,img,chunk_key=False):
+        super().__init__(pos,img,chunk_key=False)
+        self.rect = pygame.Rect(pos,(16,16))
+
+class Spikes(Platform):
+    def __init__(self,pos,img,chunk_key=False):
+        super().__init__(pos,pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),chunk_key=False)
+        self.spike=True
 
 class BG_Block(Staticentity):
     def __init__(self,pos,img):
@@ -79,13 +75,21 @@ class BG_far(FG_paralex):
 class Dynamicentity(Staticentity):
     def __init__(self,pos,img):
         super().__init__(pos,img)
+        self.frame = 0
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.currentstate = Entity_states_V2.Idle(self)
+        self.ac_dir = self.dir.copy()
+        self.state = 'Idle'
+        self.state_stack = [Entity_states.Idle(self)]
 
     def update(self,pos):
         self.update_pos(pos)
-        self.currentstate.update()
-        self.currentstate.update_animation()#has to be here
+        self.state_stack[-1].update_state()
+        self.state_stack[-1].update_animation()
+
+    def reset_timer(self):
+        self.frame = 0
+        self.ac_dir[0] = self.dir[0]
+        self.ac_dir[1] = self.dir[1]
 
 class Character(Dynamicentity):
     def __init__(self,pos,img=pygame.Surface((16,16))):
@@ -102,18 +106,14 @@ class Character(Dynamicentity):
         self.hitbox_offset = (0,0)
         self.friction=[0.2,0]
 
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.bottom=self.rect.bottom
-
     def take_dmg(self,dmg):
         if dmg>0:
             self.health-=dmg
-            if self.health>0:#check if dead¨
-                self.currentstate = Entity_states_V2.Hurt(self)
-            else:
-                self.currentstate = Entity_states_V2.Death(self)
-
+            self.state='hurt'
+            self.state_stack.append(Entity_states.Hurt(self))
+            if self.health<=0:#check if dead¨
+                self.state='death'
+                self.state_stack.append(Entity_states.Death(self))
 
     def attack_action(self,projectiles):
         return projectiles
@@ -127,7 +127,17 @@ class Character(Dynamicentity):
             self.take_dmg(10)
 
     def physics_movement(self):
+        self.velocity[1]=self.velocity[1]+self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[1]=min(self.velocity[1],7)#set a y max speed
+
         self.movement[1]=self.velocity[1]#set the vertical velocity
+
+        if self.state=='Walk' and not self.charging[0] and not self.state=='Dash':#accelerate horizontal to direction when not dashing
+            self.velocity[0]+=self.dir[0]*self.acceleration[0]
+            if abs(self.velocity[0])>self.max_vel:#max horizontal speed
+                self.velocity[0]=self.dir[0]*self.max_vel
+
+        self.velocity[0]=self.velocity[0]-self.friction[0]*self.velocity[0]#friction
         self.movement[0]=self.velocity[0]#set the horizontal velocity
 
     def update(self,pos):
@@ -247,16 +257,14 @@ class Player(Character):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = read_files.Sprites_Player('Sprites/Enteties/aila/',True)
-        self.health = 100
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)
         self.max_health = 250
         self.max_spirit = 100
-        self.projectiles = pygame.sprite.Group()
-        self.equip='Hammer'#starting abillity
-        self.sword=Sword(self.hitbox)
-        self.hammer=Sword(self.hitbox)
-        self.shield=Shield(self.hitbox)
-        self.force=Force(self.dir,self.hitbox)
+        self.equip='hammer'#starting abillity
+        self.sword=Sword(self.dir,self.hitbox)
+        self.hammer=Sword(self.dir,self.hitbox)
+        self.shield=Shield(self.ac_dir,self.hitbox)
+        self.force=Force(self.ac_dir,self.hitbox)
         self.action_sfx_player = pygame.mixer.Channel(1)
         self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
@@ -266,12 +274,12 @@ class Player(Character):
         self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.action_cooldown=False
         self.shake=0
+        self.dashing_cooldown=10
 
-        self.abilities=['Hammer','Stone','Force','Heal','Shield']#a list of abillities the player can do (should be updated as the game evolves)
-
-    def take_dmg(self,dmg):
-        if self.shield.health<=0 or self.shield.lifetime<0:
-            super().take_dmg(dmg)
+        self.abilities=['hammer','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
+        self.timer=30#second sword swing
+        self.pressed=False
+        self.charging=[False]#a list beause to make it a pointer
 
     def load_sfx(self):
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
@@ -284,6 +292,22 @@ class Player(Character):
             self.health+=20
             self.spirit-=20
 
+    def take_dmg(self,dmg):
+        if self.shield.health<=0 or self.shield.lifetime<0:
+            super().take_dmg(dmg)
+
+    def spawn_sword(self):
+        self.sword.dir=self.ac_dir
+        self.sword.lifetime=3
+        self.sword.spawn(self.hitbox)
+
+    def spawn_hammer(self):
+        self.hammer.dir=self.ac_dir
+        self.hammer.lifetime=7
+        self.hammer.spawn(self.hitbox)
+        self.spirit -= 10
+        self.hammer.state='pre'
+
     def spawn_shield(self):
         self.shield.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
         self.shield.lifetime=200
@@ -293,6 +317,7 @@ class Player(Character):
 
     def spawn_force(self):
         self.force.lifetime=20
+        self.force.dir=self.ac_dir
 
         if self.force.dir[1]!=0:#shooting up or down
             self.force.velocity=[0,-self.force.dir[1]*10]
@@ -358,7 +383,10 @@ class Player(Character):
         if self.spirit <= self.max_spirit:
             self.spirit += 0.1
 
-        #self.shield.updates(self.hitbox)
+        self.sword.updates(self.hitbox)
+        self.hammer.updates(self.hitbox)
+        self.shield.updates(self.hitbox)
+        #self.set_img()
         #self.load_sfx()
 
     def loots(self,loot):
@@ -370,7 +398,7 @@ class Enemy_1(Player):
         self.health=10
         self.distance=[0,0]
         self.inv=False#flag to check if collision with invisible blocks
-        self.sprites = read_files.Sprites_enteties('Sprites/Enteties/enemies/evil_knight/')
+        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/evil_knight/')
         self.shake=self.hitbox.height/10
 
     def AI(self,player):#the AI
@@ -413,7 +441,7 @@ class NPC(Character):
         self.acceleration=[0.3,0.8]
 
     def load_conversation(self):
-        self.conversation = read_files.read_json("Text/NPC/" + self.name + ".json")
+        self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
 
     #returns conversation depdening on worldstate input. increases index
     def get_conversation(self, flag):
@@ -453,8 +481,8 @@ class Aslat(NPC):
     def __init__(self, pos,img=pygame.Surface((16,16))):
         super().__init__(pos,img=pygame.Surface((16,16)))
         self.name = 'Aslat'
-        self.sprites = read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('stand', 0, self.dir)
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/",True)#Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        #self.image = self.sprites.get_image('stand', 0, self.dir,self.phase)
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
@@ -483,8 +511,8 @@ class MrBanks(NPC):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
         self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_BG.png").convert_alpha()
-        self.sprites = read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.conversation=read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
+        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
         self.conv_action=['deposit','withdraw']
         self.conv_action_BG=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_action_BG.png").convert_alpha()
         self.conv_possition=[[400],[300]]
@@ -632,7 +660,7 @@ class Door(Pathway):
 
     def __init__(self,pos,destination):
         super().__init__(destination)
-        self.image_sheet = read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -651,7 +679,7 @@ class Door(Pathway):
 class Chest(Interactable):
     def __init__(self,pos,id,loot,state):
         super().__init__()
-        self.image_sheet = read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest.png",16,21,1,3)
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest.png",16,21,1,3)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1]-5)
@@ -679,7 +707,7 @@ class Chest(Interactable):
 class Chest_Big(Interactable):
     def __init__(self,pos,id,loot,state):
         super().__init__()
-        self.image_sheet = read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest_big.png",32,29,1,5)
+        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest_big.png",32,29,1,5)
         self.image = self.image_sheet[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1]-13)
@@ -746,16 +774,21 @@ class Weapon(pygame.sprite.Sprite):
             self.kill()
 
 class Sword(Weapon):
-    def __init__(self,entity_hitbox):
+    def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
-        self.lifetime=10
+        self.lifetime=3#need to be changed depending on the animation of sword of player
         self.dmg=10
+        self.velocity=[0,0]
+        #self.state='pre'
 
         self.image = pygame.image.load("Sprites/Attack/Sword/main/swing1.png").convert_alpha()
 
         self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.width+5,entity_hitbox.height)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+        self.dir=entity_dir.copy()
+        self.spawn(entity_hitbox)#spawn hitbox based on entity position and direction
 
     def updates(self,entity_hitbox):
         self.lifetime-=1
@@ -781,13 +814,13 @@ class Sword(Weapon):
         #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
 
 class Shield(Weapon):
-    def __init__(self,entity_hitbox):
+    def __init__(self,entity_dir,entity_hitbox):
         super().__init__()
         self.lifetime=1#need to be changed depending on the animation of sword of player
         self.health=100
         self.velocity=[0,0]
         self.state='pre'
-        self.sprites = read_files.Sprites_Player('Sprites/Attack/Shield/',True)
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/',True)
         self.dmg=0
 
         self.image = pygame.image.load("Sprites/Attack/Shield/main/water_Shield1.png").convert_alpha()
@@ -796,6 +829,7 @@ class Shield(Weapon):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],20,20)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
+        self.dir=entity_dir.copy()
         self.hitbox.center=entity_hitbox.center#spawn hitbox based on entity position and direction
 
     def update(self,scroll=0):
@@ -826,7 +860,7 @@ class Stone(Weapon):
         self.state='pre'
         self.action='small'
         self.dir=entity_dir.copy()#direction of the projectile
-        self.sprites = read_files.Sprites_Player('Sprites/Attack/Stone/',True)
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
 
         self.image = pygame.image.load("Sprites/Attack/Stone/pre/small/force_stone1.png").convert_alpha()
         self.rect = self.image.get_rect(center=[entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1]])
@@ -893,7 +927,7 @@ class Force(Weapon):
         self.dmg=0
         self.dir=entity_dir.copy()
 
-        self.sprites = read_files.Sprites_Player('Sprites/Attack/Force/')
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
         self.state='pre'
 
         self.image = pygame.image.load("Sprites/Attack/Force/pre/fly3.png").convert_alpha()
@@ -988,7 +1022,7 @@ class Amber_Droplet(Loot):
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
 
 class Arrow(Loot):
     def __init__(self,entity_hitbox):
@@ -998,7 +1032,7 @@ class Arrow(Loot):
         self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
         self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
 
 class Spirits(pygame.sprite.Sprite):
 
