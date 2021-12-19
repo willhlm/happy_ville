@@ -181,9 +181,11 @@ class Controller():
         self.value=[0,0]
         self.key=False
         self.outputs=[self.keydown,self.keyup,self.value,self.key]
+        self.map_keyboard()
 
         pygame.joystick.init()#initialise joystick module
         self.update_controlls()#initialise joysticks and add to list
+
 
         if controller_type:
             self.buttonmapping(controller_type)#read in controller configuration file
@@ -202,6 +204,24 @@ class Controller():
         self.keybord(event)
         self.joystick(event)
 
+    def map_keyboard(self):
+        self.keyboard_map = {pygame.K_ESCAPE: 'start',
+                                pygame.K_RIGHT: 'right',
+                                pygame.K_LEFT: 'left',
+                                pygame.K_UP: 'up',
+                                pygame.K_DOWN: 'down',
+                                pygame.K_TAB: 'lb',
+                                pygame.K_SPACE: 'a',
+                                pygame.K_t: 'y',
+                                pygame.K_e: 'b',
+                                pygame.K_f: 'x',
+                                pygame.K_g: 'y',
+                                pygame.K_i: 'select',
+                                pygame.K_LSHIFT: 'rb',
+                                pygame.K_RETURN: 'return'
+                                }
+
+
     def keybord(self,event):
         self.keyup=False
         self.keydown=False
@@ -210,57 +230,11 @@ class Controller():
         if event.type == pygame.KEYDOWN:
             self.keydown=True
             self.value=[1,1]
-            if event.key==pygame.K_ESCAPE:#escape button
-                self.key='start'
-            if event.key == pygame.K_t:
-                self.key='y'
-            if event.key == pygame.K_RIGHT:
-                self.key='right'
-            if event.key == pygame.K_LEFT:
-                self.key='left'
-            if event.key == pygame.K_UP:#press up
-                self.key='up'
-            if event.key == pygame.K_DOWN:#press down
-                self.key='down'
-            if event.key == pygame.K_TAB:
-                self.key='lb'
-            if event.key==pygame.K_SPACE:#jump
-                self.key='a'
-            if event.key==pygame.K_e:#aillities
-                self.key='b'
-            if event.key==pygame.K_f:#quick attack
-                self.key='x'
-            if event.key==pygame.K_g:
-                self.key='y'
-            if event.key == pygame.K_i:
-                self.key='select'
-            if event.key == pygame.K_LSHIFT:#left shift
-                self.key='rb'
-            if event.key == pygame.K_RETURN:
-                self.key='return'
+            self.key = self.keyboard_map.get(event.key, '')
 
         elif event.type == pygame.KEYUP:#lift bottom
             self.keyup=True
-            if event.key == pygame.K_RIGHT:
-                self.key='right'
-            if event.key == pygame.K_t:#if release button
-                self.key='y'
-            if event.key == pygame.K_LEFT:
-                self.key='left'
-            if event.key == pygame.K_UP:
-                self.key='up'
-            if event.key == pygame.K_DOWN:
-                self.key='down'
-            if event.key==pygame.K_g:
-                self.key='y'
-            if event.key==pygame.K_TAB:
-                self.key='lb'
-            if event.key == pygame.K_i:
-                self.key='select'
-            if event.key==pygame.K_e:
-                self.key='b'
-            if event.key == pygame.K_RETURN:
-                self.key='return'
+            self.key = self.keyboard_map.get(event.key, '')
 
     def joystick(self,event):
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing

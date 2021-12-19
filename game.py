@@ -48,6 +48,7 @@ class Game():
             #update display
             pygame.display.update()
 
-pygame.init()#initilise
-g=Game()
-g.run()
+if __name__ == '__main__':
+    pygame.init()#initilise
+    g=Game()
+    g.run()

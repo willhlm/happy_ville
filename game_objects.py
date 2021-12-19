@@ -9,19 +9,19 @@ class Game_Objects():
 
     def __init__(self, game):
 
-        self.create_groups()
         self.game = game
         self.map_state = read_files.read_json("map_state.json") #check this file for structure of object
         pygame.mixer.init
         self.bg_music = pygame.mixer.Channel(0)
         self.collisions = engine.Collisions()
+        self.create_groups()
 
     def create_groups(self):
 
         #initiate player
         self.player = entities.Player([200,50])
         self.players = pygame.sprite.Group(self.player)
-        self.player_center = (216,180)
+        self.player_center = (self.game.WINDOW_SIZE[0]/2,2*self.game.WINDOW_SIZE[1]/3)
 
         #define all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -57,26 +57,8 @@ class Game_Objects():
         self.load_music()
 
     def change_map(self, map_name):
-        timer = 0
-        load_time = 50
-        self.bg_music.fadeout(int(1000*load_time/60))
-        #fade before loading new map
-        while timer < load_time:
-            self.game.screen.fill((207,238,250))
-            self.interactables.update((0,0))
-            self.draw()
-            self.blit_screen_info()
-            fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA)
-            fade_surface.fill((0,0,0,int(timer*255/load_time)))
-            self.game.screen.blit(fade_surface,(0,0))
-            self.display.blit(pygame.transform.scale(self.game.screen,self.game.WINDOW_SIZE_scaled),(0,0))#scale the screen
-            pygame.display.update()#update after every change
-            self.clock.tick(60)#limmit FPS
-            timer += 1
-
         #actually load the new map
         self.load_map(map_name)
-        self.game_loop(True)
 
     def load_music(self):
         self.bg_music.play(self.map.load_bg_music(),-1)

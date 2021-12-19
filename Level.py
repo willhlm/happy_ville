@@ -1,8 +1,8 @@
 import pygame, csv, entities, math, random, json
 
 class Tilemap():
-    def __init__(self, level, player_pos):
-        self.player_center = player_pos
+    def __init__(self, level, player_center):
+        self.player_center = player_center
         self.tile_size=16
         self.chunk_size=11
         self.total_distance=[0,0]
@@ -14,7 +14,7 @@ class Tilemap():
         self.platforms_pause=pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
         self.init_player_pos = (0,0)
-        self.cameras=[Auto(),Auto_CapX(),Auto_CapY(),Fixed()]
+        self.cameras=[Auto(self.player_center),Auto_CapX(self.player_center),Auto_CapY(self.player_center),Fixed()]
         self.camera = self.cameras[0]
 
     def set_camera(self, camera_number):
@@ -328,9 +328,10 @@ class Sprite_sheet():
 #scrolling
 
 class Camera():
-    def __init__(self):
+    def __init__(self, center = (240,180)):
         self.scroll=[0,0]
         self.true_scroll=[0,0]
+        self.center = center
 
     def update_scroll(self,shake):
         if shake>0:#inprinciple we do not need this if
@@ -343,28 +344,28 @@ class Camera():
         self.scroll[1]=int(self.scroll[1])+screen_shake[1]
 
 class Auto(Camera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, center):
+        super().__init__(center)
 
     def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-216)/15
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-self.center[0])/15
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-self.center[1])
         self.update_scroll(shake)
 
 class Auto_CapX(Camera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, center):
+        super().__init__(center)
 
     def scrolling(self,knight,shake):
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-self.center[1])
         self.update_scroll(shake)
 
 class Auto_CapY(Camera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, center):
+        super().__init__(center)
 
     def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-216)/15
+        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-self.center[0])/15
         self.update_scroll(shake)
 
 class Fixed(Camera):
