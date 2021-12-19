@@ -1,11 +1,11 @@
 import pygame, sys
-import read_files
-import engine
-import entities
+import Read_files
+import Engine
+import Entities
 
 class Game_State():
     def __init__(self,game):
-        self.font = read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
+        self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
         self.game = game
 
     def update(self):
@@ -26,7 +26,7 @@ class Game_State():
 class Title_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities.Menu_Arrow()
+        self.arrow = Entities.Menu_Arrow()
         self.title = self.font.render(text = 'HAPPY VILLE') #temporary
 
         #create buttons
@@ -100,7 +100,7 @@ class Title_Menu(Game_State):
 class Load_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities.Menu_Arrow()
+        self.arrow = Entities.Menu_Arrow()
         self.title = self.font.render(text = 'LOAD GAME') #temporary
 
         #create buttons
@@ -152,7 +152,7 @@ class Load_Menu(Game_State):
 class Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities.Menu_Arrow()
+        self.arrow = Entities.Menu_Arrow()
         self.title = self.font.render(text = 'OPTIONS') #temporary
 
         #create buttons
@@ -205,7 +205,7 @@ class Pause_Menu(Game_State):
 
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities.Menu_Arrow()
+        self.arrow = Entities.Menu_Arrow()
         self.title = self.font.render(text = 'PAUSE') #temporary
 
         #create buttons
@@ -290,85 +290,13 @@ class Gameplay(Game_State):
 
 
     def handle_events(self, input):
-        if input[0]:
+        if input[0] or input[1]:
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
 
-            if input[-1] == 'y':
+            elif input[-1] == 'y':
                 self.game.game_objects.player.talk()
 
-            if input[-1] == 'right':
-                self.game.game_objects.player.action['run']=True
-                self.game.game_objects.player.action['stand']=False
-                self.game.game_objects.player.dir[0]=1
-
-            if input[-1] == 'left':
-                self.game.game_objects.player.action['run']=True
-                self.game.game_objects.player.action['stand']=False
-                self.game.game_objects.player.dir[0]=-1
-
-            if input[-1] == 'up':#press up
-                self.game.game_objects.player.dir[1]=1
-            if input[-1] == 'down':#press down
-                self.game.game_objects.player.dir[1]=-1
-
-            if input[-1]=='a' and not self.game.game_objects.player.action['fall'] and not self.game.game_objects.player.action['jump']:#jump
-                #self.game.game_objects.player.action['jump']=True
-                self.game.game_objects.player.jump()
-
-            if input[-1]=='b':#aillities
-                if not self.game.game_objects.player.action['dash']:
-                    self.game.game_objects.player.action[self.game.game_objects.player.equip]=True
-                    self.game.game_objects.player.charging[0] = True
-
-            if input[-1]=='x':#quick attack
-                if not self.game.game_objects.player.action['dash']:
-                    if not self.game.game_objects.player.action['sword1']:
-                        self.game.game_objects.player.action['sword']=True
-                    if self.game.game_objects.player.timer<20:
-                        self.game.game_objects.player.action['sword1']=True
-                    self.game.game_objects.player.timer=0
-                    #self.comb_action='sword1'
-                    #self.fprojectiles.add(self.game.game_objects.player.quick_attack(self.fprojectiles))
-
-            if input[-1]=='y':
-                self.game.game_objects.player.interacting = True
-                self.game.game_objects.interactions()
-
-            #if input[-1] == 'select':
-                #self.game.game_objects.player.action['run']=False
-
-            if input[-1] == 'rb' and self.game.game_objects.player.dashing_cooldown>9:#left shift
-                self.game.game_objects.player.dashing()
-
-
-        elif input[1]:
-            if input[-1] == 'right' and self.game.game_objects.player.dir[0]>0:
-                self.game.game_objects.player.action['stand']=True
-                self.game.game_objects.player.action['run']=False
-
-            if input[-1] == 'y':#if release button
-                if self.game.game_objects.player.state!='talk':#if not in conversation
-                    self.game.game_objects.player.state='stand'
-                    self.game.game_objects.player.action['talk']=False
-
-            if input[-1] == 'left' and self.game.game_objects.player.dir[0]<0:
-                self.game.game_objects.player.action['stand']=True
-                self.game.game_objects.player.action['run']=False
-
-            if input[-1] == 'up':
-                self.game.game_objects.player.dir[1]=0
-
-            if input[-1] == 'down':
-                self.game.game_objects.player.dir[1]=0
-
-            if input[-1]== 'y':
-                self.game.game_objects.player.interacting = False
-
-            if input[-1] == 'select':
-                self.game.game_objects.player.action['run']=False
-
-            if input[-1]=='b':
-                if not self.game.game_objects.player.action['dash']:
-                    self.game.game_objects.player.charging[0]=False
+            else:
+                self.game.game_objects.player.currentstate.change_state(input)

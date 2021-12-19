@@ -78,10 +78,10 @@ class Collisions():
 
     #invisible wall collision for NPC and enemy
     @staticmethod
-    def check_invisible(dynamic_entities,inv_enteties):
+    def check_invisible(dynamic_Entities,inv_enteties):
         collided=Collisions.collided#make the hitbox collide and not rect
 
-        collisions=pygame.sprite.groupcollide(dynamic_entities,inv_enteties,False,False,collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_enteties,False,False,collided)
         for dyn_entity, inv_entity in collisions.items():
             dyn_entity.action['inv']=True
 
@@ -125,17 +125,17 @@ class Collisions():
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between enteties-groups: a dynamic and a static one
     @staticmethod
-    def collide(dynamic_entities,static_enteties):
+    def collide(dynamic_Entities,static_enteties):
 
         #move in x every dynamic sprite
-        for entity in dynamic_entities.sprites():
+        for entity in dynamic_Entities.sprites():
             entity.rect.center = [round(entity.rect.center[0] + entity.movement[0]), entity.rect.center[1]]
             entity.update_hitbox()
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
         collided=Collisions.collided#make the hitbox collide and not rect
         #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_entities,static_enteties,False,False,collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,collided)
         for dyn_entity, stat_entity in collisions.items():
             if dyn_entity.movement[0]>0:#going to the right
                 dyn_entity.hitbox.right = stat_entity[0].hitbox.left
@@ -148,13 +148,13 @@ class Collisions():
             dyn_entity.update_rect()
 
         #move in y every dynamic sprite
-        for entity in dynamic_entities.sprites():
+        for entity in dynamic_Entities.sprites():
             entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.movement[1])]
             entity.update_hitbox()#follow with hitbox
 
         collided=Collisions.collided#make the hitbox collide and not rect
         #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_entities,static_enteties,False,False,collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,collided)
         for dyn_entity, stat_entity in collisions.items():
             if dyn_entity.movement[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
@@ -168,5 +168,5 @@ class Collisions():
 
     #make the hitbox collide instead of rect
     @staticmethod
-    def collided(dynamic_entities,static_enteties):
-        return dynamic_entities.hitbox.colliderect(static_enteties.hitbox)
+    def collided(dynamic_Entities,static_enteties):
+        return dynamic_Entities.hitbox.colliderect(static_enteties.hitbox)

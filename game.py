@@ -1,7 +1,7 @@
 import pygame
 import states
 import game_objects
-import read_files
+import Read_files
 
 class Game():
     def __init__(self):
@@ -18,7 +18,7 @@ class Game():
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.state_stack = [states.Title_Menu(self)]#,'Menu':States.Menu:,'Gameplay':States.Gameplay}
-        self.controller = read_files.Controller()
+        self.controller = Read_files.Controller()
 
     def event_loop(self):
         for event in pygame.event.get():
@@ -26,7 +26,6 @@ class Game():
                 pygame.quit()
                 sys.exit()
             else:
-                print(event)
                 self.controller.map_inputs(event)
                 self.state_stack[-1].handle_events(self.controller.output())
 

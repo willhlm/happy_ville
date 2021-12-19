@@ -79,7 +79,7 @@ class Sprites_Player(Sprites):
         else:
             self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
 
-    def get_image(self, input, timer, dir,phase):#phase pre, main, post
+    def get_image(self, input, timer, dir, phase):#phase pre, main, post
         if input=='sword' and dir[1]>0:
             input=input+'_up'
         elif input=='sword' and dir[1]<0:

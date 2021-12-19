@@ -1,7 +1,7 @@
 import pygame, sys
-import read_files
-import engine
-import entities
+import Read_files
+import Engine
+import Entities
 import Level
 import BG
 
@@ -10,16 +10,16 @@ class Game_Objects():
     def __init__(self, game):
 
         self.game = game
-        self.map_state = read_files.read_json("map_state.json") #check this file for structure of object
+        self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
         pygame.mixer.init
         self.bg_music = pygame.mixer.Channel(0)
-        self.collisions = engine.Collisions()
+        self.collisions = Engine.Collisions()
         self.create_groups()
 
     def create_groups(self):
 
         #initiate player
-        self.player = entities.Player([200,50])
+        self.player = Entities.Player([200,50])
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (self.game.WINDOW_SIZE[0]/2,2*self.game.WINDOW_SIZE[1]/3)
 
@@ -40,14 +40,14 @@ class Game_Objects():
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
-        self.enemy_pause = pygame.sprite.Group() #include all entities that are far away
-        self.npc_pause = pygame.sprite.Group() #include all entities that are far away
+        self.enemy_pause = pygame.sprite.Group() #include all Entities that are far away
+        self.npc_pause = pygame.sprite.Group() #include all Entities that are far away
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
         self.platforms_pause=pygame.sprite.Group()
         self.individuals = pygame.sprite.Group()
-        self.all_entities = pygame.sprite.Group()
+        self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather()#initiate whater
         self.weather = self.weather_paricles.create_particle('Snow')#weather effects
 
