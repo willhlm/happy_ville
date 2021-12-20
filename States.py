@@ -288,7 +288,6 @@ class Gameplay(Game_State):
         self.game.screen.fill((207,238,250))
         self.game.game_objects.draw()
 
-
     def handle_events(self, input):
         if input[0] or input[1]:
             if input[-1]=='start':#escape button
@@ -297,6 +296,5 @@ class Gameplay(Game_State):
 
             elif input[-1] == 'y':
                 self.game.game_objects.player.talk()
-
             else:
                 self.game.game_objects.player.currentstate.change_state(input)

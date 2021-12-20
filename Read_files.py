@@ -211,14 +211,14 @@ class Controller():
                                 pygame.K_LEFT: 'left',
                                 pygame.K_UP: 'up',
                                 pygame.K_DOWN: 'down',
-                                pygame.K_TAB: 'lb',
+                                pygame.K_TAB: 'rb',
                                 pygame.K_SPACE: 'a',
                                 pygame.K_t: 'y',
                                 pygame.K_e: 'b',
                                 pygame.K_f: 'x',
                                 pygame.K_g: 'y',
                                 pygame.K_i: 'select',
-                                pygame.K_LSHIFT: 'rb',
+                                pygame.K_LSHIFT: 'lb',
                                 pygame.K_RETURN: 'return'
                                 }
 
