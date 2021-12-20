@@ -33,7 +33,7 @@ class Game_UI():
         self.bg_music = pygame.mixer.Channel(0)
 
         #self.states=States.title(self.display,self.font)
-        self.controller=Read_files.Controller('xbox')#initillise and things
+        self.controller=Read_files.Controler('xbox')#initillise and things
 
         self.ability_menu=False#a flag to enter "abillity changing menue"
         self.ab_index=0#index for the ability selection
