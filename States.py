@@ -341,7 +341,6 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             elif input[-1] == 'y':
-                self.game.game_objects.player.talk()
                 npc = self.game.game_objects.conversation_collision()
                 if npc:
                     new_state = Conversation(self.game, npc)
