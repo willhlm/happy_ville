@@ -22,7 +22,7 @@ class Game():
 
     def event_loop(self):
         for event in pygame.event.get():
-            print(event)
+
             if event.type==pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -52,7 +52,6 @@ class Game():
         scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
         scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
         self.scale = min(scale_w,scale_h)
-
 
 
 if __name__ == '__main__':

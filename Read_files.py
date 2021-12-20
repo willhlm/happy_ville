@@ -193,6 +193,7 @@ class Controler():
 
     def update_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
+        print(dir(self.joystick))
 
     def buttonmapping(self,controler_type):
         file = controler_type+'keys.jason'
@@ -200,7 +201,6 @@ class Controler():
             mapping=json.load(file)
             self.buttons=mapping['buttons']
             self.analogs=mapping['analogs']
-        print(self.buttons)
 
     def map_inputs(self,event):
         self.keybord(event)
