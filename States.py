@@ -274,6 +274,8 @@ class Pause_Menu(Game_State):
 class Gameplay(Game_State):
     def __init__(self,game):
         super().__init__(game)
+        self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
+        self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
 
     def update(self):
 
@@ -287,6 +289,50 @@ class Gameplay(Game_State):
 
         self.game.screen.fill((207,238,250))
         self.game.game_objects.draw()
+        self.blit_screen_info()
+
+    def blit_screen_info(self):
+        self.blit_health()
+        self.blit_spirit()
+        self.blit_fps()
+
+    def blit_health(self):
+        #this code is specific to using heart.png sprites
+        sprite_dim = [9,8] #width, height specific to sprites used
+        blit_surface = pygame.Surface((int(self.game.game_objects.player.max_health/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
+        health = self.game.game_objects.player.health
+
+        for i in range(int(self.game.game_objects.player.max_health/20)):
+            health -= 20
+            if health >= 0:
+                blit_surface.blit(self.health_sprites[0],(i*(sprite_dim[0] + 1),0))
+            elif health > -20:
+                blit_surface.blit(self.health_sprites[-(health//4)],(i*(sprite_dim[0] + 1),0))
+            else:
+                blit_surface.blit(self.health_sprites[5],(i*(sprite_dim[0] + 1),0))
+
+        self.game.screen.blit(blit_surface,(20, 20))
+
+    def blit_spirit(self):
+
+        sprite_dim = [9,9] #width, height specific to sprites used
+        blit_surface = pygame.Surface((int(self.game.game_objects.player.max_spirit/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
+        spirit = self.game.game_objects.player.spirit
+
+        for i in range(int(self.game.game_objects.player.max_spirit/20)):
+            spirit -= 20
+            if spirit > -10:
+                blit_surface.blit(self.spirit_sprites[0],(i*(sprite_dim[0] + 1),0))
+            elif spirit > -20:
+                blit_surface.blit(self.spirit_sprites[1],(i*(sprite_dim[0] + 1),0))
+            else:
+                blit_surface.blit(self.spirit_sprites[2],(i*(sprite_dim[0] + 1),0))
+
+        self.game.screen.blit(blit_surface,(20, 34))
+
+    def blit_fps(self):
+        fps_string = str(int(self.game.clock.get_fps()))
+        self.game.screen.blit(self.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
         if input[0] or input[1]:
