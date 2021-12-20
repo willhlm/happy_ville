@@ -140,9 +140,8 @@ class Tilemap():
                     player = (col_index * self.tile_size, row_index * self.tile_size)
                     self.init_player_pos = (col_index * self.tile_size, row_index * self.tile_size)
                 elif tile == '17':
-                    pass
-                    #new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
-                    #npcs.add(new_npc)
+                    new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
+                    npcs.add(new_npc)
                 elif tile == '25':
                     pass
                     #woopie

@@ -335,12 +335,65 @@ class Gameplay(Game_State):
         self.game.screen.blit(self.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
-        if input[0] or input[1]:
+        if input[0]:
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
 
             elif input[-1] == 'y':
                 self.game.game_objects.player.talk()
+                npc = self.game.game_objects.conversation_collision()
+                if npc:
+                    new_state = Conversation(self.game, npc)
+                    new_state.enter_state()
+                else:
+                    self.game.game_objects.interactions()
+
             else:
                 self.game.game_objects.player.currentstate.change_state(input)
+        elif input [1]:
+            self.game.game_objects.player.currentstate.change_state(input)
+
+class Conversation(Gameplay):
+    def __init__(self, game, npc):
+        super().__init__(game)
+        self.npc = npc
+        self.print_frame_rate = 3
+        self.text_WINDOW_SIZE = (352, 96)
+        self.blit_x = int((self.game.WINDOW_SIZE[0]-self.text_WINDOW_SIZE[0])/2)
+        self.clean_slate()
+
+        self.conv = self.npc.get_conversation('state_1')
+
+    def clean_slate(self):
+        self.letter_frame = 0
+        self.text_window = self.font.fill_text_bg(self.text_WINDOW_SIZE)
+        self.text_window.blit(self.npc.portrait,(0,10))
+
+
+    def update(self):
+        super().update()
+
+        text = self.font.render((272,80), self.conv, int(self.letter_frame//self.print_frame_rate))
+        self.text_window.blit(text,(64,8))
+        self.letter_frame += 1
+
+    def render(self):
+        super().render()
+        self.game.screen.blit(self.text_window,(self.blit_x,60))
+
+    def handle_events(self, input):
+
+        if input[0]:
+            if input[-1] == 'start':
+                self.exit_state()
+
+            elif input[-1] == 'y':
+                if self.letter_frame//self.print_frame_rate < len(self.npc.get_conversation('state_1')):
+                    self.letter_frame = 10000
+                else:
+                    self.clean_slate()
+                    self.npc.increase_conv_index()
+                    self.conv = self.npc.get_conversation('state_1')
+                    if not self.conv:
+                        self.exit_state()

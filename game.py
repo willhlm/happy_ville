@@ -37,6 +37,7 @@ class Game():
 
             #handle event
             self.event_loop()
+            print(self.state_stack)
 
             #update
             self.state_stack[-1].update()

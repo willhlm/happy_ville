@@ -143,6 +143,9 @@ class Game_Objects():
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
 
+    def conversation_collision(self):
+        return Engine.Collisions.check_npc_collision(self.player,self.npcs)
+
     def interactions(self):
         change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
         if change_map:
