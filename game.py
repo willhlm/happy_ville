@@ -8,7 +8,7 @@ class Game():
 
         #set all screens
         self.WINDOW_SIZE = (480,270)
-        self.scale = 2
+        self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
@@ -22,7 +22,7 @@ class Game():
 
     def event_loop(self):
         for event in pygame.event.get():
-            print(event)
+            #print(event)
             if event.type==pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -37,6 +37,7 @@ class Game():
 
             #handle event
             self.event_loop()
+            print(self.state_stack)
 
             #update
             self.state_stack[-1].update()

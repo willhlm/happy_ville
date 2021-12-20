@@ -65,16 +65,7 @@ class Collisions():
     #npc player conversation
     @staticmethod
     def check_npc_collision(player,npcs):
-        npc=pygame.sprite.spritecollideany(player,npcs)#check collision
-        if npc and player.action['talk']==True:#if player want to talk talks
-            #npc.talk(screen,player)
-            player.state='talk'#the player talks with npc
-            player.action['run']=False
-            npc.action['talk'] = True
-            return npc
-
-        #return None if no interaction
-        return
+        return pygame.sprite.spritecollideany(player,npcs)#check collision
 
     #invisible wall collision for NPC and enemy
     @staticmethod
@@ -90,21 +81,21 @@ class Collisions():
     def check_interaction(player,static_enteties):
         map_change = False
         chest_id = False
-        if player.interacting:
-            collided=Collisions.collided #make the hitbox collide and not rect
-            collision=pygame.sprite.spritecollideany(player,static_enteties,collided)#check collision
-            if collision:
-                collision.interacted = True
-                if type(collision).__name__ == "Door":
-                    try:
-                        map_change = collision.next_map
-                    except:
-                        pass
-                if type(collision).__name__ in ["Chest", "Chest_Big"]:
-                    try:
-                        chest_id = collision.ID
-                    except:
-                        pass
+        collided=Collisions.collided #make the hitbox collide and not rect
+        collision=pygame.sprite.spritecollideany(player,static_enteties,collided)#check collision
+        if collision:
+            collision.interacted = True
+            if type(collision).__name__ == "Door":
+                print('before try')
+                try:
+                    map_change = collision.next_map
+                except:
+                    pass
+            if type(collision).__name__ in ["Chest", "Chest_Big"]:
+                try:
+                    chest_id = collision.ID
+                except:
+                    pass
 
         return map_change, chest_id
 

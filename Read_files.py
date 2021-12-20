@@ -79,6 +79,8 @@ class Sprites_Player(Sprites):
         else:
             self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
 
+        print(self.sprite_dict)
+
     def get_image(self, input, timer, dir, phase):#phase pre, main, post
         if input=='sword' and dir[1]>0:
             input=input+'_up'
@@ -131,6 +133,7 @@ class Alphabet():
         self.char_size = (4,6)
         self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?']
         self.character_lower=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        self.text_bg_dict = Sprites().generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
         sheet=Sprites().generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))
 
         self.characters={}
@@ -174,6 +177,36 @@ class Alphabet():
             text_surface.blit(color_surface, (0,0), special_flags = pygame.BLEND_RGB_MAX)
 
         return text_surface
+
+    def fill_text_bg(self, surface_size):
+        col = int(surface_size[0]/16)
+        row = int(surface_size[1]/16)
+        surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
+
+        for r in range(0,row):
+            for c in range(0,col):
+                if r==0:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[0],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[2],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[1],(c*16,r*16))
+                elif r==row-1:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[6],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[8],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[7],(c*16,r*16))
+                else:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[3],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[5],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[4],(c*16,r*16))
+        return surface
 
 class Controler():
     def __init__(self, controler_type = False):

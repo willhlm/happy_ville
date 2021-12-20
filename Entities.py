@@ -436,7 +436,6 @@ class NPC(Character):
             self.action['run'] = False
         else:
             self.AI()
-        self.set_img()
 
     def AI(self):
         pass
@@ -453,8 +452,8 @@ class Aslat(NPC):
     def __init__(self, pos,img=pygame.Surface((16,16))):
         super().__init__(pos,img=pygame.Surface((16,16)))
         self.name = 'Aslat'
-        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('stand', 0, self.dir)
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.image = self.sprites.get_image('Idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
