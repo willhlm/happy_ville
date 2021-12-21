@@ -79,7 +79,6 @@ class Sprites_Player(Sprites):
         else:
             self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
 
-        print(self.sprite_dict)
 
     def get_image(self, input, timer, dir, phase):#phase pre, main, post
         if input=='sword' and dir[1]>0:
@@ -99,32 +98,6 @@ class Sprites_Player(Sprites):
             input=input+'_down'
 
         return len(self.sprite_dict[phase][input])
-
-#class containing sprites for enemies and NPC (no charge, pre, post or main)
-class Sprites_enteties(Sprites):
-
-    def __init__(self,path):
-        super().__init__()
-        self.sprite_dict = self.load_all_sprites(path)
-
-    def get_image(self, input, timer, dir):
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
-
-        if dir[0] <= 0:
-            return self.sprite_dict[input][timer]
-        elif dir[0] > 0:
-            return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
-
-    def get_frame_number(self, input,dir):
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
-
-        return len(self.sprite_dict[input])
 
 #class for reading and rendering fonts
 class Alphabet():

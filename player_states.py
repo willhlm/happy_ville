@@ -1,10 +1,11 @@
-class Entity_states():
+import sys
+
+class Player_states():
     def __init__(self,entity):
         self.entity=entity
+        self.dir=self.entity.dir
         self.framerate=4
         self.frame=0
-        self.dir=self.entity.dir
-        self.states={'Idle':Idle,'Walk':Walk,'Fall_stand':Fall_stand,'Fall_run':Fall_run,'Jump_run':Jump_run,'Jump_stand':Jump_stand,'Wall':Wall,'Dash':Dash,'Sword_stand':Sword_stand,'Sword1_stand':Sword1_stand,'Sword_run':Sword_run,'Hammer':Hammer}
 
     def update(self):
         self.update_vel()
@@ -22,11 +23,14 @@ class Entity_states():
         self.entity.velocity[0]=self.dir[0]*min(abs(self.entity.velocity[0]),self.entity.max_vel)#max horizontal speed
 
     def enter_state(self,newstate):
-        self.entity.currentstate=self.states[newstate](self.entity)
-        #self.reset_timer()
+        self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+        self.reset_timer()
 
     def change_state(self,input):
         pass
+
+    def reset_timer(self):
+        self.frame=0
 
     def update_animation(self):
         statename=str(type(self).__name__)
@@ -46,10 +50,7 @@ class Entity_states():
         elif self.phase=='post':
             self.phase='pre'
 
-    def reset_timer(self):
-        self.frame=0
-
-class Idle(Entity_states):#this object will never pop
+class Idle(Player_states):#this object will never pop
     def __init__(self,entity):
         super().__init__(entity)
         self.phases=['main']
@@ -78,7 +79,7 @@ class Idle(Entity_states):#this object will never pop
     def horizontal_velocity(self):
         pass
 
-class Walk(Entity_states):
+class Walk(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.phases=['main']
@@ -98,7 +99,7 @@ class Walk(Entity_states):
         elif input[-1]=='x':
             self.enter_state('Sword_run')
 
-class Jump_run(Entity_states):
+class Jump_run(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.velocity[1] = -11
@@ -136,7 +137,7 @@ class Jump_stand(Jump_run):
     def horizontal_velocity(self):
         pass
 
-class Fall_run(Entity_states):
+class Fall_run(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.phases=['pre','main']
@@ -170,7 +171,7 @@ class Fall_stand(Fall_run):
     def horizontal_velocity(self):
         pass
 
-class Wall(Entity_states):
+class Wall(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()
@@ -197,7 +198,7 @@ class Wall(Entity_states):
     #        self.entity.friction[1]=0
     #        self.enter_state('Fall_stand')
 
-class Dash(Entity_states):
+class Dash(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()
@@ -224,7 +225,7 @@ class Dash(Entity_states):
         elif self.phase=='post':
             self.done=True
 
-class Death(Entity_states):
+class Death(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -232,7 +233,7 @@ class Death(Entity_states):
         self.entity.loot()
         self.kill()
 
-class Sword(Entity_states):
+class Sword(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.sword1=False#flag to check if we shoudl go to next sword attack
@@ -242,7 +243,7 @@ class Sword(Entity_states):
         self.entity.sword.dir=self.dir#sword direction
 
     def update_hitbox(self):
-        self.entity.sword.updates(self.entity.hitbox)#make the sword hitbox follow the player
+        self.entity.sword.spawn(self.entity.hitbox)#make the sword hitbox follow the player
 
     def increase_phase(self):
         if self.phase==self.phases[-1]:
@@ -310,7 +311,7 @@ class Sword1_stand(Sword):
     def horizontal_velocity(self):
         pass
 
-class Abillitites(Entity_states):
+class Abillitites(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.done=False#animation flag
@@ -336,7 +337,7 @@ class Hammer(Abillitites):
 
     def update_state(self):
         if self.phase=='main':
-            self.entity.hammer.updates(self.entity.hitbox)#make the sword hitbox follow the player
+            self.entity.hammer.spawn(self.entity.hitbox)#make the sword hitbox follow the player
         if self.done:
             self.entity.hammer.kill()
             self.enter_state('Idle')
@@ -348,4 +349,24 @@ class Hammer(Abillitites):
             self.entity.projectiles.add(self.entity.hammer)#add sword to group
         else:#relasing during pre pahse
             self.entity.hammer.kill()
+
+class Force(Abillitites):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.phases=['pre','main','post']
+        self.phase=self.phases[0]
+        self.entity.spirit -= 10
+        self.entity.force.velocity[0]=10*self.dir[0]
+
+    def update_state(self):
+        if self.done:
+            self.entity.force.kill()
             self.enter_state('Idle')
+
+    def change_state(self,input):
+        if input[-1]=='b' and self.phase=='charge':#when release the botton
+            self.phase='main'
+            self.reset_timer()
+            self.entity.projectiles.add(self.entity.force)#add sword to group
+        else:#relasing during pre pahse
+            self.entity.force.kill()

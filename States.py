@@ -339,7 +339,9 @@ class Gameplay(Game_State):
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
-
+            elif input[-1]=='rb':
+                new_state = Abillity_Menu(self.game)
+                new_state.enter_state()
             elif input[-1] == 'y':
                 npc = self.game.game_objects.conversation_collision()
                 if npc:
@@ -369,16 +371,15 @@ class Conversation(Gameplay):
         self.text_window = self.font.fill_text_bg(self.text_WINDOW_SIZE)
         self.text_window.blit(self.npc.portrait,(0,10))
 
-
     def update(self):
         super().update()
 
-        text = self.font.render((272,80), self.conv, int(self.letter_frame//self.print_frame_rate))
-        self.text_window.blit(text,(64,8))
         self.letter_frame += 1
 
     def render(self):
         super().render()
+        text = self.font.render((272,80), self.conv, int(self.letter_frame//self.print_frame_rate))
+        self.text_window.blit(text,(64,8))
         self.game.screen.blit(self.text_window,(self.blit_x,60))
 
     def handle_events(self, input):
@@ -396,3 +397,38 @@ class Conversation(Gameplay):
                     self.conv = self.npc.get_conversation('state_1')
                     if not self.conv:
                         self.exit_state()
+
+class Abillity_Menu(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)
+        self.ab_index=self.game.game_objects.player.abilities.index(self.game.game_objects.player.equip)
+
+    def update(self):
+        super().update()
+
+        pygame.time.wait(100)#slow motion
+
+    def render(self):
+        super().render()
+
+        positions=[]#placeholder
+        for index,abillity in enumerate(self.game.game_objects.player.abilities):
+            coordinate=[100+50*index,200]
+            self.game.screen.blit(self.font.render((50,50),abillity),(coordinate))
+            positions.append(coordinate)#coordinates of all blits
+
+        self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
+        self.game.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
+
+    def handle_events(self, input):
+        if input[0]:#press
+            if input[-1] == 'right':
+                self.ab_index+=1
+                self.ab_index=min(len(self.game.game_objects.player.abilities)-1,self.ab_index)
+            elif input[-1] =='left':
+                self.ab_index-=1
+                self.ab_index=max(0,self.ab_index)
+        elif input [1]:#release
+            if input[-1]=='rb':
+                self.game.game_objects.player.equip=self.game.game_objects.player.abilities[self.ab_index]#select ability
+                self.exit_state()

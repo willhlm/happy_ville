@@ -122,7 +122,7 @@ class Game_Objects():
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
-
+        self.player.projectiles.update(scroll)
     def draw(self):
         for i in range(1,4):
             self.bgs[i].draw(self.game.screen)
@@ -142,6 +142,7 @@ class Game_Objects():
             self.bgs[i].draw(self.game.screen)
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
+        self.player.projectiles.draw(self.game.screen)
 
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)
