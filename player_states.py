@@ -10,6 +10,11 @@ class Player_states():
     def update(self):
         self.update_vel()
         self.update_state()
+        self.increase_spirit()
+
+    def increase_spirit(self):
+        self.entity.spirit += 0.1
+        self.entity.spirit=min(self.entity.max_spirit,self.entity.spirit)
 
     def update_vel(self):
         self.entity.velocity[1]=self.entity.velocity[1]+self.entity.acceleration[1]-self.entity.velocity[1]*self.entity.friction[1]#gravity
@@ -73,7 +78,7 @@ class Idle(Player_states):#this object will never pop
             self.enter_state('Dash')
         elif input[-1]=='x':
             self.enter_state('Sword_stand')
-        elif input[-1]=='b':
+        elif input[-1]=='b' and input[0]:
             self.enter_state(self.entity.equip)
 
     def horizontal_velocity(self):
@@ -243,7 +248,7 @@ class Sword(Player_states):
         self.entity.sword.dir=self.dir#sword direction
 
     def update_hitbox(self):
-        self.entity.sword.spawn(self.entity.hitbox)#make the sword hitbox follow the player
+        self.entity.sword.update_hitbox(self.entity.hitbox)#make the sword hitbox follow the player
 
     def increase_phase(self):
         if self.phase==self.phases[-1]:
@@ -320,8 +325,10 @@ class Abillitites(Player_states):
     def increase_phase(self):
         if self.phase=='pre':
             self.phase='charge'
-        elif self.phase=='main':
+        elif self.phase==self.phases[-1]:
             self.done=True
+        elif self.phase=='main':
+            self.phase='post'
 
     def horizontal_velocity(self):
         pass
@@ -337,7 +344,7 @@ class Hammer(Abillitites):
 
     def update_state(self):
         if self.phase=='main':
-            self.entity.hammer.spawn(self.entity.hitbox)#make the sword hitbox follow the player
+            self.entity.hammer.update_hitbox(self.entity.hitbox)#make the sword hitbox follow the player
         if self.done:
             self.entity.hammer.kill()
             self.enter_state('Idle')
@@ -348,25 +355,110 @@ class Hammer(Abillitites):
             self.reset_timer()
             self.entity.projectiles.add(self.entity.hammer)#add sword to group
         else:#relasing during pre pahse
-            self.entity.hammer.kill()
+            self.done=True
 
 class Force(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['pre','main','post']
+        self.phases=['pre','charge','main']
         self.phase=self.phases[0]
         self.entity.spirit -= 10
+
         self.entity.force.velocity[0]=10*self.dir[0]
+        self.entity.force.dir=self.dir
+        self.entity.force.lifetime=30
+        self.entity.force.set_pos(self.entity.rect.center)
+        self.entity.force.phase='pre'
 
     def update_state(self):
         if self.done:
-            self.entity.force.kill()
             self.enter_state('Idle')
 
     def change_state(self,input):
-        if input[-1]=='b' and self.phase=='charge':#when release the botton
+        if input[1]:
+            if input[-1]=='b' and self.phase=='charge':#when release the botton
+                self.phase='main'
+                self.reset_timer()
+                self.entity.projectiles.add(self.entity.force)#add sword to group
+            else:#relasing during pre pahse
+                self.done=True
+
+class Shield(Abillitites):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.phases=['pre','charge','main']
+        self.phase=self.phases[0]
+        self.entity.spirit -= 10
+        self.entity.shield.lifetime=100#need to be changed depending on the animation of sword of player
+        self.entity.shield.health=200
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
+
+    def change_state(self,input):
+        if input[1]:
+            if input[-1]=='b' and self.phase=='charge':#when release the botton
+                self.phase='main'
+                self.reset_timer()
+                self.entity.projectiles.add(self.entity.shield)#add sword to group
+            else:#relasing during pre pahse
+                self.done=True
+
+class Heal(Abillitites):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
+
+    def heal(self):
+        self.entity.spirit-=20
+        self.entity.health+=20
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
+
+    def change_state(self,input):
+        if input[1]:
+            self.done=True
+
+    def increase_phase(self):
+        if self.phase=='pre':
             self.phase='main'
-            self.reset_timer()
-            self.entity.projectiles.add(self.entity.force)#add sword to group
-        else:#relasing during pre pahse
-            self.entity.force.kill()
+        elif self.phase=='main':
+            self.heal()
+            self.done=True
+
+class Stone(Abillitites):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.phases=['pre','charge','main','post']
+        self.phase=self.phases[0]
+
+        self.entity.stone.phase='pre'
+        self.entity.stone.action='small'
+        self.entity.spirit -= 10
+        self.entity.stone.lifetime=100
+        self.entity.stone.velocity=[0,0]
+
+        self.entity.stone.dir=self.dir
+        self.entity.stone.set_pos(self.entity.rect.center)
+        self.entity.projectiles.add(self.entity.stone)#add sword to group
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
+
+    def change_state(self,input):
+        if input[1]:
+            if input[-1]=='b' and self.phase=='charge':#when release the botton
+                self.phase='main'
+                self.reset_timer()
+                self.entity.stone.frame=0
+                self.entity.stone.phase='main'
+                self.entity.stone.velocity[0]=self.entity.stone.charge_velocity#set the velocity
+            else:#relasing during pre pahse
+                self.done=True
+                self.entity.stone.frame=0
+                self.entity.stone.phase='main'

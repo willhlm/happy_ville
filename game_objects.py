@@ -123,6 +123,7 @@ class Game_Objects():
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
         self.player.projectiles.update(scroll)
+        
     def draw(self):
         for i in range(1,4):
             self.bgs[i].draw(self.game.screen)

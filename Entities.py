@@ -238,11 +238,16 @@ class Player(Character):
         self.max_health = 250
         self.max_spirit = 100
         self.projectiles = pygame.sprite.Group()
+
         self.equip='Hammer'#starting abillity
+        #self.abilities={'Sword':Sword(),'Hammer':Sword(),'Shield':Sheild(),'Force':Force(),'Stone':Stone(),'Heal':None}
         self.sword=Sword()
         self.hammer=Sword()
-        self.shield=Shield(self.hitbox)
+        self.shield=Shield(self)
         self.force=Force(self.hitbox)
+        self.stone=Stone()
+        self.abilities=['Hammer','Stone','Force','Heal','Shield']#a list of abillities the player can do (should be updated as the game evolves)
+
         self.action_sfx_player = pygame.mixer.Channel(1)
         self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
@@ -252,7 +257,6 @@ class Player(Character):
         self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.shake=0
 
-        self.abilities=['Hammer','Stone','Force','Heal','Shield']#a list of abillities the player can do (should be updated as the game evolves)
         self.currentstate = player_states.Idle(self)
 
     def take_dmg(self,dmg):
@@ -271,83 +275,8 @@ class Player(Character):
             self.movement_sfx_timer = 0
         self.movement_sfx_timer += 1
 
-    def healing(self):
-        if self.spirit>=1:
-            self.health+=20
-            self.spirit-=20
-
-    def spawn_shield(self):
-        self.shield.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
-        self.shield.lifetime=200
-        self.shield.health=100
-        self.state='pre'
-        self.spirit -= 10
-
-    def spawn_force(self):
-        self.force.lifetime=20
-
-        if self.force.dir[1]!=0:#shooting up or down
-            self.force.velocity=[0,-self.force.dir[1]*10]
-        else:#horizontal
-            self.force.velocity=[self.force.dir[0]*10,0]
-
-        self.force.state='pre'
-        self.force.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],30,30)
-        self.force.rect.center=self.force.hitbox.center#match the positions of hitboxes
-        self.spirit -= 10
-        self.force_jump()
-
-    def attack_action(self,projectiles):
-        return projectiles
-        #always eneters in every iteration
-        self.timer+=1
-        if not self.action_cooldown:
-
-            if self.action['sword'] or self.action['sword1']:
-                if self.phase == 'main':#produce the object in the main animation
-                    self.spawn_sword()
-                    projectiles.add(self.sword)
-                    self.action_cooldown=True#cooldown flag
-
-            elif self.action[self.equip]:
-                if self.phase == 'pre':
-                    if self.equip=='stone' and self.spirit >= 10:#creates the objct in pre phase
-
-                        projectiles.add(Stone(self.ac_dir,self.hitbox,self.charging))
-                        self.spirit -= 10
-                        self.action_cooldown=True#cooldown flag
-
-                elif self.phase == 'main':#produce the object in the main animation
-                    if self.equip=='hammer':
-                        self.spawn_hammer()
-                        projectiles.add(self.hammer)
-                        #projectiles.add(Sword(self.ac_dir,self.hitbox))
-                    elif self.equip == 'force' and self.spirit >= 10:
-                        self.spawn_force()
-                        projectiles.add(self.force)
-                        #projectiles.add(Force(self.ac_dir,self.hitbox))
-
-                    elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
-                        #self.shield=Shield(self.ac_dir,self.hitbox)
-                        self.spawn_shield()
-                        projectiles.add(self.shield)
-                    elif self.equip=='heal':
-                        self.healing()
-                    self.action_cooldown=True#cooldown flag
-
-        return projectiles
-
-    def force_jump(self):
-        #if self.dir[1]!=0:
-        self.velocity[1]=self.dir[1]*10#force jump
-
     def update(self,pos):
-        super(Player, self).update(pos)
-        #self.update_hitbox()
-        if self.spirit <= self.max_spirit:
-            self.spirit += 0.1
-
-        #self.shield.updates(self.hitbox)
+        super().update(pos)
         #self.load_sfx()
 
     def loots(self,loot):
@@ -691,6 +620,14 @@ class Weapon(pygame.sprite.Sprite):
         self.frame=0
         self.shake=0
         self.phase='main'
+        self.phases=['main']
+        self.velocity=[0,0]
+        self.action=''
+
+    def initiate(self):
+        self.image = self.sprites.sprite_dict['main'][self.action][0]
+        self.rect = self.image.get_rect()
+        self.hitbox=self.rect
 
     def update(self,pos):
         self.lifetime-=1
@@ -703,18 +640,18 @@ class Weapon(pygame.sprite.Sprite):
         self.hitbox.center = self.rect.center
 
     def update_animation(self):
-        self.image = self.sprites.get_image('',self.frame//4,self.dir,self.phase)
+        self.image = self.sprites.get_image(self.action,self.frame//4,self.dir,self.phase)
         self.frame += 1
 
-        if self.frame == self.sprites.get_frame_number('',self.dir,self.phase)*4:
+        if self.frame == self.sprites.get_frame_number(self.action,self.dir,self.phase)*4:
             self.reset_timer()
             self.increase_phase()
 
     def increase_phase(self):
         if self.phase=='pre':
-            self.phase=='main'
+            self.phase='main'
         elif self.phase=='main':
-            self.phase=='post'
+            pass
         elif self.phase=='post':
             self.kill()
 
@@ -725,21 +662,18 @@ class Weapon(pygame.sprite.Sprite):
         if self.lifetime<0:
             self.kill()
 
+    def set_pos(self, pos):
+        self.rect.center = (pos[0],pos[1])
+        self.hitbox.center = self.rect.center
+
 class Sword(Weapon):
     def __init__(self):
         super().__init__()
-        self.lifetime=10
-        self.dmg=10
-        self.velocity=[0,0]
-        self.image = pygame.image.load("Sprites/Attack/Sword/main/force_stone6.png").convert_alpha()
-        self.rect = self.image.get_rect()
-        self.hitbox=self.rect
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Sword/')
+        self.dmg=10
+        self.initiate()
 
-    def update(self,pos):
-        super().update(pos)
-
-    def spawn(self,entity_hitbox):
+    def update_hitbox(self,entity_hitbox):
         if self.dir[1] > 0:#up
             self.hitbox.midbottom=entity_hitbox.midtop
         elif self.dir[1] < 0:#down
@@ -756,37 +690,25 @@ class Sword(Weapon):
         #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
 
 class Shield(Weapon):
-    def __init__(self,entity_hitbox):
+    def __init__(self,entity):
         super().__init__()
-        self.lifetime=1#need to be changed depending on the animation of sword of player
+        self.entity=entity
         self.health=100
-        self.velocity=[0,0]
-        self.state='pre'
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/',True)
         self.dmg=0
+        self.dir=[1,0]
+        self.initiate()
 
-        self.image = pygame.image.load("Sprites/Attack/Shield/main/water_Shield1.png").convert_alpha()
+    def update_hitbox(self):
+        self.hitbox.center=self.entity.hitbox.center#spawn hitbox based on entity position and direction
 
-        self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],20,20)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-        self.hitbox.center=entity_hitbox.center#spawn hitbox based on entity position and direction
-
-    def update(self,scroll=0):
-        pass
+    def update(self,pos):
+        super().update(pos)
+        self.update_hitbox()
 
     def destroy(self):
         if self.lifetime<0 or self.health<=0:
             self.kill()
-
-    def updates(self,entity_hitbox):
-        self.lifetime-=1
-        self.hitbox.center=entity_hitbox.center#spawn hitbox based on entity position and direction
-        self.rect.center=self.hitbox.center
-
-        self.set_img()
-        self.destroy()#check lifetime and health
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         self.health-=10#reduce the health of this object
@@ -795,33 +717,29 @@ class Shield(Weapon):
 class Stone(Weapon):
     def __init__(self):
         super().__init__()
-        self.velocity=[0,0]
         self.lifetime=100
         self.dmg=10
-        self.state='pre'
-        self.action='small'
-        self.dir=entity_dir.copy()#direction of the projectile
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
+        self.charge_velocity=0
+        self.action='small'
+        self.initiate()
 
-        self.image = pygame.image.load("Sprites/Attack/Stone/pre/small/force_stone1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[self.entity.hitbox.center[0]-5+self.dir[0]*20,self.entity.hitbox.center[1]])
-        self.hitbox=pygame.Rect(entity_rect.center[0]-5+self.dir[0]*20,self.entity.hitbox.center[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-        self.charging=charge#pointed to player charge state
-        self.charge_velocity=self.dir[0]
-
-    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
-        #remove the equipment if it has expiered
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
-        self.hitbox.center = self.rect.center
-
-        self.set_img()#set the animation
+    def update(self,pos):
+        self.update_pos(pos)
+        self.update_animation()#has to be here
         self.speed()#set the speed
-        self.destroy()#if lifetime expires
+        self.destroy()
+
+    def increase_phase(self):
+        if self.phase=='pre':
+            self.phase='charge'
+        elif self.phase=='main':
+            pass
+        elif self.phase=='post':
+            self.kill()
 
     def speed(self):
-        if self.state=='charge':#charging
+        if self.phase=='charge':#charging
             self.charge_velocity=self.charge_velocity+0.5*self.dir[0]
             self.charge_velocity=self.dir[0]*min(20,self.dir[0]*self.charge_velocity)#set max velocity
 
@@ -829,12 +747,7 @@ class Stone(Weapon):
                 self.action='medium'
                 self.shake=2#add shake effect if the ball is big
 
-            if not self.charging[0]:#when finish chaging
-                self.frame=0
-                self.state='main'
-                self.velocity[0]=self.charge_velocity#set the velocity
-
-        elif self.state=='main':#main pahse
+        elif self.phase=='main':#main pahse
             self.lifetime-=1#affect only the lifetime in main state
             if self.action=='small':#only have gravity if small
                 self.velocity[1]+=0.1#graivity
@@ -858,17 +771,11 @@ class Stone(Weapon):
 class Force(Weapon):
     def __init__(self,entity_hitbox):
         super().__init__()
-        self.lifetime=20
         self.dmg=0
-        self.velocity=[0,0]
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
         self.phase='pre'
-        self.dir=[1,0]
-        self.image = pygame.image.load("Sprites/Attack/Force/pre/fly3.png").convert_alpha()
-
-        self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],30,30)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.phases=['pre','main','post']
+        self.initiate()
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):#if hit something
         #push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
