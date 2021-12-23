@@ -79,7 +79,6 @@ class Sprites_Player(Sprites):
         else:
             self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
 
-        print(self.sprite_dict)
 
     def get_image(self, input, timer, dir, phase):#phase pre, main, post
         if input=='sword' and dir[1]>0:
@@ -209,7 +208,6 @@ class Controller():
             mapping=json.load(file)
             self.buttons=mapping['buttons']
             self.analogs=mapping['analogs']
-        print(self.buttons)
 
     def map_inputs(self,event):
         self.keybord(event)
@@ -221,14 +219,14 @@ class Controller():
                                 pygame.K_LEFT: 'left',
                                 pygame.K_UP: 'up',
                                 pygame.K_DOWN: 'down',
-                                pygame.K_TAB: 'lb',
+                                pygame.K_TAB: 'rb',
                                 pygame.K_SPACE: 'a',
                                 pygame.K_t: 'y',
                                 pygame.K_e: 'b',
                                 pygame.K_f: 'x',
                                 pygame.K_g: 'y',
                                 pygame.K_i: 'select',
-                                pygame.K_LSHIFT: 'rb',
+                                pygame.K_LSHIFT: 'lb',
                                 pygame.K_RETURN: 'return'
                                 }
 

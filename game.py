@@ -10,7 +10,7 @@ class Game():
 
         #initiate all screens
         self.WINDOW_SIZE = (480,270)
-        self.scale = 3
+        self.scale_size()#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
@@ -51,6 +51,12 @@ class Game():
             #update display
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
             pygame.display.update()
+
+    def scale_size(self):
+        scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
+        scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
+        self.scale = min(scale_w,scale_h)
+
 
 if __name__ == '__main__':
     pygame.init()#initilise

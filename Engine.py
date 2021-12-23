@@ -120,7 +120,7 @@ class Collisions():
 
         #move in x every dynamic sprite
         for entity in dynamic_Entities.sprites():
-            entity.rect.center = [round(entity.rect.center[0] + entity.movement[0]), entity.rect.center[1]]
+            entity.rect.center = [round(entity.rect.center[0] + entity.velocity[0]), entity.rect.center[1]]
             entity.update_hitbox()
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
@@ -128,11 +128,11 @@ class Collisions():
         #check for collisions and get a dictionary of sprites that collides
         collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,collided)
         for dyn_entity, stat_entity in collisions.items():
-            if dyn_entity.movement[0]>0:#going to the right
+            if dyn_entity.velocity[0]>0:#going to the right
                 dyn_entity.hitbox.right = stat_entity[0].hitbox.left
                 dyn_entity.collision_types['right'] = True
 
-            elif dyn_entity.movement[0]<0:#going to the left
+            elif dyn_entity.velocity[0]<0:#going to the left
                 dyn_entity.hitbox.left = stat_entity[0].hitbox.right
                 dyn_entity.collision_types['left'] = True
 
@@ -140,18 +140,18 @@ class Collisions():
 
         #move in y every dynamic sprite
         for entity in dynamic_Entities.sprites():
-            entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.movement[1])]
+            entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
             entity.update_hitbox()#follow with hitbox
 
         collided=Collisions.collided#make the hitbox collide and not rect
         #check for collisions and get a dictionary of sprites that collides
         collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,collided)
         for dyn_entity, stat_entity in collisions.items():
-            if dyn_entity.movement[1]>0:#going down
+            if dyn_entity.velocity[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
                 dyn_entity.collision_types['bottom'] = True
 
-            elif dyn_entity.movement[1]<0:#going up
+            elif dyn_entity.velocity[1]<0:#going up
                 dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
                 dyn_entity.collision_types['top'] = True
 
