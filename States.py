@@ -340,7 +340,7 @@ class Gameplay(Game_State):
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
             elif input[-1]=='rb':
-                new_state = Abillity_Menu(self.game)
+                new_state = Ability_Menu(self.game)
                 new_state.enter_state()
             elif input[-1] == 'y':
                 npc = self.game.game_objects.conversation_collision()
@@ -349,7 +349,9 @@ class Gameplay(Game_State):
                     new_state.enter_state()
                 else:
                     self.game.game_objects.interactions()
-
+            elif input[-1] == 'select':
+                new_state = Start_Menu(self.game)
+                new_state.enter_state()
             else:
                 self.game.game_objects.player.currentstate.change_state(input)
         elif input [1]:
@@ -398,37 +400,69 @@ class Conversation(Gameplay):
                     if not self.conv:
                         self.exit_state()
 
-class Abillity_Menu(Gameplay):
+class Ability_Menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.ab_index=self.game.game_objects.player.abilities.index(self.game.game_objects.player.equip)
+        self.abilities=list(self.game.game_objects.player.abilities.keys())
+        #self.ab_index=self.game.game_objects.player.abilities.index(self.game.game_objects.player.equip)
+        ability=str(type(self.game.game_objects.player.ability).__name__)
+        self.index=self.abilities.index(ability)
 
     def update(self):
         super().update()
-
         pygame.time.wait(100)#slow motion
 
     def render(self):
         super().render()
 
         positions=[]#placeholder
-        for index,abillity in enumerate(self.game.game_objects.player.abilities):
+        for index,abillity in enumerate(self.abilities):
             coordinate=[100+50*index,200]
             self.game.screen.blit(self.font.render((50,50),abillity),(coordinate))
             positions.append(coordinate)#coordinates of all blits
 
         self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
-        self.game.screen.blit(self.font.render((20,20),'o'),(positions[self.ab_index][0],positions[self.ab_index][1]-20))#the pointer
+        self.game.screen.blit(self.font.render((20,20),'o'),(positions[self.index][0],positions[self.index][1]-20))#the pointer
 
     def handle_events(self, input):
         if input[0]:#press
             if input[-1] == 'right':
-                self.ab_index+=1
-                self.ab_index=min(len(self.game.game_objects.player.abilities)-1,self.ab_index)
+                self.index+=1
+                self.index=min(len(self.abilities)-1,self.index)
             elif input[-1] =='left':
-                self.ab_index-=1
-                self.ab_index=max(0,self.ab_index)
+                self.index-=1
+                self.index=max(0,self.index)
         elif input [1]:#release
             if input[-1]=='rb':
-                self.game.game_objects.player.equip=self.game.game_objects.player.abilities[self.ab_index]#select ability
+                temp=self.abilities[self.index]
+                self.game.game_objects.player.ability=self.game.game_objects.player.abilities[temp]
+                #self.game.game_objects.player.equip=self.game.game_objects.player.abilities[self.ab_index]#select ability
+                self.exit_state()
+
+class Start_Menu(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)
+        self.inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
+
+    def update(self):
+        super().update()
+
+    def render(self):
+        super().render()
+
+        self.game.screen.blit(self.inventory_BG,(0,0))
+
+        width=self.game.game_objects.player.image.get_size()[0]
+        height=self.game.game_objects.player.image.get_size()[1]
+        scale=2
+        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(180,120))#player position
+
+        for index, item in enumerate(self.game.game_objects.player.inventory.keys()):
+            loot=getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player.hitbox)#make the object based on the string
+            self.game.screen.blit(pygame.transform.scale(loot.image,(int(width/scale),int(height/scale))),(0+50*index,0))
+            loot.set_img()
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'select':
                 self.exit_state()

@@ -237,25 +237,21 @@ class Player(Character):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)
         self.max_health = 250
         self.max_spirit = 100
-        self.projectiles = pygame.sprite.Group()
 
-        self.equip='Hammer'#starting abillity
-        #self.abilities={'Sword':Sword(),'Hammer':Sword(),'Shield':Sheild(),'Force':Force(),'Stone':Stone(),'Heal':None}
-        self.sword=Sword()
-        self.hammer=Sword()
-        self.shield=Shield(self)
-        self.force=Force(self.hitbox)
-        self.stone=Stone()
-        self.abilities=['Hammer','Stone','Force','Heal','Shield']#a list of abillities the player can do (should be updated as the game evolves)
+        self.projectiles = pygame.sprite.Group()
+        self.abilities={'Hammer':Hammer(self),'Shield':Shield(self),'Force':Force(self),'Stone':Stone(self),'Heal':Heal(self)}
+        self.ability=self.abilities['Hammer']
+        self.sword=Sword(self)
 
         self.action_sfx_player = pygame.mixer.Channel(1)
         self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
         self.movement_sfx_timer = 110
         self.hitbox_offset = (0,13)
+
         self.interacting = False
         self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
-        self.shake=0
+        self.shake = 0
 
         self.currentstate = player_states.Idle(self)
 
@@ -615,14 +611,16 @@ class Chest_Big(Interactable):
                 self.interacted = False
 
 class Weapon(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,entity):
         super().__init__()
+        self.entity=entity
         self.frame=0
         self.shake=0
         self.phase='main'
         self.phases=['main']
         self.velocity=[0,0]
         self.action=''
+        self.frame_rate=4
 
     def initiate(self):
         self.image = self.sprites.sprite_dict['main'][self.action][0]
@@ -632,7 +630,7 @@ class Weapon(pygame.sprite.Sprite):
     def update(self,pos):
         self.lifetime-=1
         self.update_pos(pos)
-        self.update_animation()#has to be here
+        self.update_animation()
         self.destroy()
 
     def update_pos(self,scroll):
@@ -640,10 +638,10 @@ class Weapon(pygame.sprite.Sprite):
         self.hitbox.center = self.rect.center
 
     def update_animation(self):
-        self.image = self.sprites.get_image(self.action,self.frame//4,self.dir,self.phase)
+        self.image = self.sprites.get_image(self.action,self.frame//self.frame_rate,self.dir,self.phase)
         self.frame += 1
 
-        if self.frame == self.sprites.get_frame_number(self.action,self.dir,self.phase)*4:
+        if self.frame == self.sprites.get_frame_number(self.action,self.dir,self.phase)*self.frame_rate:
             self.reset_timer()
             self.increase_phase()
 
@@ -662,37 +660,44 @@ class Weapon(pygame.sprite.Sprite):
         if self.lifetime<0:
             self.kill()
 
-    def set_pos(self, pos):
-        self.rect.center = (pos[0],pos[1])
-        self.hitbox.center = self.rect.center
+class Heal(Weapon):
+    def __init__(self,entity):
+        super().__init__(entity)
 
 class Sword(Weapon):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,entity):
+        super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Sword/')
         self.dmg=10
         self.initiate()
 
-    def update_hitbox(self,entity_hitbox):
+    def update_hitbox(self):
         if self.dir[1] > 0:#up
-            self.hitbox.midbottom=entity_hitbox.midtop
+            self.hitbox.midbottom=self.entity.hitbox.midtop
         elif self.dir[1] < 0:#down
-            self.hitbox.midtop=entity_hitbox.midbottom
+            self.hitbox.midtop=self.entity.hitbox.midbottom
         elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=entity_hitbox.midright
+            self.hitbox.midleft=self.entity.hitbox.midright
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=entity_hitbox.midleft
+            self.hitbox.midright=self.entity.hitbox.midleft
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def update(self,pos):
+        super().update(pos)
+        self.update_hitbox()
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):
         return self.shake
         #entity.velocity[1]=entity.dir[1]*10#nail jump
         #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
 
+class Hammer(Sword):
+    def __init__(self,entity):
+        super().__init__(entity)
+
 class Shield(Weapon):
     def __init__(self,entity):
-        super().__init__()
-        self.entity=entity
+        super().__init__(entity)
         self.health=100
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/',True)
         self.dmg=0
@@ -715,14 +720,25 @@ class Shield(Weapon):
         return self.shake
 
 class Stone(Weapon):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,entity):
+        super().__init__(entity)
         self.lifetime=100
         self.dmg=10
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
         self.charge_velocity=0
         self.action='small'
         self.initiate()
+
+    def update_hitbox(self):
+        if self.dir[1] > 0:#up
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+        elif self.dir[1] < 0:#down
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def update(self,pos):
         self.update_pos(pos)
@@ -769,13 +785,24 @@ class Stone(Weapon):
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
 class Force(Weapon):
-    def __init__(self,entity_hitbox):
-        super().__init__()
+    def __init__(self,entity):
+        super().__init__(entity)
         self.dmg=0
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
         self.phase='pre'
         self.phases=['pre','main','post']
         self.initiate()
+
+    def update_hitbox(self):
+        if self.dir[1] > 0:#up
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+        elif self.dir[1] < 0:#down
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def collision(self,entity=None,cosmetics=None,collision_ene=None):#if hit something
         #push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
@@ -801,7 +828,6 @@ class Loot(pygame.sprite.Sprite):
         choice=[-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,2,4,6,8,10,12,14,16,18,20]#just not 0
         self.pos=[random.choice(choice),random.choice(choice)]
         self.lifetime=300
-        self.movement=[0,0]#for platfform collisions
         dir=self.pos[0]/abs(self.pos[0])#horizontal direction
         self.velocity=[dir*random.randint(0, 3),-4]
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
@@ -842,7 +868,6 @@ class Loot(pygame.sprite.Sprite):
         self.velocity[1]+=0.3#gravity
 
         self.velocity[1]=min(self.velocity[1],4)#set a y max speed
-        self.movement[1]=self.velocity[1]#set the vertical velocity
 
 class Coin(Loot):
     def __init__(self,entity_hitbox):

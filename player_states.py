@@ -79,7 +79,8 @@ class Idle(Player_states):#this object will never pop
         elif input[-1]=='x':
             self.enter_state('Sword_stand')
         elif input[-1]=='b' and input[0]:
-            self.enter_state(self.entity.equip)
+            statename=str(type(self.entity.ability).__name__)
+            self.enter_state(statename)
 
     def horizontal_velocity(self):
         pass
@@ -247,9 +248,6 @@ class Sword(Player_states):
         self.dir=self.entity.dir.copy()#animation direction
         self.entity.sword.dir=self.dir#sword direction
 
-    def update_hitbox(self):
-        self.entity.sword.update_hitbox(self.entity.hitbox)#make the sword hitbox follow the player
-
     def increase_phase(self):
         if self.phase==self.phases[-1]:
             self.done=True
@@ -267,8 +265,6 @@ class Sword_run(Sword):
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def update_state(self):
-        self.update_hitbox()
-
         if self.done and self.sword1:
             self.enter_state('Sword1_stand')
         elif self.done:
@@ -285,8 +281,6 @@ class Sword_stand(Sword_run):
         super().__init__(entity)
 
     def update_state(self):
-        self.update_hitbox()
-
         if self.done and self.sword1:
             self.enter_state('Sword1_stand')
         elif self.done:#if animation is done
@@ -303,7 +297,7 @@ class Sword1_stand(Sword):
         self.entity.sword.lifetime=15#swrod hitbox duration
 
     def update_state(self):
-        self.update_hitbox()
+    #    self.update_hitbox()
         if self.done and self.sword2:
             self.enter_state('Sword2_stand')
         elif self.done:#if animation is done
@@ -321,6 +315,11 @@ class Abillitites(Player_states):
         super().__init__(entity)
         self.done=False#animation flag
         self.dir=self.entity.dir.copy()#animation direction
+        self.entity.ability.dir=self.dir#sword direction
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
 
     def increase_phase(self):
         if self.phase=='pre':
@@ -338,22 +337,14 @@ class Hammer(Abillitites):
         super().__init__(entity)
         self.phases=['pre','charge','main']
         self.phase=self.phases[0]
-        self.entity.hammer.dir=self.dir#sword direction
         self.entity.spirit -= 10
-        self.entity.hammer.lifetime=7
-
-    def update_state(self):
-        if self.phase=='main':
-            self.entity.hammer.update_hitbox(self.entity.hitbox)#make the sword hitbox follow the player
-        if self.done:
-            self.entity.hammer.kill()
-            self.enter_state('Idle')
+        self.entity.ability.lifetime=7
 
     def change_state(self,input):
         if input[-1]=='b' and self.phase=='charge':#when release the botton
             self.phase='main'
             self.reset_timer()
-            self.entity.projectiles.add(self.entity.hammer)#add sword to group
+            self.entity.projectiles.add(self.entity.ability)#add sword to group
         else:#relasing during pre pahse
             self.done=True
 
@@ -364,22 +355,17 @@ class Force(Abillitites):
         self.phase=self.phases[0]
         self.entity.spirit -= 10
 
-        self.entity.force.velocity[0]=10*self.dir[0]
-        self.entity.force.dir=self.dir
-        self.entity.force.lifetime=30
-        self.entity.force.set_pos(self.entity.rect.center)
-        self.entity.force.phase='pre'
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
+        self.entity.ability.velocity[0]=10*self.dir[0]
+        self.entity.ability.lifetime=30
+        self.entity.ability.phase='pre'
+        self.entity.ability.update_hitbox()
 
     def change_state(self,input):
         if input[1]:
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
                 self.reset_timer()
-                self.entity.projectiles.add(self.entity.force)#add sword to group
+                self.entity.projectiles.add(self.entity.ability)#add sword to group
             else:#relasing during pre pahse
                 self.done=True
 
@@ -389,19 +375,16 @@ class Shield(Abillitites):
         self.phases=['pre','charge','main']
         self.phase=self.phases[0]
         self.entity.spirit -= 10
-        self.entity.shield.lifetime=100#need to be changed depending on the animation of sword of player
-        self.entity.shield.health=200
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
+        
+        self.entity.ability.lifetime=100#need to be changed depending on the animation of sword of player
+        self.entity.ability.health=200
 
     def change_state(self,input):
         if input[1]:
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
                 self.reset_timer()
-                self.entity.projectiles.add(self.entity.shield)#add sword to group
+                self.entity.projectiles.add(self.entity.ability)#add sword to group
             else:#relasing during pre pahse
                 self.done=True
 
@@ -414,10 +397,6 @@ class Heal(Abillitites):
     def heal(self):
         self.entity.spirit-=20
         self.entity.health+=20
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
 
     def change_state(self,input):
         if input[1]:
@@ -436,29 +415,24 @@ class Stone(Abillitites):
         self.phases=['pre','charge','main','post']
         self.phase=self.phases[0]
 
-        self.entity.stone.phase='pre'
-        self.entity.stone.action='small'
         self.entity.spirit -= 10
-        self.entity.stone.lifetime=100
-        self.entity.stone.velocity=[0,0]
 
-        self.entity.stone.dir=self.dir
-        self.entity.stone.set_pos(self.entity.rect.center)
-        self.entity.projectiles.add(self.entity.stone)#add sword to group
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
+        self.entity.ability.phase='pre'
+        self.entity.ability.action='small'
+        self.entity.ability.lifetime=100
+        self.entity.ability.velocity=[0,0]
+        self.entity.ability.update_hitbox()
+        self.entity.projectiles.add(self.entity.ability)#add sword to group
 
     def change_state(self,input):
         if input[1]:
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
                 self.reset_timer()
-                self.entity.stone.frame=0
-                self.entity.stone.phase='main'
-                self.entity.stone.velocity[0]=self.entity.stone.charge_velocity#set the velocity
+                self.entity.ability.frame=0
+                self.entity.ability.phase='main'
+                self.entity.ability.velocity[0]=self.entity.ability.charge_velocity#set the velocity
             else:#relasing during pre pahse
                 self.done=True
-                self.entity.stone.frame=0
-                self.entity.stone.phase='main'
+                self.entity.ability.frame=0
+                self.entity.ability.phase='main'
