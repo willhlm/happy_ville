@@ -6,26 +6,30 @@ import Read_files
 class Game():
     def __init__(self):
 
-        #set all screens
+        #initiate should implement a init file to read values for thing sin game, like screen scale, fps etc.
+
+        #initiate all screens
         self.WINDOW_SIZE = (480,270)
         self.scale = 3
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
 
-        #misc
+        #initiate game related values
         self.game_objects = game_objects.Game_Objects(self)
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.state_stack = [states.Title_Menu(self)]#,'Menu':States.Menu:,'Gameplay':States.Gameplay}
-        self.controller = Read_files.Controler('xbox')
+        self.controller = Read_files.Controller()
 
     def event_loop(self):
         for event in pygame.event.get():
             #print(event)
+
             if event.type==pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             else:
                 self.controller.map_inputs(event)
                 self.state_stack[-1].handle_events(self.controller.output())
@@ -37,16 +41,15 @@ class Game():
 
             #handle event
             self.event_loop()
-            print(self.state_stack)
 
             #update
             self.state_stack[-1].update()
 
             #render
             self.state_stack[-1].render()
-            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))#scale the screen
 
             #update display
+            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
             pygame.display.update()
 
 if __name__ == '__main__':
