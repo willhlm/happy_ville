@@ -228,7 +228,7 @@ class Flowy(Character):
             self.action[self.equip] = True
 
 class Player(Character):
-    def __init__(self,pos):
+    def __init__(self,pos,projectile_group):
         super().__init__(pos)
         self.image = pygame.image.load("Sprites/Enteties/aila/main/idle/aila_idle_2.png").convert()
         self.rect = self.image.get_rect(center=pos)
@@ -238,7 +238,7 @@ class Player(Character):
         self.max_health = 250
         self.max_spirit = 100
 
-        self.projectiles = pygame.sprite.Group()
+        self.projectiles = projectile_group#pygame.sprite.Group()
         self.abilities={'Hammer':Hammer(self),'Shield':Shield(self),'Force':Force(self),'Stone':Stone(self),'Heal':Heal(self)}
         self.ability=self.abilities['Hammer']
         self.sword=Sword(self)

@@ -18,11 +18,6 @@ class Game_Objects():
 
     def create_groups(self):
 
-        #initiate player
-        self.player = Entities.Player([200,50])
-        self.players = pygame.sprite.Group(self.player)
-        self.player_center = (self.game.WINDOW_SIZE[0]/2,2*self.game.WINDOW_SIZE[1]/3)
-
         #define all sprite groups
         self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
@@ -37,8 +32,8 @@ class Game_Objects():
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
-        self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
+        self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
         self.enemy_pause = pygame.sprite.Group() #include all Entities that are far away
         self.npc_pause = pygame.sprite.Group() #include all Entities that are far away
@@ -50,6 +45,11 @@ class Game_Objects():
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather()#initiate whater
         self.weather = self.weather_paricles.create_particle('Snow')#weather effects
+
+        #initiate player
+        self.player = Entities.Player([200,50],self.fprojectiles)
+        self.players = pygame.sprite.Group(self.player)
+        self.player_center = (self.game.WINDOW_SIZE[0]/2,2*self.game.WINDOW_SIZE[1]/3)
 
     def load_map(self, map_name):
         self.map = Level.Tilemap(map_name, self.player_center)
@@ -122,7 +122,6 @@ class Game_Objects():
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
-        self.player.projectiles.update(scroll)
 
     def draw(self):
         for i in range(1,4):
@@ -143,7 +142,6 @@ class Game_Objects():
             self.bgs[i].draw(self.game.screen)
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
-        self.player.projectiles.draw(self.game.screen)
 
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)
