@@ -4,39 +4,32 @@ class Collisions():
     def __init__(self):
         self.shake=0
 
-    def action_collision(self,projectiles,projectile_enteties,platforms,enemies,screen,loot,cosmetics):
+    def action_collision(self,projectiles,platforms,enemies):
         self.shake-=1
         self.shake=max(0,self.shake)#to not let it go to too low values
 
-        for entity in projectile_enteties.sprites():#go through the group
-            projectiles=entity.attack_action(projectiles)
+        for projectile in projectiles.sprites():#go through the group
 
-            for projectile in projectiles.sprites():#go through the group
+            #projectile collision?
+            collision_plat = pygame.sprite.spritecollideany(projectile,platforms,Collisions.collided)
+            collision_ene = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
 
-                #projectile collision?
-                collision_plat = pygame.sprite.spritecollideany(projectile,platforms,Collisions.collided)
-                collision_ene = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
-
-                pygame.draw.rect(screen, (0,0,255), projectile.hitbox,2)#draw hitbox
-
-                #if hit enemy
-                if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
-
-                    #self.shake+=collision_ene.death(loot)#check if dead
+            #if hit enemy
+            if collision_ene:# and not collision_ene.action['death'] and not collision_ene.action['hurt']:
+                if str(type(collision_ene.currentstate).__name__) is not 'Hurt':
+                #self.shake+=collision_ene.death(loot)#check if dead
                     collision_ene.take_dmg(projectile.dmg)
-                    self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
+                    projectile.collision_ene(collision_ene)
+                #self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
 
-                    if collision_ene.action['death']:
-                        self.shake+=collision_ene.shake
-                        loot.add(collision_ene.loots())
+                #if collision_ene.action['death']:
+                #    self.shake+=collision_ene.shake
+                #    loot.add(collision_ene.loots())
 
-                #hit platform
-                elif collision_plat:
-                    self.shake=projectile.collision(entity)#entity is the guy donig the action
-
-    @staticmethod
-    def collided(projectile,target):
-        return projectile.hitbox.colliderect(target.hitbox)
+            #hit platform
+            elif collision_plat:
+                projectile.collision_plat()
+                #self.shake=projectile.collision(entity)#entity is the guy donig the action
 
     #take damage if collide with enemy
     @staticmethod
@@ -44,14 +37,15 @@ class Collisions():
         collided=Collisions.collided #make the hitbox collide and not rect
         collisions=pygame.sprite.spritecollideany(player,enemies,collided)#check collision
 
-        if collisions and not player.action['hurt'] and not collisions.action['death']:
+        if collisions:
             player.take_dmg(10)
 
-            sign=(player.hitbox.center[0]-collisions.hitbox.center[0])/(abs(player.hitbox.center[0]-collisions.hitbox.center[0]))
-            #if player.hitbox.center[0] > collisions.hitbox.center[0]:#player on right
-            player.velocity[0]=sign*10#knock back of player
-        #    else:#player on left
-            #    player.velocity[0]=-10#knock back of player
+            sign=(player.hitbox.center[0]-collisions.hitbox.center[0])
+            if sign>0:
+                player.velocity[0]=10#knock back of player
+            else:
+                player.velocity[0]=-10#knock back of player
+
 
     #pickup loot
     @staticmethod

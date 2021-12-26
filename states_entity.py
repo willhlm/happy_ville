@@ -1,4 +1,6 @@
-class Entity_states():
+import sys
+
+class Entity_States():
     def __init__(self,entity):
         self.entity=entity
         self.dir=self.entity.dir
@@ -20,9 +22,11 @@ class Entity_states():
         self.entity.velocity[0]+=self.dir[0]*self.entity.acceleration[0]
         self.entity.velocity[0]=self.dir[0]*min(abs(self.entity.velocity[0]),self.entity.max_vel)#max horizontal speed
 
-    def enter_state(self,newstate):
-        self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
-        self.reset_timer()
+    def change_state(self,input):
+        pass
+
+    def reset_timer(self):
+        self.frame=0
 
     def update_animation(self):
         statename=str(type(self).__name__)
@@ -32,22 +36,4 @@ class Entity_states():
 
         if self.frame == self.entity.sprites.get_frame_number(statename,self.dir,self.phase)*self.framerate:
             self.reset_timer()
-
-    def reset_timer(self):
-        self.frame=0
-
-class Walk(Entity_states):#this object will never pop
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.phases=['main']
-        self.phase=self.phases[0]
-
-    def update_state(self):
-        pass
-
-class Idle(Walk):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def horizontal_velocity(self):
-        pass
+            self.increase_phase()

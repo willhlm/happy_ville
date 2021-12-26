@@ -1,51 +1,12 @@
 import sys
+from states_entity import Entity_States
 
-class Player_states():
+class Enemy_states(Entity_States):
     def __init__(self,entity):
-        self.entity=entity
-        self.dir=self.entity.dir
-        self.framerate=4
-        self.frame=0
-
-    def update(self):
-        self.update_vel()
-        self.update_state()
-        self.increase_spirit()
-
-    def increase_spirit(self):
-        self.entity.spirit += 0.1
-        self.entity.spirit=min(self.entity.max_spirit,self.entity.spirit)
-
-    def update_vel(self):
-        self.entity.velocity[1]=self.entity.velocity[1]+self.entity.acceleration[1]-self.entity.velocity[1]*self.entity.friction[1]#gravity
-        self.entity.velocity[1]=min(self.entity.velocity[1],7)#set a y max speed
-
-        self.horizontal_velocity()#some states stay still
-        self.entity.velocity[0]=self.entity.velocity[0]-self.entity.friction[0]*self.entity.velocity[0]#friction
-
-    def horizontal_velocity(self):
-        self.entity.velocity[0]+=self.dir[0]*self.entity.acceleration[0]
-        self.entity.velocity[0]=self.dir[0]*min(abs(self.entity.velocity[0]),self.entity.max_vel)#max horizontal speed
+        super().__init__(entity)
 
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
-        self.reset_timer()
-
-    def change_state(self,input):
-        pass
-
-    def reset_timer(self):
-        self.frame=0
-
-    def update_animation(self):
-        statename=str(type(self).__name__)
-
-        self.entity.image = self.entity.sprites.get_image(statename,self.frame//self.framerate,self.dir,self.phase)
-        self.frame += 1
-
-        if self.frame == self.entity.sprites.get_frame_number(statename,self.dir,self.phase)*self.framerate:
-            self.reset_timer()
-            self.increase_phase()
 
     def increase_phase(self):
         if self.phase=='pre':
@@ -55,7 +16,7 @@ class Player_states():
         elif self.phase=='post':
             self.phase='pre'
 
-class Idle(Player_states):#this object will never pop
+class Idle(Enemy_states):#this object will never pop
     def __init__(self,entity):
         super().__init__(entity)
         self.phases=['main']
@@ -80,13 +41,13 @@ class Idle(Player_states):#this object will never pop
             elif input[-1]=='x':
                 self.enter_state('Sword_stand')
             elif input[-1]=='b' and input[0]:
-                statename=str(type(self.entity.ability).__name__)
-                self.enter_state(statename)
+                #statename=str(type(self.entity.ability).__name__)
+                self.enter_state(self.entity.equip)
 
     def horizontal_velocity(self):
         pass
 
-class Walk(Player_states):
+class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.phases=['main']
@@ -108,7 +69,7 @@ class Walk(Player_states):
             if ((input[-1] == 'right' and self.entity.dir[0] == 1) or (input[-1] == 'left' and self.entity.dir[0] == -1)):
                 self.enter_state('Idle')
 
-class Jump_run(Player_states):
+class Jump_run(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.velocity[1] = -11
@@ -157,10 +118,10 @@ class Jump_stand(Jump_run):
     def horizontal_velocity(self):
         pass
 
-class Fall_run(Player_states):
+class Fall_run(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['pre','main']
+        self.phases=['main']
         self.phase=self.phases[0]
 
     def update_state(self):
@@ -195,7 +156,7 @@ class Fall_stand(Fall_run):
     def horizontal_velocity(self):
         pass
 
-class Wall(Player_states):
+class Wall(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()
@@ -230,7 +191,7 @@ class Wall(Player_states):
             if input[-1]=='right' or input[-1]=='left':
                 self.walk=False
 
-class Dash(Player_states):
+class Dash(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()
@@ -276,15 +237,40 @@ class Dash(Player_states):
         elif self.phase=='post':
             self.done=True
 
-class Death(Player_states):
+class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phase='main'
+        self.done=False
 
     def update_state(self):
-        self.entity.loot()
-        self.kill()
+        if self.done:
+            #self.entity.loot()
+            self.entity.kill()
 
-class Sword(Player_states):
+    def increase_phase(self):
+        self.done=True
+
+    def horizontal_velocity(self):
+        pass
+
+class Hurt(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.phase='main'
+        self.done=False
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
+
+    def increase_phase(self):
+        self.done=True
+
+    def horizontal_velocity(self):
+        pass
+
+class Sword(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.sword1=False#flag to check if we shoudl go to next sword attack
@@ -355,11 +341,14 @@ class Sword1_stand(Sword):
     def horizontal_velocity(self):
         pass
 
-class Abillitites(Player_states):
+class Abillitites(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.done=False#animation flag
         self.dir=self.entity.dir.copy()#animation direction
+
+        abilityname=str(type(self).__name__)
+        self.entity.ability=self.entity.abilities[abilityname](self.entity)#make the ability object
         self.entity.ability.dir=self.dir#sword direction
 
     def update_state(self):
@@ -396,7 +385,7 @@ class Hammer(Abillitites):
 class Force(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['pre','charge','main']
+        self.phases=['pre','main']
         self.phase=self.phases[0]
         self.entity.spirit -= 10
 

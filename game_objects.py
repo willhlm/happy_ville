@@ -77,7 +77,7 @@ class Game_Objects():
         self.npc_pause.empty()
 
         #load all objects
-        player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name])
+        player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name],self.eprojectiles)
         self.player.set_pos(player_pos)
         self.platforms,self.platforms_pause=self.map.load_map()#load all map
         #self.players.add(self.player)
@@ -97,6 +97,9 @@ class Game_Objects():
         self.collisions.pickup_loot(self.player,self.loot)
         self.collisions.check_enemy_collision(self.player,self.enemies)
 
+        self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
+        self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
+
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
@@ -109,7 +112,7 @@ class Game_Objects():
         for bg in self.bgs:
             bg.update(scroll)
         self.players.update(scroll)
-        self.enemies.update(scroll)
+        self.enemies.update(scroll,self.player.rect)#shoudl the AI be based on playerposition?
         self.npcs.update(scroll)
         self.interactables.update(scroll)
         self.invisible_blocks.update(scroll)
@@ -118,7 +121,7 @@ class Game_Objects():
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
         self.npc_pause.update(scroll)
-        self.enemy_pause.update(scroll)
+        self.enemy_pause.update(scroll,self.player.rect)
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
@@ -142,6 +145,15 @@ class Game_Objects():
             self.bgs[i].draw(self.game.screen)
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
+
+        #temporaries draws. Shuold be removed
+        for projectile in self.fprojectiles.sprites():#go through the group
+            pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
+        for projectile in self.eprojectiles.sprites():#go through the group
+            pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
+        for enemy in self.enemies.sprites():#go through the group
+            enemy.draw(self.game.screen)
+
 
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)

@@ -92,7 +92,7 @@ class Tilemap():
     def load_bg_music(self):
         return pygame.mixer.Sound("Audio/" + self.level_name + "/default.wav")
 
-    def load_statics(self, map_state):
+    def load_statics(self, map_state,eprojectile):
     #load Entities that shouldn't despawn with chunks, npc, enemies, interactables etc
         map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
 
@@ -143,12 +143,11 @@ class Tilemap():
                     new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
                 elif tile == '25':
-                    pass
-                    #woopie
+                    new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size),eprojectile)
+                    enemies.add(new_enemy)
                 elif tile == '24':
-                    pass
-                    #new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
-                    #enemies.add(new_enemy)
+                    new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size),eprojectile)
+                    enemies.add(new_enemy)
                 elif tile == '33':
                     new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'right')
                     camera_blocks.add(new_stop)
