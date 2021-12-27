@@ -456,9 +456,9 @@ class Start_Menu(Gameplay):
         self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(180,120))#player position
 
         for index, item in enumerate(self.game.game_objects.player.inventory.keys()):
-            loot=getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player.hitbox)#make the object based on the string
+            loot=getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player)#make the object based on the string
+            loot.update_animation()            
             self.game.screen.blit(pygame.transform.scale(loot.image,(int(width/scale),int(height/scale))),(0+50*index,0))
-            loot.set_img()
 
     def handle_events(self,input):
         if input[0]:#press

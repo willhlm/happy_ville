@@ -77,7 +77,7 @@ class Game_Objects():
         self.npc_pause.empty()
 
         #load all objects
-        player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name],self.eprojectiles)
+        player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name],self.eprojectiles,self.loot)
         self.player.set_pos(player_pos)
         self.platforms,self.platforms_pause=self.map.load_map()#load all map
         #self.players.add(self.player)

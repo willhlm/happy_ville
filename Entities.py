@@ -114,23 +114,15 @@ class Character(Dynamicentity):#enemy, NPC,player
     def update_rect(self):
         self.rect.center = [self.hitbox.center[0] - self.hitbox_offset[0], self.hitbox.center[1] - self.hitbox_offset[1]]
 
-    def loots(self):
-        drops=[]
-        for key in self.inventory.keys():#go through all loot
-            for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj=getattr(sys.modules[__name__], key)#make a class based on the name of the key: need to import sys
-                drops.append(obj(self.hitbox))
-            self.inventory[key]=0
-        return drops
-
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
         self.hitbox.center = self.rect.center
 
 class Enemy(Character):
-    def __init__(self,pos,projectile_group):
+    def __init__(self,pos,projectile_group,loot_group):
         super().__init__(pos)
         self.projectiles = projectile_group
+        self.drops = loot_group
         self.health = 100
         self.spirit = 100
         self.currentstate = states_enemy.Idle(self)
@@ -155,9 +147,16 @@ class Enemy(Character):
     def death(self):
         self.currentstate = states_enemy.Death(self)
 
+    def loots(self):
+        for key in self.inventory.keys():#go through all loot
+            for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
+                obj=getattr(sys.modules[__name__], key)(self)#make a class based on the name of the key: need to import sys
+                self.drops.add(obj)
+            self.inventory[key]=0
+
 class Woopie(Enemy):
-    def __init__(self,pos,projectile_group):
-        super().__init__(pos,projectile_group)
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/main/Idle/Kodama_stand1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
@@ -180,15 +179,15 @@ class Woopie(Enemy):
                 self.currentstate = states_enemy.Walk(self)
 
 class Flowy(Enemy):
-    def __init__(self,pos,projectile_group):
-        super().__init__(pos,projectile_group)
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/main/Idle/Stand1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 10
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/flowy/',True)
-        self.loot={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
+        self.inventory={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
         self.distance=[0,0]
         self.shake=self.hitbox.height/10
 
@@ -254,9 +253,6 @@ class Player(Character):
     def update(self,pos):
         super().update(pos)
         #self.load_sfx()xxx
-
-    def loots(self,loot):
-        pass
 
 class NPC(Character):
     def __init__(self,pos):
@@ -568,7 +564,7 @@ class Weapon(pygame.sprite.Sprite):
     def initiate(self):
         self.image = self.sprites.sprite_dict['main'][self.action][0]
         self.rect = self.image.get_rect()
-        self.hitbox=self.rect
+        self.hitbox=self.rect.copy()
 
     def update(self,pos):
         self.lifetime-=1
@@ -778,16 +774,18 @@ class Force(Weapon):
         #    entity.velocity[1]=self.dir[1]*abs(push_strength[1])*0.75#force jump
 
 class Loot(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,entity):
         super().__init__()
-        choice=[-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,2,4,6,8,10,12,14,16,18,20]#just not 0
-        self.pos=[random.choice(choice),random.choice(choice)]
+        self.entity=entity
         self.lifetime=300
-        dir=self.pos[0]/abs(self.pos[0])#horizontal direction
-        self.velocity=[dir*random.randint(0, 3),-4]
+        self.velocity=[random.randint(-3, 3),-4]
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
-        self.animation_timer = 0
+        self.frame = 0
+
+        #rectangle
+        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,5,5)
+        self.hitbox=self.rect.copy()
 
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
@@ -795,63 +793,46 @@ class Loot(pygame.sprite.Sprite):
     def update_rect(self):
         self.rect.center = self.hitbox.center
 
-    def platform_int(self):
-        if self.collision_types['bottom']:
-            self.velocity=[0,0]
-
-    def update(self,scroll):
-        #remove the equipment if it has expiered
-        self.speed()
-
-        self.lifetime-=1
+    def update_pos(self,scroll):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
+    def check_collisions(self):
+        if self.collision_types['bottom']:
+            self.velocity=[0,0]
+
+    def destory(self):
         if self.lifetime<0:#remove after a while
             self.kill()
 
-        self.platform_int()
-        self.set_img()
+    def update(self,scroll):
+        self.lifetime-=1
+        self.speed()
+        self.update_pos(scroll)
+        self.check_collisions()
+        self.update_animation()
+        self.destory()
 
-    def set_img(self, frame_rate = 0.25):
-        self.image = self.sprites['idle'][int(self.animation_timer)]
-        if self.animation_timer == len(self.sprites['idle'])-1:
-            self.animation_timer = 0
-        self.animation_timer += frame_rate
+    def update_animation(self, frame_rate = 0.25):
+        self.image = self.sprites['idle'][int(self.frame)]
+        if self.frame == len(self.sprites['idle'])-1:
+            self.frame = 0
+        self.frame += frame_rate
 
     def speed(self):
         self.velocity[1]+=0.3#gravity
-
         self.velocity[1]=min(self.velocity[1],4)#set a y max speed
 
-class Coin(Loot):
-    def __init__(self,entity_hitbox):
-        super().__init__()
-
-        self.image = pygame.image.load("Sprites/Enteties/Items/coin.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
 class Amber_Droplet(Loot):
-    def __init__(self,entity_hitbox):
-        super().__init__()
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
 
-        self.image = pygame.image.load("Sprites/Enteties/Items/amber_droplet/idle/amber_droplet1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
+    def __init__(self,entity):
+        super().__init__(entity)
 
 class Arrow(Loot):
-    def __init__(self,entity_hitbox):
-        super().__init__()
-
-        self.image = pygame.image.load("Sprites/Enteties/Items/arrow/idle/arrow.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
+    def __init__(self,entity):
+        super().__init__(entity)
 
 class Cosmetics(pygame.sprite.Sprite):
     def __init__(self,entity):

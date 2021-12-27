@@ -16,7 +16,7 @@ class Collisions():
 
             #if hit enemy
             if collision_ene:# and not collision_ene.action['death'] and not collision_ene.action['hurt']:
-                if str(type(collision_ene.currentstate).__name__) is not 'Hurt':
+                if str(type(collision_ene.currentstate).__name__) is not 'Death':
                 #self.shake+=collision_ene.death(loot)#check if dead
                     collision_ene.take_dmg(projectile.dmg)
                     projectile.collision_ene(collision_ene)
