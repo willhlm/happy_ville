@@ -9,6 +9,7 @@ class Player_states(Entity_States):
         super().update()
         self.increase_spirit()
 
+
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
@@ -371,6 +372,7 @@ class Abillitites(Player_states):
         elif self.phase=='main':
             self.phase='post'
 
+
     def horizontal_velocity(self):
         pass
 
@@ -383,12 +385,13 @@ class Hammer(Abillitites):
         self.entity.ability.lifetime=7
 
     def change_state(self,input):
-        if input[-1]=='b' and self.phase=='charge':#when release the botton
-            self.phase='main'
-            self.reset_timer()
-            self.entity.projectiles.add(self.entity.ability)#add sword to group
-        else:#relasing during pre pahse
-            self.done=True
+        if input[1]:#release
+            if input[-1]=='b' and self.phase=='charge':#when release the botton
+                self.phase='main'
+                self.reset_timer()
+                self.entity.projectiles.add(self.entity.ability)#add sword to group
+            #else:#relasing during pre pahse
+                #self.done=True
 
 class Force(Abillitites):
     def __init__(self,entity):

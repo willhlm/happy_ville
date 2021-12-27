@@ -71,7 +71,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.velocity=[0,0]
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
-        self.inventory = {'Amber_Droplet':0}
         self.max_vel = 10
         self.hitbox_offset = (0,0)
         self.friction=[0.2,0]
@@ -126,6 +125,7 @@ class Enemy(Character):
         self.health = 100
         self.spirit = 100
         self.currentstate = states_enemy.Idle(self)
+        self.inventory = {'Amber_Droplet':0}
 
     def update(self,pos,playerpos):
         super().update(pos)
@@ -204,7 +204,7 @@ class Flowy(Enemy):
 class Player(Character):
     def __init__(self,pos,projectile_group):
         super().__init__(pos)
-        self.image = pygame.image.load("Sprites/Enteties/aila/main/idle/aila_idle_2.png").convert()
+        self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
