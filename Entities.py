@@ -44,37 +44,15 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
 
 class BG_Block(Staticentity):
-    def __init__(self,pos,img):
-        super().__init__(pos,img)
-
-class FG_fixed(Staticentity):
-    def __init__(self,pos,img):
-        super().__init__(pos,img)
-
-class FG_paralex(Staticentity):
-    def __init__(self,pos,img):
+    def __init__(self,pos,img,paralex=1):
         super().__init__(pos,img)
         self.true_pos = self.rect.topleft
-        self.paralex=1.25
+        self.paralex=paralex
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
         self.rect.topleft = self.true_pos
-
-class BG_near(FG_paralex):
-    def __init__(self,pos,img):
-        super().__init__(pos,img)
-        self.paralex=0.75
-
-class BG_mid(FG_paralex):
-    def __init__(self,pos,img):
-        super().__init__(pos,img)
-        self.paralex=0.5
-
-class BG_far(FG_paralex):
-    def __init__(self,pos,img):
-        super().__init__(pos,img)
-        self.paralex=0.03
 
 class Dynamicentity(Staticentity):
     def __init__(self,pos):
@@ -875,25 +853,31 @@ class Arrow(Loot):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
 
-class Spirits(pygame.sprite.Sprite):
-
-    def __init__(self,pos):
+class Cosmetics(pygame.sprite.Sprite):
+    def __init__(self,entity):
         super().__init__()
-        self.image = pygame.image.load("Sprites/animations/Spirits/Spirits1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[pos[0],pos[1]])
-        self.hitbox=pygame.Rect(pos[0],pos[1],5,5)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.entity=entity
         self.frame=0
-        self.lifetime=10
 
-    def update(self,pos):
-        self.lifetime -= 1
+    def update(self):
+        self.lifetime-=1
+        self.update_pos()
+        self.destroy()
 
+    def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
 
+    def destroy(self):
         if self.lifetime<0:
             self.kill()
+
+class Spirits(Cosmetics):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.image = pygame.image.load("Sprites/animations/Spirits/Spirits1.png").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.lifetime=10
 
 class Menu_Arrow(pygame.sprite.Sprite):
 

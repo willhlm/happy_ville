@@ -1,4 +1,4 @@
-import sys
+import sys, pygame
 from states_entity import Entity_States
 
 class Player_states(Entity_States):

@@ -224,17 +224,17 @@ class Tilemap():
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
-                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,paralex
             elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_far((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg]))
+                backgrounds.append(Entities.BG_Block((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg],0.03))#pos,img,paralex
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_mid((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg]))
+                backgrounds.append(Entities.BG_Block((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg],0.5))#pos,img,paralex
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_near((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg]))
+                backgrounds.append(Entities.BG_Block((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg],0.75))#pos,img,paralex
             elif bg == 'fg_fixed':
-                backgrounds.append(Entities.FG_fixed((0,0),blit_surfaces[bg]))
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,paralex
             elif bg == 'fg_paralex':
-                backgrounds.append(Entities.FG_paralex((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg]))
+                backgrounds.append(Entities.BG_Block((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],1.25))#pos,img,paralex
         del blit_surfaces, bg_sheets, bg_maps
         return backgrounds
     def load_map(self):#load the whole map

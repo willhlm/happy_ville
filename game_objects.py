@@ -43,8 +43,8 @@ class Game_Objects():
         self.platforms_pause=pygame.sprite.Group()
         self.individuals = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
-        self.weather_paricles=BG.Weather()#initiate whater
-        self.weather = self.weather_paricles.create_particle('Snow')#weather effects
+        weather_paricles=BG.Weather(self.weather)#initiate whater
+        weather_paricles.create_particle('Rain')#weather effects
 
         #initiate player
         self.player = Entities.Player([200,50],self.fprojectiles)
@@ -116,7 +116,7 @@ class Game_Objects():
         self.npcs.update(scroll)
         self.interactables.update(scroll)
         self.invisible_blocks.update(scroll)
-        self.weather.update(scroll,self.game.screen)
+        self.weather.update(scroll)
         self.fprojectiles.update(scroll)
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
@@ -130,7 +130,7 @@ class Game_Objects():
         for i in range(1,4):
             self.bgs[i].draw(self.game.screen)
         self.bg_fixed.draw(self.game.screen)
-        #self.weather.draw(self.game.screen)
+        self.weather.draw(self.game.screen)
 
         #self.platforms.draw(self.game.screen)
         self.interactables.draw(self.game.screen)

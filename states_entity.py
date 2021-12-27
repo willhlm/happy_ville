@@ -1,5 +1,3 @@
-import sys
-
 class Entity_States():
     def __init__(self,entity):
         self.entity=entity
