@@ -1,26 +1,26 @@
-import pygame, math, random, sys
+import pygame, math, random, sys, Read_files, states_weather
 
 class Weather(pygame.sprite.Sprite):
 
-    def __init__(self,group):
+    def __init__(self,weather_group):
         super().__init__()
-        pos=[random.randint(-50, 500),random.randint(-500, -100)]
+        self.pos=[random.randint(0, 500),random.randint(-500, -100)]#starting position
+        self.group = weather_group
+        self.currentstate = states_weather.Fall(self)
         self.velocity=[0,0]
-        self.phase=random.randint(0, 10)
-        self.image = pygame.image.load("Sprites/animations/Weather/particle.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
-        self.group=group
+        self.wind=2
 
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0]+self.velocity[0], self.rect.topleft[1] + pos[1]+self.velocity[1]]
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0]+self.velocity[0], self.rect.topleft[1] + scroll[1]+self.velocity[1]]
 
-    def update(self,pos):
-        self.update_pos(pos)
-        self.speed()#modulate the speed according to the particle type
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.currentstate.update()
+        self.currentstate.update_animation()
         self.boundary()
 
     def boundary(self):
-        if self.rect.y>300:#if on the lower side of screen. SHould we do ground collisions?
+        if self.rect.y>300:#if on the lower side of screen.
             self.rect.y=random.randint(-500, -100)
 
         #continiouse falling, horizontally
@@ -29,8 +29,8 @@ class Weather(pygame.sprite.Sprite):
         elif self.rect.x>500:
             self.rect.x-=500
 
-    def create_particle(self,particle):
-        for i in range(0,100):
+    def create_particles(self,particle,number=100):
+        for i in range(0,number):
             obj=getattr(sys.modules[__name__], particle)(self.group)
             self.group.add(obj)
 
@@ -43,24 +43,26 @@ class Weather(pygame.sprite.Sprite):
         self.image=img_copy
         self.image.set_colorkey((0,0,0,255))
 
-    def size(self):
-        self.image=pygame.transform.scale(self.image,(self.scale[0],self.scale[1]))
-
     def speed(self):
         pass
 
+    def collision(self):
+        self.currentstate.change_state()
+
 class Snow(Weather):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Weather/Snow/')
+
     def __init__(self,group):
         super().__init__(group)
-        self.scale=[20,20]
-        self.color=(255,255,255)
-        self.timer=500
-        self.size()
-        self.set_color()
+        self.image=pygame.image.load('Sprites/animations/Weather/Snow/Fall/fall1.png').convert_alpha()
+        self.rect = self.image.get_rect(center=self.pos)
+        self.time=0
 
     def speed(self):
-        self.timer-=1
-        self.velocity=[2*math.sin(self.timer//10) + self.phase,1]
+        self.time+=1
+        self.velocity=[math.sin(self.time//10) + self.wind,1]
+        if self.time>100:
+            self.time=0
 
 class Sakura(Weather):
     def __init__(self,group):
@@ -69,8 +71,6 @@ class Sakura(Weather):
         colors=[[255,192,203],[255,105,180],[255,100,180]]
         self.color=colors[random.randint(0, len(colors)-1)]
         self.velocity=[self.phase,1.5]
-        self.size()
-        self.set_color()
 
 class Autumn(Sakura):
     def __init__(self,group):
@@ -79,13 +79,13 @@ class Autumn(Sakura):
         self.color=colors[random.randint(0, len(colors)-1)]
 
 class Rain(Weather):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Weather/Rain/')
+
     def __init__(self,group):
         super().__init__(group)
-        self.scale=[5,40]
-        self.color=(0,0,200)
-        self.velocity=[0.1,5]
-        self.size()
-        self.set_color()
+        self.image=pygame.image.load('Sprites/animations/Weather/Rain/Fall/fall1.png').convert_alpha()
+        self.rect = self.image.get_rect(center=self.pos)
+        self.velocity=[0.1+self.wind,5]
 
 class Light():
     def __init__(self):

@@ -4,6 +4,13 @@ class Collisions():
     def __init__(self):
         self.shake=0
 
+    @staticmethod
+    def weather_paricles(weathers,platforms):
+
+        collisions=pygame.sprite.groupcollide(weathers,platforms,False,False)
+        for weather, platform in collisions.items():
+            weather.collision()
+
     def action_collision(self,projectiles,platforms,enemies):
         self.shake-=1
         self.shake=max(0,self.shake)#to not let it go to too low values
@@ -34,8 +41,7 @@ class Collisions():
     #take damage if collide with enemy
     @staticmethod
     def check_enemy_collision(player,enemies):
-        collided=Collisions.collided #make the hitbox collide and not rect
-        collisions=pygame.sprite.spritecollideany(player,enemies,collided)#check collision
+        collisions=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
 
         if collisions:
             player.take_dmg(10)
@@ -46,12 +52,11 @@ class Collisions():
             else:
                 player.velocity[0]=-10#knock back of player
 
-
     #pickup loot
     @staticmethod
     def pickup_loot(player,loots):
-        collided=Collisions.collided #make the hitbox collide and not rect
-        collision=pygame.sprite.spritecollide(player,loots,True,collided)#check collision
+
+        collision=pygame.sprite.spritecollide(player,loots,True,Collisions.collided)#check collision
         for loot in collision:
             obj=(loot.__class__.__name__)#get the loot in question
             player.inventory[obj]+=1
@@ -64,9 +69,8 @@ class Collisions():
     #invisible wall collision for NPC and enemy
     @staticmethod
     def check_invisible(dynamic_Entities,inv_enteties):
-        collided=Collisions.collided#make the hitbox collide and not rect
 
-        collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_enteties,False,False,collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_enteties,False,False,Collisions.collided)
         for dyn_entity, inv_entity in collisions.items():
             dyn_entity.action['inv']=True
 
@@ -75,8 +79,7 @@ class Collisions():
     def check_interaction(player,static_enteties):
         map_change = False
         chest_id = False
-        collided=Collisions.collided #make the hitbox collide and not rect
-        collision=pygame.sprite.spritecollideany(player,static_enteties,collided)#check collision
+        collision=pygame.sprite.spritecollideany(player,static_enteties,Collisions.collided)#check collision
         if collision:
             collision.interacted = True
             if type(collision).__name__ == "Door":
@@ -96,8 +99,7 @@ class Collisions():
     @staticmethod
     def check_trigger(player,triggers):
         map_change = False
-        collided = Collisions.collided
-        collision = pygame.sprite.spritecollideany(player,triggers,collided)
+        collision = pygame.sprite.spritecollideany(player,triggers,Collisions.collided)
         if collision:
             if type(collision).__name__ in ["Path_Col_h","Path_Col_v"]:
                 try:
@@ -118,9 +120,8 @@ class Collisions():
             entity.update_hitbox()
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
-        collided=Collisions.collided#make the hitbox collide and not rect
         #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,Collisions.collided)
         for dyn_entity, stat_entity in collisions.items():
             if dyn_entity.velocity[0]>0:#going to the right
                 dyn_entity.hitbox.right = stat_entity[0].hitbox.left
@@ -137,9 +138,8 @@ class Collisions():
             entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
             entity.update_hitbox()#follow with hitbox
 
-        collided=Collisions.collided#make the hitbox collide and not rect
         #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,Collisions.collided)
         for dyn_entity, stat_entity in collisions.items():
             if dyn_entity.velocity[1]>0:#going down
                 dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top

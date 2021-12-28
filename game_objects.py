@@ -43,8 +43,8 @@ class Game_Objects():
         self.platforms_pause=pygame.sprite.Group()
         self.individuals = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
-        weather_paricles=BG.Weather(self.weather)#initiate whater
-        weather_paricles.create_particle('Rain')#weather effects
+        self.weather_paricles=BG.Weather(self.weather)#initiate whater
+        self.weather_paricles.create_particles('Snow')#weather effects
 
         #initiate player
         self.player = Entities.Player([200,50],self.fprojectiles)
@@ -100,6 +100,8 @@ class Game_Objects():
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
 
+        self.collisions.weather_paricles(self.weather,self.platforms)
+
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
@@ -121,7 +123,7 @@ class Game_Objects():
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
         self.npc_pause.update(scroll)
-        self.enemy_pause.update(scroll,self.player.rect)
+        self.enemy_pause.update(scroll,self.player.rect)#shoudl the AI be based on playerposition?
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
@@ -152,7 +154,7 @@ class Game_Objects():
         for projectile in self.eprojectiles.sprites():#go through the group
             pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
         for enemy in self.enemies.sprites():#go through the group
-            enemy.draw(self.game.screen)
+            enemy.draw(self.game.screen)#add a glow around each enemy, can it be in group draw?
 
 
     def conversation_collision(self):
