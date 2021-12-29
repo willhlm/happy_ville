@@ -19,7 +19,6 @@ class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
         surf.set_colorkey((0,0,0))
         screen.blit(surf,(rect.x,rect.y),special_flags=pygame.BLEND_RGB_ADD)
 
-
 class Platform(pygame.sprite.Sprite):#has hitbox
     def __init__(self,pos,chunk_key=False):
         super().__init__()
@@ -883,7 +882,7 @@ class Slash(Cosmetics):
         self.image = pygame.image.load("Sprites/animations/Spirits/Spirits1.png").convert_alpha()
         self.rect = self.image.get_rect(center=self.entity.hitbox.center)
         self.lifetime=10
-        
+
 class Spirits(Cosmetics):
     def __init__(self,entity):
         super().__init__(entity)
