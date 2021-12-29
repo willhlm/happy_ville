@@ -278,7 +278,6 @@ class Gameplay(Game_State):
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
 
     def update(self):
-
         self.game.game_objects.collide_all()
         self.game.game_objects.scrolling()
         self.game.game_objects.group_distance()
@@ -286,7 +285,6 @@ class Gameplay(Game_State):
         self.game.game_objects.check_camera_border()
 
     def render(self):
-
         self.game.screen.fill((207,238,250))
         self.game.game_objects.draw()
         self.blit_screen_info()
@@ -410,8 +408,8 @@ class Ability_Menu(Gameplay):
         super().__init__(game)
         self.abilities=list(self.game.game_objects.player.abilities.keys())
         #self.ab_index=self.game.game_objects.player.abilities.index(self.game.game_objects.player.equip)
-        ability=str(type(self.game.game_objects.player.ability).__name__)
-        self.index=self.abilities.index(ability)
+        #ability=str(type(self.game.game_objects.player.ability).__name__)
+        self.index=self.abilities.index(self.game.game_objects.player.equip)
 
     def update(self):
         super().update()
@@ -439,8 +437,8 @@ class Ability_Menu(Gameplay):
                 self.index=max(0,self.index)
         elif input [1]:#release
             if input[-1]=='rb':
-                temp=self.abilities[self.index]
-                self.game.game_objects.player.ability=self.game.game_objects.player.abilities[temp]
+                self.game.game_objects.player.equip=self.abilities[self.index]
+                self.game.game_objects.player.ability=self.game.game_objects.player.abilities[self.game.game_objects.player.equip]
                 #self.game.game_objects.player.equip=self.game.game_objects.player.abilities[self.ab_index]#select ability
                 self.exit_state()
 
@@ -448,6 +446,10 @@ class Start_Menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
         self.inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
+
+        self.inventory=[]#make all objects and save in list
+        for item in self.game.game_objects.player.inventory.keys():
+            self.inventory.append(getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player))#make the object based on the string
 
     def update(self):
         super().update()
@@ -457,15 +459,14 @@ class Start_Menu(Gameplay):
 
         self.game.screen.blit(self.inventory_BG,(0,0))
 
-        width=self.game.game_objects.player.image.get_size()[0]
-        height=self.game.game_objects.player.image.get_size()[1]
+        width=self.game.game_objects.player.image.get_width()
+        height=self.game.game_objects.player.image.get_height()
         scale=2
         self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(180,120))#player position
 
-        for index, item in enumerate(self.game.game_objects.player.inventory.keys()):
-            loot=getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player.hitbox)#make the object based on the string
+        for index, loot in enumerate(self.inventory):
+            loot.update_animation()
             self.game.screen.blit(pygame.transform.scale(loot.image,(int(width/scale),int(height/scale))),(0+50*index,0))
-            loot.set_img()
 
     def handle_events(self,input):
         if input[0]:#press

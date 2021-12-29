@@ -1,84 +1,92 @@
-import pygame, math, random, sys
-
-weather_paricles=pygame.sprite.Group()
+import pygame, math, random, sys, Read_files, states_weather
 
 class Weather(pygame.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self,weather_group):
         super().__init__()
-        self.pos=[random.randint(1, 479),random.randint(-500, -100)]
+        self.pos=[random.randint(0, 500),random.randint(-500, -100)]#starting position
+        self.group = weather_group
+        self.currentstate = states_weather.Fall(self)
         self.velocity=[0,0]
-        self.phase=random.randint(0, 10)
-        self.max=100#max number of partivles
-        self.image=pygame.Surface((20,20))
+        self.wind=2
 
-    def update(self,pos,screen):
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0]+self.velocity[0], self.rect.topleft[1] + scroll[1]+self.velocity[1]]
 
-        pygame.draw.circle(screen,self.color,self.pos,self.radius)#draw a circle
-    #    Light.add_white(10,(30,5,5),screen,self.pos)#light spehre around the particles
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.currentstate.update()
+        self.currentstate.update_animation()
+        self.boundary()
 
-        self.pos = [self.pos[0] + pos[0], self.pos[1] + pos[1]]#compensate for scroll and new speed
-
-        self.speed()#modulate the speed according to the particle type
-
-        if self.pos[1]>300:#if on the lower side of screen. SHould we do ground collisions?
-            self.pos=[random.randint(1, 479),random.randint(-500, -100)]
+    def boundary(self):
+        if self.rect.y>300:#if on the lower side of screen.
+            self.rect.y=random.randint(-500, -100)
 
         #continiouse falling, horizontally
-        if self.pos[0]<0:
-            self.pos[0]+=480
-        elif self.pos[0]>480:
-            self.pos[0]-=480
+        if self.rect.x<-50:
+            self.rect.x+=500
+        elif self.rect.x>500:
+            self.rect.x-=500
 
+    def create_particles(self,particle,number=100):
+        for i in range(0,number):
+            obj=getattr(sys.modules[__name__], particle)(self.group)
+            self.group.add(obj)
 
-    def create_particle(self,particle):
-        for i in range(0,self.max):
-            obj=getattr(sys.modules[__name__], particle)#make a class based on the name
-            weather_paricles.add(obj())
-        return weather_paricles
+    def set_color(self):
+        replace_color=(251,242,54)#=self.image.get_at((4,4))
+        img_copy=pygame.Surface(self.image.get_size())
+        img_copy.fill(self.color)
+        self.image.set_colorkey(replace_color)
+        img_copy.blit(self.image,(0,0))
+        self.image=img_copy
+        self.image.set_colorkey((0,0,0,255))
+
+    def speed(self):
+        pass
+
+    def collision(self):
+        self.currentstate.change_state()
+
+    def rect(self):
+        self.image=self.sprites['Fall'][0]
+        self.rect = self.image.get_rect(center=self.pos)
 
 class Snow(Weather):
-    def __init__(self):
-        super().__init__()
-        self.radius=2#size
-        self.timer=500#lifetime
-        self.color=(255,255,255)
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Weather/Snow/')
+
+    def __init__(self,group):
+        super().__init__(group)
+        self.rect()
+        self.time=0
 
     def speed(self):
-        self.timer-=1
-        self.velocity=[0.5*math.sin(self.timer//10 + self.phase),0.5]
-        self.pos=[self.pos[0]+self.velocity[0],self.pos[1]+self.velocity[1]]
+        self.time+=1
+        self.velocity=[math.sin(self.time//10) + self.wind,1]
+        if self.time>100:
+            self.time=0
 
 class Sakura(Weather):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,group):
+        super().__init__(group)
         colors=[[255,192,203],[255,105,180],[255,100,180]]
-        self.radius=2#size
-        self.timer=500#lifetime
         self.color=colors[random.randint(0, len(colors)-1)]
-
-    def speed(self):
-        self.timer-=1
         self.velocity=[self.phase,1.5]
-        self.pos=[self.pos[0]+self.velocity[0],self.pos[1]+self.velocity[1]]
 
 class Autumn(Sakura):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,group):
+        super().__init__(group)
         colors=[[178,34,34],[139,69,19],[128,128,0],[255,228,181]]
         self.color=colors[random.randint(0, len(colors)-1)]
 
 class Rain(Weather):
-    def __init__(self):
-        super().__init__()
-        self.radius=1#size
-        self.timer=500#lifetime
-        self.color=(0,0,200)
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Weather/Rain/')
 
-    def speed(self):
-        self.timer-=1
-        self.velocity=[0.1,5]
-        self.pos=[self.pos[0]+self.velocity[0],self.pos[1]+self.velocity[1]]
+    def __init__(self,group):
+        super().__init__(group)
+        self.rect()
+        self.velocity=[0.1+self.wind,5]
 
 class Light():
     def __init__(self):
