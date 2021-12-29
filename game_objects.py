@@ -19,7 +19,7 @@ class Game_Objects():
     def create_groups(self):
 
         #define all sprite groups
-        self.enemies = pygame.sprite.Group()
+        self.enemies = Entities.ExtendedGroup()# pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.bg_fixed = pygame.sprite.Group()
@@ -35,7 +35,7 @@ class Game_Objects():
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
-        self.enemy_pause = pygame.sprite.Group() #include all Entities that are far away
+        self.enemy_pause = Entities.ExtendedGroup()#pygame.sprite.Group() #include all Entities that are far away
         self.npc_pause = pygame.sprite.Group() #include all Entities that are far away
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
@@ -44,10 +44,10 @@ class Game_Objects():
         self.individuals = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
-        self.weather_paricles.create_particles('Snow')#weather effects
+        self.weather_paricles.create_particles('Rain')#weather effects
 
         #initiate player
-        self.player = Entities.Player([200,50],self.fprojectiles)
+        self.player = Entities.Player([200,50],self.fprojectiles,self.cosmetics)
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (self.game.WINDOW_SIZE[0]/2,2*self.game.WINDOW_SIZE[1]/3)
 
@@ -100,7 +100,7 @@ class Game_Objects():
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
 
-        self.collisions.weather_paricles(self.weather,self.platforms)
+        self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
@@ -153,8 +153,8 @@ class Game_Objects():
             pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
         for projectile in self.eprojectiles.sprites():#go through the group
             pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
-        for enemy in self.enemies.sprites():#go through the group
-            enemy.draw(self.game.screen)#add a glow around each enemy, can it be in group draw?
+        #for enemy in self.enemies.sprites():#go through the group
+        #    enemy.draw(self.game.screen)#add a glow around each enemy, can it be in group draw?
 
 
     def conversation_collision(self):

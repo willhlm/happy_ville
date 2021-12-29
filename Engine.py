@@ -23,7 +23,7 @@ class Collisions():
 
             #if hit enemy
             if collision_ene:# and not collision_ene.action['death'] and not collision_ene.action['hurt']:
-                if str(type(collision_ene.currentstate).__name__) is not 'Death':
+                if str(type(collision_ene.currentstate).__name__) is not 'Hurt':
                 #self.shake+=collision_ene.death(loot)#check if dead
                     collision_ene.take_dmg(projectile.dmg)
                     projectile.collision_ene(collision_ene)
@@ -41,16 +41,18 @@ class Collisions():
     #take damage if collide with enemy
     @staticmethod
     def check_enemy_collision(player,enemies):
-        collisions=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
+        collision_ene=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
 
-        if collisions:
-            player.take_dmg(10)
+        if collision_ene:
+            if str(type(collision_ene.currentstate).__name__) is not 'Death':
 
-            sign=(player.hitbox.center[0]-collisions.hitbox.center[0])
-            if sign>0:
-                player.velocity[0]=10#knock back of player
-            else:
-                player.velocity[0]=-10#knock back of player
+                player.take_dmg(10)
+
+                sign=(player.hitbox.center[0]-collision_ene.hitbox.center[0])
+                if sign>0:
+                    player.velocity[0]=10#knock back of player
+                else:
+                    player.velocity[0]=-10#knock back of player
 
     #pickup loot
     @staticmethod
@@ -72,7 +74,7 @@ class Collisions():
 
         collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_enteties,False,False,Collisions.collided)
         for dyn_entity, inv_entity in collisions.items():
-            dyn_entity.action['inv']=True
+            dyn_entity.dir=-dyn_entity.dir#turn around
 
     #interact with chests
     @staticmethod

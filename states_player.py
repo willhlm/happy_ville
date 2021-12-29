@@ -8,7 +8,7 @@ class Player_states(Entity_States):
     def update(self):
         super().update()
         self.increase_spirit()
-
+        #print(str(type(self).__name__))
 
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
@@ -81,9 +81,13 @@ class Walk(Player_states):
 class Jump_run(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.velocity[1] = -11
         self.phases=['pre','main']
         self.phase=self.phases[0]
+        self.jumping()
+
+    def jumping(self):
+        if self.entity.velocity[1]>0:
+            self.entity.velocity[1] = -11
 
     def update_state(self):
         if self.entity.velocity[1]>0:
@@ -130,7 +134,13 @@ class Jump_stand(Jump_run):
 class Fall_run(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['pre','main']
+        self.initial_phase()
+
+    def initial_phase(self):
+        if self.entity.velocity[1]>6:
+            self.phases=['main']
+        else:
+            self.phases=['pre','main']
         self.phase=self.phases[0]
 
     def update_state(self):
@@ -172,7 +182,6 @@ class Wall(Player_states):
         self.phases=['pre','main']
         self.phase=self.phases[0]
         self.entity.friction[1]=0.4
-        self.walk=True
 
     def update_state(self):
         if self.entity.collision_types['bottom']:
@@ -181,10 +190,7 @@ class Wall(Player_states):
 
         elif not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
             self.entity.friction[1]=0
-            if self.walk:
-                self.enter_state('Fall_run')
-            else:
-                self.enter_state('Fall_stand')
+            self.enter_state('Fall_run')
 
     def change_state(self,input):
         if input[0]:
@@ -198,7 +204,8 @@ class Wall(Player_states):
                 self.enter_state('Fall_run')
         elif input[1]:
             if input[-1]=='right' or input[-1]=='left':
-                self.walk=False
+                pass
+
 
 class Dash(Player_states):
     def __init__(self,entity):
@@ -296,6 +303,11 @@ class Sword(Player_states):
 
         super().increase_phase()
 
+    def horizontal_velocity(self):
+        if not self.idle:
+            self.entity.velocity[0]+=self.entity.dir[0]*self.entity.acceleration[0]
+            self.entity.velocity[0]=self.entity.dir[0]*min(abs(self.entity.velocity[0]),self.entity.max_vel)#max horizontal speed
+
 class Sword_run(Sword):
     def __init__(self,entity):
         super().__init__(entity)
@@ -303,31 +315,56 @@ class Sword_run(Sword):
         self.phase=self.phases[0]
         self.entity.sword.lifetime=10#swrod hitbox duration
         self.entity.projectiles.add(self.entity.sword)#add sword to group
+        self.idle=False
 
     def update_state(self):
         if self.done and self.sword1:
             self.enter_state('Sword1_stand')
+        elif self.done and self.idle:
+            self.enter_state('Idle')
         elif self.done:
             self.enter_state('Walk')
 
     def change_state(self,input):
-        if input[-1]=='x' and input[0]:
-            self.sword1=True
-        elif input[-1]=='left' and input[1] or input[-1]=='right' and input[1]:#if release left or right
-            self.enter_state('Sword_stand')
+        if input[0]:
+            if input[-1]=='x':
+                self.sword1=True
+            elif input[-1]=='left':
+                self.entity.dir[0]=-1
+                self.idle=False
+            elif input[-1]=='right':#if press left or right
+                self.entity.dir[0]=1
+                self.idle=False
+        elif input[1]:
+            if input[-1]=='left' or input[-1]=='right':#if release left or right
+                self.idle=True
 
 class Sword_stand(Sword_run):
     def __init__(self,entity):
         super().__init__(entity)
+        self.idle=True
 
     def update_state(self):
         if self.done and self.sword1:
             self.enter_state('Sword1_stand')
-        elif self.done:#if animation is done
+        elif self.done and self.idle:
             self.enter_state('Idle')
+        elif self.done:
+            self.enter_state('Walk')
 
-    def horizontal_velocity(self):
-        pass
+    def change_state(self,input):
+        if input[0]:
+            if input[-1]=='left':
+                self.entity.dir[0]=-1
+                self.idle=False
+            elif input[-1]=='right':#if press left or right
+                self.entity.dir[0]=1
+                self.idle=False
+            elif input[-1]=='x':
+                self.sword1=True
+        elif input[1]:
+            if input[-1]=='left' or input[-1]=='right':
+                self.idle=True
 
 class Sword1_stand(Sword):
     def __init__(self,entity):

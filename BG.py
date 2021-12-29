@@ -49,13 +49,16 @@ class Weather(pygame.sprite.Sprite):
     def collision(self):
         self.currentstate.change_state()
 
+    def rect(self):
+        self.image=self.sprites['Fall'][0]
+        self.rect = self.image.get_rect(center=self.pos)
+
 class Snow(Weather):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Weather/Snow/')
 
     def __init__(self,group):
         super().__init__(group)
-        self.image=pygame.image.load('Sprites/animations/Weather/Snow/Fall/fall1.png').convert_alpha()
-        self.rect = self.image.get_rect(center=self.pos)
+        self.rect()
         self.time=0
 
     def speed(self):
@@ -67,7 +70,6 @@ class Snow(Weather):
 class Sakura(Weather):
     def __init__(self,group):
         super().__init__(group)
-        self.scale=[20,20]
         colors=[[255,192,203],[255,105,180],[255,100,180]]
         self.color=colors[random.randint(0, len(colors)-1)]
         self.velocity=[self.phase,1.5]
@@ -83,8 +85,7 @@ class Rain(Weather):
 
     def __init__(self,group):
         super().__init__(group)
-        self.image=pygame.image.load('Sprites/animations/Weather/Rain/Fall/fall1.png').convert_alpha()
-        self.rect = self.image.get_rect(center=self.pos)
+        self.rect()
         self.velocity=[0.1+self.wind,5]
 
 class Light():

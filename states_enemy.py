@@ -5,6 +5,9 @@ class Enemy_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
+    def update(self):
+        super().update()
+
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
@@ -16,33 +19,19 @@ class Enemy_states(Entity_States):
         elif self.phase=='post':
             self.phase='pre'
 
-class Idle(Enemy_states):#this object will never pop
+class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.phases=['main']
         self.phase=self.phases[0]
 
     def update_state(self):
-        if not self.entity.collision_types['bottom']:
-            self.enter_state('Fall_stand')
+        pass
+    #    if not self.entity.collision_types['bottom']:
+    #        self.enter_state('Fall_stand')
 
     def change_state(self,input):
-        if input[0]:
-            if input[-1]=='a':
-                self.enter_state('Jump_stand')
-            elif input[-1]=='left':
-                self.entity.dir[0] = -1
-                self.enter_state('Walk')
-            elif input[-1]=='right':
-                self.entity.dir[0] = 1
-                self.enter_state('Walk')
-            elif input[-1]=='lb':
-                self.enter_state('Dash')
-            elif input[-1]=='x':
-                self.enter_state('Sword_stand')
-            elif input[-1]=='b' and input[0]:
-                #statename=str(type(self.entity.ability).__name__)
-                self.enter_state(self.entity.equip)
+        self.enter_state(input)
 
     def horizontal_velocity(self):
         pass
@@ -58,16 +47,7 @@ class Walk(Enemy_states):
             self.enter_state('Fall_run')
 
     def change_state(self,input):
-        if input[0]:#press
-            if input[-1]=='a':
-                self.enter_state('Jump_run')
-            elif input[-1]=='lb':
-                self.enter_state('Dash')
-            elif input[-1]=='x':
-                self.enter_state('Sword_run')
-        elif input[1]:#release
-            if ((input[-1] == 'right' and self.entity.dir[0] == 1) or (input[-1] == 'left' and self.entity.dir[0] == -1)):
-                self.enter_state('Idle')
+        pass
 
 class Jump_run(Enemy_states):
     def __init__(self,entity):
@@ -266,6 +246,21 @@ class Hurt(Enemy_states):
 
     def increase_phase(self):
         self.done=True
+
+    def horizontal_velocity(self):
+        pass
+
+class Trans(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.phases=['main']
+        self.phase=self.phases[0]
+
+    def update_state(self):
+        pass
+
+    def change_state(self,input):
+        pass
 
     def horizontal_velocity(self):
         pass

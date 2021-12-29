@@ -1,5 +1,25 @@
 import pygame, random, sys, Read_files, states_player, states_NPC, states_enemy
 
+class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
+    def __init__(self):
+        super().__init__()
+
+    def draw(self, surface):
+        sprites = self.sprites()
+        surface_blit = surface.blit
+        for spr in sprites:
+            self.spritedict[spr] = surface_blit(spr.image, spr.rect)
+            ExtendedGroup.add_colour(20,(20,20,20),surface,spr.rect)#addded this
+        self.lostsprites = []
+
+    @staticmethod
+    def add_colour(radius,colour,screen,rect):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(rect.x,rect.y),special_flags=pygame.BLEND_RGB_ADD)
+
+
 class Platform(pygame.sprite.Sprite):#has hitbox
     def __init__(self,pos,chunk_key=False):
         super().__init__()
@@ -122,8 +142,6 @@ class Enemy(Character):
         super().__init__(pos)
         self.projectiles = projectile_group
         self.drops = loot_group
-        self.health = 100
-        self.spirit = 100
         self.currentstate = states_enemy.Idle(self)
         self.inventory = {'Amber_Droplet':0}
 
@@ -174,9 +192,10 @@ class Woopie(Enemy):
             self.counter=0
             rand=random.randint(0,1)
             if rand==0:
-                self.currentstate = states_enemy.Idle(self)
+                self.currentstate.change_state('Idle')
             else:
-                self.currentstate = states_enemy.Walk(self)
+                self.currentstate.change_state('Walk')
+
 
 class Flowy(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
@@ -195,14 +214,13 @@ class Flowy(Enemy):
         self.distance[0]=int((self.rect.x-playerpos.x))
         self.distance[1]=int((self.rect.y-playerpos.y))
 
-    #    if 100 < abs(self.distance[0])<200 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
-    #        self.action['trans'] = True
-
-    #    elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
-    #        self.action[self.equip] = True
+        if 100 < abs(self.distance[0])<200 and abs(self.distance[1])<100:
+            pass
+        elif abs(self.distance[0])<100 and abs(self.distance[1])<100:#swing sword when close
+            pass#self.currentstate.enter_state('Trans')
 
 class Player(Character):
-    def __init__(self,pos,projectile_group):
+    def __init__(self,pos,projectile_group,cosmetics_group):
         super().__init__(pos)
         self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()
         self.rect = self.image.get_rect(center=pos)
@@ -213,6 +231,8 @@ class Player(Character):
         self.max_spirit = 100
         self.health = 100
         self.spirit = 100
+
+        self.cosmetics = cosmetics_group
 
         self.projectiles = projectile_group#pygame.sprite.Group()
         self.abilities={'Hammer':Hammer,'Shield':Shield,'Force':Force,'Stone':Stone,'Heal':Heal}#the objects are referensed but made in states
@@ -225,7 +245,7 @@ class Player(Character):
         self.movement_sfx_timer = 110
         self.hitbox_offset = (0,13)
 
-        self.interacting = False
+        #self.interacting = False
         self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
         self.shake = 0
 
@@ -550,7 +570,7 @@ class Chest_Big(Interactable):
                 self.image = self.image_sheet[4]
                 self.interacted = False
 
-class Weapon(pygame.sprite.Sprite):
+class Abilities(pygame.sprite.Sprite):
     def __init__(self,entity):
         super().__init__()
         self.entity=entity
@@ -605,11 +625,11 @@ class Weapon(pygame.sprite.Sprite):
     def collision_plat(self):
         pass
 
-class Heal(Weapon):
+class Heal(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Sword(Weapon):
+class Sword(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Sword/')
 
     def __init__(self,entity):
@@ -632,14 +652,19 @@ class Sword(Weapon):
         super().update(pos)
         self.update_hitbox()
 
-        #entity.velocity[1]=entity.dir[1]*10#nail jump
-        #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
+    def collision_ene(self,collision_ene):
+        slash=Slash(self)
+        self.entity.cosmetics.add(slash)
+        self.kill()
+
+    def collision_plat(self):
+        pass
 
 class Hammer(Sword):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Shield(Weapon):
+class Shield(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/',True)
 
     def __init__(self,entity):
@@ -662,7 +687,7 @@ class Shield(Weapon):
     def collision_ene(self,collision_ene):
         self.health-=10#reduce the health of this object
 
-class Stone(Weapon):
+class Stone(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
 
     def __init__(self,entity):
@@ -733,7 +758,7 @@ class Stone(Weapon):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
-class Force(Weapon):
+class Force(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
 
     def __init__(self,entity):
@@ -840,19 +865,25 @@ class Cosmetics(pygame.sprite.Sprite):
         self.entity=entity
         self.frame=0
 
-    def update(self):
+    def update(self,scroll):
         self.lifetime-=1
-        self.update_pos()
+        self.update_pos(scroll)
         self.destroy()
 
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
 
     def destroy(self):
         if self.lifetime<0:
             self.kill()
 
+class Slash(Cosmetics):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.image = pygame.image.load("Sprites/animations/Spirits/Spirits1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=self.entity.hitbox.center)
+        self.lifetime=10
+        
 class Spirits(Cosmetics):
     def __init__(self,entity):
         super().__init__(entity)

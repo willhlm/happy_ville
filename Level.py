@@ -101,7 +101,7 @@ class Tilemap():
 
         npcs = pygame.sprite.Group()
         interactables = pygame.sprite.Group()
-        enemies = pygame.sprite.Group()
+        enemies = Entities.ExtendedGroup()#pygame.sprite.Group()
         camera_blocks = pygame.sprite.Group()
         triggers = pygame.sprite.Group()
 

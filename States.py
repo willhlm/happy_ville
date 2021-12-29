@@ -442,6 +442,10 @@ class Start_Menu(Gameplay):
         super().__init__(game)
         self.inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
 
+        self.inventory=[]#make all objects and save in list
+        for item in self.game.game_objects.player.inventory.keys():
+            self.inventory.append(getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player))#make the object based on the string
+
     def update(self):
         super().update()
 
@@ -450,14 +454,13 @@ class Start_Menu(Gameplay):
 
         self.game.screen.blit(self.inventory_BG,(0,0))
 
-        width=self.game.game_objects.player.image.get_size()[0]
-        height=self.game.game_objects.player.image.get_size()[1]
+        width=self.game.game_objects.player.image.get_width()
+        height=self.game.game_objects.player.image.get_height()
         scale=2
         self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(180,120))#player position
 
-        for index, item in enumerate(self.game.game_objects.player.inventory.keys()):
-            loot=getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player)#make the object based on the string
-            loot.update_animation()            
+        for index, loot in enumerate(self.inventory):
+            loot.update_animation()
             self.game.screen.blit(pygame.transform.scale(loot.image,(int(width/scale),int(height/scale))),(0+50*index,0))
 
     def handle_events(self,input):
