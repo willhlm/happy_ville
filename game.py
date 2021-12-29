@@ -10,7 +10,7 @@ class Game():
 
         #initiate all screens
         self.WINDOW_SIZE = (480,270)
-        self.scale_size()#get the scale according to your display size
+        self.scale_size(3)#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
@@ -19,7 +19,7 @@ class Game():
         self.game_objects = game_objects.Game_Objects(self)
         self.clock = pygame.time.Clock()
         self.fps = 60
-        self.state_stack = [states.Title_Menu(self)]#,'Menu':States.Menu:,'Gameplay':States.Gameplay}
+        self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}
         self.controller = Read_files.Controller()
 
     def event_loop(self):
@@ -52,10 +52,13 @@ class Game():
             self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
             pygame.display.update()
 
-    def scale_size(self):
+    def scale_size(self, scale = None):
         scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
         scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
-        self.scale = min(scale_w,scale_h)
+        if scale:
+            self.scale = scale
+        else:
+            self.scale = min(scale_w,scale_h)
 
 
 if __name__ == '__main__':

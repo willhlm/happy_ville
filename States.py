@@ -339,9 +339,11 @@ class Gameplay(Game_State):
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
+
             elif input[-1]=='rb':
                 new_state = Ability_Menu(self.game)
                 new_state.enter_state()
+
             elif input[-1] == 'y':
                 npc = self.game.game_objects.conversation_collision()
                 if npc:
@@ -349,13 +351,16 @@ class Gameplay(Game_State):
                     new_state.enter_state()
                 else:
                     self.game.game_objects.interactions()
+
             elif input[-1] == 'select':
                 new_state = Start_Menu(self.game)
                 new_state.enter_state()
+
             else:
-                self.game.game_objects.player.currentstate.change_state(input)
-        elif input [1]:
-            self.game.game_objects.player.currentstate.change_state(input)
+                self.game.game_objects.player.currentstate.handle_input(input)
+
+        elif input[1]:
+            self.game.game_objects.player.currentstate.handle_input(input)
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):

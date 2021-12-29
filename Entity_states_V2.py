@@ -7,25 +7,22 @@ class Entity_states():
         self.states={'Idle':Idle,'Walk':Walk,'Fall_stand':Fall_stand,'Fall_run':Fall_run,'Jump_run':Jump_run,'Jump_stand':Jump_stand,'Wall':Wall,'Dash':Dash,'Sword_stand':Sword_stand,'Sword1_stand':Sword1_stand,'Sword_run':Sword_run,'Hammer':Hammer}
 
     def update(self):
-        self.update_vel()
+        self.update_velocities()
         self.update_state()
 
-    def update_vel(self):
+    def update_velocities(self):
         self.entity.velocity[1]=self.entity.velocity[1]+self.entity.acceleration[1]-self.entity.velocity[1]*self.entity.friction[1]#gravity
         self.entity.velocity[1]=min(self.entity.velocity[1],7)#set a y max speed
 
-        self.horizontal_velocity()#some states stay still
-        self.entity.velocity[0]=self.entity.velocity[0]-self.entity.friction[0]*self.entity.velocity[0]#friction
-
-    def horizontal_velocity(self):
         self.entity.velocity[0]+=self.dir[0]*self.entity.acceleration[0]
         self.entity.velocity[0]=self.dir[0]*min(abs(self.entity.velocity[0]),self.entity.max_vel)#max horizontal speed
+        self.entity.velocity[0]=self.entity.velocity[0]-self.entity.friction[0]*self.entity.velocity[0]#friction
 
     def enter_state(self,newstate):
         self.entity.currentstate=self.states[newstate](self.entity)
-        self.reset_timer()
+        print(self.entity.currentstate)
 
-    def change_state(self,input):
+    def handle_input(self,input):
         pass
 
     def update_animation(self):
@@ -59,7 +56,7 @@ class Idle(Entity_states):#this object will never pop
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_stand')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='a':
             self.enter_state('Jump_stand')
         elif input[-1]=='left' and input[0]:
@@ -88,7 +85,7 @@ class Walk(Entity_states):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_run')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='a':
             self.enter_state('Jump_run')
         elif input[1] and ((input[-1] == 'right' and self.entity.dir[0] == 1) or (input[-1] == 'left' and self.entity.dir[0] == -1)):
@@ -109,7 +106,7 @@ class Jump_run(Entity_states):
         if self.entity.velocity[1]>0:
             self.enter_state('Fall_run')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='lb':
             self.enter_state('Dash')
         elif input[-1]=='x':
@@ -125,7 +122,7 @@ class Jump_stand(Jump_run):
         if self.entity.velocity[1]>0:
             self.enter_state('Fall_stand')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='lb':
             self.enter_state('Dash')
         elif input[-1]=='x':
@@ -148,7 +145,7 @@ class Fall_run(Entity_states):
         elif self.entity.collision_types['right'] or self.entity.collision_types['left']:#on wall and not on ground
             self.enter_state('Wall')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input==False:
             self.enter_state('Fall_stand')
 
@@ -156,14 +153,13 @@ class Fall_stand(Fall_run):
     def __init__(self,entity):
         super().__init__(entity)
 
-
     def update_state(self):
         if self.entity.collision_types['bottom']:
             self.enter_state('Idle')
         elif self.entity.collision_types['right'] or self.entity.collision_types['left']:#on wall and not on ground
             self.enter_state('Wall')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='Left' or input[-1]=='Right':
             self.enter_state('Fall_run')
 
@@ -188,7 +184,7 @@ class Wall(Entity_states):
             self.entity.friction[1]=0
             self.enter_state('Fall_run')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='a':
             self.entity.friction[1]=0
             self.enter_state('Jump_run')
@@ -268,7 +264,7 @@ class Sword_run(Sword):
         elif self.done:#if animation is done
             self.enter_state('Walk')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='x':
             self.sword1=True
 
@@ -301,7 +297,7 @@ class Sword1_stand(Sword):
         elif self.done:#if animation is done
             self.enter_state('Idle')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='x':
             self.sword2=True
 
@@ -339,7 +335,7 @@ class Hammer(Abillitites):
             self.entity.hammer.kill()
             self.enter_state('Idle')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]==True and self.phase=='charge':#when release the botton
             self.phase='main'
             self.reset_timer()

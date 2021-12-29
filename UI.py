@@ -4,7 +4,7 @@ import Engine
 import Entities
 import Level
 import BG
-#import States
+#import states
 
 #TODO:
 #Add camera blocks to chunkloading, so they dont they check outside of reasonable range,
@@ -32,7 +32,7 @@ class Game_UI():
         pygame.mixer.init
         self.bg_music = pygame.mixer.Channel(0)
 
-        #self.states=States.title(self.display,self.font)
+        #self.states=states.title(self.display,self.font)
         self.controller=Read_files.Controller('xbox')#initillise and things
 
         self.ability_menu=False#a flag to enter "abillity changing menue"

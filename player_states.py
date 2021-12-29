@@ -31,7 +31,7 @@ class Player_states():
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
         self.reset_timer()
 
-    def change_state(self,input):
+    def handle_input(self,input):
         pass
 
     def reset_timer(self):
@@ -65,7 +65,7 @@ class Idle(Player_states):#this object will never pop
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_stand')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='a':
             self.enter_state('Jump_stand')
         elif input[-1]=='left' and input[0]:
@@ -95,7 +95,7 @@ class Walk(Player_states):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_run')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='a':
             self.enter_state('Jump_run')
         elif input[1] and ((input[-1] == 'right' and self.entity.dir[0] == 1) or (input[-1] == 'left' and self.entity.dir[0] == -1)):
@@ -116,7 +116,7 @@ class Jump_run(Player_states):
         if self.entity.velocity[1]>0:
             self.enter_state('Fall_run')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='lb':
             self.enter_state('Dash')
         elif input[-1]=='x':
@@ -132,7 +132,7 @@ class Jump_stand(Jump_run):
         if self.entity.velocity[1]>0:
             self.enter_state('Fall_stand')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='lb':
             self.enter_state('Dash')
         elif input[-1]=='x':
@@ -155,7 +155,7 @@ class Fall_run(Player_states):
         elif self.entity.collision_types['right'] or self.entity.collision_types['left']:#on wall and not on ground
             self.enter_state('Wall')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[1] and input[-1] == 'right' or input[1] and input[-1] == 'left':
             self.enter_state('Fall_stand')
 
@@ -170,7 +170,7 @@ class Fall_stand(Fall_run):
         elif self.entity.collision_types['right'] or self.entity.collision_types['left']:#on wall and not on ground
             self.enter_state('Wall')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='left' or input[-1]=='right':
             self.enter_state('Fall_run')
 
@@ -195,7 +195,7 @@ class Wall(Player_states):
             self.entity.friction[1]=0
             self.enter_state('Fall_run')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='a':
             self.entity.friction[1]=0
             self.enter_state('Jump_run')
@@ -270,7 +270,7 @@ class Sword_run(Sword):
         elif self.done:
             self.enter_state('Walk')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='x' and input[0]:
             self.sword1=True
         elif input[-1]=='left' and input[1] or input[-1]=='right' and input[1]:#if release left or right
@@ -303,7 +303,7 @@ class Sword1_stand(Sword):
         elif self.done:#if animation is done
             self.enter_state('Idle')
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='x' and input[0]:
             self.sword2=True
 
@@ -340,7 +340,7 @@ class Hammer(Abillitites):
         self.entity.spirit -= 10
         self.entity.ability.lifetime=7
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[-1]=='b' and self.phase=='charge':#when release the botton
             self.phase='main'
             self.reset_timer()
@@ -360,7 +360,7 @@ class Force(Abillitites):
         self.entity.ability.phase='pre'
         self.entity.ability.update_hitbox()
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[1]:
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
@@ -375,11 +375,11 @@ class Shield(Abillitites):
         self.phases=['pre','charge','main']
         self.phase=self.phases[0]
         self.entity.spirit -= 10
-        
+
         self.entity.ability.lifetime=100#need to be changed depending on the animation of sword of player
         self.entity.ability.health=200
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[1]:
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
@@ -398,7 +398,7 @@ class Heal(Abillitites):
         self.entity.spirit-=20
         self.entity.health+=20
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[1]:
             self.done=True
 
@@ -424,7 +424,7 @@ class Stone(Abillitites):
         self.entity.ability.update_hitbox()
         self.entity.projectiles.add(self.entity.ability)#add sword to group
 
-    def change_state(self,input):
+    def handle_input(self,input):
         if input[1]:
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
