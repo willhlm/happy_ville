@@ -3,18 +3,23 @@ import pygame
 class Collisions():
     def __init__(self):
         self.shake=0
+    
+    @staticmethod
+    def counter(fprojectiles,eprojectiles):
+        for projectile in fprojectiles.sprites():#go through the group
+            if type(projectile).__name__ == 'Shield':
+                collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
+                if collision_epro:
+                    collision_epro.conutered()
 
     @staticmethod
     def weather_paricles(weathers,platforms):
-
         collisions=pygame.sprite.groupcollide(weathers,platforms,False,False)
         for weather, platform in collisions.items():
             weather.collision()
 
-    def action_collision(self,projectiles,platforms,enemies):
-        self.shake-=1
-        self.shake=max(0,self.shake)#to not let it go to too low values
-
+    @staticmethod
+    def action_collision(projectiles,platforms,enemies):
         for projectile in projectiles.sprites():#go through the group
 
             #projectile collision?
@@ -47,7 +52,6 @@ class Collisions():
             if str(type(collision_ene.currentstate).__name__) is not 'Death':
 
                 player.take_dmg(10)
-
                 sign=(player.hitbox.center[0]-collision_ene.hitbox.center[0])
                 if sign>0:
                     player.velocity[0]=10#knock back of player
@@ -58,10 +62,16 @@ class Collisions():
     @staticmethod
     def pickup_loot(player,loots):
 
-        collision=pygame.sprite.spritecollide(player,loots,True,Collisions.collided)#check collision
-        for loot in collision:
-            obj=(loot.__class__.__name__)#get the loot in question
-            player.inventory[obj]+=1
+        collision_loot=pygame.sprite.spritecollideany(player,loots,Collisions.collided)#check collision
+
+        if collision_loot:
+    #    for loot in collision:
+            collision_loot.pickup(player)
+            #if obj=='Spiritsorb':
+            #    player.spirit += 10
+
+            #else:
+            #    player.inventory[obj]+=1
 
     #npc player conversation
     @staticmethod
@@ -74,7 +84,7 @@ class Collisions():
 
         collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_enteties,False,False,Collisions.collided)
         for dyn_entity, inv_entity in collisions.items():
-            dyn_entity.dir=-dyn_entity.dir#turn around
+            dyn_entity.dir[0]=-dyn_entity.dir[0]#turn around
 
     #interact with chests
     @staticmethod

@@ -226,7 +226,8 @@ class Controler():
                                 pygame.K_g: 'y',
                                 pygame.K_i: 'select',
                                 pygame.K_LSHIFT: 'lb',
-                                pygame.K_RETURN: 'return'
+                                pygame.K_RETURN: 'return',
+                                pygame.K_k: 'k'
                                 }
 
 
