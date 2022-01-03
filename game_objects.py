@@ -44,7 +44,7 @@ class Game_Objects():
         self.individuals = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
-        self.weather_paricles.create_particles('Rain')#weather effects
+        self.weather_paricles.create_particles('Snow')#weather effects
 
         #initiate player
         self.player = Entities.Player([200,50],self.fprojectiles,self.cosmetics)
@@ -100,6 +100,8 @@ class Game_Objects():
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
+
+        self.collisions.counter(self.fprojectiles,self.eprojectiles)
 
         self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
 

@@ -11,18 +11,19 @@ class NPC_states(Entity_States):
     def increase_phase(self):
         pass
 
-class Walk(NPC_states):#this object will never pop
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.phases=['main']
-        self.phase=self.phases[0]
-
     def update_state(self):
         pass
 
-class Idle(Walk):
+class Walk(NPC_states):#this object will never pop
     def __init__(self,entity):
         super().__init__(entity)
+        self.walk()
+        self.phases=['main']
+        self.phase=self.phases[0]
 
-    def horizontal_velocity(self):
-        pass
+class Idle(NPC_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.phases=['main']
+        self.phase=self.phases[0]

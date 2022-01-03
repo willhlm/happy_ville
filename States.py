@@ -407,9 +407,23 @@ class Ability_Menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
         self.abilities=list(self.game.game_objects.player.abilities.keys())
-        #self.ab_index=self.game.game_objects.player.abilities.index(self.game.game_objects.player.equip)
-        #ability=str(type(self.game.game_objects.player.ability).__name__)
         self.index=self.abilities.index(self.game.game_objects.player.equip)
+
+        symbol1=pygame.image.load("Sprites/Attack/Darksaber/symbol/darksaber.png").convert_alpha()
+        symbol2=pygame.image.load("Sprites/Attack/Heal/symbol/heal.png").convert_alpha()
+        symbol3=pygame.image.load("Sprites/Attack/Force/symbol/force.png").convert_alpha()
+        symbol4=pygame.image.load("Sprites/Attack/Hammer/symbol/hammer.png").convert_alpha()
+        symbol5=pygame.image.load("Sprites/Attack/Stone/symbol/stone.png").convert_alpha()
+
+        hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
+        hud3=pygame.image.load("Sprites/Attack/HUD/abilityHUD3.png").convert_alpha()
+        hud4=pygame.image.load("Sprites/Attack/HUD/abilityHUD4.png").convert_alpha()
+        hud5=pygame.image.load("Sprites/Attack/HUD/abilityHUD5.png").convert_alpha()
+        hud6=pygame.image.load("Sprites/Attack/HUD/abilityHUD6.png").convert_alpha()
+
+        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Hammer':symbol4,'Stone':symbol5}
+        self.hud=[hud2,hud3,hud4,hud5,hud6]
+        self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
 
     def update(self):
         super().update()
@@ -418,23 +432,32 @@ class Ability_Menu(Gameplay):
     def render(self):
         super().render()
 
-        positions=[]#placeholder
-        for index,abillity in enumerate(self.abilities):
-            coordinate=[100+50*index,200]
-            self.game.screen.blit(self.font.render((50,50),abillity),(coordinate))
-            positions.append(coordinate)#coordinates of all blits
+        hud=self.hud[self.index]
 
-        self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
-        self.game.screen.blit(self.font.render((20,20),'o'),(positions[self.index][0],positions[self.index][1]-20))#the pointer
+        #positions=[]#placeholder
+        for index,ability in enumerate(self.abilities):
+            #coordinate=[100+50*index,200]
+            #self.game.screen.blit(self.font.render((50,50),ability),(coordinate))
+            #self.game.screen.blit(self.symbols[ability],(coordinate))
+            hud.blit(self.symbols[ability],self.coordinates[index])
+
+            #positions.append(coordinate)#coordinates of all blits
+
+        #self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
+        #self.game.screen.blit(self.font.render((20,20),'o'),(positions[self.index][0],positions[self.index][1]-20))#the pointer
+
+        self.game.screen.blit(hud,(250,100))
 
     def handle_events(self, input):
         if input[0]:#press
             if input[-1] == 'right':
                 self.index+=1
-                self.index=min(len(self.abilities)-1,self.index)
+                if self.index>len(self.abilities)-1:
+                    self.index=0
             elif input[-1] =='left':
                 self.index-=1
-                self.index=max(0,self.index)
+                if self.index<0:
+                    self.index=len(self.abilities)-1
         elif input [1]:#release
             if input[-1]=='rb':
                 self.game.game_objects.player.equip=self.abilities[self.index]
