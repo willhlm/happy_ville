@@ -97,6 +97,7 @@ class Game_Objects():
         self.collisions.pickup_loot(self.player,self.loot)
         self.collisions.check_enemy_collision(self.player,self.enemies)
 
+        #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
 
