@@ -102,9 +102,9 @@ class Character(Dynamicentity):#enemy, NPC,player
         if dmg>0:
             self.health-=dmg
             if self.health>0:#check if dead¨
-                self.hurt()
+                self.currentstate.change_state('Hurt')
             else:
-                self.death()
+                self.currentstate.change_state('Death')
 
     def check_collisions(self):
         if self.collision_types['top']:#knock back when hit head
@@ -142,7 +142,7 @@ class Enemy(Character):
         self.projectiles = projectile_group
         self.loot_group = loot_group
         self.currentstate = states_enemy.Idle(self)
-        self.inventory = {'Amber_Droplet':random.randint(0, 10)}
+        self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
 
     def update(self,pos,playerpos):
         super().update(pos)
@@ -157,12 +157,6 @@ class Enemy(Character):
         pygame.draw.circle(surf,colour,(radius,radius),radius)
         surf.set_colorkey((0,0,0))
         screen.blit(surf,(self.rect.x,self.rect.y),special_flags=pygame.BLEND_RGB_ADD)
-
-    def hurt(self):
-        self.currentstate = states_enemy.Hurt(self)
-
-    def death(self):
-        self.currentstate = states_enemy.Death(self)
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -241,7 +235,7 @@ class Player(Character):
         self.cosmetics = cosmetics_group
 
         self.projectiles = projectile_group#pygame.sprite.Group()
-        self.abilities={'Hammer':Hammer,'Force':Force,'Stone':Stone,'Heal':Heal,'Darksaber':Darksaber}#'Shield':Shield#the objects are referensed but made in states
+        self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#'Shield':Shield#the objects are referensed but made in states
         self.equip='Hammer'#ability pointer
         self.sword=Sword(self)
         self.shield=Shield(self)
@@ -669,7 +663,6 @@ class Darksaber(Sword):
         super().__init__(entity)
         self.dmg=0
 
-
     def collision_ene(self,collision_ene):
         if collision_ene.spirit>=10:
             collision_ene.spirit-=10
@@ -843,6 +836,49 @@ class Force(Abilities):
         super().countered()
         self.knock_back()
 
+class Arrow(Abilities):
+    sprites = Read_files.Sprites_Player('Sprites/Attack/Arrow/',True)
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.lifetime=100
+        self.dmg=10
+        self.initiate()
+        self.dir=self.entity.dir.copy()
+        self.update_hitbox()
+
+    def update_hitbox(self):
+        if self.dir[1] > 0:#up
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+            self.velocity[1]=-10
+        elif self.dir[1] < 0:#down
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+            self.velocity[1]=10
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+            self.velocity[0]=10
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+            self.velocity[0]=-10
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def collision_ene(self,collision_ene):
+        self.velocity=[0,0]
+        self.dmg=0
+        self.kill()
+
+    def collision_plat(self):
+        self.velocity=[0,0]
+        self.dmg=0
+
+    def knock_back(self):
+        self.velocity[0]=-self.velocity[0]
+        self.velocity[1]=-self.velocity[1]
+
+    def countered(self):
+        super().countered()
+        self.knock_back()
+
 class Loot(pygame.sprite.Sprite):
     def __init__(self,entity):
         super().__init__()
@@ -859,7 +895,7 @@ class Loot(pygame.sprite.Sprite):
         self.rect.center = self.hitbox.center
 
     def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
         self.hitbox.center = self.rect.center
 
     def destory(self):
@@ -889,30 +925,26 @@ class Amber_Droplet(Loot):
 
     def rectangle(self):#rectangle
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,5,5)
-        self.hitbox=self.rect.copy()
+        self.hitbox = self.rect.copy()
 
     def check_collisions(self):
         if self.collision_types['bottom']:
-            self.velocity=[0,0]
+            self.velocity[0] = 0.5*self.velocity[0]
+            self.velocity[1] = -0.7*self.velocity[1]
+        elif self.collision_types['right'] or self.collision_types['left']:
+            self.velocity[0] = -self.velocity[0]
 
     def update_vel(self):
-        self.velocity[1]+=0.3#gravity
-        self.velocity[1]=min(self.velocity[1],4)#set a y max speed
+        self.velocity[1] += 0.5
 
     def update(self,pos):
+        self.check_collisions()#need to be before super.update
         super().update(pos)
-        self.check_collisions()
 
     def pickup(self,player):
         obj=(self.__class__.__name__)#get the loot in question
         player.inventory[obj]+=1
         self.kill()
-
-class Arrow(Amber_Droplet):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
-
-    def __init__(self,entity):
-        super().__init__(entity)
 
 class Spiritsorb(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')
@@ -921,15 +953,14 @@ class Spiritsorb(Loot):
         super().__init__(entity)
         self.pos=[random.randint(-10, 10),random.randint(-10, 10)]
         self.rectangle()
-        self.velocity = [0,0]
-        self.timer=0
+        self.image = self.sprites['idle'][int(self.frame)]
 
     def rectangle(self):#rectangle
         self.rect = pygame.Rect(self.entity.hitbox.x+self.pos[0],self.entity.hitbox.y+self.pos[1],5,5)
         self.hitbox=self.rect.copy()
 
     def update_vel(self):
-        self.velocity=[int(0.1*random.randint(-10, 10)),int(0.1*random.randint(-10, 10))]
+        self.velocity=[0.1*random.randint(-10, 10),0.1*random.randint(-10, 10)]
 
     def pickup(self,player):
         player.spirit += 10

@@ -278,11 +278,11 @@ class Gameplay(Game_State):
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
 
     def update(self):
-        self.game.game_objects.collide_all()
         self.game.game_objects.scrolling()
         self.game.game_objects.group_distance()
         self.game.game_objects.trigger_event()
         self.game.game_objects.check_camera_border()
+        self.game.game_objects.collide_all()
 
     def render(self):
         self.game.screen.fill((207,238,250))
@@ -351,9 +351,9 @@ class Gameplay(Game_State):
                 new_state = Start_Menu(self.game)
                 new_state.enter_state()
             else:
-                self.game.game_objects.player.currentstate.change_state(input)
+                self.game.game_objects.player.currentstate.handle_input(input)
         elif input [1]:
-            self.game.game_objects.player.currentstate.change_state(input)
+            self.game.game_objects.player.currentstate.handle_input(input)
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -408,7 +408,7 @@ class Ability_Menu(Gameplay):
         symbol2=pygame.image.load("Sprites/Attack/Heal/symbol/heal.png").convert_alpha()
         symbol3=pygame.image.load("Sprites/Attack/Force/symbol/force.png").convert_alpha()
         symbol4=pygame.image.load("Sprites/Attack/Hammer/symbol/hammer.png").convert_alpha()
-        symbol5=pygame.image.load("Sprites/Attack/Stone/symbol/stone.png").convert_alpha()
+        symbol5=pygame.image.load("Sprites/Attack/Arrow/symbol/arrow.png").convert_alpha()
 
         hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
         hud3=pygame.image.load("Sprites/Attack/HUD/abilityHUD3.png").convert_alpha()
@@ -416,7 +416,7 @@ class Ability_Menu(Gameplay):
         hud5=pygame.image.load("Sprites/Attack/HUD/abilityHUD5.png").convert_alpha()
         hud6=pygame.image.load("Sprites/Attack/HUD/abilityHUD6.png").convert_alpha()
 
-        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Hammer':symbol4,'Stone':symbol5}
+        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Hammer':symbol4,'Arrow':symbol5}
         self.hud=[hud2,hud3,hud4,hud5,hud6]
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
 
