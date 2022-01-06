@@ -144,7 +144,6 @@ class Collisions():
                 elif entity.velocity[0]<0:#going to the left
                     entity.hitbox.left = collision_x.hitbox.right
                     entity.collision_types['left'] = True
-
                 entity.update_rect()
 
             #move in y every dynamic sprite
@@ -162,7 +161,6 @@ class Collisions():
                 elif entity.velocity[1]<0:#going up
                     entity.hitbox.top = collision_y.hitbox.bottom
                     entity.collision_types['top'] = True
-
                 entity.update_rect()
 
     #make the hitbox collide instead of rect

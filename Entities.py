@@ -181,7 +181,7 @@ class Woopie(Enemy):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 1
         self.spirit=100
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/',True)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
         self.counter=0
         #self.max_vel = 1
@@ -205,7 +205,7 @@ class Flowy(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 10
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/flowy/',True)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/flowy/')
         self.distance=[0,0]
         self.shake=self.hitbox.height/10
         self.spirit=10
@@ -218,6 +218,31 @@ class Flowy(Enemy):
             pass
         elif abs(self.distance[0])<100 and abs(self.distance[1])<100:#swing sword when close
             pass#self.currentstate.enter_state('Trans')
+
+class Larv(Enemy):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/main/Idle/Stand1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=self.rect.copy()
+        #self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 10
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
+        self.distance=[0,0]
+        self.shake=self.hitbox.height/10
+        self.spirit=10
+        self.counter=0
+        self.friction=[0.5,0]
+
+    def AI(self,playerpos):#the AI
+        self.counter += 1
+        if self.counter>100:
+            self.counter=0
+            rand=random.randint(0,1)
+            if rand==0:
+                self.currentstate.change_state('Idle')
+            else:
+                self.currentstate.change_state('Walk')
 
 class Player(Character):
     def __init__(self,pos,projectile_group,cosmetics_group):
@@ -246,17 +271,10 @@ class Player(Character):
         self.movement_sfx_timer = 110
         self.hitbox_offset = (0,13)
 
-        #self.interacting = False
-        self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
+        self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.shake = 0
 
         self.currentstate = states_player.Idle(self)
-
-    def hurt(self):
-        self.currentstate = states_player.Hurt(self)
-
-    def death(self):
-        self.currentstate = states_player.Death(self)
 
     def load_sfx(self):
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
@@ -571,24 +589,14 @@ class Abilities(pygame.sprite.Sprite):
         self.frame=0
         self.phase='main'
         self.phases=['main']
-        self.velocity=[0,0]
         self.action=''
         self.frame_rate=4
-
-    def initiate(self):
-        self.image = self.sprites.sprite_dict['main'][self.action][0]
-        self.rect = self.image.get_rect()
-        self.hitbox=self.rect.copy()
 
     def update(self,pos):
         self.lifetime-=1
         self.update_pos(pos)
         self.update_animation()
         self.destroy()
-
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
-        self.hitbox.center = self.rect.center
 
     def update_animation(self):
         self.image = self.sprites.get_image(self.action,self.frame//self.frame_rate,self.dir,self.phase)
@@ -627,13 +635,57 @@ class Heal(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Sword(Abilities):
-    sprites = Read_files.Sprites_Player('Sprites/Attack/Sword/')
-
+class Projectiles(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg=10
-        self.initiate()
+        self.dir=self.entity.dir.copy()
+        self.rectangle()
+        self.update_hitbox()
+
+    def rectangle(self):
+        self.image = self.sprites.sprite_dict['main'][self.action][0]
+        self.rect = self.image.get_rect()
+        self.hitbox=self.rect.copy()
+
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.hitbox.center = self.rect.center
+
+    def update_hitbox(self):
+        if self.dir[1] > 0:#up
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+            self.velocity=[0,-10]
+        elif self.dir[1] < 0:#down
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+            self.velocity=[0,10]
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+            self.velocity=[10,0]
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+            self.velocity=[-10,0]
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def knock_back(self):
+        self.velocity[0]=-self.velocity[0]
+        self.velocity[1]=-self.velocity[1]
+
+    def countered(self):
+        super().countered()
+        self.knock_back()
+
+class Melee(Abilities):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.rectangle()
+
+    def rectangle(self):
+        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,50,50)
+        self.hitbox = self.rect.copy()
+
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+        self.hitbox.center = self.rect.center
 
     def update_hitbox(self):
         if self.dir[1] > 0:#up
@@ -646,6 +698,13 @@ class Sword(Abilities):
             self.hitbox.midright=self.entity.hitbox.midleft
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
+class Sword(Melee):
+    sprites = Read_files.Sprites_Player('Sprites/Attack/Sword/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=10
+
     def update(self,pos):
         super().update(pos)
         self.update_hitbox()
@@ -655,13 +714,11 @@ class Sword(Abilities):
         self.entity.cosmetics.add(slash)
         self.kill()
 
-    def collision_plat(self):
-        pass
-
 class Darksaber(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=0
+        self.lifetime=10#swrod hitbox duration
 
     def collision_ene(self,collision_ene):
         if collision_ene.spirit>=10:
@@ -673,26 +730,14 @@ class Darksaber(Sword):
 class Hammer(Sword):
     def __init__(self,entity):
         super().__init__(entity)
+        self.lifetime=10#swrod hitbox duration
 
-class Shield(Abilities):
+class Shield(Melee):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/')
 
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=0
-        self.dir=[1,0]
-        self.initiate()
-
-    def update_hitbox(self):
-        if self.dir[1] > 0:#up
-            self.hitbox.midbottom=self.entity.hitbox.midtop
-        elif self.dir[1] < 0:#down
-            self.hitbox.midtop=self.entity.hitbox.midbottom
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def update(self,pos):
         super().update(pos)
@@ -701,9 +746,6 @@ class Shield(Abilities):
     def collision_ene(self,collision_ene):
         collision_ene.knock_back()
         self.kill()
-
-    def collision_plat(self):
-        pass
 
 class Stone(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
@@ -784,34 +826,15 @@ class Stone(Abilities):
         super().countered()
         self.knock_back()
 
-class Force(Abilities):
+class Force(Projectiles):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
 
     def __init__(self,entity):
         super().__init__(entity)
+        self.lifetime=30
         self.dmg=0
         self.phase='pre'
         self.phases=['pre','main','post']
-        self.initiate()
-        self.lifetime=30
-        self.dir=self.entity.dir.copy()
-        self.update_hitbox()
-
-    def update_hitbox(self):
-        if self.dir[1] > 0:#up
-            self.hitbox.midbottom=self.entity.hitbox.midtop
-            self.velocity[1]=-10
-        elif self.dir[1] < 0:#down
-            self.hitbox.midtop=self.entity.hitbox.midbottom
-            self.velocity[1]=10
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-            self.velocity[0]=10
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-            self.velocity[0]=-10
-
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def collision_plat(self):
         self.phase='post'
@@ -819,7 +842,6 @@ class Force(Abilities):
         self.velocity=[0,0]
 
     def collision_ene(self,collision_ene):#if hit something
-        #push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
         self.phase='post'
         self.frame=0
         self.velocity=[0,0]
@@ -827,40 +849,13 @@ class Force(Abilities):
         collision_ene.velocity[0]=self.dir[0]*10#abs(push_strength[0])
         collision_ene.velocity[1]=-6
 
-
-    def knock_back(self):
-        self.velocity[0]=-self.velocity[0]
-        self.velocity[1]=-self.velocity[1]
-
-    def countered(self):
-        super().countered()
-        self.knock_back()
-
-class Arrow(Abilities):
-    sprites = Read_files.Sprites_Player('Sprites/Attack/Arrow/',True)
+class Arrow(Projectiles):
+    sprites = Read_files.Sprites_Player('Sprites/Attack/Arrow/')
 
     def __init__(self,entity):
         super().__init__(entity)
         self.lifetime=100
         self.dmg=10
-        self.initiate()
-        self.dir=self.entity.dir.copy()
-        self.update_hitbox()
-
-    def update_hitbox(self):
-        if self.dir[1] > 0:#up
-            self.hitbox.midbottom=self.entity.hitbox.midtop
-            self.velocity[1]=-10
-        elif self.dir[1] < 0:#down
-            self.hitbox.midtop=self.entity.hitbox.midbottom
-            self.velocity[1]=10
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-            self.velocity[0]=10
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-            self.velocity[0]=-10
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def collision_ene(self,collision_ene):
         self.velocity=[0,0]
@@ -870,14 +865,6 @@ class Arrow(Abilities):
     def collision_plat(self):
         self.velocity=[0,0]
         self.dmg=0
-
-    def knock_back(self):
-        self.velocity[0]=-self.velocity[0]
-        self.velocity[1]=-self.velocity[1]
-
-    def countered(self):
-        super().countered()
-        self.knock_back()
 
 class Loot(pygame.sprite.Sprite):
     def __init__(self,entity):
@@ -998,10 +985,9 @@ class Spirits(Cosmetics):
         self.rect = self.image.get_rect()
         self.lifetime=10
 
-class Menu_Arrow(pygame.sprite.Sprite):
+class Menu_Arrow():
 
     def __init__(self):
-        super().__init__()
         self.img = pygame.image.load("Sprites/utils/arrow.png")
         self.rect = self.img.get_rect()
 

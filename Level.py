@@ -145,6 +145,9 @@ class Tilemap():
                 elif tile == '25':
                     new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
                     enemies.add(new_enemy)
+                elif tile == '26':
+                    new_enemy = Entities.Larv((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
+                    enemies.add(new_enemy)
                 elif tile == '24':
                     new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
                     enemies.add(new_enemy)

@@ -193,13 +193,11 @@ class Controler():
         pygame.joystick.init()#initialise joystick module
         self.update_controls()#initialise joysticks and add to list
 
-
         if controler_type:
             self.buttonmapping(controler_type)#read in controler configuration file
 
     def update_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
-        print(dir(self.joystick))
 
     def buttonmapping(self,controler_type):
         file = controler_type+'keys.jason'

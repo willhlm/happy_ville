@@ -2,6 +2,7 @@ import pygame
 import states
 import game_objects
 import Read_files
+import sys
 
 class Game():
     def __init__(self):
@@ -21,6 +22,7 @@ class Game():
         self.controller = Read_files.Controler('xbox')
 
     def event_loop(self):
+
         for event in pygame.event.get():
 
             if event.type==pygame.QUIT:

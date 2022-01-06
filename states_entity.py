@@ -34,7 +34,6 @@ class Entity_States():
         self.frame=0
 
     def update_animation(self):
-        print(self.state_name,self.phase)
         self.entity.image = self.entity.sprites.get_image(self.state_name,self.frame//self.framerate,self.dir,self.phase)
         self.frame += 1
 
