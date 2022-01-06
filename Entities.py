@@ -326,7 +326,7 @@ class Aslat(NPC):
         super().__init__(pos)
         self.name = 'Aslat'
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('Idle', 0, self.dir, 'main')
+        self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
