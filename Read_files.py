@@ -151,6 +151,8 @@ class Alphabet():
 
         return text_surface
 
+    #returns a surface with menu/text background as per size input.
+    #dimensions should be divisble with 16 (unless base png is changed)
     def fill_text_bg(self, surface_size):
         col = int(surface_size[0]/16)
         row = int(surface_size[1]/16)
@@ -181,8 +183,8 @@ class Alphabet():
                         surface.blit(self.text_bg_dict[4],(c*16,r*16))
         return surface
 
-class Controler():
-    def __init__(self, controler_type = False):
+class Controller():
+    def __init__(self, controller_type = False):
         self.keydown=False
         self.keyup=False
         self.value=[0,0]
@@ -191,16 +193,16 @@ class Controler():
         self.map_keyboard()
 
         pygame.joystick.init()#initialise joystick module
-        self.update_controls()#initialise joysticks and add to list
+        self.initiate_controls()#initialise joysticks and add to list
 
-        if controler_type:
-            self.buttonmapping(controler_type)#read in controler configuration file
+        if controller_type:
+            self.buttonmapping(controller_type)#read in controler configuration file
 
-    def update_controls(self):
+    def initiate_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
 
-    def buttonmapping(self,controler_type):
-        file = controler_type+'keys.jason'
+    def buttonmapping(self,controller_type):
+        file = controller_type+'keys.jason'
         with open(join(file),'r+') as file:
             mapping=json.load(file)
             self.buttons=mapping['buttons']
@@ -244,10 +246,11 @@ class Controler():
             self.key = self.keyboard_map.get(event.key, '')
 
     def joystick(self,event):
-        if event.type==pygame.JOYDEVICEADDED:#if a controler is added while playing
-            self.update_controls()
-        if event.type==pygame.JOYDEVICEREMOVED:#if a controler is removed wile playing
-            self.update_controls()
+
+        if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
+            self.initiate_controls()
+        if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
+            self.initiate_controls()
 
         if event.type==pygame.JOYBUTTONDOWN:#press a button
             self.keydown=True

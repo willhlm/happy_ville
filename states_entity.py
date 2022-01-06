@@ -1,7 +1,7 @@
 class Entity_States():
     def __init__(self,entity):
         self.entity=entity
-        self.state_name=str(type(self).__name__)#the name of the class
+        self.state_name=str(type(self).__name__).lower()#the name of the class
         self.dir=self.entity.dir
         self.framerate=4
         self.frame=0
