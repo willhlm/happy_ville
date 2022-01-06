@@ -160,8 +160,10 @@ class Game_Objects():
         #    enemy.draw(self.game.screen)#add a glow around each enemy, can it be in group draw?
         for enemy in self.enemies.sprites():#go through the group
             pygame.draw.rect(self.game.screen, (0,0,255), enemy.hitbox,2)#draw hitbox
-            pygame.draw.rect(self.game.screen, (0,0,255), enemy.rect,2)#draw hitbox
-
+            pygame.draw.rect(self.game.screen, (255,0,255), enemy.rect,2)#draw hitbox
+        pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
+        pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
+        
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)
 
