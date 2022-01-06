@@ -9,7 +9,7 @@ class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
         surface_blit = surface.blit
         for spr in sprites:
             self.spritedict[spr] = surface_blit(spr.image, spr.rect)
-            ExtendedGroup.add_colour(20,(20,20,20),surface,spr.rect)#addded this
+            ExtendedGroup.add_colour(20,(20,20,20),surface,spr.hitbox)#addded this
         self.lostsprites = []
 
     @staticmethod
@@ -91,7 +91,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
         self.max_vel = 10
-        self.hitbox_offset = (0,0)
         self.friction=[0.2,0]
 
     def update_pos(self,pos):
@@ -127,14 +126,14 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.check_collisions()
 
     def update_hitbox(self):
-        self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
+        self.hitbox.midbottom = self.rect.midbottom#[self.rect.bottom + self.hitbox_offset[0], self.rect.bottom + self.hitbox_offset[1]]
 
     def update_rect(self):
-        self.rect.center = [self.hitbox.center[0] - self.hitbox_offset[0], self.hitbox.center[1] - self.hitbox_offset[1]]
+        self.rect.midbottom = self.hitbox.midbottom#[self.hitbox.bottom - self.hitbox_offset[0], self.hitbox.bottom - self.hitbox_offset[1]]
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
-        self.hitbox.center = self.rect.center
+        self.hitbox.midbottom = self.rect.midbottom
 
 class Enemy(Character):
     def __init__(self,pos,projectile_group,loot_group):
@@ -222,10 +221,10 @@ class Flowy(Enemy):
 class Larv(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
         super().__init__(pos,projectile_group,loot_group)
-        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/main/Idle/Stand1.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/Enteties/enemies/larv/main/Idle/catapillar_idle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=self.rect.copy()
-        #self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
+        self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
         self.health = 10
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
         self.distance=[0,0]
@@ -250,7 +249,7 @@ class Player(Character):
         self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)
         self.max_health = 250
         self.max_spirit = 100
@@ -269,7 +268,6 @@ class Player(Character):
         self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
         self.movement_sfx_timer = 110
-        self.hitbox_offset = (0,13)
 
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.shake = 0
