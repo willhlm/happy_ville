@@ -198,7 +198,7 @@ class Controller():
         if controller_type:
             self.buttonmapping(controller_type)#read in controler configuration file
 
-    def update_controls(self):
+    def initiate_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
 
     def buttonmapping(self,controller_type):
