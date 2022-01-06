@@ -19,6 +19,9 @@ class Enemy_states(Entity_States):
         elif self.phase=='post':
             self.phase='pre'
 
+    def change_state(self,input):
+        self.enter_state(input)
+
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -31,8 +34,6 @@ class Idle(Enemy_states):
     #    if not self.entity.collision_types['bottom']:
     #        self.enter_state('Fall_stand')
 
-    def change_state(self,input):
-        self.enter_state(input)
 
 class Walk(Enemy_states):
     def __init__(self,entity):
@@ -45,8 +46,6 @@ class Walk(Enemy_states):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_run')
 
-    def change_state(self,input):
-        pass
 
 class Jump_run(Enemy_states):
     def __init__(self,entity):
@@ -186,6 +185,9 @@ class Death(Enemy_states):
     def increase_phase(self):
         self.done=True
 
+    def change_state(self,input):
+        pass
+
 class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -199,6 +201,10 @@ class Hurt(Enemy_states):
 
     def increase_phase(self):
         self.done=True
+
+    def change_state(self,input):
+        pass
+
 
 class Trans(Enemy_states):
     def __init__(self,entity):

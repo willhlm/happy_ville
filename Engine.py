@@ -3,7 +3,7 @@ import pygame
 class Collisions():
     def __init__(self):
         self.shake=0
-    
+
     @staticmethod
     def counter(fprojectiles,eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group
@@ -128,40 +128,40 @@ class Collisions():
 
         #move in x every dynamic sprite
         for entity in dynamic_Entities.sprites():
-            entity.rect.center = [round(entity.rect.center[0] + entity.velocity[0]), entity.rect.center[1]]
-            entity.update_hitbox()
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
-        #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,Collisions.collided)
-        for dyn_entity, stat_entity in collisions.items():
-            if dyn_entity.velocity[0]>0:#going to the right
-                dyn_entity.hitbox.right = stat_entity[0].hitbox.left
-                dyn_entity.collision_types['right'] = True
+            entity.rect.center = [round(entity.rect.center[0] + entity.velocity[0]), entity.rect.center[1]]
+            entity.update_hitbox()
 
-            elif dyn_entity.velocity[0]<0:#going to the left
-                dyn_entity.hitbox.left = stat_entity[0].hitbox.right
-                dyn_entity.collision_types['left'] = True
+            collision_x = pygame.sprite.spritecollideany(entity,static_enteties,Collisions.collided)
 
-            dyn_entity.update_rect()
+            if collision_x:
+                #check for collisions and get a dictionary of sprites that collides
+                if entity.velocity[0]>0:#going to the right
+                    entity.hitbox.right = collision_x.hitbox.left
+                    entity.collision_types['right'] = True
 
-        #move in y every dynamic sprite
-        for entity in dynamic_Entities.sprites():
+                elif entity.velocity[0]<0:#going to the left
+                    entity.hitbox.left = collision_x.hitbox.right
+                    entity.collision_types['left'] = True
+                entity.update_rect()
+
+            #move in y every dynamic sprite
             entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
             entity.update_hitbox()#follow with hitbox
 
-        #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_Entities,static_enteties,False,False,Collisions.collided)
-        for dyn_entity, stat_entity in collisions.items():
-            if dyn_entity.velocity[1]>0:#going down
-                dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
-                dyn_entity.collision_types['bottom'] = True
+            collision_y = pygame.sprite.spritecollideany(entity,static_enteties,Collisions.collided)
 
-            elif dyn_entity.velocity[1]<0:#going up
-                dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
-                dyn_entity.collision_types['top'] = True
+            if collision_y:
 
-            dyn_entity.update_rect()
+                if entity.velocity[1]>0:#going down
+                    entity.hitbox.bottom = collision_y.hitbox.top
+                    entity.collision_types['bottom'] = True
+
+                elif entity.velocity[1]<0:#going up
+                    entity.hitbox.top = collision_y.hitbox.bottom
+                    entity.collision_types['top'] = True
+                entity.update_rect()
 
     #make the hitbox collide instead of rect
     @staticmethod

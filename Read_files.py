@@ -195,12 +195,11 @@ class Controller():
         pygame.joystick.init()#initialise joystick module
         self.initiate_controls()#initialise joysticks and add to list
 
-
         if controller_type:
-            self.buttonmapping(controller_type)#read in controller configuration file
+            self.buttonmapping(controller_type)#read in controler configuration file
 
-    def initiate_controls(self):
-        self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controllers.
+    def update_controls(self):
+        self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
 
     def buttonmapping(self,controller_type):
         file = controller_type+'keys.jason'
