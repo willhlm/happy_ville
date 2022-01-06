@@ -355,10 +355,10 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             else:
-                self.game.game_objects.player.currentstate.handle_input(input)
+                self.game.game_objects.player.currentstate.change_state(input)
 
         elif input[1]:
-            self.game.game_objects.player.currentstate.handle_input(input)
+            self.game.game_objects.player.currentstate.change_state(input)
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
