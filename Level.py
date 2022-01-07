@@ -148,7 +148,7 @@ class Tilemap():
                 elif tile == '26':
                     new_enemy = Entities.Larv((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
                     enemies.add(new_enemy)
-                elif tile == '26':
+                elif tile == '27':
                     new_enemy = Entities.Vatt((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
                     enemies.add(new_enemy)
                 elif tile == '24':
