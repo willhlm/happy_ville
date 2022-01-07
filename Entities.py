@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, states_player, states_NPC, states_enemy
+import pygame, random, sys, Read_files, states_player, states_NPC, states_enemy, states_vatt
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -208,14 +208,18 @@ class Vatt(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 100
-        self.spirit=100
+        self.spirit=30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
         self.counter=0
         #self.max_vel = 1
         self.friction=[0.7,0]
+        self.currentstate = states_vatt.Idle(self)
 
     def AI(self,playerpos):#the AI based on playerpos
+        if Vatt.aggro and not self.aggro:
+            self.currentstate.change_state('Transform')
+            self.aggro = True
         self.counter += 1
         if self.counter>100:
             self.counter=0

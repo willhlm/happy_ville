@@ -103,7 +103,7 @@ class Game_Objects():
 
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
 
-        self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
+        #self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
@@ -163,7 +163,7 @@ class Game_Objects():
             pygame.draw.rect(self.game.screen, (255,0,255), enemy.rect,2)#draw hitbox
         pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
         pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
-        
+
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)
 
