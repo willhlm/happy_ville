@@ -234,8 +234,6 @@ class Attack(Enemy_states):
         self.phases=['pre','main']
         self.phase=self.phases[0]
 
-        self.attack=self.entity.attack(self.entity)#make the ability object
-
     def update_state(self):
         if self.done:
             self.change_state('Idle')
@@ -243,6 +241,7 @@ class Attack(Enemy_states):
     def increase_phase(self):
         if self.phase=='pre':
             self.phase='main'
-            self.entity.projectiles.add(self.attack)#add sword to group but in main phase        elif self.phase=='main':
+            attack=self.entity.attack(self.entity)#make the object
+            self.entity.projectiles.add(attack)#add sword to group but in main phase        elif self.phase=='main':
         elif self.phase=='main':
             self.done=True

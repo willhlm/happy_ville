@@ -463,7 +463,7 @@ class Ability_Menu(Gameplay):
         elif input [1]:#release
             if input[-1]=='rb':
                 self.game.game_objects.player.equip=self.abilities[self.index]
-                self.game.game_objects.player.ability=self.game.game_objects.player.abilities[self.game.game_objects.player.equip]
+                #self.game.game_objects.player.ability=self.game.game_objects.player.abilities[self.game.game_objects.player.equip]
                 #self.game.game_objects.player.equip=self.game.game_objects.player.abilities[self.ab_index]#select ability
                 self.exit_state()
 
