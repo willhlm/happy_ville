@@ -24,19 +24,19 @@ class Collisions():
 
             #projectile collision?
             collision_plat = pygame.sprite.spritecollideany(projectile,platforms,Collisions.collided)
-            collision_ene = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
+            collision_enemy = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
 
             #if hit enemy
-            if collision_ene:# and not collision_ene.action['death'] and not collision_ene.action['hurt']:
-                if str(type(collision_ene.currentstate).__name__) is not 'Hurt':
-                #self.shake+=collision_ene.death(loot)#check if dead
-                    collision_ene.take_dmg(projectile.dmg)
-                    projectile.collision_ene(collision_ene)
-                #self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
+            if collision_enemy:# and not collision_enemy.action['death'] and not collision_enemy.action['hurt']:
+                if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':
+                #self.shake+=collision_enemy.death(loot)#check if dead
+                    collision_enemy.take_dmg(projectile.dmg)
+                    projectile.collision_enemy(collision_enemy)
+                #self.shake=projectile.collision(entity,cosmetics,collision_enemy)#response of projetile hits
 
-                #if collision_ene.action['death']:
-                #    self.shake+=collision_ene.shake
-                #    loot.add(collision_ene.loots())
+                #if collision_enemy.action['death']:
+                #    self.shake+=collision_enemy.shake
+                #    loot.add(collision_enemy.loots())
 
             #hit platform
             elif collision_plat:
@@ -46,13 +46,13 @@ class Collisions():
     #take damage if collide with enemy
     @staticmethod
     def check_enemy_collision(player,enemies):
-        collision_ene=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
+        collision_enemy=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
 
-        if collision_ene:
-            if str(type(collision_ene.currentstate).__name__) is not 'Death':
+        if collision_enemy:
+            if str(type(collision_enemy.currentstate).__name__) is not 'Death':
 
                 player.take_dmg(10)
-                sign=(player.hitbox.center[0]-collision_ene.hitbox.center[0])
+                sign=(player.hitbox.center[0]-collision_enemy.hitbox.center[0])
                 if sign>0:
                     player.velocity[0]=10#knock back of player
                 else:
