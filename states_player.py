@@ -469,13 +469,12 @@ class Abillitites(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-
         self.done=False#animation flag
         self.dir=self.entity.dir.copy()#animation direction
 
+    def make_abillity(self):
         abilityname=str(type(self).__name__)
-        self.entity.ability=self.entity.abilities[abilityname](self.entity)#make the ability object
-        self.entity.ability.dir=self.dir#sword direction
+        return self.entity.abilities[abilityname](self.entity)#make the ability object
 
     def update_state(self):
         if self.done:
@@ -501,14 +500,15 @@ class Hammer(Abillitites):
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
                 self.reset_timer()
-                self.entity.projectiles.add(self.entity.ability)#add sword to group
+                ability=self.make_abillity()
+                self.entity.projectiles.add(ability)#add sword to group
 
 class Force(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.spirit -= 10
-
-        self.entity.projectiles.add(self.entity.ability)#add sword to group
+        ability=self.make_abillity()
+        self.entity.projectiles.add(ability)#add sword to group
         self.force_jump()
         self.walking()#check if we were walking are idle before
 
@@ -601,7 +601,8 @@ class Stone(Abillitites):
 class Darksaber(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.projectiles.add(self.entity.ability)#add sword to group
+        ability=self.make_abillity()
+        self.entity.projectiles.add(ability)#add sword to group
 
     def handle_input(self,input):
         pass
@@ -616,14 +617,14 @@ class Arrow(Abillitites):
     def handle_input(self,input):
         if input[0]:
             pass
-
         elif input[1]:
             pass
 
     def increase_phase(self):
         if self.phase=='pre':
             self.phase='main'
-            self.entity.projectiles.add(self.entity.ability)#add sword to group
+            ability=self.make_abillity()
+            self.entity.projectiles.add(ability)#add sword to group
 
         elif self.phase==self.phases[-1]:
             self.done=True

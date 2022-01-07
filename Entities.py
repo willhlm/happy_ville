@@ -201,7 +201,6 @@ class Vatt(Enemy):
 
     aggro = False  #remember to turn false when changing maps
     def __init__(self,pos,projectile_group,loot_group):
-        print('vatt yo')
         super().__init__(pos,projectile_group,loot_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/vatt/main/idle/idle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
@@ -622,6 +621,7 @@ class Abilities(pygame.sprite.Sprite):
         self.phase='main'
         self.action=''
         self.frame_rate=4
+        self.dir=entity.dir
 
     def update(self,pos):
         self.lifetime-=1
@@ -662,45 +662,6 @@ class Heal(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Projectiles(Abilities):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.dir=self.entity.dir.copy()
-        self.rectangle()
-        self.velocity=[0,0]
-
-    def rectangle(self):
-        self.image = self.sprites.sprite_dict['main'][self.action][0]
-        self.rect = self.image.get_rect()
-        self.hitbox=self.rect.copy()
-
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0], self.rect.topleft[1] + self.velocity[1]]
-        self.hitbox.center = self.rect.center
-
-    def update_hitbox(self):
-        if self.dir[1] > 0:#up
-            self.hitbox.midbottom=self.entity.hitbox.midtop
-            self.velocity[1]=-self.speed[1]
-        elif self.dir[1] < 0:#down
-            self.hitbox.midtop=self.entity.hitbox.midbottom
-            self.velocity[1]=self.speed[1]
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-            self.velocity[0]=self.speed[0]
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-            self.velocity[0]=-self.speed[1]
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-    def knock_back(self):
-        self.velocity[0]=-self.velocity[0]
-        self.velocity[1]=-self.velocity[1]
-
-    def countered(self,projectile):
-        projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
-        self.knock_back()
-
 class Melee(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
@@ -740,10 +701,14 @@ class Sword(Melee):
         super().__init__(entity)
         self.dmg=10
 
-    def collision_ene(self,collision_ene):
+    def collision_enemy(self,collision_enemy):
         slash=Slash(self)
         self.entity.cosmetics.add(slash)
+        self.knock_back(collision_enemy)
         self.kill()
+
+    def knock_back(self,collision_enemy):
+        collision_enemy.velocity[0]=self.dir[0]*100
 
 class Darksaber(Sword):
     def __init__(self,entity):
@@ -774,6 +739,46 @@ class Shield(Melee):
         collision_ene.knock_back()
         self.kill()
 
+class Projectiles(Abilities):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir=self.entity.dir.copy()
+        self.rectangle()
+        self.velocity=[0,0]
+
+    def rectangle(self):
+        self.image = self.sprites.sprite_dict['main'][self.action][0]
+        self.rect = self.image.get_rect()
+        self.hitbox=self.rect.copy()
+
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.hitbox.center = self.rect.center
+
+    def update_hitbox(self):
+        if self.dir[1] > 0:#up
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+            self.velocity[1]=-self.speed[1]
+        elif self.dir[1] < 0:#down
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+            self.velocity[1]=self.speed[1]
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+            self.velocity[0]=self.speed[0]
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+            self.velocity[0]=-self.speed[1]
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def knock_back(self):
+        self.velocity[0]=-self.velocity[0]
+        self.velocity[1]=-self.velocity[1]
+
+    def countered(self,projectile):
+        projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
+        self.knock_back()
+
+
 class Poisoncould(Projectiles):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Poisoncloud/')
 
@@ -801,7 +806,7 @@ class Poisonblobb(Projectiles):
         super().__init__(entity)
         self.dmg=10
         self.lifetime=100
-        self.speed=[10,10]
+        self.speed=[4,4]
         self.update_hitbox()
 
     def update(self,scroll):
