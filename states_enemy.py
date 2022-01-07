@@ -43,8 +43,9 @@ class Walk(Enemy_states):
         self.phase=self.phases[0]
 
     def update_state(self):
-        if not self.entity.collision_types['bottom']:
-            self.enter_state('Fall_stand')
+        pass
+        #if not self.entity.collision_types['bottom']:
+        #    self.enter_state('Fall_run')
 
 
 class Jump_run(Enemy_states):

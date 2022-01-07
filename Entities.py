@@ -651,10 +651,6 @@ class Abilities(pygame.sprite.Sprite):
     def collision_plat(self):
         pass
 
-    def countered(self):
-        self.entity.stun(30)
-        self.kill()
-
 class Heal(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
@@ -721,6 +717,10 @@ class Melee(Abilities):
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
             self.hitbox.midright=self.entity.hitbox.midleft
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def countered(self):
+        self.entity.stun(30)
+        self.kill()
 
 class Sword(Melee):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Sword/')
