@@ -207,7 +207,7 @@ class Hurt(Enemy_states):
         pass
 
 
-class Trans(Enemy_states):
+class Transform(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()

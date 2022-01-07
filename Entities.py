@@ -142,6 +142,7 @@ class Enemy(Character):
         self.loot_group = loot_group
         self.currentstate = states_enemy.Idle(self)
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
+        self.aggro = False
 
     def update(self,pos,playerpos):
         super().update(pos)
@@ -197,6 +198,8 @@ class Woopie(Enemy):
                 self.currentstate.change_state('Walk')
 
 class Vatt(Enemy):
+
+    aggro = False  #remember to turn false when changing maps
     def __init__(self,pos,projectile_group,loot_group):
         print('vatt yo')
         super().__init__(pos,projectile_group,loot_group)
@@ -204,13 +207,13 @@ class Vatt(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 1
+        self.health = 100
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
         self.counter=0
         #self.max_vel = 1
-        self.friction=[0.5,0]
+        self.friction=[0.7,0]
 
     def AI(self,playerpos):#the AI based on playerpos
         self.counter += 1
@@ -645,7 +648,7 @@ class Abilities(pygame.sprite.Sprite):
         if self.lifetime<0:
             self.kill()
 
-    def collision_ene(self,collision_ene):
+    def collision_enemy(self,collision_enemy):
         self.kill()
 
     def collision_plat(self):
@@ -733,7 +736,7 @@ class Sword(Melee):
         super().update(pos)
         self.update_hitbox()
 
-    def collision_ene(self,collision_ene):
+    def collision_enemy(self,collision_enemy):
         slash=Slash(self)
         self.entity.cosmetics.add(slash)
         self.kill()
@@ -744,11 +747,11 @@ class Darksaber(Sword):
         self.dmg=0
         self.lifetime=10#swrod hitbox duration
 
-    def collision_ene(self,collision_ene):
-        if collision_ene.spirit>=10:
-            collision_ene.spirit-=10
-            spirits=Spiritsorb(collision_ene)
-            collision_ene.loot_group.add(spirits)
+    def collision_enemy(self,collision_enemy):
+        if collision_enemy.spirit>=10:
+            collision_enemy.spirit-=10
+            spirits=Spiritsorb(collision_enemy)
+            collision_enemy.loot_group.add(spirits)
         self.kill()
 
 class Hammer(Sword):
@@ -767,8 +770,8 @@ class Shield(Melee):
         super().update(pos)
         self.update_hitbox()
 
-    def collision_ene(self,collision_ene):
-        collision_ene.knock_back()
+    def collision_enemy(self,collision_enemy):
+        collision_enemy.knock_back()
         self.kill()
 
 class Stone(Abilities):
@@ -822,7 +825,7 @@ class Stone(Abilities):
             if self.action=='small':#only have gravity if small
                 self.velocity[1]+=0.1#graivity
 
-    def collision_ene(self,collision_ene):
+    def collision_enemy(self,collision_enemy):
         self.velocity=[0,0]
         self.dmg=0
         self.phase='post'
@@ -865,13 +868,13 @@ class Force(Projectiles):
         self.frame=0
         self.velocity=[0,0]
 
-    def collision_ene(self,collision_ene):#if hit something
+    def collision_enemy(self,collision_enemy):#if hit something
         self.phase='post'
         self.frame=0
         self.velocity=[0,0]
 
-        collision_ene.velocity[0]=self.dir[0]*10#abs(push_strength[0])
-        collision_ene.velocity[1]=-6
+        collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
+        collision_enemy.velocity[1]=-6
 
 class Arrow(Projectiles):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Arrow/')
@@ -881,7 +884,7 @@ class Arrow(Projectiles):
         self.lifetime=100
         self.dmg=10
 
-    def collision_ene(self,collision_ene):
+    def collision_enemy(self,collision_enemy):
         self.velocity=[0,0]
         self.dmg=0
         self.kill()

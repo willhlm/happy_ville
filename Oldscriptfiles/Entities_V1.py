@@ -808,10 +808,10 @@ class Sword(Weapon):
     def update(self,scroll=0):
         pass
 
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
+    def collision(self,entity=None,cosmetics=None,collision_enemy=None):
         return self.shake
         #entity.velocity[1]=entity.dir[1]*10#nail jump
-        #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
+        #collision_enemy.velocity[0]=entity.dir[0]*10#enemy knock back
 
 class Shield(Weapon):
     def __init__(self,entity_dir,entity_hitbox):
@@ -847,7 +847,7 @@ class Shield(Weapon):
         self.set_img()
         self.destroy()#check lifetime and health
 
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
+    def collision(self,entity=None,cosmetics=None,collision_enemy=None):
         self.health-=10#reduce the health of this object
         return self.shake
 
@@ -898,7 +898,7 @@ class Stone(Weapon):
             if self.action=='small':#only have gravity if small
                 self.velocity[1]+=0.1#graivity
 
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
+    def collision(self,entity=None,cosmetics=None,collision_enemy=None):
         self.velocity=[0,0]
         self.dmg=0
         self.state='post'
@@ -938,19 +938,19 @@ class Force(Weapon):
         self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],30,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):#if hit something
+    def collision(self,entity=None,cosmetics=None,collision_enemy=None):#if hit something
         #push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
         self.state='post'
         self.frame=0
         self.velocity=[0,0]
 
-        if collision_ene:#if collision with enemy
-            cosmetics.add(Spirits([collision_ene.rect[0],collision_ene.rect[1]]))#spawn cosmetic spirits
+        if collision_enemy:#if collision with enemy
+            cosmetics.add(Spirits([collision_enemy.rect[0],collision_enemy.rect[1]]))#spawn cosmetic spirits
             #if self.dir[1]!=0:
             #    entity.velocity[1]=self.dir[1]*abs(push_strength[1])#force jump
             if self.dir[1]==0:#push enemy back
-                collision_ene.velocity[0]=self.dir[0]*10#abs(push_strength[0])
-                collision_ene.velocity[1]=-6
+                collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
+                collision_enemy.velocity[1]=-6
             return self.shake
         return self.shake
         #if self.dir[1]!=0:#if patform down
