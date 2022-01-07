@@ -4,6 +4,8 @@ from states_entity import Entity_States
 class Enemy_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases=['main']
+        self.phase=self.phases[0]
 
     def update(self):
         super().update()
@@ -17,7 +19,7 @@ class Enemy_states(Entity_States):
         elif self.phase=='main':
             self.phase=self.phases[-1]
         elif self.phase=='post':
-            self.phase='pre'
+            self.done=True
 
     def change_state(self,input):
         self.enter_state(input)
@@ -26,8 +28,6 @@ class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def update_state(self):
         pass
@@ -39,8 +39,6 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def update_state(self):
         pass
@@ -80,8 +78,6 @@ class Fall_run(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def update_state(self):
         if self.entity.collision_types['bottom']:
@@ -96,8 +92,6 @@ class Fall_stand(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def update_state(self):
         if self.entity.collision_types['bottom']:
@@ -175,7 +169,6 @@ class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.phase='main'
         self.done=False
 
     def update_state(self):
@@ -193,7 +186,6 @@ class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.phase='main'
         self.done=False
 
     def update_state(self):
@@ -212,8 +204,6 @@ class Trans(Enemy_states):
         super().__init__(entity)
         self.stay_still()
 
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def update_state(self):
         pass
@@ -226,8 +216,6 @@ class Stun(Enemy_states):
         super().__init__(entity)
         self.stay_still()
         self.lifetime=duration
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def update_state(self):
         self.lifetime-=1
@@ -236,3 +224,25 @@ class Stun(Enemy_states):
 
     def change_state(self,input):
         pass
+
+class Attack(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir=self.entity.dir.copy()#animation direction
+        self.entity.attack.dir=self.dir#sword direction
+        self.done=False
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
+
+        self.attack=self.entity.attack(self.entity)#make the ability object
+
+    def update_state(self):
+        if self.done:
+            self.change_state('Idle')
+
+    def increase_phase(self):
+        if self.phase=='pre':
+            self.phase='main'
+            self.entity.projectiles.add(self.attack)#add sword to group but in main phase        elif self.phase=='main':
+        elif self.phase=='main':
+            self.done=True

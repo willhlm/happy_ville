@@ -37,14 +37,14 @@ class Player_states(Entity_States):
     #    if keys_pressed[pygame.K_RIGHT]:
     #        self.pressed=True
 
-class Idle(Player_states):#this object will never pop
+class Idle(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
 
     def update_state(self):
         if not self.entity.collision_types['bottom']:
-            self.entity.velocity[1]=0
+            #self.entity.velocity[1]=0
             self.enter_state('Fall_stand')
 
     def handle_input(self,input):

@@ -258,6 +258,7 @@ class Larv(Enemy):
         self.spirit=10
         self.counter=0
         self.friction=[0.5,0]
+        self.attack=Poisonblobb
 
     def AI(self,playerpos):#the AI
         self.counter += 1
@@ -267,7 +268,7 @@ class Larv(Enemy):
             if rand==0:
                 self.currentstate.change_state('Idle')
             else:
-                self.currentstate.change_state('Walk')
+                self.currentstate.change_state('Attack')
 
 class Player(Character):
     def __init__(self,pos,projectile_group,cosmetics_group):
@@ -612,7 +613,6 @@ class Abilities(pygame.sprite.Sprite):
         self.entity=entity
         self.frame=0
         self.phase='main'
-        self.phases=['main']
         self.action=''
         self.frame_rate=4
 
@@ -660,7 +660,7 @@ class Projectiles(Abilities):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()
         self.rectangle()
-        self.update_hitbox()
+        self.velocity=[0,0]
 
     def rectangle(self):
         self.image = self.sprites.sprite_dict['main'][self.action][0]
@@ -668,30 +668,30 @@ class Projectiles(Abilities):
         self.hitbox=self.rect.copy()
 
     def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0], self.rect.topleft[1] + self.velocity[1]]
         self.hitbox.center = self.rect.center
 
     def update_hitbox(self):
         if self.dir[1] > 0:#up
             self.hitbox.midbottom=self.entity.hitbox.midtop
-            self.velocity=[0,-10]
+            self.velocity[1]=-self.speed[1]
         elif self.dir[1] < 0:#down
             self.hitbox.midtop=self.entity.hitbox.midbottom
-            self.velocity=[0,10]
+            self.velocity[1]=self.speed[1]
         elif self.dir[0] > 0 and self.dir[1] == 0:#right
             self.hitbox.midleft=self.entity.hitbox.midright
-            self.velocity=[10,0]
+            self.velocity[0]=self.speed[0]
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
             self.hitbox.midright=self.entity.hitbox.midleft
-            self.velocity=[-10,0]
+            self.velocity[0]=-self.speed[1]
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def knock_back(self):
         self.velocity[0]=-self.velocity[0]
         self.velocity[1]=-self.velocity[1]
 
-    def countered(self):
-        super().countered()
+    def countered(self,projectile):
+        projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
         self.knock_back()
 
 class Melee(Abilities):
@@ -718,6 +718,10 @@ class Melee(Abilities):
             self.hitbox.midright=self.entity.hitbox.midleft
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
+    def update(self,pos):
+        super().update(pos)
+        self.update_hitbox()
+
     def countered(self):
         self.entity.stun(30)
         self.kill()
@@ -728,10 +732,6 @@ class Sword(Melee):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=10
-
-    def update(self,pos):
-        super().update(pos)
-        self.update_hitbox()
 
     def collision_ene(self,collision_ene):
         slash=Slash(self)
@@ -754,7 +754,7 @@ class Darksaber(Sword):
 class Hammer(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.lifetime=10#swrod hitbox duration
+        self.lifetime=10
 
 class Shield(Melee):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/')
@@ -763,13 +763,46 @@ class Shield(Melee):
         super().__init__(entity)
         self.dmg=0
 
-    def update(self,pos):
-        super().update(pos)
-        self.update_hitbox()
-
     def collision_ene(self,collision_ene):
         collision_ene.knock_back()
         self.kill()
+
+class Poisoncould(Projectiles):
+    sprites = Read_files.Sprites_Player('Sprites/Attack/Poisoncloud/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=10
+        self.lifetime=400
+        self.speed=[0,0]
+        self.update_hitbox()
+
+    def collision_ene(self,collision_ene):
+        pass
+
+    def destroy(self):
+        if self.lifetime<0:
+            self.phase='post'
+
+    def countered(self):
+        self.phase='post'
+
+class Poisonblobb(Projectiles):
+    sprites = Read_files.Sprites_Player('Sprites/Attack/Poisonblobb/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=10
+        self.lifetime=100
+        self.speed=[10,10]
+        self.update_hitbox()
+
+    def update(self,scroll):
+        self.update_vel()
+        super().update(scroll)
+
+    def update_vel(self):
+        self.velocity[1]+=0.1#graivity
 
 class Stone(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
@@ -858,7 +891,8 @@ class Force(Projectiles):
         self.lifetime=30
         self.dmg=0
         self.phase='pre'
-        self.phases=['pre','main','post']
+        self.speed=[10,10]
+        self.update_hitbox()
 
     def collision_plat(self):
         self.phase='post'
@@ -880,6 +914,9 @@ class Arrow(Projectiles):
         super().__init__(entity)
         self.lifetime=100
         self.dmg=10
+        self.speed=[10,10]
+        self.update_hitbox()
+
 
     def collision_ene(self,collision_ene):
         self.velocity=[0,0]

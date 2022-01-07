@@ -10,7 +10,7 @@ class Collisions():
             if type(projectile).__name__ == 'Shield':
                 collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
                 if collision_epro:
-                    collision_epro.conutered()
+                    collision_epro.countered(projectile)
 
     @staticmethod
     def weather_paricles(weathers,platforms):
