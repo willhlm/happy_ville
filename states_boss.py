@@ -121,3 +121,20 @@ class Attack(Enemy_states):
             self.entity.projectiles.add(attack)#add sword to group but in main phase        elif self.phase=='main':
         elif self.phase=='main':
             self.done=True
+
+class Hurt(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update_animation(self):
+        super().update_animation()
+        self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
+
+    def update_state(self):
+        super().update_state()
+
+    def increase_phase(self):
+        super().increase_phase()
+
+    def handle_input(self,input):
+        super().handle_input(input)

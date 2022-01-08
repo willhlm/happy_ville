@@ -21,6 +21,9 @@ class Enemy_states(Entity_States):
     def change_state(self,input):
         self.enter_state(input)
 
+    def handle_input(self,input):
+        pass
+
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)

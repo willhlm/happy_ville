@@ -360,8 +360,6 @@ class Gameplay(Game_State):
         elif input [1]:
             self.game.game_objects.player.currentstate.handle_input(input)
 
-
-
 class Conversation(Gameplay):
     def __init__(self, game, npc):
         super().__init__(game)
@@ -486,3 +484,16 @@ class Start_Menu(Gameplay):
         if input[0]:#press
             if input[-1] == 'select':
                 self.exit_state()
+
+class Boss_encounter(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)
+
+    def update(self):
+        super().update()
+
+    def render(self):
+        super().render()
+
+    def handle_events(self, input):
+        pass

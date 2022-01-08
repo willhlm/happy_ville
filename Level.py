@@ -4,7 +4,7 @@ class Tilemap():
     def __init__(self, level, player_center):
         self.player_center = player_center
         self.tile_size=16
-        self.chunk_size=11
+        self.chunk_size=10
         self.total_distance=[0,0]
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
@@ -166,6 +166,9 @@ class Tilemap():
                 elif tile == '36':
                     new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'bottom')
                     camera_blocks.add(new_stop)
+                elif tile == '40':
+                    new_enemy = Entities.Reindeer((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
+                    enemies.add(new_enemy)
                 col_index += 1
             row_index += 1
             col_index = 0 #reset column

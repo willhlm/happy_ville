@@ -8,8 +8,8 @@ class Vatt_states(Entity_States):
         self.phases=['main']
         self.phase=self.phases[0]
 
-    def update(self):
-        super().update()
+    def update_state(self):
+        pass
 
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
@@ -30,24 +30,11 @@ class Idle(Vatt_states):
         super().__init__(entity)
         self.stay_still()
 
-    def update_state(self):
-        pass
-
-    #    if not self.entity.collision_types['bottom']:
-    #        self.enter_state('Fall_stand')
-
-class Idle_aggro(Vatt_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.stay_still()
-
-    def update_state(self):
-        pass
-
-    def handle_input(self, input):
-        self.change_state(input)
-    #    if not self.entity.collision_types['bottom']:
-    #        self.enter_state('Fall_stand')
+    def handle_input(self,input):
+        if input=='Hurt' and not self.entity.aggro:
+            self.enter_state('Hurt')
+        elif input =='Run':
+            self.enter_state('Run')
 
 
 class Walk(Vatt_states):
@@ -55,12 +42,11 @@ class Walk(Vatt_states):
         super().__init__(entity)
         self.walk()
 
-    def update_state(self):
-        pass
-        #if not self.entity.collision_types['bottom']:
-        #    self.enter_state('Fall_run')
+    def handle_input(self, input):
+        if input=='Hurt' and not self.entity.aggro:
+            self.enter_state('Hurt')
 
-class Run_aggro(Vatt_states):
+class Run(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.acceleration = [1.5,0.8]
@@ -76,21 +62,6 @@ class Run_aggro(Vatt_states):
         #if not self.entity.collision_types['bottom']:
         #    self.enter_state('Fall_run')
 
-class Fall_stand(Vatt_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.stay_still()
-        self.phases = ['pre','main']
-        self.phase = pre
-
-    def update_state(self):
-        if self.entity.collision_types['bottom']:
-            self.enter_state('Idle')
-        elif self.entity.collision_types['right'] or self.entity.collision_types['left']:#on wall and not on ground
-            self.enter_state('Wall')
-
-    def change_state(self,input):
-        pass
 
 class Death(Vatt_states):
     def __init__(self,entity):
@@ -129,26 +100,6 @@ class Hurt(Vatt_states):
     def handle_input(self, input):
         pass
 
-class Hurt_aggro(Vatt_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            self.entity.counter = 0
-            self.enter_state('Idle_aggro')
-
-    def increase_phase(self):
-        self.done=True
-
-    def change_state(self,input):
-        pass
-
-    def handle_input(self, input):
-        pass
-
 class Transform(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -160,8 +111,9 @@ class Transform(Vatt_states):
 
     def update_state(self):
         if self.done:
-            self.enter_state('Idle_aggro')
+            self.enter_state('Idle')
             type(self.entity).aggro = True
+            self.entity.aggro_animation()#go into aggro animaetion
 
     def increase_phase(self):
         self.done=True
