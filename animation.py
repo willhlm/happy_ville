@@ -41,7 +41,7 @@ class Hurt_animation(Entity_animation):#become white
         if self.duration<0:
             self.exit_state()
 
-class Aggro_animation(Animation):#become white
+class Aggro_animation(Animation):
     def __init__(self,entity):
         super().__init__(entity)
 

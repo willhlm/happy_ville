@@ -82,7 +82,11 @@ class Dynamicentity(Staticentity):
     def update(self,pos):
         self.update_pos(pos)
         self.currentstate.update()
-        self.animation_stack[-1].update()
+
+        try:
+            self.animation_stack[-1].update()
+        except:
+            print(str(type(self).__name__))
 
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos):
@@ -170,7 +174,7 @@ class Enemy(Character):
     def knock_back(self,dir):
         self.velocity[0]=dir*100
 
-    def stun(self,duration):
+    def countered(self,duration):
         self.currentstate = states_enemy.Stun(self,duration)
 
 class Woopie(Enemy):
@@ -347,7 +351,7 @@ class Player(Character):
 class NPC(Character):
     def __init__(self,pos):
         super().__init__(pos)
-        self.name = '<always define name>'
+        self.name = str(type(self).__name__)#the name of the class
         self.health = 50
         self.conv_index = 0
         self.currentstate = states_NPC.Idle(self)
@@ -384,7 +388,6 @@ class NPC(Character):
 class Aslat(NPC):
     def __init__(self, pos):
         super().__init__(pos)
-        self.name = 'Aslat'
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
@@ -746,7 +749,7 @@ class Melee(Abilities):
         self.update_hitbox()
 
     def countered(self):
-        self.entity.stun(30)
+        self.entity.countered(30)
         self.kill()
 
 class Sword(Melee):
