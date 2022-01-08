@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, states_player, states_NPC, states_enemy, states_vatt
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -77,11 +77,12 @@ class Dynamicentity(Staticentity):
     def __init__(self,pos):
         super().__init__(pos)
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
+        self.animation_stack=[animation.Entity_animation(self)]
 
     def update(self,pos):
         self.update_pos(pos)
         self.currentstate.update()
-        self.currentstate.update_animation()#has to be here
+        self.animation_stack[-1].update()
 
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos):
@@ -90,7 +91,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.velocity=[0,0]
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
-        self.max_vel = 10
         self.friction=[0.2,0]
 
     def update_pos(self,pos):
@@ -101,25 +101,30 @@ class Character(Dynamicentity):#enemy, NPC,player
         if dmg>0:
             self.health-=dmg
             if self.health>0:#check if dead¨
-                self.currentstate.change_state('Hurt')
+                self.hurt_animation()#become white
+                self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             else:
-                self.currentstate.change_state('Death')
+                self.currentstate.change_state('Death')#overrite any state and go to death
+
+    def hurt_animation(self):
+        new_animation=animation.Hurt_animation(self)
+        new_animation.enter_state()
 
     def check_collisions(self):
         if self.collision_types['top']:#knock back when hit head
             self.velocity[1]=0
-        elif self.collision_spikes['bottom']:
-            self.velocity[1]=-6#knock back
-            self.take_dmg(10)
-        elif self.collision_spikes['right']:
-            self.velocity[0]=-6#knock back
-            self.take_dmg(10)
-        elif self.collision_spikes['left']:
-            self.velocity[0]=6#knock back
-            self.take_dmg(10)
-        elif self.collision_spikes['top']:
-            self.velocity[1]=6#knock back
-            self.take_dmg(10)
+        #elif self.collision_spikes['bottom']:
+        #    self.velocity[1]=-6#knock back
+        #    self.take_dmg(10)
+        #elif self.collision_spikes['right']:
+        #    self.velocity[0]=-6#knock back
+        #    self.take_dmg(10)
+        #elif self.collision_spikes['left']:
+        #    self.velocity[0]=6#knock back
+        #    self.take_dmg(10)
+        #elif self.collision_spikes['top']:
+        #    self.velocity[1]=6#knock back
+        #    self.take_dmg(10)
 
     def update(self,pos):
         super().update(pos)
@@ -140,23 +145,16 @@ class Enemy(Character):
         super().__init__(pos)
         self.projectiles = projectile_group
         self.loot_group = loot_group
-        self.currentstate = states_enemy.Idle(self)
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
         self.aggro = False
+        self.states()
+
+    def states(self):
+        self.currentstate = states_enemy.Idle(self)
 
     def update(self,pos,playerpos):
         super().update(pos)
         self.AI(playerpos)
-
-    def draw(self,screen):#could be added to group draw somehow?
-        self.add_colour(20,(20,20,20),screen)#radius, clolor, screen
-
-    #a function to add glow around the entity
-    def add_colour(self,radius,colour,screen):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(self.rect.x,self.rect.y),special_flags=pygame.BLEND_RGB_ADD)
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -165,9 +163,12 @@ class Enemy(Character):
                 self.loot_group.add(obj)
             self.inventory[key]=0
 
-    def knock_back(self):
+    def countered(self):
         self.velocity[0]=-50*self.dir[0]
         self.stun(30)
+
+    def knock_back(self,dir):
+        self.velocity[0]=dir*100
 
     def stun(self,duration):
         self.currentstate = states_enemy.Stun(self,duration)
@@ -211,21 +212,13 @@ class Vatt(Enemy):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
         self.counter=0
-        #self.max_vel = 1
         self.friction=[0.7,0]
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
 
-    def take_dmg(self,dmg):
-        if dmg>0:
-            self.health-=dmg
-            if self.health>0:#check if dead¨
-                if self.aggro:
-                    self.currentstate.change_state('Hurt_aggro')
-                else:
-                    self.currentstate.change_state('Hurt')
-            else:
-                self.currentstate.change_state('Death')
+    def aggro_animation(self):
+        new_animation=animation.Aggro_animation(self)
+        new_animation.enter_state()
 
     def AI(self,playerpos):#the AI based on playerpos
         #transform if aggro, supersedes all states
@@ -244,13 +237,13 @@ class Vatt(Enemy):
             else:
                 if player_distance > self.attack_distance:
                     self.dir[0] = 1
-                    self.currentstate.handle_input('Run_aggro')
+                    self.currentstate.handle_input('Run')
                 elif player_distance < -self.attack_distance:
                     self.dir[0] = -1
-                    self.currentstate.handle_input('Run_aggro')
+                    self.currentstate.handle_input('Run')
                 else:
                     self.counter = 0
-                    self.currentstate.handle_input('Idle_aggro')
+                    self.currentstate.handle_input('Idle')
 
         #peaceful ai
         else:
@@ -258,9 +251,9 @@ class Vatt(Enemy):
                 self.counter=0
                 rand=random.randint(0,1)
                 if rand==0:
-                    self.currentstate.change_state('Idle')
+                    self.currentstate.handle_input('Idle')
                 else:
-                    self.currentstate.change_state('Walk')
+                    self.currentstate.handle_input('Walk')
 
 class Flowy(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
@@ -291,7 +284,7 @@ class Larv(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
-        self.health = 10
+        self.health = 100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
         self.distance=[0,0]
         self.shake=self.hitbox.height/10
@@ -506,6 +499,33 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
+class Boss(Enemy):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+
+    def knock_back(self,dir):
+        pass
+
+    def states(self):
+        self.currentstate = states_boss.Idle(self)
+
+    def stun(self,duration):
+        self.currentstate = states_boss.Stun(self,duration)
+
+class Reindeer(Boss):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/boss/reindeer/main/idle/raindeer_idle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 1000
+        self.spirit=1000
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/reindeer/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+
+    def AI(self,playerpos):
+        pass
+
 class Trigger(pygame.sprite.Sprite):
 
     def __init__(self,pos):
@@ -664,6 +684,7 @@ class Abilities(pygame.sprite.Sprite):
         self.destroy()
 
     def update_animation(self):
+        #print(self.action,self.frame,self.dir,self.phase)
         self.image = self.sprites.get_image(self.action,self.frame//self.frame_rate,self.dir,self.phase)
         self.frame += 1
 
@@ -738,11 +759,8 @@ class Sword(Melee):
     def collision_enemy(self,collision_enemy):
         slash=Slash(self)
         self.entity.cosmetics.add(slash)
-        self.knock_back(collision_enemy)
+        collision_enemy.knock_back(self.dir[0])
         self.kill()
-
-    def knock_back(self,collision_enemy):
-        collision_enemy.velocity[0]=self.dir[0]*100
 
 class Darksaber(Sword):
     def __init__(self,entity):
@@ -770,7 +788,7 @@ class Shield(Melee):
         self.dmg=0
 
     def collision_ene(self,collision_ene):
-        collision_ene.knock_back()
+        collision_ene.countered()
         self.kill()
 
 class Projectiles(Abilities):
@@ -812,7 +830,6 @@ class Projectiles(Abilities):
         projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
         self.knock_back()
 
-
 class Poisoncould(Projectiles):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Poisoncloud/')
 
@@ -841,6 +858,8 @@ class Poisonblobb(Projectiles):
         self.dmg=10
         self.lifetime=100
         self.speed=[4,4]
+        self.rectangle()
+        self.hitbox=pygame.Rect(self.rect.x,self.rect.y,16,16)
         self.update_hitbox()
 
     def update(self,scroll):
@@ -849,6 +868,12 @@ class Poisonblobb(Projectiles):
 
     def update_vel(self):
         self.velocity[1]+=0.1#graivity
+
+    def collision_plat(self):
+        self.velocity=[0,0]
+        if self.phase=='main':
+            self.phase='post'
+            self.reset_timer()
 
 class Stone(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)

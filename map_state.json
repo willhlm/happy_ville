@@ -3,7 +3,7 @@
         "pathways" : {
             "0" : "light_forest",
             "1" : "light_forest",
-            "2" : "mine",
+            "2" : "light_forest2",
             "3" : "light_forest",
             "4" : "village2"
         },
@@ -25,8 +25,19 @@
     },
     "mine" : {
         "pathways" : {
-            "0" : "light_forest",
-            "1" : "village2"
+            "0" : "light_forest2",
+            "1" : "light_forest2",
+            "2" : "light_forest2"
+        },
+        "chests" : {
+            "0" : ["amber_droplet", "closed"]
+        }
+    },
+    "light_forest2" : {
+        "pathways" : {
+            "0" : "light_forest2",
+            "1" : "light_forest2",
+            "2" : "light_forest2"
         },
         "chests" : {
             "0" : ["amber_droplet", "closed"]

@@ -29,14 +29,6 @@ class Player_states(Entity_States):
     def change_state(self,input):
         self.enter_state(input)
 
-    #def pressing(self):
-    #    self.pressed=False
-    #    keys_pressed=pygame.key.get_pressed()
-    #    if keys_pressed[pygame.K_LEFT]:
-    #        self.pressed=True
-    #    if keys_pressed[pygame.K_RIGHT]:
-    #        self.pressed=True
-
 class Idle(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -69,6 +61,8 @@ class Idle(Player_states):
                 self.entity.dir[1] = 1
             elif input[-1] == 'down':
                 self.entity.dir[1] = -1
+            elif input == 'Hurt':
+                self.enter_state('Hurt')
         elif input[1]:
             if input[-1] == 'up' or input[-1] == 'down':
                 self.entity.dir[1] = 0
@@ -348,9 +342,9 @@ class Hurt(Player_states):
         self.done=False
         self.next_state='Idle'
 
-    def update_animation(self):
-        super().update_animation()
-        self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
+#    def update_animation(self):
+#        super().update_animation()
+#        self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
 
     def update_state(self):
         if self.done:
@@ -499,7 +493,7 @@ class Hammer(Abillitites):
         if input[1]:#release
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
-                self.reset_timer()
+                self.entity.animation_stack[-1].reset_timer()
                 ability=self.make_abillity()
                 self.entity.projectiles.add(ability)#add sword to group
 
@@ -589,7 +583,7 @@ class Stone(Abillitites):
         if input[1]:
             if input[-1]=='b' and self.phase=='charge':#when release the botton
                 self.phase='main'
-                self.reset_timer()
+                self.entity.animation_stack[-1].reset_timer()
                 self.entity.ability.frame=0
                 self.entity.ability.phase='main'
                 self.entity.ability.velocity[0]=self.entity.ability.charge_velocity#set the velocity

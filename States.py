@@ -360,8 +360,6 @@ class Gameplay(Game_State):
         elif input [1]:
             self.game.game_objects.player.currentstate.handle_input(input)
 
-
-
 class Conversation(Gameplay):
     def __init__(self, game, npc):
         super().__init__(game)
@@ -436,17 +434,8 @@ class Ability_Menu(Gameplay):
 
         hud=self.hud[self.index]
 
-        #positions=[]#placeholder
         for index,ability in enumerate(self.abilities):
-            #coordinate=[100+50*index,200]
-            #self.game.screen.blit(self.font.render((50,50),ability),(coordinate))
-            #self.game.screen.blit(self.symbols[ability],(coordinate))
             hud.blit(self.symbols[ability],self.coordinates[index])
-
-            #positions.append(coordinate)#coordinates of all blits
-
-        #self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)#change the overall colour while changing equip
-        #self.game.screen.blit(self.font.render((20,20),'o'),(positions[self.index][0],positions[self.index][1]-20))#the pointer
 
         self.game.screen.blit(hud,(250,100))
 
@@ -463,8 +452,6 @@ class Ability_Menu(Gameplay):
         elif input [1]:#release
             if input[-1]=='rb':
                 self.game.game_objects.player.equip=self.abilities[self.index]
-                #self.game.game_objects.player.ability=self.game.game_objects.player.abilities[self.game.game_objects.player.equip]
-                #self.game.game_objects.player.equip=self.game.game_objects.player.abilities[self.ab_index]#select ability
                 self.exit_state()
 
 class Start_Menu(Gameplay):
@@ -497,3 +484,16 @@ class Start_Menu(Gameplay):
         if input[0]:#press
             if input[-1] == 'select':
                 self.exit_state()
+
+class Boss_encounter(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)
+
+    def update(self):
+        super().update()
+
+    def render(self):
+        super().render()
+
+    def handle_events(self, input):
+        pass

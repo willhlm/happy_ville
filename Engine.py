@@ -11,6 +11,7 @@ class Collisions():
                 collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
                 if collision_epro:
                     collision_epro.countered(projectile)
+                    projectile.kill()
 
     @staticmethod
     def weather_paricles(weathers,platforms):
@@ -49,7 +50,7 @@ class Collisions():
         collision_enemy=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
 
         if collision_enemy:
-            print(collision_enemy.aggro)
+
             if str(type(collision_enemy.currentstate).__name__) is not 'Death' and collision_enemy.aggro:
 
                 player.take_dmg(10)

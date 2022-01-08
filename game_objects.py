@@ -103,7 +103,7 @@ class Game_Objects():
 
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
 
-        #self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
+        self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
 
     def scrolling(self):
         self.map.scrolling(self.player.rect,self.collisions.shake)
