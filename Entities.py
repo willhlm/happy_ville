@@ -82,14 +82,13 @@ class Dynamicentity(Staticentity):
     def update(self,pos):
         self.update_pos(pos)
         self.currentstate.update()
-
-        try:
-            self.animation_stack[-1].update()
-        except:
-            print(str(type(self).__name__))
-            print(error)
-            print(a)
-            exit()
+    #    try:
+        self.animation_stack[-1].update()
+    #    except:
+    #        print(str(type(self).__name__))
+    #        print(error)
+    #        print(a)
+    #        exit()
 
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos):
@@ -185,6 +184,7 @@ class Enemy(Character):
     def set_aggroAI(self):
         new_AI=AI.Aggro_AI(self)
         new_AI.enter_state()
+        self.aggro = True
 
     def set_peaceAI(self):
         new_AI=AI.Peace_AI(self)
@@ -206,6 +206,9 @@ class Enemy(Character):
             if self.AI_stack[-1].player_distance[0] > self.attack_distance:
                 self.dir[0] = 1
                 self.currentstate.handle_input('Run')
+            elif abs(self.AI_stack[-1].player_distance[0])<self.attack_distance:
+                self.currentstate.handle_input('Attack')
+                self.AI_stack[-1].counter = 0
             elif self.AI_stack[-1].player_distance[0] < -self.attack_distance:
                 self.dir[0] = -1
                 self.currentstate.handle_input('Run')
@@ -224,19 +227,7 @@ class Woopie(Enemy):
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
-        self.counter=0
-        #self.max_vel = 1
         self.friction=[0.5,0]
-
-    def AI(self,playerpos):#the AI based on playerpos
-        self.counter += 1
-        if self.counter>100:
-            self.counter=0
-            rand=random.randint(0,1)
-            if rand==0:
-                self.currentstate.change_state('Idle')
-            else:
-                self.currentstate.change_state('Walk')
 
 class Vatt(Enemy):
 
@@ -250,12 +241,12 @@ class Vatt(Enemy):
         self.health = 50
         self.spirit=30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.shake=10
         self.friction=[0.7,0]
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
+        self.AI_stack=[AI.Peace_AI(self)]
 
-    def aggro_animation(self):
+    def set_aggro_animation(self):
         new_animation=animation.Aggro_animation(self)
         new_animation.enter_state()
 
@@ -270,6 +261,21 @@ class Vatt(Enemy):
             self.aggro = True
             self.set_aggroAI()
 
+        #print(type(self.animation_stack[-1]))
+    def aggroAI(self):
+        if self.AI_stack[-1].counter < 40:
+            pass
+        else:
+            if self.AI_stack[-1].player_distance[0] > self.attack_distance:
+                self.dir[0] = 1
+                self.currentstate.handle_input('Run')
+            elif self.AI_stack[-1].player_distance[0] < -self.attack_distance:
+                self.dir[0] = -1
+                self.currentstate.handle_input('Run')
+            else:
+                self.AI_stack[-1].counter = 0
+                self.currentstate.handle_input('Idle')
+
 class Flowy(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
         super().__init__(pos,projectile_group,loot_group)
@@ -279,8 +285,6 @@ class Flowy(Enemy):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 10
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/flowy/')
-        self.distance=[0,0]
-        self.shake=self.hitbox.height/10
         self.spirit=10
 
 class Larv(Enemy):
@@ -292,10 +296,7 @@ class Larv(Enemy):
         self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
         self.health = 100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
-        self.distance=[0,0]
-        self.shake=self.hitbox.height/10
         self.spirit=10
-        self.counter=0
         self.friction=[0.5,0]
         self.attack=Poisonblobb
         self.attack_distance=60
@@ -327,7 +328,6 @@ class Player(Character):
         self.movement_sfx_timer = 110
 
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
-        self.shake = 0
 
         self.currentstate = states_player.Idle(self)
 
@@ -495,16 +495,17 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
-class Boss(Enemy):
+class Boss(Character):
     def __init__(self,pos,projectile_group,loot_group):
         super().__init__(pos,projectile_group,loot_group)
+        self.projectiles = projectile_group
+        self.loot_group = loot_group
+        self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
+        self.AI_stack=[AI.Peace_AI(self)]
         self.currentstate = states_boss.Idle(self)
 
     def knock_back(self,dir):
         pass
-
-    def stun(self,duration):
-        self.currentstate = states_boss.Stun(self,duration)
 
 class Reindeer(Boss):
     def __init__(self,pos,projectile_group,loot_group):
@@ -852,7 +853,6 @@ class Poisonblobb(Projectiles):
         self.dmg=10
         self.lifetime=100
         self.speed=[4,4]
-        self.rectangle()
         self.hitbox=pygame.Rect(self.rect.x,self.rect.y,16,16)
         self.update_hitbox()
 

@@ -32,7 +32,7 @@ class Entity_animation(Animation):
 class Hurt_animation(Entity_animation):#become white
     def __init__(self,entity):
         super().__init__(entity)
-        self.duration=5
+        self.duration=15
         self.frame=entity.animation_stack[0].frame#set the initial frame
 
     def update(self):
