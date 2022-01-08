@@ -8,9 +8,6 @@ class Vatt_states(Entity_States):
         self.phases=['main']
         self.phase=self.phases[0]
 
-    def update_state(self):
-        pass
-
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
@@ -46,10 +43,23 @@ class Walk(Vatt_states):
         if input=='Hurt' and not self.entity.aggro:
             self.enter_state('Hurt')
 
+class Fall_stand(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.walk()
+
+    def update_state(self):
+        if self.entity.collision_types['bottom']:
+            self.enter_state('Idle')
+
+    def handle_input(self, input):
+        if input=='Hurt' and not self.entity.aggro:
+            self.enter_state('Hurt')
+
 class Run(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.acceleration = [1.9,0.8]
+        self.entity.acceleration = [1.6,0.8]
 
     def update_state(self):
         pass
@@ -166,11 +176,33 @@ class Javelin(Vatt_states):
         self.phases = ['pre','main','post']
         self.phase = 'pre'
         self.entity.acceleration = [0,0]
+        self.entity.velocity = [0,0]
+        self.counter = 0
+        self.done = False
+        self.pre_pos_increment = [-3,-2,-1,-1,-1,-1]
 
     def update_state(self):
+        if self.phase == 'pre':
+            if int(self.counter/4) >= len(self.pre_pos_increment):
+                pass
+            elif self.counter%4 == 0:
+                self.entity.update_pos((0,self.pre_pos_increment[int(self.counter/4)]))
+        elif self.phase == 'main':
+            if self.counter > 24:
+                self.phase = 'post'
+        elif self.done:
+            self.enter_state('Fall_stand')
+        self.counter += 1
 
-        if self.pahse == 'pre':
-            self.entity.update_pos(self.entity)
+    def increase_phase(self):
+        if self.phase=='pre':
+            self.phase='main'
+            self.counter = 0
+            self.entity.acceleration = [6,0]
+        elif self.phase=='main':
+            pass
+        elif self.phase=='post':
+            self.done=True
 
 
     def change_state(self,input):

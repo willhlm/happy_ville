@@ -15,6 +15,9 @@ class Entity_States():
 
         self.entity.velocity[0]+=self.entity.dir[0]*self.entity.acceleration[0]-self.entity.friction[0]*self.entity.velocity[0]
 
+    def update_state(self):
+        pass
+
     def walk(self):
         self.entity.acceleration=[1,0.8]
 

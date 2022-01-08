@@ -207,7 +207,7 @@ class Vatt(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 50
+        self.health = 30
         self.spirit=30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
@@ -243,7 +243,7 @@ class Vatt(Enemy):
                     self.currentstate.handle_input('Run')
                 else:
                     self.counter = 0
-                    self.currentstate.handle_input('Idle')
+                    self.currentstate.handle_input('Javelin')
 
         #peaceful ai
         else:
