@@ -63,7 +63,7 @@ class Walk(Vatt_states):
 class Run_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.acceleration = [1.5,0.8]
+        self.entity.acceleration = [1.9,0.8]
 
     def update_state(self):
         pass
@@ -208,9 +208,18 @@ class Attack(Vatt_states):
         elif self.phase=='main':
             self.done=True
 
-class javelin(Vatt_states):
+class Javelin(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases = ['pre','main','post']
+        self.phase = 'pre'
+        self.entity.acceleration = [0,0]
+
+    def update_state(self):
+
+        if self.pahse == 'pre':
+            self.entity.update_pos(self.entity)
+
 
     def change_state(self,input):
         pass
