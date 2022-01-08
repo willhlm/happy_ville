@@ -117,7 +117,7 @@ class Game_Objects():
         for bg in self.bgs:
             bg.update(scroll)
         self.players.update(scroll)
-        self.enemies.update(scroll,self.player.rect)#shoudl the AI be based on playerposition?
+        self.enemies.update(scroll,self.player.rect.center)#shoudl the AI be based on playerposition?
         self.npcs.update(scroll)
         self.interactables.update(scroll)
         self.invisible_blocks.update(scroll)
@@ -126,7 +126,7 @@ class Game_Objects():
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
         self.npc_pause.update(scroll)
-        self.enemy_pause.update(scroll,self.player.rect)#shoudl the AI be based on playerposition?
+        self.enemy_pause.update(scroll,self.player.rect.center)#shoudl the AI be based on playerposition?
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
@@ -163,7 +163,7 @@ class Game_Objects():
             pygame.draw.rect(self.game.screen, (255,0,255), enemy.rect,2)#draw hitbox
         pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
         pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
-        
+
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)
 

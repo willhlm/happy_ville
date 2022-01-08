@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, states_player, states_NPC, states_enemy
+import pygame, random, sys, Read_files, states_player, states_NPC, states_enemy, states_boss
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -140,23 +140,16 @@ class Enemy(Character):
         super().__init__(pos)
         self.projectiles = projectile_group
         self.loot_group = loot_group
-        self.currentstate = states_enemy.Idle(self)
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
         self.aggro = False
+        self.states()
+
+    def states(self):
+        self.currentstate = states_enemy.Idle(self)
 
     def update(self,pos,playerpos):
         super().update(pos)
         self.AI(playerpos)
-
-    def draw(self,screen):#could be added to group draw somehow?
-        self.add_colour(20,(20,20,20),screen)#radius, clolor, screen
-
-    #a function to add glow around the entity
-    def add_colour(self,radius,colour,screen):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(self.rect.x,self.rect.y),special_flags=pygame.BLEND_RGB_ADD)
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -165,9 +158,12 @@ class Enemy(Character):
                 self.loot_group.add(obj)
             self.inventory[key]=0
 
-    def knock_back(self):
+    def countered(self):
         self.velocity[0]=-50*self.dir[0]
         self.stun(30)
+
+    def knock_back(self,dir):
+        self.velocity[0]=dir*100
 
     def stun(self,duration):
         self.currentstate = states_enemy.Stun(self,duration)
@@ -253,7 +249,7 @@ class Larv(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
-        self.health = 10
+        self.health = 100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
         self.distance=[0,0]
         self.shake=self.hitbox.height/10
@@ -468,6 +464,33 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
+class Boss(Enemy):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+
+    def knock_back(self,dir):
+        pass
+
+    def states(self):
+        self.currentstate = states_boss.Idle(self)
+
+    def stun(self,duration):
+        self.currentstate = states_boss.Stun(self,duration)
+
+class Reindeer(Boss):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/boss/reindeer/main/idle/Reindeer.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 1000
+        self.spirit=1000
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/reindeer/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+
+    def AI(self,playerpos):
+        pass
+
 class Trigger(pygame.sprite.Sprite):
 
     def __init__(self,pos):
@@ -626,6 +649,7 @@ class Abilities(pygame.sprite.Sprite):
         self.destroy()
 
     def update_animation(self):
+        #print(self.action,self.frame,self.dir,self.phase)
         self.image = self.sprites.get_image(self.action,self.frame//self.frame_rate,self.dir,self.phase)
         self.frame += 1
 
@@ -700,11 +724,8 @@ class Sword(Melee):
     def collision_enemy(self,collision_enemy):
         slash=Slash(self)
         self.entity.cosmetics.add(slash)
-        self.knock_back(collision_enemy)
+        collision_enemy.knock_back(self.dir[0])
         self.kill()
-
-    def knock_back(self,collision_enemy):
-        collision_enemy.velocity[0]=self.dir[0]*100
 
 class Darksaber(Sword):
     def __init__(self,entity):
@@ -732,7 +753,7 @@ class Shield(Melee):
         self.dmg=0
 
     def collision_ene(self,collision_ene):
-        collision_ene.knock_back()
+        collision_ene.countered()
         self.kill()
 
 class Projectiles(Abilities):
@@ -774,7 +795,6 @@ class Projectiles(Abilities):
         projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
         self.knock_back()
 
-
 class Poisoncould(Projectiles):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Poisoncloud/')
 
@@ -803,6 +823,8 @@ class Poisonblobb(Projectiles):
         self.dmg=10
         self.lifetime=100
         self.speed=[4,4]
+        self.rectangle()
+        self.hitbox=pygame.Rect(self.rect.x,self.rect.y,16,16)
         self.update_hitbox()
 
     def update(self,scroll):
@@ -811,6 +833,12 @@ class Poisonblobb(Projectiles):
 
     def update_vel(self):
         self.velocity[1]+=0.1#graivity
+
+    def collision_plat(self):
+        self.velocity=[0,0]
+        if self.phase=='main':
+            self.phase='post'
+            self.reset_timer()
 
 class Stone(Abilities):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)

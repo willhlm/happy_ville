@@ -11,6 +11,7 @@ class Collisions():
                 collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
                 if collision_epro:
                     collision_epro.countered(projectile)
+                    projectile.kill()
 
     @staticmethod
     def weather_paricles(weathers,platforms):
