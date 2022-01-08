@@ -24,26 +24,26 @@ class Enemy_states(Entity_States):
     def handle_input(self,input):
         pass
 
+    def update_state(self):
+        pass
+
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
 
-    def update_state(self):
-        pass
-    #    if not self.entity.collision_types['bottom']:
-    #        self.enter_state('Fall_stand')
-
+    def handle_input(self,input):
+        if input=='Run' or input=='Walk':
+             self.enter_state('Walk')
 
 class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
 
-    def update_state(self):
-        pass
-        #if not self.entity.collision_types['bottom']:
-        #    self.enter_state('Fall_run')
+    def handle_input(self,input):
+        if input=='Idle':
+             self.enter_state('Idle')
 
 class Death(Enemy_states):
     def __init__(self,entity):

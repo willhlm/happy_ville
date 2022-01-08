@@ -88,7 +88,6 @@ class Hurt(Vatt_states):
 
     def update_state(self):
         if self.done:
-            self.entity.aggro = True
             self.enter_state('Transform')
 
     def increase_phase(self):
