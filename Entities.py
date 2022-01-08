@@ -206,7 +206,7 @@ class Vatt(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 100
+        self.health = 50
         self.spirit=30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
@@ -214,19 +214,53 @@ class Vatt(Enemy):
         #self.max_vel = 1
         self.friction=[0.7,0]
         self.currentstate = states_vatt.Idle(self)
+        self.attack_distance = 60
+
+    def take_dmg(self,dmg):
+        if dmg>0:
+            self.health-=dmg
+            if self.health>0:#check if dead¨
+                if self.aggro:
+                    self.currentstate.change_state('Hurt_aggro')
+                else:
+                    self.currentstate.change_state('Hurt')
+            else:
+                self.currentstate.change_state('Death')
 
     def AI(self,playerpos):#the AI based on playerpos
+        #transform if aggro, supersedes all states
         if Vatt.aggro and not self.aggro:
             self.currentstate.change_state('Transform')
             self.aggro = True
+
         self.counter += 1
-        if self.counter>100:
-            self.counter=0
-            rand=random.randint(0,1)
-            if rand==0:
-                self.currentstate.change_state('Idle')
+        #aggro ai
+
+        if self.aggro:
+            player_distance = playerpos[0] - self.rect.center[0]
+
+            if self.counter < 40:
+                pass
             else:
-                self.currentstate.change_state('Walk')
+                if player_distance > self.attack_distance:
+                    self.dir[0] = 1
+                    self.currentstate.handle_input('Run_aggro')
+                elif player_distance < -self.attack_distance:
+                    self.dir[0] = -1
+                    self.currentstate.handle_input('Run_aggro')
+                else:
+                    self.counter = 0
+                    self.currentstate.handle_input('Idle_aggro')
+
+        #peaceful ai
+        else:
+            if self.counter>100:
+                self.counter=0
+                rand=random.randint(0,1)
+                if rand==0:
+                    self.currentstate.change_state('Idle')
+                else:
+                    self.currentstate.change_state('Walk')
 
 class Flowy(Enemy):
     def __init__(self,pos,projectile_group,loot_group):

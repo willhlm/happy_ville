@@ -32,6 +32,7 @@ class Idle(Vatt_states):
 
     def update_state(self):
         pass
+
     #    if not self.entity.collision_types['bottom']:
     #        self.enter_state('Fall_stand')
 
@@ -42,6 +43,9 @@ class Idle_aggro(Vatt_states):
 
     def update_state(self):
         pass
+
+    def handle_input(self, input):
+        self.change_state(input)
     #    if not self.entity.collision_types['bottom']:
     #        self.enter_state('Fall_stand')
 
@@ -56,10 +60,28 @@ class Walk(Vatt_states):
         #if not self.entity.collision_types['bottom']:
         #    self.enter_state('Fall_run')
 
+class Run_aggro(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.acceleration = [1.5,0.8]
+
+    def update_state(self):
+        pass
+
+    def handle_input(self, input):
+        if input == str(type(self).__name__):
+            pass
+        else:
+            self.change_state(input)
+        #if not self.entity.collision_types['bottom']:
+        #    self.enter_state('Fall_run')
+
 class Fall_stand(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
+        self.phases = ['pre','main']
+        self.phase = pre
 
     def update_state(self):
         if self.entity.collision_types['bottom']:
@@ -95,12 +117,16 @@ class Hurt(Vatt_states):
 
     def update_state(self):
         if self.done:
+            self.entity.aggro = True
             self.enter_state('Transform')
 
     def increase_phase(self):
         self.done=True
 
     def change_state(self,input):
+        pass
+
+    def handle_input(self, input):
         pass
 
 class Hurt_aggro(Vatt_states):
@@ -111,12 +137,16 @@ class Hurt_aggro(Vatt_states):
 
     def update_state(self):
         if self.done:
-            self.enter_state('Idle')
+            self.entity.counter = 0
+            self.enter_state('Idle_aggro')
 
     def increase_phase(self):
         self.done=True
 
     def change_state(self,input):
+        pass
+
+    def handle_input(self, input):
         pass
 
 class Transform(Vatt_states):
@@ -137,6 +167,9 @@ class Transform(Vatt_states):
         self.done=True
 
     def change_state(self,input):
+        pass
+
+    def handle_input(self, input):
         pass
 
 class Stun(Vatt_states):
@@ -174,3 +207,13 @@ class Attack(Vatt_states):
             self.entity.projectiles.add(self.attack)#add sword to group but in main phase        elif self.phase=='main':
         elif self.phase=='main':
             self.done=True
+
+class javelin(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def change_state(self,input):
+        pass
+
+    def handle_input(self, input):
+        pass

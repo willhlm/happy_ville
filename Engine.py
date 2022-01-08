@@ -49,7 +49,8 @@ class Collisions():
         collision_enemy=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
 
         if collision_enemy:
-            if str(type(collision_enemy.currentstate).__name__) is not 'Death':
+            print(collision_enemy.aggro)
+            if str(type(collision_enemy.currentstate).__name__) is not 'Death' and collision_enemy.aggro:
 
                 player.take_dmg(10)
                 sign=(player.hitbox.center[0]-collision_enemy.hitbox.center[0])
