@@ -111,7 +111,7 @@ class Transform(Vatt_states):
     def update_state(self):
         if self.done:
             type(self.entity).aggro = True
-            self.entity.set_aggro_animation()#go into aggro animaetion
+            #self.entity.set_aggro_animation()#go into aggro animaetion
             self.enter_state('Idle')
 
 

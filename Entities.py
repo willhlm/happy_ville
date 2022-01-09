@@ -246,10 +246,6 @@ class Vatt(Enemy):
         self.attack_distance = 60
         self.AI_stack=[AI.Peace_AI(self)]
 
-    def set_aggro_animation(self):
-        new_animation=animation.Aggro_animation(self)
-        new_animation.enter_state()
-
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
         self.updateAI()
@@ -261,7 +257,7 @@ class Vatt(Enemy):
             self.aggro = True
             self.set_aggroAI()
 
-        #print(type(self.animation_stack[-1]))
+    #print(type(self.animation_stack[-1]))
     def aggroAI(self):
         if self.AI_stack[-1].counter < 40:
             pass
