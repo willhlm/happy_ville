@@ -27,11 +27,20 @@ class Idle(Vatt_states):
         super().__init__(entity)
         self.stay_still()
 
-    def handle_input(self,input):
-        if input=='Hurt' and not self.entity.aggro:
-            self.enter_state('Hurt')
-        elif input =='Run':
-            self.enter_state('Run')
+    def update_state(self):
+        pass
+    #    if not self.entity.collision_types['bottom']:
+    #        self.enter_state('Fall_stand')
+
+class Idle_aggro(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+
+    def update_state(self):
+        pass
+    #    if not self.entity.collision_types['bottom']:
+    #        self.enter_state('Fall_stand')
 
 
 class Walk(Vatt_states):
@@ -39,11 +48,25 @@ class Walk(Vatt_states):
         super().__init__(entity)
         self.walk()
 
+    def update_state(self):
+        pass
+        #if not self.entity.collision_types['bottom']:
+        #    self.enter_state('Fall_run')
+
+class Fall_stand(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.walk()
+
+    def update_state(self):
+        if self.entity.collision_types['bottom']:
+            self.enter_state('Idle')
+
     def handle_input(self, input):
         if input=='Hurt' and not self.entity.aggro:
             self.enter_state('Hurt')
 
-class Fall_stand(Vatt_states):
+class Fall_stand_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
@@ -72,6 +95,21 @@ class Run(Vatt_states):
         #if not self.entity.collision_types['bottom']:
         #    self.enter_state('Fall_run')
 
+class Run_aggro(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.acceleration = [1.5,0.8]
+
+    def update_state(self):
+        pass
+
+    def handle_input(self, input):
+        if input == str(type(self).__name__):
+            pass
+        else:
+            self.change_state(input)
+        #if not self.entity.collision_types['bottom']:
+        #    self.enter_state('Fall_run')
 
 class Death(Vatt_states):
     def __init__(self,entity):
@@ -106,7 +144,20 @@ class Hurt(Vatt_states):
     def change_state(self,input):
         pass
 
-    def handle_input(self, input):
+class Hurt_aggro(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.done=False
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
+
+    def increase_phase(self):
+        self.done=True
+
+    def change_state(self,input):
         pass
 
 class Transform(Vatt_states):
