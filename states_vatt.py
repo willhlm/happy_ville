@@ -199,28 +199,6 @@ class Stun(Vatt_states):
     def change_state(self,input):
         pass
 
-class Attack(Vatt_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.dir=self.entity.dir.copy()#animation direction
-        self.entity.attack.dir=self.dir#sword direction
-        self.done=False
-        self.phases=['pre','main']
-        self.phase=self.phases[0]
-
-        self.attack=self.entity.attack(self.entity)#make the ability object
-
-    def update_state(self):
-        if self.done:
-            self.change_state('Idle')
-
-    def increase_phase(self):
-        if self.phase=='pre':
-            self.phase='main'
-            self.entity.projectiles.add(self.attack)#add sword to group but in main phase        elif self.phase=='main':
-        elif self.phase=='main':
-            self.done=True
-
 class Javelin(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
