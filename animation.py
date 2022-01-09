@@ -42,17 +42,3 @@ class Hurt_animation(Entity_animation):#become white
 
         if self.duration<0:
             self.exit_state()
-
-class Aggro_animation(Animation):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        state_name=self.entity.currentstate.state_name + '_aggro'
-
-        self.entity.image = self.entity.sprites.get_image(state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
-        self.frame += 1
-
-        if self.frame == self.entity.sprites.get_frame_number(state_name,self.entity.currentstate.dir,self.entity.currentstate.phase)*self.framerate:
-            self.reset_timer()
-            self.entity.currentstate.increase_phase()

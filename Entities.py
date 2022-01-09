@@ -246,10 +246,6 @@ class Vatt(Enemy):
         self.attack_distance = 60
         self.AI_stack=[AI.Peace_AI(self)]
 
-    def set_aggro_animation(self):
-        new_animation=animation.Aggro_animation(self)
-        new_animation.enter_state()
-
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
         self.updateAI(playerpos)
