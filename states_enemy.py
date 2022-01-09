@@ -24,26 +24,30 @@ class Enemy_states(Entity_States):
     def handle_input(self,input):
         pass
 
+    def update_state(self):
+        pass
+
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
 
-    def update_state(self):
-        pass
-    #    if not self.entity.collision_types['bottom']:
-    #        self.enter_state('Fall_stand')
-
+    def handle_input(self,input):
+        if input=='Run' or input=='Walk':
+             self.enter_state('Walk')
+        elif input =='Attack':
+             self.enter_state('Attack')
 
 class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
 
-    def update_state(self):
-        pass
-        #if not self.entity.collision_types['bottom']:
-        #    self.enter_state('Fall_run')
+    def handle_input(self,input):
+        if input=='Idle':
+             self.enter_state('Idle')
+        elif input =='Attack':
+             self.enter_state('Attack')
 
 class Death(Enemy_states):
     def __init__(self,entity):
@@ -108,7 +112,6 @@ class Attack(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()#animation direction
-        self.entity.attack.dir=self.dir#sword direction
         self.done=False
         self.phases=['pre','main']
         self.phase=self.phases[0]
@@ -121,6 +124,6 @@ class Attack(Enemy_states):
         if self.phase=='pre':
             self.phase='main'
             attack=self.entity.attack(self.entity)#make the object
-            self.entity.projectiles.add(attack)#add sword to group but in main phase        elif self.phase=='main':
+            self.entity.projectiles.add(attack)#add to group but in main phase
         elif self.phase=='main':
             self.done=True

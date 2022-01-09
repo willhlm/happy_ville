@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss
+import pygame, random, sys, Read_files, animation, AI, states_player, states_NPC, states_enemy, states_vatt, states_boss
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -82,7 +82,13 @@ class Dynamicentity(Staticentity):
     def update(self,pos):
         self.update_pos(pos)
         self.currentstate.update()
+    #    try:
         self.animation_stack[-1].update()
+    #    except:
+    #        print(str(type(self).__name__))
+    #        print(error)
+    #        print(a)
+    #        exit()
 
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos):
@@ -147,14 +153,16 @@ class Enemy(Character):
         self.loot_group = loot_group
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
         self.aggro = False
-        self.states()
-
-    def states(self):
         self.currentstate = states_enemy.Idle(self)
+        self.AI_stack=[AI.Peace_AI(self)]
+
+    def take_dmg(self,dmg):
+        super().take_dmg(dmg)
+        self.set_aggroAI()
 
     def update(self,pos,playerpos):
         super().update(pos)
-        self.AI(playerpos)
+        self.AI_stack[-1].update(playerpos)
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -165,13 +173,48 @@ class Enemy(Character):
 
     def countered(self):
         self.velocity[0]=-50*self.dir[0]
-        self.stun(30)
+        self.stun()
 
     def knock_back(self,dir):
         self.velocity[0]=dir*100
 
-    def stun(self,duration):
+    def stun(self,duration=30):
         self.currentstate = states_enemy.Stun(self,duration)
+
+    def set_aggroAI(self):
+        new_AI=AI.Aggro_AI(self)
+        new_AI.enter_state()
+        self.aggro = True
+
+    def set_peaceAI(self):
+        new_AI=AI.Peace_AI(self)
+        new_AI.enter_state()
+
+    def peaceAI(self):
+        if self.AI_stack[-1].counter>100:
+            self.AI_stack[-1].counter=0
+            rand=random.randint(0,1)
+            if rand==0:
+                self.currentstate.handle_input('Idle')
+            else:
+                self.currentstate.handle_input('Walk')
+
+    def aggroAI(self):
+        if self.AI_stack[-1].counter < 40:
+            pass
+        else:
+            if self.AI_stack[-1].player_distance[0] > self.attack_distance:
+                self.dir[0] = 1
+                self.currentstate.handle_input('Run')
+            elif abs(self.AI_stack[-1].player_distance[0])<self.attack_distance:
+                self.currentstate.handle_input('Attack')
+                self.AI_stack[-1].counter = 0
+            elif self.AI_stack[-1].player_distance[0] < -self.attack_distance:
+                self.dir[0] = -1
+                self.currentstate.handle_input('Run')
+            else:
+                self.AI_stack[-1].counter = 0
+                self.currentstate.handle_input('Idle')
 
 class Woopie(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
@@ -184,19 +227,7 @@ class Woopie(Enemy):
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
-        self.counter=0
-        #self.max_vel = 1
         self.friction=[0.5,0]
-
-    def AI(self,playerpos):#the AI based on playerpos
-        self.counter += 1
-        if self.counter>100:
-            self.counter=0
-            rand=random.randint(0,1)
-            if rand==0:
-                self.currentstate.change_state('Idle')
-            else:
-                self.currentstate.change_state('Walk')
 
 class Vatt(Enemy):
 
@@ -210,17 +241,20 @@ class Vatt(Enemy):
         self.health = 30
         self.spirit=30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.shake=10
-        self.counter=0
         self.friction=[0.7,0]
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
+        self.AI_stack=[AI.Peace_AI(self)]
 
-    def aggro_animation(self):
+    def set_aggro_animation(self):
         new_animation=animation.Aggro_animation(self)
         new_animation.enter_state()
 
-    def AI(self,playerpos):#the AI based on playerpos
+    def update(self,pos,playerpos):
+        super().update(pos,playerpos)
+        self.updateAI(playerpos)
+
+    def updateAI(self,playerpos):#the AI based on playerpos
         #transform if aggro, supersedes all states
         if Vatt.aggro and not self.aggro:
             self.currentstate.change_state('Transform')
@@ -247,13 +281,15 @@ class Vatt(Enemy):
 
         #peaceful ai
         else:
-            if self.counter>100:
-                self.counter=0
-                rand=random.randint(0,1)
-                if rand==0:
-                    self.currentstate.handle_input('Idle')
-                else:
-                    self.currentstate.handle_input('Walk')
+            if self.AI_stack[-1].player_distance[0] > self.attack_distance:
+                self.dir[0] = 1
+                self.currentstate.handle_input('Run')
+            elif self.AI_stack[-1].player_distance[0] < -self.attack_distance:
+                self.dir[0] = -1
+                self.currentstate.handle_input('Run')
+            else:
+                self.AI_stack[-1].counter = 0
+                self.currentstate.handle_input('Idle')
 
 class Flowy(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
@@ -264,18 +300,7 @@ class Flowy(Enemy):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 10
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/flowy/')
-        self.distance=[0,0]
-        self.shake=self.hitbox.height/10
         self.spirit=10
-
-    def AI(self,playerpos):#the AI
-        self.distance[0]=int((self.rect.x-playerpos.x))
-        self.distance[1]=int((self.rect.y-playerpos.y))
-
-        if 100 < abs(self.distance[0])<200 and abs(self.distance[1])<100:
-            pass
-        elif abs(self.distance[0])<100 and abs(self.distance[1])<100:#swing sword when close
-            pass#self.currentstate.enter_state('Trans')
 
 class Larv(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
@@ -286,22 +311,10 @@ class Larv(Enemy):
         self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
         self.health = 100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
-        self.distance=[0,0]
-        self.shake=self.hitbox.height/10
         self.spirit=10
-        self.counter=0
         self.friction=[0.5,0]
         self.attack=Poisonblobb
-
-    def AI(self,playerpos):#the AI
-        self.counter += 1
-        if self.counter>100:
-            self.counter=0
-            rand=random.randint(0,1)
-            if rand==0:
-                self.currentstate.change_state('Idle')
-            else:
-                self.currentstate.change_state('Attack')
+        self.attack_distance=60
 
 class Player(Character):
     def __init__(self,pos,projectile_group,cosmetics_group):
@@ -330,7 +343,6 @@ class Player(Character):
         self.movement_sfx_timer = 110
 
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
-        self.shake = 0
 
         self.currentstate = states_player.Idle(self)
 
@@ -347,7 +359,7 @@ class Player(Character):
 class NPC(Character):
     def __init__(self,pos):
         super().__init__(pos)
-        self.name = '<always define name>'
+        self.name = str(type(self).__name__)#the name of the class
         self.health = 50
         self.conv_index = 0
         self.currentstate = states_NPC.Idle(self)
@@ -376,15 +388,14 @@ class NPC(Character):
         self.AI()
 
     def idle(self):
-        self.currentstate = states_NPC.Idle(self)
+        self.currentstate.handle_input('Idle')
 
     def walk(self):
-        self.currentstate = states_NPC.Walk(self)
+        self.currentstate.handle_input('Walk')
 
 class Aslat(NPC):
     def __init__(self, pos):
         super().__init__(pos)
-        self.name = 'Aslat'
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
@@ -499,18 +510,17 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
-class Boss(Enemy):
+class Boss(Character):
     def __init__(self,pos,projectile_group,loot_group):
         super().__init__(pos,projectile_group,loot_group)
+        self.projectiles = projectile_group
+        self.loot_group = loot_group
+        self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
+        self.AI_stack=[AI.Peace_AI(self)]
+        self.currentstate = states_boss.Idle(self)
 
     def knock_back(self,dir):
         pass
-
-    def states(self):
-        self.currentstate = states_boss.Idle(self)
-
-    def stun(self,duration):
-        self.currentstate = states_boss.Stun(self,duration)
 
 class Reindeer(Boss):
     def __init__(self,pos,projectile_group,loot_group):
@@ -746,7 +756,7 @@ class Melee(Abilities):
         self.update_hitbox()
 
     def countered(self):
-        self.entity.stun(30)
+        self.entity.countered()
         self.kill()
 
 class Sword(Melee):
@@ -858,7 +868,6 @@ class Poisonblobb(Projectiles):
         self.dmg=10
         self.lifetime=100
         self.speed=[4,4]
-        self.rectangle()
         self.hitbox=pygame.Rect(self.rect.x,self.rect.y,16,16)
         self.update_hitbox()
 

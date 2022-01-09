@@ -98,7 +98,6 @@ class Hurt(Vatt_states):
 
     def update_state(self):
         if self.done:
-            self.entity.aggro = True
             self.enter_state('Transform')
 
     def increase_phase(self):
@@ -121,9 +120,10 @@ class Transform(Vatt_states):
 
     def update_state(self):
         if self.done:
-            self.enter_state('Idle')
             type(self.entity).aggro = True
-            self.entity.aggro_animation()#go into aggro animaetion
+            self.entity.set_aggro_animation()#go into aggro animaetion
+            self.enter_state('Idle')
+
 
     def increase_phase(self):
         self.done=True

@@ -95,6 +95,8 @@ class Walk(Player_states):
                 self.entity.dir[0]=1
             elif input[-1] == 'left' and self.entity.dir[0] == 1:
                 self.entity.dir[0]=-1
+            elif input == 'Hurt':
+                self.enter_state('Hurt')                
         elif input[1]:#release
             if ((input[-1] == 'right' and self.entity.dir[0] == 1) or (input[-1] == 'left' and self.entity.dir[0] == -1)):
                 self.enter_state('Idle')
