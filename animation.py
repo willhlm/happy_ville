@@ -22,6 +22,7 @@ class Entity_animation(Animation):
         super().__init__(entity)
 
     def update(self):
+    #    if str(type(self.entity).__name__)=='Vatt':
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
         self.frame += 1
 
@@ -37,6 +38,7 @@ class Hurt_animation(Entity_animation):#become white
 
     def update(self):
         super().update()
+
         self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
         self.duration -=1
 

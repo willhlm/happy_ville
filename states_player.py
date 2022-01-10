@@ -96,7 +96,7 @@ class Walk(Player_states):
             elif input[-1] == 'left' and self.entity.dir[0] == 1:
                 self.entity.dir[0]=-1
             elif input == 'Hurt':
-                self.enter_state('Hurt')                
+                self.enter_state('Hurt')
         elif input[1]:#release
             if ((input[-1] == 'right' and self.entity.dir[0] == 1) or (input[-1] == 'left' and self.entity.dir[0] == -1)):
                 self.enter_state('Idle')
@@ -344,10 +344,6 @@ class Hurt(Player_states):
         self.done=False
         self.next_state='Idle'
 
-#    def update_animation(self):
-#        super().update_animation()
-#        self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
-
     def update_state(self):
         if self.done:
             self.enter_state(self.next_state)
@@ -363,6 +359,8 @@ class Hurt(Player_states):
             elif input[-1]=='right':
                 self.entity.dir[0]=1
                 self.next_state='Walk'
+            elif input=='Hurt':
+                pass
         elif input[1]:#release
             if input[-1]=='left':
                 self.next_state='Idle'

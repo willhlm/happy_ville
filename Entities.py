@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, AI, states_player, states_NPC, states_enemy, states_vatt, states_boss
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -82,13 +82,13 @@ class Dynamicentity(Staticentity):
     def update(self,pos):
         self.update_pos(pos)
         self.currentstate.update()
-    #    try:
+        #try:
         self.animation_stack[-1].update()
-    #    except:
-    #        print(str(type(self).__name__))
+        #except:
+        #    print(str(type(self).__name__))
     #        print(error)
-    #        print(a)
-    #        exit()
+        #    print(a)
+        #    exit()
 
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos):
@@ -113,8 +113,9 @@ class Character(Dynamicentity):#enemy, NPC,player
                 self.currentstate.change_state('Death')#overrite any state and go to death
 
     def hurt_animation(self):
-        new_animation=animation.Hurt_animation(self)
-        new_animation.enter_state()
+        if str(type(self.animation_stack[-1]).__name__) != 'Hurt_animation':#making sure to not append more than one hurt animation at time
+            new_animation=animation.Hurt_animation(self)
+            new_animation.enter_state()
 
     def check_collisions(self):
         if self.collision_types['top']:#knock back when hit head
@@ -152,17 +153,16 @@ class Enemy(Character):
         self.projectiles = projectile_group
         self.loot_group = loot_group
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
-        self.aggro = False
         self.currentstate = states_enemy.Idle(self)
-        self.AI_stack=[AI.Peace_AI(self)]
-
-    def take_dmg(self,dmg):
-        super().take_dmg(dmg)
-        self.set_aggroAI()
+        self.counter=0
+        self.AI_stack=[self.peaceAI]
+        self.player_distance=[0,0]
+        self.aggro=True
 
     def update(self,pos,playerpos):
         super().update(pos)
-        self.AI_stack[-1].update(playerpos)
+        self.playerdistance(playerpos)
+        self.AI_stack[-1]()
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -181,39 +181,38 @@ class Enemy(Character):
     def stun(self,duration=30):
         self.currentstate = states_enemy.Stun(self,duration)
 
-    def set_aggroAI(self):
-        new_AI=AI.Aggro_AI(self)
-        new_AI.enter_state()
-        self.aggro = True
+    def playerdistance(self,playerpos):
+        self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[0]-self.rect.centerx]
 
-    def set_peaceAI(self):
-        new_AI=AI.Peace_AI(self)
-        new_AI.enter_state()
+#        if abs(self.player_distance[0])<100 and str(type(self.AI_stack[-1]).__name__) != 'aggroAI':
+#            self.AI_stack.append(self.aggroAI)
 
     def peaceAI(self):
-        if self.AI_stack[-1].counter>100:
-            self.AI_stack[-1].counter=0
+        self.counter += 1
+        if self.counter>100:
+            self.counter=0
             rand=random.randint(0,1)
             if rand==0:
                 self.currentstate.handle_input('Idle')
             else:
-                self.currentstate.handle_input('Walk')
+                self.currentstate.handle_input('Idle')
 
     def aggroAI(self):
-        if self.AI_stack[-1].counter < 40:
+        self.counter += 1
+        if self.counter < 40:
             pass
         else:
-            if self.AI_stack[-1].player_distance[0] > self.attack_distance:
+            if self.player_distance[0] > self.attack_distance:
                 self.dir[0] = 1
                 self.currentstate.handle_input('Run')
-            elif abs(self.AI_stack[-1].player_distance[0])<self.attack_distance:
+            elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
-                self.AI_stack[-1].counter = 0
-            elif self.AI_stack[-1].player_distance[0] < -self.attack_distance:
+                self.counter = 0
+            elif self.player_distance[0] < -self.attack_distance:
                 self.dir[0] = -1
                 self.currentstate.handle_input('Run')
             else:
-                self.AI_stack[-1].counter = 0
+                self.counter = 0
                 self.currentstate.handle_input('Idle')
 
 class Woopie(Enemy):
@@ -244,48 +243,29 @@ class Vatt(Enemy):
         self.friction=[0.7,0]
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
-        self.AI_stack=[AI.Peace_AI(self)]
+        self.aggro=False
 
-    def update(self,pos,playerpos):
-        super().update(pos,playerpos)
-        self.updateAI(playerpos)
-
-    def updateAI(self,playerpos):#the AI based on playerpos
-        #transform if aggro, supersedes all states
+    def peaceAI(self):
+        super().peaceAI()
         if Vatt.aggro and not self.aggro:
             self.currentstate.change_state('Transform')
             self.aggro = True
 
+    def aggroAI(self):
         self.counter += 1
-        #aggro ai
 
-        if self.aggro:
-            player_distance = playerpos[0] - self.rect.center[0]
-
-            if self.counter < 40:
-                pass
-            else:
-                if player_distance > self.attack_distance:
-                    self.dir[0] = 1
-                    self.currentstate.handle_input('Run')
-                elif player_distance < -self.attack_distance:
-                    self.dir[0] = -1
-                    self.currentstate.handle_input('Run')
-                else:
-                    self.counter = 0
-                    self.currentstate.handle_input('Javelin')
-
-        #peaceful ai
+        if self.counter < 40:
+            pass
         else:
-            if self.AI_stack[-1].player_distance[0] > self.attack_distance:
+            if self.player_distance[0] > self.attack_distance:
                 self.dir[0] = 1
                 self.currentstate.handle_input('Run')
-            elif self.AI_stack[-1].player_distance[0] < -self.attack_distance:
+            elif self.player_distance[0] < -self.attack_distance:
                 self.dir[0] = -1
                 self.currentstate.handle_input('Run')
             else:
-                self.AI_stack[-1].counter = 0
-                self.currentstate.handle_input('Idle')
+                self.counter = 0
+                self.currentstate.handle_input('Javelin')
 
 class Flowy(Enemy):
     def __init__(self,pos,projectile_group,loot_group):
@@ -512,7 +492,6 @@ class Boss(Character):
         self.projectiles = projectile_group
         self.loot_group = loot_group
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
-        self.AI_stack=[AI.Peace_AI(self)]
         self.currentstate = states_boss.Idle(self)
 
     def knock_back(self,dir):
