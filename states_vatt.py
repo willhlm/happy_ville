@@ -183,7 +183,7 @@ class Transform(Vatt_states):
         if self.done:
             self.entity.aggro=True
             type(self.entity).aggro = True
-            self.entity.AI_stack.append(self.entity.aggroAI)
+            self.entity.AImethod=self.entity.aggroAI
             self.enter_state('Idle_aggro')
 
     def increase_phase(self):

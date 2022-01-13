@@ -155,14 +155,13 @@ class Enemy(Character):
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
         self.currentstate = states_enemy.Idle(self)
         self.counter=0
-        self.AI_stack=[self.peaceAI]
+        self.AImethod=self.peaceAI
         self.player_distance=[0,0]
         self.aggro=True
 
     def update(self,pos,playerpos):
         super().update(pos)
-        self.playerdistance(playerpos)
-        self.AI_stack[-1]()
+        self.AI(playerpos)
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -173,32 +172,34 @@ class Enemy(Character):
 
     def countered(self):
         self.velocity[0]=-50*self.dir[0]
-        self.stun()
+        duration=30
+        self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
 
     def knock_back(self,dir):
         self.velocity[0]=dir*100
 
-    def stun(self,duration=30):
-        self.currentstate = states_enemy.Stun(self,duration)
+    def AI(self,playerpos):
+        self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[1]-self.rect.centerx]#check plater distance
+        self.updateAI()#decide aggro or peace
+        self.counter += 1
+        self.AImethod()#run ether aggro- or peace-AI
 
-    def playerdistance(self,playerpos):
-        self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[0]-self.rect.centerx]
-
-#        if abs(self.player_distance[0])<100 and str(type(self.AI_stack[-1]).__name__) != 'aggroAI':
-#            self.AI_stack.append(self.aggroAI)
+    def updateAI(self):
+        if abs(self.player_distance[0])<200 and self.AImethod.__name__ != 'aggroAI':
+            self.AImethod=self.aggroAI
+        elif abs(self.player_distance[0])>200 and self.AImethod.__name__ != 'peaceAI':
+            self.AImethod=self.peaceAI
 
     def peaceAI(self):
-        self.counter += 1
         if self.counter>100:
             self.counter=0
             rand=random.randint(0,1)
             if rand==0:
                 self.currentstate.handle_input('Idle')
             else:
-                self.currentstate.handle_input('Idle')
+                self.currentstate.handle_input('Walk')
 
     def aggroAI(self):
-        self.counter += 1
         if self.counter < 40:
             pass
         else:
@@ -245,15 +246,13 @@ class Vatt(Enemy):
         self.attack_distance = 60
         self.aggro=False
 
-    def peaceAI(self):
-        super().peaceAI()
+    def updateAI(self):
         if Vatt.aggro and not self.aggro:
-            self.currentstate.change_state('Transform')
+            self.currentstate.change_state('Transform')#also sets to aggro AI
             self.aggro = True
+            #self.AImethod=self.aggroAI
 
     def aggroAI(self):
-        self.counter += 1
-
         if self.counter < 40:
             pass
         else:
@@ -760,11 +759,6 @@ class Darksaber(Sword):
             collision_enemy.loot_group.add(spirits)
         self.kill()
 
-class Hammer(Sword):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.lifetime=10
-
 class Shield(Melee):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/')
 
@@ -815,7 +809,23 @@ class Projectiles(Abilities):
         projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
         self.knock_back()
 
-class Poisoncould(Projectiles):
+class Hammer(Projectiles):
+    sprites = Read_files.Sprites_Player('Sprites/Attack/Hammer/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=10
+        self.lifetime=25
+        self.speed=[0,0]
+        self.update_hitbox()
+        offset=5
+        self.rect.bottom=self.entity.rect.bottom+offset
+        self.hitbox.center = self.rect.center
+
+    def collision_enemy(self,collision_enemy):
+        self.dmg=0
+
+class Poisoncloud(Projectiles):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Poisoncloud/')
 
     def __init__(self,entity):
@@ -1078,6 +1088,7 @@ class Cosmetics(pygame.sprite.Sprite):
     def update(self,scroll):
         self.lifetime-=1
         self.update_pos(scroll)
+        self.update_animation()
         self.destroy()
 
     def update_pos(self,scroll):
@@ -1087,12 +1098,21 @@ class Cosmetics(pygame.sprite.Sprite):
         if self.lifetime<0:
             self.kill()
 
+    def update_animation(self, frame_rate = 0.25):
+        self.image = self.sprites['idle'][int(self.frame)]
+        if self.frame == len(self.sprites['idle'])-1:
+            self.frame = 0
+        self.frame += frame_rate
+
 class Slash(Cosmetics):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/GFX/slash/')
+
     def __init__(self,entity):
         super().__init__(entity)
-        self.image = pygame.image.load("Sprites/animations/Spirits/Spirits1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=self.entity.hitbox.center)
-        self.lifetime=10
+        self.image = self.sprites['idle'][self.frame]
+        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,5,5)
+        self.hitbox = self.rect.copy()
+        self.lifetime=20
 
 class Spirits(Cosmetics):
     def __init__(self,entity):
