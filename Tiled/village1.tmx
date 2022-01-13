@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="250" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="35">
+<map version="1.5" tiledversion="1.6.0" orientation="orthogonal" renderorder="right-down" width="250" height="80" tilewidth="16" tileheight="16" infinite="0" nextlayerid="8" nextobjectid="37">
  <editorsettings>
-  <export target="village1.csv" format="csv"/>
+  <export target="village1.json" format="json"/>
  </editorsettings>
  <properties>
   <property name="yo" value="yo"/>
@@ -362,5 +362,11 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="5" name="Object Layer 1"/>
+ <objectgroup id="5" name="Object Layer 1">
+  <object id="35" gid="97" x="2240" y="560" width="16" height="16">
+   <properties>
+    <property name="path" value="sdf"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>
