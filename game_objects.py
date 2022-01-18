@@ -45,7 +45,7 @@ class Game_Objects():
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
         self.weather_paricles.create_particles('Snow')#weather effects
-
+        self.reflection=BG.Reflection()
         #initiate player
         self.player = Entities.Player([200,50],self.fprojectiles,self.cosmetics)
         self.players = pygame.sprite.Group(self.player)
@@ -150,7 +150,7 @@ class Game_Objects():
             self.bgs[i].draw(self.game.screen)
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
-
+        self.reflection.draw(self.game.screen)
         #temporaries draws. Shuold be removed
         for projectile in self.fprojectiles.sprites():#go through the group
             pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
@@ -161,6 +161,10 @@ class Game_Objects():
         for enemy in self.enemies.sprites():#go through the group
             pygame.draw.rect(self.game.screen, (0,0,255), enemy.hitbox,2)#draw hitbox
             pygame.draw.rect(self.game.screen, (255,0,255), enemy.rect,2)#draw hitbox
+        #for loot in self.loot.sprites():#go through the group
+        #    pygame.draw.rect(self.game.screen, (0,0,255), loot.hitbox,2)#draw hitbox
+        #    pygame.draw.rect(self.game.screen, (255,0,255), loot.rect,2)#draw hitbox
+
         pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
         pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
 

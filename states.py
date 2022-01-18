@@ -276,6 +276,7 @@ class Gameplay(Game_State):
         super().__init__(game)
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
+        self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
 
     def update(self):
         self.game.game_objects.scrolling()
@@ -351,12 +352,12 @@ class Gameplay(Game_State):
                     self.game.game_objects.interactions()
 
             elif input[-1] == 'select':
-                new_state = Start_Menu(self.game)
+                new_state = Select_Menu(self.game)
                 new_state.enter_state()
 
             else:
                 self.game.game_objects.player.currentstate.handle_input(input)
-
+                self.game.game_objects.player.omamoris.handle_input(input)
         elif input [1]:
             self.game.game_objects.player.currentstate.handle_input(input)
 
@@ -433,7 +434,6 @@ class Ability_Menu(Gameplay):
         super().render()
 
         hud=self.hud[self.index]
-
         for index,ability in enumerate(self.abilities):
             hud.blit(self.symbols[ability],self.coordinates[index])
 
@@ -454,36 +454,65 @@ class Ability_Menu(Gameplay):
                 self.game.game_objects.player.equip=self.abilities[self.index]
                 self.exit_state()
 
-class Start_Menu(Gameplay):
+class Select_Menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
 
-        self.inventory=[]#make all objects and save in list
+        self.items=[]#make all objects and save in list
         for item in self.game.game_objects.player.inventory.keys():
-            self.inventory.append(getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player))#make the object based on the string
+            self.items.append(getattr(sys.modules[Entities.__name__], item)([0,0]))#make the object based on the string
+
+        self.omamori_list=[]#make all objects and save in list
+        for omamori in self.game.game_objects.player.omamoris.omamori_list:
+            self.omamori_list.append(getattr(sys.modules[Entities.__name__], omamori)(self.game.game_objects.player))#make the object based on the string
+
+        self.pages=[self.map,self.inventory,self.omamori]
+        self.page_index=1
 
     def update(self):
         super().update()
 
     def render(self):
         super().render()
-
-        self.game.screen.blit(self.inventory_BG,(0,0))
-
-        width=self.game.game_objects.player.image.get_width()
-        height=self.game.game_objects.player.image.get_height()
-        scale=2
-        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(180,120))#player position
-
-        for index, loot in enumerate(self.inventory):
-            loot.update_animation()
-            self.game.screen.blit(pygame.transform.scale(loot.image,(int(width/scale),int(height/scale))),(0+50*index,0))
+        self.blit_inventory()
+        self.pages[self.page_index]()
 
     def handle_events(self,input):
         if input[0]:#press
             if input[-1] == 'select':
                 self.exit_state()
+            elif input[-1] == 'rb':
+                self.page_index+=1
+                self.page_index=min(self.page_index,len(self.pages)-1)
+            elif input[-1] == 'lb':
+                self.page_index-=1
+                self.page_index=max(self.page_index,0)
+
+    def blit_inventory(self):
+        width=self.inventory_BG[self.page_index].get_width()
+        self.game.screen.blit(self.inventory_BG[self.page_index],((self.game.WINDOW_SIZE[0]-width)/2,20))
+
+    def map(self):#implement map
+        pass
+
+    def inventory(self):
+        width=self.game.game_objects.player.image.get_width()
+        height=self.game.game_objects.player.image.get_height()
+        scale=2
+        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(105,0))#player position
+
+        for index, loot in enumerate(self.items):
+            loot.animation.update()
+            self.game.screen.blit(pygame.transform.scale(loot.image,(10,10)),(185+20*index,155))
+
+    def omamori(self):
+        for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):#equipped ones
+            omamori.animation.update()
+            self.game.screen.blit(pygame.transform.scale(omamori.image,(20,20)),(180+50*index,50))
+
+        for index, omamori in enumerate(self.omamori_list):#the ones in inventory
+            omamori.animation.update()
+            self.game.screen.blit(pygame.transform.scale(omamori.image,(10,10)),(185+20*index,150))
 
 class Boss_encounter(Gameplay):
     def __init__(self, game):

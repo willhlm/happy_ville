@@ -88,14 +88,15 @@ class Rain(Weather):
         self.rect()
         self.velocity=[0.1+self.wind,5]
 
-class Light():
+class Reflection():
     def __init__(self):
-        super().__init__()
         pass
 
-    @staticmethod
-    def add_white(radius,colour,screen,pos):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
+    def draw(self, gamescreen):
+        rect = pygame.Rect(25, 25, 100, 50)#size and position of interest
+        sub = gamescreen.subsurface(rect)#cut off the interest
+
+        reflection_image = pygame.transform.flip(sub, False, True)#flip in y
+        offset=60
+        position=[250,100+offset]
+        gamescreen.blit(reflection_image,position,special_flags=pygame.BLEND_RGBA_MULT)

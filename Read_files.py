@@ -65,38 +65,22 @@ class Sprites():
 #class containing sprites for players (pre,post,main charge)
 class Sprites_Player(Sprites):
 
-    def __init__(self,path,charge=False):
+    def __init__(self,path):
         super().__init__()
 
         pre_dict = self.load_all_sprites(path+'pre/')
         main_dict = self.load_all_sprites(path+'main/')
         post_dict = self.load_all_sprites(path+'post/')
         charge_dict = self.load_all_sprites(path+'charge/')
+        self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
 
-        if charge:#if there is charge
-            charge_dict = self.load_all_sprites(path+'charge/')
-            self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
-        else:
-            self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
-
-
-    def get_image(self, input, timer, dir, phase):#phase pre, main, post
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
-
+    def get_image(self, input, timer, dir, phase):#phase pre, main, post, input=action,timer=frame
         if dir[0] <= 0:
             return self.sprite_dict[phase][input][timer]
         elif dir[0] > 0:
             return pygame.transform.flip(self.sprite_dict[phase][input][timer],True,False)
 
-    def get_frame_number(self, input,dir,phase):
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
-
+    def get_frame_number(self, input,phase):
         return len(self.sprite_dict[phase][input])
 
 #class for reading and rendering fonts

@@ -187,6 +187,8 @@ class Fall_run(Player_states):
                 self.entity.dir[0]=-self.entity.dir[0]
             elif input[-1]=='x':
                 self.enter_state('Air_sword1')
+            elif input=='double_jump':
+                self.enter_state('Jump_run')
         elif input[1]:
             if input[-1] == 'right' and self.entity.dir[0]==1 or input[-1] == 'left' and self.entity.dir[0]==-1 :
                 self.enter_state('Fall_stand')
@@ -211,7 +213,9 @@ class Fall_stand(Fall_run):
             elif input[-1]=='b':
                 self.enter_state(self.entity.equip)
             elif input[-1]=='x':
-                self.enter_state('Air_sword1')                
+                self.enter_state('Air_sword1')
+            elif input=='double_jump':
+                self.enter_state('Jump_stand')
         elif input[1]:
             if input[-1]=='right' or input[-1]=='left':
                 pass
@@ -264,7 +268,7 @@ class Dash(Player_states):
         self.phase=self.phases[0]
         self.done=False#animation flag
         self.walking()
-        self.entity.velocity[0] = 10*self.dir[0]
+        self.entity.velocity[0] = 30*self.dir[0]
         self.entity.spirit -= 10
 
     def walking(self):
@@ -561,7 +565,6 @@ class Air_sword2(Sword):
         elif input[1]:
             if ((input[-1] == 'right' and self.entity.dir[0] == 1) or (input[-1] == 'left' and self.entity.dir[0] == -1)):
                 self.stay_still()
-
 
 class Abillitites(Player_states):
     def __init__(self,entity):
