@@ -1105,6 +1105,9 @@ class Omamori():
     def handle_input(self,input):
         pass
 
+    def detach(self):
+        pass
+
 class Double_jump(Omamori):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_jump/')#for inventory
 
@@ -1120,8 +1123,11 @@ class Double_sword(Omamori):
 
     def __init__(self,entity):
         super().__init__(entity)
-        width=self.entity.sword.rect.width
-        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,width*2,40)
+        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,80,40)
+        self.entity.sword.hitbox = self.entity.sword.rect.copy()
+
+    def detach(self):
+        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
         self.entity.sword.hitbox = self.entity.sword.rect.copy()
 
 class More_spirit(Omamori):
