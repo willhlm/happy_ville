@@ -181,6 +181,7 @@ class Transform(Vatt_states):
 
     def update_state(self):
         if self.done:
+            self.entity.max_vel=5
             self.entity.aggro=True
             type(self.entity).aggro = True
             self.entity.AImethod=self.entity.aggroAI

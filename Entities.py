@@ -96,18 +96,13 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.velocity=[0,0]
         self.friction=[0.2,0]
         self.animation_stack=[animation.Entity_animation(self)]#maybe it is better to assign animation class based on the speific entity, since some doesn't have pre,main,post
+        self.max_vel=7
 
     def update(self,pos):
         self.update_pos(pos)
         self.currentstate.update()
         self.animation_stack[-1].update()
         self.check_collisions()
-
-        #except:
-        #    print(str(type(self).__name__))
-    #        print(error)
-        #    print(a)
-        #    exit()
 
     def take_dmg(self,dmg):
         if dmg>0:
@@ -154,6 +149,8 @@ class Enemy(Character):
         self.AImethod=self.peaceAI
         self.player_distance=[0,0]
         self.aggro=True
+        self.max_vel=3
+        self.friction=[0.5,0]
 
     def update(self,pos,playerpos):
         super().update(pos)
@@ -167,12 +164,12 @@ class Enemy(Character):
             self.inventory[key]=0
 
     def countered(self):
-        self.velocity[0]=-50*self.dir[0]
+        self.velocity[0]=-30*self.dir[0]
         duration=30
         self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
 
     def knock_back(self,dir):
-        self.velocity[0]=dir*100
+        self.velocity[0]=dir*30
 
     def AI(self,playerpos):
         self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[1]-self.rect.centerx]#check plater distance
@@ -223,7 +220,6 @@ class Woopie(Enemy):
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
-        self.friction=[0.5,0]
 
 class Vatt(Enemy):
 
@@ -237,7 +233,6 @@ class Vatt(Enemy):
         self.health = 30
         self.spirit=30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.friction=[0.7,0]
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
         self.aggro=False
@@ -282,7 +277,6 @@ class Larv(Enemy):
         self.health = 10
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
         self.spirit=10
-        self.friction=[0.5,0]
         self.attack=Poisonblobb
         self.attack_distance=60
 
@@ -313,13 +307,10 @@ class Player(Character):
         self.movement_sfx_timer = 110
 
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
-
         self.currentstate = states_player.Idle(self)
-
         self.omamoris=Omamoris(self)
 
-
-    def load_sfx(self):
+    def load_sfx(self):#make a sound class
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
             self.action_sfx_player.play(self.action_sfx['run'])
             self.movement_sfx_timer = 0
@@ -328,7 +319,18 @@ class Player(Character):
     def update(self,pos):
         super().update(pos)
         self.omamoris.update()
-        #self.load_sfx()xxx
+        #self.load_sfx()
+
+    def equip_omamori(self,omamori_index):
+        new_omamori=self.omamoris.omamori_list[omamori_index]
+        if new_omamori not in self.omamoris.equipped_omamoris:#add the omamori
+            if len(self.omamoris.equipped_omamoris)<3:#maximum number of omamoris to equip
+                self.omamoris.equipped_omamoris.append(new_omamori)
+                new_omamori.attach()
+        else:#remove the omamori
+            old_omamori=self.omamoris.omamori_list[omamori_index]#call the detach function of omamori        
+            self.omamoris.equipped_omamoris.remove(old_omamori)
+            old_omamori.detach()
 
 class NPC(Character):
     def __init__(self,pos):
@@ -337,7 +339,6 @@ class NPC(Character):
         self.health = 50
         self.conv_index = 0
         self.currentstate = states_NPC.Idle(self)
-        self.friction=[0.5,0]
 
     def load_conversation(self):
         self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
@@ -1082,8 +1083,8 @@ class Menu_Arrow():
 class Omamoris():
 
     def __init__(self,entity):
-        self.equipped_omamoris=[Double_jump(entity),Double_sword(entity)]#equiped omamoris
-        self.omamori_list=['Double_jump','Double_sword','More_spirit']#in inventory
+        self.equipped_omamoris=[]#equiped omamoris
+        self.omamori_list=[Double_jump(entity),Double_sword(entity),More_spirit(entity)]#omamoris inventory.
 
     def update(self):
         for omamori in self.equipped_omamoris:
@@ -1106,7 +1107,12 @@ class Omamori():
         pass
 
     def detach(self):
-        pass
+        self.state='idle'
+        self.animation.reset_timer()
+
+    def attach(self):
+        self.state='equip'
+        self.animation.reset_timer()
 
 class Double_jump(Omamori):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_jump/')#for inventory
@@ -1119,19 +1125,23 @@ class Double_jump(Omamori):
             self.entity.currentstate.handle_input('double_jump')
 
 class Double_sword(Omamori):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_jump/')#for inventory
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_sword/')#for inventory
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,80,40)
-        self.entity.sword.hitbox = self.entity.sword.rect.copy()
 
     def detach(self):
+        super().detach()
         self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
         self.entity.sword.hitbox = self.entity.sword.rect.copy()
 
+    def attach(self):
+        super().attach()
+        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,80,40)
+        self.entity.sword.hitbox = self.entity.sword.rect.copy()
+
 class More_spirit(Omamori):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_jump/')#for inventory
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/more_spirit/')#for inventory
 
     def __init__(self,entity):
         super().__init__(entity)
