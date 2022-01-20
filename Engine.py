@@ -28,11 +28,11 @@ class Collisions():
             collision_enemy = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
 
             #if hit enemy
-            if collision_enemy:# and not collision_enemy.action['death'] and not collision_enemy.action['hurt']:
+            if collision_enemy:
                 if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':
-                #self.shake+=collision_enemy.death(loot)#check if dead
                     collision_enemy.take_dmg(projectile.dmg)
                     projectile.collision_enemy(collision_enemy)
+                #self.shake+=collision_enemy.death(loot)#check if dead                    
                 #self.shake=projectile.collision(entity,cosmetics,collision_enemy)#response of projetile hits
 
                 #if collision_enemy.action['death']:

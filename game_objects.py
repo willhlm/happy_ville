@@ -100,7 +100,6 @@ class Game_Objects():
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
-
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
 
         self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy

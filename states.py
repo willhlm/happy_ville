@@ -334,7 +334,7 @@ class Gameplay(Game_State):
         self.game.screen.blit(self.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
-        if input[0]:
+        if input[0]:#press
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
@@ -356,10 +356,10 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             else:
-                self.game.game_objects.player.currentstate.handle_input(input)
+                self.game.game_objects.player.currentstate.handle_press_input(input)
                 self.game.game_objects.player.omamoris.handle_input(input)
-        elif input [1]:
-            self.game.game_objects.player.currentstate.handle_input(input)
+        elif input[1]:#release
+            self.game.game_objects.player.currentstate.handle_release_input(input)
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):

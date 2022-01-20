@@ -327,8 +327,9 @@ class Player(Character):
             if len(self.omamoris.equipped_omamoris)<3:#maximum number of omamoris to equip
                 self.omamoris.equipped_omamoris.append(new_omamori)
                 new_omamori.attach()
+
         else:#remove the omamori
-            old_omamori=self.omamoris.omamori_list[omamori_index]#call the detach function of omamori        
+            old_omamori=self.omamoris.omamori_list[omamori_index]#call the detach function of omamori
             self.omamoris.equipped_omamoris.remove(old_omamori)
             old_omamori.detach()
 
@@ -692,11 +693,13 @@ class Melee(Abilities):
         self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
         self.hitbox.center = self.rect.center
 
-    def update_hitbox(self):
+    def update_hitbox(self):#make this a dictionary?
         if self.dir[1] > 0:#up
             self.hitbox.midbottom=self.entity.hitbox.midtop
+            self.dir[0] = 0#no knock back when hit from below or above
         elif self.dir[1] < 0:#down
             self.hitbox.midtop=self.entity.hitbox.midbottom
+            self.dir[0] = 0 #no knock back when hit from below or above
         elif self.dir[0] > 0 and self.dir[1] == 0:#right
             self.hitbox.midleft=self.entity.hitbox.midright
         elif self.dir[0] < 0 and self.dir[1] == 0:#left
@@ -719,10 +722,15 @@ class Sword(Melee):
         self.dmg=10
 
     def collision_enemy(self,collision_enemy):
-        slash=Slash([self.rect.x,self.rect.y])
-        self.entity.cosmetics.add(slash)
+        self.sword_jump()
         collision_enemy.knock_back(self.dir[0])
+        slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
+        self.entity.cosmetics.add(slash)
         self.kill()
+
+    def sword_jump(self):
+        if self.dir[1]==-1:
+            self.entity.velocity[1]=-11
 
 class Darksaber(Sword):
     def __init__(self,entity):
@@ -733,7 +741,7 @@ class Darksaber(Sword):
     def collision_enemy(self,collision_enemy):
         if collision_enemy.spirit>=10:
             collision_enemy.spirit-=10
-            spirits=Spiritsorb(collision_enemy)
+            spirits=Spiritsorb([collision_enemy.rect.x,collision_enemy.rect.y])
             collision_enemy.loot_group.add(spirits)
         self.kill()
 
@@ -1119,10 +1127,20 @@ class Double_jump(Omamori):
 
     def __init__(self,entity):
         super().__init__(entity)
+        self.counter=0
+
+    def update(self):
+        if self.entity.collision_types['bottom'] or self.entity.collision_types['right'] or self.entity.collision_types['left']:
+            self.reset_counter()
 
     def handle_input(self,input):
-        if input[-1]=='a':
-            self.entity.currentstate.handle_input('double_jump')
+        if input[-1]=='a' and self.counter<1:
+            self.entity.currentstate.handle_press_input('double_jump')
+            if type(self.entity.currentstate).__name__=='Double_jump':
+                self.counter+=1
+
+    def reset_counter(self):
+        self.counter=0
 
 class Double_sword(Omamori):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_sword/')#for inventory
