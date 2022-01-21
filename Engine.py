@@ -32,7 +32,7 @@ class Collisions():
                 if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':
                     collision_enemy.take_dmg(projectile.dmg)
                     projectile.collision_enemy(collision_enemy)
-                #self.shake+=collision_enemy.death(loot)#check if dead                    
+                #self.shake+=collision_enemy.death(loot)#check if dead
                 #self.shake=projectile.collision(entity,cosmetics,collision_enemy)#response of projetile hits
 
                 #if collision_enemy.action['death']:

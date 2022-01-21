@@ -24,14 +24,11 @@ class Game():
         self.controller = Read_files.Controller()
 
     def event_loop(self):
-
         for event in pygame.event.get():
             #print(event)
-
             if event.type==pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
             else:
                 self.controller.map_inputs(event)
                 self.state_stack[-1].handle_events(self.controller.output())
