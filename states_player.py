@@ -1,4 +1,4 @@
-import sys, pygame
+import sys
 from states_entity import Entity_States
 
 class Player_states(Entity_States):
@@ -113,7 +113,6 @@ class Walk(Player_states):
 class Jump_run(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.walk()
         self.phases=['pre','main']
         self.phase=self.phases[0]
         self.jumping()
@@ -151,7 +150,6 @@ class Jump_run(Player_states):
 class Jump_stand(Jump_run):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.stay_still()
 
     def update_state(self):
         if self.entity.velocity[1]>0:
