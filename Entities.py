@@ -299,7 +299,7 @@ class Player(Character):
         self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#'Shield':Shield#the objects are referensed but made in states
         self.equip='Hammer'#ability pointer
         self.sword=Sword(self)
-        self.shield=Shield(self)
+        self.shield=Shield
 
         self.action_sfx_player = pygame.mixer.Channel(1)
         self.action_sfx_player.set_volume(0.1)
@@ -751,6 +751,15 @@ class Shield(Melee):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=0
+        self.lifetime=10
+
+    def rectangle(self):
+        self.rect = pygame.Rect(self.entity.rect[0],self.entity.rect[1],80,80)
+        self.rect.midtop=self.entity.rect.midtop
+        self.hitbox = self.rect.copy()
+
+    def update_hitbox(self):
+        pass
 
     def collision_ene(self,collision_ene):
         collision_ene.countered()

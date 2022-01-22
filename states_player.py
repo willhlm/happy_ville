@@ -328,16 +328,20 @@ class Counter(Player_states):
         self.entity.spirit -= 10
         self.done=False#animation flag
 
-        self.entity.shield.lifetime=10
-        self.entity.shield.dir=self.dir
-        self.entity.projectiles.add(self.entity.shield)#add sword to group
+        shield=self.entity.shield(self.entity)
+        self.entity.projectiles.add(shield)#add sword to group
 
     def update_state(self):
         if self.done:
             self.enter_state('Idle')
 
     def increase_phase(self):
-        self.done=True
+        if self.phase=='pre':
+            self.phase='main'
+        elif self.phase=='main':
+            self.phase=self.phases[-1]
+        elif self.phase=='post':
+            self.done=True
 
 class Death(Player_states):
     def __init__(self,entity):
