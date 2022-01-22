@@ -29,7 +29,7 @@ class Title_Menu(Game_State):
         self.arrow = Entities.Menu_Arrow()
         self.title = self.font.render(text = 'HAPPY VILLE') #temporary
 
-        #create buttons
+        #create buttons, items in list will be blitted in order in a centered column.
         self.buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
         self.current_button = 0
         self.initiate_buttons()
@@ -82,8 +82,8 @@ class Title_Menu(Game_State):
         if self.current_button == 0:
             new_state = Gameplay(self.game)
             new_state.enter_state()
-            #load new game level
-            self.game.game_objects.load_map('village1')
+            #load start level
+            self.game.game_objects.load_map('collision_map')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -378,7 +378,6 @@ class Conversation(Gameplay):
 
     def update(self):
         super().update()
-
         self.letter_frame += 1
 
     def render(self):

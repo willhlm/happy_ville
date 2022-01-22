@@ -1,8 +1,9 @@
 import pygame, csv, Entities, math, random, json
 
 class Tilemap():
-    def __init__(self, level, player_center):
-        self.player_center = player_center
+    def __init__(self, level, player_center, screen_size):
+        self.PLAYER_CENTER = player_center
+        self.SCREEN_SIZE = screen_size
         self.tile_size=16
         self.chunk_size=10
         self.total_distance=[0,0]
