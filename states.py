@@ -88,6 +88,7 @@ class Title_Menu(Game_State):
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
             new_state.enter_state()
+            #load correct map below
 
         elif self.current_button == 2:
             new_state = Option_Menu(self.game)

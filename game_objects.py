@@ -52,7 +52,7 @@ class Game_Objects():
         self.player_center = (self.game.WINDOW_SIZE[0]/2,2*self.game.WINDOW_SIZE[1]/3)
 
     def load_map(self, map_name):
-        self.map = Level.Tilemap(map_name, self.player_center)
+        self.map = Level.Tilemap(map_name, self.player_center, self.game.WINDOW_SIZE)
         self.initiate_groups()
         self.load_music()
 
