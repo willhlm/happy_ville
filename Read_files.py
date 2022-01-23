@@ -214,26 +214,47 @@ class Controller():
                                 pygame.K_k: 'k'
                                 }
 
-
     def keybord(self,event):
         self.keyup=False
         self.keydown=False
-        self.value=[0,0]
 
         if event.type == pygame.KEYDOWN:
             self.keydown=True
-            self.value=[1,1]
             self.key = self.keyboard_map.get(event.key, '')
+
+            if self.key=='right':
+                self.value[0]=1
+            elif self.key=='left':
+                self.value[0]=-1
+            elif self.key=='up':
+                self.value[1]=-1
+            elif self.key=='down':
+                self.value[1]=1
 
         elif event.type == pygame.KEYUP:#lift bottom
             self.keyup=True
             self.key = self.keyboard_map.get(event.key, '')
 
-    def joystick(self,event):
+            if self.key=='right':
+                keys_pressed=pygame.key.get_pressed()
+                if keys_pressed[pygame.K_LEFT]:
+                    self.value[0]=-1
+                else:
+                    self.value[0]=0
+            elif self.key=='left':
+                keys_pressed=pygame.key.get_pressed()
+                if keys_pressed[pygame.K_RIGHT]:
+                    self.value[0]=1
+                else:
+                    self.value[0]=0
 
+            elif self.key=='up' or self.key=='down':
+                self.value[1]=0
+
+    def joystick(self,event):
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
             self.initiate_controls()
-        if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
+        elif event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
             self.initiate_controls()
 
         if event.type==pygame.JOYBUTTONDOWN:#press a button
@@ -245,35 +266,22 @@ class Controller():
             self.key=self.buttons[str(event.button)]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
-            self.keydown=True
 
             if event.axis==self.analogs['lh']:#left horizontal
-                self.value=[event.value,0]
+                self.value[0]=event.value
                 if abs(event.value)<0.2:
-                    self.keydown=False
-                    self.value=[0,0]
-                elif event.value>0.2:
-                    self.key='right'
-                else:#if negative
-                    self.key='left'
+                    self.value[0]=0
+
             if event.axis==self.analogs['lv']:#left vertical
-                self.value=[0,event.value]
+                self.value[1]=event.value
                 if abs(event.value)<0.2:
-                    self.keydown=False
-                    self.value=[0,0]
-                elif event.value>0.2:
-                    self.key='up'
-                else:#if negative
-                    self.key='down'
-            if event.axis==self.analogs['rh']:#right horizonal
-                self.value=[event.value,0]
-                if abs(event.value)<0.5:
-                    self.keydown=False
-                    self.value=[0,0]
-                elif event.value>0.5:
-                    self.key='right_rh'
-                else:#if negative
-                    self.key='left_rh'
+                    self.value[1]=0
+
+        #    if event.axis==self.analogs['rh']:#right horizonal
+        #        pass
+                #self.value=[event.value,0]
+                #if abs(event.value)<0.5:
+                    #self.value[0]=0
 
         if event.type==pygame.JOYHATMOTION:
             pass

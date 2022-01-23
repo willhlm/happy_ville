@@ -334,6 +334,8 @@ class Gameplay(Game_State):
         self.game.screen.blit(self.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
+        self.game.game_objects.player.currentstate.handle_movement(input)
+
         if input[0]:#press
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)

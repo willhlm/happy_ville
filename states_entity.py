@@ -13,7 +13,7 @@ class Entity_States():
         self.entity.velocity[1]+=self.entity.acceleration[1]-self.entity.velocity[1]*self.entity.friction[1]#gravity
         self.entity.velocity[1]=min(self.entity.velocity[1],7)#set a y max speed
 
-        self.entity.velocity[0]+=self.entity.dir[0]*self.entity.acceleration[0]-self.entity.friction[0]*self.entity.velocity[0]
+        self.entity.velocity[0]+=self.entity.acceleration[0]-self.entity.friction[0]*self.entity.velocity[0]
 
     #    if self.entity.velocity[0]>0:
     #        self.entity.velocity[0]=min(self.entity.velocity[0],self.entity.max_vel)

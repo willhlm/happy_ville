@@ -21,7 +21,7 @@ class Game():
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}
-        self.controller = Read_files.Controller()
+        self.controller = Read_files.Controller('xbox')
 
     def event_loop(self):
         for event in pygame.event.get():

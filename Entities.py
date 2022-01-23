@@ -177,7 +177,7 @@ class Enemy(Character):
         self.counter += 1
         self.AImethod()#run ether aggro- or peace-AI
 
-    def updateAI(self):
+    def updateAI(self):#move these into AI methods
         if abs(self.player_distance[0])<200 and self.AImethod.__name__ != 'aggroAI':
             self.AImethod=self.aggroAI
         elif abs(self.player_distance[0])>200 and self.AImethod.__name__ != 'peaceAI':
@@ -198,12 +198,14 @@ class Enemy(Character):
         else:
             if self.player_distance[0] > self.attack_distance:
                 self.dir[0] = 1
+                self.acceleration[0]=1
                 self.currentstate.handle_input('Run')
             elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
                 self.dir[0] = -1
+                self.acceleration[0]=-1                
                 self.currentstate.handle_input('Run')
             else:
                 self.counter = 0
@@ -683,7 +685,7 @@ class Melee(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
         self.rectangle()
-        self.dir=entity.dir
+        self.dir=entity.dir.copy()
 
     def rectangle(self):
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
@@ -700,9 +702,9 @@ class Melee(Abilities):
         elif self.dir[1] < 0:#down
             self.hitbox.midtop=self.entity.hitbox.midbottom
             self.dir[0] = 0 #no knock back when hit from below or above
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+        elif self.dir[0] > 0:#right
             self.hitbox.midleft=self.entity.hitbox.midright
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+        elif self.dir[0] < 0:#left
             self.hitbox.midright=self.entity.hitbox.midleft
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
@@ -755,11 +757,10 @@ class Shield(Melee):
 
     def rectangle(self):
         self.rect = pygame.Rect(self.entity.rect[0],self.entity.rect[1],80,80)
-        self.rect.midtop=self.entity.rect.midtop
         self.hitbox = self.rect.copy()
 
     def update_hitbox(self):
-        pass
+        self.rect.midtop=self.entity.rect.midtop
 
     def collision_ene(self,collision_ene):
         collision_ene.countered()
