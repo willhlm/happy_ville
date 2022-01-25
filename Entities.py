@@ -205,7 +205,7 @@ class Enemy(Character):
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
                 self.dir[0] = -1
-                self.acceleration[0]=-1                
+                self.acceleration[0]=-1
                 self.currentstate.handle_input('Run')
             else:
                 self.counter = 0
@@ -222,7 +222,7 @@ class Woopie(Enemy):
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
-
+        self.attack_distance=0
 class Vatt(Enemy):
 
     aggro = False  #remember to turn false when changing maps

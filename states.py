@@ -434,6 +434,7 @@ class Ability_Menu(Gameplay):
 
     def render(self):
         super().render()
+        self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)
 
         hud=self.hud[self.index]
         for index,ability in enumerate(self.abilities):

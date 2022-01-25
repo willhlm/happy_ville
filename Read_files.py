@@ -175,12 +175,11 @@ class Controller():
         self.key=False
         self.outputs=[self.keydown,self.keyup,self.value,self.key]
         self.map_keyboard()
+        self.methods=[self.keybord]#joystick may be appended
 
         pygame.joystick.init()#initialise joystick module
         self.initiate_controls()#initialise joysticks and add to list
-
-        if controller_type:
-            self.buttonmapping(controller_type)#read in controler configuration file
+        self.buttonmapping(controller_type)#read in controler configuration file
 
     def initiate_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
@@ -191,10 +190,6 @@ class Controller():
             mapping=json.load(file)
             self.buttons=mapping['buttons']
             self.analogs=mapping['analogs']
-
-    def map_inputs(self,event):
-        self.keybord(event)
-        self.joystick(event)
 
     def map_keyboard(self):
         self.keyboard_map = {pygame.K_ESCAPE: 'start',
@@ -211,13 +206,15 @@ class Controller():
                                 pygame.K_i: 'select',
                                 pygame.K_LSHIFT: 'lb',
                                 pygame.K_RETURN: 'return',
-                                pygame.K_k: 'k'
+                                pygame.K_k: 'rt'
                                 }
 
-    def keybord(self,event):
+    def map_inputs(self,event):
         self.keyup=False
         self.keydown=False
+        self.methods[-1](event)
 
+    def keybord(self,event):
         if event.type == pygame.KEYDOWN:
             self.keydown=True
             self.key = self.keyboard_map.get(event.key, '')
@@ -251,11 +248,14 @@ class Controller():
             elif self.key=='up' or self.key=='down':
                 self.value[1]=0
 
-    def joystick(self,event):
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
             self.initiate_controls()
-        elif event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
+            self.methods.append(self.joystick)
+
+    def joystick(self,event):
+        if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
             self.initiate_controls()
+            self.methods.pop()
 
         if event.type==pygame.JOYBUTTONDOWN:#press a button
             self.keydown=True
