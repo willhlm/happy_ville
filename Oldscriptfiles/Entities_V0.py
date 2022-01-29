@@ -793,25 +793,25 @@ class FG_fixed(Block):
     def __init__(self,img,pos):
         super().__init__(img,pos)
 
-class FG_paralex(Block):
+class FG_parallax(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=1.25
+        self.parallax=1.25
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.parallax*pos[0], self.rect.topleft[1] + self.parallax*pos[1]]
 
 class BG_near(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=0.75
+        self.parallax=0.75
         self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
+        self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
+        #self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + pos[1]]
         self.update_pos()
 
     def update_pos(self):
@@ -821,21 +821,21 @@ class BG_mid(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=0.5
+        self.parallax=0.5
 
     def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + int(self.paralex*pos[0]), self.rect.topleft[1] + int(self.paralex*pos[1])]
+        self.rect.topleft = [self.rect.topleft[0] + int(self.parallax*pos[0]), self.rect.topleft[1] + int(self.parallax*pos[1])]
 
 class BG_far(Block):
 
     def __init__(self,img,pos):
         super().__init__(img,pos)
-        self.paralex=0.03
+        self.parallax=0.03
         self.true_pos = self.rect.topleft
 
     def update(self,pos):
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
+        self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
+        #self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + pos[1]]
         self.update_pos()
 
     def update_pos(self):

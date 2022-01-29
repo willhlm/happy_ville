@@ -2,7 +2,7 @@ import pygame, csv, Entities, math, random, json
 
 class Tilemap():
     def __init__(self, level, player_center, screen_size):
-        self.PLAYER_CENTER = player_center
+        self.player_center = player_center
         self.SCREEN_SIZE = screen_size
         self.tile_size=16
         self.chunk_size=10
@@ -178,8 +178,8 @@ class Tilemap():
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex','bg_fixed_deco','bg_far_deco','bg_mid_deco','bg_near_deco','fg_fixed_deco','fg_paralex_deco']
-        deco_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex']
+        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_parallax','bg_fixed_deco','bg_far_deco','bg_mid_deco','bg_near_deco','fg_fixed_deco','fg_parallax_deco']
+        deco_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_parallax']
         top_left = {}
         bg_flags = {}
         for bg in bg_list:
@@ -201,7 +201,7 @@ class Tilemap():
         bg_sheets = {}
         bg_maps = {}
 
-        #try loading all paralex backgrounds
+        #try loading all parallax backgrounds
         for bg in bg_list:
             try:
                 bg_sheets[bg] = self.read_spritesheet("Sprites/level_sheets/" + self.level_name + "/%s.png" % bg)
@@ -234,17 +234,17 @@ class Tilemap():
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
-                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
             elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_Block((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg],0.03))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg],0.03))#pos,img,parallax
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_Block((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg],0.5))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg],0.5))#pos,img,parallax
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_Block((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg],0.75))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg],0.75))#pos,img,parallax
             elif bg == 'fg_fixed':
-                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,paralex
-            elif bg == 'fg_paralex':
-                backgrounds.append(Entities.BG_Block((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],1.25))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
+            elif bg == 'fg_parallax':
+                backgrounds.append(Entities.BG_Block((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],1.25))#pos,img,parallax
         del blit_surfaces, bg_sheets, bg_maps
         return backgrounds
     def load_map(self):#load the whole map

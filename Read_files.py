@@ -3,7 +3,6 @@ import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
 
-
 def read_json(path):
     with open(path) as f:
         text = json.load(f)
@@ -11,6 +10,21 @@ def read_json(path):
 
 def write_json():
     pass
+
+def format_tiled_json(map_data):
+
+    formatted_map_data = {}
+    formatted_map_data['tile_layers'] = {}
+    formatted_map_data['tilesets'] = map_data['tilesets']
+
+    for layer in map_data['layers']:
+        if 'data' in layer.keys():
+            formatted_map_data['tile_layers'][layer['name']] = layer
+        elif 'objects' in layer.keys():
+            formatted_map_data[layer['name']] = layer['objects']
+
+
+    return formatted_map_data
 
 #sprires and fonts
 class Sprites():

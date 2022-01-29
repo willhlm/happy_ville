@@ -14,7 +14,11 @@ class Game():
         self.scale_size()#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
-        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,vsync = 1)
+        flags = pygame.SCALED# | pygame.FULLSCREEN
+        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
+
+
+
 
         #initiate game related values
         self.game_objects = game_objects.Game_Objects(self)

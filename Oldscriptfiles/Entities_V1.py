@@ -47,30 +47,30 @@ class FG_fixed(Staticentity):
     def __init__(self,pos,img):
         super().__init__(pos,img)
 
-class FG_paralex(Staticentity):
+class FG_parallax(Staticentity):
     def __init__(self,pos,img):
         super().__init__(pos,img)
         self.true_pos = self.rect.topleft
-        self.paralex=1.25
+        self.parallax=1.25
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.parallax*pos[0], self.rect.topleft[1] + self.parallax*pos[1]]
         self.rect.topleft = self.true_pos
 
-class BG_near(FG_paralex):
+class BG_near(FG_parallax):
     def __init__(self,pos,img):
         super().__init__(pos,img)
-        self.paralex=0.75
+        self.parallax=0.75
 
-class BG_mid(FG_paralex):
+class BG_mid(FG_parallax):
     def __init__(self,pos,img):
         super().__init__(pos,img)
-        self.paralex=0.5
+        self.parallax=0.5
 
-class BG_far(FG_paralex):
+class BG_far(FG_parallax):
     def __init__(self,pos,img):
         super().__init__(pos,img)
-        self.paralex=0.03
+        self.parallax=0.03
 
 class Dynamicentity(Staticentity):
     def __init__(self,pos,img):

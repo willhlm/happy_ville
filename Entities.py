@@ -20,12 +20,11 @@ class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
         screen.blit(surf,(rect.x,rect.y),special_flags=pygame.BLEND_RGB_ADD)
 
 class Platform(pygame.sprite.Sprite):#has hitbox
-    def __init__(self,pos,chunk_key=False):
+    def __init__(self,pos,size = (16,16)):
         super().__init__()
-        self.rect = pygame.Rect(pos,(16,16))
-        self.rect.topleft = pos
+        self.rect = pygame.Rect(pos,size)
+        self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
         self.spike=False
 
     def update(self,pos):
@@ -40,12 +39,12 @@ class Invisible_block(Platform):
         super().__init__(pos,chunk_key=False)
 
 class Collision_block(Platform):
-    def __init__(self,pos,chunk_key=False):
-        super().__init__(pos,chunk_key=False)
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
 
 class Spikes(Platform):
-    def __init__(self,pos,chunk_key=False):
-        super().__init__(pos,chunk_key=False)
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
         self.image=pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha()
         self.spike=True
 
@@ -63,14 +62,14 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
 
 class BG_Block(Staticentity):
-    def __init__(self,pos,img,paralex=1):
+    def __init__(self,pos,img,parallax=1):
         super().__init__(pos,img)
         self.true_pos = self.rect.topleft
-        self.paralex=paralex
+        self.parallax=parallax
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.parallax*pos[0], self.rect.topleft[1] + self.parallax*pos[1]]
+        self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
         self.rect.topleft = self.true_pos
 
 class Dynamicentity(Staticentity):
@@ -93,7 +92,8 @@ class Dynamicentity(Staticentity):
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos):
         super().__init__(pos)
-        self.acceleration=[1,0.8]
+        #self.acceleration=[1,0.8]
+        self.acceleration=[1,0]
         self.velocity=[0,0]
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}

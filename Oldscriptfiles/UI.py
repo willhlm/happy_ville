@@ -54,8 +54,8 @@ class Game_UI():
         self.bg_mid = pygame.sprite.Group()
         self.bg_near = pygame.sprite.Group()
         self.fg_fixed = pygame.sprite.Group()
-        self.fg_paralex = pygame.sprite.Group()
-        self.bgs = [self.bg_fixed,self.bg_far,self.bg_mid,self.bg_near,self.fg_fixed,self.fg_paralex]
+        self.fg_parallax = pygame.sprite.Group()
+        self.bgs = [self.bg_fixed,self.bg_far,self.bg_mid,self.bg_near,self.fg_fixed,self.fg_parallax]
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()

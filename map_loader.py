@@ -1,20 +1,26 @@
-import pygame, csv, Entities, math, random, json
+import pygame, csv, Entities, math, random, Read_files
 
 class Level():
-    def __init__(self, level, player_center, screen_size):
-        self.PLAYER_CENTER = player_center
-        self.SCREEN_SIZE = screen_size
-        self.tile_size=16
+    def __init__(self, level, game_objects):
+        self.PLAYER_CENTER = game_objects.player_center
+        self.SCREEN_SIZE = game_objects.game.WINDOW_SIZE
+        self.TILE_SIZE = 16
+        self.game_objects = game_objects
         self.level_name = level
         self.platforms = pygame.sprite.Group()
         self.platforms_pause=pygame.sprite.Group()
         self.npc_collision = pygame.sprite.Group()
         self.init_player_pos = (0,0)
-        self.cameras = [Auto(self.player_center),Auto_CapX(self.player_center),Auto_CapY(self.player_center),Fixed()]
+        self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed()]
         self.camera = self.cameras[0]
         self.load_map_data()
 
     def load_map_data(self):
+        self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
+        self.map_data = Read_files.format_tiled_json(self.map_data)
+        for tileset in self.map_data['tilesets']:
+            if 'source' in tileset.keys():
+                self.map_data['statics_firstgid'] = tileset['firstgid']
 
 
     def set_camera(self, camera_number):
@@ -23,186 +29,163 @@ class Level():
     def scrolling(self,player,shake):
         self.camera.scrolling(player,shake)
 
-
-    def read_spritesheet(self, path):
+    def read_all_spritesheets(self):
         sprites = {}
 
-        sheet = pygame.image.load(path).convert_alpha()
-        rows = int(sheet.get_rect().h/self.tile_size)
-        columns = int(sheet.get_rect().w/self.tile_size)
-        n = 0
+        for tileset in self.map_data['tilesets']:
+            if 'source' in tileset.keys():
+                continue
 
-        for row in range(rows):
-            for column in range(columns):
-                y = row * self.tile_size
-                x = column * self.tile_size
-                rect = pygame.Rect(x, y, x + self.tile_size, y + self.tile_size)
-                image = pygame.Surface((self.tile_size,self.tile_size),pygame.SRCALPHA,32)
-                image.blit(sheet,(0,0),rect)
-                sprites[n] = image
-                n += 1
+            sheet = pygame.image.load("maps/%s/%s" % (self.level_name, tileset['image'])).convert_alpha()
+            rows = int(sheet.get_rect().h/self.TILE_SIZE)
+            columns = int(sheet.get_rect().w/self.TILE_SIZE)
+            n = tileset['firstgid']
+
+            for row in range(rows):
+                for column in range(columns):
+                    y = row * self.TILE_SIZE
+                    x = column * self.TILE_SIZE
+                    rect = pygame.Rect(x, y, x + self.TILE_SIZE, y + self.TILE_SIZE)
+                    image = pygame.Surface((self.TILE_SIZE,self.TILE_SIZE),pygame.SRCALPHA,32)
+                    image.blit(sheet,(0,0),rect)
+                    sprites[n] = image
+                    n += 1
 
         return sprites
 
     def load_bg_music(self):
         return pygame.mixer.Sound("Audio/" + self.level_name + "/default.wav")
 
-    def load_statics(self, map_state,eprojectile,loot):
-    #load Entities that shouldn't despawn with chunks, npc, enemies, interactables etc
-        map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
+    def load_collision_layer(self):#load the whole map
 
-        pathways = map_state["pathways"]
-        chests = map_state["chests"]
+        map_collisions = self.map_data["collision"]
 
-        npcs = pygame.sprite.Group()
-        interactables = pygame.sprite.Group()
-        enemies = Entities.ExtendedGroup()#pygame.sprite.Group()
-        camera_blocks = pygame.sprite.Group()
-        triggers = pygame.sprite.Group()
+        for obj in map_collisions:
+            id = obj['gid'] - (self.map_data['statics_firstgid'] + 6) #the last in depends on postion of COL stamp in stamp png
+            object_position = (int(obj['x']),int(obj['y']))
+            object_size = (int(obj['width']),int(obj['height']))
+            #normal collision blocks
+            if id == 0:
+                new_block = Entities.Collision_block(object_position,object_size)
+                self.game_objects.platforms.add(new_block)
+            #spike collision blocks
+            elif id == 1:
+                new_block = Entities.Spikes(object_position,object_size)
+                self.game_objects.platforms.add(new_block)
 
-        row_index = 0
-        col_index = 0
 
-        path_index = 0
-        chest_index = 0
+    def load_statics(self):
 
-        for row in map_statics:
-            for tile in row:
-                if tile == '-1':
-                    col_index += 1
-                    continue
-                elif tile == '0':
-                    new_chest = Entities.Chest((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
-                    interactables.add(new_chest)
-                    chest_index += 1
-                elif tile == '1':
-                    new_chest = Entities.Chest_Big((col_index * self.tile_size, row_index * self.tile_size),str(chest_index),chests[str(chest_index)][0],chests[str(chest_index)][1])
-                    interactables.add(new_chest)
-                    chest_index += 1
-                elif tile == '8':
-                    new_path = Entities.Door((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
-                    interactables.add(new_path)
-                    path_index += 1
-                elif tile == '13':
-                    new_path = Entities.Path_Col_v((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
-                    triggers.add(new_path)
-                    path_index += 1
-                elif tile == '14':
-                    new_path = Entities.Path_Col_h((col_index * self.tile_size, row_index * self.tile_size),pathways[str(path_index)])
-                    triggers.add(new_path)
-                    path_index += 1
-                elif tile == '16':
-                    player = (col_index * self.tile_size, row_index * self.tile_size)
-                    self.init_player_pos = (col_index * self.tile_size, row_index * self.tile_size)
-                elif tile == '17':
-                    new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
-                    npcs.add(new_npc)
-                elif tile == '25':
-                    new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
-                    enemies.add(new_enemy)
-                elif tile == '26':
-                    new_enemy = Entities.Larv((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
-                    enemies.add(new_enemy)
-                elif tile == '27':
-                    new_enemy = Entities.Vatt((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
-                    enemies.add(new_enemy)
-                elif tile == '24':
-                    new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
-                    enemies.add(new_enemy)
-                elif tile == '33':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'right')
-                    camera_blocks.add(new_stop)
-                elif tile == '34':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'top')
-                    camera_blocks.add(new_stop)
-                elif tile == '35':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'left')
-                    camera_blocks.add(new_stop)
-                elif tile == '36':
-                    new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'bottom')
-                    camera_blocks.add(new_stop)
-                elif tile == '40':
-                    new_enemy = Entities.Reindeer((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
-                    enemies.add(new_enemy)
-                col_index += 1
-            row_index += 1
-            col_index = 0 #reset column
+        map_statics = self.map_data["statics"]
 
-        return player, npcs, enemies, interactables, triggers, camera_blocks
+        for obj in map_statics:
+            id = obj['gid'] - self.map_data['statics_firstgid']
+            object_position = (int(obj['x']),int(obj['y']))
+            #player
+            if id == 0:
+                self.game_objects.player.set_pos(object_position)
+                self.init_player_pos = object_position
+            #npcs
+            elif id == 1:
+                properties = obj['properties']
+                for property in properties:
+                    if property['name'] == 'class':
+                        npc_name = property['value']
+                new_npc = getattr(Entities, npc_name)
+                self.game_objects.npcs.add(new_npc(object_position))
+            #enemies
+            elif id == 2:
+                properties = obj['properties']
+                for property in properties:
+                    if property['name'] == 'class':
+                        enemy_name = property['value']
+                new_enemy = getattr(Entities, enemy_name)
+                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles,self.game_objects.loot))
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex','bg_fixed_deco','bg_far_deco','bg_mid_deco','bg_near_deco','fg_fixed_deco','fg_paralex_deco']
-        deco_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex']
+        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_parallax']
+        deco_lists = {}
         top_left = {}
         bg_flags = {}
+
+        for layer in list(self.map_data['tile_layers'].keys()):
+            if '_deco' in layer:
+                bg_list.append(layer)
+                deco_base = layer[:layer.find('_deco')]
+                if deco_base in deco_lists.keys():
+                    deco_lists[deco_base].append(layer)
+                else:
+                    deco_lists[deco_base] = [layer]
+
         for bg in bg_list:
             bg_flags[bg] = True
 
         #all these figures below should be passed and not hardcoded, will break if we change UI etc.
-        screen_center = self.player_center
+        screen_center = self.PLAYER_CENTER
         new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1])
 
-        map_bg = self.read_csv("Tiled/" + self.level_name + "_bg_fixed.csv")
-        cols = len(map_bg[0])
-        rows = len(map_bg)
-
+        cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']
+        rows = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['height']
 
         blit_surfaces = {}
         for bg in bg_list:
-            blit_surfaces[bg] = pygame.Surface((cols*self.tile_size,rows*self.tile_size), pygame.SRCALPHA, 32).convert_alpha()
+            blit_surfaces[bg] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
 
         bg_sheets = {}
         bg_maps = {}
 
-        #try loading all paralex backgrounds
+        spritesheet_dict = self.read_all_spritesheets()
+
+        #try loading all parallax backgrounds
         for bg in bg_list:
             try:
-                bg_sheets[bg] = self.read_spritesheet("Sprites/level_sheets/" + self.level_name + "/%s.png" % bg)
-                bg_maps[bg] = self.read_csv("Tiled/" + self.level_name + "_%s.csv" % bg)
+                bg_maps[bg] = self.map_data['tile_layers'][bg]['data']
                 top_left[bg] = (0,0)
             except:
                 bg_flags[bg] = False
                 #print("Failed to read %s" % bg)
 
+
+
+        #blit background to one image, mapping tile set data to image data
         for bg in bg_list:
             if bg_flags[bg]:
-                for row in range(rows):
-                    for col in range(cols):
-                        if not bg_maps[bg][row][col] == '-1':
-                            #print(bg + " " + bg_maps[bg][row][col])
-                            blit_surfaces[bg].blit(bg_sheets[bg][int(bg_maps[bg][row][col])], (col * self.tile_size, row * self.tile_size))
-                            if top_left[bg] == (0,0):
-                                #get inital position for blit
-                                top_left[bg] = (col * self.tile_size, row * self.tile_size)
-
-
-
+                for index, tile_number in enumerate(bg_maps[bg]):
+                    if tile_number == 0:
+                        continue
+                    else:
+                        print(tile_number)
+                        y = math.floor(index/cols)
+                        x = (index - (y*cols))
+                        blit_pos = (x * self.TILE_SIZE, y * self.TILE_SIZE)
+                        blit_surfaces[bg].blit(spritesheet_dict[tile_number], blit_pos)
+                        if top_left[bg] == (0,0):
+                            top_left[bg] = blit_pos
 
         #blit deco over corresponding layer
-        for bg in deco_list:
-            if bg_flags[bg + '_deco']:
-                blit_surfaces[bg].blit(blit_surfaces[bg + '_deco'],(0,0))
+        for bg in list(deco_lists.keys()):
+            deco_lists[bg].sort()
+            for deco in deco_lists[bg]:
+                blit_surfaces[bg].blit(blit_surfaces[deco],(0,0))
 
         #print(top_left)
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
-                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
             elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_Block((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg],0.03))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg],0.03))#pos,img,parallax
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_Block((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg],0.5))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg],0.5))#pos,img,parallax
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_Block((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg],0.75))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg],0.75))#pos,img,parallax
             elif bg == 'fg_fixed':
-                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,paralex
-            elif bg == 'fg_paralex':
-                backgrounds.append(Entities.BG_Block((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],1.25))#pos,img,paralex
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
+            elif bg == 'fg_parallax':
+                backgrounds.append(Entities.BG_Block((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],1.25))#pos,img,parallax
         del blit_surfaces, bg_sheets, bg_maps
         return backgrounds
-
-    def load_collison_layer(self):#load the whole map
 
 class Sprite_sheet():
 

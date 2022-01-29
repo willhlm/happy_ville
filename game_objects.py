@@ -3,6 +3,7 @@ import Read_files
 import Engine
 import Entities
 import Level
+import map_loader
 import BG
 
 class Game_Objects():
@@ -27,8 +28,8 @@ class Game_Objects():
         self.bg_mid = pygame.sprite.Group()
         self.bg_near = pygame.sprite.Group()
         self.fg_fixed = pygame.sprite.Group()
-        self.fg_paralex = pygame.sprite.Group()
-        self.bgs = [self.bg_fixed,self.bg_far,self.bg_mid,self.bg_near,self.fg_fixed,self.fg_paralex]
+        self.fg_parallax = pygame.sprite.Group()
+        self.bgs = [self.bg_fixed,self.bg_far,self.bg_mid,self.bg_near,self.fg_fixed,self.fg_parallax]
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
@@ -49,12 +50,12 @@ class Game_Objects():
         #initiate player
         self.player = Entities.Player([200,50],self.fprojectiles,self.cosmetics)
         self.players = pygame.sprite.Group(self.player)
-        self.player_center = (self.game.WINDOW_SIZE[0]/2,2*self.game.WINDOW_SIZE[1]/3)
+        self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(2*self.game.WINDOW_SIZE[1]/3))
 
     def load_map(self, map_name):
-        self.map = Level.Tilemap(map_name, self.player_center, self.game.WINDOW_SIZE)
+        self.map = map_loader.Level(map_name, self)
         self.initiate_groups()
-        self.load_music()
+        #self.load_music()
 
     def change_map(self, map_name):
         #actually load the new map
@@ -77,9 +78,8 @@ class Game_Objects():
         self.npc_pause.empty()
 
         #load all objects
-        player_pos, self.npcs, self.enemies, self.interactables, self.triggers, self.camera_blocks = self.map.load_statics(self.map_state[self.map.level_name],self.eprojectiles,self.loot)
-        self.player.set_pos(player_pos)
-        self.platforms,self.platforms_pause=self.map.load_map()#load all map
+        self.map.load_statics()
+        self.map.load_collision_layer()
         #self.players.add(self.player)
 
         #clean and load bg
@@ -164,6 +164,9 @@ class Game_Objects():
         pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
         pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
 
+        for platform in self.platforms:#go through the group
+            pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)
 
@@ -201,8 +204,6 @@ class Game_Objects():
             if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
                 self.npcs.add(entity)
                 self.npc_pause.remove(entity)
-
-        self.platforms,self.platforms_pause=self.map.update_chunks()#update the rellavant pltforms
 
     def check_camera_border(self):
 
