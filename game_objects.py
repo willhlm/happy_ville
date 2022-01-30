@@ -23,13 +23,8 @@ class Game_Objects():
         self.enemies = Entities.ExtendedGroup()# pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
-        self.bg_fixed = pygame.sprite.Group()
-        self.bg_far = pygame.sprite.Group()
-        self.bg_mid = pygame.sprite.Group()
-        self.bg_near = pygame.sprite.Group()
-        self.fg_fixed = pygame.sprite.Group()
-        self.fg_parallax = pygame.sprite.Group()
-        self.bgs = [self.bg_fixed,self.bg_far,self.bg_mid,self.bg_near,self.fg_fixed,self.fg_parallax]
+        self.all_bgs = pygame.sprite.LayeredUpdates()
+        self.all_fgs = pygame.sprite.LayeredUpdates()
         self.invisible_blocks = pygame.sprite.Group()
         self.weather = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
@@ -76,17 +71,13 @@ class Game_Objects():
         self.platforms_pause.empty()
         self.enemy_pause.empty()
         self.npc_pause.empty()
+        self.all_bgs.empty()
+        self.all_fgs.empty()
 
-        #load all objects
+        #load all objects and art
         self.map.load_statics()
         self.map.load_collision_layer()
-        #self.players.add(self.player)
-
-        #clean and load bg
-        for bg in self.bgs:
-            bg.empty()
-        for i, bg in enumerate(self.map.load_bg()):
-            self.bgs[i].add(bg)
+        self.map.load_bg()
 
     def collide_all(self):
         self.collisions.collide(self.players,self.platforms)
@@ -111,11 +102,11 @@ class Game_Objects():
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):
+
         self.platforms.update(scroll)
         self.platforms_pause.update(scroll)
-
-        for bg in self.bgs:
-            bg.update(scroll)
+        self.all_bgs.update(scroll)
+        self.all_fgs.update(scroll)
         self.players.update(scroll)
         self.enemies.update(scroll,self.player.rect.center)#shoudl the AI be based on playerposition?
         self.npcs.update(scroll)
@@ -132,9 +123,8 @@ class Game_Objects():
         self.triggers.update(scroll)
 
     def draw(self):
-        for i in range(1,4):
-            self.bgs[i].draw(self.game.screen)
-        self.bg_fixed.draw(self.game.screen)
+
+        self.all_bgs.draw(self.game.screen)
         self.weather.draw(self.game.screen)
 
         #self.platforms.draw(self.game.screen)
@@ -146,12 +136,11 @@ class Game_Objects():
         self.eprojectiles.draw(self.game.screen)
         self.loot.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
-        for i in range(4,6):
-            self.bgs[i].draw(self.game.screen)
+        self.all_fgs.draw(self.game.screen)
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
 
-        #temporaries draws. Shuold be removed
+        #temporaries draws. ---->> should be added as a debug feature in the option menu!^^
         for projectile in self.fprojectiles.sprites():#go through the group
             pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
         for projectile in self.eprojectiles.sprites():#go through the group

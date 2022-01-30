@@ -80,6 +80,7 @@ class Level():
 
         for obj in map_statics:
             id = obj['gid'] - self.map_data['statics_firstgid']
+            print(id)
             object_position = (int(obj['x']),int(obj['y']))
             #player
             if id == 0:
@@ -104,11 +105,15 @@ class Level():
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_parallax']
+        base_bg_list = ['bg_far','bg_mid','bg_near','bg_fixed','fg_fixed','fg_parallax']
+        bg_list = ['bg_far','bg_mid','bg_near','bg_fixed','fg_fixed','fg_parallax']
+        parallax_values = {'bg_far': 0.03,'bg_mid': 0.5,'bg_near': 0.75,'bg_fixed': 1,'fg_fixed': 1,'fg_parallax': 1.25}
+        animation_list = {}
         deco_lists = {}
         top_left = {}
         bg_flags = {}
 
+        #check for animation and deco layers in map data
         for layer in list(self.map_data['tile_layers'].keys()):
             if '_deco' in layer:
                 bg_list.append(layer)
@@ -117,6 +122,9 @@ class Level():
                     deco_lists[deco_base].append(layer)
                 else:
                     deco_lists[deco_base] = [layer]
+            elif '_animated' in layer:
+                animation_base_layer = layer[:layer.find('_animated')]
+                animation_list[animation_base_layer] = layer
 
         for bg in bg_list:
             bg_flags[bg] = True
@@ -146,8 +154,6 @@ class Level():
                 bg_flags[bg] = False
                 #print("Failed to read %s" % bg)
 
-
-
         #blit background to one image, mapping tile set data to image data
         for bg in bg_list:
             if bg_flags[bg]:
@@ -155,7 +161,6 @@ class Level():
                     if tile_number == 0:
                         continue
                     else:
-                        print(tile_number)
                         y = math.floor(index/cols)
                         x = (index - (y*cols))
                         blit_pos = (x * self.TILE_SIZE, y * self.TILE_SIZE)
@@ -169,23 +174,48 @@ class Level():
             for deco in deco_lists[bg]:
                 blit_surfaces[bg].blit(blit_surfaces[deco],(0,0))
 
-        #print(top_left)
-        backgrounds = []
-        for i, bg in enumerate(bg_list):
-            if bg == 'bg_fixed':
-                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
-            elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_Block((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg],0.03))#pos,img,parallax
+        animation_entities = {}
+        #create animation layers
+        for bg in animation_list.keys():
+            for index, tile_number in enumerate(self.map_data['tile_layers'][animation_list[bg]]['data']):
+                if tile_number == 0:
+                    continue
+                else:
+                    for tileset in self.map_data['tilesets']:
+                        if tile_number == tileset['firstgid']:
+                            path = 'maps/%s/%s' % (self.level_name, Read_files.get_folder(tileset['image']))
+                            y = math.floor(index/cols)
+                            x = (index - (y*cols))
+                            parallax = parallax_values[bg]
+                            blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[0]))
+                            new_animation = Entities.BG_Animated(blit_pos,path,parallax)
+                            try:
+                                animation_entities[bg].append(new_animation)
+                            except KeyError:
+                                animation_entities[bg] = [new_animation]
+
+
+
+        for bg in base_bg_list:
+            parallax = parallax_values[bg]
+            if bg == 'bg_far':
+                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_Block((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg],0.5))#pos,img,parallax
+                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_Block((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg],0.75))#pos,img,parallax
+                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
+            elif bg == 'bg_fixed':
+                self.game_objects.all_bgs.add(Entities.BG_Block((0,0),blit_surfaces[bg],parallax))#pos,img,parallax
             elif bg == 'fg_fixed':
-                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
+                self.game_objects.all_bgs.add(Entities.BG_Block((0,0),blit_surfaces[bg],parallax))#pos,img,parallax
             elif bg == 'fg_parallax':
-                backgrounds.append(Entities.BG_Block((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],1.25))#pos,img,parallax
+                self.game_objects.all_bgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
+            try:
+                for bg_animation in animation_entities[bg]:
+                    self.game_objects.all_bgs.add(bg_animation)
+            except KeyError:
+                pass
         del blit_surfaces, bg_sheets, bg_maps
-        return backgrounds
 
 class Sprite_sheet():
 

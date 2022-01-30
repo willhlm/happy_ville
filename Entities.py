@@ -72,6 +72,29 @@ class BG_Block(Staticentity):
         self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
         self.rect.topleft = self.true_pos
 
+class BG_Animated(BG_Block):
+    def __init__(self,pos,sprite_folder_path,parallax=1):
+        super().__init__(pos,pygame.Surface((16,16)),parallax)
+        self.timer = 0
+        self.frame_index = 0
+        self.sprites = Read_files.load_sprites(sprite_folder_path)
+        self.image = self.sprites[0]
+
+    def update(self, pos):
+        self.update_pos(pos)
+        self.update_sprite()
+
+    def update_sprite(self):
+        if self.timer == 4:
+            self.timer = 0
+            self.frame_index += 1
+            if self.frame_index == len(self.sprites):
+                self.frame_index = 0
+            self.image = self.sprites[self.frame_index]
+        else:
+            self.timer += 1
+
+
 class Dynamicentity(Staticentity):
     def __init__(self,pos):
         super().__init__(pos)

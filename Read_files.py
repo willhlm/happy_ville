@@ -23,8 +23,42 @@ def format_tiled_json(map_data):
         elif 'objects' in layer.keys():
             formatted_map_data[layer['name']] = layer['objects']
 
-
     return formatted_map_data
+
+def get_folder(file_path):
+    for n in range(len(file_path)):
+        if file_path[-(n+1)] == '/':
+            return file_path[:-n]
+
+def generic_sheet_reader(self, path_to_sheet, w, h, r, c):
+#width, height, no o sprites in row, no o sprites in column
+#loads all sprites from a sheet,
+#this method requires all sprites to have the same dimension in the sheet
+    sprite_dict = {}
+    sheet = pygame.image.load(path_to_sheet).convert_alpha()
+    sprite_size = (w,h) #[width, height] of sprite in sheet
+    sprite_count = [r,c] # nomber of sprites per [row,column]
+    n = 0
+
+    for i in range(sprite_count[0]):
+        for j in range(sprite_count[1]):
+            rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
+            image = pygame.Surface(sprite_size,pygame.SRCALPHA,32)
+            image.blit(sheet,(0,0),rect)
+            sprite_dict[n] = image
+            n+=1
+    return sprite_dict
+
+def load_sprites(path_to_folder):
+    print(path_to_folder)
+    #use this to load multiple sprites in a path_to_folder
+    list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
+    if join(path_to_folder,'.DS_Store') in list_of_sprites:
+        list_of_sprites.remove(join(path_to_folder,'.DS_Store'))
+    if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
+        list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
+    list_of_sprites.sort()
+    return [pygame.image.load(file) for file in list_of_sprites]
 
 #sprires and fonts
 class Sprites():
@@ -57,6 +91,8 @@ class Sprites():
         #use to load single sprite, full path must be provided
         return pygame.image.load(path_to_sprite)
 
+
+    #TO DO: put this method outside of class!
     def generic_sheet_reader(self, path_to_sheet, w, h, r, c):
     #width, height, no o sprites in row, no o sprites in column
     #loads all sprites from a sheet,

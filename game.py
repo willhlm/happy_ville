@@ -18,8 +18,6 @@ class Game():
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
 
 
-
-
         #initiate game related values
         self.game_objects = game_objects.Game_Objects(self)
         self.clock = pygame.time.Clock()
