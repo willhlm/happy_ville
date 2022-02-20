@@ -71,10 +71,10 @@ class Level():
             object_position = (int(obj['x']),int(obj['y']))
             object_size = (int(obj['width']),int(obj['height']))
 
-            #check for polygon type
+            #check for polygon type first
             if 'polygon' in obj.keys():
                 new_block = Entities.Collision_right_angle(object_position, convert_points_to_list(obj['polygon']))
-                self.game_objects.platforms.add(new_block)
+                self.game_objects.platforms_ramps.add(new_block)
                 continue
 
             id = obj['gid'] - (self.map_data['statics_firstgid'] + 6) #the last in depends on postion of COL stamp in stamp png

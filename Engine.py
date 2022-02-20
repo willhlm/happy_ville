@@ -82,18 +82,18 @@ class Collisions():
 
     #invisible wall collision for NPC and enemy
     @staticmethod
-    def check_invisible(dynamic_Entities,inv_enteties):
+    def check_invisible(dynamic_Entities,inv_entities):
 
-        collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_enteties,False,False,Collisions.collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_entities,False,False,Collisions.collided)
         for dyn_entity, inv_entity in collisions.items():
             dyn_entity.dir[0]=-dyn_entity.dir[0]#turn around
 
     #interact with chests
     @staticmethod
-    def check_interaction(player,static_enteties):
+    def check_interaction(player,static_entities):
         map_change = False
         chest_id = False
-        collision=pygame.sprite.spritecollideany(player,static_enteties,Collisions.collided)#check collision
+        collision=pygame.sprite.spritecollideany(player,static_entities,Collisions.collided)#check collision
         if collision:
             collision.interacted = True
             if type(collision).__name__ == "Door":
@@ -124,27 +124,29 @@ class Collisions():
         return map_change
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
-    #collisions between enteties-groups: a dynamic and a static one
+    #collisions between entities-groups: a dynamic and a static one
     @staticmethod
-    def collide(dynamic_Entities,static_enteties):
+    def collide(dynamic_Entities,static_entities,ramps):
 
-        #move in x every dynamic sprite
+
         for entity in dynamic_Entities.sprites():
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
+            #move in x every dynamic sprite
             entity.rect.center = [round(entity.rect.center[0] + entity.velocity[0]), entity.rect.center[1]]
             entity.update_hitbox()
 
-            collision_x = pygame.sprite.spritecollideany(entity,static_enteties,Collisions.collided)
+            static_entity_x = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
 
-            if collision_x:
+            if static_entity_x:
+
                 #check for collisions and get a dictionary of sprites that collides
                 if entity.velocity[0]>0:#going to the right
-                    entity.hitbox.right = collision_x.hitbox.left
+                    entity.hitbox.right = static_entity_x.hitbox.left
                     entity.collision_types['right'] = True
 
                 elif entity.velocity[0]<0:#going to the left
-                    entity.hitbox.left = collision_x.hitbox.right
+                    entity.hitbox.left = static_entity_x.hitbox.right
                     entity.collision_types['left'] = True
                 entity.update_rect()
 
@@ -152,20 +154,52 @@ class Collisions():
             entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
             entity.update_hitbox()#follow with hitbox
 
-            collision_y = pygame.sprite.spritecollideany(entity,static_enteties,Collisions.collided)
+            ramp = pygame.sprite.spritecollideany(entity,ramps,Collisions.collided)
+            ramp_collision = False
 
-            if collision_y:
+            if ramp:
+                x_tot = ramp.size[0]
+                y_tot = ramp.size[1]
+                x_1 = entity.hitbox.centerx - ramp.hitbox.left
+                if  (0 < x_1 < x_tot) and entity.velocity[1] > 0:
+                    if ramp.orientation == 0:
+                        y = (x_tot - x_1)*(y_tot/x_tot)
+                        y = int(ramp.hitbox.bottom - y)
 
-                if entity.velocity[1]>0:#going down
-                    entity.hitbox.bottom = collision_y.hitbox.top
-                    entity.collision_types['bottom'] = True
 
-                elif entity.velocity[1]<0:#going up
-                    entity.hitbox.top = collision_y.hitbox.bottom
-                    entity.collision_types['top'] = True
-                entity.update_rect()
+                        if entity.hitbox.bottom <= y:
+                            pass
+                        else:
+                            ramp_collision = True
+                            entity.hitbox.bottom = y
+                            entity.collision_types['bottom'] = True
+
+                    elif ramp.orientation == 1:
+                        y = x_1*(y_tot/x_tot)
+                        y = int(ramp.hitbox.bottom - y)
+
+                        if entity.hitbox.bottom <= y:
+                            pass
+                        else:
+                            ramp_collision = True
+                            entity.hitbox.bottom = y
+                            entity.collision_types['bottom'] = True
+                    entity.update_rect()
+
+            if not ramp_collision:
+                static_entity_y = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
+                if static_entity_y:
+
+                    if entity.velocity[1]>0:#going down
+                        entity.hitbox.bottom = static_entity_y.hitbox.top
+                        entity.collision_types['bottom'] = True
+
+                    elif entity.velocity[1]<0:#going up
+                        entity.hitbox.top = static_entity_y.hitbox.bottom
+                        entity.collision_types['top'] = True
+                    entity.update_rect()
 
     #make the hitbox collide instead of rect
     @staticmethod
-    def collided(dynamic_Entities,static_enteties):
-        return dynamic_Entities.hitbox.colliderect(static_enteties.hitbox)
+    def collided(dynamic_Entities,static_entities):
+        return dynamic_Entities.hitbox.colliderect(static_entities.hitbox)

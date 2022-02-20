@@ -23,6 +23,7 @@ class Game_Objects():
         self.enemies = Entities.ExtendedGroup()# pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
+        self.platforms_ramps = pygame.sprite.Group()
         self.all_bgs = pygame.sprite.LayeredUpdates()
         self.all_fgs = pygame.sprite.LayeredUpdates()
         self.invisible_blocks = pygame.sprite.Group()
@@ -68,6 +69,7 @@ class Game_Objects():
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
+        self.platforms_ramps.empty()
         self.platforms_pause.empty()
         self.enemy_pause.empty()
         self.npc_pause.empty()
@@ -80,10 +82,10 @@ class Game_Objects():
         self.map.load_bg()
 
     def collide_all(self):
-        self.collisions.collide(self.players,self.platforms)
-        self.collisions.collide(self.enemies,self.platforms)
-        self.collisions.collide(self.npcs,self.platforms)
-        self.collisions.collide(self.loot,self.platforms)
+        self.collisions.collide(self.players,self.platforms, self.platforms_ramps)
+        self.collisions.collide(self.enemies,self.platforms, self.platforms_ramps)
+        self.collisions.collide(self.npcs,self.platforms, self.platforms_ramps)
+        self.collisions.collide(self.loot,self.platforms, self.platforms_ramps)
         self.collisions.check_invisible(self.npcs,self.invisible_blocks)
         self.collisions.pickup_loot(self.player,self.loot)
         self.collisions.check_enemy_collision(self.player,self.enemies)
@@ -104,6 +106,7 @@ class Game_Objects():
     def update_groups(self, scroll = (0,0)):
 
         self.platforms.update(scroll)
+        self.platforms_ramps.update(scroll)
         self.platforms_pause.update(scroll)
         self.all_bgs.update(scroll)
         self.all_fgs.update(scroll)
@@ -154,10 +157,9 @@ class Game_Objects():
         pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
 
         for platform in self.platforms:#go through the group
-            if isinstance(platform,Entities.Collision_right_angle):
-                pygame.draw.rect(self.game.screen, (255,100,100), platform.hitbox,2)#draw hitbox
-            else:
-                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+            pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+        for ramp in self.platforms_ramps:
+            pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
 
 
     def conversation_collision(self):
@@ -175,7 +177,7 @@ class Game_Objects():
         if change_map:
             self.change_map(change_map)
 
-    def group_distance(self):#remove the eneteies if it is off screen from thir group
+    def group_distance(self):#remove the entities if it is off screen from thir group
         bounds=[-100,600,-100,350]#-x,+x,-y,+y
 
         for entity in self.enemies:
