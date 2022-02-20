@@ -26,6 +26,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.spike=False
+        self.is_slope=False
 
     def update(self,pos):
         self.update_pos(pos)
@@ -41,6 +42,78 @@ class Invisible_block(Platform):
 class Collision_block(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
+
+class Collision_right_angle(Collision_block):
+    def __init__(self,pos,points):
+        self.define_values(pos, points)
+        super().__init__(self.new_pos,self.size)
+        self.is_slope=True
+
+    #function calculates size, real bottomleft position and orientation of right angle triangle
+    #the value in orientatiion represents the following:
+    #0 = tilting to the right, flatside down
+    #1 = tilting to the left, flatside down
+    #2 = tilting to the right, flatside up
+    #3 = tilting to the left, flatside up
+    def define_values(self, pos, points):
+        self.new_pos = (0,0)
+        self.size = (0,0)
+        self.orientation = 0
+        x_0_count = 0
+        y_0_count = 0
+        x_extreme = 0
+        y_extreme = 0
+
+        for point in points:
+            if point[0] == 0:
+                x_0_count += 1
+            else:
+                x_extreme = point[0]
+            if point[1] == 0:
+                y_0_count += 1
+            else:
+                y_extreme = point[1]
+
+        self.size = (abs(x_extreme), abs(y_extreme))
+
+        if x_extreme < 0:
+            if y_extreme < 0:
+                self.new_pos = (pos[0] + x_extreme, pos[1])
+                if x_0_count == 1:
+                    self.orientation = 0
+                elif y_0_count == 1:
+                    self.orientation = 3
+                else:
+                    self.orientation = 1
+
+            else:
+                self.new_pos = (pos[0] + x_extreme, pos[1] + y_extreme)
+                if x_0_count == 1:
+                    self.orientation = 2
+                elif y_0_count == 1:
+                    self.orientation = 1
+                else:
+                    self.orientation = 3
+
+        else:
+            if y_extreme < 0:
+                self.new_pos = pos
+                if x_0_count == 1:
+                    self.orientation = 1
+                elif y_0_count == 1:
+                    self.orientation = 2
+                else:
+                    self.orientation = 0
+
+            else:
+                self.new_pos = (pos[0], pos[1] + y_extreme)
+                if x_0_count == 1:
+                    self.orientation = 3
+                elif y_0_count == 1:
+                    self.orientation = 0
+                else:
+                    self.orientation = 2
+
 
 class Spikes(Platform):
     def __init__(self,pos,size):

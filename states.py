@@ -83,7 +83,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load start level
-            self.game.game_objects.load_map('debug_map')
+            self.game.game_objects.load_map('collision_map')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)

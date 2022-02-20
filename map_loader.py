@@ -60,10 +60,24 @@ class Level():
 
         map_collisions = self.map_data["collision"]
 
+        def convert_points_to_list(points):
+            points_list = []
+            for point in points:
+                points_list.append((point['x'],point['y']))
+            return points_list
+
         for obj in map_collisions:
-            id = obj['gid'] - (self.map_data['statics_firstgid'] + 6) #the last in depends on postion of COL stamp in stamp png
+
             object_position = (int(obj['x']),int(obj['y']))
             object_size = (int(obj['width']),int(obj['height']))
+
+            #check for polygon type
+            if 'polygon' in obj.keys():
+                new_block = Entities.Collision_right_angle(object_position, convert_points_to_list(obj['polygon']))
+                self.game_objects.platforms.add(new_block)
+                continue
+
+            id = obj['gid'] - (self.map_data['statics_firstgid'] + 6) #the last in depends on postion of COL stamp in stamp png
             #normal collision blocks
             if id == 0:
                 new_block = Entities.Collision_block(object_position,object_size)
@@ -187,13 +201,12 @@ class Level():
                             y = math.floor(index/cols)
                             x = (index - (y*cols))
                             parallax = parallax_values[bg]
-                            blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[0]))
+                            blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
                             new_animation = Entities.BG_Animated(blit_pos,path,parallax)
                             try:
                                 animation_entities[bg].append(new_animation)
                             except KeyError:
                                 animation_entities[bg] = [new_animation]
-
 
 
         for bg in base_bg_list:

@@ -154,7 +154,11 @@ class Game_Objects():
         pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
 
         for platform in self.platforms:#go through the group
-            pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+            if isinstance(platform,Entities.Collision_right_angle):
+                pygame.draw.rect(self.game.screen, (255,100,100), platform.hitbox,2)#draw hitbox
+            else:
+                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+
 
     def conversation_collision(self):
         return Engine.Collisions.check_npc_collision(self.player,self.npcs)

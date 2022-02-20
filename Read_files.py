@@ -50,7 +50,6 @@ def generic_sheet_reader(self, path_to_sheet, w, h, r, c):
     return sprite_dict
 
 def load_sprites(path_to_folder):
-    print(path_to_folder)
     #use this to load multiple sprites in a path_to_folder
     list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
     if join(path_to_folder,'.DS_Store') in list_of_sprites:
