@@ -119,9 +119,18 @@ class Level():
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        base_bg_list = ['bg_far','bg_mid','bg_near','bg_fixed','fg_fixed','fg_parallax']
-        bg_list = ['bg_far','bg_mid','bg_near','bg_fixed','fg_fixed','fg_parallax']
-        parallax_values = {'bg_far': 0.03,'bg_mid': 0.5,'bg_near': 0.75,'bg_fixed': 1,'fg_fixed': 1,'fg_parallax': 1.25}
+        base_bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
+        bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
+        parallax_values = {'bg_farfar': 0.01,
+                            'bg_far': 0.03,
+                            'bg_midmid': 0.6,
+                            'bg_mid': 0.5,
+                            'bg_nearnear': 0.75,
+                            'bg_near': 0.8,
+                            'bg_fixed': 1,
+                            'fg_fixed': 1,
+                            'fg_near': 1.25,
+                            'fg_mid': 1.5}
         animation_list = {}
         deco_lists = {}
         top_left = {}
@@ -211,18 +220,12 @@ class Level():
 
         for bg in base_bg_list:
             parallax = parallax_values[bg]
-            if bg == 'bg_far':
-                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
-            elif bg == 'bg_mid':
-                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
-            elif bg == 'bg_near':
-                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
-            elif bg == 'bg_fixed':
+            if 'fixed' in bg:
                 self.game_objects.all_bgs.add(Entities.BG_Block((0,0),blit_surfaces[bg],parallax))#pos,img,parallax
-            elif bg == 'fg_fixed':
-                self.game_objects.all_bgs.add(Entities.BG_Block((0,0),blit_surfaces[bg],parallax))#pos,img,parallax
-            elif bg == 'fg_parallax':
-                self.game_objects.all_bgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
+            elif 'fg' in bg:
+                self.game_objects.all_bgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))
+            else:
+                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
             try:
                 for bg_animation in animation_entities[bg]:
                     self.game_objects.all_bgs.add(bg_animation)

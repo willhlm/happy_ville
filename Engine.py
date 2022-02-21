@@ -158,31 +158,32 @@ class Collisions():
             ramp_collision = False
 
             if ramp:
+                ramp_offset = 1 #make transitions smoother, maybe implement this differently
                 x_tot = ramp.size[0]
                 y_tot = ramp.size[1]
                 x_1 = entity.hitbox.centerx - ramp.hitbox.left
                 if  (0 < x_1 < x_tot) and entity.velocity[1] > 0:
                     if ramp.orientation == 0:
-                        y = (x_tot - x_1)*(y_tot/x_tot)
-                        y = int(ramp.hitbox.bottom - y)
+                        y = (x_tot - x_1 + 2)*(y_tot/x_tot)
+                        y = int(ramp.hitbox.bottom - y - ramp_offset)
 
 
                         if entity.hitbox.bottom <= y:
                             pass
                         else:
                             ramp_collision = True
-                            entity.hitbox.bottom = y
+                            entity.hitbox.bottom = max(y, ramp.hitbox.top)
                             entity.collision_types['bottom'] = True
 
                     elif ramp.orientation == 1:
-                        y = x_1*(y_tot/x_tot)
+                        y = (x_1+4)*(y_tot/x_tot)
                         y = int(ramp.hitbox.bottom - y)
 
                         if entity.hitbox.bottom <= y:
                             pass
                         else:
                             ramp_collision = True
-                            entity.hitbox.bottom = y
+                            entity.hitbox.bottom = max(y, ramp.hitbox.top)
                             entity.collision_types['bottom'] = True
                     entity.update_rect()
 
