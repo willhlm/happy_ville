@@ -8,25 +8,25 @@ def actions(projectiles,projectile_enteties,platforms,enemies,screen,loot):
 
             #projectile collision?
             collision_plat = pygame.sprite.spritecollideany(projectile,platforms,collided)
-            collision_ene = pygame.sprite.spritecollideany(projectile,enemies,collided)
+            collision_enemy = pygame.sprite.spritecollideany(projectile,enemies,collided)
 
             pygame.draw.rect(screen, (0,0,255), projectile.hitbox,2)#draw hitbox
 
             #if hit enemy
-            if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
+            if collision_enemy and not collision_enemy.action['death'] and not collision_enemy.action['hurt']:
 
-                entity.shake=collision_ene.shake#screen shake
+                entity.shake=collision_enemy.shake#screen shake
 
-                collision_ene.health-=projectile.dmg
-                collision_ene.action['hurt']=True
+                collision_enemy.health-=projectile.dmg
+                collision_enemy.action['hurt']=True
 
-                if collision_ene.health<=0:#if 0 health of enemy
-                    collision_ene.action['death']=True
-                    collision_ene.action['run']=False
-                    loot=collision_ene.loots(loot)
+                if collision_enemy.health<=0:#if 0 health of enemy
+                    collision_enemy.action['death']=True
+                    collision_enemy.action['run']=False
+                    loot=collision_enemy.loots(loot)
 
                 if projectile.type=='sword':#knockback if sword is quipped
-                    #collision_ene.velocity[0]=entity.dir[0]*10#knock back of enemy
+                    #collision_enemy.velocity[0]=entity.dir[0]*10#knock back of enemy
                     projectiles.remove(projectile)
                     entity.velocity[1]=entity.dir[1]*10#nail jump
 

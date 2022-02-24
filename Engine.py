@@ -4,115 +4,116 @@ class Collisions():
     def __init__(self):
         self.shake=0
 
-    def action_collision(self,projectiles,projectile_enteties,platforms,enemies,screen,loot,cosmetics):
-        self.shake-=1
-        self.shake=max(0,self.shake)#to not let it go to too low values
-
-        for entity in projectile_enteties.sprites():#go through the group
-            projectiles=entity.attack_action(projectiles)
-
-            for projectile in projectiles.sprites():#go through the group
-
-                #projectile collision?
-                collision_plat = pygame.sprite.spritecollideany(projectile,platforms,Collisions.collided)
-                collision_ene = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
-
-                pygame.draw.rect(screen, (0,0,255), projectile.hitbox,2)#draw hitbox
-
-                #if hit enemy
-                if collision_ene and not collision_ene.action['death'] and not collision_ene.action['hurt']:
-
-                    #self.shake+=collision_ene.death(loot)#check if dead
-                    collision_ene.take_dmg(projectile.dmg)
-                    self.shake=projectile.collision(entity,cosmetics,collision_ene)#response of projetile hits
-
-                    if collision_ene.action['death']:
-                        self.shake+=collision_ene.shake
-                        loot.add(collision_ene.loots())
-
-                #hit platform
-                elif collision_plat:
-                    self.shake=projectile.collision(entity)#entity is the guy donig the action
+    @staticmethod
+    def counter(fprojectiles,eprojectiles):
+        for projectile in fprojectiles.sprites():#go through the group
+            if type(projectile).__name__ == 'Shield':
+                collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
+                if collision_epro:
+                    collision_epro.countered(projectile)
+                    projectile.kill()
 
     @staticmethod
-    def collided(projectile,target):
-        return projectile.hitbox.colliderect(target.hitbox)
+    def weather_paricles(weathers,platforms):
+        collisions=pygame.sprite.groupcollide(weathers,platforms,False,False)
+        for weather, platform in collisions.items():
+            weather.collision()
+
+    @staticmethod
+    def action_collision(projectiles,platforms,enemies):
+        for projectile in projectiles.sprites():#go through the group
+
+            #projectile collision?
+            collision_plat = pygame.sprite.spritecollideany(projectile,platforms,Collisions.collided)
+            collision_enemy = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
+
+            #if hit enemy
+            if collision_enemy:
+                if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':
+                    collision_enemy.take_dmg(projectile.dmg)
+                    projectile.collision_enemy(collision_enemy)
+                #self.shake+=collision_enemy.death(loot)#check if dead
+                #self.shake=projectile.collision(entity,cosmetics,collision_enemy)#response of projetile hits
+
+                #if collision_enemy.action['death']:
+                #    self.shake+=collision_enemy.shake
+                #    loot.add(collision_enemy.loots())
+
+            #hit platform
+            elif collision_plat:
+                projectile.collision_plat()
+                #self.shake=projectile.collision(entity)#entity is the guy donig the action
 
     #take damage if collide with enemy
     @staticmethod
     def check_enemy_collision(player,enemies):
-        collided=Collisions.collided #make the hitbox collide and not rect
-        collisions=pygame.sprite.spritecollideany(player,enemies,collided)#check collision
+        collision_enemy=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
 
-        if collisions and not player.action['hurt'] and not collisions.action['death']:
-            player.take_dmg(10)
+        if collision_enemy:
 
-            sign=(player.hitbox.center[0]-collisions.hitbox.center[0])/(abs(player.hitbox.center[0]-collisions.hitbox.center[0]))
-            #if player.hitbox.center[0] > collisions.hitbox.center[0]:#player on right
-            player.velocity[0]=sign*10#knock back of player
-        #    else:#player on left
-            #    player.velocity[0]=-10#knock back of player
+            if str(type(collision_enemy.currentstate).__name__) is not 'Death' and collision_enemy.aggro:
+
+                player.take_dmg(10)
+                sign=(player.hitbox.center[0]-collision_enemy.hitbox.center[0])
+                if sign>0:
+                    player.velocity[0]=10#knock back of player
+                else:
+                    player.velocity[0]=-10#knock back of player
 
     #pickup loot
     @staticmethod
     def pickup_loot(player,loots):
-        collided=Collisions.collided #make the hitbox collide and not rect
-        collision=pygame.sprite.spritecollide(player,loots,True,collided)#check collision
-        for loot in collision:
-            obj=(loot.__class__.__name__)#get the loot in question
-            player.inventory[obj]+=1
+
+        collision_loot=pygame.sprite.spritecollideany(player,loots,Collisions.collided)#check collision
+
+        if collision_loot:
+    #    for loot in collision:
+            collision_loot.pickup(player)
+            #if obj=='Spiritsorb':
+            #    player.spirit += 10
+
+            #else:
+            #    player.inventory[obj]+=1
 
     #npc player conversation
     @staticmethod
     def check_npc_collision(player,npcs):
-        npc=pygame.sprite.spritecollideany(player,npcs)#check collision
-        if npc and player.action['talk']==True:#if player want to talk talks
-            #npc.talk(screen,player)
-            player.state='talk'#the player talks with npc
-            player.action['run']=False
-            npc.action['talk'] = True
-            return npc
-
-        #return None if no interaction
-        return
+        return pygame.sprite.spritecollideany(player,npcs)#check collision
 
     #invisible wall collision for NPC and enemy
     @staticmethod
-    def check_invisible(dynamic_entities,inv_enteties):
-        collided=Collisions.collided#make the hitbox collide and not rect
+    def check_invisible(dynamic_Entities,inv_entities):
 
-        collisions=pygame.sprite.groupcollide(dynamic_entities,inv_enteties,False,False,collided)
+        collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_entities,False,False,Collisions.collided)
         for dyn_entity, inv_entity in collisions.items():
-            dyn_entity.action['inv']=True
+            dyn_entity.dir[0]=-dyn_entity.dir[0]#turn around
 
     #interact with chests
     @staticmethod
-    def check_interaction(player,static_enteties):
+    def check_interaction(player,static_entities):
         map_change = False
         chest_id = False
-        if player.interacting:
-            collided=Collisions.collided #make the hitbox collide and not rect
-            collision=pygame.sprite.spritecollideany(player,static_enteties,collided)#check collision
-            if collision:
-                collision.interacted = True
-                if type(collision).__name__ == "Door":
-                    try:
-                        map_change = collision.next_map
-                    except:
-                        pass
-                if type(collision).__name__ in ["Chest", "Chest_Big"]:
-                    try:
-                        chest_id = collision.ID
-                    except:
-                        pass
+        collision=pygame.sprite.spritecollideany(player,static_entities,Collisions.collided)#check collision
+        if collision:
+            collision.interacted = True
+            if type(collision).__name__ == "Door":
+                print('before try')
+                try:
+                    map_change = collision.next_map
+                except:
+                    pass
+            if type(collision).__name__ in ["Chest", "Chest_Big"]:
+                try:
+                    chest_id = collision.ID
+                except:
+                    pass
 
         return map_change, chest_id
 
     @staticmethod
     def check_trigger(player,triggers):
         map_change = False
-        collided = Collisions.collided
-        collision = pygame.sprite.spritecollideany(player,triggers,collided)
+        collision = pygame.sprite.spritecollideany(player,triggers,Collisions.collided)
         if collision:
             if type(collision).__name__ in ["Path_Col_h","Path_Col_v"]:
                 try:
@@ -123,139 +124,83 @@ class Collisions():
         return map_change
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
-    #collisions between enteties-groups: a dynamic and a static one
+    #collisions between entities-groups: a dynamic and a static one
     @staticmethod
-    def collide(dynamic_entities,static_enteties):
+    def collide(dynamic_Entities,static_entities,ramps):
 
-        #move in x every dynamic sprite
-        for entity in dynamic_entities.sprites():
-            entity.rect.center = [round(entity.rect.center[0] + entity.movement[0]), entity.rect.center[1]]
-            entity.update_hitbox()
+
+        for entity in dynamic_Entities.sprites():
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
-        collided=Collisions.collided#make the hitbox collide and not rect
-        #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_entities,static_enteties,False,False,collided)
-        for dyn_entity, stat_entity in collisions.items():
-            if dyn_entity.movement[0]>0:#going to the right
-                dyn_entity.hitbox.right = stat_entity[0].hitbox.left
-                dyn_entity.collision_types['right'] = True
+            #move in x every dynamic sprite
+            entity.rect.center = [round(entity.rect.center[0] + entity.velocity[0]), entity.rect.center[1]]
+            entity.update_hitbox()
 
-            elif dyn_entity.movement[0]<0:#going to the left
-                dyn_entity.hitbox.left = stat_entity[0].hitbox.right
-                dyn_entity.collision_types['left'] = True
+            static_entity_x = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
 
-            dyn_entity.update_rect()
+            if static_entity_x:
 
-        #move in y every dynamic sprite
-        for entity in dynamic_entities.sprites():
-            entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.movement[1])]
+                #check for collisions and get a dictionary of sprites that collides
+                if entity.velocity[0]>0:#going to the right
+                    entity.hitbox.right = static_entity_x.hitbox.left
+                    entity.collision_types['right'] = True
+
+                elif entity.velocity[0]<0:#going to the left
+                    entity.hitbox.left = static_entity_x.hitbox.right
+                    entity.collision_types['left'] = True
+                entity.update_rect()
+
+            #move in y every dynamic sprite
+            entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
             entity.update_hitbox()#follow with hitbox
 
-        collided=Collisions.collided#make the hitbox collide and not rect
-        #check for collisions and get a dictionary of sprites that collides
-        collisions=pygame.sprite.groupcollide(dynamic_entities,static_enteties,False,False,collided)
-        for dyn_entity, stat_entity in collisions.items():
-            if dyn_entity.movement[1]>0:#going down
-                dyn_entity.hitbox.bottom = stat_entity[0].hitbox.top
-                dyn_entity.collision_types['bottom'] = True
+            ramp = pygame.sprite.spritecollideany(entity,ramps,Collisions.collided)
+            ramp_collision = False
 
-            elif dyn_entity.movement[1]<0:#going up
-                dyn_entity.hitbox.top = stat_entity[0].hitbox.bottom
-                dyn_entity.collision_types['top'] = True
+            if ramp:
+                ramp_offset = 1 #make transitions smoother, maybe implement this differently
+                x_tot = ramp.size[0]
+                y_tot = ramp.size[1]
+                x_1 = entity.hitbox.centerx - ramp.hitbox.left
+                if  (0 < x_1 < x_tot) and entity.velocity[1] > 0:
+                    if ramp.orientation == 0:
+                        y = (x_tot - x_1 + 2)*(y_tot/x_tot)
+                        y = int(ramp.hitbox.bottom - y - ramp_offset)
 
-            dyn_entity.update_rect()
+
+                        if entity.hitbox.bottom <= y:
+                            pass
+                        else:
+                            ramp_collision = True
+                            entity.hitbox.bottom = max(y, ramp.hitbox.top)
+                            entity.collision_types['bottom'] = True
+
+                    elif ramp.orientation == 1:
+                        y = (x_1+4)*(y_tot/x_tot)
+                        y = int(ramp.hitbox.bottom - y)
+
+                        if entity.hitbox.bottom <= y:
+                            pass
+                        else:
+                            ramp_collision = True
+                            entity.hitbox.bottom = max(y, ramp.hitbox.top)
+                            entity.collision_types['bottom'] = True
+                    entity.update_rect()
+
+            if not ramp_collision:
+                static_entity_y = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
+                if static_entity_y:
+
+                    if entity.velocity[1]>0:#going down
+                        entity.hitbox.bottom = static_entity_y.hitbox.top
+                        entity.collision_types['bottom'] = True
+
+                    elif entity.velocity[1]<0:#going up
+                        entity.hitbox.top = static_entity_y.hitbox.bottom
+                        entity.collision_types['top'] = True
+                    entity.update_rect()
 
     #make the hitbox collide instead of rect
     @staticmethod
-    def collided(dynamic_entities,static_enteties):
-        return dynamic_entities.hitbox.colliderect(static_enteties.hitbox)
-#
-
-#obsolete
-class Physics():
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def movement(dynamic_entities):
-        for entity in dynamic_entities.sprites():
-
-            entity.velocity[1]=entity.velocity[1]+entity.acceleration[1]-entity.velocity[1]*entity.friction[1]#gravity
-            entity.velocity[1]=min(entity.velocity[1],7)#set a y max speed
-
-            if entity.action['dash']:
-                entity.dashing_cooldown-=1
-                entity.velocity[1]=0
-                entity.velocity[0]=entity.velocity[0]+entity.ac_dir[0]*0.5
-
-                if abs(entity.velocity[0])<10:#max horizontal speed
-                    entity.velocity[0]=entity.ac_dir[0]*10
-                #entity.velocity[0]=max(10,entity.velocity[0])
-            try:
-                if entity.action['run'] and not entity.charging[0]:#accelerate horizontal to direction when not dashing
-                    entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
-                    entity.friction[0]=0.2
-                    if abs(entity.velocity[0])>10:#max horizontal speed
-                        entity.velocity[0]=entity.dir[0]*10
-            except:
-                if entity.action['run']:#accelerate horizontal to direction when not dashing
-                    entity.velocity[0]+=entity.dir[0]*entity.acceleration[0]
-                    entity.friction[0]=0.2
-                    if abs(entity.velocity[0])>entity.max_vel:#max horizontal speed
-                        entity.velocity[0]=entity.dir[0]*entity.max_vel
-
-            entity.movement[1]=entity.velocity[1]#set the vertical velocity
-
-            entity.velocity[0]=entity.velocity[0]-entity.friction[0]*entity.velocity[0]#friction
-            entity.movement[0]=entity.velocity[0]#set the horizontal velocity
-
-#obsolete
-class Animation():
-    def __init__(self):
-        #super().__init__()
-        pass
-
-
-    ### FIX frame rate thingy
-    @staticmethod
-    def set_img(enteties):
-
-        for entity in enteties.sprites():#go through the group
-            all_action=entity.priority_action+entity.nonpriority_action
-
-
-            for action in all_action:#go through the actions
-                if entity.action[action] and action in entity.priority_action:#if the action is priority
-
-                    if action != entity.state:
-                        entity.state = action
-                        entity.reset_timer()
-
-                    entity.image = entity.sprites.get_image(action,entity.frame//5,entity.ac_dir)
-                    entity.frame += 1
-
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.ac_dir)*5:
-                        if action == 'death':
-                            entity.kill()
-                        else:
-                            entity.reset_timer()
-                            entity.action[action] = False
-                            entity.state = 'stand'
-                            entity.action[entity.equip]=False#to cancel even if you get hurt
-
-                    break
-
-                elif entity.action[action] and action in entity.nonpriority_action:#if the action is nonpriority
-
-                    #reset timer if the action is wrong
-                    if action != entity.state:
-                        entity.state = action
-                        entity.reset_timer()
-
-                    entity.image = entity.sprites.get_image(action,entity.frame//5,entity.dir)
-                    entity.frame += 1
-
-                    if entity.frame == entity.sprites.get_frame_number(action,entity.dir)*5:
-                            entity.reset_timer()
-                    break#take only the higest priority of the nonpriority list
+    def collided(dynamic_Entities,static_entities):
+        return dynamic_Entities.hitbox.colliderect(static_entities.hitbox)

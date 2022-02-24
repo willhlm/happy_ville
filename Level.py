@@ -1,10 +1,11 @@
 import pygame, csv, Entities, math, random, json
 
 class Tilemap():
-    def __init__(self, level, player_pos):
-        self.player_center = player_pos
+    def __init__(self, level, player_center, screen_size):
+        self.player_center = player_center
+        self.SCREEN_SIZE = screen_size
         self.tile_size=16
-        self.chunk_size=11
+        self.chunk_size=10
         self.total_distance=[0,0]
         self.level_name = level
         self.chunks=self.define_chunks("collision")#placeholder to store the chunks containing collision information
@@ -14,7 +15,7 @@ class Tilemap():
         self.platforms_pause=pygame.sprite.Group()
         self.invisible_blocks = pygame.sprite.Group()
         self.init_player_pos = (0,0)
-        self.cameras=[Auto(),Auto_CapX(),Auto_CapY(),Fixed()]
+        self.cameras=[Auto(self.player_center),Auto_CapX(self.player_center),Auto_CapY(self.player_center),Fixed()]
         self.camera = self.cameras[0]
 
     def set_camera(self, camera_number):
@@ -92,8 +93,8 @@ class Tilemap():
     def load_bg_music(self):
         return pygame.mixer.Sound("Audio/" + self.level_name + "/default.wav")
 
-    def load_statics(self, map_state):
-    #load entities that shouldn't despawn with chunks, npc, enemies, interactables etc
+    def load_statics(self, map_state,eprojectile,loot):
+    #load Entities that shouldn't despawn with chunks, npc, enemies, interactables etc
         map_statics = self.read_csv("Tiled/" + self.level_name + "_statics.csv")
 
         pathways = map_state["pathways"]
@@ -101,7 +102,7 @@ class Tilemap():
 
         npcs = pygame.sprite.Group()
         interactables = pygame.sprite.Group()
-        enemies = pygame.sprite.Group()
+        enemies = Entities.ExtendedGroup()#pygame.sprite.Group()
         camera_blocks = pygame.sprite.Group()
         triggers = pygame.sprite.Group()
 
@@ -143,12 +144,17 @@ class Tilemap():
                     new_npc = Entities.Aslat((col_index * self.tile_size, row_index * self.tile_size))
                     npcs.add(new_npc)
                 elif tile == '25':
-                    new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size))
+                    new_enemy = Entities.Woopie((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
+                    enemies.add(new_enemy)
+                elif tile == '26':
+                    new_enemy = Entities.Larv((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
+                    enemies.add(new_enemy)
+                elif tile == '27':
+                    new_enemy = Entities.Vatt((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
                     enemies.add(new_enemy)
                 elif tile == '24':
-                    pass
-                    #new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size))
-                    #enemies.add(new_enemy)
+                    new_enemy = Entities.Flowy((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
+                    enemies.add(new_enemy)
                 elif tile == '33':
                     new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'right')
                     camera_blocks.add(new_stop)
@@ -161,6 +167,9 @@ class Tilemap():
                 elif tile == '36':
                     new_stop = Entities.Camera_Stop((col_index * self.tile_size, row_index * self.tile_size),'bottom')
                     camera_blocks.add(new_stop)
+                elif tile == '40':
+                    new_enemy = Entities.Reindeer((col_index * self.tile_size, row_index * self.tile_size),eprojectile,loot)
+                    enemies.add(new_enemy)
                 col_index += 1
             row_index += 1
             col_index = 0 #reset column
@@ -169,8 +178,8 @@ class Tilemap():
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex','bg_fixed_deco','bg_far_deco','bg_mid_deco','bg_near_deco','fg_fixed_deco','fg_paralex_deco']
-        deco_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_paralex']
+        bg_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_parallax','bg_fixed_deco','bg_far_deco','bg_mid_deco','bg_near_deco','fg_fixed_deco','fg_parallax_deco']
+        deco_list = ['bg_fixed','bg_far','bg_mid','bg_near','fg_fixed','fg_parallax']
         top_left = {}
         bg_flags = {}
         for bg in bg_list:
@@ -192,7 +201,7 @@ class Tilemap():
         bg_sheets = {}
         bg_maps = {}
 
-        #try loading all paralex backgrounds
+        #try loading all parallax backgrounds
         for bg in bg_list:
             try:
                 bg_sheets[bg] = self.read_spritesheet("Sprites/level_sheets/" + self.level_name + "/%s.png" % bg)
@@ -225,21 +234,19 @@ class Tilemap():
         backgrounds = []
         for i, bg in enumerate(bg_list):
             if bg == 'bg_fixed':
-                backgrounds.append(Entities.BG_Block(blit_surfaces[bg],(0,0)))
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
             elif bg == 'bg_far':
-                backgrounds.append(Entities.BG_far(blit_surfaces[bg],(-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_Block((-int(0.97*new_map_diff[0]),-int(0.97*new_map_diff[1])),blit_surfaces[bg],0.03))#pos,img,parallax
             elif bg == 'bg_mid':
-                backgrounds.append(Entities.BG_mid(blit_surfaces[bg],(-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_Block((-int(0.5*new_map_diff[0]),-int(0.5*new_map_diff[1])),blit_surfaces[bg],0.5))#pos,img,parallax
             elif bg == 'bg_near':
-                backgrounds.append(Entities.BG_near(blit_surfaces[bg],(-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1]))))
+                backgrounds.append(Entities.BG_Block((-int(0.25*new_map_diff[0]),-int(0.25*new_map_diff[1])),blit_surfaces[bg],0.75))#pos,img,parallax
             elif bg == 'fg_fixed':
-                backgrounds.append(Entities.FG_fixed(blit_surfaces[bg],(0,0)))
-            elif bg == 'fg_paralex':
-                backgrounds.append(Entities.FG_paralex(blit_surfaces[bg],(int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1]))))
-
+                backgrounds.append(Entities.BG_Block((0,0),blit_surfaces[bg]))#pos,img,parallax
+            elif bg == 'fg_parallax':
+                backgrounds.append(Entities.BG_Block((int(0.25*new_map_diff[0]),int(0.25*new_map_diff[1])),blit_surfaces[bg],1.25))#pos,img,parallax
         del blit_surfaces, bg_sheets, bg_maps
         return backgrounds
-
     def load_map(self):#load the whole map
         chunk_distances=self.chunk_distance()
 
@@ -328,9 +335,10 @@ class Sprite_sheet():
 #scrolling
 
 class Camera():
-    def __init__(self):
+    def __init__(self, center = (240,180)):
         self.scroll=[0,0]
         self.true_scroll=[0,0]
+        self.center = center
 
     def update_scroll(self,shake):
         if shake>0:#inprinciple we do not need this if
@@ -343,28 +351,28 @@ class Camera():
         self.scroll[1]=int(self.scroll[1])+screen_shake[1]
 
 class Auto(Camera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, center):
+        super().__init__(center)
 
     def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-216)/15
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-self.center[0])/15
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-self.center[1])
         self.update_scroll(shake)
 
 class Auto_CapX(Camera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, center):
+        super().__init__(center)
 
     def scrolling(self,knight,shake):
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-self.center[1])
         self.update_scroll(shake)
 
 class Auto_CapY(Camera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, center):
+        super().__init__(center)
 
     def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-216)/15
+        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-self.center[0])/15
         self.update_scroll(shake)
 
 class Fixed(Camera):

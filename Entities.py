@@ -1,554 +1,443 @@
-import pygame, Read_files, random, sys
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss
 
-class Entity(pygame.sprite.Sprite):
-
+class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
         super().__init__()
-        self.acceleration=[1,0.8]
-        self.movement=[0,0]
-        self.velocity=[0,0]
-        self.frame = 0
-        self.dir=[1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.ac_dir=self.dir.copy()
-        self.state = 'stand'
-        self.world_state=0#state of happyness thingy of the world
-        self.inventory={'Amber_Droplet':0}
+
+    def draw(self, surface):
+        sprites = self.sprites()
+        surface_blit = surface.blit
+        for spr in sprites:
+            self.spritedict[spr] = surface_blit(spr.image, spr.rect)
+            ExtendedGroup.add_colour(20,(20,20,20),surface,spr.hitbox)#addded this
+        self.lostsprites = []
+
+    @staticmethod
+    def add_colour(radius,colour,screen,rect):
+        surf=pygame.Surface((2*radius,2*radius))
+        pygame.draw.circle(surf,colour,(radius,radius),radius)
+        surf.set_colorkey((0,0,0))
+        screen.blit(surf,(rect.x,rect.y),special_flags=pygame.BLEND_RGB_ADD)
+
+class Platform(pygame.sprite.Sprite):#has hitbox
+    def __init__(self,pos,size = (16,16)):
+        super().__init__()
+        self.rect = pygame.Rect(pos,size)
+        self.rect.bottomleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.spike=False
+        self.is_slope=False
+
+    def update(self,pos):
+        self.update_pos(pos)
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+class Invisible_block(Platform):
+    def __init__(self,pos,chunk_key=False):
+        super().__init__(pos,chunk_key=False)
+
+class Collision_block(Platform):
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
+
+class Collision_right_angle(Collision_block):
+    def __init__(self,pos,points):
+        self.define_values(pos, points)
+        super().__init__(self.new_pos,self.size)
+        self.is_slope=True
+
+    #function calculates size, real bottomleft position and orientation of right angle triangle
+    #the value in orientatiion represents the following:
+    #0 = tilting to the right, flatside down
+    #1 = tilting to the left, flatside down
+    #2 = tilting to the right, flatside up
+    #3 = tilting to the left, flatside up
+    def define_values(self, pos, points):
+        self.new_pos = (0,0)
+        self.size = (0,0)
+        self.orientation = 0
+        x_0_count = 0
+        y_0_count = 0
+        x_extreme = 0
+        y_extreme = 0
+
+        for point in points:
+            if point[0] == 0:
+                x_0_count += 1
+            else:
+                x_extreme = point[0]
+            if point[1] == 0:
+                y_0_count += 1
+            else:
+                y_extreme = point[1]
+
+        self.size = (abs(x_extreme), abs(y_extreme))
+
+        if x_extreme < 0:
+            if y_extreme < 0:
+                self.new_pos = (pos[0] + x_extreme, pos[1])
+                if x_0_count == 1:
+                    self.orientation = 0
+                elif y_0_count == 1:
+                    self.orientation = 3
+                else:
+                    self.orientation = 1
+
+            else:
+                self.new_pos = (pos[0] + x_extreme, pos[1] + y_extreme)
+                if x_0_count == 1:
+                    self.orientation = 2
+                elif y_0_count == 1:
+                    self.orientation = 1
+                else:
+                    self.orientation = 3
+
+        else:
+            if y_extreme < 0:
+                self.new_pos = pos
+                if x_0_count == 1:
+                    self.orientation = 1
+                elif y_0_count == 1:
+                    self.orientation = 2
+                else:
+                    self.orientation = 0
+
+            else:
+                self.new_pos = (pos[0], pos[1] + y_extreme)
+                if x_0_count == 1:
+                    self.orientation = 3
+                elif y_0_count == 1:
+                    self.orientation = 0
+                else:
+                    self.orientation = 2
+
+
+class Spikes(Platform):
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
+        self.image=pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha()
+        self.spike=True
+
+class Staticentity(pygame.sprite.Sprite):#no hitbox but image
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__()
+        self.image = img
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+
+    def update(self,pos):
+        self.update_pos(pos)
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+
+class BG_Block(Staticentity):
+    def __init__(self,pos,img,parallax=1):
+        super().__init__(pos,img)
+        self.true_pos = self.rect.topleft
+        self.parallax=parallax
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + self.parallax*pos[0], self.rect.topleft[1] + self.parallax*pos[1]]
+        self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
+        self.rect.topleft = self.true_pos
+
+class BG_Animated(BG_Block):
+    def __init__(self,pos,sprite_folder_path,parallax=1):
+        super().__init__(pos,pygame.Surface((16,16)),parallax)
+        self.timer = 0
+        self.frame_index = 0
+        self.sprites = Read_files.load_sprites(sprite_folder_path)
+        self.image = self.sprites[0]
+
+    def update(self, pos):
+        self.update_pos(pos)
+        self.update_sprite()
+
+    def update_sprite(self):
+        if self.timer == 4:
+            self.timer = 0
+            self.frame_index += 1
+            if self.frame_index == len(self.sprites):
+                self.frame_index = 0
+            self.image = self.sprites[self.frame_index]
+        else:
+            self.timer += 1
+
+
+class Dynamicentity(Staticentity):
+    def __init__(self,pos):
+        super().__init__(pos)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
-        self.phase='pre'
-        self.max_vel = 10
-        self.charging=[False]#a list beause to make it a pointer
-        self.hitbox_offset=(0,0)
-        self.framerate=4
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.bottom=self.rect.bottom
+
+    def update_hitbox(self):
+        self.hitbox.midbottom = self.rect.midbottom#[self.rect.bottom + self.hitbox_offset[0], self.rect.bottom + self.hitbox_offset[1]]
+
+    def update_rect(self):
+        self.rect.midbottom = self.hitbox.midbottom#[self.hitbox.bottom - self.hitbox_offset[0], self.hitbox.bottom - self.hitbox_offset[1]]
+
+class Character(Dynamicentity):#enemy, NPC,player
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
+        self.acceleration=[1,0.8]
+        self.velocity=[0,0]
+        self.friction=[0.2,0]
+        self.animation_stack=[animation.Entity_animation(self)]#maybe it is better to assign animation class based on the speific entity, since some doesn't have pre,main,post
+        self.max_vel=7
+
+    def update(self,pos):
+        self.update_pos(pos)
+        self.currentstate.update()
+        self.animation_stack[-1].update()
+        self.check_collisions()
 
     def take_dmg(self,dmg):
         if dmg>0:
             self.health-=dmg
-            self.action['hurt']=True
-            if self.health<=0:#check if dead
-                self.action['death']=True
-                self.action['run']=False
-                self.velocity=[0,0]
+            if self.health>0:#check if dead¨
+                self.hurt_animation()#become white
+                self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            else:
+                self.currentstate.change_state('Death')#overrite any state and go to death
 
-    def set_img(self):#action is set to true- > pre animation. When finished, main animation and set action to false -> do post animatino
-        all_action=self.priority_action+self.nonpriority_action
-
-        for action in all_action:#go through the actions
-            if self.action[action] and action in self.priority_action:#if the action is priority
-
-                if action != self.state:
-                    self.state = action
-                    self.reset_timer()
-
-                self.image = self.sprites.get_image(action,self.frame//self.framerate,self.ac_dir)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(action,self.ac_dir)*self.framerate:
-                    if action == 'death':
-                        self.kill()
-                    else:
-                        self.reset_timer()
-                        self.action[action] = False
-                        self.state = 'stand'
-                        self.action[self.equip]=False#to cancel even if you get hurt
-                break
-
-            elif self.action[action] and action in self.nonpriority_action:#if the action is nonpriority
-
-                #reset timer if the action is wrong
-                if action != self.state:
-                    self.state = action
-                    self.reset_timer()
-
-                self.image = self.sprites.get_image(action,self.frame//self.framerate,self.dir)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(action,self.dir)*self.framerate:
-                        self.reset_timer()
-                break#take only the higest priority of the nonpriority list
-
-    def AI(self,knight):
-        pass
-
-    def attack_action(self,projectiles):
-        return projectiles
+    def hurt_animation(self):
+        if str(type(self.animation_stack[-1]).__name__) != 'Hurt_animation':#making sure to not append more than one hurt animation at time
+            new_animation=animation.Hurt_animation(self)
+            new_animation.enter_state()
 
     def check_collisions(self):
-        self.friction[1]=0
-
-        if self.collision_types['bottom']:#if on ground
-            self.dashing_cooldown=10
-            self.action['fall']=False
-            self.action['stand']=True
-            self.action['wall']=False
-            #self.action['jump']=False
-
-            #if self.dir[1]<0:#if on ground, cancel sword swing
-            #    self.action['sword']=False
-
-        else:#if not on ground
-            #self.action['stand']=False
-            if self.velocity[1]>=0:#if falling down
-                self.action['jump']=False
-                self.action['fall']=True
-                if self.collision_types['right'] or self.collision_types['left']:#on wall and not on ground
-                    self.action['wall']=True
-                    self.action['dash']=False
-                    self.action['fall']=False
-                    self.friction[1]=0.4
-                    self.dashing_cooldown=10
-                else:
-                    self.action['wall']=False
-            else:#if going up
-                self.action['jump']=True
-
         if self.collision_types['top']:#knock back when hit head
             self.velocity[1]=0
+        #elif self.collision_spikes['bottom']:
+        #    self.velocity[1]=-6#knock back
+        #    self.take_dmg(10)
+        #elif self.collision_spikes['right']:
+        #    self.velocity[0]=-6#knock back
+        #    self.take_dmg(10)
+        #elif self.collision_spikes['left']:
+        #    self.velocity[0]=6#knock back
+        #    self.take_dmg(10)
+        #elif self.collision_spikes['top']:
+        #    self.velocity[1]=6#knock back
+        #    self.take_dmg(10)
 
-        if self.collision_spikes['bottom']:
-            self.velocity[1]=-6#knock back
-            self.take_dmg(10)
+    def set_pos(self, pos):
+        self.rect.center = (pos[0],pos[1])
+        self.hitbox.midbottom = self.rect.midbottom
 
-    def physics_movement(self):
-        self.velocity[1]=self.velocity[1]+self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
-        self.velocity[1]=min(self.velocity[1],7)#set a y max speed
+class Enemy(Character):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos)
+        self.projectiles = projectile_group
+        self.loot_group = loot_group
+        self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
+        self.currentstate = states_enemy.Idle(self)
+        self.counter=0
+        self.AImethod=self.peaceAI
+        self.player_distance=[0,0]
+        self.aggro=True
+        self.max_vel=3
+        self.friction=[0.5,0]
 
-        if self.action['dash']:
-            self.dashing_cooldown-=1
-            self.velocity[1]=0
-            self.velocity[0]=self.velocity[0]+self.ac_dir[0]*0.5
-
-            if abs(self.velocity[0])<10:#max horizontal speed
-                self.velocity[0]=self.ac_dir[0]*10
-            #entity.velocity[0]=max(10,entity.velocity[0])
-
-        if self.action['run'] and not self.charging[0]:#accelerate horizontal to direction when not dashing
-            self.velocity[0]+=self.dir[0]*self.acceleration[0]
-            self.friction[0]=0.2
-            if abs(self.velocity[0])>self.max_vel:#max horizontal speed
-                self.velocity[0]=self.dir[0]*self.max_vel
-
-        self.movement[1]=self.velocity[1]#set the vertical velocity
-
-        self.velocity[0]=self.velocity[0]-self.friction[0]*self.velocity[0]#friction
-        self.movement[0]=self.velocity[0]#set the horizontal velocity
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
-
-        self.check_collisions()
-        self.physics_movement()
-
-    def update_action(self, new_action):
-        if not self.action[new_action]:
-            self.action[new_action] = True
-            self.timer = 0
-
-    def update_hitbox(self):
-        self.hitbox.center = self.rect.center
-
-    def update_rect(self):
-        self.rect.center = self.hitbox.center
-
-    def reset_timer(self):
-        self.frame = 0
-        self.ac_dir[0]=self.dir[0]
-        self.ac_dir[1]=self.dir[1]
+    def update(self,pos,playerpos):
+        super().update(pos)
+        self.AI(playerpos)
 
     def loots(self):
-        drops=[]
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj=getattr(sys.modules[__name__], key)#make a class based on the name of the key: need to import sys
-                drops.append(obj(self.hitbox))
+                obj=getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y])#make a class based on the name of the key: need to import sys
+                self.loot_group.add(obj)
             self.inventory[key]=0
-        return drops
 
-class Player(Entity):
-    def __init__(self,pos):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/aila/main/stand/aila_idle_2.png").convert()
+    def countered(self):
+        self.velocity[0]=-30*self.dir[0]
+        duration=30
+        self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
+
+    def knock_back(self,dir):
+        self.velocity[0]=dir*30
+
+    def AI(self,playerpos):
+        self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[1]-self.rect.centerx]#check plater distance
+        self.updateAI()#decide aggro or peace
+        self.counter += 1
+        self.AImethod()#run ether aggro- or peace-AI
+
+    def updateAI(self):#move these into AI methods
+        if abs(self.player_distance[0])<200 and self.AImethod.__name__ != 'aggroAI':
+            self.AImethod=self.aggroAI
+        elif abs(self.player_distance[0])>200 and self.AImethod.__name__ != 'peaceAI':
+            self.AImethod=self.peaceAI
+
+    def peaceAI(self):
+        if self.counter>100:
+            self.counter=0
+            rand=random.randint(0,1)
+            if rand==0:
+                self.currentstate.handle_input('Idle')
+            else:
+                self.currentstate.handle_input('Walk')
+
+    def aggroAI(self):
+        if self.counter < 40:
+            pass
+        else:
+            if self.player_distance[0] > self.attack_distance:
+                self.dir[0] = 1
+                self.acceleration[0]=1
+                self.currentstate.handle_input('Run')
+            elif abs(self.player_distance[0])<self.attack_distance:
+                self.currentstate.handle_input('Attack')
+                self.counter = 0
+            elif self.player_distance[0] < -self.attack_distance:
+                self.dir[0] = -1
+                self.acceleration[0]=-1
+                self.currentstate.handle_input('Run')
+            else:
+                self.counter = 0
+                self.currentstate.handle_input('Idle')
+
+class Woopie(Enemy):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/main/Idle/Kodama_stand1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 1
+        self.spirit=100
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.shake=10
+        self.attack_distance=0
+class Vatt(Enemy):
+
+    aggro = False  #remember to turn false when changing maps
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/enemies/vatt/main/idle/idle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 30
+        self.spirit=30
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.currentstate = states_vatt.Idle(self)
+        self.attack_distance = 60
+        self.aggro=False
+
+    def updateAI(self):
+        if Vatt.aggro and not self.aggro:
+            self.currentstate.change_state('Transform')#also sets to aggro AI
+            self.aggro = True
+            #self.AImethod=self.aggroAI
+
+    def aggroAI(self):
+        if self.counter < 40:
+            pass
+        else:
+            if self.player_distance[0] > self.attack_distance:
+                self.dir[0] = 1
+                self.currentstate.handle_input('Run')
+            elif self.player_distance[0] < -self.attack_distance:
+                self.dir[0] = -1
+                self.currentstate.handle_input('Run')
+            else:
+                self.counter = 0
+                self.currentstate.handle_input('Javelin')
+
+class Flowy(Enemy):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/main/Idle/Stand1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 10
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/flowy/')
+        self.spirit=10
+
+class Larv(Enemy):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/enemies/larv/main/Idle/catapillar_idle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
+        self.health = 10
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
+        self.spirit=10
+        self.attack=Poisonblobb
+        self.attack_distance=60
+
+class Player(Character):
+    def __init__(self,pos,projectile_group,cosmetics_group):
+        super().__init__(pos)
+        self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/',True)
-        self.health = 100
+        self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/')
         self.max_health = 250
-        self.spirit = 100
         self.max_spirit = 100
-        self.priority_action=['death','hurt','dash','sword','sword1','hammer','stone','force','heal','shield']#animation
-        self.nonpriority_action=['jump','wall','fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'hammer':False,'sword1':False,'sword':False,'jump':False,'death':False,'hurt':False,'stone':False,'dash':False,'wall':False,'fall':False,'inv':False,'talk':False,'force':False,'heal':False,'shield':False}
-        self.state = 'stand'
-        self.equip='hammer'#starting abillity
-        self.sword=Sword(self.dir,self.hitbox)
-        self.hammer=Sword(self.dir,self.hitbox)
-        self.shield=Shield(self.ac_dir,self.hitbox)
-        self.force=Force(self.ac_dir,self.hitbox)
+        self.health = 100
+        self.spirit = 100
+
+        self.cosmetics = cosmetics_group
+
+        self.projectiles = projectile_group#pygame.sprite.Group()
+        self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#'Shield':Shield#the objects are referensed but made in states
+        self.equip='Hammer'#ability pointer
+        self.sword=Sword(self)
+        self.shield=Shield
+
         self.action_sfx_player = pygame.mixer.Channel(1)
         self.action_sfx_player.set_volume(0.1)
         self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
         self.movement_sfx_timer = 110
-        self.hitbox_offset = (0,13)
-        self.interacting = False
-        self.friction=[0.2,0]
-        self.inventory={'Amber_Droplet':10,'Arrow':2}#the keys need to have the same name as their respective classes
-        self.action_cooldown=False
-        self.shake=0
-        self.dashing_cooldown=10
-        self.abilities=['hammer','stone','force','heal','shield']#a list of abillities the player can do (should be updated as the game evolves)
 
-        self.timer=30#second sword swing
-        #frame rates per action
-        self.framerate={'wall':4,'hammer':2,'death':2,'hurt':2,'dash':2,'sword1':4,'sword':4,'stone':6,'force':6,'heal':4,'shield':2,'fall':5,'stand':4,'run':5,'jump':5}
+        self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
+        self.currentstate = states_player.Idle(self)
+        self.omamoris=Omamoris(self)
 
-    def load_sfx(self):
+    def load_sfx(self):#make a sound class
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
             self.action_sfx_player.play(self.action_sfx['run'])
             self.movement_sfx_timer = 0
         self.movement_sfx_timer += 1
 
-    def combined_action(self,action):
-        actions=['sword','jump','fall']#the animations in which should change if runnig or standing
-        if action in actions:
-            if self.action['run']:
-                action=action+'_run'
-            elif self.action['stand']:
-                action=action+'_stand'
-        return action
-
-    def set_img(self):
-        all_action=self.priority_action+self.nonpriority_action
-
-        for action in all_action:#go through the actions
-            if self.action[action]:
-
-                if action != self.state and self.phase!='post':#changing action
-                    self.state = action
-                    self.reset_timer()#reset frame and remember the direction
-                    self.phase = 'pre'
-                    self.comb_action=self.combined_action(action)
-
-                if action in self.nonpriority_action:
-                    dir=self.dir
-                else:#if priority action
-                    dir=self.ac_dir
-
-                if self.sprites.get_frame_number(self.comb_action,dir,'pre') == 0:#if there is no pre animation
-                    self.phase='main'
-
-                self.image = self.sprites.get_image(self.comb_action,self.frame//self.framerate[action],dir,self.phase)
-                self.frame += 1
-
-                if self.frame == self.sprites.get_frame_number(self.comb_action,dir,self.phase)*self.framerate[action]:
-                    self.frame=0
-
-                    if action == 'death':
-                        self.kill()
-
-                    if self.phase=='pre' or self.phase=='charge':
-                        if self.charging[0] and action in self.abilities:#do not set chagre while standing/running
-
-                            if action=='heal' and self.phase=='charge':#special for heal. After charge is finished, enter main phase
-                                self.phase='main'
-                            else:
-                                self.phase='charge'
-                        else:
-                            self.phase = 'main'
-                    elif self.phase == 'main':
-                        if self.sprites.get_frame_number(self.comb_action,dir,'post') == 0:#if there is no post animation
-                            if action in self.priority_action:
-                                self.phase = 'pre'
-                                self.action_cooldown = False#allow for new action after animation
-                                self.action[action] = False
-                                self.action[self.equip] = False#cancel abillity in case hurt
-
-                        else:#if there is post animation
-                            self.phase = 'post'
-
-                    else:#if post animation
-                        self.phase = 'pre'
-                        self.action_cooldown = False#allow for new action after post animation
-                        self.action[action] = False
-                break
-
-    def set_pos(self, pos):
-        self.rect.center = (pos[0],pos[1])
-        self.hitbox.center = self.rect.center
-
-    def healing(self):
-        if self.spirit>=1:
-            self.health+=20
-            self.spirit-=20
-
-    def take_dmg(self,dmg):
-        if self.shield.health<=0 or self.shield.lifetime<0:
-            super().take_dmg(dmg)
-
-    def spawn_sword(self):
-        self.sword.dir=self.ac_dir
-        self.sword.lifetime=3
-        self.sword.spawn(self.hitbox)
-
-    def spawn_hammer(self):
-        self.hammer.dir=self.ac_dir
-        self.hammer.lifetime=7
-        self.hammer.spawn(self.hitbox)
-        self.spirit -= 10
-        self.hammer.state='pre'
-
-    def spawn_shield(self):
-        self.shield.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],self.hitbox.width+5,self.hitbox.height)
-        self.shield.lifetime=200
-        self.shield.health=100
-        self.state='pre'
-        self.spirit -= 10
-
-    def spawn_force(self):
-        self.force.lifetime=20
-        self.force.dir=self.ac_dir
-
-        if self.force.dir[1]!=0:#shooting up or down
-            self.force.velocity=[0,-self.force.dir[1]*10]
-        else:#horizontal
-            self.force.velocity=[self.force.dir[0]*10,0]
-
-        self.force.state='pre'
-        self.force.hitbox=pygame.Rect(self.hitbox[0],self.hitbox[1],30,30)
-        self.force.rect.center=self.force.hitbox.center#match the positions of hitboxes
-        self.spirit -= 10
-        self.force_jump()
-
-    #def quick_attack(self,projectiles):
-    #    if not self.action_cooldown:
-    #        self.action['sword']=True
-    #        self.action_cooldown=True#cooldown flag
-    #        self.spawn_sword()
-            #self.sword=Sword(self.ac_dir,self.hitbox)
-    #        return self.sword
-    #    return projectiles
-
-    def attack_action(self,projectiles):
-        #always eneters in every iteration
-        self.timer+=1
-        if not self.action_cooldown:
-
-            if self.action['sword'] or self.action['sword1']:
-                if self.phase == 'main':#produce the object in the main animation
-                    self.spawn_sword()
-                    projectiles.add(self.sword)
-                    self.action_cooldown=True#cooldown flag
-
-            elif self.action[self.equip]:
-                if self.phase == 'pre':
-                    if self.equip=='stone' and self.spirit >= 10:#creates the objct in pre phase
-
-                        projectiles.add(Stone(self.ac_dir,self.hitbox,self.charging))
-                        self.spirit -= 10
-                        self.action_cooldown=True#cooldown flag
-
-                elif self.phase == 'main':#produce the object in the main animation
-                    if self.equip=='hammer':
-                        self.spawn_hammer()
-                        projectiles.add(self.hammer)
-                        #projectiles.add(Sword(self.ac_dir,self.hitbox))
-                    elif self.equip == 'force' and self.spirit >= 10:
-                        self.spawn_force()
-                        projectiles.add(self.force)
-                        #projectiles.add(Force(self.ac_dir,self.hitbox))
-
-                    elif self.equip == 'shield' and self.spirit >= 10 and self.shield.lifetime<0:
-                        #self.shield=Shield(self.ac_dir,self.hitbox)
-                        self.spawn_shield()
-                        projectiles.add(self.shield)
-                    elif self.equip=='heal':
-                        self.healing()
-                    self.action_cooldown=True#cooldown flag
-
-        return projectiles
-
-    def force_jump(self):
-        #if self.dir[1]!=0:
-        self.velocity[1]=self.dir[1]*10#force jump
-
-    def dashing(self):
-        if self.spirit>=10 and not self.charging[0]:#if we have spirit
-            self.velocity[0] = 30*self.dir[0]
-            self.action['dash'] = True
-            self.spirit -= 10
-            self.action[self.equip]=False#cancel any action
-            self.action['sword']=False#cancel any action
-
-    def jump(self):
-        self.friction[1] = 0
-        self.velocity[1]=-11
-        self.action['jump']=True
-
-        if self.action['wall']:
-            self.velocity[0]=-self.dir[0]*10
-
-    def talk(self):
-        self.action['talk']=not self.action['talk']
-
-    def update(self,pos):
-        super(Player, self).update(pos)
-        #self.update_hitbox()
-        if self.spirit <= self.max_spirit:
-            self.spirit += 0.1
-
-        self.sword.updates(self.hitbox)
-        self.hammer.updates(self.hitbox)
-        self.shield.updates(self.hitbox)
-        self.set_img()
-        self.load_sfx()
-
-    def update_hitbox(self):
-        self.hitbox.center = [self.rect.center[0] + self.hitbox_offset[0], self.rect.center[1] + self.hitbox_offset[1]]
-
-    def update_rect(self):
-        self.rect.center = [self.hitbox.center[0] - self.hitbox_offset[0], self.hitbox.center[1] - self.hitbox_offset[1]]
-
-    def loots(self,loot):
-        pass
-
-class Enemy_1(Player):
-    def __init__(self,pos):
-        super().__init__(pos)
-        self.health=10
-        self.distance=[0,0]
-        self.inv=False#flag to check if collision with invisible blocks
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/evil_knight/')
-        self.shake=self.hitbox.height/10
-
-    def AI(self,player):#the AI
-
-        self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
-        self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
-
-        if abs(self.distance[0])>150 and abs(self.distance[1])>40 or player.action['death'] or self.action['hurt']:#don't do anything if far away, or player dead or while taking dmg
-            self.action['run']=False
-            self.action['stand']=True
-
-        elif abs(self.distance[0]<150) and abs(self.distance[1])<40:
-
-            self.dir[0]=-Enemy_1.sign(self.distance[0])
-            self.action['run']=True
-            self.action['stand']=False
-
-            if abs(self.distance[0])<40:#don't get too close
-                self.action['run']=False
-                self.action['stand']=True
-
-        if abs(self.distance[0])<80 and abs(self.distance[1])<40 and not player.action['death']:#swing sword when close
-            self.action[self.equip] = True
-
-    @staticmethod
-    def sign(x):
-        if x>0: return 1
-        return -1
-
-class Woopie(Entity):
-    def __init__(self,pos):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/stand/Kodama_stand1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 1
-        self.priority_action=['death','pick']#animation
-        self.nonpriority_action=['run','stand']#animation
-        self.action={'stand':True,'run':False,'death':False,'pick':False,'fall':False,'dash':False,'hurt':False}
-        self.equip='sword'
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.friction=[0.2,0]
-        self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
-        self.shake=10
-        self.counter=0
-        self.acceleration=[1,0.2]
-        self.max_vel = 1
-        self.framerate=6
-
-    @staticmethod#a function to add glow around the entity
-    def add_white(radius,colour,screen,pos):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
-
     def update(self,pos):
         super().update(pos)
-        self.set_img()
+        self.omamoris.update()
+        #self.load_sfx()
 
-    def AI(self,player,screen):#the AI
-        #light around the entity
-        Woopie.add_white(20,(20,20,20),screen,self.rect.center)#radius, clolor, screen,position
-        self.counter+=1
+    def equip_omamori(self,omamori_index):
+        new_omamori=self.omamoris.omamori_list[omamori_index]
+        if new_omamori not in self.omamoris.equipped_omamoris:#add the omamori
+            if len(self.omamoris.equipped_omamoris)<3:#maximum number of omamoris to equip
+                self.omamoris.equipped_omamoris.append(new_omamori)
+                new_omamori.attach()
 
-        choice=self.priority_action+self.nonpriority_action
-        choice.remove('death')
+        else:#remove the omamori
+            old_omamori=self.omamoris.omamori_list[omamori_index]#call the detach function of omamori
+            self.omamoris.equipped_omamoris.remove(old_omamori)
+            old_omamori.detach()
 
-        if self.counter>=100:
-            action=random.choice(choice)
-            self.action[action]=True
-            self.counter=0
-
-            if self.action['run']:
-                self.dir[0]=-self.dir[0]
-                self.action['run']=random.choice([False,True])
-
-class Flowy(Entity):
+class NPC(Character):
     def __init__(self,pos):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/stand/Stand1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 10
-        self.priority_action=['death','hurt','sword','stone','trans']#animation
-        self.nonpriority_action=['fall','run','stand']#animation
-        self.action={'stand':True,'run':False,'sword':False,'death':False,'hurt':False,'stone':False,'fall':False,'trans':False,'dash':False}
-        self.equip='sword'
-        self.sprites = Read_files.Sprites_enteties('Sprites/Enteties/enemies/flowy/')
-        self.friction=[0.2,0]
-        self.loot={'Amber_Droplet':2,'Arrow':1}#the keys need to have the same name as their respective classes
-        self.distance=[0,0]
-        self.shake=self.hitbox.height/10
-
-    @staticmethod#a function to add glow around the entity
-    def add_white(radius,colour,screen,pos):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(pos[0]-radius,pos[1]-radius),special_flags=pygame.BLEND_RGB_ADD)
-
-    def AI(self,player,screen):#the AI
-        #light around the entity
-        radius=max(20-abs(self.distance[0])//10,1)
-        Enemy_2.add_white(radius,(20,0,0),screen,self.rect.center)#radius, clolor, screen,position
-
-        self.distance[0]=int((self.rect[0]-player.rect[0]))#follow the player
-        self.distance[1]=int((self.rect[1]-player.rect[1]))#follow the player
-
-        if 100 < abs(self.distance[0])<200 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
-            self.action['trans'] = True
-
-        elif abs(self.distance[0])<100 and abs(self.distance[1])<100 and not player.action['death']:#swing sword when close
-            self.action[self.equip] = True
-#remove dev when working
-class NPC(Entity):
-
-    def __init__(self):
-        super().__init__()
-        self.name = '<always define name>'
-        self.action = {'stand':True,'run':False,'death':False,'hurt':False,'dash':False,'inv':False,'talk':False}
-        self.nonpriority_action = ['run','stand']
-        self.priority_action = ['death','hurt']
+        super().__init__(pos)
+        self.name = str(type(self).__name__)#the name of the class
         self.health = 50
         self.conv_index = 0
-        self.friction=[0.2,0]
-        self.acceleration=[0.3,0.8]
-
+        self.currentstate = states_NPC.Idle(self)
 
     def load_conversation(self):
         self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
@@ -570,53 +459,45 @@ class NPC(Entity):
 
     def update(self, pos):
         super().update(pos)
-        if self.action['talk']:
-            self.action['run'] = False
-        else:
-            self.AI()
-        self.set_img()
+        self.AI()
 
-    def AI(self):
-        pass
+    def idle(self):
+        self.currentstate.handle_input('Idle')
 
-    def stay_still(self):
-        self.acceleration=[0,0]
-        self.action['stand']=True
-
-    def move_again(self):
-        self.acceleration=[1,0.8]
+    def walk(self):
+        self.currentstate.handle_input('Walk')
 
 class Aslat(NPC):
-
     def __init__(self, pos):
-        super().__init__()
-        self.name = 'Aslat'
-        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('stand', 0, self.dir)
+        super().__init__(pos)
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
         self.load_conversation()
-        self.max_vel = 1.5
+        #self.max_vel = 1.5
+        self.counter=0
 
     def AI(self):
-        self.action['run']=True
-        if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
-            self.stay_still()
-        else:
-            self.move_again()
-
-        if self.action['inv']:#collision with invisble block
-            self.velocity[0] = -self.velocity[0]
-            self.dir[0] = -self.dir[0]
-            self.action['inv'] = False
+        self.counter+=1
+        if self.counter>100:
+            self.counter=0
+            rand=random.randint(0,1)
+            if rand==0:
+                self.idle()
+            else:
+                self.walk()
+#        if self.action['inv']:#collision with invisble block
+#            self.velocity[0] = -self.velocity[0]
+#            self.dir[0] = -self.dir[0]
+#            self.action['inv'] = False
 
 class MrBanks(NPC):
-    def __init__(self,pos):
-        super().__init__()
+    def __init__(self,pos,img=pygame.Surface((16,16))):
+        super().__init__(pos,img=pygame.Surface((16,16)))
         self.name = 'MrBanks'
-        self.image = pygame.image.load("Sprites/Enteties/player/run/HeroKnight_run_0.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
@@ -703,6 +584,31 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
+class Boss(Character):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.projectiles = projectile_group
+        self.loot_group = loot_group
+        self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
+        self.currentstate = states_boss.Idle(self)
+
+    def knock_back(self,dir):
+        pass
+
+class Reindeer(Boss):
+    def __init__(self,pos,projectile_group,loot_group):
+        super().__init__(pos,projectile_group,loot_group)
+        self.image = pygame.image.load("Sprites/Enteties/boss/reindeer/main/idle/raindeer_idle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.health = 1000
+        self.spirit=1000
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/reindeer/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+
+    def AI(self,playerpos):
+        pass
+
 class Trigger(pygame.sprite.Sprite):
 
     def __init__(self,pos):
@@ -736,122 +642,6 @@ class Path_Col_h(Trigger):
         self.next_map = destination
         self.image = pygame.Surface((16+(2*ext),16))
         self.image.fill((0,0,0))
-
-class Collision_block(pygame.sprite.Sprite):
-
-    def __init__(self,pos,chunk_key=False):
-        super().__init__()
-        self.rect = pygame.Rect(pos,(16,16))
-        self.chunk_key=chunk_key
-        self.hitbox = self.rect.inflate(0,0)
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
-
-class Block(pygame.sprite.Sprite):
-
-    def __init__(self,img,pos):
-        super().__init__()
-        self.image = img
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-
-class Platform(Block):
-
-    def __init__(self,img,pos,chunk_key=False):
-        super().__init__(img,pos)
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=False
-
-    def update(self,pos):
-        super().update(pos)
-        self.hitbox.center=self.rect.center
-
-class Spikes(Block):
-    def __init__(self,img,pos,chunk_key=False):
-        super().__init__(pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha(),pos)
-        self.hitbox = self.rect.inflate(0,0)
-        self.chunk_key=chunk_key
-        self.spike=True
-
-    def update(self,pos):
-        super().update(pos)
-        self.hitbox.center=self.rect.center
-
-class BG_Block(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-
-class FG_fixed(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-
-class FG_paralex(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=1.25
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.paralex*pos[0], self.rect.topleft[1] + self.paralex*pos[1]]
-
-class BG_near(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.75
-        self.true_pos = self.rect.topleft
-
-    def update(self,pos):
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
-        self.update_pos()
-
-    def update_pos(self):
-        self.rect.topleft = self.true_pos
-
-class BG_mid(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.5
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + int(self.paralex*pos[0]), self.rect.topleft[1] + int(self.paralex*pos[1])]
-
-class BG_far(Block):
-
-    def __init__(self,img,pos):
-        super().__init__(img,pos)
-        self.paralex=0.03
-        self.true_pos = self.rect.topleft
-
-    def update(self,pos):
-        self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + self.paralex*pos[1]]
-        #self.true_pos= [self.true_pos[0] + self.paralex*pos[0], self.true_pos[1] + pos[1]]
-        self.update_pos()
-
-    def update_pos(self):
-        self.rect.topleft = self.true_pos
-
-class Invisible_block(pygame.sprite.Sprite):
-
-    def __init__(self,pos):
-        super().__init__()
-        self.rect=pygame.Rect(pos[0],pos[1],2,2)
-        self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
 
 class Camera_Stop(pygame.sprite.Sprite):
 
@@ -960,154 +750,258 @@ class Chest_Big(Interactable):
                 self.image = self.image_sheet[4]
                 self.interacted = False
 
-class Weapon(pygame.sprite.Sprite):
-    def __init__(self):
+class Abilities(pygame.sprite.Sprite):
+    def __init__(self,entity):
         super().__init__()
-        self.frame=0
-        self.charging=[False]
-        self.action=''
-        self.shake=0
+        self.entity=entity
+        self.state='main'
+        self.animation=animation.Ability_animation(self)
 
-    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
-        #remove the equipment if it has expiered
+    def update(self,pos):
         self.lifetime-=1
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
-        self.hitbox.center = self.rect.center
-
-        self.set_img()
+        self.update_pos(pos)
+        self.animation.update()
         self.destroy()
-
-    def set_img(self):
-        self.image = self.sprites.get_image(self.action,self.frame//4,self.dir,self.state)
-        self.frame += 1
-
-        if self.frame == self.sprites.get_frame_number(self.action,self.dir,self.state)*4:
-            self.reset_timer()
-            if self.state=='pre':
-                if self.charging[0]:
-                    self.state='charge'
-                else:
-                    self.state = 'main'
-            #elif self.state=='charge' and not self.charging[0]:
-            #    self.state='main'
-            elif self.state=='post':
-                self.kill()
-
-    def reset_timer(self):
-        self.frame = 0
 
     def destroy(self):
         if self.lifetime<0:
             self.kill()
 
-class Sword(Weapon):
-    def __init__(self,entity_dir,entity_hitbox):
-        super().__init__()
-        self.lifetime=3#need to be changed depending on the animation of sword of player
-        self.dmg=10
-        self.velocity=[0,0]
-        #self.state='pre'
+    def collision_enemy(self,collision_enemy):
+        self.kill()
 
-        self.image = pygame.image.load("Sprites/Attack/Sword/main/swing1.png").convert_alpha()
+    def collision_plat(self):
+        pass
 
-        self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],entity_hitbox.width+5,entity_hitbox.height)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+class Heal(Abilities):
+    def __init__(self,entity):
+        super().__init__(entity)
 
-        self.dir=entity_dir.copy()
-        self.spawn(entity_hitbox)#spawn hitbox based on entity position and direction
+class Melee(Abilities):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.rectangle()
+        self.dir=entity.dir.copy()
 
-    def updates(self,entity_hitbox):
-        self.lifetime-=1
-        self.spawn(entity_hitbox)
-        self.destroy()#check lifetime
+    def rectangle(self):
+        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
+        self.hitbox = self.rect.copy()
 
-    def spawn(self,entity_hitbox):
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+        self.hitbox.center = self.rect.center
+
+    def update_hitbox(self):#make this a dictionary?
         if self.dir[1] > 0:#up
-            self.hitbox.midbottom=entity_hitbox.midtop
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+            self.dir[0] = 0#no knock back when hit from below or above
         elif self.dir[1] < 0:#down
-            self.hitbox.midtop=entity_hitbox.midbottom
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=entity_hitbox.midright
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=entity_hitbox.midleft
-
-    def update(self,scroll=0):
-        pass
-
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
-        return self.shake
-        #entity.velocity[1]=entity.dir[1]*10#nail jump
-        #collision_ene.velocity[0]=entity.dir[0]*10#enemy knock back
-
-class Shield(Weapon):
-    def __init__(self,entity_dir,entity_hitbox):
-        super().__init__()
-        self.lifetime=1#need to be changed depending on the animation of sword of player
-        self.health=100
-        self.velocity=[0,0]
-        self.state='pre'
-        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Shield/',True)
-        self.dmg=0
-
-        self.image = pygame.image.load("Sprites/Attack/Shield/main/water_Shield1.png").convert_alpha()
-
-        self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],20,20)
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+            self.dir[0] = 0 #no knock back when hit from below or above
+        elif self.dir[0] > 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+        elif self.dir[0] < 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
-        self.dir=entity_dir.copy()
-        self.hitbox.center=entity_hitbox.center#spawn hitbox based on entity position and direction
+    def update(self,pos):
+        super().update(pos)
+        self.update_hitbox()
 
-    def update(self,scroll=0):
-        pass
+    def countered(self):
+        self.entity.countered()
+        self.kill()
 
-    def destroy(self):
-        if self.lifetime<0 or self.health<=0:
-            self.kill()
+class Sword(Melee):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Sword/')
 
-    def updates(self,entity_hitbox):
-        self.lifetime-=1
-        self.hitbox.center=entity_hitbox.center#spawn hitbox based on entity position and direction
-        self.rect.center=self.hitbox.center
-
-        self.set_img()
-        self.destroy()#check lifetime and health
-
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
-        self.health-=10#reduce the health of this object
-        return self.shake
-
-class Stone(Weapon):
-    def __init__(self,entity_dir,entity_rect,charge):
-        super().__init__()
-        self.velocity=[0,0]
-        self.lifetime=100
+    def __init__(self,entity):
+        super().__init__(entity)
         self.dmg=10
-        self.state='pre'
-        self.action='small'
-        self.dir=entity_dir.copy()#direction of the projectile
-        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Stone/',True)
 
-        self.image = pygame.image.load("Sprites/Attack/Stone/pre/small/force_stone1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1]])
-        self.hitbox=pygame.Rect(entity_rect.center[0]-5+self.dir[0]*20,entity_rect.center[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+    def collision_enemy(self,collision_enemy):
+        self.sword_jump()
+        collision_enemy.knock_back(self.dir[0])
+        slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
+        self.entity.cosmetics.add(slash)
+        self.kill()
 
-        self.charging=charge#pointed to player charge state
-        self.charge_velocity=self.dir[0]
+    def sword_jump(self):
+        if self.dir[1]==-1:
+            self.entity.velocity[1]=-11
 
-    def update(self,scroll,entity_ac_dir=[0,0],entity_hitbox=[0,0]):
-        #remove the equipment if it has expiered
+class Darksaber(Sword):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=0
+        self.lifetime=10#swrod hitbox duration
+
+    def collision_enemy(self,collision_enemy):
+        if collision_enemy.spirit>=10:
+            collision_enemy.spirit-=10
+            spirits=Spiritsorb([collision_enemy.rect.x,collision_enemy.rect.y])
+            collision_enemy.loot_group.add(spirits)
+        self.kill()
+
+class Shield(Melee):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Shield/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=0
+        self.lifetime=10
+
+    def rectangle(self):
+        self.rect = pygame.Rect(self.entity.rect[0],self.entity.rect[1],80,80)
+        self.hitbox = self.rect.copy()
+
+    def update_hitbox(self):
+        self.rect.midtop=self.entity.rect.midtop
+
+    def collision_ene(self,collision_ene):
+        collision_ene.countered()
+        self.kill()
+
+class Projectiles(Abilities):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir=self.entity.dir.copy()
+        self.rectangle()
+        self.velocity=[0,0]
+
+    def rectangle(self):
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.hitbox=self.rect.copy()
+
+    def update_pos(self,scroll):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
-        self.set_img()#set the animation
+    def update_hitbox(self):
+        if self.dir[1] > 0:#up
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+            self.velocity[1]=-self.speed[1]
+        elif self.dir[1] < 0:#down
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+            self.velocity[1]=self.speed[1]
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+            self.velocity[0]=self.speed[0]
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+            self.velocity[0]=-self.speed[1]
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def knock_back(self):
+        self.velocity[0]=-self.velocity[0]
+        self.velocity[1]=-self.velocity[1]
+
+    def countered(self,projectile):
+        projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
+        self.knock_back()
+
+class Hammer(Projectiles):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Hammer/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=10
+        self.lifetime=25
+        self.speed=[0,0]
+        self.update_hitbox()
+
+        self.rect.bottom=self.entity.rect.bottom
+        self.hitbox.center = self.rect.center
+
+    def collision_enemy(self,collision_enemy):
+        self.dmg=0
+
+class Poisoncloud(Projectiles):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Poisoncloud/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=1
+        self.lifetime=400
+        self.speed=[0,0]
+        self.update_hitbox()
+
+    def collision_ene(self,collision_ene):
+        pass
+
+    def destroy(self):
+        if self.lifetime<0:
+            self.animation.reset_timer()
+            self.state='post'
+
+    def countered(self):
+        self.animation.reset_timer()
+        self.state='post'
+
+class Poisonblobb(Projectiles):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Poisonblobb/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=10
+        self.lifetime=100
+        self.speed=[4,4]
+        self.hitbox=pygame.Rect(self.rect.x,self.rect.y,16,16)
+        self.update_hitbox()
+
+    def update(self,scroll):
+        self.update_vel()
+        super().update(scroll)
+
+    def update_vel(self):
+        self.velocity[1]+=0.1#graivity
+
+    def collision_plat(self):
+        self.velocity=[0,0]
+        if self.state=='main':
+            self.animation.reset_timer()
+            self.state='post'
+
+class Stone(Abilities):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Stone/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.lifetime=100
+        self.dmg=10
+        self.charge_velocity=0
+        self.action='small'
+        self.initiate()
+        self.hitbox=pygame.Rect(self.rect.x,self.rect.y,10,10)
+
+    def update_hitbox(self):
+        if self.dir[1] > 0:#up
+            self.hitbox.midbottom=self.entity.hitbox.midtop
+        elif self.dir[1] < 0:#down
+            self.hitbox.midtop=self.entity.hitbox.midbottom
+        elif self.dir[0] > 0 and self.dir[1] == 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+        elif self.dir[0] < 0 and self.dir[1] == 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def update(self,pos):
+        self.update_pos(pos)
+        self.update_animation()#has to be here
         self.speed()#set the speed
-        self.destroy()#if lifetime expires
+        self.destroy()
+
+    def increase_phase(self):
+        if self.phase=='pre':
+            self.phase='charge'
+        elif self.phase=='main':
+            pass
+        elif self.phase=='post':
+            self.kill()
 
     def speed(self):
-        if self.state=='charge':#charging
+        if self.phase=='charge':#charging
             self.charge_velocity=self.charge_velocity+0.5*self.dir[0]
             self.charge_velocity=self.dir[0]*min(20,self.dir[0]*self.charge_velocity)#set max velocity
 
@@ -1115,21 +1009,20 @@ class Stone(Weapon):
                 self.action='medium'
                 self.shake=2#add shake effect if the ball is big
 
-            if not self.charging[0]:#when finish chaging
-                self.frame=0
-                self.state='main'
-                self.velocity[0]=self.charge_velocity#set the velocity
-
-        elif self.state=='main':#main pahse
+        elif self.phase=='main':#main pahse
             self.lifetime-=1#affect only the lifetime in main state
             if self.action=='small':#only have gravity if small
                 self.velocity[1]+=0.1#graivity
 
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):
+    def collision_enemy(self,collision_enemy):
         self.velocity=[0,0]
         self.dmg=0
-        self.state='post'
-        return self.shake
+        self.phase='post'
+
+    def collision_plat(self):
+        self.velocity=[0,0]
+        self.dmg=0
+        self.phase='post'
 
     def rotate(self):
         angle=self.dir[0]*max(-self.dir[0]*self.velocity[0]*self.velocity[1],-60)
@@ -1141,142 +1034,241 @@ class Stone(Weapon):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
-class Force(Weapon):
-    def __init__(self,entity_dir,entity_hitbox):
-        super().__init__()
+    def knock_back(self):
+        self.velocity[0]=-self.velocity[0]
+        self.velocity[1]=-self.velocity[1]
 
-        if entity_dir[1]!=0:#shppting up or down
-            self.velocity=[0,-entity_dir[1]*10]
-        else:#horizontal
-            self.velocity=[entity_dir[0]*10,0]
+    def countered(self):
+        super().countered()
+        self.knock_back()
 
-        self.lifetime=20
+class Force(Projectiles):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Force/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.lifetime=30
         self.dmg=0
-        self.dir=entity_dir.copy()
-
-        self.sprites = Read_files.Sprites_Player('Sprites/Attack/Force/')
         self.state='pre'
+        self.speed=[10,10]
+        self.update_hitbox()
 
-        self.image = pygame.image.load("Sprites/Attack/Force/pre/fly3.png").convert_alpha()
-        if self.velocity[0]<0:#if shoting left
-            self.image=pygame.transform.flip(self.image,True,False)
-
-        self.rect = self.image.get_rect(center=[entity_hitbox[0],entity_hitbox[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0],entity_hitbox[1],30,30)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-    def collision(self,entity=None,cosmetics=None,collision_ene=None):#if hit something
-        #push_strength=[500/(self.rect[0]-entity.rect[0]),500/(self.rect[1]-entity.rect[1])]
+    def collision_plat(self):
+        self.animation.reset_timer()
         self.state='post'
-        self.frame=0
         self.velocity=[0,0]
 
-        if collision_ene:#if collision with enemy
-            cosmetics.add(Spirits([collision_ene.rect[0],collision_ene.rect[1]]))#spawn cosmetic spirits
-            #if self.dir[1]!=0:
-            #    entity.velocity[1]=self.dir[1]*abs(push_strength[1])#force jump
-            if self.dir[1]==0:#push enemy back
-                collision_ene.velocity[0]=self.dir[0]*10#abs(push_strength[0])
-                collision_ene.velocity[1]=-6
-            return self.shake
-        return self.shake
-        #if self.dir[1]!=0:#if patform down
-        #    entity.velocity[1]=self.dir[1]*abs(push_strength[1])*0.75#force jump
+    def collision_enemy(self,collision_enemy):#if hit something
+        self.animation.reset_timer()
+        self.state='post'
+        self.velocity=[0,0]
 
-class Loot(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        choice=[-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,2,4,6,8,10,12,14,16,18,20]#just not 0
-        self.pos=[random.choice(choice),random.choice(choice)]
-        self.lifetime=300
-        self.movement=[0,0]#for platfform collisions
-        dir=self.pos[0]/abs(self.pos[0])#horizontal direction
-        self.velocity=[dir*random.randint(0, 3),-4]
-        self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
-        self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
-        self.animation_timer = 0
+        collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
+        collision_enemy.velocity[1]=-6
 
-    def update_hitbox(self):
-        self.hitbox.center = self.rect.center
+class Arrow(Projectiles):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Arrow/')
 
-    def update_rect(self):
-        self.rect.center = self.hitbox.center
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.lifetime=100
+        self.dmg=10
+        self.speed=[10,10]
+        self.update_hitbox()
 
-    def platform_int(self):
-        if self.collision_types['bottom']:
-            self.velocity=[0,0]
 
-    def update(self,scroll):
-        #remove the equipment if it has expiered
-        self.speed()
+    def collision_enemy(self,collision_enemy):
+        self.velocity=[0,0]
+        self.dmg=0
+        self.kill()
 
-        self.lifetime-=1
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
-        self.hitbox.center = self.rect.center
+    def collision_plat(self):
+        self.velocity=[0,0]
+        self.dmg=0
 
+class Loot(Dynamicentity):
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.lifetime=500
+        self.state='idle'
+        self.animation=animation.Basic_animation(self)
+
+    def destory(self):
         if self.lifetime<0:#remove after a while
             self.kill()
 
-        self.platform_int()
-        self.set_img()
-
-    def set_img(self, frame_rate = 0.25):
-        self.image = self.sprites['idle'][int(self.animation_timer)]
-        if self.animation_timer == len(self.sprites['idle'])-1:
-            self.animation_timer = 0
-        self.animation_timer += frame_rate
-
-    def speed(self):
-        self.velocity[1]+=0.3#gravity
-
-        self.velocity[1]=min(self.velocity[1],4)#set a y max speed
-        self.movement[1]=self.velocity[1]#set the vertical velocity
-
-class Coin(Loot):
-    def __init__(self,entity_hitbox):
-        super().__init__()
-
-        self.image = pygame.image.load("Sprites/Enteties/Items/coin.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+    def update(self,scroll):
+        self.lifetime-=1
+        self.update_pos(scroll)
+        self.update_vel()
+        self.animation.update()
+        self.destory()
 
 class Amber_Droplet(Loot):
-    def __init__(self,entity_hitbox):
-        super().__init__()
-
-        self.image = pygame.image.load("Sprites/Enteties/Items/amber_droplet/idle/amber_droplet1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
-
-class Arrow(Loot):
-    def __init__(self,entity_hitbox):
-        super().__init__()
-
-        self.image = pygame.image.load("Sprites/Enteties/Items/arrow/idle/arrow.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1]])
-        self.hitbox=pygame.Rect(entity_hitbox[0]+self.pos[0],entity_hitbox[1]+self.pos[1],10,10)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/arrow/')
-
-class Spirits(pygame.sprite.Sprite):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
 
     def __init__(self,pos):
-        super().__init__()
-        self.image = pygame.image.load("Sprites/animations/Spirits/Spirits1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=[pos[0],pos[1]])
-        self.hitbox=pygame.Rect(pos[0],pos[1],5,5)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.frame=0
-        self.lifetime=10
+        super().__init__(pos)
+        self.velocity=[random.randint(-3, 3),-4]
+        self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
+        self.hitbox = self.rect.copy()
+
+    def check_collisions(self):
+        if self.collision_types['bottom']:
+            self.velocity[0] = 0.5*self.velocity[0]
+            self.velocity[1] = -0.7*self.velocity[1]
+        elif self.collision_types['right'] or self.collision_types['left']:
+            self.velocity[0] = -self.velocity[0]
+
+    def update_vel(self):
+        self.velocity[1] += 0.5
 
     def update(self,pos):
-        self.lifetime -= 1
+        self.check_collisions()#need to be before super.update
+        super().update(pos)
 
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
+    def pickup(self,player):
+        obj=(self.__class__.__name__)#get the loot in question
+        player.inventory[obj]+=1
+        self.kill()
 
+class Spiritsorb(Loot):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        rand_pos=[random.randint(-10, 10),random.randint(-10, 10)]
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0]+rand_pos[0],pos[1]+rand_pos[1],5,5)
+        self.hitbox=self.rect.copy()
+
+    def update_vel(self):
+        self.velocity=[0.1*random.randint(-10, 10),0.1*random.randint(-10, 10)]
+
+    def pickup(self,player):
+        player.spirit += 10
+        self.kill()
+
+class Animatedentity(Staticentity):#animated without hitbox
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.state='idle'
+        self.animation=animation.Basic_animation(self)
+
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.animation.update()
+
+class Cosmetics(Animatedentity):
+    def __init__(self,pos):
+        super().__init__(pos)
+
+    def update(self,scroll):
+        self.lifetime-=1
+        super().update(scroll)
+        self.destroy()
+
+    def destroy(self):
         if self.lifetime<0:
             self.kill()
+
+class Slash(Cosmetics):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/GFX/slash/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.state=str(random.randint(1, 3))
+        self.image = self.sprites[self.state][0]#not sure why we need this.... there is a black box without
+        self.lifetime=10
+
+class Menu_Arrow():
+
+    def __init__(self):
+        self.img = pygame.image.load("Sprites/utils/arrow.png")
+        self.rect = self.img.get_rect()
+
+    #note: sets pos to input, doesn't update with an increment of pos like other entities
+    def update(self,pos):
+        self.rect.topleft = pos
+
+    def draw(self,screen):
+        screen.blit(self.img, self.rect.topleft)
+
+class Omamoris():
+
+    def __init__(self,entity):
+        self.equipped_omamoris=[]#equiped omamoris
+        self.omamori_list=[Double_jump(entity),Double_sword(entity),More_spirit(entity)]#omamoris inventory.
+
+    def update(self):
+        for omamori in self.equipped_omamoris:
+            omamori.update()
+
+    def handle_input(self,input):
+        for omamori in self.equipped_omamoris:
+            omamori.handle_input(input)
+
+class Omamori():
+    def __init__(self,entity):
+        self.entity=entity
+        self.state='idle'
+        self.animation=animation.Basic_animation(self)
+
+    def update(self):
+        pass
+
+    def handle_input(self,input):
+        pass
+
+    def detach(self):
+        self.state='idle'
+        self.animation.reset_timer()
+
+    def attach(self):
+        self.state='equip'
+        self.animation.reset_timer()
+
+class Double_jump(Omamori):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_jump/')#for inventory
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.counter=0
+
+    def update(self):
+        if self.entity.collision_types['bottom'] or self.entity.collision_types['right'] or self.entity.collision_types['left']:
+            self.reset_counter()
+
+    def handle_input(self,input):
+        if input[-1]=='a' and self.counter<1:
+            self.entity.currentstate.handle_press_input('double_jump')
+            if type(self.entity.currentstate).__name__=='Double_jump':
+                self.counter+=1
+
+    def reset_counter(self):
+        self.counter=0
+
+class Double_sword(Omamori):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_sword/')#for inventory
+
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def detach(self):
+        super().detach()
+        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
+        self.entity.sword.hitbox = self.entity.sword.rect.copy()
+
+    def attach(self):
+        super().attach()
+        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,80,40)
+        self.entity.sword.hitbox = self.entity.sword.rect.copy()
+
+class More_spirit(Omamori):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/more_spirit/')#for inventory
+
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        self.entity.spirit += 0.5
