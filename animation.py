@@ -23,7 +23,8 @@ class Entity_animation(Animation):
         super().__init__(entity)
 
     def update(self):
-        #if str(type(self.entity).__name__)=='Player':        
+        #if str(type(self.entity).__name__)=='Player':
+
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
         self.frame += 1
 
