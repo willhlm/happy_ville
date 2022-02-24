@@ -114,38 +114,22 @@ class Sprites():
 #class containing sprites for players (pre,post,main charge)
 class Sprites_Player(Sprites):
 
-    def __init__(self,path,charge=False):
+    def __init__(self,path):
         super().__init__()
 
         pre_dict = self.load_all_sprites(path+'pre/')
         main_dict = self.load_all_sprites(path+'main/')
         post_dict = self.load_all_sprites(path+'post/')
         charge_dict = self.load_all_sprites(path+'charge/')
+        self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
 
-        if charge:#if there is charge
-            charge_dict = self.load_all_sprites(path+'charge/')
-            self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
-        else:
-            self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict}
-
-
-    def get_image(self, input, timer, dir, phase):#phase pre, main, post
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
-
+    def get_image(self, input, timer, dir, phase):#phase pre, main, post, input=action,timer=frame
         if dir[0] <= 0:
             return self.sprite_dict[phase][input][timer]
         elif dir[0] > 0:
             return pygame.transform.flip(self.sprite_dict[phase][input][timer],True,False)
 
-    def get_frame_number(self, input,dir,phase):
-        if input=='sword' and dir[1]>0:
-            input=input+'_up'
-        elif input=='sword' and dir[1]<0:
-            input=input+'_down'
-
+    def get_frame_number(self, input,phase):
         return len(self.sprite_dict[phase][input])
 
 #class for reading and rendering fonts
@@ -240,12 +224,11 @@ class Controller():
         self.key=False
         self.outputs=[self.keydown,self.keyup,self.value,self.key]
         self.map_keyboard()
+        self.methods=[self.keybord]#joystick may be appended
 
         pygame.joystick.init()#initialise joystick module
         self.initiate_controls()#initialise joysticks and add to list
-
-        if controller_type:
-            self.buttonmapping(controller_type)#read in controler configuration file
+        self.buttonmapping(controller_type)#read in controler configuration file
 
     def initiate_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
@@ -256,10 +239,6 @@ class Controller():
             mapping=json.load(file)
             self.buttons=mapping['buttons']
             self.analogs=mapping['analogs']
-
-    def map_inputs(self,event):
-        self.keybord(event)
-        self.joystick(event)
 
     def map_keyboard(self):
         self.keyboard_map = {pygame.K_ESCAPE: 'start',
@@ -276,30 +255,56 @@ class Controller():
                                 pygame.K_i: 'select',
                                 pygame.K_LSHIFT: 'lb',
                                 pygame.K_RETURN: 'return',
-                                pygame.K_k: 'k'
+                                pygame.K_k: 'rt'
                                 }
 
-
-    def keybord(self,event):
+    def map_inputs(self,event):
         self.keyup=False
         self.keydown=False
-        self.value=[0,0]
+        self.methods[-1](event)
 
+    def keybord(self,event):
         if event.type == pygame.KEYDOWN:
             self.keydown=True
-            self.value=[1,1]
             self.key = self.keyboard_map.get(event.key, '')
+
+            if self.key=='right':
+                self.value[0]=1
+            elif self.key=='left':
+                self.value[0]=-1
+            elif self.key=='up':
+                self.value[1]=-1
+            elif self.key=='down':
+                self.value[1]=1
 
         elif event.type == pygame.KEYUP:#lift bottom
             self.keyup=True
             self.key = self.keyboard_map.get(event.key, '')
 
-    def joystick(self,event):
+            if self.key=='right':
+                keys_pressed=pygame.key.get_pressed()
+                if keys_pressed[pygame.K_LEFT]:
+                    self.value[0]=-1
+                else:
+                    self.value[0]=0
+            elif self.key=='left':
+                keys_pressed=pygame.key.get_pressed()
+                if keys_pressed[pygame.K_RIGHT]:
+                    self.value[0]=1
+                else:
+                    self.value[0]=0
+
+            elif self.key=='up' or self.key=='down':
+                self.value[1]=0
 
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
             self.initiate_controls()
+            self.methods.append(self.joystick)
+
+    def joystick(self,event):
         if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
             self.initiate_controls()
+            self.methods.pop()
 
         if event.type==pygame.JOYBUTTONDOWN:#press a button
             self.keydown=True
@@ -310,35 +315,22 @@ class Controller():
             self.key=self.buttons[str(event.button)]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
-            self.keydown=True
 
             if event.axis==self.analogs['lh']:#left horizontal
-                self.value=[event.value,0]
+                self.value[0]=event.value
                 if abs(event.value)<0.2:
-                    self.keydown=False
-                    self.value=[0,0]
-                elif event.value>0.2:
-                    self.key='right'
-                else:#if negative
-                    self.key='left'
+                    self.value[0]=0
+
             if event.axis==self.analogs['lv']:#left vertical
-                self.value=[0,event.value]
+                self.value[1]=event.value
                 if abs(event.value)<0.2:
-                    self.keydown=False
-                    self.value=[0,0]
-                elif event.value>0.2:
-                    self.key='up'
-                else:#if negative
-                    self.key='down'
-            if event.axis==self.analogs['rh']:#right horizonal
-                self.value=[event.value,0]
-                if abs(event.value)<0.5:
-                    self.keydown=False
-                    self.value=[0,0]
-                elif event.value>0.5:
-                    self.key='right_rh'
-                else:#if negative
-                    self.key='left_rh'
+                    self.value[1]=0
+
+        #    if event.axis==self.analogs['rh']:#right horizonal
+        #        pass
+                #self.value=[event.value,0]
+                #if abs(event.value)<0.5:
+                    #self.value[0]=0
 
         if event.type==pygame.JOYHATMOTION:
             pass

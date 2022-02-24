@@ -29,7 +29,7 @@ class Title_Menu(Game_State):
         self.arrow = Entities.Menu_Arrow()
         self.title = self.font.render(text = 'HAPPY VILLE') #temporary
 
-        #create buttons, items in list will be blitted in order in a centered column.
+        #create buttons
         self.buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
         self.current_button = 0
         self.initiate_buttons()
@@ -82,13 +82,12 @@ class Title_Menu(Game_State):
         if self.current_button == 0:
             new_state = Gameplay(self.game)
             new_state.enter_state()
-            #load start level
+            #load new game level
             self.game.game_objects.load_map('debug_map')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
             new_state.enter_state()
-            #load correct map below
 
         elif self.current_button == 2:
             new_state = Option_Menu(self.game)
@@ -277,6 +276,7 @@ class Gameplay(Game_State):
         super().__init__(game)
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
+        self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
 
     def update(self):
         self.game.game_objects.scrolling()
@@ -334,7 +334,9 @@ class Gameplay(Game_State):
         self.game.screen.blit(self.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
-        if input[0]:
+        self.game.game_objects.player.currentstate.handle_movement(input)
+
+        if input[0]:#press
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
@@ -352,14 +354,14 @@ class Gameplay(Game_State):
                     self.game.game_objects.interactions()
 
             elif input[-1] == 'select':
-                new_state = Start_Menu(self.game)
+                new_state = Select_Menu(self.game)
                 new_state.enter_state()
 
             else:
-                self.game.game_objects.player.currentstate.handle_input(input)
-
-        elif input [1]:
-            self.game.game_objects.player.currentstate.handle_input(input)
+                self.game.game_objects.player.currentstate.handle_press_input(input)
+                self.game.game_objects.player.omamoris.handle_input(input)
+        elif input[1]:#release
+            self.game.game_objects.player.currentstate.handle_release_input(input)
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -379,6 +381,7 @@ class Conversation(Gameplay):
 
     def update(self):
         super().update()
+
         self.letter_frame += 1
 
     def render(self):
@@ -431,9 +434,9 @@ class Ability_Menu(Gameplay):
 
     def render(self):
         super().render()
+        self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)
 
         hud=self.hud[self.index]
-
         for index,ability in enumerate(self.abilities):
             hud.blit(self.symbols[ability],self.coordinates[index])
 
@@ -454,36 +457,93 @@ class Ability_Menu(Gameplay):
                 self.game.game_objects.player.equip=self.abilities[self.index]
                 self.exit_state()
 
-class Start_Menu(Gameplay):
+class Select_Menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.inventory_BG=pygame.image.load("Sprites/UI/Inventory/inventory.png").convert_alpha()
+        self.page=1
+        self.pages=[self.map_menu,self.inventory_menu,self.omamori_menu]#what to render
 
+        #invenotory stuff
         self.inventory=[]#make all objects and save in list
         for item in self.game.game_objects.player.inventory.keys():
-            self.inventory.append(getattr(sys.modules[Entities.__name__], item)(self.game.game_objects.player))#make the object based on the string
+            self.inventory.append(getattr(sys.modules[Entities.__name__], item)([0,0]))#make the object based on the string
 
-    def update(self):
-        super().update()
+        #omamori stuff
+        self.omamori_index=[0,0]
+        self.positions=(165,120)
+        self.equip_positions=(170,25)
+        self.box=pygame.image.load("Sprites/UI/Menu/box.png").convert_alpha()#select box
+
+    def blit_inventory(self):
+        width=self.inventory_BG[self.page].get_width()
+        self.game.screen.blit(self.inventory_BG[self.page],((self.game.WINDOW_SIZE[0]-width)/2,20))
 
     def render(self):
         super().render()
+        self.blit_inventory()
+        self.pages[self.page]()
 
-        self.game.screen.blit(self.inventory_BG,(0,0))
+    def map_menu(self):
+        pass
 
+    def inventory_menu(self):
         width=self.game.game_objects.player.image.get_width()
         height=self.game.game_objects.player.image.get_height()
         scale=2
-        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(180,120))#player position
+        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(105,0))#player position
 
         for index, loot in enumerate(self.inventory):
-            loot.update_animation()
-            self.game.screen.blit(pygame.transform.scale(loot.image,(int(width/scale),int(height/scale))),(0+50*index,0))
+            loot.animation.update()
+            self.game.screen.blit(pygame.transform.scale(loot.image,(10,10)),(185+20*index,155))
+
+    def omamori_menu(self):
+        for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):#equipped ones
+            pos=[self.equip_positions[0]+50*index,self.equip_positions[1]]
+            self.game.screen.blit(omamori.image,pos)
+
+        for index, omamori in enumerate(self.game.game_objects.player.omamoris.omamori_list):#the ones in inventory
+            omamori.animation.update()
+            pos=[self.positions[0]+20*index,self.positions[1]]
+            self.game.screen.blit(omamori.image,pos)
+
+        self.game.screen.blit(self.box,(165+20*self.omamori_index[0],135+20*self.omamori_index[1]))#pointer
 
     def handle_events(self,input):
         if input[0]:#press
             if input[-1] == 'select':
                 self.exit_state()
+            elif input[-1] == 'rb':
+                self.page+=1
+                self.page=min(self.page,2)
+            elif input[-1] == 'lb':
+                self.page-=1
+                self.page=max(self.page,0)
+
+            if self.page==2:#omamori stuff
+                if input[-1] =='right':
+                    self.omamori_index[0]+=1
+                    if self.omamori_index[1]>=0:#on the bottom row
+                        self.omamori_index[0]=min(self.omamori_index[0],5)
+                    else:#if negative, on the top row
+                        self.omamori_index[0]=min(self.omamori_index[0],2)
+                elif input[-1] =='left':
+                    self.omamori_index[0]-=1
+                    self.omamori_index[0]=max(self.omamori_index[0],0)
+                elif input[-1] =='down':
+                    self.omamori_index[1]+=1
+                    self.omamori_index[1]=min(self.omamori_index[1],1)
+                elif input[-1] =='up':
+                    self.omamori_index[1]-=1
+                    self.omamori_index[1]=max(self.omamori_index[1],0)
+                elif input[-1]=='a':
+                    self.choose_omamori()
+
+    def choose_omamori(self):
+        omamori_index=self.omamori_index[0]
+        if self.omamori_index[1]==1:#if on the bottom row
+            omamori_index+=5
+        if omamori_index<len(self.game.game_objects.player.omamoris.omamori_list):
+            self.game.game_objects.player.equip_omamori(omamori_index)
 
 class Boss_encounter(Gameplay):
     def __init__(self, game):

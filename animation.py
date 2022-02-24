@@ -23,11 +23,11 @@ class Entity_animation(Animation):
         super().__init__(entity)
 
     def update(self):
-    #    if str(type(self.entity).__name__)=='Vatt':
+        #if str(type(self.entity).__name__)=='Player':        
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
         self.frame += 1
 
-        if self.frame == self.entity.sprites.get_frame_number(self.entity.currentstate.state_name,self.entity.currentstate.dir,self.entity.currentstate.phase)*self.framerate:
+        if self.frame == self.entity.sprites.get_frame_number(self.entity.currentstate.state_name,self.entity.currentstate.phase)*self.framerate:
             self.reset_timer()
             self.entity.currentstate.increase_phase()
 
@@ -45,3 +45,23 @@ class Hurt_animation(Entity_animation):#become white
 
         if self.duration<0:
             self.exit_state()
+
+class Basic_animation(Animation):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        self.entity.image = self.entity.sprites[self.entity.state][self.frame//self.framerate].copy()
+        self.frame += 1
+
+        if self.frame == len(self.entity.sprites[self.entity.state])*self.framerate:
+            self.reset_timer()
+
+class Ability_animation(Basic_animation):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def reset_timer(self):
+        super().reset_timer()
+        if self.entity.state=='post':
+            self.entity.kill()#kill the object after post animation

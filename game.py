@@ -17,23 +17,18 @@ class Game():
         flags = pygame.SCALED# | pygame.FULLSCREEN
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
 
-
         #initiate game related values
         self.game_objects = game_objects.Game_Objects(self)
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}
-        self.controller = Read_files.Controller()
+        self.controller = Read_files.Controller('xbox')
 
     def event_loop(self):
-
         for event in pygame.event.get():
-            #print(event)
-
             if event.type==pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
             else:
                 self.controller.map_inputs(event)
                 self.state_stack[-1].handle_events(self.controller.output())

@@ -455,6 +455,60 @@
                  "width":16,
                  "x":368,
                  "y":544
+                }, 
+                {
+                 "gid":387,
+                 "height":16,
+                 "id":86,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Vatt"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1920,
+                 "y":608
+                }, 
+                {
+                 "gid":387,
+                 "height":16,
+                 "id":87,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Vatt"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1984,
+                 "y":608
+                }, 
+                {
+                 "gid":387,
+                 "height":16,
+                 "id":88,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Vatt"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":2032,
+                 "y":608
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -463,7 +517,7 @@
          "y":0
         }],
  "nextlayerid":13,
- "nextobjectid":86,
+ "nextobjectid":89,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.6.0",
