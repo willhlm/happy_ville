@@ -41,7 +41,7 @@ class Game_Objects():
         self.individuals = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
-        self.weather_paricles.create_particles('Snow')#weather effects
+        #self.weather_paricles.create_particles('Snow')#weather effects
         self.reflection=BG.Reflection()
         #initiate player
         self.player = Entities.Player([200,50],self.fprojectiles,self.cosmetics)
@@ -143,26 +143,28 @@ class Game_Objects():
         #self.camera_blocks.draw(self.game.screen)
         self.reflection.draw(self.game.screen)
         #temporaries draws. Shuold be removed
-        for projectile in self.fprojectiles.sprites():#go through the group
-            pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
-        for projectile in self.eprojectiles.sprites():#go through the group
-            pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
-        #for enemy in self.enemies.sprites():#go through the group
-        #    enemy.draw(self.game.screen)#add a glow around each enemy, can it be in group draw?
-        for enemy in self.enemies.sprites():#go through the group
-            pygame.draw.rect(self.game.screen, (0,0,255), enemy.hitbox,2)#draw hitbox
-            pygame.draw.rect(self.game.screen, (255,0,255), enemy.rect,2)#draw hitbox
-        #for loot in self.loot.sprites():#go through the group
-        #    pygame.draw.rect(self.game.screen, (0,0,255), loot.hitbox,2)#draw hitbox
-        #    pygame.draw.rect(self.game.screen, (255,0,255), loot.rect,2)#draw hitbox
 
-        pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
-        pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
+        if self.game.RENDER_HITBOX_FLAG:
+            for projectile in self.fprojectiles.sprites():#go through the group
+                pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
+            for projectile in self.eprojectiles.sprites():#go through the group
+                pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
+            #for enemy in self.enemies.sprites():#go through the group
+            #    enemy.draw(self.game.screen)#add a glow around each enemy, can it be in group draw?
+            for enemy in self.enemies.sprites():#go through the group
+                pygame.draw.rect(self.game.screen, (0,0,255), enemy.hitbox,2)#draw hitbox
+                pygame.draw.rect(self.game.screen, (255,0,255), enemy.rect,2)#draw hitbox
+            #for loot in self.loot.sprites():#go through the group
+            #    pygame.draw.rect(self.game.screen, (0,0,255), loot.hitbox,2)#draw hitbox
+            #    pygame.draw.rect(self.game.screen, (255,0,255), loot.rect,2)#draw hitbox
 
-        for platform in self.platforms:#go through the group
-            pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
-        for ramp in self.platforms_ramps:
-            pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
+            pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
+            pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
+
+            for platform in self.platforms:#go through the group
+                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+            for ramp in self.platforms_ramps:
+                pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
 
 
     def conversation_collision(self):

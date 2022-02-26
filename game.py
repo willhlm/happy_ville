@@ -24,6 +24,11 @@ class Game():
         self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}
         self.controller = Read_files.Controller('xbox')
 
+        #debug flags
+        self.DEBUG_MODE = True
+        self.RENDER_FPS_FLAG = False
+        self.RENDER_HITBOX_FLAG = False
+
     def event_loop(self):
         for event in pygame.event.get():
             if event.type==pygame.QUIT:

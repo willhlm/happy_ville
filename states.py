@@ -83,14 +83,14 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('debug_map')
+            self.game.game_objects.load_map('collision_map')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
             new_state.enter_state()
 
         elif self.current_button == 2:
-            new_state = Option_Menu(self.game)
+            new_state = Start_Option_Menu(self.game)
             new_state.enter_state()
 
         elif self.current_button == 3:
@@ -149,7 +149,7 @@ class Load_Menu(Game_State):
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
-class Option_Menu(Game_State):
+class Start_Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.arrow = Entities.Menu_Arrow()
@@ -200,6 +200,69 @@ class Option_Menu(Game_State):
             self.button_surfaces[b] = (self.font.render(text = b))
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
+
+class Option_Menu(Game_State):
+    def __init__(self,game):
+        super().__init__(game)
+        self.arrow = Entities.Menu_Arrow()
+        self.title = self.font.render(text = 'OPTIONS') #temporary
+
+        #create buttons
+        self.buttons = ['Option 1','Option 2','Option 3','Option 4','Option 5']
+        if self.game.DEBUG_MODE:
+            self.buttons = ['Render FPS', 'Render Hitboxes']
+        self.current_button = 0
+        self.initiate_buttons()
+
+    def update(self):
+        #update menu arrow position
+        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
+        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
+
+    def render(self):
+        #fill game.screen
+        self.game.screen.fill((255,255,255))
+
+        #blit title
+        self.game.screen.blit(self.title, (self.game.WINDOW_SIZE[0]/2 - self.title.get_width()/2,50))
+
+        #blit buttons
+        for b in self.buttons:
+            self.game.screen.blit(self.button_surfaces[b], self.button_rects[b].topleft)
+
+        #blit arrow
+        self.arrow.draw(self.game.screen)
+
+    def handle_events(self, event):
+        if event[0]:
+            if event[-1] == 'up':
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.buttons) - 1
+            elif event[-1] == 'down':
+                self.current_button += 1
+                if self.current_button >= len(self.buttons):
+                    self.current_button = 0
+            elif event[-1] == 'start':
+                self.exit_state()
+            elif event[-1] in ('return', 'a'):
+                self.update_options()
+
+    def initiate_buttons(self):
+        y_pos = 90
+        self.button_surfaces = {}
+        self.button_rects = {}
+        for b in self.buttons:
+            self.button_surfaces[b] = (self.font.render(text = b))
+            self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
+            y_pos += 20
+
+    def update_options(self):
+        if self.game.DEBUG_MODE:
+            if self.current_button == 0:
+                self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
+            elif self.current_button == 1:
+                self.game.RENDER_HITBOX_FLAG = not self.game.RENDER_HITBOX_FLAG
 
 class Pause_Menu(Game_State):
 
@@ -293,7 +356,8 @@ class Gameplay(Game_State):
     def blit_screen_info(self):
         self.blit_health()
         self.blit_spirit()
-        self.blit_fps()
+        if self.game.RENDER_FPS_FLAG:
+            self.blit_fps()
 
     def blit_health(self):
         #this code is specific to using heart.png sprites
