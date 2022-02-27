@@ -26,8 +26,8 @@ class Game():
 
         #debug flags
         self.DEBUG_MODE = True
-        self.RENDER_FPS_FLAG = False
-        self.RENDER_HITBOX_FLAG = False
+        self.RENDER_FPS_FLAG = True
+        self.RENDER_HITBOX_FLAG = True
 
     def event_loop(self):
         for event in pygame.event.get():
