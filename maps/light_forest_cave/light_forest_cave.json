@@ -644,15 +644,15 @@
                 }, 
                 {
                  "gid":8199,
-                 "height":32,
+                 "height":16,
                  "id":73,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":96,
+                 "width":128,
                  "x":240,
-                 "y":1568
+                 "y":1552
                 }, 
                 {
                  "gid":8199,

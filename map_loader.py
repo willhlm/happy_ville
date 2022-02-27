@@ -117,6 +117,8 @@ class Level():
                 new_enemy = getattr(Entities, enemy_name)
                 self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles,self.game_objects.loot))
 
+
+    #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
         base_bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
@@ -223,7 +225,7 @@ class Level():
             if 'fixed' in bg:
                 self.game_objects.all_bgs.add(Entities.BG_Block((0,0),blit_surfaces[bg],parallax))#pos,img,parallax
             elif 'fg' in bg:
-                self.game_objects.all_bgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))
+                self.game_objects.all_fgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))
             else:
                 self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
             try:
