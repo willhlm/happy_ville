@@ -222,9 +222,7 @@ class Level():
 
         for bg in base_bg_list:
             parallax = parallax_values[bg]
-            if 'fixed' in bg:
-                self.game_objects.all_bgs.add(Entities.BG_Block((0,0),blit_surfaces[bg],parallax))#pos,img,parallax
-            elif 'fg' in bg:
+            if 'fg' in bg:
                 self.game_objects.all_fgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))
             else:
                 self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
