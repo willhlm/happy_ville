@@ -18,6 +18,7 @@ class Level():
     def load_map_data(self):
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
         self.map_data = Read_files.format_tiled_json(self.map_data)
+
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
                 self.map_data['statics_firstgid'] = tileset['firstgid']
@@ -31,6 +32,7 @@ class Level():
 
     def read_all_spritesheets(self):
         sprites = {}
+
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
