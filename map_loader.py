@@ -124,7 +124,8 @@ class Level():
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
         base_bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
-        bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
+        #bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
+        bg_list = []
         parallax_values = {'bg_farfar': 0.01,
                             'bg_far': 0.03,
                             'bg_midmid': 0.6,
@@ -136,22 +137,23 @@ class Level():
                             'fg_near': 1.25,
                             'fg_mid': 1.5}
         animation_list = {}
-        deco_lists = {}
         top_left = {}
         bg_flags = {}
+        blit_dict = {}
 
         #check for animation and deco layers in map data
-        for layer in list(self.map_data['tile_layers'].keys()):
-            if '_deco' in layer:
-                bg_list.append(layer)
-                deco_base = layer[:layer.find('_deco')]
-                if deco_base in deco_lists.keys():
-                    deco_lists[deco_base].append(layer)
-                else:
-                    deco_lists[deco_base] = [layer]
-            elif '_animated' in layer:
-                animation_base_layer = layer[:layer.find('_animated')]
-                animation_list[animation_base_layer] = layer
+        for bg in base_bg_list:
+            for layer in list(self.map_data['tile_layers'].keys()):
+                if '_animated' in layer:
+                    animation_base_layer = layer[:layer.find('_animated')]
+                    animation_list[animation_base_layer] = layer
+                elif bg in layer:
+                    if bg in blit_dict.keys():
+                        blit_dict[bg].append(layer)
+                    else:
+                        blit_dict[bg] = [layer]
+                    bg_list.append(layer)
+
 
         for bg in bg_list:
             bg_flags[bg] = True
@@ -195,11 +197,13 @@ class Level():
                         if top_left[bg] == (0,0):
                             top_left[bg] = blit_pos
 
-        #blit deco over corresponding layer
-        for bg in list(deco_lists.keys()):
-            deco_lists[bg].sort()
-            for deco in deco_lists[bg]:
-                blit_surfaces[bg].blit(blit_surfaces[deco],(0,0))
+        #blit all sublayers onto one single parallax layer in order
+        for bg in list(blit_dict.keys()):
+            if len(blit_dict[bg]) == 1:
+                continue
+            blit_dict[bg].sort(reverse = True)
+            for i in range(1,len(blit_dict[bg])):
+                blit_surfaces[blit_dict[bg][0]].blit(blit_surfaces[blit_dict[bg][i]],(0,0))
 
         animation_entities = {}
         #create animation layers
@@ -221,13 +225,19 @@ class Level():
                             except KeyError:
                                 animation_entities[bg] = [new_animation]
 
+        print(blit_dict)
+        print(blit_surfaces)
+        print(bg_list)
+        #exit()
+
 
         for bg in base_bg_list:
             parallax = parallax_values[bg]
-            if 'fg' in bg:
-                self.game_objects.all_fgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))
-            else:
-                self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[bg],parallax))#pos,img,parallax
+            if bg in blit_dict.keys():
+                if 'fg' in bg:
+                    self.game_objects.all_fgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))
+                else:
+                    self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))#pos,img,parallax
             try:
                 for bg_animation in animation_entities[bg]:
                     self.game_objects.all_bgs.add(bg_animation)

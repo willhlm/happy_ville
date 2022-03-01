@@ -141,7 +141,7 @@ class Game_Objects():
         self.all_fgs.draw(self.game.screen)
         self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
-        self.reflection.draw(self.game.screen)
+        #self.reflection.draw(self.game.screen)
         #temporaries draws. Shuold be removed
 
         if self.game.RENDER_HITBOX_FLAG:
