@@ -123,14 +123,14 @@ class Level():
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        base_bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
+        base_bg_list = ['bg_behindfar','bg_far','bg_behindmid','bg_mid','bg_behindnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
         #bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
         bg_list = []
-        parallax_values = {'bg_farfar': 0.01,
+        parallax_values = {'bg_behindfar': 0.01,
                             'bg_far': 0.03,
-                            'bg_midmid': 0.6,
+                            'bg_behindmid': 0.6,
                             'bg_mid': 0.5,
-                            'bg_nearnear': 0.75,
+                            'bg_behindnear': 0.75,
                             'bg_near': 0.8,
                             'bg_fixed': 1,
                             'fg_fixed': 1,
@@ -199,6 +199,7 @@ class Level():
 
         #blit all sublayers onto one single parallax layer in order
         for bg in list(blit_dict.keys()):
+            print(blit_dict[bg])
             if len(blit_dict[bg]) == 1:
                 continue
             blit_dict[bg].sort(reverse = True)
@@ -224,11 +225,6 @@ class Level():
                                 animation_entities[bg].append(new_animation)
                             except KeyError:
                                 animation_entities[bg] = [new_animation]
-
-        print(blit_dict)
-        print(blit_surfaces)
-        print(bg_list)
-        #exit()
 
 
         for bg in base_bg_list:
