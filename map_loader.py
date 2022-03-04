@@ -128,7 +128,7 @@ class Level():
         bg_list = []
         parallax_values = {'bg_behindfar': 0.01,
                             'bg_far': 0.03,
-                            'bg_behindmid': 0.6,
+                            'bg_behindmid': 0.2,
                             'bg_mid': 0.5,
                             'bg_behindnear': 0.75,
                             'bg_near': 0.8,
