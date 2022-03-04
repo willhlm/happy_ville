@@ -75,6 +75,7 @@ class Game_Objects():
         self.npc_pause.empty()
         self.all_bgs.empty()
         self.all_fgs.empty()
+        self.camera_blocks.empty()
 
         #load all objects and art
         self.map.load_statics()
@@ -210,17 +211,19 @@ class Game_Objects():
         xflag, yflag = False, False
         for stop in self.camera_blocks:
             if stop.dir == 'right':
-                if (stop.rect.centerx - self.player.rect.centerx) < self.game.WINDOW_SIZE[0]/2:
+                if (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
                     xflag = True
             elif stop.dir == 'left':
-                if stop.rect.right >= 0 and self.player.rect.centerx < self.game.WINDOW_SIZE[0]/2:
+                if stop.rect.right >= 0 and self.player.hitbox.centerx < self.player_center[0]:
                     xflag = True
             elif stop.dir == 'bottom':
-                if (stop.rect.centery - self.player.rect.centery) < (self.game.WINDOW_SIZE[1] - 180):
-                    yflag = True
+                if (0 < stop.rect.left - self.player.hitbox.centerx < self.player_center[0]) or (0 < self.player.hitbox.centerx - stop.rect.right < self.player_center[0]):
+                    if (-self.game.WINDOW_SIZE[1] < (stop.rect.centery - self.player.hitbox.centery) < (self.game.WINDOW_SIZE[1] - self.player_center[1])):
+                        yflag = True
             elif stop.dir == 'top':
-                if self.player.rect.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
-                    yflag = True
+                if (0 < stop.rect.left - self.player.hitbox.centerx < self.player_center[0]) or (0 < self.player.hitbox.centerx - stop.rect.right < self.player_center[0]):
+                    if self.player.hitbox.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
+                        yflag = True
 
         if xflag and yflag:
             self.map.set_camera(3)

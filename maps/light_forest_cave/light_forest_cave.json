@@ -156,6 +156,30 @@
                  "width":16,
                  "x":1552,
                  "y":480
+                }, 
+                {
+                 "gid":8208,
+                 "height":16,
+                 "id":129,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":208,
+                 "x":1920,
+                 "y":720
+                }, 
+                {
+                 "gid":8208,
+                 "height":16,
+                 "id":130,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":128,
+                 "x":2704,
+                 "y":1952
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -861,7 +885,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1472,
+                 "x":1475,
                  "y":1760
                 }, 
                 {
@@ -885,7 +909,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":2336,
+                 "x":2333,
                  "y":1760
                 }, 
                 {
@@ -1221,7 +1245,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":2896,
+                 "x":2899,
                  "y":1216
                 }, 
                 {
@@ -1281,7 +1305,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1232,
+                 "x":1234,
                  "y":528
                 }, 
                 {
@@ -1305,7 +1329,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1488,
+                 "x":1491,
                  "y":560
                 }, 
                 {
@@ -1373,17 +1397,17 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":3440,
+                 "x":3437,
                  "y":1440
                 }],
          "opacity":0.44,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
  "nextlayerid":14,
- "nextobjectid":128,
+ "nextobjectid":131,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.6.0",
