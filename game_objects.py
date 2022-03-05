@@ -206,6 +206,8 @@ class Game_Objects():
                 self.npcs.add(entity)
                 self.npc_pause.remove(entity)
 
+
+    #TODO: fix distance chek for remaining camera stops (right, left, top)
     def check_camera_border(self):
 
         xflag, yflag = False, False
