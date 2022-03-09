@@ -23,7 +23,6 @@ class Level():
             if 'source' in tileset.keys():
                 self.map_data['statics_firstgid'] = tileset['firstgid']
 
-
     def set_camera(self, camera_number):
         self.camera = self.cameras[camera_number]
 
@@ -160,7 +159,7 @@ class Level():
 
         #all these figures below should be passed and not hardcoded, will break if we change UI etc.
         screen_center = self.PLAYER_CENTER
-        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1])
+        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1]+5)
 
         cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']
         rows = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['height']
@@ -229,11 +228,13 @@ class Level():
 
         for bg in base_bg_list:
             parallax = parallax_values[bg]
+
             if bg in blit_dict.keys():
                 if 'fg' in bg:
                     self.game_objects.all_fgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))
                 else:
-                    self.game_objects.all_bgs.add(Entities.BG_Block((-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))#pos,img,parallax
+                    pos=(-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1]))
+                    self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_surfaces[blit_dict[bg][0]],parallax))#pos,img,parallax
             try:
                 for bg_animation in animation_entities[bg]:
                     self.game_objects.all_bgs.add(bg_animation)

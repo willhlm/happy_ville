@@ -418,6 +418,7 @@ class Player(Character):
         super().update(pos)
         self.omamoris.update()
         #self.load_sfx()
+        
 
     def equip_omamori(self,omamori_index):
         new_omamori=self.omamoris.omamori_list[omamori_index]
