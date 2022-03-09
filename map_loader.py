@@ -116,7 +116,23 @@ class Level():
                     if property['name'] == 'class':
                         enemy_name = property['value']
                 new_enemy = getattr(Entities, enemy_name)
-                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles,self.game_objects.loot))
+                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles, self.game_objects.loot))
+            elif id == 12:
+                object_size = (int(obj['width']),int(obj['height']))
+                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'right')
+                self.game_objects.camera_blocks.add(new_camera_stop)
+            elif id == 13:
+                object_size = (int(obj['width']),int(obj['height']))
+                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'top')
+                self.game_objects.camera_blocks.add(new_camera_stop)
+            elif id == 14:
+                object_size = (int(obj['width']),int(obj['height']))
+                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'left')
+                self.game_objects.camera_blocks.add(new_camera_stop)
+            elif id == 15:
+                object_size = (int(obj['width']),int(obj['height']))
+                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'bottom')
+                self.game_objects.camera_blocks.add(new_camera_stop)
 
 
     #TODO: Make sure all FG layers are added to all_fgs!!

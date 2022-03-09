@@ -646,9 +646,9 @@ class Path_Col_h(Trigger):
 
 class Camera_Stop(pygame.sprite.Sprite):
 
-    def __init__(self,pos,dir):
+    def __init__(self,size,pos,dir):
         super().__init__()
-        self.rect=pygame.Rect((pos),(16,16))
+        self.rect=pygame.Rect((pos),size)
         self.hitbox = self.rect.inflate(0,0)
         self.dir = dir
         self.image = pygame.Surface((16,16))
