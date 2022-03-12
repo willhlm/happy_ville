@@ -190,10 +190,11 @@ class Collisions():
             if not ramp_collision:
                 static_entity_y = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
                 if static_entity_y:
-
+                    print(entity.velocity[1])
                     if entity.velocity[1]>0:#going down
                         entity.hitbox.bottom = static_entity_y.hitbox.top
                         entity.collision_types['bottom'] = True
+                        entity.velocity[1] = 0
 
                     elif entity.velocity[1]<0:#going up
                         entity.hitbox.top = static_entity_y.hitbox.bottom

@@ -213,17 +213,16 @@ class Game_Objects():
         xflag, yflag = False, False
         for stop in self.camera_blocks:
             if stop.dir == 'right':
-                if (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
-                    xflag = True
+                if (self.player.hitbox.centery - stop.rect.bottom < self.player_center[1]) and (stop.rect.top - self.player.hitbox.centery < self.game.WINDOW_SIZE[1] - self.player_center[1]):
+                    if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
+                        xflag = True
             elif stop.dir == 'left':
                 if stop.rect.right >= 0 and self.player.hitbox.centerx < self.player_center[0]:
                     xflag = True
             elif stop.dir == 'bottom':
-                print(stop.rect.left - self.player.hitbox.centerx, ' ', self.player.hitbox.centerx - stop.rect.right)
                 if (stop.rect.left - self.player.hitbox.centerx < self.player_center[0]) and (self.player.hitbox.centerx - stop.rect.right < self.player_center[0]):
                     if (-self.game.WINDOW_SIZE[1] < (stop.rect.centery - self.player.hitbox.centery) < (self.game.WINDOW_SIZE[1] - self.player_center[1])):
                         yflag = True
-                        print('yo')
             elif stop.dir == 'top':
                 if (0 < stop.rect.left - self.player.hitbox.centerx < self.player_center[0]) or (0 < self.player.hitbox.centerx - stop.rect.right < self.player_center[0]):
                     if self.player.hitbox.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:

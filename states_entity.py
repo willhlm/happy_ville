@@ -11,7 +11,7 @@ class Entity_States():
 
     def update_vel(self):
         self.entity.velocity[1]+=self.entity.acceleration[1]-self.entity.velocity[1]*self.entity.friction[1]#gravity
-        self.entity.velocity[1]=min(self.entity.velocity[1],7)#set a y max speed
+        self.entity.velocity[1]=min(self.entity.velocity[1],7.5)#set a y max speed
 
         self.entity.velocity[0]+=self.entity.acceleration[0]-self.entity.friction[0]*self.entity.velocity[0]
 
@@ -25,10 +25,10 @@ class Entity_States():
         pass
 
     def walk(self):
-        self.entity.acceleration=[1,0.8]
+        self.entity.acceleration=[1,0.7]
 
     def stay_still(self):
-        self.entity.acceleration=[0,0.8]
+        self.entity.acceleration=[0,0.7]
 
     def handle_input(self,input):
         pass

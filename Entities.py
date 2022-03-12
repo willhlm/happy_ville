@@ -188,7 +188,7 @@ class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos):
         super().__init__(pos)
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.acceleration=[1,0.8]
+        self.acceleration=[1,0.7]
         self.velocity=[0,0]
         self.friction=[0.2,0]
         self.animation_stack=[animation.Entity_animation(self)]#maybe it is better to assign animation class based on the speific entity, since some doesn't have pre,main,post
@@ -418,7 +418,7 @@ class Player(Character):
         super().update(pos)
         self.omamoris.update()
         #self.load_sfx()
-        
+
 
     def equip_omamori(self,omamori_index):
         new_omamori=self.omamoris.omamori_list[omamori_index]

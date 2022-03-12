@@ -1,3 +1,4 @@
+
 import sys
 from states_entity import Entity_States
 
@@ -114,8 +115,8 @@ class Jump_run(Player_states):
         self.jumping()
 
     def jumping(self):
-        if self.entity.velocity[1]>0:
-            self.entity.velocity[1] = -11
+        if self.entity.velocity[1]>=0:
+            self.entity.velocity[1] = -10.5
 
     def update_state(self):
         if self.entity.velocity[1]>0:
@@ -346,7 +347,7 @@ class Dash_attack(Player_states):
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
 
     def update_state(self):
-        self.entity.velocity[1]=0        
+        self.entity.velocity[1]=0
         self.entity.velocity[0]=self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
 
         if self.done:

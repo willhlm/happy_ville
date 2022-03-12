@@ -95,7 +95,6 @@ class Level():
 
         for obj in map_statics:
             id = obj['gid'] - self.map_data['statics_firstgid']
-            print(id)
             object_position = (int(obj['x']),int(obj['y']))
             #player
             if id == 0:
@@ -214,7 +213,6 @@ class Level():
 
         #blit all sublayers onto one single parallax layer in order
         for bg in list(blit_dict.keys()):
-            print(blit_dict[bg])
             if len(blit_dict[bg]) == 1:
                 continue
             blit_dict[bg].sort(reverse = True)
