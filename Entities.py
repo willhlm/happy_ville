@@ -280,7 +280,7 @@ class Enemy(Character):
             self.AImethod=self.peaceAI
 
     def peaceAI(self):
-        if self.counter>100:
+        if self.counter>20:
             self.counter=0
             rand=random.randint(0,1)
             if rand==0:
@@ -319,6 +319,7 @@ class Woopie(Enemy):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.shake=10
         self.attack_distance=0
+
 class Vatt(Enemy):
 
     aggro = False  #remember to turn false when changing maps
@@ -326,10 +327,10 @@ class Vatt(Enemy):
         super().__init__(pos,projectile_group,loot_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/vatt/main/idle/idle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
+        self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 30
-        self.spirit=30
+        self.spirit = 30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
@@ -340,6 +341,15 @@ class Vatt(Enemy):
             self.currentstate.change_state('Transform')#also sets to aggro AI
             self.aggro = True
             #self.AImethod=self.aggroAI
+
+    def peaceAI(self):
+        if self.counter>70:
+            self.counter=0
+            rand=random.randint(0,6)
+            if rand<2:
+                self.currentstate.handle_input('Idle')
+            else:
+                self.currentstate.handle_input('Walk')
 
     def aggroAI(self):
         if self.counter < 40:

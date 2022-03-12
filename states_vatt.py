@@ -1,5 +1,6 @@
 import sys
 from states_entity import Entity_States
+import random
 #from Entities import Vatt
 
 class Vatt_states(Entity_States):
@@ -40,6 +41,9 @@ class Idle(Vatt_states):
             self.enter_state('Hurt')
         elif input == 'Run':
             self.enter_state('Run')
+        elif input == 'Walk':
+            self.entity.dir[0] = random.choice((1,-1))
+            self.enter_state('Walk')
 
 class Idle_aggro(Vatt_states):
     def __init__(self,entity):
@@ -56,14 +60,18 @@ class Idle_aggro(Vatt_states):
         elif input == 'Run':
             self.enter_state('Run_aggro')
 
+
 class Walk(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
+        self.entity.acceleration[0] = 0.4 * self.entity.dir[0]
 
-    def handle_input(self):
+    def handle_input(self,input):
         if input=='Hurt':
             self.enter_state('Hurt')
+        elif input == 'Idle':
+            self.enter_state('Idle')
         #if not self.entity.collision_types['bottom']:
         #    self.enter_state('Fall_run')
 
@@ -96,7 +104,7 @@ class Fall_stand_aggro(Vatt_states):
 class Run(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.acceleration = [1.6,0.8]
+        self.entity.acceleration[0] = 1.5
 
     def update_state(self):
         pass
@@ -110,7 +118,7 @@ class Run(Vatt_states):
 class Run_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.acceleration = [1.5,0.8]
+        self.entity.acceleration[0] = 1.2 * self.entity.dir[0]
 
     def update_state(self):
         pass
@@ -232,7 +240,7 @@ class Javelin(Vatt_states):
         if self.phase=='pre':
             self.phase='main'
             self.counter = 0
-            self.entity.acceleration = [6,0]
+            self.entity.acceleration = [3.5*self.entity.dir[0],0]
         elif self.phase=='main':
             pass
         elif self.phase=='post':
