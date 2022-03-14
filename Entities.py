@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss, math
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -166,6 +166,76 @@ class BG_Animated(BG_Block):
             self.image = self.sprites[self.frame_index]
         else:
             self.timer += 1
+
+class Particle_effect(Staticentity):
+
+    class Particle(pygame.sprite.Sprite):
+        def __init__(self, pos = [0,0], vel = [0,0], accel = 0.98, color = [0,0,0,0], fade = 1):
+            super().__init__()
+            self.image = pygame.Surface((1,1), pygame.SRCALPHA, 32)
+            self.image = self.image.convert_alpha()
+            self.image.fill(color)
+            self.rect = self.image.get_rect()
+            self.rect.topleft = pos
+            self.true_pos = pos
+            self.vel = vel
+            self.accel = accel
+            self.color = color
+            self.fade = fade
+            print(pos,vel,color)
+
+        def update(self):
+            self.true_pos = [self.true_pos[0] + self.vel[0], self.true_pos[1] + self.vel[1]]
+            self.rect.topleft = [int(self.true_pos[0]),int(self.true_pos[1])]
+            self.vel[0] = self.vel[0] * self.accel
+            self.vel[1] = self.vel[1] * self.accel
+            if not self.fade == 1:
+                self.color[-1] = int(self.color[-1] * self.fade)
+                self.image.fill(self.color)
+
+
+
+    def __init__(self, pos, img_size = (32,32)):
+        super().__init__(pos)
+        self.image = pygame.Surface(img_size, pygame.SRCALPHA, 32)
+        self.image = self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.lifetime = 100
+        self.generate_particles()
+
+    def generate_particles(self):
+        self.particles = pygame.sprite.Group()
+
+    def update(self, pos):
+        self.image.fill((0,0,0,0))
+        self.particles.draw(self.image)
+        self.particles.update()
+        super().update(pos)
+        self.lifetime -= 1
+        if not bool(self.particles) or self.lifetime == 0:
+            self.kill()
+
+class Particle_effect_attack(Particle_effect):
+
+
+    def __init__(self, pos):
+        self.blit_size = (128,128)
+        super().__init__(pos, self.blit_size)
+        self.lifetime = 60
+
+    def generate_particles(self):
+        #generate random number of particles
+        super().generate_particles()
+        quantity = random.randint(60,100)
+        direction_qty = random.randint(5,20)
+        directions = []
+        for _ in range(direction_qty):
+            angle = random.randint(1,360)
+            directions.append((math.cos(angle),math.sin(angle)))
+        for j in range(quantity):
+            vel = random.uniform(1.5,5)
+            self.particles.add(self.Particle(pos = [self.blit_size[0]/2,self.blit_size[1]/2],vel = [i*vel for i in directions[random.randint(0,len(directions)-1)]], color = [255,255,255,255], fade = 0.95))
 
 
 class Dynamicentity(Staticentity):
@@ -834,7 +904,8 @@ class Sword(Melee):
         self.sword_jump()
         collision_enemy.knock_back(self.dir[0])
         slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
-        self.entity.cosmetics.add(slash)
+        clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
+        self.entity.cosmetics.add(clash)
         self.kill()
 
     def sword_jump(self):
