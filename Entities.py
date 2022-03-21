@@ -687,6 +687,17 @@ class Reindeer(Boss):
     def AI(self,playerpos):
         pass
 
+class Path_col(Staticentity):
+
+    def __init__(self, pos, size, img):
+        super().__init__(pos, pygame.Surface(size))
+        self.hitbox = self.rect.inflate(0,0)
+
+    def update(self, pos):
+        super().update(pos)
+        self.hitbox.center = self.rect.center
+
+#legacy code --- delete???
 class Trigger(pygame.sprite.Sprite):
 
     def __init__(self,pos):

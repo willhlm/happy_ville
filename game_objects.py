@@ -5,6 +5,7 @@ import Entities
 import Level
 import map_loader
 import BG
+import sound
 
 class Game_Objects():
 
@@ -12,8 +13,7 @@ class Game_Objects():
 
         self.game = game
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
-        pygame.mixer.init
-        self.bg_music = pygame.mixer.Channel(0)
+        self.sound = sound.Sound()
         self.collisions = Engine.Collisions()
         self.create_groups()
 
@@ -51,15 +51,11 @@ class Game_Objects():
     def load_map(self, map_name):
         self.map = map_loader.Level(map_name, self)
         self.initiate_groups()
-        #self.load_music()
+        self.load_bg_music()
 
-    def change_map(self, map_name):
-        #actually load the new map
-        self.load_map(map_name)
-
-    def load_music(self):
-        self.bg_music.play(self.map.load_bg_music(),-1)
-        self.bg_music.set_volume(0.1)
+    def load_bg_music(self):
+        self.sound.load_bg_sound(self.map.level_name)
+        self.sound.play_bg_sound()
 
     def initiate_groups(self):
 
@@ -214,7 +210,8 @@ class Game_Objects():
         for stop in self.camera_blocks:
             if stop.dir == 'right':
                 if (self.player.hitbox.centery - stop.rect.bottom < self.player_center[1]) and (stop.rect.top - self.player.hitbox.centery < self.game.WINDOW_SIZE[1] - self.player_center[1]):
-                    if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
+                    #if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
+                    if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player_center[0]) < self.player_center[0] and self.player.hitbox.centerx >= self.player_center[0]:
                         xflag = True
             elif stop.dir == 'left':
                 if stop.rect.right >= 0 and self.player.hitbox.centerx < self.player_center[0]:
