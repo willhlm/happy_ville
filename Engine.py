@@ -112,16 +112,8 @@ class Collisions():
 
     @staticmethod
     def check_trigger(player,triggers):
-        map_change = False
-        collision = pygame.sprite.spritecollideany(player,triggers,Collisions.collided)
-        if collision:
-            if type(collision).__name__ in ["Path_Col_h","Path_Col_v"]:
-                try:
-                    map_change = collision.next_map
-                except:
-                    pass
+        return pygame.sprite.spritecollideany(player,triggers,Collisions.collided)
 
-        return map_change
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one

@@ -1,12 +1,13 @@
 import pygame, csv, Entities, math, random, Read_files
 
 class Level():
-    def __init__(self, level, game_objects):
+    def __init__(self, level, game_objects, spawn):
         self.PLAYER_CENTER = game_objects.player_center
         self.SCREEN_SIZE = game_objects.game.WINDOW_SIZE
         self.TILE_SIZE = 16
         self.game_objects = game_objects
         self.level_name = level
+        self.spawn = spawn
         self.platforms = pygame.sprite.Group()
         self.platforms_pause=pygame.sprite.Group()
         self.npc_collision = pygame.sprite.Group()
@@ -14,6 +15,7 @@ class Level():
         self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed()]
         self.camera = self.cameras[0]
         self.load_map_data()
+
 
     def load_map_data(self):
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
@@ -98,8 +100,11 @@ class Level():
             object_position = (int(obj['x']),int(obj['y']))
             #player
             if id == 0:
-                self.game_objects.player.set_pos(object_position)
-                self.init_player_pos = object_position
+                for property in obj['properties']:
+                    if property['name'] == 'spawn':
+                        if property['value'] == self.spawn:
+                            self.game_objects.player.set_pos(object_position)
+                            self.init_player_pos = object_position
             #npcs
             elif id == 1:
                 properties = obj['properties']
@@ -116,6 +121,16 @@ class Level():
                         enemy_name = property['value']
                 new_enemy = getattr(Entities, enemy_name)
                 self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles, self.game_objects.loot))
+
+            elif id == 9:
+                object_size = (int(obj['width']),int(obj['height']))
+                for property in obj['properties']:
+                    if property['name'] == 'path_to':
+                        destination = property['value']
+                    if property['name'] == 'spawn':
+                        spawn = property['value']
+                new_path = Entities.Path_col(object_position,object_size,destination,spawn)
+                self.game_objects.triggers.add(new_path)
             elif id == 12:
                 object_size = (int(obj['width']),int(obj['height']))
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'right')

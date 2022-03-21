@@ -48,8 +48,8 @@ class Game_Objects():
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(2*self.game.WINDOW_SIZE[1]/3))
 
-    def load_map(self, map_name):
-        self.map = map_loader.Level(map_name, self)
+    def load_map(self, map_name, spawn = '1'):
+        self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
         self.load_bg_music()
 
@@ -72,6 +72,7 @@ class Game_Objects():
         self.all_bgs.empty()
         self.all_fgs.empty()
         self.camera_blocks.empty()
+        self.triggers.empty()
 
         #load all objects and art
         self.map.load_statics()
@@ -86,6 +87,12 @@ class Game_Objects():
         self.collisions.check_invisible(self.npcs,self.invisible_blocks)
         self.collisions.pickup_loot(self.player,self.loot)
         self.collisions.check_enemy_collision(self.player,self.enemies)
+
+        trigger = self.collisions.check_trigger(self.player,self.triggers)
+        if trigger:
+            if type(trigger).__name__ == 'Path_col':
+                self.load_map(trigger.destination, trigger.spawn)
+
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
@@ -173,11 +180,6 @@ class Game_Objects():
             self.change_map(change_map)
         elif chest_id:
             self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
-
-    def trigger_event(self):
-        change_map = self.collisions.check_trigger(self.player,self.triggers)
-        if change_map:
-            self.change_map(change_map)
 
     def group_distance(self):#remove the entities if it is off screen from thir group
         bounds=[-100,600,-100,350]#-x,+x,-y,+y

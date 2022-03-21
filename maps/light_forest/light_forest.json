@@ -1,11 +1,4 @@
 { "compressionlevel":-1,
- "editorsettings":
-    {
-     "export":
-        {
-         "target":"."
-        }
-    },
  "height":50,
  "infinite":false,
  "layers":[
@@ -222,6 +215,129 @@
          "type":"tilelayer",
          "visible":true,
          "width":700,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":6,
+         "name":"statics",
+         "objects":[
+                {
+                 "gid":1,
+                 "height":16,
+                 "id":100,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":6416,
+                 "y":272
+                }, 
+                {
+                 "gid":16,
+                 "height":16,
+                 "id":144,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":144,
+                 "x":8384,
+                 "y":576
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":153,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Aslat"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":10592,
+                 "y":560
+                }, 
+                {
+                 "gid":10,
+                 "height":16,
+                 "id":154,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"path_to",
+                         "type":"string",
+                         "value":"light_forest_cave"
+                        }, 
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":144,
+                 "x":8384,
+                 "y":592
+                }, 
+                {
+                 "gid":10,
+                 "height":48,
+                 "id":155,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"path_to",
+                         "type":"string",
+                         "value":"light_forest_cave"
+                        }, 
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"2"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":9248,
+                 "y":512
+                }, 
+                {
+                 "gid":1,
+                 "height":16,
+                 "id":156,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"2"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":9344,
+                 "y":480
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -655,65 +771,12 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":6,
-         "name":"statics",
-         "objects":[
-                {
-                 "gid":1,
-                 "height":16,
-                 "id":100,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":352,
-                 "y":576
-                }, 
-                {
-                 "gid":16,
-                 "height":16,
-                 "id":144,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":144,
-                 "x":8384,
-                 "y":576
-                }, 
-                {
-                 "gid":2,
-                 "height":16,
-                 "id":153,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"class",
-                         "type":"string",
-                         "value":"Aslat"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":10592,
-                 "y":560
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
         }],
  "nextlayerid":39,
- "nextobjectid":154,
+ "nextobjectid":157,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.4.3",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -852,6 +915,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":1.4,
+ "version":"1.6",
  "width":700
 }

@@ -344,7 +344,6 @@ class Gameplay(Game_State):
     def update(self):
         self.game.game_objects.scrolling()
         self.game.game_objects.group_distance()
-        self.game.game_objects.trigger_event()
         self.game.game_objects.check_camera_border()
         self.game.game_objects.collide_all()
 

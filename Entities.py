@@ -689,9 +689,12 @@ class Reindeer(Boss):
 
 class Path_col(Staticentity):
 
-    def __init__(self, pos, size, img):
+    def __init__(self, pos, size, destination, spawn):
         super().__init__(pos, pygame.Surface(size))
+        self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
+        self.destination = destination
+        self.spawn = spawn
 
     def update(self, pos):
         super().update(pos)
