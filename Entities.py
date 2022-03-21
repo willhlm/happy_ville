@@ -220,22 +220,22 @@ class Particle_effect_attack(Particle_effect):
 
 
     def __init__(self, pos):
-        self.blit_size = (128,128)
+        self.blit_size = (256,256)
         super().__init__(pos, self.blit_size)
-        self.lifetime = 60
+        self.lifetime = 30
 
     def generate_particles(self):
         #generate random number of particles
         super().generate_particles()
-        quantity = random.randint(60,100)
-        direction_qty = random.randint(5,20)
+        quantity = random.randint(600,700)
+        direction_qty = random.randint(50,60)
         directions = []
         for _ in range(direction_qty):
             angle = random.randint(1,360)
             directions.append((math.cos(angle),math.sin(angle)))
         for j in range(quantity):
-            vel = random.uniform(1.5,5)
-            self.particles.add(self.Particle(pos = [self.blit_size[0]/2,self.blit_size[1]/2],vel = [i*vel for i in directions[random.randint(0,len(directions)-1)]], color = [255,255,255,255], fade = 0.95))
+            vel = random.uniform(1,9)
+            self.particles.add(self.Particle(pos = [self.blit_size[0]/2,self.blit_size[1]/2],vel = [i*vel for i in directions[random.randint(0,len(directions)-1)]], color = [255,255,255,255], fade = 0.9))
 
 
 class Dynamicentity(Staticentity):
