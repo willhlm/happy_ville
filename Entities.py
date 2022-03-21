@@ -364,14 +364,12 @@ class Enemy(Character):
         else:
             if self.player_distance[0] > self.attack_distance:
                 self.dir[0] = 1
-                self.acceleration[0]=1
                 self.currentstate.handle_input('Run')
             elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
                 self.dir[0] = -1
-                self.acceleration[0]=-1
                 self.currentstate.handle_input('Run')
             else:
                 self.counter = 0
@@ -498,7 +496,6 @@ class Player(Character):
         super().update(pos)
         self.omamoris.update()
         #self.load_sfx()
-
 
     def equip_omamori(self,omamori_index):
         new_omamori=self.omamoris.omamori_list[omamori_index]
