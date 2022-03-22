@@ -102,6 +102,8 @@ class Game_Objects():
         if trigger:
             if type(trigger).__name__ == 'Path_col':
                 self.sound.pause_bg_sound()
+                self.player.enter_idle()
+                self.player.reset_movement()
                 new_game_state = states.Fadeout(self.game, trigger.destination, trigger.spawn)
                 new_game_state.enter_state()
                 #self.load_map(trigger.destination, trigger.spawn)

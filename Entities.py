@@ -486,6 +486,14 @@ class Player(Character):
         self.currentstate = states_player.Idle(self)
         self.omamoris=Omamoris(self)
 
+    def enter_idle(self):
+        self.currentstate = states_player.Idle(self)
+
+    def reset_movement(self):
+        self.velocity = [0,0]
+        self.acceleration = [0,0.7]
+        self.friction = [0.2,0]
+
     def load_sfx(self):#make a sound class
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
             self.action_sfx_player.play(self.action_sfx['run'])
