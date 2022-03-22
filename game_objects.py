@@ -63,8 +63,11 @@ class Game_Objects():
         self.fade_count = 0
 
     def load_bg_music(self):
-        self.sound.load_bg_sound(self.map.level_name)
-        self.sound.play_bg_sound()
+        try:
+            self.sound.load_bg_sound(self.map.level_name)
+            self.sound.play_bg_sound()
+        except FileNotFoundError:
+            print("No BG music found")
 
     def initiate_groups(self):
 

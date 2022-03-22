@@ -83,7 +83,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('light_forest_cave')
+            self.game.game_objects.load_map('light_forest')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -446,7 +446,7 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             else:
-                if not (self.game.game_objects.FADEIN or self.game.game_objects.BLACKEDOUT):
+                if not self.game.game_objects.BLACKEDOUT:
                     self.game.game_objects.player.currentstate.handle_press_input(input)
                     self.game.game_objects.player.omamoris.handle_input(input)
         elif input[1]:#release

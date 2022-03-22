@@ -1,4 +1,6 @@
-import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss, math
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss, math, sound
+
+pygame.mixer.init()
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -457,6 +459,9 @@ class Larv(Enemy):
         self.attack_distance=60
 
 class Player(Character):
+
+    sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword.ogg")
+
     def __init__(self,pos,projectile_group,cosmetics_group):
         super().__init__(pos)
         self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()

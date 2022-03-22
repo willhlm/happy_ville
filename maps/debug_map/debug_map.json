@@ -431,6 +431,12 @@
                  "height":16,
                  "id":58,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"1"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
