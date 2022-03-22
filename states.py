@@ -367,7 +367,7 @@ class Gameplay(Game_State):
             if count > b_len:
                 self.game.game_objects.BLACKEDOUT = False
                 self.game.game_objects.fade_count = 0
-                self.game.game_objects.load_bg_music() 
+                self.game.game_objects.load_bg_music()
             self.game.screen.fill((0,0,0))
             self.game.game_objects.fade_count += 1
         elif self.game.game_objects.FADEIN:
@@ -422,35 +422,35 @@ class Gameplay(Game_State):
         self.game.screen.blit(self.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
-        if not (self.game.game_objects.FADEIN or self.game.game_objects.BLACKEDOUT):
-            self.game.game_objects.player.currentstate.handle_movement(input)
+        self.game.game_objects.player.currentstate.handle_movement(input)
 
-            if input[0]:#press
-                if input[-1]=='start':#escape button
-                    new_state = Pause_Menu(self.game)
+        if input[0]:#press
+            if input[-1]=='start':#escape button
+                new_state = Pause_Menu(self.game)
+                new_state.enter_state()
+
+            elif input[-1]=='rb':
+                new_state = Ability_Menu(self.game)
+                new_state.enter_state()
+
+            elif input[-1] == 'y':
+                npc = self.game.game_objects.conversation_collision()
+                if npc:
+                    new_state = Conversation(self.game, npc)
                     new_state.enter_state()
-
-                elif input[-1]=='rb':
-                    new_state = Ability_Menu(self.game)
-                    new_state.enter_state()
-
-                elif input[-1] == 'y':
-                    npc = self.game.game_objects.conversation_collision()
-                    if npc:
-                        new_state = Conversation(self.game, npc)
-                        new_state.enter_state()
-                    else:
-                        self.game.game_objects.interactions()
-
-                elif input[-1] == 'select':
-                    new_state = Select_Menu(self.game)
-                    new_state.enter_state()
-
                 else:
+                    self.game.game_objects.interactions()
+
+            elif input[-1] == 'select':
+                new_state = Select_Menu(self.game)
+                new_state.enter_state()
+
+            else:
+                if not (self.game.game_objects.FADEIN or self.game.game_objects.BLACKEDOUT):
                     self.game.game_objects.player.currentstate.handle_press_input(input)
                     self.game.game_objects.player.omamoris.handle_input(input)
-            elif input[1]:#release
-                self.game.game_objects.player.currentstate.handle_release_input(input)
+        elif input[1]:#release
+            self.game.game_objects.player.currentstate.handle_release_input(input)
 
 class Fadeout(Game_State):
 
