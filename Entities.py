@@ -1,4 +1,6 @@
-import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss, math
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss, math, sound
+
+pygame.mixer.init()
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
     def __init__(self):
@@ -457,6 +459,9 @@ class Larv(Enemy):
         self.attack_distance=60
 
 class Player(Character):
+
+    sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword.ogg")
+
     def __init__(self,pos,projectile_group,cosmetics_group):
         super().__init__(pos)
         self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()
@@ -485,6 +490,14 @@ class Player(Character):
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.currentstate = states_player.Idle(self)
         self.omamoris=Omamoris(self)
+
+    def enter_idle(self):
+        self.currentstate = states_player.Idle(self)
+
+    def reset_movement(self):
+        self.velocity = [0,0]
+        self.acceleration = [0,0.7]
+        self.friction = [0.2,0]
 
     def load_sfx(self):#make a sound class
         if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:

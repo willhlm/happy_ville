@@ -63,8 +63,11 @@ class Game_Objects():
         self.fade_count = 0
 
     def load_bg_music(self):
-        self.sound.load_bg_sound(self.map.level_name)
-        self.sound.play_bg_sound()
+        try:
+            self.sound.load_bg_sound(self.map.level_name)
+            self.sound.play_bg_sound()
+        except FileNotFoundError:
+            print("No BG music found")
 
     def initiate_groups(self):
 
@@ -102,6 +105,8 @@ class Game_Objects():
         if trigger:
             if type(trigger).__name__ == 'Path_col':
                 self.sound.pause_bg_sound()
+                self.player.enter_idle()
+                self.player.reset_movement()
                 new_game_state = states.Fadeout(self.game, trigger.destination, trigger.spawn)
                 new_game_state.enter_state()
                 #self.load_map(trigger.destination, trigger.spawn)

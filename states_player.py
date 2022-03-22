@@ -1,5 +1,5 @@
 
-import sys
+import sys, sound
 from states_entity import Entity_States
 
 class Player_states(Entity_States):
@@ -424,6 +424,8 @@ class Sword(Player_states):
         self.sword3=False#flag to check if we shoudl go to third sword attack
         self.dir=self.entity.dir.copy()#animation direction
         self.entity.sword.dir=self.dir.copy()#sword direction
+        sound.Sound.play_sfx(self.entity.sfx_sword)
+
 
     def increase_phase(self):
         if self.phase==self.phases[-1]:
@@ -474,6 +476,7 @@ class Sword1_stand(Sword):
         self.phase=self.phases[0]
         self.entity.sword.lifetime=10#swrod hitbox duration
         self.entity.sword.dir[1]=0
+
 
     def update_state(self):
         if self.done and self.sword2:
