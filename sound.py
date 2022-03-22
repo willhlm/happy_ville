@@ -19,6 +19,9 @@ class Sound():
     def play_bg_sound(self):
         self.channels[0].play(self.bg, loops = -1, fade_ms = 500)
 
+    def pause_bg_sound(self):
+        self.channels[0].fadeout(1000)
+
     def remove_sounds(self, channel):
         pass
 

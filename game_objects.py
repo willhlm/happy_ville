@@ -6,6 +6,7 @@ import Level
 import map_loader
 import BG
 import sound
+import states
 
 class Game_Objects():
 
@@ -15,6 +16,11 @@ class Game_Objects():
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
         self.sound = sound.Sound()
         self.collisions = Engine.Collisions()
+        self.FADEIN = False
+        self.BLACKEDOUT = False
+        self.fadein_length = 20
+        self.blackedout_length = 40
+        self.fade_count = 0
         self.create_groups()
 
     def create_groups(self):
@@ -51,7 +57,10 @@ class Game_Objects():
     def load_map(self, map_name, spawn = '1'):
         self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
-        self.load_bg_music()
+        #self.load_bg_music()
+        self.FADEIN = True
+        self.BLACKEDOUT = True
+        self.fade_count = 0
 
     def load_bg_music(self):
         self.sound.load_bg_sound(self.map.level_name)
@@ -88,10 +97,14 @@ class Game_Objects():
         self.collisions.pickup_loot(self.player,self.loot)
         self.collisions.check_enemy_collision(self.player,self.enemies)
 
+        #enter new state if new map is provided
         trigger = self.collisions.check_trigger(self.player,self.triggers)
         if trigger:
             if type(trigger).__name__ == 'Path_col':
-                self.load_map(trigger.destination, trigger.spawn)
+                self.sound.pause_bg_sound()
+                new_game_state = states.Fadeout(self.game, trigger.destination, trigger.spawn)
+                new_game_state.enter_state()
+                #self.load_map(trigger.destination, trigger.spawn)
 
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
