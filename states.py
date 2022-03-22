@@ -83,7 +83,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('light_forest')
+            self.game.game_objects.load_map('light_forest_cave')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -264,6 +264,7 @@ class Option_Menu(Game_State):
             elif self.current_button == 1:
                 self.game.RENDER_HITBOX_FLAG = not self.game.RENDER_HITBOX_FLAG
 
+
 class Pause_Menu(Game_State):
 
     def __init__(self,game):
@@ -340,11 +341,14 @@ class Gameplay(Game_State):
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
+        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
+        self.fade_surface.set_alpha(255)
+        self.fade_surface.fill((0,0,0))
+
 
     def update(self):
         self.game.game_objects.scrolling()
         self.game.game_objects.group_distance()
-        self.game.game_objects.trigger_event()
         self.game.game_objects.check_camera_border()
         self.game.game_objects.collide_all()
 
@@ -352,6 +356,26 @@ class Gameplay(Game_State):
         self.game.screen.fill((207,238,250))
         self.game.game_objects.draw()
         self.blit_screen_info()
+        if self.game.game_objects.FADEIN:
+            self.fadein()
+
+    def fadein(self):
+        count = self.game.game_objects.fade_count
+        b_len = self.game.game_objects.blackedout_length
+        f_len = self.game.game_objects.fadein_length
+        if self.game.game_objects.BLACKEDOUT:
+            if count > b_len:
+                self.game.game_objects.BLACKEDOUT = False
+                self.game.game_objects.fade_count = 0
+                self.game.game_objects.load_bg_music()
+            self.game.screen.fill((0,0,0))
+            self.game.game_objects.fade_count += 1
+        elif self.game.game_objects.FADEIN:
+            if count > f_len:
+                self.game.game_objects.FADEIN = False
+            self.fade_surface.set_alpha(int((f_len - count)*(255/f_len)))
+            self.game.screen.blit(self.fade_surface, (0,0))
+            self.game.game_objects.fade_count += 1
 
     def blit_screen_info(self):
         self.blit_health()
@@ -422,10 +446,35 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             else:
-                self.game.game_objects.player.currentstate.handle_press_input(input)
-                self.game.game_objects.player.omamoris.handle_input(input)
+                if not (self.game.game_objects.FADEIN or self.game.game_objects.BLACKEDOUT):
+                    self.game.game_objects.player.currentstate.handle_press_input(input)
+                    self.game.game_objects.player.omamoris.handle_input(input)
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
+
+class Fadeout(Game_State):
+
+    def __init__(self,game,new_map,spawn):
+        super().__init__(game)
+        self.count = 0
+        self.fadeout_length = 60
+        self.new_map = new_map
+        self.spawn = spawn
+        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
+        self.fade_surface.set_alpha(int(255/self.fadeout_length))
+        self.fade_surface.fill((0,0,0))
+
+    def update(self):
+        self.count += 1
+        if self.count > self.fadeout_length:
+            self.exit_state()
+            self.game.game_objects.load_map(self.new_map, self.spawn)
+
+    def render(self):
+        self.fade_surface.set_alpha(int(self.count*(255/self.fadeout_length)))
+        self.game.screen.blit(self.fade_surface, (0,0))
+
+
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):

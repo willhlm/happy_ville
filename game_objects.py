@@ -5,6 +5,8 @@ import Entities
 import Level
 import map_loader
 import BG
+import sound
+import states
 
 class Game_Objects():
 
@@ -12,9 +14,13 @@ class Game_Objects():
 
         self.game = game
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
-        pygame.mixer.init
-        self.bg_music = pygame.mixer.Channel(0)
+        self.sound = sound.Sound()
         self.collisions = Engine.Collisions()
+        self.FADEIN = False
+        self.BLACKEDOUT = False
+        self.fadein_length = 20
+        self.blackedout_length = 40
+        self.fade_count = 0
         self.create_groups()
 
     def create_groups(self):
@@ -48,18 +54,17 @@ class Game_Objects():
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(2*self.game.WINDOW_SIZE[1]/3))
 
-    def load_map(self, map_name):
-        self.map = map_loader.Level(map_name, self)
+    def load_map(self, map_name, spawn = '1'):
+        self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
-        #self.load_music()
+        #self.load_bg_music()
+        self.FADEIN = True
+        self.BLACKEDOUT = True
+        self.fade_count = 0
 
-    def change_map(self, map_name):
-        #actually load the new map
-        self.load_map(map_name)
-
-    def load_music(self):
-        self.bg_music.play(self.map.load_bg_music(),-1)
-        self.bg_music.set_volume(0.1)
+    def load_bg_music(self):
+        self.sound.load_bg_sound(self.map.level_name)
+        self.sound.play_bg_sound()
 
     def initiate_groups(self):
 
@@ -76,6 +81,7 @@ class Game_Objects():
         self.all_bgs.empty()
         self.all_fgs.empty()
         self.camera_blocks.empty()
+        self.triggers.empty()
 
         #load all objects and art
         self.map.load_statics()
@@ -90,6 +96,16 @@ class Game_Objects():
         self.collisions.check_invisible(self.npcs,self.invisible_blocks)
         self.collisions.pickup_loot(self.player,self.loot)
         self.collisions.check_enemy_collision(self.player,self.enemies)
+
+        #enter new state if new map is provided
+        trigger = self.collisions.check_trigger(self.player,self.triggers)
+        if trigger:
+            if type(trigger).__name__ == 'Path_col':
+                self.sound.pause_bg_sound()
+                new_game_state = states.Fadeout(self.game, trigger.destination, trigger.spawn)
+                new_game_state.enter_state()
+                #self.load_map(trigger.destination, trigger.spawn)
+
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
@@ -178,11 +194,6 @@ class Game_Objects():
         elif chest_id:
             self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
 
-    def trigger_event(self):
-        change_map = self.collisions.check_trigger(self.player,self.triggers)
-        if change_map:
-            self.change_map(change_map)
-
     def group_distance(self):#remove the entities if it is off screen from thir group
         bounds=[-100,600,-100,350]#-x,+x,-y,+y
 
@@ -214,7 +225,8 @@ class Game_Objects():
         for stop in self.camera_blocks:
             if stop.dir == 'right':
                 if (self.player.hitbox.centery - stop.rect.bottom < self.player_center[1]) and (stop.rect.top - self.player.hitbox.centery < self.game.WINDOW_SIZE[1] - self.player_center[1]):
-                    if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
+                    #if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
+                    if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player_center[0]) < self.player_center[0] and self.player.hitbox.centerx >= self.player_center[0]:
                         xflag = True
             elif stop.dir == 'left':
                 if stop.rect.right >= 0 and self.player.hitbox.centerx < self.player_center[0]:
