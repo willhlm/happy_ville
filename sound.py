@@ -14,7 +14,7 @@ class Sound():
             self.channels.append(pygame.mixer.Channel(i))
             if i < self.reserved_channels:
                 pygame.mixer.set_reserved(i)
-        self.channels[0].set_volume(1)
+        self.channels[0].set_volume(0.4)
 
     def play_bg_sound(self):
         self.channels[0].play(self.bg, loops = -1, fade_ms = 500)
@@ -31,7 +31,7 @@ class Sound():
     def play_sfx(sfx):
         channel = pygame.mixer.find_channel()
         try:
-            channel.set_volume(1)
+            channel.set_volume(0.3)
             channel.play(sfx)
         except:
             print("No available channels")

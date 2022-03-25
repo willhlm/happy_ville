@@ -460,7 +460,7 @@ class Larv(Enemy):
 
 class Player(Character):
 
-    sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword.ogg")
+    sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
 
     def __init__(self,pos,projectile_group,cosmetics_group):
         super().__init__(pos)
