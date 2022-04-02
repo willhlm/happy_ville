@@ -180,6 +180,7 @@ class Collisions():
                     entity.update_rect()
 
             if not ramp_collision:
+
                 static_entity_y = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
                 if static_entity_y:
                     if entity.velocity[1]>0:#going down

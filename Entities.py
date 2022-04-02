@@ -38,12 +38,23 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.hitbox.center=self.rect.center
 
 class Invisible_block(Platform):
-    def __init__(self,pos,chunk_key=False):
-        super().__init__(pos,chunk_key=False)
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
+
 
 class Collision_block(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
+
+    def collide(self,entity):
+        pass
+
+class Collision_block_up(Platform):
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
+
+    def collide(self,entity):
+        pass
 
 class Collision_right_angle(Collision_block):
     def __init__(self,pos,points):
