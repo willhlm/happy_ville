@@ -8,14 +8,10 @@ class Level():
         self.game_objects = game_objects
         self.level_name = level
         self.spawn = spawn
-        self.platforms = pygame.sprite.Group()
-        self.platforms_pause=pygame.sprite.Group()
-        self.npc_collision = pygame.sprite.Group()
         self.init_player_pos = (0,0)
         self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed()]
         self.camera = self.cameras[0]
         self.load_map_data()
-
 
     def load_map_data(self):
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
@@ -28,12 +24,11 @@ class Level():
     def set_camera(self, camera_number):
         self.camera = self.cameras[camera_number]
 
-    def scrolling(self,player,shake):
-        self.camera.scrolling(player,shake)
+    def scrolling(self,player):
+        self.camera.update(player)
 
     def read_all_spritesheets(self):
         sprites = {}
-
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
@@ -89,7 +84,6 @@ class Level():
             elif id == 1:
                 new_block = Entities.Spikes(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
-
 
     def load_statics(self):
 
@@ -189,7 +183,7 @@ class Level():
 
         #all these figures below should be passed and not hardcoded, will break if we change UI etc.
         screen_center = self.PLAYER_CENTER
-        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1]+5)
+        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1])
 
         cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']
         rows = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['height']
@@ -247,7 +241,7 @@ class Level():
                             y = math.floor(index/cols)
                             x = (index - (y*cols))
                             parallax = parallax_values[bg]
-                            blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
+                            blit_pos = (x * self.TILE_SIZE -math.ceil((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - math.ceil((1-parallax)*new_map_diff[1]))
                             new_animation = Entities.BG_Animated(blit_pos,path,parallax)
                             try:
                                 animation_entities[bg].append(new_animation)
@@ -262,7 +256,7 @@ class Level():
                 if 'fg' in bg:
                     self.game_objects.all_fgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))
                 else:
-                    pos=(-int((1-parallax)*new_map_diff[0]),-int((1-parallax)*new_map_diff[1]))
+                    pos=(-math.ceil((1-parallax)*new_map_diff[0]),-math.ceil((1-parallax)*new_map_diff[1]))
                     self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_surfaces[blit_dict[bg][0]],parallax))#pos,img,parallax
             try:
                 for bg_animation in animation_entities[bg]:
@@ -305,11 +299,12 @@ class Camera():
         self.true_scroll=[0,0]
         self.center = center
 
-    def update_scroll(self,shake):
-        if shake>0:#inprinciple we do not need this if
-            screen_shake=[random.randint(-shake,shake),random.randint(-shake,shake)]
-        else:
-            screen_shake=[0,0]
+    def update(self):
+        #if shake>0:#inprinciple we do not need this if
+        #    screen_shake=[random.randint(-shake,shake),random.randint(-shake,shake)]
+        #else:
+        #    screen_shake=[0,0]
+        screen_shake=[0,0]
 
         self.scroll=self.true_scroll.copy()
         self.scroll[0]=int(self.scroll[0])+screen_shake[0]
@@ -319,68 +314,68 @@ class Auto(Camera):
     def __init__(self, center):
         super().__init__(center)
 
-    def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-self.center[0])/15
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-self.center[1])
-        self.update_scroll(shake)
+    def update(self,player):
+        self.true_scroll[0]+=(player.center[0]-8*self.true_scroll[0]-self.center[0])/15
+        self.true_scroll[1]+=(player.center[1]-self.true_scroll[1]-self.center[1])
+        super().update()
 
 class Auto_CapX(Camera):
     def __init__(self, center):
         super().__init__(center)
 
-    def scrolling(self,knight,shake):
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-self.center[1])
-        self.update_scroll(shake)
+    def update(self,player):
+        self.true_scroll[1]+=(player.center[1]-self.true_scroll[1]-self.center[1])
+        super().update()
 
 class Auto_CapY(Camera):
     def __init__(self, center):
         super().__init__(center)
 
-    def scrolling(self,knight,shake):
-        self.true_scroll[0]+=(knight.center[0]-8*self.true_scroll[0]-self.center[0])/15
-        self.update_scroll(shake)
+    def update(self,player):
+        self.true_scroll[0]+=(player.center[0]-8*self.true_scroll[0]-self.center[0])/15
+        super().update()
 
 class Fixed(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,shake):
-        self.update_scroll(shake)
+    def update(self,player):
+        super().update()
 
 class Autocap(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,distance,shake):
-        if knight.center[0]>400:
+    def update(self,player,distance):
+        if player.center[0]>400:
             self.true_scroll[0]+=5
-        elif knight.center[0]<30:
+        elif player.center[0]<30:
             self.true_scroll[0]-=5
-        elif knight.center[0]>150 and knight.center[0]<220:
+        elif player.center[0]>150 and player.center[0]<220:
             self.true_scroll[0]=0
 
-        if knight.center[1]>200:
+        if player.center[1]>200:
             self.true_scroll[1]+=0.5
-        elif knight.center[1]<70:
+        elif player.center[1]<70:
             self.true_scroll[1]-=0.5
-        elif knight.center[1]>130 and knight.center[1]<190:
+        elif player.center[1]>130 and player.center[1]<190:
             self.true_scroll[1]=0
 
-        self.update_scroll(shake)
+        super().update()
 
 class Border(Camera):
     def __init__(self):
         super().__init__()
 
-    def scrolling(self,knight,total_distance,shake):
-        self.true_scroll[1]+=(knight.center[1]-self.true_scroll[1]-180)
+    def update(self,player,total_distance):
+        self.true_scroll[1]+=(player.center[1]-self.true_scroll[1]-180)
         if -40 < total_distance[0]<1400:#map boundaries
-            self.true_scroll[0]+=(knight.center[0]-4*self.true_scroll[0]-240)/20
+            self.true_scroll[0]+=(player.center[0]-4*self.true_scroll[0]-240)/20
         else:
-            if knight.center[0]<60:
+            if player.center[0]<60:
                 self.true_scroll[0]-=1
-            elif knight.center[0]>440:
+            elif player.center[0]>440:
                 self.true_scroll[0]+=1
             else:
                 self.true_scroll[0]=0
-        self.update_scroll(shake)
+        super().update()

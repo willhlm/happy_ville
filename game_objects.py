@@ -43,7 +43,6 @@ class Game_Objects():
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
-        self.platforms_pause=pygame.sprite.Group()
         self.individuals = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
@@ -70,7 +69,6 @@ class Game_Objects():
             print("No BG music found")
 
     def initiate_groups(self):
-
         #clean all groups
         #self.players.empty()
         self.npcs.empty()
@@ -78,7 +76,6 @@ class Game_Objects():
         self.interactables.empty()
         self.platforms.empty()
         self.platforms_ramps.empty()
-        self.platforms_pause.empty()
         self.enemy_pause.empty()
         self.npc_pause.empty()
         self.all_bgs.empty()
@@ -120,15 +117,13 @@ class Game_Objects():
         self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
 
     def scrolling(self):
-        self.map.scrolling(self.player.rect,self.collisions.shake)
+        self.map.scrolling(self.player.rect)
         scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):
-
         self.platforms.update(scroll)
         self.platforms_ramps.update(scroll)
-        self.platforms_pause.update(scroll)
         self.all_bgs.update(scroll)
         self.all_fgs.update(scroll)
         self.players.update(scroll)
