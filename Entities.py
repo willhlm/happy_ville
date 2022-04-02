@@ -184,7 +184,6 @@ class Particle_effect(Staticentity):
             self.accel = accel
             self.color = color
             self.fade = fade
-            print(pos,vel,color)
 
         def update(self):
             self.true_pos = [self.true_pos[0] + self.vel[0], self.true_pos[1] + self.vel[1]]

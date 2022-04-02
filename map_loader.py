@@ -159,8 +159,8 @@ class Level():
                             'bg_far': 0.03,
                             'bg_behindmid': 0.4,
                             'bg_mid': 0.5,
-                            'bg_behindnear': 0.75,
-                            'bg_near': 0.9,
+                            'bg_behindnear': 0.7,
+                            'bg_near': 0.8,
                             'bg_fixed': 1,
                             'fg_fixed': 1,
                             'fg_near': 1.25,
@@ -189,7 +189,7 @@ class Level():
 
         #all these figures below should be passed and not hardcoded, will break if we change UI etc.
         screen_center = self.PLAYER_CENTER
-        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1]+5)
+        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1])
 
         cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']
         rows = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['height']
@@ -247,7 +247,9 @@ class Level():
                             y = math.floor(index/cols)
                             x = (index - (y*cols))
                             parallax = parallax_values[bg]
-                            blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
+                            print(new_map_diff[0], ' ', x)
+                            #blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
+                            blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]) + int((self.init_player_pos[0]-x*self.TILE_SIZE)*(1-parallax)), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]) + int((self.init_player_pos[1]-y*self.TILE_SIZE)*(1-parallax)))
                             new_animation = Entities.BG_Animated(blit_pos,path,parallax)
                             try:
                                 animation_entities[bg].append(new_animation)
