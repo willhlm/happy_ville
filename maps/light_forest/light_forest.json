@@ -1,11 +1,4 @@
 { "compressionlevel":-1,
- "editorsettings":
-    {
-     "export":
-        {
-         "target":"."
-        }
-    },
  "height":50,
  "infinite":false,
  "layers":[
@@ -245,8 +238,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":400,
-                 "y":560
+                 "x":7648,
+                 "y":256
                 }, 
                 {
                  "gid":16,
@@ -427,7 +420,7 @@
                 }, 
                 {
                  "gid":7,
-                 "height":16,
+                 "height":112,
                  "id":123,
                  "name":"",
                  "rotation":0,
@@ -435,7 +428,7 @@
                  "visible":true,
                  "width":128,
                  "x":2672,
-                 "y":512
+                 "y":608
                 }, 
                 {
                  "height":0,
@@ -463,15 +456,15 @@
                 }, 
                 {
                  "gid":7,
-                 "height":16,
+                 "height":32,
                  "id":125,
                  "name":"",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":1824,
-                 "x":3024,
-                 "y":624
+                 "width":2032,
+                 "x":2816,
+                 "y":640
                 }, 
                 {
                  "height":0,
@@ -631,7 +624,7 @@
                 }, 
                 {
                  "gid":7,
-                 "height":16,
+                 "height":64,
                  "id":138,
                  "name":"",
                  "rotation":0,
@@ -639,7 +632,7 @@
                  "visible":true,
                  "width":256,
                  "x":7136,
-                 "y":496
+                 "y":544
                 }, 
                 {
                  "gid":7,
@@ -783,7 +776,7 @@
  "nextobjectid":157,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.4.3",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -922,6 +915,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":1.4,
+ "version":"1.6",
  "width":700
 }

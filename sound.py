@@ -31,7 +31,7 @@ class Sound():
     def play_sfx(sfx):
         channel = pygame.mixer.find_channel()
         try:
-            channel.set_volume(0.3)
+            channel.set_volume(0.2)
             channel.play(sfx)
         except:
             print("No available channels")
