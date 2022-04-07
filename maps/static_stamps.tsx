@@ -34,6 +34,11 @@
    <property name="spawn" value=""/>
   </properties>
  </tile>
+ <tile id="10">
+  <properties>
+   <property name="direction" value=""/>
+  </properties>
+ </tile>
  <tile id="17">
   <properties>
    <property name="event_type" value=""/>

@@ -84,6 +84,10 @@ class Level():
             elif id == 1:
                 new_block = Entities.Spikes(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
+            #one way collision block (currently on top implemented)
+            elif id == 4:
+                new_block = Entities.Collision_oneway_up(object_position,object_size)
+                self.game_objects.platforms.add(new_block)
 
     def load_statics(self):
 
