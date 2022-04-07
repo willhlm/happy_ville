@@ -2,7 +2,7 @@ import pygame
 
 class Collisions():
     def __init__(self):
-        self.shake=0
+        pass
 
     @staticmethod
     def counter(fprojectiles,eprojectiles):
@@ -15,9 +15,10 @@ class Collisions():
 
     @staticmethod
     def weather_paricles(weathers,platforms):
-        collisions=pygame.sprite.groupcollide(weathers,platforms,False,False)
-        for weather, platform in collisions.items():
-            weather.collision()
+        for particle in weathers.sprites():#go through the group
+            collision = pygame.sprite.spritecollideany(particle,platforms)
+            if collision:
+                particle.collision()
 
     @staticmethod
     def action_collision(projectiles,platforms,enemies):
@@ -32,17 +33,9 @@ class Collisions():
                 if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':
                     collision_enemy.take_dmg(projectile.dmg)
                     projectile.collision_enemy(collision_enemy)
-                #self.shake+=collision_enemy.death(loot)#check if dead
-                #self.shake=projectile.collision(entity,cosmetics,collision_enemy)#response of projetile hits
-
-                #if collision_enemy.action['death']:
-                #    self.shake+=collision_enemy.shake
-                #    loot.add(collision_enemy.loots())
-
             #hit platform
             elif collision_plat:
                 projectile.collision_plat()
-                #self.shake=projectile.collision(entity)#entity is the guy donig the action
 
     #take damage if collide with enemy
     @staticmethod
@@ -65,28 +58,13 @@ class Collisions():
     def pickup_loot(player,loots):
 
         collision_loot=pygame.sprite.spritecollideany(player,loots,Collisions.collided)#check collision
-
         if collision_loot:
-    #    for loot in collision:
             collision_loot.pickup(player)
-            #if obj=='Spiritsorb':
-            #    player.spirit += 10
-
-            #else:
-            #    player.inventory[obj]+=1
 
     #npc player conversation
     @staticmethod
     def check_npc_collision(player,npcs):
         return pygame.sprite.spritecollideany(player,npcs)#check collision
-
-    #invisible wall collision for NPC and enemy
-    @staticmethod
-    def check_invisible(dynamic_Entities,inv_entities):
-
-        collisions=pygame.sprite.groupcollide(dynamic_Entities,inv_entities,False,False,Collisions.collided)
-        for dyn_entity, inv_entity in collisions.items():
-            dyn_entity.dir[0]=-dyn_entity.dir[0]#turn around
 
     #interact with chests
     @staticmethod

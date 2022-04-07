@@ -52,7 +52,7 @@ class Weather(pygame.sprite.Sprite):
     def rect(self):
         self.image=self.sprites['Fall'][0]
         self.rect = self.image.get_rect(center=self.pos)
-
+        
 class Snow(Weather):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Weather/Snow/')
 

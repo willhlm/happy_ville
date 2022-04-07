@@ -106,7 +106,7 @@ class Level():
                     if property['name'] == 'class':
                         npc_name = property['value']
                 new_npc = getattr(Entities, npc_name)
-                self.game_objects.npcs.add(new_npc(object_position))
+                self.game_objects.npcs.add(new_npc(object_position,self.game_objects.npcs,self.game_objects.entity_pause))
             #enemies
             elif id == 2:
                 properties = obj['properties']
@@ -114,7 +114,7 @@ class Level():
                     if property['name'] == 'class':
                         enemy_name = property['value']
                 new_enemy = getattr(Entities, enemy_name)
-                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles, self.game_objects.loot))
+                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles, self.game_objects.loot,self.game_objects.enemies,self.game_objects.entity_pause))
 
             elif id == 9:
                 object_size = (int(obj['width']),int(obj['height']))

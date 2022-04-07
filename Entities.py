@@ -27,8 +27,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect = pygame.Rect(pos,size)
         self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        self.spike=False
-        self.is_slope=False
+        #self.is_slope=False
 
     def update(self,pos):
         self.update_pos(pos)
@@ -41,6 +40,12 @@ class Invisible_block(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
 
+    def collide_y(self,entity):
+        pass
+
+    def collide_x(self,entity):
+        if type(entity).__name__ != "Player":#only apply to enemies and NPC
+            entity.dir[0] = -entity.dir[0]#turn around
 
 class Collision_block(Platform):
     def __init__(self,pos,size):
@@ -64,8 +69,8 @@ class Collision_block(Platform):
         else:#going up
             entity.hitbox.top = self.hitbox.bottom
             entity.collision_types['top'] = True
+            entity.velocity[1] = 0 #knock back
         entity.update_rect()
-
 
 class Collision_oneway_up(Platform):
     def __init__(self,pos,size):
@@ -90,7 +95,7 @@ class Collision_right_angle(Collision_block):
     def __init__(self,pos,points):
         self.define_values(pos, points)
         super().__init__(self.new_pos,self.size)
-        self.is_slope=True
+        #self.is_slope=True
 
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
@@ -161,7 +166,21 @@ class Spikes(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
         self.image=pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha()
-        self.spike=True
+        self.dmg = 10
+
+    def collide_x(self,entity):
+        if entity.velocity[0]>0:#going to the right
+            entity.velocity[0]=-6#knock back
+        else:#going to the left
+            entity.velocity[0]=6#knock back
+        entity.take_dmg(self.dmg)
+
+    def collide_y(self,entity):
+        if entity.velocity[1]>0:#going down
+            entity.velocity[1]=-6#knock back
+        else:#going up
+            entity.velocity[1]=6#knock back
+        entity.take_dmg(self.dmg)
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def __init__(self,pos,img=pygame.Surface((16,16))):
@@ -278,12 +297,10 @@ class Particle_effect_attack(Particle_effect):
             vel = random.uniform(1,9)
             self.particles.add(self.Particle(pos = [self.blit_size[0]/2,self.blit_size[1]/2],vel = [i*vel for i in directions[random.randint(0,len(directions)-1)]], color = [255,255,255,255], fade = 0.9))
 
-
 class Dynamicentity(Staticentity):
     def __init__(self,pos):
         super().__init__(pos)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
-        self.collision_spikes = {'top':False,'bottom':False,'right':False,'left':False}
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -309,7 +326,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.update_pos(pos)
         self.currentstate.update()
         self.animation_stack[-1].update()
-        self.check_collisions()
 
     def take_dmg(self,dmg):
         if dmg>0:
@@ -325,31 +341,26 @@ class Character(Dynamicentity):#enemy, NPC,player
             new_animation=animation.Hurt_animation(self)
             new_animation.enter_state()
 
-    def check_collisions(self):
-        if self.collision_types['top']:#knock back when hit head
-            self.velocity[1]=0
-        #elif self.collision_spikes['bottom']:
-        #    self.velocity[1]=-6#knock back
-        #    self.take_dmg(10)
-        #elif self.collision_spikes['right']:
-        #    self.velocity[0]=-6#knock back
-        #    self.take_dmg(10)
-        #elif self.collision_spikes['left']:
-        #    self.velocity[0]=6#knock back
-        #    self.take_dmg(10)
-        #elif self.collision_spikes['top']:
-        #    self.velocity[1]=6#knock back
-        #    self.take_dmg(10)
-
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
         self.hitbox.midbottom = self.rect.midbottom
 
+    def group_distance(self):
+        bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
+        if self.rect[0]<bounds[0] or self.rect[0]>bounds[1] or self.rect[1]<bounds[2] or self.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+            self.remove(self.group)#remove from group
+            self.add(self.pause_group)#add to pause
+        else:
+            self.add(self.group)#add to group
+            self.remove(self.pause_group)#remove from pause
+
 class Enemy(Character):
-    def __init__(self,pos,projectile_group,loot_group):
+    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
         super().__init__(pos)
         self.projectiles = projectile_group
         self.loot_group = loot_group
+        self.group = enemy_group
+        self.pause_group = pause_group
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
         self.currentstate = states_enemy.Idle(self)
         self.counter=0
@@ -362,6 +373,7 @@ class Enemy(Character):
     def update(self,pos,playerpos):
         super().update(pos)
         self.AI(playerpos)
+        self.group_distance()
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -417,8 +429,8 @@ class Enemy(Character):
                 self.currentstate.handle_input('Idle')
 
 class Woopie(Enemy):
-    def __init__(self,pos,projectile_group,loot_group):
-        super().__init__(pos,projectile_group,loot_group)
+    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
+        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/main/Idle/Kodama_stand1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
@@ -426,14 +438,13 @@ class Woopie(Enemy):
         self.health = 1
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.shake=10
         self.attack_distance=0
 
 class Vatt(Enemy):
 
     aggro = False  #remember to turn false when changing maps
-    def __init__(self,pos,projectile_group,loot_group):
-        super().__init__(pos,projectile_group,loot_group)
+    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
+        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/vatt/main/idle/idle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
@@ -475,8 +486,8 @@ class Vatt(Enemy):
                 self.currentstate.handle_input('Javelin')
 
 class Flowy(Enemy):
-    def __init__(self,pos,projectile_group,loot_group):
-        super().__init__(pos,projectile_group,loot_group)
+    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
+        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/main/Idle/Stand1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
@@ -486,8 +497,8 @@ class Flowy(Enemy):
         self.spirit=10
 
 class Larv(Enemy):
-    def __init__(self,pos,projectile_group,loot_group):
-        super().__init__(pos,projectile_group,loot_group)
+    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
+        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
         self.image = pygame.image.load("Sprites/Enteties/enemies/larv/main/Idle/catapillar_idle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
@@ -514,21 +525,28 @@ class Player(Character):
         self.spirit = 100
 
         self.cosmetics = cosmetics_group
-
         self.projectiles = projectile_group#pygame.sprite.Group()
+
         self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#'Shield':Shield#the objects are referensed but made in states
         self.equip='Hammer'#ability pointer
         self.sword=Sword(self)
         self.shield=Shield
 
-        self.action_sfx_player = pygame.mixer.Channel(1)
-        self.action_sfx_player.set_volume(0.1)
-        self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
-        self.movement_sfx_timer = 110
+        #can be removed?
+        #self.action_sfx_player = pygame.mixer.Channel(1)
+        #self.action_sfx_player.set_volume(0.1)
+        #self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
+        #self.movement_sfx_timer = 110
 
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
-        self.currentstate = states_player.Idle(self)
         self.omamoris=Omamoris(self)
+        self.currentstate = states_player.Idle(self)
+
+    #def load_sfx(self):#make a sound class
+    #    if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
+    #        self.action_sfx_player.play(self.action_sfx['run'])
+    #        self.movement_sfx_timer = 0
+    #    self.movement_sfx_timer += 1
 
     def enter_idle(self):
         self.currentstate = states_player.Idle(self)
@@ -538,16 +556,9 @@ class Player(Character):
         self.acceleration = [0,0.7]
         self.friction = [0.2,0]
 
-    def load_sfx(self):#make a sound class
-        if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
-            self.action_sfx_player.play(self.action_sfx['run'])
-            self.movement_sfx_timer = 0
-        self.movement_sfx_timer += 1
-
     def update(self,pos):
         super().update(pos)
         self.omamoris.update()
-        #self.load_sfx()
 
     def equip_omamori(self,omamori_index):
         new_omamori=self.omamoris.omamori_list[omamori_index]
@@ -555,15 +566,16 @@ class Player(Character):
             if len(self.omamoris.equipped_omamoris)<3:#maximum number of omamoris to equip
                 self.omamoris.equipped_omamoris.append(new_omamori)
                 new_omamori.attach()
-
         else:#remove the omamori
-            old_omamori=self.omamoris.omamori_list[omamori_index]#call the detach function of omamori
+            old_omamori=self.omamoris.omamori_list[omamori_index]
             self.omamoris.equipped_omamoris.remove(old_omamori)
-            old_omamori.detach()
+            old_omamori.detach()#call the detach function of omamori
 
 class NPC(Character):
-    def __init__(self,pos):
+    def __init__(self,pos,npc_group,pause_group):
         super().__init__(pos)
+        self.group = npc_group
+        self.pause_group = pause_group
         self.name = str(type(self).__name__)#the name of the class
         self.health = 50
         self.conv_index = 0
@@ -587,9 +599,10 @@ class NPC(Character):
     def increase_conv_index(self):
         self.conv_index += 1
 
-    def update(self, pos):
+    def update(self, pos,playerpos):
         super().update(pos)
         self.AI()
+        self.group_distance()
 
     def idle(self):
         self.currentstate.handle_input('Idle')
@@ -598,8 +611,8 @@ class NPC(Character):
         self.currentstate.handle_input('Walk')
 
 class Aslat(NPC):
-    def __init__(self, pos):
-        super().__init__(pos)
+    def __init__(self, pos,npc_group,pause_group):
+        super().__init__(pos,npc_group,pause_group)
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
@@ -625,8 +638,8 @@ class Aslat(NPC):
 #            self.action['inv'] = False
 
 class MrBanks(NPC):
-    def __init__(self,pos,img=pygame.Surface((16,16))):
-        super().__init__(pos,img=pygame.Surface((16,16)))
+    def __init__(self,pos,npc_group,pause_group):
+        super().__init__(pos,npc_group,pause_group)
         self.name = 'MrBanks'
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
@@ -1003,8 +1016,8 @@ class Shield(Melee):
     def update_hitbox(self):
         self.rect.midtop=self.entity.rect.midtop
 
-    def collision_ene(self,collision_ene):
-        collision_ene.countered()
+    def collision_enemy(self,collision_enemy):
+        collision_enemy.countered()
         self.kill()
 
 class Projectiles(Abilities):
@@ -1340,7 +1353,6 @@ class Menu_Arrow():
         screen.blit(self.img, self.rect.topleft)
 
 class Omamoris():
-
     def __init__(self,entity):
         self.equipped_omamoris=[]#equiped omamoris
         self.omamori_list=[Double_jump(entity),Double_sword(entity),More_spirit(entity)]#omamoris inventory.
