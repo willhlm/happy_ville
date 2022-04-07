@@ -46,15 +46,45 @@ class Collision_block(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
 
-    def collide(self,entity):
-        pass
+    def collide_x(self,entity):
+        #check for collisions and get a dictionary of sprites that collides
+        if entity.velocity[0]>0:#going to the right
+            entity.hitbox.right = self.hitbox.left
+            entity.collision_types['right'] = True
+        else:#going to the left
+            entity.hitbox.left = self.hitbox.right
+            entity.collision_types['left'] = True
+        entity.update_rect()
 
-class Collision_block_up(Platform):
+    def collide_y(self,entity):
+        if entity.velocity[1]>0:#going down
+            entity.hitbox.bottom = self.hitbox.top
+            entity.collision_types['bottom'] = True
+            entity.velocity[1] = 0
+        else:#going up
+            entity.hitbox.top = self.hitbox.bottom
+            entity.collision_types['top'] = True
+        entity.update_rect()
+
+
+class Collision_oneway_up(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
 
-    def collide(self,entity):
+    def collide_x(self,entity):
         pass
+
+    def collide_y(self,entity):
+        offset=10
+        if entity.velocity[1]>0:#going down
+            if entity.hitbox.bottom<self.hitbox.top+offset:
+                entity.hitbox.bottom = self.hitbox.top
+                entity.collision_types['bottom'] = True
+                entity.velocity[1] = 0
+                self.goingup=False
+                entity.update_rect()
+        else:#going up
+            pass
 
 class Collision_right_angle(Collision_block):
     def __init__(self,pos,points):
@@ -126,7 +156,6 @@ class Collision_right_angle(Collision_block):
                     self.orientation = 0
                 else:
                     self.orientation = 2
-
 
 class Spikes(Platform):
     def __init__(self,pos,size):

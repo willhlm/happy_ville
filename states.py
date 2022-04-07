@@ -83,11 +83,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-<<<<<<< HEAD
-            self.game.game_objects.load_map('last_boss_path')
-=======
             self.game.game_objects.load_map('light_forest')
->>>>>>> cfbcf729c7b113c228bfe26227947b65e317e88e
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)

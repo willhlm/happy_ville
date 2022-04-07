@@ -120,7 +120,6 @@ class Collisions():
     @staticmethod
     def collide(dynamic_Entities,static_entities,ramps):
 
-
         for entity in dynamic_Entities.sprites():
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
@@ -129,18 +128,8 @@ class Collisions():
             entity.update_hitbox()
 
             static_entity_x = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
-
             if static_entity_x:
-
-                #check for collisions and get a dictionary of sprites that collides
-                if entity.velocity[0]>0:#going to the right
-                    entity.hitbox.right = static_entity_x.hitbox.left
-                    entity.collision_types['right'] = True
-
-                elif entity.velocity[0]<0:#going to the left
-                    entity.hitbox.left = static_entity_x.hitbox.right
-                    entity.collision_types['left'] = True
-                entity.update_rect()
+                static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
             entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
@@ -158,7 +147,6 @@ class Collisions():
                     if ramp.orientation == 0:
                         y = (x_tot - x_1 + 2)*(y_tot/x_tot)
                         y = int(ramp.hitbox.bottom - y - ramp_offset)
-
 
                         if entity.hitbox.bottom <= y:
                             pass
@@ -180,18 +168,9 @@ class Collisions():
                     entity.update_rect()
 
             if not ramp_collision:
-
                 static_entity_y = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
                 if static_entity_y:
-                    if entity.velocity[1]>0:#going down
-                        entity.hitbox.bottom = static_entity_y.hitbox.top
-                        entity.collision_types['bottom'] = True
-                        entity.velocity[1] = 0
-
-                    elif entity.velocity[1]<0:#going up
-                        entity.hitbox.top = static_entity_y.hitbox.bottom
-                        entity.collision_types['top'] = True
-                    entity.update_rect()
+                    static_entity_y.collide_y(entity)
 
     #make the hitbox collide instead of rect
     @staticmethod
