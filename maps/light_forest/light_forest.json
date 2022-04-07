@@ -81,7 +81,7 @@
          "name":"bg_behindnear1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -93,7 +93,7 @@
          "name":"bg_near2",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -105,7 +105,7 @@
          "name":"bg_near1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -117,7 +117,7 @@
          "name":"bg_fixed6",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -129,7 +129,7 @@
          "name":"bg_fixed5",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -141,7 +141,7 @@
          "name":"bg_fixed4",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -153,7 +153,7 @@
          "name":"bg_fixed3",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -165,7 +165,7 @@
          "name":"bg_fixed2",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -177,7 +177,7 @@
          "name":"bg_fixed1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -189,7 +189,7 @@
          "name":"bg_fixed_animated1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -201,7 +201,7 @@
          "name":"fg_fixed2",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -213,7 +213,7 @@
          "name":"fg_fixed1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -262,7 +262,7 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Aslat"
+                         "value":"Sahkar"
                         }],
                  "rotation":0,
                  "type":"",
@@ -352,6 +352,42 @@
                  "width":16,
                  "x":6848,
                  "y":448
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":163,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Aslat"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":8256,
+                 "y":272
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":164,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Sahkar"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":8240,
+                 "y":272
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -791,7 +827,7 @@
          "y":0
         }],
  "nextlayerid":39,
- "nextobjectid":163,
+ "nextobjectid":165,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.6.0",

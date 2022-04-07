@@ -637,6 +637,33 @@ class Aslat(NPC):
 #            self.dir[0] = -self.dir[0]
 #            self.action['inv'] = False
 
+class Sahkar(NPC):
+    def __init__(self, pos,npc_group,pause_group):
+        super().__init__(pos,npc_group,pause_group)
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
+        self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
+        self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
+        self.load_conversation()
+        #self.max_vel = 1.5
+        self.counter=0
+
+    def AI(self):
+        self.counter+=1
+        if self.counter>100:
+            self.counter=0
+            rand=random.randint(0,1)
+            if rand==0:
+                self.idle()
+            else:
+                self.walk()
+#        if self.action['inv']:#collision with invisble block
+#            self.velocity[0] = -self.velocity[0]
+#            self.dir[0] = -self.dir[0]
+#            self.action['inv'] = False
+
 class MrBanks(NPC):
     def __init__(self,pos,npc_group,pause_group):
         super().__init__(pos,npc_group,pause_group)

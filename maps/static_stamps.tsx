@@ -24,8 +24,8 @@
  <tile id="8">
   <properties>
    <property name="image" value=""/>
-   <property name="path_from" value=""/>
    <property name="path_to" value=""/>
+   <property name="spawn" value=""/>
   </properties>
  </tile>
  <tile id="9">
