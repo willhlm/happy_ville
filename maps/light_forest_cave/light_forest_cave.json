@@ -598,7 +598,7 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Aslat"
+                         "value":"Sahkar"
                         }],
                  "rotation":0,
                  "type":"",
@@ -1868,18 +1868,6 @@
                 }, 
                 {
                  "gid":8200,
-                 "height":80,
-                 "id":131,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":784,
-                 "x":1648,
-                 "y":832
-                }, 
-                {
-                 "gid":8200,
                  "height":48,
                  "id":194,
                  "name":"",
@@ -1913,6 +1901,18 @@
                  "width":0,
                  "x":1491,
                  "y":528
+                }, 
+                {
+                 "gid":8204,
+                 "height":80,
+                 "id":1592,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":768,
+                 "x":1632,
+                 "y":816
                 }],
          "opacity":0.44,
          "type":"objectgroup",
@@ -1921,7 +1921,7 @@
          "y":0
         }],
  "nextlayerid":15,
- "nextobjectid":1592,
+ "nextobjectid":1593,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.6.0",
