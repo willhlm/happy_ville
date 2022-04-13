@@ -24,14 +24,19 @@
  <tile id="8">
   <properties>
    <property name="image" value=""/>
-   <property name="path_from" value=""/>
    <property name="path_to" value=""/>
+   <property name="spawn" value=""/>
   </properties>
  </tile>
  <tile id="9">
   <properties>
    <property name="path_to" value=""/>
    <property name="spawn" value=""/>
+  </properties>
+ </tile>
+ <tile id="10">
+  <properties>
+   <property name="direction" value=""/>
   </properties>
  </tile>
  <tile id="17">
