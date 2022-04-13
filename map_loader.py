@@ -78,7 +78,8 @@ class Level():
             id = obj['gid'] - (self.map_data['statics_firstgid'] + 6) #the last in depends on postion of COL stamp in stamp png
             #normal collision blocks
             if id == 0:
-                new_block = Entities.Collision_block(object_position,object_size)
+                #new_block = Entities.Collision_block(object_position,object_size)
+                new_block = Entities.Collision_oneway_up(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #spike collision blocks
             elif id == 1:
