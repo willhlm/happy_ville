@@ -2,7 +2,6 @@ import pygame
 
 
 class Animation():
-
     def __init__(self,entity):
         self.entity=entity
         self.framerate=4
@@ -18,13 +17,12 @@ class Animation():
     def reset_timer(self):
         self.frame=0
 
-class Entity_animation(Animation):
+class Entity_animation(Animation):#phase and state
     def __init__(self,entity):
         super().__init__(entity)
 
     def update(self):
         #if str(type(self.entity).__name__)=='Player':
-
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
         self.frame += 1
 
@@ -35,7 +33,7 @@ class Entity_animation(Animation):
 class Hurt_animation(Entity_animation):#become white
     def __init__(self,entity):
         super().__init__(entity)
-        self.duration=15
+        self.duration=15#hurt animation duration
         self.frame=entity.animation_stack[0].frame#set the initial frame
 
     def update(self):
@@ -47,7 +45,7 @@ class Hurt_animation(Entity_animation):#become white
         if self.duration<0:
             self.exit_state()
 
-class Basic_animation(Animation):
+class Basic_animation(Animation):#state
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -66,3 +64,21 @@ class Ability_animation(Basic_animation):
         super().reset_timer()
         if self.entity.state=='post':
             self.entity.kill()#kill the object after post animation
+
+class Simple_animation(Animation):#no state or phase
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        self.entity.image = self.entity.sprites[self.frame//self.framerate].copy()
+        self.frame += 1
+
+        if self.frame == len(self.entity.sprites)*self.framerate:
+            self.reset_timer()
+
+class Cutscene_animation(Simple_animation):#no state or phase
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def reset_timer(self):
+        self.entity.finished=True

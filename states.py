@@ -264,7 +264,6 @@ class Option_Menu(Game_State):
             elif self.current_button == 1:
                 self.game.RENDER_HITBOX_FLAG = not self.game.RENDER_HITBOX_FLAG
 
-
 class Pause_Menu(Game_State):
 
     def __init__(self,game):
@@ -344,7 +343,6 @@ class Gameplay(Game_State):
         self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
         self.fade_surface.set_alpha(255)
         self.fade_surface.fill((0,0,0))
-
 
     def update(self):
         self.game.game_objects.scrolling()
@@ -473,8 +471,6 @@ class Fadeout(Game_State):
     def render(self):
         self.fade_surface.set_alpha(int(self.count*(255/self.fadeout_length)))
         self.game.screen.blit(self.fade_surface, (0,0))
-
-
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -658,15 +654,43 @@ class Select_Menu(Gameplay):
         if omamori_index<len(self.game.game_objects.player.omamoris.omamori_list):
             self.game.game_objects.player.equip_omamori(omamori_index)
 
-class Boss_encounter(Gameplay):
-    def __init__(self, game):
+class Cutscene_engine(Gameplay):
+    def __init__(self, game,cutscene):
         super().__init__(game)
+        self.game.game_objects.cutscene_manager.start(cutscene,'engine')
 
     def update(self):
-        super().update()
+        super().update()#want the BG to keep updating
+        self.game.game_objects.cutscene_manager.update()
 
     def render(self):
-        super().render()
+        super().render()#want the BG to keep rendering
+        #make black corners
 
     def handle_events(self, input):
-        pass
+        if input[0]:#press
+            if input[-1] == 'start':
+                self.game.game_objects.cutscene_manager.end()
+                self.exit_state()
+
+class Cutscene_file(Gameplay):
+    def __init__(self, game,cutscene):
+        super().__init__(game)
+        self.game.game_objects.cutscene_manager.start(cutscene,'file')
+
+    def update(self):
+        self.game.game_objects.cutscene_manager.update()
+
+        if self.game.game_objects.cutscene_manager.current_scene.finished:
+            self.game.game_objects.cutscene_manager.end()
+            self.exit_state()
+
+    def render(self):
+        self.game.game_objects.cutscene_manager.render(self.game.screen)
+        #make black corners
+
+    def handle_events(self, input):
+        if input[0]:#press
+            if input[-1] == 'start':
+                self.game.game_objects.cutscene_manager.end()
+                self.exit_state()

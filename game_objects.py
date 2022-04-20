@@ -7,6 +7,7 @@ import map_loader
 import BG
 import sound
 import states
+import cutscene
 
 class Game_Objects():
 
@@ -22,6 +23,8 @@ class Game_Objects():
         self.blackedout_length = 40
         self.fade_count = 0
         self.create_groups()
+        self.cutscene_manager = cutscene.Cutscene_Manager(self.player)
+
 
     def create_groups(self):
 
@@ -103,7 +106,16 @@ class Game_Objects():
                 self.player.reset_movement()
                 new_game_state = states.Fadeout(self.game, trigger.destination, trigger.spawn)
                 new_game_state.enter_state()
-                #self.load_map(trigger.destination, trigger.spawn)
+                self.load_map(trigger.destination, trigger.spawn)
+
+            elif type(trigger).__name__ == 'Trigger':
+                if trigger.event not in self.cutscene_manager.cutscenes_complete:#if the cutscene has not been shown before
+                    if trigger.event_type=='cutscene_file':
+                        new_game_state = states.Cutscene_file(self.game,trigger.event)
+                        new_game_state.enter_state()
+                    elif trigger.event_type=='cutscene_engine':
+                        new_game_state = states.Cutscene_engine(self.game,trigger.event)
+                        new_game_state.enter_state()
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
@@ -136,7 +148,6 @@ class Game_Objects():
         self.triggers.update(scroll)
 
     def draw(self):
-
         self.all_bgs.draw(self.game.screen)
         self.weather.draw(self.game.screen)
 
@@ -151,7 +162,8 @@ class Game_Objects():
         #self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
-        self.triggers.draw(self.game.screen)
+
+        #self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
         #self.reflection.draw(self.game.screen)
         #temporaries draws. Shuold be removed

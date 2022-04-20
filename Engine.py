@@ -93,6 +93,7 @@ class Collisions():
         return pygame.sprite.spritecollideany(player,triggers,Collisions.collided)
 
 
+
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one
     @staticmethod

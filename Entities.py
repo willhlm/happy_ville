@@ -27,7 +27,6 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect = pygame.Rect(pos,size)
         self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        #self.is_slope=False
 
     def update(self,pos):
         self.update_pos(pos)
@@ -35,6 +34,13 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
+
+class Trigger(Platform):
+
+    def __init__(self,pos,size,values):
+        super().__init__(pos,size)
+        self.event=values['event']
+        self.event_type=values['event_type']
 
 class Invisible_block(Platform):
     def __init__(self,pos,size):
@@ -86,7 +92,6 @@ class Collision_oneway_up(Platform):
                 entity.hitbox.bottom = self.hitbox.top
                 entity.collision_types['bottom'] = True
                 entity.velocity[1] = 0
-                self.goingup=False
                 entity.update_rect()
         else:#going up
             pass
@@ -209,24 +214,13 @@ class BG_Block(Staticentity):
 class BG_Animated(BG_Block):
     def __init__(self,pos,sprite_folder_path,parallax=1):
         super().__init__(pos,pygame.Surface((16,16)),parallax)
-        self.timer = 0
-        self.frame_index = 0
         self.sprites = Read_files.load_sprites(sprite_folder_path)
         self.image = self.sprites[0]
+        self.animation=animation.Simple_animation(self)
 
     def update(self, pos):
         self.update_pos(pos)
-        self.update_sprite()
-
-    def update_sprite(self):
-        if self.timer == 4:
-            self.timer = 0
-            self.frame_index += 1
-            if self.frame_index == len(self.sprites):
-                self.frame_index = 0
-            self.image = self.sprites[self.frame_index]
-        else:
-            self.timer += 1
+        self.animation.update()
 
 class Particle_effect(Staticentity):
 
@@ -791,41 +785,6 @@ class Path_col(Staticentity):
     def update(self, pos):
         super().update(pos)
         self.hitbox.center = self.rect.center
-
-#legacy code --- delete???
-class Trigger(pygame.sprite.Sprite):
-
-    def __init__(self,pos):
-        super().__init__()
-        self.rect = pygame.Rect(pos, (16,16))
-        self.hitbox = self.rect.inflate(0,0)
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
-
-class Path_Col_v(Trigger):
-
-
-    def __init__(self,pos,destination):
-        super().__init__(pos)
-        ext = 32
-        self.rect = pygame.Rect((pos[0],pos[1]-ext), (16,16+(2*ext)))
-        self.hitbox = self.rect.inflate(0,0)
-        self.next_map = destination
-        self.image = pygame.Surface((16,16+(2*ext)))
-        self.image.fill((0,0,0))
-
-class Path_Col_h(Trigger):
-
-    def __init__(self,pos,destination):
-        super().__init__(pos)
-        ext = 32
-        self.rect = pygame.Rect((pos[0]-ext,pos[1]), (16+(2*ext),16))
-        self.hitbox = self.rect.inflate(0,0)
-        self.next_map = destination
-        self.image = pygame.Surface((16+(2*ext),16))
-        self.image.fill((0,0,0))
 
 class Camera_Stop(pygame.sprite.Sprite):
 

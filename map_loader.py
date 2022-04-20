@@ -147,6 +147,16 @@ class Level():
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'bottom')
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
+            elif id == 17:#trigger
+                values={}
+                for property in obj['properties']:
+                    if property['name'] == 'event':
+                        values['event'] = property['value']
+                    elif property['name'] == 'event_type':
+                        values['event_type']=property['value']
+                object_size = (int(obj['width']),int(obj['height']))
+                new_trigger = Entities.Trigger(object_position,object_size ,values)
+                self.game_objects.triggers.add(new_trigger)
 
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):

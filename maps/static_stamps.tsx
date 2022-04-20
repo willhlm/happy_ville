@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.5" tiledversion="1.6.0" name="static_stamps" tilewidth="16" tileheight="16" tilecount="24" columns="6">
+<tileset version="1.8" tiledversion="1.8.2" name="static_stamps" tilewidth="16" tileheight="16" tilecount="24" columns="6">
  <image source="static_stamps.png" width="96" height="64"/>
  <tile id="0">
   <properties>
@@ -41,6 +41,7 @@
  </tile>
  <tile id="17">
   <properties>
+   <property name="event" value=""/>
    <property name="event_type" value=""/>
   </properties>
  </tile>
