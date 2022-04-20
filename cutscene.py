@@ -6,6 +6,7 @@ class Cutscene_Manager():
     def __init__(self,player):
         self.player=player
         self.cutscenes_complete = []
+        #test
 
     def start(self,cutscene,type):
         if type=='file':
