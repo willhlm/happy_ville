@@ -23,7 +23,7 @@ class Game_Objects():
         self.blackedout_length = 40
         self.fade_count = 0
         self.create_groups()
-        self.cutscene_manager = cutscene.Cutscene_Manager(self.player)
+        self.cutscene_manager = cutscene.Cutscene_Manager()
 
 
     def create_groups(self):
@@ -44,7 +44,7 @@ class Game_Objects():
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
-        self.individuals = pygame.sprite.Group()
+        self.cutscene_characters = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
         #self.weather_paricles.create_particles('Snow')#weather effects
@@ -83,6 +83,7 @@ class Game_Objects():
         self.all_fgs.empty()
         self.camera_blocks.empty()
         self.triggers.empty()
+        self.cutscene_characters.empty()
 
         #load all objects and art
         self.map.load_statics()
@@ -116,7 +117,7 @@ class Game_Objects():
                     elif trigger.event_type=='cutscene_engine':
                         new_game_state = states.Cutscene_engine(self.game,trigger.event)
                         new_game_state.enter_state()
-
+                        self.map.set_camera(4)
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
@@ -146,6 +147,7 @@ class Game_Objects():
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
+        self.cutscene_characters.update(scroll)
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
@@ -162,6 +164,7 @@ class Game_Objects():
         #self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
+        self.cutscene_characters.draw(self.game.screen)
 
         #self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)

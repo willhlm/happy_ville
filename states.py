@@ -2,6 +2,7 @@ import pygame, sys
 import Read_files
 import Engine
 import Entities
+import cutscene
 
 class Game_State():
     def __init__(self,game):
@@ -655,42 +656,51 @@ class Select_Menu(Gameplay):
             self.game.game_objects.player.equip_omamori(omamori_index)
 
 class Cutscene_engine(Gameplay):
-    def __init__(self, game,cutscene):
+    def __init__(self, game,scene):
         super().__init__(game)
-        self.game.game_objects.cutscene_manager.start(cutscene,'engine')
+        self.init(scene)
+        self.game.game_objects.cutscene_manager.start(self.current_scene.name)
+
+    def init(self,scene):
+        self.game.game_objects.player.reset_movement()
+        self.pos = [-self.game.WINDOW_SIZE[1],self.game.WINDOW_SIZE[1]]
+        self.current_scene = getattr(cutscene, scene)(self.game.game_objects.player,self.game.game_objects.cutscene_characters)#make an object based on string
 
     def update(self):
-        super().update()#want the BG to keep updating
-        self.game.game_objects.cutscene_manager.update()
+        #super().update()
+        self.game.game_objects.scrolling()
+        self.game.game_objects.collide_all()
 
-    def render(self):
-        super().render()#want the BG to keep rendering
-        #make black corners
-
-    def handle_events(self, input):
-        if input[0]:#press
-            if input[-1] == 'start':
-                self.game.game_objects.cutscene_manager.end()
-                self.exit_state()
-
-class Cutscene_file(Gameplay):
-    def __init__(self, game,cutscene):
-        super().__init__(game)
-        self.game.game_objects.cutscene_manager.start(cutscene,'file')
-
-    def update(self):
-        self.game.game_objects.cutscene_manager.update()
-
-        if self.game.game_objects.cutscene_manager.current_scene.finished:
-            self.game.game_objects.cutscene_manager.end()
+        self.current_scene.update()
+        if self.current_scene.finished:
             self.exit_state()
 
     def render(self):
-        self.game.game_objects.cutscene_manager.render(self.game.screen)
-        #make black corners
+        super().render()#want the BG to keep rendering
+
+        #black box stuff
+        self.pos[0]+=1#the upper balck box
+        rect1=(0, self.pos[0], self.game.screen.get_width(), self.game.WINDOW_SIZE[1])
+        pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
+
+        self.pos[1]-=1#the lower balck box
+        rect1=(0, self.pos[1], self.game.screen.get_width(), self.game.WINDOW_SIZE[1])
+        pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
+
+        self.pos[0]=min(-200,self.pos[0])
+        self.pos[1]=max(250,self.pos[1])
 
     def handle_events(self, input):
         if input[0]:#press
             if input[-1] == 'start':
-                self.game.game_objects.cutscene_manager.end()
                 self.exit_state()
+
+class Cutscene_file(Cutscene_engine):
+    def __init__(self, game,scene):
+        super().__init__(game,scene)
+
+    def init(self,scene):
+        self.current_scene=cutscene.Cutscene_files(scene)
+
+    def render(self):
+        self.current_scene.render(self.game.screen)

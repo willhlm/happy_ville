@@ -403,7 +403,7 @@
                         {
                          "name":"event_type",
                          "type":"string",
-                         "value":"cutscene_file"
+                         "value":"cutscene_engine"
                         }],
                  "rotation":0,
                  "type":"",

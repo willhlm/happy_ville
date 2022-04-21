@@ -9,7 +9,7 @@ class Level():
         self.level_name = level
         self.spawn = spawn
         self.init_player_pos = (0,0)
-        self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed()]
+        self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed(),Deer_encounter()]
         self.camera = self.cameras[0]
         self.load_map_data()
 
@@ -78,8 +78,8 @@ class Level():
             id = obj['gid'] - (self.map_data['statics_firstgid'] + 6) #the last in depends on postion of COL stamp in stamp png
             #normal collision blocks
             if id == 0:
-                #new_block = Entities.Collision_block(object_position,object_size)
-                new_block = Entities.Collision_oneway_up(object_position,object_size)
+                new_block = Entities.Collision_block(object_position,object_size)
+                #new_block = Entities.Collision_oneway_up(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #spike collision blocks
             elif id == 1:
@@ -396,3 +396,12 @@ class Border(Camera):
             else:
                 self.true_scroll[0]=0
         super().update()
+
+class Deer_encounter(Auto):
+    def __init__(self, center=[240,180]):
+        super().__init__(center=[240,180])
+
+    def update(self,player):
+        self.center[0]-=5
+        self.center[0]=max(100,self.center[0])
+        super().update(player)

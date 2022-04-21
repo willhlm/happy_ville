@@ -87,7 +87,6 @@ class Transform(Enemy_states):
         super().__init__(entity)
         self.stay_still()
 
-
     def update_state(self):
         pass
 

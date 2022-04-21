@@ -773,6 +773,32 @@ class Reindeer(Boss):
     def AI(self,playerpos):
         pass
 
+class Cutscene_characters(Staticentity):#all but player
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
+        self.acceleration=[1,0.7]
+        self.velocity=[0,0]
+        self.friction=[0.2,0]
+        self.animation_stack=[animation.Entity_animation(self)]
+        self.max_vel=7
+        self.currentstate = states_enemy.Idle(self)
+
+    def update(self,pos):
+        self.update_pos(pos)
+        #self.currentstate.update()
+        self.animation_stack[-1].update()
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0]+self.velocity[0], self.rect.topleft[1] + pos[1]+self.velocity[1]]
+
+class Cutscene_reindeer(Cutscene_characters):
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.image = pygame.image.load("Sprites/Enteties/boss/reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/cut_reindeer/')
+
 class Path_col(Staticentity):
 
     def __init__(self, pos, size, destination, spawn):

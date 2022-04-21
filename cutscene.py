@@ -1,32 +1,18 @@
 import animation
 import Read_files
-import sys
+import Entities
 
 class Cutscene_Manager():
-    def __init__(self,player):
-        self.player=player
+    def __init__(self):
         self.cutscenes_complete = []
-        #test
 
-    def start(self,cutscene,type):
-        if type=='file':
-            self.current_scene=Cutscene_files(cutscene)
-        elif type=='engine':
-            self.current_scene=getattr(sys.modules[__name__], cutscene)(self.player)
-
-    def update(self):
-        self.current_scene.update()
-
-    def render(self,screen):
-        self.current_scene.render(screen)
-
-    def end(self):
-        self.cutscenes_complete.append(self.current_scene.name)
+    def start(self,scene):
+        self.cutscenes_complete.append(scene)
 
 class Cutscene_files():
     def __init__(self,cutscene):
         self.name=cutscene
-        self.sprites = Read_files.load_sprites('Sprites/Cutscene/'+self.name)
+        self.sprites = Read_files.load_sprites('cutscene/'+self.name)
         self.image=self.sprites[0]
         self.finished=False
         self.animation=animation.Cutscene_animation(self)
@@ -38,12 +24,34 @@ class Cutscene_files():
         screen.blit(self.image,(0, 0))
 
 class deer_encounter():
-    def __init__(self,player):
+    def __init__(self,player,group):
+        self.name=type(self).__name__
         self.player=player
+        self.finished=False
+        self.timer=0
 
-    def update(self):
-        pass
-        #manimuplate the plater
+        pos=(650,170)
+        self.deer = Entities.Cutscene_reindeer(pos)
+        group.add(self.deer)
+
+    def update(self):#write how you want the plater want to act
+        self.timer+=1
+        if self.timer==1:
+            self.player.currentstate.change_state('Walk')#should only enter these states once
+        elif self.timer<50:
+            self.player.velocity[0]=4
+            self.deer.currentstate.change_state('Idle')
+        elif self.timer==50:
+            self.player.currentstate.change_state('Idle')#should only enter these states once
+            self.deer.currentstate.change_state('Walk')
+            #self.deer.dir[0]=-self.deer.dir[0]
+        elif self.timer>50:
+            self.player.velocity[0]=0
+            self.deer.velocity[0]=5
+
+        if self.timer>100:
+            self.finished=True
+            self.deer.kill()
 
     def render(self):
         pass
