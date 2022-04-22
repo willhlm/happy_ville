@@ -86,12 +86,22 @@ class Transform(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
+        self.done=False
 
     def update_state(self):
-        pass
+        if self.done:
+            self.enter_state('Transform_idle')
 
     def change_state(self,input):
         pass
+
+    def increase_phase(self):
+        self.done=True
+
+class Transform_idle(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
 
 class Stun(Enemy_states):
     def __init__(self,entity,duration):

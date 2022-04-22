@@ -396,9 +396,14 @@
                  "name":"",
                  "properties":[
                         {
+                         "name":"entity",
+                         "type":"string",
+                         "value":"Reindeer"
+                        }, 
+                        {
                          "name":"event",
                          "type":"string",
-                         "value":"deer_encounter"
+                         "value":"Deer_encounter"
                         }, 
                         {
                          "name":"event_type",
@@ -411,6 +416,34 @@
                  "width":16,
                  "x":8192,
                  "y":416
+                }, 
+                {
+                 "gid":18,
+                 "height":224,
+                 "id":167,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"entity",
+                         "type":"string",
+                         "value":"Reindeer"
+                        }, 
+                        {
+                         "name":"event",
+                         "type":"string",
+                         "value":"Boss_deer_encounter"
+                        }, 
+                        {
+                         "name":"event_type",
+                         "type":"string",
+                         "value":"cutscene_engine"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":10048,
+                 "y":608
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -850,7 +883,7 @@
          "y":0
         }],
  "nextlayerid":39,
- "nextobjectid":167,
+ "nextobjectid":168,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

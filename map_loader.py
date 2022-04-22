@@ -9,7 +9,7 @@ class Level():
         self.level_name = level
         self.spawn = spawn
         self.init_player_pos = (0,0)
-        self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed(),Deer_encounter()]
+        self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed(),Camera_shake(self.PLAYER_CENTER),Deer_encounter(self.PLAYER_CENTER)]
         self.camera = self.cameras[0]
         self.load_map_data()
 
@@ -154,6 +154,9 @@ class Level():
                         values['event'] = property['value']
                     elif property['name'] == 'event_type':
                         values['event_type']=property['value']
+                    elif property['name'] == 'entity':
+                        values['entity']=property['value']
+
                 object_size = (int(obj['width']),int(obj['height']))
                 new_trigger = Entities.Trigger(object_position,object_size ,values)
                 self.game_objects.triggers.add(new_trigger)
@@ -315,17 +318,12 @@ class Camera():
         self.scroll=[0,0]
         self.true_scroll=[0,0]
         self.center = center
+        self.shake=[0,0]
 
     def update(self):
-        #if shake>0:#inprinciple we do not need this if
-        #    screen_shake=[random.randint(-shake,shake),random.randint(-shake,shake)]
-        #else:
-        #    screen_shake=[0,0]
-        screen_shake=[0,0]
-
         self.scroll=self.true_scroll.copy()
-        self.scroll[0]=int(self.scroll[0])+screen_shake[0]
-        self.scroll[1]=int(self.scroll[1])+screen_shake[1]
+        self.scroll[0]=int(self.scroll[0])+self.shake[0]
+        self.scroll[1]=int(self.scroll[1])+self.shake[1]
 
 class Auto(Camera):
     def __init__(self, center):
@@ -396,6 +394,16 @@ class Border(Camera):
             else:
                 self.true_scroll[0]=0
         super().update()
+
+class Camera_shake(Auto):
+    def __init__(self, center):
+        super().__init__(center)
+        self.amp=3
+
+    def update(self,player):
+        self.shake[0]=random.randint(-self.amp,self.amp)
+        self.shake[1]=random.randint(-self.amp,self.amp)
+        super().update(player)
 
 class Deer_encounter(Auto):
     def __init__(self, center=[240,180]):

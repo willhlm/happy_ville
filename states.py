@@ -656,15 +656,15 @@ class Select_Menu(Gameplay):
             self.game.game_objects.player.equip_omamori(omamori_index)
 
 class Cutscene_engine(Gameplay):
-    def __init__(self, game,scene):
+    def __init__(self, game,trigger):
         super().__init__(game)
-        self.init(scene)
+        self.init(trigger)
         self.game.game_objects.cutscene_manager.start(self.current_scene.name)
 
-    def init(self,scene):
+    def init(self,trigger):
         self.game.game_objects.player.reset_movement()
         self.pos = [-self.game.WINDOW_SIZE[1],self.game.WINDOW_SIZE[1]]
-        self.current_scene = getattr(cutscene, scene)(self.game.game_objects.player,self.game.game_objects.cutscene_characters)#make an object based on string
+        self.current_scene = getattr(cutscene, trigger.event)(self.game.game_objects,trigger)#make an object based on string: send in player, group and camera
 
     def update(self):
         #super().update()
@@ -684,8 +684,8 @@ class Cutscene_engine(Gameplay):
         pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
 
         self.pos[1]-=1#the lower balck box
-        rect1=(0, self.pos[1], self.game.screen.get_width(), self.game.WINDOW_SIZE[1])
-        pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
+        rect2=(0, self.pos[1], self.game.screen.get_width(), self.game.WINDOW_SIZE[1])
+        pygame.draw.rect(self.game.screen, (0, 0, 0), rect2)
 
         self.pos[0]=min(-200,self.pos[0])
         self.pos[1]=max(250,self.pos[1])

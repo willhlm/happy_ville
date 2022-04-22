@@ -41,6 +41,7 @@ class Trigger(Platform):
         super().__init__(pos,size)
         self.event=values['event']
         self.event_type=values['event_type']
+        self.entity=values['entity']
 
 class Invisible_block(Platform):
     def __init__(self,pos,size):
@@ -748,27 +749,16 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
-class Boss(Character):
-    def __init__(self,pos,projectile_group,loot_group):
-        super().__init__(pos,projectile_group,loot_group)
-        self.projectiles = projectile_group
-        self.loot_group = loot_group
-        self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
-        self.currentstate = states_boss.Idle(self)
-
-    def knock_back(self,dir):
-        pass
-
-class Reindeer(Boss):
-    def __init__(self,pos,projectile_group,loot_group):
-        super().__init__(pos,projectile_group,loot_group)
-        self.image = pygame.image.load("Sprites/Enteties/boss/reindeer/main/idle/raindeer_idle1.png").convert_alpha()
+class Reindeer(Enemy):
+    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
+        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/reindeer/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 1000
         self.spirit=1000
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/reindeer/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
 
     def AI(self,playerpos):
         pass
@@ -780,13 +770,13 @@ class Cutscene_characters(Staticentity):#all but player
         self.acceleration=[1,0.7]
         self.velocity=[0,0]
         self.friction=[0.2,0]
-        self.animation_stack=[animation.Entity_animation(self)]
         self.max_vel=7
+        self.animation_stack=[animation.Entity_animation(self)]
         self.currentstate = states_enemy.Idle(self)
 
     def update(self,pos):
         self.update_pos(pos)
-        #self.currentstate.update()
+        self.currentstate.update()
         self.animation_stack[-1].update()
 
     def update_pos(self,pos):
@@ -795,9 +785,9 @@ class Cutscene_characters(Staticentity):#all but player
 class Cutscene_reindeer(Cutscene_characters):
     def __init__(self,pos):
         super().__init__(pos)
-        self.image = pygame.image.load("Sprites/Enteties/boss/reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/cut_reindeer/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
 
 class Path_col(Staticentity):
 
