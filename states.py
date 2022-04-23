@@ -347,8 +347,6 @@ class Gameplay(Game_State):
 
     def update(self):
         self.game.game_objects.scrolling()
-        #self.game.game_objects.group_distance()
-        self.game.game_objects.check_camera_border()
         self.game.game_objects.collide_all()
 
     def render(self):
@@ -656,21 +654,18 @@ class Select_Menu(Gameplay):
             self.game.game_objects.player.equip_omamori(omamori_index)
 
 class Cutscene_engine(Gameplay):
-    def __init__(self, game,trigger):
+    def __init__(self, game,scene):
         super().__init__(game)
-        self.init(trigger)
-        self.game.game_objects.cutscene_manager.start(self.current_scene.name)
+        self.init(scene)
+        self.game.game_objects.cutscenes_complete.append(self.current_scene.name)
 
-    def init(self,trigger):
+    def init(self,scene):
         self.game.game_objects.player.reset_movement()
         self.pos = [-self.game.WINDOW_SIZE[1],self.game.WINDOW_SIZE[1]]
-        self.current_scene = getattr(cutscene, trigger.event)(self.game.game_objects,trigger)#make an object based on string: send in player, group and camera
+        self.current_scene = getattr(cutscene, scene)(self.game.game_objects)#make an object based on string: send in player, group and camera
 
     def update(self):
-        #super().update()
-        self.game.game_objects.scrolling()
-        self.game.game_objects.collide_all()
-
+        super().update()
         self.current_scene.update()
         if self.current_scene.finished:
             self.exit_state()

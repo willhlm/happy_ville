@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_boss, math, sound
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, math, sound, states
 
 pygame.mixer.init()
 
@@ -39,9 +39,9 @@ class Trigger(Platform):
 
     def __init__(self,pos,size,values):
         super().__init__(pos,size)
+        #will crach if values do not exist
         self.event=values['event']
         self.event_type=values['event_type']
-        self.entity=values['entity']
 
 class Invisible_block(Platform):
     def __init__(self,pos,size):
@@ -308,7 +308,7 @@ class Dynamicentity(Staticentity):
         self.rect.midbottom = self.hitbox.midbottom#[self.hitbox.bottom - self.hitbox_offset[0], self.hitbox.bottom - self.hitbox_offset[1]]
 
 class Character(Dynamicentity):#enemy, NPC,player
-    def __init__(self,pos):
+    def __init__(self,pos,game_objects):
         super().__init__(pos)
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.acceleration=[1,0.7]
@@ -316,6 +316,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.friction=[0.2,0]
         self.animation_stack=[animation.Entity_animation(self)]#maybe it is better to assign animation class based on the speific entity, since some doesn't have pre,main,post
         self.max_vel=7
+        self.game_objects = game_objects
 
     def update(self,pos):
         self.update_pos(pos)
@@ -350,25 +351,29 @@ class Character(Dynamicentity):#enemy, NPC,player
             self.remove(self.pause_group)#remove from pause
 
 class Enemy(Character):
-    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
-        super().__init__(pos)
-        self.projectiles = projectile_group
-        self.loot_group = loot_group
-        self.group = enemy_group
-        self.pause_group = pause_group
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.projectiles = game_objects.eprojectiles
+        self.loot_group = game_objects.loot
+        self.group = game_objects.enemies
+        self.pause_group = game_objects.entity_pause
+
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
-        self.currentstate = states_enemy.Idle(self)
         self.counter=0
         self.AImethod=self.peaceAI
         self.player_distance=[0,0]
         self.aggro=True
         self.max_vel=3
         self.friction=[0.5,0]
+        self.currentstate = states_enemy.Idle(self)
 
     def update(self,pos,playerpos):
         super().update(pos)
         self.AI(playerpos)
         self.group_distance()
+
+    def death(self):
+        self.kill()
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -424,8 +429,8 @@ class Enemy(Character):
                 self.currentstate.handle_input('Idle')
 
 class Woopie(Enemy):
-    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
-        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/main/Idle/Kodama_stand1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
@@ -438,8 +443,8 @@ class Woopie(Enemy):
 class Vatt(Enemy):
 
     aggro = False  #remember to turn false when changing maps
-    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
-        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = pygame.image.load("Sprites/Enteties/enemies/vatt/main/idle/idle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
@@ -481,8 +486,8 @@ class Vatt(Enemy):
                 self.currentstate.handle_input('Javelin')
 
 class Flowy(Enemy):
-    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
-        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = pygame.image.load("Sprites/Enteties/enemies/flowy/main/Idle/Stand1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
@@ -492,8 +497,8 @@ class Flowy(Enemy):
         self.spirit=10
 
 class Larv(Enemy):
-    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
-        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = pygame.image.load("Sprites/Enteties/enemies/larv/main/Idle/catapillar_idle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
@@ -507,8 +512,8 @@ class Player(Character):
 
     sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
 
-    def __init__(self,pos,projectile_group,cosmetics_group):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
@@ -519,8 +524,8 @@ class Player(Character):
         self.health = 100
         self.spirit = 100
 
-        self.cosmetics = cosmetics_group
-        self.projectiles = projectile_group#pygame.sprite.Group()
+        self.cosmetics = game_objects.cosmetics
+        self.projectiles = game_objects.fprojectiles#pygame.sprite.Group()
 
         self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#'Shield':Shield#the objects are referensed but made in states
         self.equip='Hammer'#ability pointer
@@ -567,10 +572,10 @@ class Player(Character):
             old_omamori.detach()#call the detach function of omamori
 
 class NPC(Character):
-    def __init__(self,pos,npc_group,pause_group):
-        super().__init__(pos)
-        self.group = npc_group
-        self.pause_group = pause_group
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.group = game_objects.npcs
+        self.pause_group = game_objects.entity_pause
         self.name = str(type(self).__name__)#the name of the class
         self.health = 50
         self.conv_index = 0
@@ -606,8 +611,8 @@ class NPC(Character):
         self.currentstate.handle_input('Walk')
 
 class Aslat(NPC):
-    def __init__(self, pos,npc_group,pause_group):
-        super().__init__(pos,npc_group,pause_group)
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
@@ -633,8 +638,8 @@ class Aslat(NPC):
 #            self.action['inv'] = False
 
 class Sahkar(NPC):
-    def __init__(self, pos,npc_group,pause_group):
-        super().__init__(pos,npc_group,pause_group)
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
         self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
         self.rect = self.image.get_rect(center=pos)
@@ -660,8 +665,8 @@ class Sahkar(NPC):
 #            self.action['inv'] = False
 
 class MrBanks(NPC):
-    def __init__(self,pos,npc_group,pause_group):
-        super().__init__(pos,npc_group,pause_group)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.name = 'MrBanks'
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
@@ -749,45 +754,28 @@ class MrBanks(NPC):
         self.ammount-=1*int(self.business)
         self.ammount=max(0,self.ammount)#minimum 0
 
-class Reindeer(Enemy):
-    def __init__(self,pos,projectile_group,loot_group,enemy_group,pause_group):
-        super().__init__(pos,projectile_group,loot_group,enemy_group,pause_group)
+class Boss(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+
+    def death(self):
+        new_game_state = states.Cutscene_engine(self.game_objects.game,'Defeated_boss')
+        new_game_state.enter_state()
+
+class Reindeer(Boss):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/reindeer/')
         self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 1000
-        self.spirit=1000
+        self.health = 1
+        self.spirit=1
+        self.ability='Dash'
 
     def AI(self,playerpos):
         pass
-
-class Cutscene_characters(Staticentity):#all but player
-    def __init__(self,pos):
-        super().__init__(pos)
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.acceleration=[1,0.7]
-        self.velocity=[0,0]
-        self.friction=[0.2,0]
-        self.max_vel=7
-        self.animation_stack=[animation.Entity_animation(self)]
-        self.currentstate = states_enemy.Idle(self)
-
-    def update(self,pos):
-        self.update_pos(pos)
-        self.currentstate.update()
-        self.animation_stack[-1].update()
-
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0]+self.velocity[0], self.rect.topleft[1] + pos[1]+self.velocity[1]]
-
-class Cutscene_reindeer(Cutscene_characters):
-    def __init__(self,pos):
-        super().__init__(pos)
-        self.rect = self.image.get_rect(center=pos)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/cut_reindeer/')
-        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
 
 class Path_col(Staticentity):
 

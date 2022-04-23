@@ -58,10 +58,26 @@ class Death(Enemy_states):
     def update_state(self):
         if self.done:
             self.entity.loots()
-            self.entity.kill()
+            self.enter_state('Dead')
+
 
     def increase_phase(self):
         self.done=True
+
+    def change_state(self,input):
+        pass
+
+class Dead(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.entity.death()
+
+    def update_state(self):
+        pass
+
+    def increase_phase(self):
+        pass
 
     def change_state(self,input):
         pass

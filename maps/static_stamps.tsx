@@ -41,7 +41,6 @@
  </tile>
  <tile id="17">
   <properties>
-   <property name="entity" value=""/>
    <property name="event" value=""/>
    <property name="event_type" value=""/>
   </properties>

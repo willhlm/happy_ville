@@ -1,4 +1,4 @@
-import pygame, csv, Entities, math, random, Read_files
+import pygame, csv, Entities, math, Read_files
 
 class Level():
     def __init__(self, level, game_objects, spawn):
@@ -9,8 +9,6 @@ class Level():
         self.level_name = level
         self.spawn = spawn
         self.init_player_pos = (0,0)
-        self.cameras = [Auto(self.PLAYER_CENTER),Auto_CapX(self.PLAYER_CENTER),Auto_CapY(self.PLAYER_CENTER),Fixed(),Camera_shake(self.PLAYER_CENTER),Deer_encounter(self.PLAYER_CENTER)]
-        self.camera = self.cameras[0]
         self.load_map_data()
 
     def load_map_data(self):
@@ -20,12 +18,6 @@ class Level():
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
                 self.map_data['statics_firstgid'] = tileset['firstgid']
-
-    def set_camera(self, camera_number):
-        self.camera = self.cameras[camera_number]
-
-    def scrolling(self,player):
-        self.camera.update(player)
 
     def read_all_spritesheets(self):
         sprites = {}
@@ -111,7 +103,7 @@ class Level():
                     if property['name'] == 'class':
                         npc_name = property['value']
                 new_npc = getattr(Entities, npc_name)
-                self.game_objects.npcs.add(new_npc(object_position,self.game_objects.npcs,self.game_objects.entity_pause))
+                self.game_objects.npcs.add(new_npc(object_position,self.game_objects))
             #enemies
             elif id == 2:
                 properties = obj['properties']
@@ -119,7 +111,7 @@ class Level():
                     if property['name'] == 'class':
                         enemy_name = property['value']
                 new_enemy = getattr(Entities, enemy_name)
-                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects.eprojectiles, self.game_objects.loot,self.game_objects.enemies,self.game_objects.entity_pause))
+                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects))
 
             elif id == 9:
                 object_size = (int(obj['width']),int(obj['height']))
@@ -154,9 +146,6 @@ class Level():
                         values['event'] = property['value']
                     elif property['name'] == 'event_type':
                         values['event_type']=property['value']
-                    elif property['name'] == 'entity':
-                        values['entity']=property['value']
-
                 object_size = (int(obj['width']),int(obj['height']))
                 new_trigger = Entities.Trigger(object_position,object_size ,values)
                 self.game_objects.triggers.add(new_trigger)
@@ -309,107 +298,3 @@ class Sprite_sheet():
     def images_at(self, rects, colorkey = None):
         #returns list of all images in sheet
         return [self.image_at(rect, colorkey) for rect in rects]
-
-
-#scrolling
-
-class Camera():
-    def __init__(self, center = (240,180)):
-        self.scroll=[0,0]
-        self.true_scroll=[0,0]
-        self.center = center
-        self.shake=[0,0]
-
-    def update(self):
-        self.scroll=self.true_scroll.copy()
-        self.scroll[0]=int(self.scroll[0])+self.shake[0]
-        self.scroll[1]=int(self.scroll[1])+self.shake[1]
-
-class Auto(Camera):
-    def __init__(self, center):
-        super().__init__(center)
-
-    def update(self,player):
-        self.true_scroll[0]+=(player.center[0]-8*self.true_scroll[0]-self.center[0])/15
-        self.true_scroll[1]+=(player.center[1]-self.true_scroll[1]-self.center[1])
-        super().update()
-
-class Auto_CapX(Camera):
-    def __init__(self, center):
-        super().__init__(center)
-
-    def update(self,player):
-        self.true_scroll[1]+=(player.center[1]-self.true_scroll[1]-self.center[1])
-        super().update()
-
-class Auto_CapY(Camera):
-    def __init__(self, center):
-        super().__init__(center)
-
-    def update(self,player):
-        self.true_scroll[0]+=(player.center[0]-8*self.true_scroll[0]-self.center[0])/15
-        super().update()
-
-class Fixed(Camera):
-    def __init__(self):
-        super().__init__()
-
-    def update(self,player):
-        super().update()
-
-class Autocap(Camera):
-    def __init__(self):
-        super().__init__()
-
-    def update(self,player,distance):
-        if player.center[0]>400:
-            self.true_scroll[0]+=5
-        elif player.center[0]<30:
-            self.true_scroll[0]-=5
-        elif player.center[0]>150 and player.center[0]<220:
-            self.true_scroll[0]=0
-
-        if player.center[1]>200:
-            self.true_scroll[1]+=0.5
-        elif player.center[1]<70:
-            self.true_scroll[1]-=0.5
-        elif player.center[1]>130 and player.center[1]<190:
-            self.true_scroll[1]=0
-
-        super().update()
-
-class Border(Camera):
-    def __init__(self):
-        super().__init__()
-
-    def update(self,player,total_distance):
-        self.true_scroll[1]+=(player.center[1]-self.true_scroll[1]-180)
-        if -40 < total_distance[0]<1400:#map boundaries
-            self.true_scroll[0]+=(player.center[0]-4*self.true_scroll[0]-240)/20
-        else:
-            if player.center[0]<60:
-                self.true_scroll[0]-=1
-            elif player.center[0]>440:
-                self.true_scroll[0]+=1
-            else:
-                self.true_scroll[0]=0
-        super().update()
-
-class Camera_shake(Auto):
-    def __init__(self, center):
-        super().__init__(center)
-        self.amp=3
-
-    def update(self,player):
-        self.shake[0]=random.randint(-self.amp,self.amp)
-        self.shake[1]=random.randint(-self.amp,self.amp)
-        super().update(player)
-
-class Deer_encounter(Auto):
-    def __init__(self, center=[240,180]):
-        super().__init__(center=[240,180])
-
-    def update(self,player):
-        self.center[0]-=5
-        self.center[0]=max(100,self.center[0])
-        super().update(player)

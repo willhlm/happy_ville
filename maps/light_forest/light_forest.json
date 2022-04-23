@@ -238,8 +238,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":7648,
-                 "y":256
+                 "x":9760,
+                 "y":576
                 }, 
                 {
                  "gid":16,
@@ -396,11 +396,6 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"entity",
-                         "type":"string",
-                         "value":"Reindeer"
-                        }, 
-                        {
                          "name":"event",
                          "type":"string",
                          "value":"Deer_encounter"
@@ -423,11 +418,6 @@
                  "id":167,
                  "name":"",
                  "properties":[
-                        {
-                         "name":"entity",
-                         "type":"string",
-                         "value":"Reindeer"
-                        }, 
                         {
                          "name":"event",
                          "type":"string",

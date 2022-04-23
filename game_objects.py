@@ -7,7 +7,7 @@ import map_loader
 import BG
 import sound
 import states
-import cutscene
+import camera
 
 class Game_Objects():
 
@@ -22,8 +22,9 @@ class Game_Objects():
         self.fadein_length = 20
         self.blackedout_length = 40
         self.fade_count = 0
+        self.cutscenes_complete = []
         self.create_groups()
-        self.cutscene_manager = cutscene.Cutscene_Manager()
+        self.camera = [camera.Auto(self)]
 
     def create_groups(self):
 
@@ -49,7 +50,7 @@ class Game_Objects():
         self.reflection=BG.Reflection()
 
         #initiate player
-        self.player = Entities.Player([200,50],self.fprojectiles,self.cosmetics)
+        self.player = Entities.Player([200,50],self)
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(2*self.game.WINDOW_SIZE[1]/3))
 
@@ -107,24 +108,23 @@ class Game_Objects():
                 self.load_map(trigger.destination, trigger.spawn)
 
             elif type(trigger).__name__ == 'Trigger':
-                if trigger.event not in self.cutscene_manager.cutscenes_complete:#if the cutscene has not been shown before
+                if trigger.event not in self.cutscenes_complete:#if the cutscene has not been shown before
                     if trigger.event_type=='cutscene_file':
-                        new_game_state = states.Cutscene_file(self.game,trigger)
+                        new_game_state = states.Cutscene_file(self.game,trigger.event)
                         new_game_state.enter_state()
                     elif trigger.event_type=='cutscene_engine':
-                        new_game_state = states.Cutscene_engine(self.game,trigger)
+                        new_game_state = states.Cutscene_engine(self.game,trigger.event)
                         new_game_state.enter_state()
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
-
         self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
 
     def scrolling(self):
-        self.map.scrolling(self.player.rect)
-        scroll = [-self.map.camera.scroll[0],-self.map.camera.scroll[1]]
+        self.camera[-1].update()
+        scroll = [-self.camera[-1].scroll[0],-self.camera[-1].scroll[1]]
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):
@@ -197,58 +197,3 @@ class Game_Objects():
             self.change_map(change_map)
         elif chest_id:
             self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
-
-#    def group_distance(self):#remove the entities if it is off screen from thir group. move to their update methods
-#        bounds=[-100,600,-100,350]#-x,+x,-y,+y
-
-#        for entity in self.enemies:
-#            if entity.rect[0]<bounds[0] or entity.rect[0]>bounds[1] or entity.rect[1]<bounds[2] or entity.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
-#                self.enemies.remove(entity)
-#                self.enemy_pause.add(entity)
-
-#        for entity in self.enemy_pause:
-#            if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
-#                self.enemies.add(entity)
-#                self.enemy_pause.remove(entity)
-
-#        for entity in self.npcs:
-#            if entity.rect[0]<bounds[0] or entity.rect[0]>bounds[1] or entity.rect[1]<bounds[2] or entity.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
-#                self.npcs.remove(entity)
-#                self.npc_pause.add(entity)
-
-#        for entity in self.npc_pause:
-#            if bounds[0]<entity.rect[0]<bounds[1] and bounds[2]<entity.rect[1]<bounds[3]: #or abs(entity.rect[1])<300:#this means it is outside of screen
-#                self.npcs.add(entity)
-#                self.npc_pause.remove(entity)
-
-
-    #TODO: fix distance chek for remaining camera stops (right, left, top)
-    def check_camera_border(self):
-
-        xflag, yflag = False, False
-        for stop in self.camera_blocks:
-            if stop.dir == 'right':
-                if (self.player.hitbox.centery - stop.rect.bottom < self.player_center[1]) and (stop.rect.top - self.player.hitbox.centery < self.game.WINDOW_SIZE[1] - self.player_center[1]):
-                    #if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
-                    if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player_center[0]) < self.player_center[0] and self.player.hitbox.centerx >= self.player_center[0]:
-                        xflag = True
-            elif stop.dir == 'left':
-                if stop.rect.right >= 0 and self.player.hitbox.centerx < self.player_center[0]:
-                    xflag = True
-            elif stop.dir == 'bottom':
-                if (stop.rect.left - self.player.hitbox.centerx < self.player_center[0]) and (self.player.hitbox.centerx - stop.rect.right < self.player_center[0]):
-                    if (-self.game.WINDOW_SIZE[1] < (stop.rect.centery - self.player.hitbox.centery) < (self.game.WINDOW_SIZE[1] - self.player_center[1])):
-                        yflag = True
-            elif stop.dir == 'top':
-                if (0 < stop.rect.left - self.player.hitbox.centerx < self.player_center[0]) or (0 < self.player.hitbox.centerx - stop.rect.right < self.player_center[0]):
-                    if self.player.hitbox.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
-                        yflag = True
-
-        if xflag and yflag:
-            self.map.set_camera(3)
-        elif xflag:
-            self.map.set_camera(1)
-        elif yflag:
-            self.map.set_camera(2)
-        else:
-            self.map.set_camera(0)
