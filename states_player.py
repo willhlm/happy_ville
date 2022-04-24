@@ -15,6 +15,14 @@ class Player_states(Entity_States):
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
+    def enter_condition(self,newstate):
+        if newstate=='Dash':
+            if self.entity.dash:
+                self.enter_state(newstate)
+        elif newstate=='Wall':
+            if self.entity.wall:
+                self.enter_state(newstate)
+
     def increase_spirit(self):
         self.entity.spirit += 0.1
         self.entity.spirit = min(self.entity.max_spirit,self.entity.spirit)
@@ -54,7 +62,7 @@ class Idle(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_stand')
         elif input[-1]=='lb':
-            self.enter_state('Dash')
+            self.enter_condition('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -88,7 +96,7 @@ class Walk(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_run')
         elif input[-1]=='lb':
-            self.enter_state('Dash')
+            self.enter_condition('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1] == 'b':
@@ -124,7 +132,7 @@ class Jump_run(Player_states):
 
     def handle_press_input(self,input):
         if input[-1]=='lb':
-            self.enter_state('Dash')
+            self.enter_condition('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -188,7 +196,7 @@ class Fall_run(Player_states):
         if self.entity.collision_types['bottom']:
             self.enter_state('Walk')
         elif self.entity.collision_types['right'] or self.entity.collision_types['left']:#on wall and not on ground
-            self.enter_state('Wall')
+            self.enter_condition('Wall')
 
     def handle_press_input(self,input):
         if input[-1]=='b':

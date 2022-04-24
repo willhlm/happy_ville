@@ -499,7 +499,6 @@ class Conversation(Gameplay):
         self.game.screen.blit(self.text_window,(self.blit_x,60))
 
     def handle_events(self, input):
-
         if input[0]:
             if input[-1] == 'start':
                 self.exit_state()
@@ -672,8 +671,10 @@ class Cutscene_engine(Gameplay):
 
     def render(self):
         super().render()#want the BG to keep rendering
+        self.cinematic()
+        self.current_scene.render()
 
-        #black box stuff
+    def cinematic(self):#black box stuff
         self.pos[0]+=1#the upper balck box
         rect1=(0, self.pos[0], self.game.screen.get_width(), self.game.WINDOW_SIZE[1])
         pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)

@@ -1,6 +1,7 @@
 import animation
 import Read_files
 import Entities
+import pygame
 
 class Cutscene_files():
     def __init__(self,cutscene):
@@ -24,6 +25,9 @@ class Cutscene_engine():
 
         self.game_objects=objects
         self.player = objects.player
+
+    def render(self):
+        pass
 
 class Deer_encounter(Cutscene_engine):
     def __init__(self,objects):
@@ -87,18 +91,29 @@ class Boss_deer_encounter(Cutscene_engine):
 class Defeated_boss(Cutscene_engine):
     def __init__(self,objects):
         super().__init__(objects)
+        self.image=pygame.image.load("Sprites/UI/Menu/select/inventory1.png").convert_alpha()
+        self.step1=False
+
+
+    def set_image(self):
+        img=self.player.sprites.sprite_dict['main']['dash'][0]
+        self.image.blit(img,(50, 0))
 
     def update(self):
         self.timer+=1
         if self.timer==1:
             self.player.currentstate.change_state('Idle')#should only enter these states once
-        elif self.timer<50:
-            self.player.velocity[1]=2
-        elif self.timer>50:
-            self.player.velocity[1]=0
-
-        if self.timer >100:
+        elif self.timer<75:
             self.player.velocity[1]=-2
+        elif self.timer>75:
+            self.player.velocity[1]=-1
+        if self.timer >200:
+            self.player.velocity[1]=2
 
-        if self.timer>200:
-            self.finished=True
+        if self.timer>300:
+            self.step1=True
+
+    def render(self):
+        if self.step1:
+            self.set_image()            
+            self.game_objects.game.screen.blit(self.image,(100, 50))

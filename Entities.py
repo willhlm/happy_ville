@@ -514,11 +514,12 @@ class Player(Character):
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.image = pygame.image.load("Sprites/Enteties/aila/main/Idle/aila_idle1.png").convert()
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/')
+
         self.max_health = 250
         self.max_spirit = 100
         self.health = 100
@@ -527,26 +528,16 @@ class Player(Character):
         self.cosmetics = game_objects.cosmetics
         self.projectiles = game_objects.fprojectiles#pygame.sprite.Group()
 
-        self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#'Shield':Shield#the objects are referensed but made in states
+        self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
         self.equip='Hammer'#ability pointer
         self.sword=Sword(self)
         self.shield=Shield
-
-        #can be removed?
-        #self.action_sfx_player = pygame.mixer.Channel(1)
-        #self.action_sfx_player.set_volume(0.1)
-        #self.action_sfx = {'run': pygame.mixer.Sound("Audio/SFX/player/footstep.mp3")}
-        #self.movement_sfx_timer = 110
+        self.dash=False
+        self.wall=True
 
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.omamoris=Omamoris(self)
         self.currentstate = states_player.Idle(self)
-
-    #def load_sfx(self):#make a sound class
-    #    if self.action['run'] and not self.action['fall'] and self.movement_sfx_timer > 15:
-    #        self.action_sfx_player.play(self.action_sfx['run'])
-    #        self.movement_sfx_timer = 0
-    #    self.movement_sfx_timer += 1
 
     def enter_idle(self):
         self.currentstate = states_player.Idle(self)
@@ -759,8 +750,12 @@ class Boss(Enemy):
         super().__init__(pos,game_objects)
 
     def death(self):
+        self.give_abillity()
         new_game_state = states.Cutscene_engine(self.game_objects.game,'Defeated_boss')
         new_game_state.enter_state()
+
+    def give_abillity(self):
+        self.game_objects.player.abilities[self.ability]=getattr(sys.modules[__name__], self.ability)
 
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
@@ -772,7 +767,9 @@ class Reindeer(Boss):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 1
         self.spirit=1
-        self.ability='Dash'
+
+    def give_abillity(self):
+        self.game_objects.player.dash=True
 
     def AI(self,playerpos):
         pass
