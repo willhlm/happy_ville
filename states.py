@@ -341,9 +341,6 @@ class Gameplay(Game_State):
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
-        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
-        self.fade_surface.set_alpha(255)
-        self.fade_surface.fill((0,0,0))
 
     def update(self):
         self.game.game_objects.scrolling()
@@ -353,26 +350,6 @@ class Gameplay(Game_State):
         self.game.screen.fill((207,238,250))
         self.game.game_objects.draw()
         self.blit_screen_info()
-        if self.game.game_objects.FADEIN:
-            self.fadein()
-
-    def fadein(self):
-        count = self.game.game_objects.fade_count
-        b_len = self.game.game_objects.blackedout_length
-        f_len = self.game.game_objects.fadein_length
-        if self.game.game_objects.BLACKEDOUT:
-            if count > b_len:
-                self.game.game_objects.BLACKEDOUT = False
-                self.game.game_objects.fade_count = 0
-                self.game.game_objects.load_bg_music()
-            self.game.screen.fill((0,0,0))
-            self.game.game_objects.fade_count += 1
-        elif self.game.game_objects.FADEIN:
-            if count > f_len:
-                self.game.game_objects.FADEIN = False
-            self.fade_surface.set_alpha(int((f_len - count)*(255/f_len)))
-            self.game.screen.blit(self.fade_surface, (0,0))
-            self.game.game_objects.fade_count += 1
 
     def blit_screen_info(self):
         self.blit_health()
@@ -431,44 +408,62 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             elif input[-1] == 'y':
-                npc = self.game.game_objects.conversation_collision()
-                if npc:
-                    new_state = Conversation(self.game, npc)
-                    new_state.enter_state()
-                else:
-                    self.game.game_objects.interactions()
+                self.game.game_objects.collisions.check_interaction_collision()
 
             elif input[-1] == 'select':
                 new_state = Select_Menu(self.game)
                 new_state.enter_state()
 
             else:
-                if not self.game.game_objects.BLACKEDOUT:
-                    self.game.game_objects.player.currentstate.handle_press_input(input)
-                    self.game.game_objects.player.omamoris.handle_input(input)
+                self.game.game_objects.player.currentstate.handle_press_input(input)
+                self.game.game_objects.player.omamoris.handle_input(input)
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-class Fadeout(Game_State):
-
-    def __init__(self,game,new_map,spawn):
+class Fadein(Gameplay):
+    def __init__(self,game):
         super().__init__(game)
+        self.game.game_objects.player.reset_movement()
+        self.game.game_objects.player.enter_idle()
+
         self.count = 0
-        self.fadeout_length = 60
-        self.new_map = new_map
-        self.spawn = spawn
+        self.fade_length = 20
+
         self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
-        self.fade_surface.set_alpha(int(255/self.fadeout_length))
+        self.fade_surface.set_alpha(255)
         self.fade_surface.fill((0,0,0))
 
     def update(self):
+        super().update()
         self.count += 1
-        if self.count > self.fadeout_length:
-            self.exit_state()
-            self.game.game_objects.load_map(self.new_map, self.spawn)
+        if self.count > self.fade_length:
+            self.exit()
+
+    def exit(self):
+        self.game.game_objects.load_bg_music()
+        self.exit_state()
 
     def render(self):
-        self.fade_surface.set_alpha(int(self.count*(255/self.fadeout_length)))
+        super().render()
+        self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
+        self.game.screen.blit(self.fade_surface, (0,0))
+
+    def handle_events(self, input):
+        pass
+
+class Fadeout(Fadein):
+    def __init__(self,game):
+        super().__init__(game)
+        self.fade_length = 60
+        self.fade_surface.set_alpha(int(255/self.fade_length))
+
+    def exit(self):
+        self.exit_state()
+        new_state=Fadein(self.game)#
+        new_state.enter_state()
+
+    def render(self):
+        self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
         self.game.screen.blit(self.fade_surface, (0,0))
 
 class Conversation(Gameplay):
@@ -672,7 +667,7 @@ class Cutscene_engine(Gameplay):
     def render(self):
         super().render()#want the BG to keep rendering
         self.cinematic()
-        self.current_scene.render()
+        self.current_scene.render()#to plot the abilities. Maybe better with another state?
 
     def cinematic(self):#black box stuff
         self.pos[0]+=1#the upper balck box

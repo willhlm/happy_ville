@@ -1,8 +1,9 @@
 import pygame
+import states
 
 class Collisions():
-    def __init__(self):
-        pass
+    def __init__(self,game_objects):
+        self.game_objects = game_objects
 
     @staticmethod
     def counter(fprojectiles,eprojectiles):
@@ -61,37 +62,55 @@ class Collisions():
             collision_loot.pickup(player)
 
     #npc player conversation
-    @staticmethod
-    def check_npc_collision(player,npcs):
-        return pygame.sprite.spritecollideany(player,npcs)#check collision
+    def check_interaction_collision(self):
+        self.check_npc_collision()
+        self.check_interactables()
+
+    def check_npc_collision(self):
+        npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
+
+        if npc:
+            new_state = states.Conversation(self.game_objects.game, npc)
+            new_state.enter_state()
 
     #interact with chests
-    @staticmethod
-    def check_interaction(player,static_entities):
-        map_change = False
-        chest_id = False
-        collision=pygame.sprite.spritecollideany(player,static_entities,Collisions.collided)#check collision
+    def check_interactables(self):
+        collision = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
+
         if collision:
             collision.interacted = True
             if type(collision).__name__ == "Door":
                 print('before try')
                 try:
-                    map_change = collision.next_map
+                    self.game_objects.change_map(collision.next_map)
                 except:
                     pass
             if type(collision).__name__ in ["Chest", "Chest_Big"]:
                 try:
                     chest_id = collision.ID
+                    self.game_objects.map_state[self.game_objects.map.level_name]["chests"][collision.ID][1] = "opened"
                 except:
                     pass
 
-        return map_change, chest_id
 
-    @staticmethod
-    def check_trigger(player,triggers):
-        return pygame.sprite.spritecollideany(player,triggers,Collisions.collided)
+    def check_trigger(self,player,triggers):
+        trigger = pygame.sprite.spritecollideany(player,triggers,Collisions.collided)
 
+        if trigger:
+            if type(trigger).__name__ == 'Path_col':
+                self.game_objects.sound.pause_bg_sound()
+                self.game_objects.player.enter_idle()
+                self.game_objects.player.reset_movement()
+                self.game_objects.load_map(trigger.destination, trigger.spawn)
 
+            elif type(trigger).__name__ == 'Trigger':
+                if trigger.event not in self.game_objects.cutscenes_complete:#if the cutscene has not been shown before
+                    if trigger.event_type=='cutscene_file':
+                        new_game_state = states.Cutscene_file(self.game_objects.game,trigger.event)
+                        new_game_state.enter_state()
+                    elif trigger.event_type=='cutscene_engine':
+                        new_game_state = states.Cutscene_engine(self.game_objects.game,trigger.event)
+                        new_game_state.enter_state()
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one

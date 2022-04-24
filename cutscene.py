@@ -93,10 +93,10 @@ class Defeated_boss(Cutscene_engine):
         super().__init__(objects)
         self.image=pygame.image.load("Sprites/UI/Menu/select/inventory1.png").convert_alpha()
         self.step1=False
-
+        self.abillity='dash'
 
     def set_image(self):
-        img=self.player.sprites.sprite_dict['main']['dash'][0]
+        img=self.player.sprites.sprite_dict['main'][self.abillity][0]
         self.image.blit(img,(50, 0))
 
     def update(self):
@@ -115,5 +115,5 @@ class Defeated_boss(Cutscene_engine):
 
     def render(self):
         if self.step1:
-            self.set_image()            
+            self.set_image()
             self.game_objects.game.screen.blit(self.image,(100, 50))

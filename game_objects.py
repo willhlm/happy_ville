@@ -16,15 +16,10 @@ class Game_Objects():
         self.game = game
         self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
         self.sound = sound.Sound()
-        self.collisions = Engine.Collisions()
-        self.FADEIN = False
-        self.BLACKEDOUT = False
-        self.fadein_length = 20
-        self.blackedout_length = 40
-        self.fade_count = 0
         self.cutscenes_complete = []
         self.create_groups()
         self.camera = [camera.Auto(self)]
+        self.collisions = Engine.Collisions(self)
 
     def create_groups(self):
 
@@ -57,10 +52,8 @@ class Game_Objects():
     def load_map(self, map_name, spawn = '1'):
         self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
-        #self.load_bg_music()
-        self.FADEIN = True
-        self.BLACKEDOUT = True
-        self.fade_count = 0
+        new_game_state = states.Fadeout(self.game)
+        new_game_state.enter_state()
 
     def load_bg_music(self):
         try:
@@ -96,25 +89,7 @@ class Game_Objects():
         self.collisions.pickup_loot(self.player,self.loot)
         self.collisions.check_enemy_collision(self.player,self.enemies)
 
-        #enter new state if new map is provided
-        trigger = self.collisions.check_trigger(self.player,self.triggers)
-        if trigger:
-            if type(trigger).__name__ == 'Path_col':
-                self.sound.pause_bg_sound()
-                self.player.enter_idle()
-                self.player.reset_movement()
-                new_game_state = states.Fadeout(self.game, trigger.destination, trigger.spawn)
-                new_game_state.enter_state()
-                self.load_map(trigger.destination, trigger.spawn)
-
-            elif type(trigger).__name__ == 'Trigger':
-                if trigger.event not in self.cutscenes_complete:#if the cutscene has not been shown before
-                    if trigger.event_type=='cutscene_file':
-                        new_game_state = states.Cutscene_file(self.game,trigger.event)
-                        new_game_state.enter_state()
-                    elif trigger.event_type=='cutscene_engine':
-                        new_game_state = states.Cutscene_engine(self.game,trigger.event)
-                        new_game_state.enter_state()
+        self.collisions.check_trigger(self.player,self.triggers)
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
@@ -187,13 +162,3 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
-
-    def conversation_collision(self):
-        return Engine.Collisions.check_npc_collision(self.player,self.npcs)
-
-    def interactions(self):
-        change_map, chest_id = self.collisions.check_interaction(self.player,self.interactables)
-        if change_map:
-            self.change_map(change_map)
-        elif chest_id:
-            self.map_state[self.map.level_name]["chests"][chest_id][1] = "opened"
