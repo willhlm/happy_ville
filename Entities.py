@@ -355,6 +355,9 @@ class Character(Dynamicentity):#enemy, NPC,player
             else:
                 self.currentstate.change_state('Death')#overrite any state and go to death
 
+    def knock_back(self,dir):
+        self.velocity[0]=dir*30
+
     def hurt_animation(self):
         if str(type(self.animation_stack[-1]).__name__) != 'Hurt_animation':#making sure to not append more than one hurt animation at time
             new_animation=animation.Hurt_animation(self)
@@ -376,6 +379,7 @@ class Enemy(Character):
         self.loot_group = game_objects.loot
         self.group = game_objects.enemies
         self.pause_group = game_objects.entity_pause
+        self.cosmetics = game_objects.cosmetics
 
         self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
         self.counter=0
@@ -385,6 +389,7 @@ class Enemy(Character):
         self.max_vel=3
         self.friction=[0.5,0]
         self.currentstate = states_enemy.Idle(self)
+        self.attack_distance = 0
 
     def update(self,pos,playerpos):
         super().update(pos)
@@ -392,6 +397,7 @@ class Enemy(Character):
         self.group_distance()
 
     def death(self):
+        self.aggro=False
         self.kill()
 
     def loots(self):
@@ -406,20 +412,20 @@ class Enemy(Character):
         duration=30
         self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
 
-    def knock_back(self,dir):
-        self.velocity[0]=dir*30
-
     def AI(self,playerpos):
         self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[1]-self.rect.centerx]#check plater distance
-        self.updateAI()#decide aggro or peace
         self.counter += 1
+        self.updateAI()#decide aggro or peace
         self.AImethod()#run ether aggro- or peace-AI
 
-    def updateAI(self):#move these into AI methods
+    def updateAI(self):#move these into AI methods, or maybe in group distance?
         if abs(self.player_distance[0])<200 and self.AImethod.__name__ != 'aggroAI':
             self.AImethod=self.aggroAI
         elif abs(self.player_distance[0])>200 and self.AImethod.__name__ != 'peaceAI':
             self.AImethod=self.peaceAI
+
+    def cutsceneAI(self):#do nothing
+        pass
 
     def peaceAI(self):
         if self.counter>20:
@@ -437,14 +443,14 @@ class Enemy(Character):
             if self.player_distance[0] > self.attack_distance:
                 self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = 1
-                self.currentstate.handle_input('Run')
+                self.currentstate.handle_input('Walk')
             elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
                 self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = -1
-                self.currentstate.handle_input('Run')
+                self.currentstate.handle_input('Walk')
             else:
                 self.counter = 0
                 self.currentstate.handle_input('Idle')
@@ -459,7 +465,6 @@ class Woopie(Enemy):
         self.health = 1
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.attack_distance=0
 
 class Vatt(Enemy):
 
@@ -474,8 +479,8 @@ class Vatt(Enemy):
         self.spirit = 30
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.currentstate = states_vatt.Idle(self)
-        self.attack_distance = 60
         self.aggro=False
+        self.attack_distance = 60
 
     def updateAI(self):
         if Vatt.aggro and not self.aggro:
@@ -499,11 +504,11 @@ class Vatt(Enemy):
             if self.player_distance[0] > self.attack_distance:
                 self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = 1
-                self.currentstate.handle_input('Run')
+                self.currentstate.handle_input('Walk')
             elif self.player_distance[0] < -self.attack_distance:
                 self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = -1
-                self.currentstate.handle_input('Run')
+                self.currentstate.handle_input('Walk')
             else:
                 self.counter = 0
                 self.currentstate.handle_input('Javelin')
@@ -771,12 +776,17 @@ class Boss(Enemy):
         super().__init__(pos,game_objects)
 
     def death(self):
+        self.aggro=False
+        self.AImethod=self.cutsceneAI
         self.give_abillity()
         new_game_state = states.Cutscene_engine(self.game_objects.game,'Defeated_boss')
         new_game_state.enter_state()
 
     def give_abillity(self):
         self.game_objects.player.abilities[self.ability]=getattr(sys.modules[__name__], self.ability)
+
+    def updateAI(self):
+        pass
 
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
@@ -786,14 +796,43 @@ class Reindeer(Boss):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 1
+        self.health = 100
         self.spirit=1
+        self.attack=Sword
 
     def give_abillity(self):
         self.game_objects.player.dash=True
 
-    def AI(self,playerpos):
-        pass
+    def update(self,pos,playerpos):
+        super().update(pos,playerpos)
+
+    def aggroAI(self):
+        if self.counter < 40:
+            pass
+        else:
+            if self.player_distance[0] > self.attack_distance:
+                self.acceleration[0]=abs(self.acceleration[0])
+                self.dir[0] = 1
+
+                if random.randint(0, 100)==100:
+                    self.currentstate.handle_input('Dash')
+                else:
+                    self.currentstate.handle_input('Walk')
+
+
+            elif abs(self.player_distance[0])<self.attack_distance:
+                self.currentstate.handle_input('Attack')
+                self.counter = 0
+            elif self.player_distance[0] < -self.attack_distance:
+                self.acceleration[0]=-abs(self.acceleration[0])
+                self.dir[0] = -1
+                if random.randint(0, 100)==100:
+                    self.currentstate.handle_input('Dash')
+                else:
+                    self.currentstate.handle_input('Walk')
+            else:
+                self.counter = 0
+                self.currentstate.handle_input('Idle')
 
 class Path_col(Staticentity):
 

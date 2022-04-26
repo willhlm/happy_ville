@@ -61,12 +61,13 @@ class Boss_deer_encounter(Cutscene_engine):
         super().__init__(objects)
         pos=(650,140)
         self.entity=Entities.Reindeer(pos, objects)
+        self.entity.AImethod=self.entity.cutsceneAI
         objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
-
         self.game_objects.camera[-1].set_camera('Deer_encounter')
 
     def update(self):#write how you want the player/group to act
+
         self.entity.velocity[1]=0
         self.timer+=1
         if self.timer==1:
@@ -86,6 +87,8 @@ class Boss_deer_encounter(Cutscene_engine):
         if self.timer>200:
             self.game_objects.camera[-1].exit_state()
             self.finished=True
+            self.entity.AImethod=self.entity.aggroAI
+
             #self.entity.kill()
 
 class Defeated_boss(Cutscene_engine):

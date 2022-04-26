@@ -33,7 +33,7 @@ class Idle(Enemy_states):
         self.stay_still()
 
     def handle_input(self,input):
-        if input=='Run' or input=='Walk':
+        if input=='Walk':
              self.enter_state('Walk')
         elif input =='Attack':
              self.enter_state('Attack')
@@ -106,6 +106,7 @@ class Transform(Enemy_states):
 
     def update_state(self):
         if self.done:
+            self.entity.attack_distance=60
             self.enter_state('Transform_idle')
 
     def change_state(self,input):
@@ -118,6 +119,27 @@ class Transform_idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
+
+    def handle_input(self,input):
+        if input=='Walk':
+             self.enter_state('Transform_walk')
+        elif input =='Attack':
+             self.enter_state('Attack')
+        elif input =='Dash':
+             self.enter_state('Dash')
+
+class Transform_walk(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.walk()
+
+    def handle_input(self,input):
+        if input=='Idle':
+             self.enter_state('Transform_idle')
+        elif input =='Attack':
+             self.enter_state('Attack')
+        elif input =='Dash':
+             self.enter_state('Dash')
 
 class Stun(Enemy_states):
     def __init__(self,entity,duration):
@@ -140,10 +162,11 @@ class Attack(Enemy_states):
         self.done=False
         self.phases=['pre','main']
         self.phase=self.phases[0]
+        self.entity.attack.lifetime=10
 
     def update_state(self):
         if self.done:
-            self.change_state('Idle')
+            self.enter_state('Transform_idle')
 
     def increase_phase(self):
         if self.phase=='pre':
@@ -151,4 +174,34 @@ class Attack(Enemy_states):
             attack=self.entity.attack(self.entity)#make the object
             self.entity.projectiles.add(attack)#add to group but in main phase
         elif self.phase=='main':
+            self.done=True
+
+class Dash(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.dir=self.entity.dir.copy()
+        self.phases=['pre','main','post']
+        self.phase=self.phases[0]
+        self.done=False#animation flag
+
+    def update_state(self):
+        self.entity.velocity[1]=0
+
+        if self.phase == 'main':
+            self.entity.velocity[0]=self.dir[0]*max(20,abs(self.entity.velocity[0]))#max horizontal speed
+
+        if self.done:
+            if self.entity.acceleration[0]==0:
+                self.enter_state('Transform_idle')
+            else:
+                self.enter_state('Transform_walk')
+
+    def increase_phase(self):
+        if self.phase=='pre':
+            self.phase='main'
+            self.entity.velocity[0] = 30*self.dir[0]
+        elif self.phase=='main':
+            self.phase=self.phases[-1]
+        elif self.phase=='post':
             self.done=True
