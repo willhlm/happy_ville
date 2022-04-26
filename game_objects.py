@@ -2,7 +2,6 @@ import pygame, sys
 import Read_files
 import Engine
 import Entities
-import Level
 import map_loader
 import BG
 import sound
@@ -35,7 +34,7 @@ class Game_Objects():
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
-        self.entity_pause = pygame.sprite.Group() #include all Entities that are far away,Entities.PauseGroup()
+        self.entity_pause = pygame.sprite.Group()#Entities.PauseGroup() #include all Entities that are far away,Entities.PauseGroup()
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
@@ -108,6 +107,7 @@ class Game_Objects():
         self.all_bgs.update(scroll)
         self.all_fgs.update(scroll)
         self.players.update(scroll)
+        self.entity_pause.update(scroll,self.player.rect.center)#should be before enemies and npcs group
         self.enemies.update(scroll,self.player.rect.center)#shoudl the AI be based on playerposition?
         self.npcs.update(scroll,self.player.rect.center)
         self.interactables.update(scroll)
@@ -115,7 +115,6 @@ class Game_Objects():
         self.fprojectiles.update(scroll)
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
-        self.entity_pause.update(scroll,self.player.rect.center)#(scroll,self.player.rect.center)
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.triggers.update(scroll)
@@ -132,7 +131,7 @@ class Game_Objects():
         self.fprojectiles.draw(self.game.screen)
         self.eprojectiles.draw(self.game.screen)
         self.loot.draw(self.game.screen)
-        #self.entity_pause.draw(self.game.screen)
+        self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
 

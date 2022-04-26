@@ -248,7 +248,7 @@ class Level():
                             y = math.floor(index/cols)
                             x = (index - (y*cols))
                             parallax = parallax_values[bg]
-                            print(new_map_diff[0], ' ', x)
+                            #print(new_map_diff[0], ' ', x)
                             #blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
                             blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]) + int((self.init_player_pos[0]-x*self.TILE_SIZE)*(1-parallax)), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]) + int((self.init_player_pos[1]-y*self.TILE_SIZE)*(1-parallax)))
                             new_animation = Entities.BG_Animated(blit_pos,path,parallax)

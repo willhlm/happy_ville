@@ -21,6 +21,25 @@ class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
         surf.set_colorkey((0,0,0))
         screen.blit(surf,(rect.x,rect.y),special_flags=pygame.BLEND_RGB_ADD)
 
+class PauseGroup(pygame.sprite.Group):#adds a white glow around enteties
+    def __init__(self):
+        super().__init__()
+
+    def update(self, *args):
+        pos,playerpos=args
+        for s in self.sprites():
+            s.update_pos(pos)
+            self.group_distance(s)
+
+    @staticmethod
+    def group_distance(s):
+        bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
+        if s.rect[0]<bounds[0] or s.rect[0]>bounds[1] or s.rect[1]<bounds[2] or s.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+            pass
+        else:
+            s.add(s.group)#add to group
+            s.remove(s.pause_group)#remove from pause
+
 class Platform(pygame.sprite.Sprite):#has hitbox
     def __init__(self,pos,size = (16,16)):
         super().__init__()
@@ -307,6 +326,10 @@ class Dynamicentity(Staticentity):
     def update_rect(self):
         self.rect.midbottom = self.hitbox.midbottom#[self.hitbox.bottom - self.hitbox_offset[0], self.hitbox.bottom - self.hitbox_offset[1]]
 
+    def set_pos(self, pos):
+        self.rect.center = (pos[0],pos[1])
+        self.hitbox.midbottom = self.rect.midbottom
+
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
         super().__init__(pos)
@@ -336,10 +359,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         if str(type(self.animation_stack[-1]).__name__) != 'Hurt_animation':#making sure to not append more than one hurt animation at time
             new_animation=animation.Hurt_animation(self)
             new_animation.enter_state()
-
-    def set_pos(self, pos):
-        self.rect.center = (pos[0],pos[1])
-        self.hitbox.midbottom = self.rect.midbottom
 
     def group_distance(self):
         bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
@@ -416,12 +435,14 @@ class Enemy(Character):
             pass
         else:
             if self.player_distance[0] > self.attack_distance:
+                self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = 1
                 self.currentstate.handle_input('Run')
             elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
+                self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = -1
                 self.currentstate.handle_input('Run')
             else:
@@ -476,9 +497,11 @@ class Vatt(Enemy):
             pass
         else:
             if self.player_distance[0] > self.attack_distance:
+                self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = 1
                 self.currentstate.handle_input('Run')
             elif self.player_distance[0] < -self.attack_distance:
+                self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = -1
                 self.currentstate.handle_input('Run')
             else:
@@ -499,14 +522,17 @@ class Flowy(Enemy):
 class Larv(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.image = pygame.image.load("Sprites/Enteties/enemies/larv/main/Idle/catapillar_idle1.png").convert_alpha()
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.health = 10
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
         self.spirit=10
         self.attack=Poisonblobb
         self.attack_distance=60
+
+    def update(self,pos,playerpos):
+        super().update(pos,playerpos)
 
 class Player(Character):
 
@@ -623,10 +649,6 @@ class Aslat(NPC):
                 self.idle()
             else:
                 self.walk()
-#        if self.action['inv']:#collision with invisble block
-#            self.velocity[0] = -self.velocity[0]
-#            self.dir[0] = -self.dir[0]
-#            self.action['inv'] = False
 
 class Sahkar(NPC):
     def __init__(self, pos,game_objects):
@@ -641,6 +663,9 @@ class Sahkar(NPC):
         #self.max_vel = 1.5
         self.counter=0
 
+    def update(self,pos,playerpos):
+        super().update(pos,playerpos)
+
     def AI(self):
         self.counter+=1
         if self.counter>100:
@@ -650,10 +675,6 @@ class Sahkar(NPC):
                 self.idle()
             else:
                 self.walk()
-#        if self.action['inv']:#collision with invisble block
-#            self.velocity[0] = -self.velocity[0]
-#            self.dir[0] = -self.dir[0]
-#            self.action['inv'] = False
 
 class MrBanks(NPC):
     def __init__(self,pos,game_objects):

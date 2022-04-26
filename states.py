@@ -375,7 +375,6 @@ class Gameplay(Game_State):
         self.game.screen.blit(blit_surface,(20, 20))
 
     def blit_spirit(self):
-
         sprite_dim = [9,9] #width, height specific to sprites used
         blit_surface = pygame.Surface((int(self.game.game_objects.player.max_spirit/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
         spirit = self.game.game_objects.player.spirit
