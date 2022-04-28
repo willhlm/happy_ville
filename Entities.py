@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, math, sound, states
+import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, math, sound, states
 
 pygame.mixer.init()
 
@@ -392,13 +392,13 @@ class Enemy(Character):
         self.attack_distance = 0
 
     def update(self,pos,playerpos):
+        self.group_distance()#need to be before currentstate.update()
         super().update(pos)
         self.AI(playerpos)
-        self.group_distance()
 
     def death(self):
         self.aggro=False
-        self.kill()
+        self.currentstate.change_state('dead')
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -536,8 +536,13 @@ class Larv(Enemy):
         self.attack=Poisonblobb
         self.attack_distance=60
 
+    def death(self):
+        self.aggro=False
+        self.kill()
+
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
+
 
 class Player(Character):
 
@@ -563,7 +568,7 @@ class Player(Character):
         self.equip='Hammer'#ability pointer
         self.sword=Sword(self)
         self.shield=Shield
-        self.dash=False
+        self.dash=True
         self.wall=True
 
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
@@ -796,6 +801,8 @@ class Reindeer(Boss):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.currentstate = states_reindeer.Idle(self)
+
         self.health = 100
         self.spirit=1
         self.attack=Sword
@@ -826,6 +833,7 @@ class Reindeer(Boss):
             elif self.player_distance[0] < -self.attack_distance:
                 self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = -1
+
                 if random.randint(0, 100)==100:
                     self.currentstate.handle_input('Dash')
                 else:
