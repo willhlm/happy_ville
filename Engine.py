@@ -56,7 +56,6 @@ class Collisions():
     #pickup loot
     @staticmethod
     def pickup_loot(player,loots):
-
         collision_loot=pygame.sprite.spritecollideany(player,loots,Collisions.collided)#check collision
         if collision_loot:
             collision_loot.pickup(player)
@@ -68,7 +67,6 @@ class Collisions():
 
     def check_npc_collision(self):
         npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
-
         if npc:
             new_state = states.Conversation(self.game_objects.game, npc)
             new_state.enter_state()
@@ -76,22 +74,8 @@ class Collisions():
     #interact with chests
     def check_interactables(self):
         collision = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
-
         if collision:
-            collision.interacted = True
-            if type(collision).__name__ == "Door":
-                print('before try')
-                try:
-                    self.game_objects.change_map(collision.next_map)
-                except:
-                    pass
-            if type(collision).__name__ in ["Chest", "Chest_Big"]:
-                try:
-                    chest_id = collision.ID
-                    self.game_objects.map_state[self.game_objects.map.level_name]["chests"][collision.ID][1] = "opened"
-                except:
-                    pass
-
+            collision.interact(self.game_objects.player)
 
     def check_trigger(self,player,triggers):
         trigger = pygame.sprite.spritecollideany(player,triggers,Collisions.collided)

@@ -120,3 +120,35 @@ class Defeated_boss(Cutscene_engine):
         if self.step1:
             self.set_image()
             self.game_objects.game.screen.blit(self.image,(100, 50))
+
+class Death(Cutscene_engine):
+    def __init__(self,objects):
+        super().__init__(objects)
+        self.game_objects.camera[-1].set_camera('Death')#make the camera not move
+        self.stage=0
+        self.init=False
+
+    def update(self):
+        if self.stage==0:
+            self.timer+=1
+
+            if self.timer>100:#fly to sky
+                self.player.velocity[1]=-20
+
+            if self.timer>120:
+                self.stage=1
+
+
+        elif self.stage==2:
+            if not self.init:#enter only once
+                pos=(0,0)#
+                offset=100#depends on the effect animation
+                self.spawneffect=Entities.Spawneffect(pos)
+                self.spawneffect.rect.midbottom=self.player.rect.midbottom
+                self.spawneffect.rect.bottom+=offset
+                self.player.cosmetics.add(self.spawneffect)
+                self.init=True
+
+            if self.spawneffect.lifetime<0:#when the cosmetic effetc finishes
+                self.player.currentstate.change_state('Spawn')
+                self.stage=3

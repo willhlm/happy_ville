@@ -63,7 +63,6 @@ class Game_Objects():
 
     def initiate_groups(self):
         #clean all groups
-        #self.players.empty()
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
@@ -161,3 +160,5 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
+            for int in self.interactables:
+                pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,2)#draw hitbox

@@ -1,4 +1,3 @@
-
 import sys, sound
 from states_entity import Entity_States
 
@@ -393,16 +392,19 @@ class Counter(Player_states):
 class Death(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
         self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            #self.entity.loot()
-            self.entity.kill()
+        self.entity.death()
 
     def increase_phase(self):
-        self.done=True
+        if self.phase=='pre':
+            self.phase='main'
+
+class Invisible(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
 
 class Hurt(Player_states):
     def __init__(self,entity):
@@ -423,6 +425,20 @@ class Hurt(Player_states):
             self.next_state='Idle'
         else:
             self.next_state='Walk'
+
+class Spawn(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.done=False
+
+    def update_state(self):
+        if self.done:
+            self.entity.health=self.entity.max_health
+            self.enter_state('Idle')
+
+    def increase_phase(self):
+        self.done=True
 
 class Sword(Player_states):
     def __init__(self,entity):
@@ -712,6 +728,7 @@ class Stone(Abillitites):
             self.done=True
             self.entity.ability.frame=0
             self.entity.ability.phase='main'
+
 
 class Darksaber(Abillitites):
     def __init__(self,entity):

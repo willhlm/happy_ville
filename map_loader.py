@@ -150,6 +150,17 @@ class Level():
                 new_trigger = Entities.Trigger(object_position,object_size ,values)
                 self.game_objects.triggers.add(new_trigger)
 
+            elif id == 18:#trigger
+                values={}
+                for property in obj['properties']:
+                    if property['name'] == 'map':
+                        values['map'] = property['value']
+                    elif property['name'] == 'point':
+                        values['point']=property['value']
+                object_size = (int(obj['width']),int(obj['height']))
+                new_int = Entities.Savepoint(object_position,values)
+                self.game_objects.interactables.add(new_int)
+
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer

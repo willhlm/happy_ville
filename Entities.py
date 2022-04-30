@@ -353,7 +353,8 @@ class Character(Dynamicentity):#enemy, NPC,player
                 self.hurt_animation()#become white
                 self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             else:
-                self.currentstate.change_state('Death')#overrite any state and go to death
+                if self.currentstate.state_name!='death':#if not already dead
+                    self.currentstate.change_state('Death')#overrite any state and go to death
 
     def knock_back(self,dir):
         self.velocity[0]=dir*30
@@ -543,7 +544,6 @@ class Larv(Enemy):
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
 
-
 class Player(Character):
 
     sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
@@ -558,7 +558,7 @@ class Player(Character):
 
         self.max_health = 250
         self.max_spirit = 100
-        self.health = 100
+        self.health = 1
         self.spirit = 100
 
         self.cosmetics = game_objects.cosmetics
@@ -571,9 +571,14 @@ class Player(Character):
         self.dash=True
         self.wall=True
 
+        self.spawn_point={'map':'light_forest', 'point':'3'}
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.omamoris=Omamoris(self)
         self.currentstate = states_player.Idle(self)
+
+    def death(self):
+        new_game_state = states.Death(self.game_objects.game,'Death')
+        new_game_state.enter_state()
 
     def enter_idle(self):
         self.currentstate = states_player.Idle(self)
@@ -855,19 +860,16 @@ class Path_col(Staticentity):
         super().update(pos)
         self.hitbox.center = self.rect.center
 
-class Camera_Stop(pygame.sprite.Sprite):
+class Camera_Stop(Staticentity):
 
     def __init__(self,size,pos,dir):
-        super().__init__()
-        self.rect=pygame.Rect((pos),size)
+        super().__init__(pos,pygame.Surface(size))
         self.hitbox = self.rect.inflate(0,0)
         self.dir = dir
-        self.image = pygame.Surface((16,16))
-        self.image.fill((0,0,0))
 
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
+    def update(self, pos):
+        super().update(pos)
+        self.hitbox.center = self.rect.center
 
 class Interactable(pygame.sprite.Sprite):
 
@@ -878,6 +880,9 @@ class Interactable(pygame.sprite.Sprite):
     def update(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
+
+    def interact(self):
+        self.interacted=True
 
 class Pathway(Interactable):
 
@@ -904,6 +909,13 @@ class Door(Pathway):
                 self.timer += 1
             else:
                 self.image = self.image_sheet[3]
+
+    def interact(self):
+        super().interact()
+        try:
+            self.game_objects.change_map(collision.next_map)
+        except:
+            pass
 
 class Chest(Interactable):
     def __init__(self,pos,id,loot,state):
@@ -933,6 +945,14 @@ class Chest(Interactable):
             else:
                 self.image = self.image_sheet[2]
 
+    def interact(self):
+        super().interact()
+        try:
+            chest_id = collision.ID
+            self.game_objects.map_state[self.game_objects.map.level_name]["chests"][collision.ID][1] = "opened"
+        except:
+            pass
+
 class Chest_Big(Interactable):
     def __init__(self,pos,id,loot,state):
         super().__init__()
@@ -961,6 +981,14 @@ class Chest_Big(Interactable):
             else:
                 self.image = self.image_sheet[4]
                 self.interacted = False
+
+    def interact(self):
+        super().interact()
+        try:
+            chest_id = collision.ID
+            self.game_objects.map_state[self.game_objects.map.level_name]["chests"][collision.ID][1] = "opened"
+        except:
+            pass
 
 class Abilities(pygame.sprite.Sprite):
     def __init__(self,entity):
@@ -1372,6 +1400,29 @@ class Animatedentity(Staticentity):#animated without hitbox
         self.update_pos(scroll)
         self.animation.update()
 
+class Savepoint(Animatedentity):
+    def __init__(self,pos,values):
+        super().__init__(pos)
+        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Savepoint/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
+
+        self.map = values['map']
+        self.point=values['point']
+
+    def interact(self,entity):
+        self.state='on'
+        entity.spawn_point['map']=self.map
+        entity.spawn_point['point']=self.point
+
+class Corpse(Animatedentity):
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.map = map
+        self.level = 0
+
 class Cosmetics(Animatedentity):
     def __init__(self,pos):
         super().__init__(pos)
@@ -1384,6 +1435,16 @@ class Cosmetics(Animatedentity):
     def destroy(self):
         if self.lifetime<0:
             self.kill()
+
+class Spawneffect(Cosmetics):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/GFX/respawn/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.lifetime=10
 
 class Slash(Cosmetics):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/GFX/slash/')

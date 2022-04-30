@@ -423,7 +423,6 @@ class Fadein(Gameplay):
     def __init__(self,game):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()
-        self.game.game_objects.player.enter_idle()
 
         self.count = 0
         self.fade_length = 20
@@ -684,6 +683,26 @@ class Cutscene_engine(Gameplay):
         if input[0]:#press
             if input[-1] == 'start':
                 self.exit_state()
+
+class Death(Gameplay):
+    def __init__(self, game,scene):
+        super().__init__(game)
+        self.current_scene = getattr(cutscene, scene)(self.game.game_objects)#make an object based on string: send in player, group and camera
+
+    def update(self):
+        super().update()
+        self.current_scene.update()
+
+        if self.current_scene.stage==1:
+            self.game.game_objects.load_map(self.game.game_objects.player.spawn_point['map'],self.game.game_objects.player.spawn_point['point'])
+            self.game.game_objects.player.currentstate.change_state('Invisible')
+            self.game.game_objects.camera[-1].exit_state()#go to auto camera
+            self.current_scene.stage=2
+        elif self.current_scene.stage==3:
+            self.exit_state()
+
+    def handle_events(self, input):
+        pass
 
 class Cutscene_file(Cutscene_engine):
     def __init__(self, game,scene):
