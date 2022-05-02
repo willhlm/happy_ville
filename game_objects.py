@@ -40,7 +40,7 @@ class Game_Objects():
         self.triggers = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
-        #self.weather_paricles.create_particles('Snow')#weather effects
+        self.weather_paricles.create_particles('Snow')#weather effects
         self.reflection=BG.Reflection()
 
         #initiate player

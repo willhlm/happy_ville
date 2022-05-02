@@ -729,7 +729,6 @@ class Stone(Abillitites):
             self.entity.ability.frame=0
             self.entity.ability.phase='main'
 
-
 class Darksaber(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)

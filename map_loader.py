@@ -158,7 +158,7 @@ class Level():
                     elif property['name'] == 'point':
                         values['point']=property['value']
                 object_size = (int(obj['width']),int(obj['height']))
-                new_int = Entities.Savepoint(object_position,values)
+                new_int = Entities.Spawnpoint(object_position,values)
                 self.game_objects.interactables.add(new_int)
 
     #TODO: Make sure all FG layers are added to all_fgs!!

@@ -398,6 +398,47 @@
                  "width":16,
                  "x":4080,
                  "y":576
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":177,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Slime"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":9424,
+                 "y":480
+                }, 
+                {
+                 "gid":19,
+                 "height":16,
+                 "id":183,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"map",
+                         "type":"string",
+                         "value":"light_forest"
+                        }, 
+                        {
+                         "name":"point",
+                         "type":"string",
+                         "value":"3"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":4096,
+                 "y":560
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -837,7 +878,7 @@
          "y":0
         }],
  "nextlayerid":39,
- "nextobjectid":175,
+ "nextobjectid":185,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

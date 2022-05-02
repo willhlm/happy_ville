@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, math, sound, states
+import pygame, random, sys, Read_files, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, math, sound, states
 
 pygame.mixer.init()
 
@@ -399,7 +399,7 @@ class Enemy(Character):
 
     def death(self):
         self.aggro=False
-        self.currentstate.change_state('dead')
+        self.kill()
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -455,6 +455,19 @@ class Enemy(Character):
             else:
                 self.counter = 0
                 self.currentstate.handle_input('Idle')
+
+class Slime(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
+        self.health = 200
+        self.spirit=100
+
+    def update(self,pos,playerpos):
+        super().update(pos,playerpos)
 
 class Woopie(Enemy):
     def __init__(self,pos,game_objects):
@@ -532,14 +545,10 @@ class Larv(Enemy):
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
-        self.health = 10
+        self.health = 40
         self.spirit=10
         self.attack=Poisonblobb
         self.attack_distance=60
-
-    def death(self):
-        self.aggro=False
-        self.kill()
 
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
@@ -558,7 +567,7 @@ class Player(Character):
 
         self.max_health = 250
         self.max_spirit = 100
-        self.health = 1
+        self.health = 100
         self.spirit = 100
 
         self.cosmetics = game_objects.cosmetics
@@ -577,6 +586,7 @@ class Player(Character):
         self.currentstate = states_player.Idle(self)
 
     def death(self):
+        self.cosmetics.add(Corpse([self.rect[0],self.rect[1]]))
         new_game_state = states.Death(self.game_objects.game,'Death')
         new_game_state.enter_state()
 
@@ -871,125 +881,6 @@ class Camera_Stop(Staticentity):
         super().update(pos)
         self.hitbox.center = self.rect.center
 
-class Interactable(pygame.sprite.Sprite):
-
-    def __init__(self):
-        super().__init__()
-        self.interacted = False
-
-    def update(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
-
-    def interact(self):
-        self.interacted=True
-
-class Pathway(Interactable):
-
-    def __init__(self, destination):
-        super().__init__()
-        self.next_map = destination
-
-class Door(Pathway):
-
-    def __init__(self,pos,destination):
-        super().__init__(destination)
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Door/door.png",32,48,1,4)
-        self.image = self.image_sheet[0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-        self.timer = 0
-
-    def update(self,pos):
-        super().update(pos)
-        if self.interacted:
-            if self.timer < 21:
-                self.image = self.image_sheet[self.timer//7]
-                self.timer += 1
-            else:
-                self.image = self.image_sheet[3]
-
-    def interact(self):
-        super().interact()
-        try:
-            self.game_objects.change_map(collision.next_map)
-        except:
-            pass
-
-class Chest(Interactable):
-    def __init__(self,pos,id,loot,state):
-        super().__init__()
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest.png",16,21,1,3)
-        self.image = self.image_sheet[0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1]-5)
-        self.hitbox = self.rect.inflate(0,0)
-        self.timer = 0
-        self.ID = id
-        self.loot = {loot:1}
-        if state == "opened":
-            self.opened()
-
-    def opened(self):
-        self.image = self.image_sheet[2]
-        self.timer = 9
-        self.interacted = True
-
-    def update(self,pos):
-        super().update(pos)
-        if self.interacted:
-            if self.timer < 8:
-                self.image = self.image_sheet[1]
-                self.timer += 1
-            else:
-                self.image = self.image_sheet[2]
-
-    def interact(self):
-        super().interact()
-        try:
-            chest_id = collision.ID
-            self.game_objects.map_state[self.game_objects.map.level_name]["chests"][collision.ID][1] = "opened"
-        except:
-            pass
-
-class Chest_Big(Interactable):
-    def __init__(self,pos,id,loot,state):
-        super().__init__()
-        self.image_sheet = Read_files.Sprites().generic_sheet_reader("Sprites/animations/Chest/chest_big.png",32,29,1,5)
-        self.image = self.image_sheet[0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1]-13)
-        self.hitbox = self.rect.inflate(0,0)
-        self.timer = 0
-        self.ID = id
-        self.loot = loot
-        if state == "opened":
-            self.opened()
-
-    def opened(self):
-        self.image = self.image_sheet[4]
-        self.timer = 29
-        self.interacted = True
-
-    def update(self,pos):
-        super().update(pos)
-        if self.interacted:
-            if self.timer < 28:
-                self.image = self.image_sheet[self.timer//7]
-                self.timer += 1
-            else:
-                self.image = self.image_sheet[4]
-                self.interacted = False
-
-    def interact(self):
-        super().interact()
-        try:
-            chest_id = collision.ID
-            self.game_objects.map_state[self.game_objects.map.level_name]["chests"][collision.ID][1] = "opened"
-        except:
-            pass
-
 class Abilities(pygame.sprite.Sprite):
     def __init__(self,entity):
         super().__init__()
@@ -1065,6 +956,7 @@ class Sword(Melee):
         slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
         clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
         self.entity.cosmetics.add(clash)
+        self.entity.cosmetics.add(slash)
         self.kill()
 
     def sword_jump(self):
@@ -1395,33 +1287,24 @@ class Animatedentity(Staticentity):#animated without hitbox
         super().__init__(pos)
         self.state='idle'
         self.animation=animation.Basic_animation(self)
+        self.currentstate = states_basic.Idle(self)
 
     def update(self,scroll):
         self.update_pos(scroll)
+        self.currentstate.update()
         self.animation.update()
 
-class Savepoint(Animatedentity):
-    def __init__(self,pos,values):
+class Corpse(Animatedentity):
+
+    def __init__(self,pos):
         super().__init__(pos)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Savepoint/')
+        self.currentstate = states_basic.Corpse(self)
+        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/corpse/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-        self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
 
-        self.map = values['map']
-        self.point=values['point']
-
-    def interact(self,entity):
-        self.state='on'
-        entity.spawn_point['map']=self.map
-        entity.spawn_point['point']=self.point
-
-class Corpse(Animatedentity):
-    def __init__(self,pos):
-        super().__init__(pos)
         self.map = map
-        self.level = 0
 
 class Cosmetics(Animatedentity):
     def __init__(self,pos):
@@ -1452,8 +1335,86 @@ class Slash(Cosmetics):
     def __init__(self,pos):
         super().__init__(pos)
         self.state=str(random.randint(1, 3))
-        self.image = self.sprites[self.state][0]#not sure why we need this.... there is a black box without
+        self.image = self.sprites[self.state][0]
         self.lifetime=10
+
+class Interactable(Animatedentity):
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.interacted=False
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.center=self.rect.center
+
+    def interact(self):
+        self.interacted=True
+
+class Door(Interactable):
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Door/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+
+    def interact(self):
+        super().interact()
+        self.state='opening'
+        try:
+            self.game_objects.change_map(collision.next_map)
+        except:
+            pass
+
+class Chest(Interactable):
+    def __init__(self,pos,id,loot,state):
+        super().__init__()
+        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Chest/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0],pos[1]-5)
+        self.hitbox = self.rect.inflate(0,0)
+        self.ID = id
+        self.loot = {loot:1}
+        if state == "opened":
+            self.interacted = True
+            self.currentstate = states_basic.Open(self)
+
+    def interact(self):
+        super().interact()
+        try:
+            chest_id = self.ID
+            self.game_objects.map_state[self.game_objects.map.level_name]["chests"][self.ID][1] = "opened"
+        except:
+            pass
+
+class Chest_Big(Chest):
+    def __init__(self,pos,id,loot,state):
+        super().__init__(pos,id,loot,state)
+        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Chest_big/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0],pos[1]-13)
+        self.hitbox = self.rect.inflate(0,0)
+
+class Spawnpoint(Interactable):
+    def __init__(self,pos,values):
+        super().__init__(pos)
+        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Spawnpoint/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox=self.rect.copy()
+
+        self.map = values['map']
+        self.point=values['point']
+
+    def interact(self,entity):
+        self.state='on'
+        entity.spawn_point['map']=self.map
+        entity.spawn_point['point']=self.point
 
 class Menu_Arrow():
 

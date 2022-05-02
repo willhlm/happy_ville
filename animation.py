@@ -51,6 +51,7 @@ class Basic_animation(Animation):#state
     def update(self):
         self.entity.image = self.entity.sprites[self.entity.state][self.frame//self.framerate].copy()
         self.frame += 1
+        #if str(type(self.entity).__name__)=='Snow':
 
         if self.frame == len(self.entity.sprites[self.entity.state])*self.framerate:
             self.reset_timer()
