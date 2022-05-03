@@ -140,6 +140,14 @@ class Load_Menu(Game_State):
                     self.current_button = 0
             elif event[-1] == 'start':
                 self.exit_state()
+            elif event[-1] in ('return', 'a'):
+                self.load_file()
+
+                new_state = Gameplay(self.game)
+                new_state.enter_state()
+                map=self.game.game_objects.player.spawn_point['map']
+                point=self.game.game_objects.player.spawn_point['point']
+                self.game.game_objects.load_map(map,point)
 
     def initiate_buttons(self):
         y_pos = 90
@@ -149,6 +157,17 @@ class Load_Menu(Game_State):
             self.button_surfaces[b] = (self.font.render(text = b))
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
+
+    def load_file(self):
+        name='Player.json'
+        path='save/'+name
+        player_data=Read_files.read_json(path)
+        self.game.game_objects.player.from_json(player_data)
+
+        name='Game_objects.json'
+        path='save/'+name
+        game_objects_data=Read_files.read_json(path)
+        self.game.game_objects.from_json(game_objects_data)
 
 class Start_Option_Menu(Game_State):
     def __init__(self,game):

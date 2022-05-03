@@ -15,6 +15,11 @@ def save_obj(obj):
     with open(path, "w") as outfile:
         outfile.write(jsonStr)
 
+def from_json(obj):
+    if hasattr(obj, 'from_json'):
+        return obj.from_json()
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+
 def read_json(path):
     with open(path) as f:
         text = json.load(f)

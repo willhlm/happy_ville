@@ -625,6 +625,25 @@ class Player(Character):
         save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities}
         return save_dict
 
+    def from_json(self,data):
+        self.max_health=data['health']['max_health']
+        self.max_spirit=data['health']['max_spirit']
+        self.health=data['health']['health']
+        self.spirit=data['health']['spirit']
+
+        self.dash=data['abilities']['dash']
+        self.dash=data['abilities']['wall']
+
+        self.inventory=data['inventory']
+
+        self.abilities={}
+        for ability in data['abilities'].keys():
+            if ability == 'dash' or ability == 'wall':
+                pass
+            else:
+                self.abilities[ability]=getattr(sys.modules[__name__], ability)
+
+
 class NPC(Character):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)

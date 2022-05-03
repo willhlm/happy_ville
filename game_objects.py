@@ -21,7 +21,7 @@ class Game_Objects():
         self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)
 
-    def save_game(self):
+    def save_game(self):#save_obj calls to_json method in the object: write the to_json mthod such that it save the attributes of interest.
         Read_files.save_obj(self.player)
         Read_files.save_obj(self)
 
@@ -56,7 +56,6 @@ class Game_Objects():
     def load_map(self, map_name, spawn = '1'):
         self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
-        self.save_game()
         new_game_state = states.Fadeout(self.game)
         new_game_state.enter_state()
 
@@ -172,3 +171,6 @@ class Game_Objects():
     def to_json(self):
         save_dict={'cutscenes_complete':self.cutscenes_complete}
         return save_dict
+
+    def from_json(self,data):
+        self.cutscenes_complete=data['cutscenes_complete']
