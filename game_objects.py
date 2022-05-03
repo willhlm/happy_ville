@@ -7,18 +7,23 @@ import BG
 import sound
 import states
 import camera
+import json
 
 class Game_Objects():
 
     def __init__(self, game):
 
         self.game = game
-        self.map_state = Read_files.read_json("map_state.json") #check this file for structure of object
+        self.controller = Read_files.Controller('xbox')
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
         self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)
+
+    def save_game(self):
+        Read_files.save_obj(self.player)
+        Read_files.save_obj(self)
 
     def create_groups(self):
 
@@ -51,6 +56,7 @@ class Game_Objects():
     def load_map(self, map_name, spawn = '1'):
         self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
+        self.save_game()
         new_game_state = states.Fadeout(self.game)
         new_game_state.enter_state()
 
@@ -162,3 +168,7 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,2)#draw hitbox
+
+    def to_json(self):
+        save_dict={'cutscenes_complete':self.cutscenes_complete}
+        return save_dict

@@ -10,7 +10,8 @@ class Level():
         self.spawn = spawn
         self.init_player_pos = (0,0)
         self.load_map_data()
-
+        self.state = Read_files.read_json("map_state.json") #check this file for structure of object
+        
     def load_map_data(self):
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
         self.map_data = Read_files.format_tiled_json(self.map_data)
@@ -150,7 +151,7 @@ class Level():
                 new_trigger = Entities.Trigger(object_position,object_size ,values)
                 self.game_objects.triggers.add(new_trigger)
 
-            elif id == 18:#trigger
+            elif id == 18:#Spawpoint
                 values={}
                 for property in obj['properties']:
                     if property['name'] == 'map':

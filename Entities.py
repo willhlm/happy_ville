@@ -613,6 +613,18 @@ class Player(Character):
             self.omamoris.equipped_omamoris.remove(old_omamori)
             old_omamori.detach()#call the detach function of omamori
 
+    def to_json(self):#things to save: needs to be a dict
+        health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
+
+        abilities={}
+        for key,ability in self.abilities.items():
+            abilities[key]=True
+        abilities['dash']=self.dash
+        abilities['wall']=self.wall
+
+        save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities}
+        return save_dict
+
 class NPC(Character):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1285,7 +1297,6 @@ class Spiritsorb(Loot):
 class Animatedentity(Staticentity):#animated without hitbox
     def __init__(self,pos):
         super().__init__(pos)
-        self.state='idle'
         self.animation=animation.Basic_animation(self)
         self.currentstate = states_basic.Idle(self)
 
@@ -1295,7 +1306,6 @@ class Animatedentity(Staticentity):#animated without hitbox
         self.animation.update()
 
 class Corpse(Animatedentity):
-
     def __init__(self,pos):
         super().__init__(pos)
         self.currentstate = states_basic.Corpse(self)

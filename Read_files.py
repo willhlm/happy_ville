@@ -3,6 +3,18 @@ import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
 
+def default(obj):
+    if hasattr(obj, 'to_json'):
+        return obj.to_json()
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+
+def save_obj(obj):
+    jsonStr=json.dumps(obj, default=default)
+    name=str(type(obj).__name__)
+    path="save/" + name + ".json"
+    with open(path, "w") as outfile:
+        outfile.write(jsonStr)
+
 def read_json(path):
     with open(path) as f:
         text = json.load(f)
