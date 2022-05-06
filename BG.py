@@ -6,7 +6,7 @@ class Weather(pygame.sprite.Sprite):
         super().__init__()
         self.pos=[random.randint(0, 500),random.randint(-500, -100)]#starting position
         self.group = weather_group
-        self.animation = animation.Basic_animation(self)        
+        self.animation = animation.Basic_animation(self)
         self.currentstate = states_basic.Fall(self)
         self.velocity=[0,0]
         self.wind=2

@@ -45,12 +45,6 @@
    <property name="event_type" value=""/>
   </properties>
  </tile>
- <tile id="18">
-  <properties>
-   <property name="map" value=""/>
-   <property name="point" value=""/>
-  </properties>
- </tile>
  <tile id="19">
   <properties>
    <property name="interaction_type" value=""/>

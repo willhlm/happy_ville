@@ -18,12 +18,20 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
+        self.weather_paricles=BG.Weather(self.weather)#initiate whater
+        self.weather_paricles.create_particles('Snow')
+
+        self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)
 
     def save_game(self):#save_obj calls to_json method in the object: write the to_json mthod such that it save the attributes of interest.
         Read_files.save_obj(self.player)
         Read_files.save_obj(self)
+
+    def load_game(self):
+        Read_files.load_obj(self.player)
+        Read_files.load_obj(self)
 
     def create_groups(self):
 
@@ -44,9 +52,6 @@ class Game_Objects():
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
-        self.weather_paricles=BG.Weather(self.weather)#initiate whater
-        self.weather_paricles.create_particles('Snow')#weather effects
-        self.reflection=BG.Reflection()
 
         #initiate player
         self.player = Entities.Player([200,50],self)
@@ -168,9 +173,9 @@ class Game_Objects():
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,2)#draw hitbox
 
-    def to_json(self):
+    def to_json(self):#stuff to save
         save_dict={'cutscenes_complete':self.cutscenes_complete}
         return save_dict
 
-    def from_json(self,data):
+    def from_json(self,data):#stuff to load
         self.cutscenes_complete=data['cutscenes_complete']

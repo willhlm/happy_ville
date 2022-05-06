@@ -6,7 +6,6 @@ from os.path import isfile, join
 def default(obj):
     if hasattr(obj, 'to_json'):
         return obj.to_json()
-    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 def save_obj(obj):
     jsonStr=json.dumps(obj, default=default)
@@ -15,10 +14,11 @@ def save_obj(obj):
     with open(path, "w") as outfile:
         outfile.write(jsonStr)
 
-def from_json(obj):
-    if hasattr(obj, 'from_json'):
-        return obj.from_json()
-    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+def load_obj(obj):
+    name=str(type(obj).__name__)
+    path='save/' + name + '.json'
+    load_data=read_json(path)
+    obj.from_json(load_data)
 
 def read_json(path):
     with open(path) as f:

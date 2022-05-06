@@ -11,7 +11,7 @@ class Level():
         self.init_player_pos = (0,0)
         self.load_map_data()
         self.state = Read_files.read_json("map_state.json") #check this file for structure of object
-        
+
     def load_map_data(self):
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
         self.map_data = Read_files.format_tiled_json(self.map_data)
@@ -94,9 +94,14 @@ class Level():
             if id == 0:
                 for property in obj['properties']:
                     if property['name'] == 'spawn':
-                        if property['value'] == self.spawn:
-                            self.game_objects.player.set_pos(object_position)
-                            self.init_player_pos = object_position
+
+                        if type(self.spawn).__name__ != 'str':#if respawn
+                            self.game_objects.player.set_pos(self.spawn)
+                            self.init_player_pos = self.spawn
+                        else:#if notmal load
+                            if property['value'] == self.spawn:
+                                self.game_objects.player.set_pos(object_position)
+                                self.init_player_pos = object_position
             #npcs
             elif id == 1:
                 properties = obj['properties']
@@ -152,14 +157,7 @@ class Level():
                 self.game_objects.triggers.add(new_trigger)
 
             elif id == 18:#Spawpoint
-                values={}
-                for property in obj['properties']:
-                    if property['name'] == 'map':
-                        values['map'] = property['value']
-                    elif property['name'] == 'point':
-                        values['point']=property['value']
-                object_size = (int(obj['width']),int(obj['height']))
-                new_int = Entities.Spawnpoint(object_position,values)
+                new_int = Entities.Spawnpoint(object_position,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
     #TODO: Make sure all FG layers are added to all_fgs!!

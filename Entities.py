@@ -580,7 +580,7 @@ class Player(Character):
         self.dash=True
         self.wall=True
 
-        self.spawn_point={'map':'light_forest', 'point':'3'}
+        self.spawn_point={'map':'light_forest', 'point':'1'}
         self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
         self.omamoris=Omamoris(self)
         self.currentstate = states_player.Idle(self)
@@ -625,7 +625,7 @@ class Player(Character):
         save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities}
         return save_dict
 
-    def from_json(self,data):
+    def from_json(self,data):#things to load. data is a dict
         self.max_health=data['health']['max_health']
         self.max_spirit=data['health']['max_spirit']
         self.health=data['health']['health']
@@ -1327,7 +1327,7 @@ class Animatedentity(Staticentity):#animated without hitbox
 class Corpse(Animatedentity):
     def __init__(self,pos):
         super().__init__(pos)
-        self.currentstate = states_basic.Corpse(self)
+        self.currentstate = states_basic.Once(self,30)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/corpse/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
@@ -1429,21 +1429,21 @@ class Chest_Big(Chest):
         self.hitbox = self.rect.inflate(0,0)
 
 class Spawnpoint(Interactable):
-    def __init__(self,pos,values):
+    def __init__(self,pos,map):
         super().__init__(pos)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Spawnpoint/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect.center = (pos[0],pos[1]-16)
         self.hitbox=self.rect.copy()
-
-        self.map = values['map']
-        self.point=values['point']
+        self.init_cor=pos
+        self.map = map
 
     def interact(self,entity):
-        self.state='on'
+        if self.state != 'once':
+            self.currentstate = states_basic.Once(self,80)
         entity.spawn_point['map']=self.map
-        entity.spawn_point['point']=self.point
+        entity.spawn_point['point']=self.init_cor
 
 class Menu_Arrow():
 

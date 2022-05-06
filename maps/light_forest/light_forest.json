@@ -382,24 +382,6 @@
                  "y":480
                 }, 
                 {
-                 "gid":1,
-                 "height":16,
-                 "id":170,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"spawn",
-                         "type":"string",
-                         "value":"3"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":4080,
-                 "y":576
-                }, 
-                {
                  "gid":3,
                  "height":16,
                  "id":177,
@@ -422,23 +404,12 @@
                  "height":16,
                  "id":183,
                  "name":"",
-                 "properties":[
-                        {
-                         "name":"map",
-                         "type":"string",
-                         "value":"light_forest"
-                        }, 
-                        {
-                         "name":"point",
-                         "type":"string",
-                         "value":"3"
-                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":4096,
-                 "y":560
+                 "x":3632,
+                 "y":576
                 }],
          "opacity":1,
          "type":"objectgroup",

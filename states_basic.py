@@ -18,14 +18,14 @@ class Entity_States():
     def increase_phase(self):
         pass
 
-class Corpse(Entity_States):
-    def __init__(self,entity):
+class Once(Entity_States):
+    def __init__(self,entity,duration):
         super().__init__(entity)
-        self.lifetime=30
+        self.duration=duration
 
     def update_state(self):
-        self.lifetime-=1
-        if self.lifetime<0:
+        self.duration-=1
+        if self.duration<0:
             self.enter_state('Idle')
 
 class Idle(Entity_States):
