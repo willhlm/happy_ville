@@ -353,7 +353,7 @@ class Gameplay(Game_State):
     def update(self):
         self.game.game_objects.scrolling()
         self.game.game_objects.collide_all()
-
+        
     def render(self):
         self.game.screen.fill((207,238,250))
         self.game.game_objects.draw()
@@ -568,19 +568,26 @@ class Ability_Menu(Gameplay):
 class Select_Menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
+        self.box = Entities.Menu_Box()
+
         self.page=1
         self.pages=[self.map_menu,self.inventory_menu,self.omamori_menu]#what to render
 
         #invenotory stuff
-        self.inventory=[]#make all objects and save in list
+        self.use_items=[]
+        self.key_items=[]
         for item in self.game.game_objects.player.inventory.keys():
-            self.inventory.append(getattr(sys.modules[Entities.__name__], item)([0,0]))#make the object based on the string
+            item=getattr(sys.modules[Entities.__name__], item)([0,0])#make the object based on the string
+            if hasattr(item, 'use_item'):
+                self.use_items.append(item)
+            else:
+                self.key_items.append(item)
+        self.item_index=[0,0]
 
         #omamori stuff
         self.omamori_index=[0,0]
         self.positions=(165,120)
         self.equip_positions=(170,25)
-        self.box=pygame.image.load("Sprites/UI/Menu/box.png").convert_alpha()#select box
 
     def blit_inventory(self):
         width=self.inventory_BG[self.page].get_width()
@@ -600,9 +607,15 @@ class Select_Menu(Gameplay):
         scale=2
         self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(105,0))#player position
 
-        for index, loot in enumerate(self.inventory):
-            loot.animation.update()
-            self.game.screen.blit(pygame.transform.scale(loot.image,(10,10)),(185+20*index,155))
+        for index, item in enumerate(self.use_items):
+            item.animation.update()
+            self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(185+20*index,155))
+
+        for index, item in enumerate(self.key_items):
+            item.animation.update()
+            self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240+20*index,60))
+
+        self.game.screen.blit(self.box.img,(165+20*self.item_index[0],135+20*self.item_index[1]))#pointer
 
     def omamori_menu(self):
         for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):#equipped ones
@@ -614,7 +627,7 @@ class Select_Menu(Gameplay):
             pos=[self.positions[0]+20*index,self.positions[1]]
             self.game.screen.blit(omamori.image,pos)
 
-        self.game.screen.blit(self.box,(165+20*self.omamori_index[0],135+20*self.omamori_index[1]))#pointer
+        self.game.screen.blit(self.box.img,(165+20*self.omamori_index[0],135+20*self.omamori_index[1]))#pointer
 
     def handle_events(self,input):
         if input[0]:#press
@@ -627,13 +640,27 @@ class Select_Menu(Gameplay):
                 self.page-=1
                 self.page=max(self.page,0)
 
+
+            if self.page==1:#inventory stuff
+                if input[-1] =='right':
+                    self.item_index[0]+=1
+                    self.item_index[0]=min(self.item_index[0],5)
+                elif input[-1] =='left':
+                    self.item_index[0]-=1
+                    self.item_index[0]=max(self.item_index[0],0)
+                elif input[-1] =='down':
+                    self.item_index[1]+=1
+                    self.item_index[1]=min(self.item_index[1],1)
+                elif input[-1] =='up':
+                    self.item_index[1]-=1
+                    self.item_index[1]=max(self.item_index[1],0)
+                elif input[-1]=='a':
+                    self.use_item()
+
             if self.page==2:#omamori stuff
                 if input[-1] =='right':
                     self.omamori_index[0]+=1
-                    if self.omamori_index[1]>=0:#on the bottom row
-                        self.omamori_index[0]=min(self.omamori_index[0],5)
-                    else:#if negative, on the top row
-                        self.omamori_index[0]=min(self.omamori_index[0],2)
+                    self.omamori_index[0]=min(self.omamori_index[0],5)
                 elif input[-1] =='left':
                     self.omamori_index[0]-=1
                     self.omamori_index[0]=max(self.omamori_index[0],0)
@@ -652,6 +679,15 @@ class Select_Menu(Gameplay):
             omamori_index+=5
         if omamori_index<len(self.game.game_objects.player.omamoris.omamori_list):
             self.game.game_objects.player.equip_omamori(omamori_index)
+
+    def use_item(self):
+        item_index=self.item_index[0]
+        if self.item_index[1]==1:#if on the bottom row
+            item_index+=5
+        if item_index<len(self.use_items):
+            if self.game.game_objects.player.inventory['Bone']>0:#if we have bones
+                self.use_items[item_index].use_item(self.game.game_objects.player)
+                self.exit_state()
 
 class Cutscene_engine(Gameplay):
     def __init__(self, game,scene):
@@ -702,11 +738,13 @@ class Death(Gameplay):
         self.current_scene.update()
 
         if self.current_scene.stage==1:
-            self.game.game_objects.load_map(self.game.game_objects.player.spawn_point['map'],self.game.game_objects.player.spawn_point['point'])
+            self.game.game_objects.load_map(self.game.game_objects.player.spawn_point[-1]['map'],self.game.game_objects.player.spawn_point[-1]['point'])
             self.game.game_objects.player.currentstate.change_state('Invisible')
             self.game.game_objects.camera[-1].exit_state()#go to auto camera
             self.current_scene.stage=2
         elif self.current_scene.stage==3:
+            if len(self.game.game_objects.player.spawn_point)==2:#if the respawn was a bone
+                self.game.game_objects.player.spawn_point.pop()
             self.exit_state()
 
     def handle_events(self, input):

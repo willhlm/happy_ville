@@ -382,7 +382,7 @@ class Enemy(Character):
         self.pause_group = game_objects.entity_pause
         self.cosmetics = game_objects.cosmetics
 
-        self.inventory = {'Amber_Droplet':random.randint(0, 10)}#random.randint(0, 10)
+        self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}#random.randint(0, 10)
         self.counter=0
         self.AImethod=self.peaceAI
         self.player_distance=[0,0]
@@ -463,7 +463,7 @@ class Slime(Enemy):
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
-        self.health = 200
+        self.health = 1
         self.spirit=100
 
     def update(self,pos,playerpos):
@@ -580,15 +580,21 @@ class Player(Character):
         self.dash=True
         self.wall=True
 
-        self.spawn_point={'map':'light_forest', 'point':'1'}
-        self.inventory={'Amber_Droplet':10}#the keys need to have the same name as their respective classes
+        self.spawn_point=[{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
+        self.inventory={'Amber_Droplet':10,'Bone':2}#the keys need to have the same name as their respective classes
         self.omamoris=Omamoris(self)
         self.currentstate = states_player.Idle(self)
+
+        self.set_abs_dist()
+
+    def set_abs_dist(self):#the absolute distance, i.e. the total scroll
+        self.abs_dist=[247,180]#the coordinate for buring the bone
 
     def death(self):
         self.cosmetics.add(Corpse([self.rect[0],self.rect[1]]))
         new_game_state = states.Death(self.game_objects.game,'Death')
         new_game_state.enter_state()
+        self.set_abs_dist()
 
     def enter_idle(self):
         self.currentstate = states_player.Idle(self)
@@ -600,6 +606,7 @@ class Player(Character):
 
     def update(self,pos):
         super().update(pos)
+        self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
         self.omamoris.update()
 
     def equip_omamori(self,omamori_index):
@@ -642,7 +649,6 @@ class Player(Character):
                 pass
             else:
                 self.abilities[ability]=getattr(sys.modules[__name__], ability)
-
 
 class NPC(Character):
     def __init__(self,pos,game_objects):
@@ -1268,14 +1274,10 @@ class Loot(Dynamicentity):
         self.animation.update()
         self.destory()
 
-class Amber_Droplet(Loot):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
-
+class Enemy_drop(Loot):
     def __init__(self,pos):
         super().__init__(pos)
         self.velocity=[random.randint(-3, 3),-4]
-        self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
-        self.hitbox = self.rect.copy()
 
     def check_collisions(self):
         if self.collision_types['bottom']:
@@ -1295,6 +1297,31 @@ class Amber_Droplet(Loot):
         obj=(self.__class__.__name__)#get the loot in question
         player.inventory[obj]+=1
         self.kill()
+
+class Amber_Droplet(Enemy_drop):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
+        self.hitbox = self.rect.copy()
+
+class Bone(Enemy_drop):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/bone/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.image = self.sprites['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.hitbox = self.rect.copy()
+
+    def use_item(self,player):
+        player.inventory['Bone']-=1
+        if len(player.spawn_point)==2:#if there is already a bone
+            player.spawn_point.pop()
+        player.spawn_point.append({'map':player.game_objects.map.level_name, 'point':player.abs_dist})
+        player.currentstate = states_player.Plant_bone(player)
 
 class Spiritsorb(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')
@@ -1442,13 +1469,13 @@ class Spawnpoint(Interactable):
     def interact(self,entity):
         if self.state != 'once':
             self.currentstate = states_basic.Once(self,80)
-        entity.spawn_point['map']=self.map
-        entity.spawn_point['point']=self.init_cor
+        entity.spawn_point[0]['map']=self.map
+        entity.spawn_point[0]['point']=self.init_cor
 
 class Menu_Arrow():
 
     def __init__(self):
-        self.img = pygame.image.load("Sprites/utils/arrow.png")
+        self.img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
         self.rect = self.img.get_rect()
 
     #note: sets pos to input, doesn't update with an increment of pos like other entities
@@ -1457,6 +1484,18 @@ class Menu_Arrow():
 
     def draw(self,screen):
         screen.blit(self.img, self.rect.topleft)
+
+class Menu_Box():
+    def __init__(self):
+        self.img = pygame.image.load("Sprites/UI/Menu/box.png").convert_alpha()#select box
+        self.rect = self.img.get_rect()
+
+    def update(self,pos):
+        pass
+
+    def draw(self,screen):
+        pass
+        #screen.blit(self.img, self.rect.topleft)
 
 class Omamoris():
     def __init__(self,entity):

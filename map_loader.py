@@ -84,7 +84,6 @@ class Level():
                 self.game_objects.platforms.add(new_block)
 
     def load_statics(self):
-
         map_statics = self.map_data["statics"]
 
         for obj in map_statics:

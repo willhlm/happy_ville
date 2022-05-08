@@ -603,6 +603,19 @@ class Sword_down(Sword):
             else:
                 self.enter_state('Fall_run')
 
+class Plant_bone(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.done=False
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
+
+    def increase_phase(self):
+        self.done=True
+
 class Abillitites(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
