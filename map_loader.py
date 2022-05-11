@@ -159,6 +159,16 @@ class Level():
                 new_int = Entities.Spawnpoint(object_position,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
+            elif id == 19:#Spawpoint
+                values={}
+                for property in obj['properties']:
+                    if property['name'] == 'entity':
+                        values['entity'] = property['value']
+                    elif property['name'] == 'number':
+                        values['number']=property['value']
+                new_spawn = Entities.Spawner(object_position,self.game_objects,values)
+                self.game_objects.cosmetics.add(new_spawn)
+
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer

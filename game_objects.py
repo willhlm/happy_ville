@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame
 import Read_files
 import Engine
 import Entities

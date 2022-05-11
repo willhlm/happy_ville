@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, math, sound, states
+import pygame, random, sys, Read_files, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, math, sound, states
 
 pygame.mixer.init()
 
@@ -442,14 +442,12 @@ class Enemy(Character):
             pass
         else:
             if self.player_distance[0] > self.attack_distance:
-                self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = 1
                 self.currentstate.handle_input('Walk')
             elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
-                self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = -1
                 self.currentstate.handle_input('Walk')
             else:
@@ -516,11 +514,9 @@ class Vatt(Enemy):
             pass
         else:
             if self.player_distance[0] > self.attack_distance:
-                self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = 1
                 self.currentstate.handle_input('Walk')
             elif self.player_distance[0] < -self.attack_distance:
-                self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = -1
                 self.currentstate.handle_input('Walk')
             else:
@@ -552,6 +548,37 @@ class Larv(Enemy):
 
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
+
+class Blue_bird(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/animals/bluebird/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
+        self.currentstate = states_bluebird.Idle(self)
+        self.aggro=False
+        self.health=1
+
+    def update(self,pos,playerpos):
+        super().update(pos,playerpos)
+
+    def updateAI(self):
+        pass
+
+    def peaceAI(self):
+        if abs(self.player_distance[0])<100:
+            self.currentstate.handle_input('Fly')
+        else:
+            rand=random.randint(0,100)
+            if rand==1:
+                self.currentstate.handle_input('Idle')
+            elif rand==2:
+                self.currentstate.handle_input('Walk')
+            elif rand==3:
+                self.currentstate.handle_input('Eat')
+            elif rand==4:
+                self.dir[0]=-self.dir[0]
 
 class Player(Character):
 
@@ -917,6 +944,22 @@ class Camera_Stop(Staticentity):
     def update(self, pos):
         super().update(pos)
         self.hitbox.center = self.rect.center
+
+class Spawner(Staticentity):#an entity spawner
+    def __init__(self,pos,game_objects,values):
+        super().__init__(pos)
+        self.image = pygame.image.load("Sprites/invisible.png").convert_alpha()
+        self.game_objects=game_objects
+        self.entity=values['entity']
+        self.number=int(values['number'])
+        self.spawn_entities()
+
+    def spawn_entities(self):
+        for i in range(0,self.number):
+            offset=random.randint(-100, 100)
+            pos=[self.rect.x+offset,self.rect.y]
+            obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
+            self.game_objects.enemies.add(obj)
 
 class Abilities(pygame.sprite.Sprite):
     def __init__(self,entity):

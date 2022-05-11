@@ -238,7 +238,7 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":8816,
+                 "x":8688,
                  "y":384
                 }, 
                 {
@@ -410,6 +410,29 @@
                  "width":16,
                  "x":3632,
                  "y":576
+                }, 
+                {
+                 "gid":20,
+                 "height":16,
+                 "id":186,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"entity",
+                         "type":"string",
+                         "value":"Blue_bird"
+                        }, 
+                        {
+                         "name":"number",
+                         "type":"string",
+                         "value":"100"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":8944,
+                 "y":416
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -849,7 +872,7 @@
          "y":0
         }],
  "nextlayerid":39,
- "nextobjectid":185,
+ "nextobjectid":187,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
