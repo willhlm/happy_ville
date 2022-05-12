@@ -560,6 +560,9 @@ class Blue_bird(Enemy):
         self.aggro=False
         self.health=1
 
+    def knock_back(self,dir):
+        pass
+
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
 
