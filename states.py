@@ -530,6 +530,7 @@ class Vendor(Gameplay):
         self.item_index = [0,0]
         self.set_response('Welcome')
         self.letter_frame = 0
+
     def set_response(self,text):
         self.respond = self.font.render(text = text)
 
@@ -551,20 +552,18 @@ class Vendor(Gameplay):
 
     def blit_money(self):
         money = self.game.game_objects.player.inventory['Amber_Droplet']
-        count = self.font.render(text = str(money))
-        self.game.screen.blit(count,(200,50))
+        count_text = self.font.render(text = str(money))
+        self.game.screen.blit(count_text,(200,50))
         self.amber.animation.update()
         self.game.screen.blit(self.amber.image,(190,50))
 
     def blit_description(self):
         self.conv=self.items[self.item_index[1]].description
-
-        text = self.font.render((272,80), self.conv, int(self.letter_frame//4))
+        text = self.font.render((272,80), self.conv, int(self.letter_frame//2))
         self.game.screen.blit(text,(190,100))
 
-
     def blit_response(self):
-        self.game.screen.blit(self.respond,(190,200))
+        self.game.screen.blit(self.respond,(190,150))
 
     def blit_items(self):
         for index, item in enumerate(self.items):
@@ -604,6 +603,9 @@ class Selecting_items(Vendor):
         self.arrow = Entities.Menu_Arrow()
         self.bg = self.font.fill_text_bg([64,32])
 
+        self.buy_sur = self.font.render(text = 'Buy')
+        self.cancel_sur= self.font.render(text = 'Cancel')
+
     def render(self):
         super().render()
         self.blit_text()
@@ -626,15 +628,12 @@ class Selecting_items(Vendor):
                 self.select_item()
 
     def blit_text(self):
-        buy = self.font.render(text = 'Buy')
-        cancel = self.font.render(text = 'Cancel')
-
-        self.bg.blit(buy,(30,10))#pointer
-        self.bg.blit(cancel,(30,20))#pointer
-        self.vendor_BG[0].blit(self.bg,(50,100))#pointer
+        self.bg.blit(self.buy_sur,(30,10))#
+        self.bg.blit(self.cancel_sur,(30,20))#
+        self.vendor_BG[0].blit(self.bg,(180,100))#box position
 
     def update_pointer(self):
-        self.game.screen.blit(self.arrow.img,(210,130+10*self.item_index[1]))#pointer
+        self.game.screen.blit(self.arrow.img,(300,130+10*self.item_index[1]))#pointer
 
     def select_item(self):
         if self.item_index[1] == 0:#if we select buy
