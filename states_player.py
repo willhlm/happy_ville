@@ -372,21 +372,22 @@ class Dash_attack(Player_states):
 class Counter(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
         self.dir=self.entity.dir.copy()
         self.entity.spirit -= 10
         self.done=False#animation flag
-
-        shield=self.entity.shield(self.entity)
-        self.entity.projectiles.add(shield)#add sword to group
 
     def update_state(self):
         if self.done:
             self.enter_state('Idle')
 
     def increase_phase(self):
-        if self.phase=='main':
-            self.phase='post'
-        elif self.phase=='post':
+        if self.phase=='pre':
+            self.phase='main'
+            shield=self.entity.shield(self.entity)
+            self.entity.projectiles.add(shield)#add sword to group
+        elif self.phase=='main':
             self.done=True
 
 class Death(Player_states):

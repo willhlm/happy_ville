@@ -68,9 +68,8 @@ class Collisions():
     def check_npc_collision(self):
         npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
         if npc:
-            new_state = states.Conversation(self.game_objects.game, npc)
-            new_state.enter_state()
-
+            npc.interact()
+            
     #interact with chests
     def check_interactables(self):
         collision = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision

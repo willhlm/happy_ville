@@ -348,12 +348,11 @@ class Gameplay(Game_State):
         super().__init__(game)
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
-        self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
 
     def update(self):
         self.game.game_objects.scrolling()
         self.game.game_objects.collide_all()
-        
+
     def render(self):
         self.game.screen.fill((207,238,250))
         self.game.game_objects.draw()
@@ -490,7 +489,6 @@ class Conversation(Gameplay):
 
     def update(self):
         super().update()
-
         self.letter_frame += 1
 
     def render(self):
@@ -513,6 +511,145 @@ class Conversation(Gameplay):
                     self.conv = self.npc.get_conversation('state_1')
                     if not self.conv:
                         self.exit_state()
+
+class Vendor(Gameplay):
+    def __init__(self, game, npc):
+        super().__init__(game)
+        self.box = Entities.Menu_Box()
+
+        self.npc = npc
+        self.vendor_BG = Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/vendor/")['']
+
+        self.items = []
+        for item in self.npc.inventory.keys():
+            item=getattr(sys.modules[Entities.__name__], item)([0,0])#make the object based on the string
+            self.items.append(item)
+
+        self.amber = getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0])#make the object based on the string
+
+        self.item_index = [0,0]
+        self.set_response('Welcome')
+        self.letter_frame = 0
+    def set_response(self,text):
+        self.respond = self.font.render(text = text)
+
+    def blit_BG(self):
+        width=self.vendor_BG[0].get_width()
+        self.game.screen.blit(self.vendor_BG[0],((self.game.WINDOW_SIZE[0]-width)/2,20))
+
+    def update(self):
+        super().update()
+        self.letter_frame += 1
+
+    def render(self):
+        super().render()
+        self.blit_BG()
+        self.blit_items()
+        self.blit_response()
+        self.blit_money()
+        self.blit_description()
+
+    def blit_money(self):
+        money = self.game.game_objects.player.inventory['Amber_Droplet']
+        count = self.font.render(text = str(money))
+        self.game.screen.blit(count,(200,50))
+        self.amber.animation.update()
+        self.game.screen.blit(self.amber.image,(190,50))
+
+    def blit_description(self):
+        self.conv=self.items[self.item_index[1]].description
+
+        text = self.font.render((272,80), self.conv, int(self.letter_frame//4))
+        self.game.screen.blit(text,(190,100))
+
+
+    def blit_response(self):
+        self.game.screen.blit(self.respond,(190,200))
+
+    def blit_items(self):
+        for index, item in enumerate(self.items):
+            item.animation.update()
+            self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,60+20*index))
+
+        self.update_pointer()
+
+    def update_pointer(self):
+        self.game.screen.blit(self.box.img,(220+20*self.item_index[0],40+20*self.item_index[1]))#pointer
+
+    def handle_events(self, input):
+        if input[0]:#press
+            if input[-1] == 'y':
+                self.exit_state()
+
+            elif input[-1] =='down':
+                self.item_index[1] += 1
+                self.item_index[1] = min(self.item_index[1],len(self.items)-1)
+                self.letter_frame=0
+            elif input[-1] =='up':
+                self.item_index[1] -= 1
+                self.item_index[1] = max(self.item_index[1],0)
+                self.letter_frame=0
+            elif input[-1]=='a' or input[-1]=='return':
+                self.select_item()
+
+    def select_item(self):
+        item = type(self.items[self.item_index[1]]).__name__
+        new_state = Selecting_items(self.game,self.npc,item)#
+        new_state.enter_state()
+
+class Selecting_items(Vendor):
+    def __init__(self, game,npc,item):
+        super().__init__(game,npc)
+        self.item=item#string
+        self.arrow = Entities.Menu_Arrow()
+        self.bg = self.font.fill_text_bg([64,32])
+
+    def render(self):
+        super().render()
+        self.blit_text()
+
+    def blit_description(self):
+        pass
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'y':
+                self.exit_state()
+
+            elif input[-1] =='down':
+                self.item_index[1] += 1
+                self.item_index[1] = min(self.item_index[1],1)
+            elif input[-1] =='up':
+                self.item_index[1] -= 1
+                self.item_index[1] = max(self.item_index[1],0)
+            elif input[-1]=='a' or input[-1]=='return':
+                self.select_item()
+
+    def blit_text(self):
+        buy = self.font.render(text = 'Buy')
+        cancel = self.font.render(text = 'Cancel')
+
+        self.bg.blit(buy,(30,10))#pointer
+        self.bg.blit(cancel,(30,20))#pointer
+        self.vendor_BG[0].blit(self.bg,(50,100))#pointer
+
+    def update_pointer(self):
+        self.game.screen.blit(self.arrow.img,(210,130+10*self.item_index[1]))#pointer
+
+    def select_item(self):
+        if self.item_index[1] == 0:#if we select buy
+            self.buy()
+        else:
+            self.game.state_stack[-2].set_response('What do you want?')
+        self.exit_state()
+
+    def buy(self):
+        if self.game.game_objects.player.inventory['Amber_Droplet']>=self.npc.inventory[self.item]:
+            self.game.game_objects.player.inventory[self.item] += 1
+            self.game.game_objects.player.inventory['Amber_Droplet']-=self.npc.inventory[self.item]
+            self.game.state_stack[-2].set_response('Thanks for buying')
+        else:#not enough money
+            self.game.state_stack[-2].set_response('Get loss you poor piece of shit')
 
 class Ability_Menu(Gameplay):
     def __init__(self, game):
@@ -568,6 +705,7 @@ class Ability_Menu(Gameplay):
 class Select_Menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
+        self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
         self.box = Entities.Menu_Box()
 
         self.page=1
@@ -654,7 +792,7 @@ class Select_Menu(Gameplay):
                 elif input[-1] =='up':
                     self.item_index[1]-=1
                     self.item_index[1]=max(self.item_index[1],0)
-                elif input[-1]=='a':
+                elif input[-1]=='a' or input[-1]=='return':
                     self.use_item()
 
             if self.page==2:#omamori stuff
@@ -685,9 +823,8 @@ class Select_Menu(Gameplay):
         if self.item_index[1]==1:#if on the bottom row
             item_index+=5
         if item_index<len(self.use_items):
-            if self.game.game_objects.player.inventory['Bone']>0:#if we have bones
-                self.use_items[item_index].use_item(self.game.game_objects.player)
-                self.exit_state()
+            self.use_items[item_index].use_item(self.game.game_objects.player)
+            self.exit_state()
 
 class Cutscene_engine(Gameplay):
     def __init__(self, game,scene):

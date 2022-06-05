@@ -611,7 +611,7 @@ class Player(Character):
         self.wall=True
 
         self.spawn_point=[{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
-        self.inventory={'Amber_Droplet':10,'Bone':2}#the keys need to have the same name as their respective classes
+        self.inventory={'Amber_Droplet':23,'Bone':2}#the keys need to have the same name as their respective classes
         self.omamoris=Omamoris(self)
         self.currentstate = states_player.Idle(self)
 
@@ -686,9 +686,16 @@ class NPC(Character):
         self.group = game_objects.npcs
         self.pause_group = game_objects.entity_pause
         self.name = str(type(self).__name__)#the name of the class
-        self.health = 50
         self.conv_index = 0
         self.currentstate = states_NPC.Idle(self)
+
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
+        self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
+        self.portrait=pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()  #temp
+        self.load_conversation()
 
     def load_conversation(self):
         self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
@@ -713,25 +720,16 @@ class NPC(Character):
         self.AI()
         self.group_distance()
 
+    def interact(self):#when plater press t
+        new_state = states.Conversation(self.game_objects.game, self)
+        new_state.enter_state()
+
     def idle(self):
         self.currentstate.handle_input('Idle')
 
     def walk(self):
         self.currentstate.handle_input('Walk')
 
-class Aslat(NPC):
-    def __init__(self, pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
-        self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
-        self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
-        self.load_conversation()
-        #self.max_vel = 1.5
-        self.counter=0
-
     def AI(self):
         self.counter+=1
         if self.counter>100:
@@ -741,32 +739,29 @@ class Aslat(NPC):
                 self.idle()
             else:
                 self.walk()
+
+class Aslat(NPC):
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.counter=0
 
 class Sahkar(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('idle', 0, self.dir, 'main')
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
-        self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
-        self.portrait=pygame.image.load('Sprites/Enteties/NPC/MrBanks/Woman1.png').convert_alpha()  #temp
-        self.load_conversation()
-        #self.max_vel = 1.5
         self.counter=0
 
-    def update(self,pos,playerpos):
-        super().update(pos,playerpos)
+class Astrid(NPC):
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.counter=0
+        self.inventory={'Bone':10,'Amber_Droplet':1}#itam+price
+
+    def interact(self):
+        new_state = states.Vendor(self.game_objects.game, self)
+        new_state.enter_state()
 
     def AI(self):
-        self.counter+=1
-        if self.counter>100:
-            self.counter=0
-            rand=random.randint(0,1)
-            if rand==0:
-                self.idle()
-            else:
-                self.walk()
+        pass
 
 class MrBanks(NPC):
     def __init__(self,pos,game_objects):
@@ -994,8 +989,8 @@ class Heal(Abilities):
 class Melee(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
-        self.rectangle()
         self.dir=entity.dir.copy()
+        self.rectangle()
 
     def rectangle(self):
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
@@ -1065,14 +1060,18 @@ class Shield(Melee):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=0
-        self.lifetime=10
+        self.lifetime=15
 
     def rectangle(self):
-        self.rect = pygame.Rect(self.entity.rect[0],self.entity.rect[1],80,80)
+        self.rect = self.entity.hitbox.copy()#pygame.Rect(self.entity.rect[0],self.entity.rect[1],20,40)
         self.hitbox = self.rect.copy()
 
     def update_hitbox(self):
-        self.rect.midtop=self.entity.rect.midtop
+        if self.dir[0] > 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+        elif self.dir[0] < 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def collision_enemy(self,collision_enemy):
         collision_enemy.countered()
@@ -1351,6 +1350,7 @@ class Amber_Droplet(Enemy_drop):
         super().__init__(pos)
         self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
         self.hitbox = self.rect.copy()
+        self.description = 'moneyy'
 
 class Bone(Enemy_drop):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/bone/')
@@ -1361,13 +1361,15 @@ class Bone(Enemy_drop):
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.hitbox = self.rect.copy()
+        self.description = 'Ribs from my daugther. You can respawn and stuff'
 
     def use_item(self,player):
-        player.inventory['Bone']-=1
-        if len(player.spawn_point)==2:#if there is already a bone
-            player.spawn_point.pop()
-        player.spawn_point.append({'map':player.game_objects.map.level_name, 'point':player.abs_dist})
-        player.currentstate = states_player.Plant_bone(player)
+        if player.inventory['Bone']>0:#if we have bones
+            player.inventory['Bone']-=1
+            if len(player.spawn_point)==2:#if there is already a bone
+                player.spawn_point.pop()
+            player.spawn_point.append({'map':player.game_objects.map.level_name, 'point':player.abs_dist})
+            player.currentstate = states_player.Plant_bone(player)
 
 class Spiritsorb(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')

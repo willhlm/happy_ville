@@ -159,7 +159,7 @@ class Level():
                 new_int = Entities.Spawnpoint(object_position,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
-            elif id == 19:#Spawpoint
+            elif id == 19:#Spawner
                 values={}
                 for property in obj['properties']:
                     if property['name'] == 'entity':
@@ -202,7 +202,6 @@ class Level():
                     else:
                         blit_dict[bg] = [layer]
                     bg_list.append(layer)
-
 
         for bg in bg_list:
             bg_flags[bg] = True
@@ -275,7 +274,6 @@ class Level():
                                 animation_entities[bg].append(new_animation)
                             except KeyError:
                                 animation_entities[bg] = [new_animation]
-
 
         for bg in base_bg_list:
             parallax = parallax_values[bg]
