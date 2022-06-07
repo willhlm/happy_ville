@@ -878,13 +878,9 @@ class Reindeer(Boss):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-<<<<<<< HEAD
-        self.health = 10
-=======
         self.currentstate = states_reindeer.Idle(self)
 
         self.health = 100
->>>>>>> b2b769bbfd76f7922cc0b47c75ca71c766c8d5d4
         self.spirit=1
         self.attack=Sword
 
