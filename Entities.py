@@ -515,10 +515,10 @@ class Vatt(Enemy):
         else:
             if self.player_distance[0] > self.attack_distance:
                 self.dir[0] = 1
-                self.currentstate.handle_input('Walk')
+                self.currentstate.handle_input('Run')
             elif self.player_distance[0] < -self.attack_distance:
                 self.dir[0] = -1
-                self.currentstate.handle_input('Walk')
+                self.currentstate.handle_input('Run')
             else:
                 self.counter = 0
                 self.currentstate.handle_input('Javelin')

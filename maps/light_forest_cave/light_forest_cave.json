@@ -609,29 +609,6 @@
                 }, 
                 {
                  "gid":8202,
-                 "height":32,
-                 "id":1588,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"path_to",
-                         "type":"string",
-                         "value":"light_forest"
-                        }, 
-                        {
-                         "name":"spawn",
-                         "type":"string",
-                         "value":"1"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":1648,
-                 "y":560
-                }, 
-                {
-                 "gid":8202,
                  "height":96,
                  "id":1589,
                  "name":"",
@@ -1924,7 +1901,7 @@
  "nextobjectid":1593,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.6.0",
+ "tiledversion":"1.8.2",
  "tileheight":16,
  "tilesets":[
         {
@@ -2063,6 +2040,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.6",
+ "version":"1.8",
  "width":260
 }

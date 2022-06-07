@@ -250,8 +250,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":432,
-                 "y":576
+                 "x":656,
+                 "y":560
                 }, 
                 {
                  "gid":16,
@@ -498,6 +498,24 @@
                  "visible":true,
                  "width":16,
                  "x":592,
+                 "y":560
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":193,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Vatt"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":704,
                  "y":560
                 }],
          "opacity":1,
@@ -938,7 +956,7 @@
          "y":0
         }],
  "nextlayerid":40,
- "nextobjectid":193,
+ "nextobjectid":194,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
