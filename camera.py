@@ -18,8 +18,14 @@ class Camera():
         new_camera=getattr(sys.modules[__name__], camera)(self.game_objects)
         self.game_objects.camera.append(new_camera)
 
+    def camera_shake(self,amp=3,duration=100):
+        self.game_objects.camera.append(Camera_shake(self.game_objects,amp,duration))
+
     def exit_state(self):
         self.game_objects.camera.pop()
+
+    def handle_input(self,x,y):
+        pass
 
     def check_camera_border(self):
         xflag, yflag = False, False
@@ -103,19 +109,24 @@ class Fixed(Camera):
         if not xflag and not yflag:
             self.exit_state()
 
-class Camera_shake(Auto):
-    def __init__(self, center,amp=3):
+class Camera_shake(Camera):
+    def __init__(self, center,amp,duration):
         super().__init__(center)
         self.amp=amp
+        self.duration=duration
 
     def update(self):
+        self.duration-=1
         self.shake[0]=random.randint(-self.amp,self.amp)
         self.shake[1]=random.randint(-self.amp,self.amp)
         super().update()
 
+        self.exit_state()
+
     def exit_state(self):
-        super().exit_state()
-        self.shake=[0,0]
+        if self.duration<0:
+            self.shake=[0,0]
+            super().exit_state()
 
 class Deer_encounter(Auto):
     def __init__(self, game_objects):
@@ -125,3 +136,10 @@ class Deer_encounter(Auto):
         self.center[0]-=5
         self.center[0]=max(100,self.center[0])
         super().update()
+
+class Death(Camera):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+
+    def update(self):
+        pass

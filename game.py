@@ -23,7 +23,6 @@ class Game():
         self.clock = pygame.time.Clock()
         self.fps = 60
         self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}
-        self.controller = Read_files.Controller('xbox')
 
         #debug flags
         self.DEBUG_MODE = True
@@ -36,8 +35,8 @@ class Game():
                 pygame.quit()
                 sys.exit()
             else:
-                self.controller.map_inputs(event)
-                self.state_stack[-1].handle_events(self.controller.output())
+                self.game_objects.controller.map_inputs(event)
+                self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
     def run(self):
         while True:

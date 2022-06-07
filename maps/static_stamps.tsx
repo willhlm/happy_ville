@@ -47,7 +47,8 @@
  </tile>
  <tile id="19">
   <properties>
-   <property name="interaction_type" value=""/>
+   <property name="entity" value=""/>
+   <property name="number" value=""/>
   </properties>
  </tile>
 </tileset>

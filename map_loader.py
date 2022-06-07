@@ -10,6 +10,7 @@ class Level():
         self.spawn = spawn
         self.init_player_pos = (0,0)
         self.load_map_data()
+        self.state = Read_files.read_json("map_state.json") #check this file for structure of object
 
     def load_map_data(self):
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
@@ -83,7 +84,6 @@ class Level():
                 self.game_objects.platforms.add(new_block)
 
     def load_statics(self):
-
         map_statics = self.map_data["statics"]
 
         for obj in map_statics:
@@ -93,9 +93,14 @@ class Level():
             if id == 0:
                 for property in obj['properties']:
                     if property['name'] == 'spawn':
-                        if property['value'] == self.spawn:
-                            self.game_objects.player.set_pos(object_position)
-                            self.init_player_pos = object_position
+
+                        if type(self.spawn).__name__ != 'str':#if respawn
+                            self.game_objects.player.set_pos(self.spawn)
+                            self.init_player_pos = self.spawn
+                        else:#if notmal load
+                            if property['value'] == self.spawn:
+                                self.game_objects.player.set_pos(object_position)
+                                self.init_player_pos = object_position
             #npcs
             elif id == 1:
                 properties = obj['properties']
@@ -150,6 +155,20 @@ class Level():
                 new_trigger = Entities.Trigger(object_position,object_size ,values)
                 self.game_objects.triggers.add(new_trigger)
 
+            elif id == 18:#Spawpoint
+                new_int = Entities.Spawnpoint(object_position,self.level_name)
+                self.game_objects.interactables.add(new_int)
+
+            elif id == 19:#Spawner
+                values={}
+                for property in obj['properties']:
+                    if property['name'] == 'entity':
+                        values['entity'] = property['value']
+                    elif property['name'] == 'number':
+                        values['number']=property['value']
+                new_spawn = Entities.Spawner(object_position,self.game_objects,values)
+                self.game_objects.cosmetics.add(new_spawn)
+
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
@@ -183,7 +202,6 @@ class Level():
                     else:
                         blit_dict[bg] = [layer]
                     bg_list.append(layer)
-
 
         for bg in bg_list:
             bg_flags[bg] = True
@@ -256,7 +274,6 @@ class Level():
                                 animation_entities[bg].append(new_animation)
                             except KeyError:
                                 animation_entities[bg] = [new_animation]
-
 
         for bg in base_bg_list:
             parallax = parallax_values[bg]

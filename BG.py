@@ -1,4 +1,4 @@
-import pygame, math, random, sys, Read_files, states_weather
+import pygame, math, random, sys, Read_files, states_basic, animation
 
 class Weather(pygame.sprite.Sprite):
 
@@ -6,7 +6,8 @@ class Weather(pygame.sprite.Sprite):
         super().__init__()
         self.pos=[random.randint(0, 500),random.randint(-500, -100)]#starting position
         self.group = weather_group
-        self.currentstate = states_weather.Fall(self)
+        self.animation = animation.Basic_animation(self)
+        self.currentstate = states_basic.Fall(self)
         self.velocity=[0,0]
         self.wind=2
 
@@ -16,7 +17,7 @@ class Weather(pygame.sprite.Sprite):
     def update(self,scroll):
         self.update_pos(scroll)
         self.currentstate.update()
-        self.currentstate.update_animation()
+        self.animation.update()
         self.boundary()
 
     def boundary(self):
@@ -50,9 +51,9 @@ class Weather(pygame.sprite.Sprite):
         self.currentstate.change_state()
 
     def rect(self):
-        self.image=self.sprites['Fall'][0]
+        self.image=self.sprites['fall'][0]
         self.rect = self.image.get_rect(center=self.pos)
-        
+
 class Snow(Weather):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Weather/Snow/')
 

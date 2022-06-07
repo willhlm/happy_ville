@@ -1,4 +1,3 @@
-
 import sys, sound
 from states_entity import Entity_States
 
@@ -41,7 +40,7 @@ class Player_states(Entity_States):
 
     def handle_movement(self,input):
         value=input[2]
-        self.entity.acceleration[0]=value[0]
+        self.entity.acceleration[0]=abs(value[0])
         self.entity.dir[1]=-value[1]
 
         if value[0]>0.2:#x
@@ -373,36 +372,40 @@ class Dash_attack(Player_states):
 class Counter(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
         self.dir=self.entity.dir.copy()
         self.entity.spirit -= 10
         self.done=False#animation flag
-
-        shield=self.entity.shield(self.entity)
-        self.entity.projectiles.add(shield)#add sword to group
 
     def update_state(self):
         if self.done:
             self.enter_state('Idle')
 
     def increase_phase(self):
-        if self.phase=='main':
-            self.phase='post'
-        elif self.phase=='post':
+        if self.phase=='pre':
+            self.phase='main'
+            shield=self.entity.shield(self.entity)
+            self.entity.projectiles.add(shield)#add sword to group
+        elif self.phase=='main':
             self.done=True
 
 class Death(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
         self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            #self.entity.loot()
-            self.entity.kill()
+        self.entity.death()
 
     def increase_phase(self):
-        self.done=True
+        if self.phase=='pre':
+            self.phase='main'
+
+class Invisible(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
 
 class Hurt(Player_states):
     def __init__(self,entity):
@@ -423,6 +426,20 @@ class Hurt(Player_states):
             self.next_state='Idle'
         else:
             self.next_state='Walk'
+
+class Spawn(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.done=False
+
+    def update_state(self):
+        if self.done:
+            self.entity.health=self.entity.max_health
+            self.enter_state('Idle')
+
+    def increase_phase(self):
+        self.done=True
 
 class Sword(Player_states):
     def __init__(self,entity):
@@ -586,6 +603,19 @@ class Sword_down(Sword):
                 self.enter_state('Fall_stand')
             else:
                 self.enter_state('Fall_run')
+
+class Plant_bone(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.stay_still()
+        self.done=False
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Idle')
+
+    def increase_phase(self):
+        self.done=True
 
 class Abillitites(Player_states):
     def __init__(self,entity):

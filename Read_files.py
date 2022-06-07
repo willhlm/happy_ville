@@ -3,6 +3,23 @@ import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
 
+def default(obj):
+    if hasattr(obj, 'to_json'):
+        return obj.to_json()
+
+def save_obj(obj):
+    jsonStr=json.dumps(obj, default=default)
+    name=str(type(obj).__name__)
+    path="save/" + name + ".json"
+    with open(path, "w") as outfile:
+        outfile.write(jsonStr)
+
+def load_obj(obj):
+    name=str(type(obj).__name__)
+    path='save/' + name + '.json'
+    load_data=read_json(path)
+    obj.from_json(load_data)
+
 def read_json(path):
     with open(path) as f:
         text = json.load(f)
@@ -72,7 +89,6 @@ class Sprites():
         for subdir in [d[0] for d in walk(base_path)]:
             if subdir == base_path:
                 pass
-
             sprite_dict[subdir.split("/")[-1]] = self.load_sprites(subdir)
         return sprite_dict
 
