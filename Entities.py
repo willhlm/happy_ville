@@ -594,6 +594,7 @@ class Player(Character):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
         self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
+        self.max_vel = 4
 
         self.max_health = 250
         self.max_spirit = 100
@@ -632,7 +633,7 @@ class Player(Character):
     def reset_movement(self):
         self.velocity = [0,0]
         self.acceleration = [0,0.7]
-        self.friction = [0.2,0]
+        self.friction = [0.24,0]
 
     def update(self,pos):
         super().update(pos)

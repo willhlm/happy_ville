@@ -200,6 +200,8 @@ class Fall_run(Player_states):
     def handle_press_input(self,input):
         if input[-1]=='b':
             self.enter_state(self.entity.equip)
+        elif input[-1]=='lb':
+            self.enter_condition('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input=='double_jump':
@@ -245,6 +247,8 @@ class Fall_stand(Player_states):
             self.enter_state(self.entity.equip)
         elif input[-1]=='x':
             self.swing_sword()
+        elif input[-1]=='lb':
+            self.enter_condition('Dash')
         elif input=='double_jump':
             self.enter_state('Double_jump')
 
@@ -310,7 +314,7 @@ class Dash(Player_states):
         self.phases=['pre','main','post']
         self.phase=self.phases[0]
         self.done=False#animation flag
-        self.entity.velocity[0] = 30*self.dir[0]
+        self.entity.velocity[0] = 20*self.dir[0]
         self.entity.spirit -= 10
 
     def update_state(self):
@@ -337,6 +341,7 @@ class Dash(Player_states):
             self.phase='main'
         elif self.phase=='main':
             self.phase=self.phases[-1]
+            self.done=True
         elif self.phase=='post':
             self.done=True
 

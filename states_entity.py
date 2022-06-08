@@ -15,10 +15,10 @@ class Entity_States():
 
         self.entity.velocity[0]+=self.dir[0]*self.entity.acceleration[0]-self.entity.friction[0]*self.entity.velocity[0]
 
-    #    if self.entity.velocity[0]>0:
-    #        self.entity.velocity[0]=min(self.entity.velocity[0],self.entity.max_vel)
-    #    else:
-    #        self.entity.velocity[0]=max(self.entity.velocity[0],-self.entity.max_vel)
+        #if self.entity.velocity[0]>0:
+        #    self.entity.velocity[0]=min(self.entity.velocity[0],self.entity.max_vel)
+        #else:
+        #    self.entity.velocity[0]=max(self.entity.velocity[0],-self.entity.max_vel)
 
 
     def update_state(self):

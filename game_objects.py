@@ -19,7 +19,7 @@ class Game_Objects():
         self.cutscenes_complete = []
         self.create_groups()
         self.weather_paricles=BG.Weather(self.weather)#initiate whater
-        self.weather_paricles.create_particles('Snow')
+        #self.weather_paricles.create_particles('Snow')
 
         self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
