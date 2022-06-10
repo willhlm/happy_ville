@@ -169,6 +169,12 @@ class Level():
                 new_spawn = Entities.Spawner(object_position,self.game_objects,values)
                 self.game_objects.cosmetics.add(new_spawn)
 
+            elif id == 20:#Shroompolin
+                new_shroompolin = Entities.Shroompolin(object_position,self.game_objects)
+                self.game_objects.enemies.add(new_shroompolin)
+                #new_shroompolin = Entities.Shroompolin(object_position,self.game_objects)
+                #self.game_objects.cosmetics.add(new_shroompolin)
+
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer

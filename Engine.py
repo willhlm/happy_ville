@@ -44,14 +44,10 @@ class Collisions():
         collision_enemy=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
 
         if collision_enemy:
-            if str(type(collision_enemy.currentstate).__name__) is not 'Death' and collision_enemy.aggro:
+            if str(type(collision_enemy.currentstate).__name__) is not 'Death':
 
-                player.take_dmg(10)
-                sign=(player.hitbox.center[0]-collision_enemy.hitbox.center[0])
-                if sign>0:
-                    player.velocity[0]=10#knock back of player
-                else:
-                    player.velocity[0]=-10#knock back of player
+                #player.take_dmg(10)
+                collision_enemy.player_collision()
 
     #pickup loot
     @staticmethod
@@ -69,7 +65,7 @@ class Collisions():
         npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
         if npc:
             npc.interact()
-            
+
     #interact with chests
     def check_interactables(self):
         collision = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision

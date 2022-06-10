@@ -397,6 +397,15 @@ class Enemy(Character):
         super().update(pos)
         self.AI(playerpos)
 
+    def player_collision(self):
+        if self.aggro:
+            self.game_pbjects.player.take_dmg(10)
+            sign=(player.hitbox.center[0]-self.hitbox.center[0])
+            if sign>0:
+                self.game_pbjects.player.knock_back(1)
+            else:
+                self.game_pbjects.player.knock_back(-1)
+
     def death(self):
         self.aggro=False
         self.kill()
@@ -583,6 +592,40 @@ class Blue_bird(Enemy):
             elif rand==4:
                 self.dir[0]=-self.dir[0]
 
+class Shroompolin(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/shroompolin/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
+        self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
+        self.aggro=False
+
+    def player_collision(self):
+        offset=9
+        if self.game_objects.player.velocity[1]>0:#going down
+            if self.game_objects.player.hitbox.bottom<self.jump_box.top+offset:
+                self.game_objects.player.velocity[1] = -10
+                self.currentstate.change_state('Hurt')
+
+    def update_hitbox(self):
+        super().update_hitbox()
+        self.jump_box.midtop = self.rect.midtop
+
+    def update(self,pos,playerpos):
+        super().update(pos,playerpos)
+
+    def take_dmg(self,dmg):
+        pass
+
+    def updateAI(self):
+        pass
+
+    def peaceAI(self):
+        pass
+
+
 class Player(Character):
 
     sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
@@ -612,7 +655,7 @@ class Player(Character):
 
         self.spawn_point=[{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
         self.inventory={'Amber_Droplet':23,'Bone':2}#the keys need to have the same name as their respective classes
-        self.omamoris=Omamoris(self)
+        self.omamoris = Omamoris(self)
         self.currentstate = states_player.Idle(self)
 
         self.set_abs_dist()
@@ -1391,7 +1434,7 @@ class Spiritsorb(Loot):
 class Animatedentity(Staticentity):#animated without hitbox
     def __init__(self,pos):
         super().__init__(pos)
-        self.animation=animation.Basic_animation(self)
+        self.animation = animation.Basic_animation(self)
         self.currentstate = states_basic.Idle(self)
 
     def update(self,scroll):

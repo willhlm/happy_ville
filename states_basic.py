@@ -32,6 +32,26 @@ class Idle(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
+    def handle_input(self,input):
+        if input=='Hurt':
+             self.enter_state('Hurt')
+
+class Hurt(Entity_States):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.flag = False#to make sure it doesn't finish in the first frame = 0
+        self.entity.state = 'hurt'
+
+    def update_state(self):
+        if self.entity.animation.frame==0 and self.flag:
+            self.entity.state = 'idle'
+            self.enter_state('Idle')
+            
+        self.flag = True
+
+    def handle_input(self,input):
+        pass
+
 class Opening(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)

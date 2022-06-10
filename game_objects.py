@@ -143,7 +143,6 @@ class Game_Objects():
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
-
         #self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
         #self.reflection.draw(self.game.screen)
@@ -166,12 +165,13 @@ class Game_Objects():
             pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
             pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
 
-            for platform in self.platforms:#go through the group
-                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+            #for platform in self.platforms:#go through the group
+                #pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,2)#draw hitbox
+
 
     def to_json(self):#stuff to save
         save_dict={'cutscenes_complete':self.cutscenes_complete}

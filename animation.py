@@ -23,7 +23,8 @@ class Entity_animation(Animation):#phase and state
     def update(self):
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
         self.frame += 1
-        #if str(type(self.entity).__name__)=='Cutscene_reindeer':
+    #    if str(type(self.entity).__name__)=='Shroompolin':
+    #        print(self.entity.currentstate.state_name,self.frame)
 
         if self.frame == self.entity.sprites.get_frame_number(self.entity.currentstate.state_name,self.entity.currentstate.phase)*self.framerate:
             self.reset_timer()
@@ -37,7 +38,6 @@ class Hurt_animation(Entity_animation):#become white
 
     def update(self):
         super().update()
-
         self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
         self.duration -=1
 
@@ -51,7 +51,6 @@ class Basic_animation(Animation):#state
     def update(self):
         self.entity.image = self.entity.sprites[self.entity.state][self.frame//self.framerate].copy()
         self.frame += 1
-        #if str(type(self.entity).__name__)=='Snow':
 
         if self.frame == len(self.entity.sprites[self.entity.state])*self.framerate:
             self.reset_timer()
