@@ -3,7 +3,7 @@ import Read_files
 import Engine
 import Entities
 import map_loader
-import BG
+import particles
 import sound
 import states
 import camera
@@ -18,10 +18,9 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
-        self.weather_paricles=BG.Weather(self.weather)#initiate whater
-        #self.weather_paricles.create_particles('Snow')
+        #self.weather_paricles=particles.Weather(self.weather,'Snow')#initiate whater
 
-        self.reflection=BG.Reflection()
+        #self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)
 
@@ -103,7 +102,7 @@ class Game_Objects():
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
-        self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino. it is heavy
+        #self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino.
 
     def scrolling(self):
         self.camera[-1].update()

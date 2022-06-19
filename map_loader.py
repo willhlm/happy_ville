@@ -172,8 +172,6 @@ class Level():
             elif id == 20:#Shroompolin
                 new_shroompolin = Entities.Shroompolin(object_position,self.game_objects)
                 self.game_objects.enemies.add(new_shroompolin)
-                #new_shroompolin = Entities.Shroompolin(object_position,self.game_objects)
-                #self.game_objects.cosmetics.add(new_shroompolin)
 
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):

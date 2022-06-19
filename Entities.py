@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, math, sound, states
+import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, math, sound, states
 
 pygame.mixer.init()
 
@@ -21,7 +21,7 @@ class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
         surf.set_colorkey((0,0,0))
         screen.blit(surf,(rect.x,rect.y),special_flags=pygame.BLEND_RGB_ADD)
 
-class PauseGroup(pygame.sprite.Group):#adds a white glow around enteties
+class PauseGroup(pygame.sprite.Group):#I guess we don't need it
     def __init__(self):
         super().__init__()
 
@@ -292,7 +292,6 @@ class Particle_effect(Staticentity):
 
 class Particle_effect_attack(Particle_effect):
 
-
     def __init__(self, pos):
         self.blit_size = (256,256)
         super().__init__(pos, self.blit_size)
@@ -399,12 +398,12 @@ class Enemy(Character):
 
     def player_collision(self):
         if self.aggro:
-            self.game_pbjects.player.take_dmg(10)
-            sign=(player.hitbox.center[0]-self.hitbox.center[0])
+            self.game_objects.player.take_dmg(10)
+            sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
             if sign>0:
-                self.game_pbjects.player.knock_back(1)
+                self.game_objects.player.knock_back(1)
             else:
-                self.game_pbjects.player.knock_back(-1)
+                self.game_objects.player.knock_back(-1)
 
     def death(self):
         self.aggro=False
@@ -624,7 +623,6 @@ class Shroompolin(Enemy):
 
     def peaceAI(self):
         pass
-
 
 class Player(Character):
 
@@ -1071,13 +1069,17 @@ class Sword(Melee):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=10
+        self.effect =  particles.Sword_effect(self.entity.cosmetics)
 
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
         collision_enemy.knock_back(self.dir[0])
         slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
-        clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
-        self.entity.cosmetics.add(clash)
+        self.effect.create_particles(collision_enemy.rect.center)
+
+        #clash = particles.Sword_effect(self.entity.cosmetics,collision_enemy.rect.center)
+        #clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
+        #self.entity.cosmetics.add(clash)
         self.entity.cosmetics.add(slash)
         self.kill()
 
