@@ -14,7 +14,7 @@ class Sword_effect():
     def __init__(self,group):
         self.group = group
 
-    def create_particles(self,pos,number_particles=100):
+    def create_particles(self,pos,number_particles=20):
         for i in range(0,number_particles):
             obj=Sparks(pos)
             self.group.add(obj)
@@ -27,7 +27,9 @@ class Particles(pygame.sprite.Sprite):
         self.update_pos(scroll)
 
     def update_pos(self,scroll):
-        self.rect.center = [self.rect.center[0] + scroll[0]+self.velocity[0], self.rect.center[1] + scroll[1]+self.velocity[1]]
+        self.true_pos= [self.true_pos[0] + scroll[0]+self.velocity[0], self.true_pos[1] + scroll[1]+self.velocity[1]]
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0]+self.velocity[0], self.rect.topleft[1] + scroll[1]+self.velocity[1]]
+        self.rect.topleft = self.true_pos
 
     def make_circle(self):
         image = pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32)
@@ -35,13 +37,15 @@ class Particles(pygame.sprite.Sprite):
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+        self.true_pos = self.pos
 
     def make_sparks(self):
-        self.surface = pygame.Surface((10,10), pygame.SRCALPHA, 32).convert_alpha()
-        self.image = self.surface
+        self.surface = pygame.Surface((100,100), pygame.SRCALPHA, 32).convert_alpha()
+        self.image = self.surface.copy()
         pygame.draw.polygon(self.image,self.colour,self.points)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+        self.true_pos = self.pos
 
     def set_color(self):
         replace_color=(251,242,54)#=self.image.get_at((4,4))
@@ -55,21 +59,24 @@ class Particles(pygame.sprite.Sprite):
 class Sparks(Particles):
     def __init__(self,pos):
         super().__init__()
-        self.pos = pos
-        self.angle = random.randint(0, 360)
-        self.scale = 2
-        scale=random.randint(-6, 6)#should maybe depend on the hit direction
-        self.velocity = [scale*math.cos(self.angle),scale*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
+        self.pos = pos #spawn position
+
+        angle=random.randint(0, 360)#the ejection anglex,should maybe depend on the hit direction?
+        self.angle = -(2*math.pi*angle)/360
+        self.scale = 1
+
+        amp=random.randint(5, 10)
+        self.velocity = [amp*math.cos(self.angle),amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
         self.colour = [255,255,255]
 
         self.spark_shape()
         self.make_sparks()
-        self.lifetime=20#how long the sparks shoud be here
+        self.lifetime=60#how long the sparks shoud be here
 
     def speed(self):
         self.angle += 0
-        self.velocity[0] -= 0.1
-        self.velocity[1] -= 0.1
+        self.velocity[0] -= 0.05*self.velocity[0]#0.1*math.cos(self.angle)
+        self.velocity[1] -= 0.05*self.velocity[1]#0.1*math.sin(self.angle)
 
     def update(self,scroll):
         super().update(scroll)
@@ -79,21 +86,29 @@ class Sparks(Particles):
         self.destroy()
 
     def destroy(self):
-        if self.lifetime<0:
+        vel=math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
+
+        if vel<1:#better to check if the velocity changed sign and then kill
             self.kill()
 
     def update_spark(self):
-        self.image = self.surface#reset image
+        self.image = self.surface.copy()
         self.spark_shape()
         pygame.draw.polygon(self.image,self.colour,self.points)
 
-    def spark_shape(self):#potato formula
+    def spark_shape(self):
+        vel=math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
+        offsetx=30
+        offsety=30
+
         self.points = [
-        [math.cos(self.angle)*self.velocity[0]*self.scale,math.sin(self.angle)*self.velocity[0]*self.scale],
-        [math.cos(self.angle+math.pi*0.5)*self.velocity[0]*self.scale*0.3,math.sin(self.angle+math.pi*0.5)*self.velocity[0]*self.scale*0.3],
-        [-math.cos(self.angle)*self.velocity[0]*self.scale*3.5,-math.sin(self.angle)*self.velocity[0]*self.scale*3.5],
-        [math.cos(self.angle-math.pi*0.5)*self.velocity[0]*self.scale*0.3,-math.sin(self.angle+math.pi*0.5)*self.velocity[0]*self.scale*0.3]
+        [offsetx+math.cos(self.angle)*vel*self.scale,offsety+math.sin(self.angle)*vel*self.scale],
+        [offsetx+math.cos(self.angle+math.pi*0.5)*vel*self.scale*0.3,offsety+math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3],
+        [offsetx-math.cos(self.angle)*vel*self.scale*3.5,offsety-math.sin(self.angle)*vel*self.scale*3.5],
+        [offsetx+math.cos(self.angle-math.pi*0.5)*vel*self.scale*0.3,offsety-math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3]
         ]
+
+        print(self.points)
 
 class Weather_particles(Particles):
     def __init__(self):
