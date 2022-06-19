@@ -55,7 +55,6 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.hitbox.center=self.rect.center
 
 class Trigger(Platform):
-
     def __init__(self,pos,size,values):
         super().__init__(pos,size)
         #will crach if values do not exist
@@ -336,7 +335,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.acceleration=[1,0.7]
         self.velocity=[0,0]
         self.friction=[0.2,0]
-        self.animation_stack=[animation.Entity_animation(self)]#maybe it is better to assign animation class based on the speific entity, since some doesn't have pre,main,post
+        self.animation_stack=[animation.Entity_animation(self)]
         self.max_vel=7
         self.game_objects = game_objects
 
@@ -1005,7 +1004,7 @@ class Abilities(pygame.sprite.Sprite):
     def __init__(self,entity):
         super().__init__()
         self.entity=entity
-        self.state='main'
+        self.state = 'main'
         self.animation=animation.Ability_animation(self)
 
     def update(self,pos):
@@ -1432,7 +1431,7 @@ class Spiritsorb(Loot):
         player.spirit += 10
         self.kill()
 
-class Animatedentity(Staticentity):#animated without hitbox
+class Animatedentity(Staticentity):
     def __init__(self,pos):
         super().__init__(pos)
         self.animation = animation.Basic_animation(self)

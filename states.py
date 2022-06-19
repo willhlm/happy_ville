@@ -527,9 +527,18 @@ class Vendor(Gameplay):
 
         self.amber = getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0])#make the object based on the string
 
-        self.item_index = [0,0]
+        #tempporary to have many items to test scrollingl list
+        for i in range(0,3):
+            self.items.append(getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0]))
+        self.items.append(getattr(sys.modules[Entities.__name__], 'Bone')([0,0]))
+
+        self.item_index = [0,0]#pointer of item
+        self.box_index = [0,0]#position of box
         self.set_response('Welcome')
         self.letter_frame = 0
+
+        self.display_number = min(3,len(self.items))#number of items to list
+        self.sale_items=self.items[0:self.display_number+1]
 
     def set_response(self,text):
         self.respond = self.font.render(text = text)
@@ -550,7 +559,7 @@ class Vendor(Gameplay):
         self.blit_money()
         self.blit_description()
 
-    def blit_money(self):
+    def blit_money(self):#blit how much gold we have in inventory
         money = self.game.game_objects.player.inventory['Amber_Droplet']
         count_text = self.font.render(text = str(money))
         self.game.screen.blit(count_text,(200,50))
@@ -558,7 +567,7 @@ class Vendor(Gameplay):
         self.game.screen.blit(self.amber.image,(190,50))
 
     def blit_description(self):
-        self.conv=self.items[self.item_index[1]].description
+        self.conv=self.items[self.box_index[1]].description
         text = self.font.render((272,80), self.conv, int(self.letter_frame//2))
         self.game.screen.blit(text,(190,100))
 
@@ -566,14 +575,19 @@ class Vendor(Gameplay):
         self.game.screen.blit(self.respond,(190,150))
 
     def blit_items(self):
-        for index, item in enumerate(self.items):
-            item.animation.update()
-            self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,60+20*index))
+        for index, item in enumerate(self.sale_items):
+            if index < self.display_number:
+                item.animation.update()
+                self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,80+20*index))
+            else:#the last index
+                item.animation.update()
+                item.image.set_alpha(100)
+                self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,140))
 
         self.update_pointer()
 
     def update_pointer(self):
-        self.game.screen.blit(self.box.img,(220+20*self.item_index[0],40+20*self.item_index[1]))#pointer
+        self.game.screen.blit(self.box.img,(220+20*self.box_index[0],60+20*self.box_index[1]))#pointer
 
     def handle_events(self, input):
         if input[0]:#press
@@ -583,11 +597,25 @@ class Vendor(Gameplay):
             elif input[-1] =='down':
                 self.item_index[1] += 1
                 self.item_index[1] = min(self.item_index[1],len(self.items)-1)
+
+                if self.box_index[1]==2:
+                    self.sale_items=self.items[self.item_index[1]-self.display_number+1:self.item_index[1]+self.display_number-1]
+
+                self.box_index[1] += 1
+                self.box_index[1] = min(self.box_index[1],self.display_number-1)
                 self.letter_frame=0
+
             elif input[-1] =='up':
-                self.item_index[1] -= 1
+                self.item_index[1]-=1
                 self.item_index[1] = max(self.item_index[1],0)
-                self.letter_frame=0
+
+                if self.box_index[1]==0:
+                    self.sale_items=self.items[self.item_index[1]:self.item_index[1]+self.display_number+1]
+
+                self.box_index[1] -= 1
+                self.box_index[1] = max(self.box_index[1],0)
+                self.letter_frame = 0
+
             elif input[-1]=='a' or input[-1]=='return':
                 self.select_item()
 

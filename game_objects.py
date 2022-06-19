@@ -34,7 +34,6 @@ class Game_Objects():
         Read_files.load_obj(self)
 
     def create_groups(self):
-
         #define all sprite groups
         self.enemies = pygame.sprite.Group()# pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
