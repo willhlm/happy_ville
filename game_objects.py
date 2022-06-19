@@ -18,7 +18,8 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
-        #self.weather_paricles=particles.Weather(self.weather,'Snow')#initiate whater
+        self.weather_paricles=particles.Weather(self.weather)#initiate weather
+        self.weather_paricles.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
         #self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
@@ -129,7 +130,6 @@ class Game_Objects():
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
-        self.weather.draw(self.game.screen)
 
         #self.platforms.draw(self.game.screen)
         self.interactables.draw(self.game.screen)
@@ -142,6 +142,8 @@ class Game_Objects():
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
+        self.weather.draw(self.game.screen)
+
         #self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
         #self.reflection.draw(self.game.screen)

@@ -1031,7 +1031,7 @@ class Heal(Abilities):
 class Melee(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
-        self.dir=entity.dir.copy()
+        self.dir = entity.dir.copy()
         self.rectangle()
 
     def rectangle(self):
@@ -1069,15 +1069,13 @@ class Sword(Melee):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=10
-        self.effect =  particles.Sword_effect(self.entity.cosmetics)
+        self.effect =  particles.Sword_GFX(self.entity.cosmetics)
 
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
         collision_enemy.knock_back(self.dir[0])
         slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
-        self.effect.create_particles(collision_enemy.rect.center)
-
-        #clash = particles.Sword_effect(self.entity.cosmetics,collision_enemy.rect.center)
+        self.effect.create_particles([collision_enemy.rect.x,collision_enemy.rect.y],self.dir[0])
         #clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
         #self.entity.cosmetics.add(clash)
         self.entity.cosmetics.add(slash)

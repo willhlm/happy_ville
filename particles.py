@@ -1,23 +1,24 @@
 import pygame, math, random, sys
 
-class Weather():
-    def __init__(self,weather_group,type,number_particles=100):
+class Weather():#maybe should just be a function
+    def __init__(self,weather_group):
         self.group = weather_group
-        self.create_particles(type,number_particles)
 
     def create_particles(self,type,number_particles=100):
         for i in range(0,number_particles):
-            obj=getattr(sys.modules[__name__], type)()
+            obj = getattr(sys.modules[__name__], type)()
             self.group.add(obj)
 
-class Sword_effect():
-    def __init__(self,group):
-        self.group = group
+class Sword_GFX():#maybe should just be a function
+    def __init__(self,cosmetics_group):
+        self.group = cosmetics_group
 
-    def create_particles(self,pos,number_particles=20):
+    def create_particles(self,pos,dir,number_particles=25):
         for i in range(0,number_particles):
-            obj=Sparks(pos)
-            self.group.add(obj)
+            obj2 = Sword_particles(pos,dir)
+            self.group.add(obj2)
+            obj1 = Sword_sparks(pos,dir)
+            self.group.add(obj1)
 
 class Particles(pygame.sprite.Sprite):
     def __init__(self):
@@ -40,56 +41,68 @@ class Particles(pygame.sprite.Sprite):
         self.true_pos = self.pos
 
     def make_sparks(self):
-        self.surface = pygame.Surface((100,100), pygame.SRCALPHA, 32).convert_alpha()
+        self.spark_shape()#define the shape of spark
+        self.surface = pygame.Surface((60,60), pygame.SRCALPHA, 32).convert_alpha()
         self.image = self.surface.copy()
         pygame.draw.polygon(self.image,self.colour,self.points)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
         self.true_pos = self.pos
 
-    def set_color(self):
+    def set_color(self):#not using for now
         replace_color=(251,242,54)#=self.image.get_at((4,4))
         img_copy=pygame.Surface(self.image.get_size())
-        img_copy.fill(self.color)
+        img_copy.fill(self.colour)
         self.image.set_colorkey(replace_color)#the color key will not be drawn
         img_copy.blit(self.image,(0,0))
         self.image=img_copy
         self.image.set_colorkey((0,0,0,255))
 
-class Sparks(Particles):
-    def __init__(self,pos):
+class Sword_effects(Particles):
+    def __init__(self,pos,dir):
         super().__init__()
-        self.pos = pos #spawn position
+        if dir > 0:#rigth hit
+            angle=random.randint(-70, 70)#the ejection anglex
+        else:#left hit
+            angle=random.randint(110, 250)#the ejection anglex
 
-        angle=random.randint(0, 360)#the ejection anglex,should maybe depend on the hit direction?
         self.angle = -(2*math.pi*angle)/360
-        self.scale = 1
-
-        amp=random.randint(5, 10)
-        self.velocity = [amp*math.cos(self.angle),amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
-        self.colour = [255,255,255]
-
-        self.spark_shape()
-        self.make_sparks()
-        self.lifetime=60#how long the sparks shoud be here
-
-    def speed(self):
-        self.angle += 0
-        self.velocity[0] -= 0.05*self.velocity[0]#0.1*math.cos(self.angle)
-        self.velocity[1] -= 0.05*self.velocity[1]#0.1*math.sin(self.angle)
+        self.fade = 255
+        self.pos = pos #spawn position
+        self.lifetime = 30
 
     def update(self,scroll):
         super().update(scroll)
-        self.lifetime-=1
+        self.lifetime -= 1
         self.speed()
-        self.update_spark()
+        self.fading()
         self.destroy()
 
-    def destroy(self):
-        vel=math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
+    def speed(self):
+        self.velocity[0] -= 0.05*self.velocity[0]#0.1*math.cos(self.angle)
+        self.velocity[1] -= 0.05*self.velocity[1]#0.1*math.sin(self.angle)
 
-        if vel<1:#better to check if the velocity changed sign and then kill
+    def fading(self):
+        self.fade-=4
+        self.image.set_alpha(self.fade)
+
+    def destroy(self):
+        if self.lifetime < 0:
             self.kill()
+
+class Sword_sparks(Sword_effects):
+    def __init__(self,pos,dir):
+        super().__init__(pos,dir)
+        self.scale = 1
+        amp=random.randint(5, 10)
+        self.velocity = [amp*math.cos(self.angle),amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
+        self.colour = [255,255,255,self.fade]
+
+        self.make_sparks()
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.update_spark()
 
     def update_spark(self):
         self.image = self.surface.copy()
@@ -108,7 +121,18 @@ class Sparks(Particles):
         [offsetx+math.cos(self.angle-math.pi*0.5)*vel*self.scale*0.3,offsety-math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3]
         ]
 
-        print(self.points)
+class Sword_particles(Sword_effects):
+    def __init__(self,pos,dir):
+        super().__init__(pos,dir)
+        amp=random.randint(1, 10)
+        self.velocity = [amp*math.cos(self.angle),amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
+        self.colour = [255,255,255,self.fade]
+
+        vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
+
+        low = max(int(vel/3),1)#trying so that higher velocities have larger radius
+        self.radius = low
+        self.make_circle()
 
 class Weather_particles(Particles):
     def __init__(self):
@@ -123,12 +147,13 @@ class Weather_particles(Particles):
 
     def boundary(self):
         if self.rect.y>300:#if on the lower side of screen.
-            self.rect.y=random.randint(-500, -100)
+            self.true_pos[1]=random.randint(-500, -100)
+
         #continiouse falling, horizontally
-        if self.rect.x<-100:
-            self.rect.x+=500
-        elif self.rect.x>500:
-            self.rect.x-=500
+        if self.true_pos[0]<-100:
+            self.true_pos[0]+=580
+        elif self.true_pos[0]>600:
+            self.true_pos[0]-=700
 
 class Snow(Weather_particles):
 
@@ -164,11 +189,29 @@ class Autumn(Snow):
 class Rain(Weather_particles):
     def __init__(self):
         super().__init__()
-        self.radius = 1
-        colors=[[169,139,116],[152,245,255],[61,89,171],[100,149,237]]
+        colors=[[10,191,255],[152,245,255],[61,89,171],[100,149,237]]
         self.colour=colors[random.randint(0, len(colors)-1)]
-        self.velocity=[self.wind,3]
-        self.make_circle()
+
+        self.angle=math.acos(self.wind/6)
+        self.scale = 0.5
+        amp = random.randint(2, 4)
+        self.velocity = [amp*math.cos(self.angle),4]#[random.randint(-6, 6),random.randint(-6, 6)]#
+
+        self.make_sparks()
+
+    def speed(self):
+        pass
+
+    def spark_shape(self):
+        offsetx=30
+        offsety=30
+
+        self.points = [
+        [offsetx+math.cos(self.angle)*self.scale,offsety+math.sin(self.angle)*self.scale],
+        [offsetx+math.cos(self.angle+math.pi*0.5)*self.scale*0.3,offsety+math.sin(self.angle+math.pi*0.5)*self.scale*0.3],
+        [offsetx-math.cos(self.angle)*self.scale*3.5,offsety-math.sin(self.angle)*self.scale*3.5],
+        [offsetx+math.cos(self.angle-math.pi*0.5)*self.scale*0.3,offsety-math.sin(self.angle+math.pi*0.5)*self.scale*0.3]
+        ]
 
 class Reflection():
     def __init__(self):
