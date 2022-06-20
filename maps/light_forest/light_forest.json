@@ -586,7 +586,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":1133,
+                 "x":1136,
                  "y":560
                 }, 
                 {
@@ -646,7 +646,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":2803,
+                 "x":2800,
                  "y":496
                 }, 
                 {
@@ -682,7 +682,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":2637,
+                 "x":2640,
                  "y":512
                 }, 
                 {
@@ -706,7 +706,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":2507,
+                 "x":2512,
                  "y":560
                 }, 
                 {
@@ -963,7 +963,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],

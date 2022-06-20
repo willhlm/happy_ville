@@ -515,9 +515,12 @@ class Conversation(Gameplay):
 class Vendor(Gameplay):
     def __init__(self, game, npc):
         super().__init__(game)
-        self.box = Entities.Menu_Box()
-
         self.npc = npc
+        self.letter_frame = 0
+        self.pointer_index = [0,0]#position of box
+        self.init()
+
+    def init(self):
         self.vendor_BG = Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/vendor/")['']
 
         self.items = []
@@ -532,13 +535,14 @@ class Vendor(Gameplay):
             self.items.append(getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0]))
         self.items.append(getattr(sys.modules[Entities.__name__], 'Bone')([0,0]))
 
-        self.item_index = [0,0]#pointer of item
-        self.box_index = [0,0]#position of box
-        self.set_response('Welcome')
-        self.letter_frame = 0
-
         self.display_number = min(3,len(self.items))#number of items to list
         self.sale_items=self.items[0:self.display_number+1]
+
+
+        self.pointer = Entities.Menu_Box()
+
+        self.item_index = [0,0]#pointer of item
+        self.set_response('Welcome')
 
     def set_response(self,text):
         self.respond = self.font.render(text = text)
@@ -558,6 +562,7 @@ class Vendor(Gameplay):
         self.blit_response()
         self.blit_money()
         self.blit_description()
+        self.update_pointer()
 
     def blit_money(self):#blit how much gold we have in inventory
         money = self.game.game_objects.player.inventory['Amber_Droplet']
@@ -567,7 +572,7 @@ class Vendor(Gameplay):
         self.game.screen.blit(self.amber.image,(190,50))
 
     def blit_description(self):
-        self.conv=self.items[self.box_index[1]].description
+        self.conv=self.items[self.item_index[1]].description
         text = self.font.render((272,80), self.conv, int(self.letter_frame//2))
         self.game.screen.blit(text,(190,100))
 
@@ -579,15 +584,19 @@ class Vendor(Gameplay):
             if index < self.display_number:
                 item.animation.update()
                 self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,80+20*index))
+                #blit cost
+                item_name=str(type(item).__name__)
+                cost=self.npc.inventory[item_name]
+                cost_text = self.font.render(text = str(cost))
+                self.game.screen.blit(cost_text,(260,80+20*index))
+
             else:#the last index
                 item.animation.update()
                 item.image.set_alpha(100)
                 self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,140))
 
-        self.update_pointer()
-
     def update_pointer(self):
-        self.game.screen.blit(self.box.img,(220+20*self.box_index[0],60+20*self.box_index[1]))#pointer
+        self.game.screen.blit(self.pointer.img,(220+20*self.pointer_index[0],60+20*self.pointer_index[1]))#pointer
 
     def handle_events(self, input):
         if input[0]:#press
@@ -598,22 +607,26 @@ class Vendor(Gameplay):
                 self.item_index[1] += 1
                 self.item_index[1] = min(self.item_index[1],len(self.items)-1)
 
-                if self.box_index[1]==2:
+                if self.pointer_index[1]==2:
                     self.sale_items=self.items[self.item_index[1]-self.display_number+1:self.item_index[1]+self.display_number-1]
+                    if self.item_index[1]==len(self.items)-1:
+                        return
 
-                self.box_index[1] += 1
-                self.box_index[1] = min(self.box_index[1],self.display_number-1)
+                self.pointer_index[1] += 1
+                self.pointer_index[1] = min(self.pointer_index[1],self.display_number-1)
                 self.letter_frame=0
 
             elif input[-1] =='up':
                 self.item_index[1]-=1
                 self.item_index[1] = max(self.item_index[1],0)
 
-                if self.box_index[1]==0:
+                if self.pointer_index[1]==0:
                     self.sale_items=self.items[self.item_index[1]:self.item_index[1]+self.display_number+1]
+                    if self.item_index[1]==0:
+                        return
 
-                self.box_index[1] -= 1
-                self.box_index[1] = max(self.box_index[1],0)
+                self.pointer_index[1] -= 1
+                self.pointer_index[1] = max(self.pointer_index[1],0)
                 self.letter_frame = 0
 
             elif input[-1]=='a' or input[-1]=='return':
@@ -628,18 +641,18 @@ class Selecting_items(Vendor):
     def __init__(self, game,npc,item):
         super().__init__(game,npc)
         self.item=item#string
-        self.arrow = Entities.Menu_Arrow()
+
+    def init(self):
+        self.pointer = Entities.Menu_Arrow()
         self.bg = self.font.fill_text_bg([64,32])
 
         self.buy_sur = self.font.render(text = 'Buy')
         self.cancel_sur= self.font.render(text = 'Cancel')
 
     def render(self):
-        super().render()
+        self.game.state_stack[-2].render()
         self.blit_text()
-
-    def blit_description(self):
-        pass
+        self.update_pointer()
 
     def handle_events(self,input):
         if input[0]:#press
@@ -647,24 +660,24 @@ class Selecting_items(Vendor):
                 self.exit_state()
 
             elif input[-1] =='down':
-                self.item_index[1] += 1
-                self.item_index[1] = min(self.item_index[1],1)
+                self.pointer_index[1] += 1
+                self.pointer_index[1] = min(self.pointer_index[1],1)
             elif input[-1] =='up':
-                self.item_index[1] -= 1
-                self.item_index[1] = max(self.item_index[1],0)
+                self.pointer_index[1] -= 1
+                self.pointer_index[1] = max(self.pointer_index[1],0)
             elif input[-1]=='a' or input[-1]=='return':
                 self.select_item()
 
     def blit_text(self):
         self.bg.blit(self.buy_sur,(30,10))#
         self.bg.blit(self.cancel_sur,(30,20))#
-        self.vendor_BG[0].blit(self.bg,(180,100))#box position
+        self.game.screen.blit(self.bg,(280,120))#box position
 
     def update_pointer(self):
-        self.game.screen.blit(self.arrow.img,(300,130+10*self.item_index[1]))#pointer
+        self.game.screen.blit(self.pointer.img,(300,130+10*self.pointer_index[1]))#pointer
 
     def select_item(self):
-        if self.item_index[1] == 0:#if we select buy
+        if self.pointer_index[1] == 0:#if we select buy
             self.buy()
         else:
             self.game.state_stack[-2].set_response('What do you want?')

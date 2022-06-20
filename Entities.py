@@ -119,7 +119,7 @@ class Collision_right_angle(Collision_block):
     def __init__(self,pos,points):
         self.define_values(pos, points)
         super().__init__(self.new_pos,self.size)
-        #self.is_slope=True
+        self.ratio = self.size[1]/self.size[0]
 
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
@@ -127,6 +127,7 @@ class Collision_right_angle(Collision_block):
     #1 = tilting to the left, flatside down
     #2 = tilting to the right, flatside up
     #3 = tilting to the left, flatside up
+
     def define_values(self, pos, points):
         self.new_pos = (0,0)
         self.size = (0,0)
@@ -185,6 +186,22 @@ class Collision_right_angle(Collision_block):
                     self.orientation = 0
                 else:
                     self.orientation = 2
+
+    def collide(self,entity):
+        if self.orientation == 1:
+            rel_x = entity.hitbox.right - self.hitbox.left
+            self.shift_y(rel_x,entity)
+        elif self.orientation == 0:
+            rel_x = self.hitbox.right - entity.hitbox.left
+            self.shift_y(rel_x,entity)
+
+    def shift_y(self,rel_x,entity):
+        if rel_x > 0:
+            target = -rel_x*self.ratio + self.hitbox.bottom
+            if entity.hitbox.bottom > target:
+                entity.hitbox.bottom = target
+                entity.collision_types['bottom'] = True
+                entity.update_rect()
 
 class Spikes(Platform):
     def __init__(self,pos,size):
@@ -468,7 +485,7 @@ class Slime(Enemy):
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
-        self.health = 1
+        self.health = 50
         self.spirit=100
 
     def update(self,pos,playerpos):
@@ -900,7 +917,7 @@ class Boss(Enemy):
 
     def death(self):
         self.aggro=False
-        self.AImethod=self.cutsceneAI
+        self.AImethod = self.cutsceneAI
         self.give_abillity()
         new_game_state = states.Cutscene_engine(self.game_objects.game,'Defeated_boss')
         new_game_state.enter_state()
@@ -917,13 +934,13 @@ class Reindeer(Boss):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/reindeer/')
         self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],40,50)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
+        self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.currentstate = states_reindeer.Idle(self)
 
         self.health = 100
-        self.spirit=1
-        self.attack=Sword
+        self.spirit = 1
+        self.attack = Sword
 
     def give_abillity(self):
         self.game_objects.player.dash=True
@@ -936,7 +953,7 @@ class Reindeer(Boss):
             pass
         else:
             if self.player_distance[0] > self.attack_distance:
-                self.acceleration[0]=abs(self.acceleration[0])
+                self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = 1
 
                 if random.randint(0, 100)==100:
@@ -949,7 +966,7 @@ class Reindeer(Boss):
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
-                self.acceleration[0]=-abs(self.acceleration[0])
+                self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = -1
 
                 if random.randint(0, 100)==100:

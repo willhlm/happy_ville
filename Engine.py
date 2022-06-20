@@ -111,42 +111,13 @@ class Collisions():
             entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
             entity.update_hitbox()#follow with hitbox
 
+            static_entity_y = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
+            if static_entity_y:
+                static_entity_y.collide_y(entity)
+
             ramp = pygame.sprite.spritecollideany(entity,ramps,Collisions.collided)
-            ramp_collision = False
-
             if ramp:
-                ramp_offset = 1 #make transitions smoother, maybe implement this differently
-                x_tot = ramp.size[0]
-                y_tot = ramp.size[1]
-                x_1 = entity.hitbox.centerx - ramp.hitbox.left
-                if  (0 < x_1 < x_tot) and entity.velocity[1] > 0:
-                    if ramp.orientation == 0:
-                        y = (x_tot - x_1 + 2)*(y_tot/x_tot)
-                        y = int(ramp.hitbox.bottom - y - ramp_offset)
-
-                        if entity.hitbox.bottom <= y:
-                            pass
-                        else:
-                            ramp_collision = True
-                            entity.hitbox.bottom = max(y, ramp.hitbox.top)
-                            entity.collision_types['bottom'] = True
-
-                    elif ramp.orientation == 1:
-                        y = (x_1+4)*(y_tot/x_tot)
-                        y = int(ramp.hitbox.bottom - y)
-
-                        if entity.hitbox.bottom <= y:
-                            pass
-                        else:
-                            ramp_collision = True
-                            entity.hitbox.bottom = max(y, ramp.hitbox.top)
-                            entity.collision_types['bottom'] = True
-                    entity.update_rect()
-
-            if not ramp_collision:
-                static_entity_y = pygame.sprite.spritecollideany(entity,static_entities,Collisions.collided)
-                if static_entity_y:
-                    static_entity_y.collide_y(entity)
+                ramp.collide(entity)
 
     #make the hitbox collide instead of rect
     @staticmethod

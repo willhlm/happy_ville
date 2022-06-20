@@ -116,7 +116,7 @@ class Game_Objects():
         self.all_fgs.update(scroll)
         self.players.update(scroll)
         self.entity_pause.update(scroll,self.player.rect.center)#should be before enemies and npcs group
-        self.enemies.update(scroll,self.player.rect.center)#shoudl the AI be based on playerposition?
+        self.enemies.update(scroll,self.player.rect.center)
         self.npcs.update(scroll,self.player.rect.center)
         self.interactables.update(scroll)
         self.weather.update(scroll)
@@ -165,8 +165,8 @@ class Game_Objects():
             pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
             pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
 
-            #for platform in self.platforms:#go through the group
-                #pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+            for platform in self.platforms:#go through the group
+                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
             for int in self.interactables:
