@@ -115,11 +115,12 @@ class Collision_oneway_up(Platform):
         else:#going up
             pass
 
-class Collision_right_angle(Collision_block):
+class Collision_right_angle(Platform):
     def __init__(self,pos,points):
         self.define_values(pos, points)
         super().__init__(self.new_pos,self.size)
         self.ratio = self.size[1]/self.size[0]
+        self.other_side = False
 
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
@@ -127,7 +128,6 @@ class Collision_right_angle(Collision_block):
     #1 = tilting to the left, flatside down
     #2 = tilting to the right, flatside up
     #3 = tilting to the left, flatside up
-
     def define_values(self, pos, points):
         self.new_pos = (0,0)
         self.size = (0,0)
@@ -187,20 +187,31 @@ class Collision_right_angle(Collision_block):
                 else:
                     self.orientation = 2
 
+    def update(self,pos):
+        super().update(pos)
+
     def collide(self,entity):
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
-            self.shift_y(rel_x,entity)
+            other_side = entity.hitbox.right - self.hitbox.right
+            self.shift_y(rel_x,other_side,entity)
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
-            self.shift_y(rel_x,entity)
+            other_side = self.hitbox.left - entity.hitbox.left
+            self.shift_y(rel_x,other_side,entity)
 
-    def shift_y(self,rel_x,entity):
-        if rel_x > 0:
-            target = -rel_x*self.ratio + self.hitbox.bottom
+    def shift_y(self,rel_x,other_side,entity):
+        target = -rel_x*self.ratio + self.hitbox.bottom
+        if other_side > 0 and entity.hitbox.bottom > target:
+            self.other_side = True
+        elif self.other_side and entity.hitbox.bottom < target:
+            self.other_side = False
+
+        if not self.other_side:
             if entity.hitbox.bottom > target:
                 entity.hitbox.bottom = target
                 entity.collision_types['bottom'] = True
+                entity.velocity[1] = 0
                 entity.update_rect()
 
 class Spikes(Platform):

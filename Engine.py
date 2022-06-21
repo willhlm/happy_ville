@@ -5,6 +5,11 @@ class Collisions():
     def __init__(self,game_objects):
         self.game_objects = game_objects
 
+    def pass_through(self):
+        ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
+        if ramp:
+            ramp.other_side = True
+
     @staticmethod
     def counter(fprojectiles,eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group
@@ -42,7 +47,6 @@ class Collisions():
     @staticmethod
     def check_enemy_collision(player,enemies):
         collision_enemy=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
-
         if collision_enemy:
             if str(type(collision_enemy.currentstate).__name__) is not 'Death':
 
