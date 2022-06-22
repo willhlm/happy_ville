@@ -8,6 +8,7 @@ class Collisions():
     def pass_through(self):
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
+            self.game_objects.player.velocity[1] = 0
             ramp.other_side = True
 
     @staticmethod
@@ -49,8 +50,6 @@ class Collisions():
         collision_enemy=pygame.sprite.spritecollideany(player,enemies,Collisions.collided)#check collision
         if collision_enemy:
             if str(type(collision_enemy.currentstate).__name__) is not 'Death':
-
-                #player.take_dmg(10)
                 collision_enemy.player_collision()
 
     #pickup loot

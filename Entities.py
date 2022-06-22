@@ -211,7 +211,6 @@ class Collision_right_angle(Platform):
             if entity.hitbox.bottom > target:
                 entity.hitbox.bottom = target
                 entity.collision_types['bottom'] = True
-                entity.velocity[1] = 0
                 entity.update_rect()
 
 class Spikes(Platform):

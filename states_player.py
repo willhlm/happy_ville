@@ -39,13 +39,13 @@ class Player_states(Entity_States):
         pass
 
     def handle_movement(self,input):
-        value=input[2]
-        self.entity.acceleration[0]=abs(value[0])
-        self.entity.dir[1]=-value[1]
+        value = input[2]
+        self.entity.acceleration[0] = abs(value[0])
+        self.entity.dir[1] = -value[1]
 
-        if value[0]>0.2:#x
+        if value[0] > 0.2:#x
             self.entity.dir[0] = 1
-        elif value[0]<-0.2:#x
+        elif value[0] < -0.2:#x
             self.entity.dir[0] = -1
 
 class Idle(Player_states):
