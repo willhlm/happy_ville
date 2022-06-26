@@ -19,7 +19,7 @@ class Camera():
         self.game_objects.camera.append(new_camera)
 
     def camera_shake(self,amp=3,duration=100):
-        self.game_objects.camera.append(Camera_shake(self.game_objects,amp,duration))
+        self.game_objects.camera.append(Camera_shake(self,amp,duration))
 
     def exit_state(self):
         self.game_objects.camera.pop()
@@ -110,22 +110,24 @@ class Fixed(Camera):
             self.exit_state()
 
 class Camera_shake(Camera):
-    def __init__(self, center,amp,duration):
-        super().__init__(center)
-        self.amp=amp
-        self.duration=duration
+    def __init__(self, curr_camera,amp,duration):
+        super().__init__(curr_camera.game_objects)
+        self.curr_camera = curr_camera
+        self.amp = amp
+        self.duration = duration
 
     def update(self):
         self.duration-=1
-        self.shake[0]=random.randint(-self.amp,self.amp)
-        self.shake[1]=random.randint(-self.amp,self.amp)
-        super().update()
+        self.curr_camera.shake[0]=random.randint(-self.amp,self.amp)
+        self.curr_camera.shake[1]=random.randint(-self.amp,self.amp)
+        self.curr_camera.update()
+        self.scroll = self.curr_camera.scroll#update the calculated scroll
 
         self.exit_state()
 
     def exit_state(self):
         if self.duration<0:
-            self.shake=[0,0]
+            self.curr_camera.shake=[0,0]
             super().exit_state()
 
 class Deer_encounter(Auto):

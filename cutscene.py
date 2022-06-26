@@ -78,14 +78,13 @@ class Boss_deer_encounter(Cutscene_engine):
             self.player.currentstate.change_state('Idle')#should only enter these states once
             self.entity.currentstate.change_state('Transform')
             self.player.velocity[0]=-20
-            self.game_objects.camera[-1].exit_state()
-            self.game_objects.camera[-1].camera_shake(3,100)#amplitude, duration
+            self.game_objects.camera[-1].camera_shake()#amplitude, duration
         elif self.timer>100:
             pass
             #self.deer.velocity[0]=5
 
         if self.timer>200:
-            #self.game_objects.camera[-1].exit_state()
+            self.game_objects.camera[-1].exit_state()
             self.finished=True
             self.entity.AImethod=self.entity.aggroAI
 

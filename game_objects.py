@@ -153,8 +153,6 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
             for projectile in self.eprojectiles.sprites():#go through the group
                 pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
-            #for enemy in self.enemies.sprites():#go through the group
-            #    enemy.draw(self.game.screen)#add a glow around each enemy, can it be in group draw?
             for enemy in self.enemies.sprites():#go through the group
                 pygame.draw.rect(self.game.screen, (0,0,255), enemy.hitbox,2)#draw hitbox
                 pygame.draw.rect(self.game.screen, (255,0,255), enemy.rect,2)#draw hitbox

@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, math, sound, states
+import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, math, sound, states
 
 pygame.mixer.init()
 
@@ -364,7 +364,7 @@ class Enemy(Character):
         self.attack_distance = 0
 
     def update(self,pos,playerpos):
-        self.group_distance()#need to be before currentstate.update()
+        #self.group_distance()#need to be before currentstate.update()
         super().update(pos)
         self.AI(playerpos)
 
@@ -595,6 +595,85 @@ class Shroompolin(Enemy):
 
     def peaceAI(self):
         pass
+
+class Kusa(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/kusa/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.currentstate = states_kusa.Idle(self)
+        self.attack_distance = 30
+        self.health = 100
+
+    def updateAI(self):#move these into AI methods, or maybe in group distance?
+        pass
+
+    def peaceAI(self):
+        if abs(self.player_distance[0])<150 and self.AImethod.__name__ != 'aggroAI':
+            self.AImethod=self.aggroAI
+            self.currentstate.handle_input('Transform')
+
+    def suicide(self):
+        self.projectiles.add(Explosion(self,dmg=10))
+        self.game_objects.camera[-1].camera_shake(amp=2,duration=30)#amplitude and duration
+
+class Svampis(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/svampis/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.currentstate = states_kusa.Idle(self)
+        self.attack_distance = 30
+        self.health = 100
+
+    def updateAI(self):#move these into AI methods, or maybe in group distance?
+        pass
+
+    def peaceAI(self):
+        if abs(self.player_distance[0])<150 and self.AImethod.__name__ != 'aggroAI':
+            self.AImethod=self.aggroAI
+            self.currentstate.handle_input('Transform')
+
+    def suicide(self):
+        self.projectiles.add(Explosion(self,dmg=10))
+        self.game_objects.camera[-1].camera_shake(amp=2,duration=30)#amplitude and duration
+
+class Egg(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/egg/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
+        #self.attack_distance = 30
+        self.health = 1
+        self.number = 4
+
+    def knock_back(self,dir):
+        pass
+
+
+    def death(self):
+        self.spawn_minions()
+        self.kill()
+
+    def spawn_minions(self):
+        for i in range(0,self.number):
+            pos=[self.hitbox.centerx,self.hitbox.centery-10]
+            obj=Slime(pos,self.game_objects)
+            obj.velocity=[random.randint(-100, 100),random.randint(-10, -5)]
+            self.game_objects.enemies.add(obj)
+
+    def peaceAI(self):
+        pass
+
+    def aggroAI(self):
+        pass
+
 
 class Player(Character):
 
@@ -976,9 +1055,9 @@ class Spawner(Staticentity):#an entity spawner
 class Abilities(pygame.sprite.Sprite):
     def __init__(self,entity):
         super().__init__()
-        self.entity=entity
+        self.entity = entity
         self.state = 'main'
-        self.animation=animation.Ability_animation(self)
+        self.animation = animation.Ability_animation(self)
 
     def update(self,pos):
         self.lifetime-=1
@@ -1035,6 +1114,21 @@ class Melee(Abilities):
         self.entity.countered()
         self.kill()
 
+class Explosion(Melee):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/invisible/')
+
+    def __init__(self,entity,dmg):
+        super().__init__(entity)
+        self.lifetime = 10
+        self.dmg = dmg
+
+    def rectangle(self):
+        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,100,100)
+        self.hitbox = self.rect.copy()
+
+    def update_hitbox(self):
+        pass
+
 class Sword(Melee):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Sword/')
 
@@ -1071,7 +1165,7 @@ class Darksaber(Sword):
         self.kill()
 
 class Shield(Melee):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Shield/')
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/invisible/')
 
     def __init__(self,entity):
         super().__init__(entity)

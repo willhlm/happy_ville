@@ -407,6 +407,60 @@
                  "width":16,
                  "x":240,
                  "y":384
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":186,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Kusa"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":656,
+                 "y":384
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":187,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Svampis"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":944,
+                 "y":384
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":188,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Egg"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":416,
+                 "y":64
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -415,7 +469,7 @@
          "y":0
         }],
  "nextlayerid":58,
- "nextobjectid":186,
+ "nextobjectid":189,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
