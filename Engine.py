@@ -9,7 +9,7 @@ class Collisions():
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
             self.game_objects.player.velocity[1] = 0
-            ramp.other_side = True
+            self.game_objects.player.go_through = True
 
     @staticmethod
     def counter(fprojectiles,eprojectiles):
@@ -121,6 +121,8 @@ class Collisions():
             ramp = pygame.sprite.spritecollideany(entity,ramps,Collisions.collided)
             if ramp:
                 ramp.collide(entity)
+            else:
+                entity.go_through = False
 
     #make the hitbox collide instead of rect
     @staticmethod
