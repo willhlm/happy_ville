@@ -120,7 +120,6 @@ class Collision_right_angle(Platform):
         self.define_values(pos, points)
         super().__init__(self.new_pos,self.size)
         self.ratio = self.size[1]/self.size[0]
-        self.other_side = False
 
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
@@ -187,27 +186,41 @@ class Collision_right_angle(Platform):
                 else:
                     self.orientation = 2
 
-    def update(self,pos):
-        super().update(pos)
-
     def collide(self,entity):
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
-            self.shift_y(rel_x,other_side,entity)
+            self.shift_up(rel_x,other_side,entity)
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
-            self.shift_y(rel_x,other_side,entity)
+            self.shift_up(rel_x,other_side,entity)
+        elif self.orientation == 2:
+            rel_x = self.hitbox.right - entity.hitbox.left
+            self.shift_down(rel_x,entity)
+        else:#orientation 3
+            rel_x = entity.hitbox.right - self.hitbox.left
+            self.shift_down(rel_x,entity)
 
-    def shift_y(self,rel_x,other_side,entity):
+    def shift_down(self,rel_x,entity):
+        target = rel_x*self.ratio + self.hitbox.top
+
+        if entity.hitbox.top < target:
+            entity.hitbox.top = target
+            entity.collision_types['top'] = True
+            entity.velocity[1] = 1 #need to have a value to avoid "dragin in air" while running
+            entity.update_rect()
+
+    def shift_up(self,rel_x,other_side,entity):
         target = -rel_x*self.ratio + self.hitbox.bottom
-        if other_side > 0 and entity.hitbox.bottom > target:
-            self.other_side = True
-        elif self.other_side and entity.hitbox.bottom < target:
-            self.other_side = False
 
-        if not self.other_side:
+        if other_side > 0:
+            if entity.hitbox.bottom > target:
+                entity.go_through = True
+            else:
+                entity.go_through = False
+
+        if not entity.go_through:
             if entity.hitbox.bottom > target:
                 entity.hitbox.bottom = target
                 entity.collision_types['bottom'] = True
@@ -268,74 +281,6 @@ class BG_Animated(BG_Block):
         self.update_pos(pos)
         self.animation.update()
 
-class Particle_effect(Staticentity):
-
-    class Particle(pygame.sprite.Sprite):
-        def __init__(self, pos = [0,0], vel = [0,0], accel = 0.98, color = [0,0,0,0], fade = 1):
-            super().__init__()
-            self.image = pygame.Surface((1,1), pygame.SRCALPHA, 32)
-            self.image = self.image.convert_alpha()
-            self.image.fill(color)
-            self.rect = self.image.get_rect()
-            self.rect.topleft = pos
-            self.true_pos = pos
-            self.vel = vel
-            self.accel = accel
-            self.color = color
-            self.fade = fade
-
-        def update(self):
-            self.true_pos = [self.true_pos[0] + self.vel[0], self.true_pos[1] + self.vel[1]]
-            self.rect.topleft = [int(self.true_pos[0]),int(self.true_pos[1])]
-            self.vel[0] = self.vel[0] * self.accel
-            self.vel[1] = self.vel[1] * self.accel
-            if not self.fade == 1:
-                self.color[-1] = int(self.color[-1] * self.fade)
-                self.image.fill(self.color)
-
-
-
-    def __init__(self, pos, img_size = (32,32)):
-        super().__init__(pos)
-        self.image = pygame.Surface(img_size, pygame.SRCALPHA, 32)
-        self.image = self.image.convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.center = pos
-        self.lifetime = 100
-        self.generate_particles()
-
-    def generate_particles(self):
-        self.particles = pygame.sprite.Group()
-
-    def update(self, pos):
-        self.image.fill((0,0,0,0))
-        self.particles.draw(self.image)
-        self.particles.update()
-        super().update(pos)
-        self.lifetime -= 1
-        if not bool(self.particles) or self.lifetime == 0:
-            self.kill()
-
-class Particle_effect_attack(Particle_effect):
-
-    def __init__(self, pos):
-        self.blit_size = (256,256)
-        super().__init__(pos, self.blit_size)
-        self.lifetime = 30
-
-    def generate_particles(self):
-        #generate random number of particles
-        super().generate_particles()
-        quantity = random.randint(600,700)
-        direction_qty = random.randint(50,60)
-        directions = []
-        for _ in range(direction_qty):
-            angle = random.randint(1,360)
-            directions.append((math.cos(angle),math.sin(angle)))
-        for j in range(quantity):
-            vel = random.uniform(1,9)
-            self.particles.add(self.Particle(pos = [self.blit_size[0]/2,self.blit_size[1]/2],vel = [i*vel for i in directions[random.randint(0,len(directions)-1)]], color = [255,255,255,255], fade = 0.9))
-
 class Dynamicentity(Staticentity):
     def __init__(self,pos):
         super().__init__(pos)
@@ -365,6 +310,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack=[animation.Entity_animation(self)]
         self.max_vel=7
         self.game_objects = game_objects
+        self.go_through = False#a flag for entities to go through ramps from side or top
 
     def update(self,pos):
         self.update_pos(pos)
@@ -442,7 +388,7 @@ class Enemy(Character):
                 self.loot_group.add(obj)
             self.inventory[key]=0
 
-    def countered(self):
+    def countered(self):#player shield
         self.velocity[0]=-30*self.dir[0]
         duration=30
         self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
@@ -737,7 +683,7 @@ class Player(Character):
         self.spirit=data['health']['spirit']
 
         self.dash=data['abilities']['dash']
-        self.dash=data['abilities']['wall']
+        self.wall=data['abilities']['wall']
 
         self.inventory=data['inventory']
 
@@ -1364,7 +1310,6 @@ class Arrow(Projectiles):
 
     def collision_enemy(self,collision_enemy):
         self.velocity=[0,0]
-        self.dmg=0
         self.kill()
 
     def collision_plat(self):
