@@ -220,6 +220,9 @@ class Collision_right_angle(Platform):
             else:
                 entity.go_through = False
 
+        elif entity.hitbox.bottom < target:
+            entity.go_through = False
+
         if not entity.go_through:
             if entity.hitbox.bottom > target:
                 entity.hitbox.bottom = target
