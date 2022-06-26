@@ -340,7 +340,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":11005,
+                 "x":11008,
                  "y":416
                 }, 
                 {
@@ -376,7 +376,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":14835,
+                 "x":14832,
                  "y":416
                 }],
          "opacity":1,
@@ -418,7 +418,7 @@
  "nextobjectid":168,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.8.2",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -544,6 +544,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.6",
  "width":1200
 }
