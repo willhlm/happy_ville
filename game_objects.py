@@ -18,7 +18,7 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
-        self.weather_paricles=particles.Weather(self.weather)#initiate weather
+        self.weather_paricles=particles.Weather(self)#initiate weather
         self.weather_paricles.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
         #self.reflection=BG.Reflection()

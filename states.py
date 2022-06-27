@@ -893,20 +893,22 @@ class Cutscene_engine(Gameplay):
 
     def cinematic(self):#black box stuff
         self.pos[0]+=1#the upper balck box
-        rect1=(0, self.pos[0], self.game.screen.get_width(), self.game.WINDOW_SIZE[1])
+        rect1=(0, self.pos[0], self.game.WINDOW_SIZE[0], self.game.WINDOW_SIZE[1])
         pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
 
         self.pos[1]-=1#the lower balck box
-        rect2=(0, self.pos[1], self.game.screen.get_width(), self.game.WINDOW_SIZE[1])
+        rect2=(0, self.pos[1], self.game.WINDOW_SIZE[0], self.game.WINDOW_SIZE[1])
         pygame.draw.rect(self.game.screen, (0, 0, 0), rect2)
 
-        self.pos[0]=min(-200,self.pos[0])
-        self.pos[1]=max(250,self.pos[1])
+        self.pos[0]=min(-self.game.WINDOW_SIZE[1]*self.current_scene.const,self.pos[0])
+        self.pos[1]=max(self.game.WINDOW_SIZE[1]*self.current_scene.const,self.pos[1])
 
     def handle_events(self, input):
         if input[0]:#press
             if input[-1] == 'start':
                 self.exit_state()
+            elif input[-1] == 'a':
+                self.current_scene.step3 = True
 
 class Death(Gameplay):
     def __init__(self, game,scene):

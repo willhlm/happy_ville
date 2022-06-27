@@ -2,6 +2,7 @@ import animation
 import Read_files
 import Entities
 import pygame
+import particles
 
 class Cutscene_files():
     def __init__(self,cutscene):
@@ -22,6 +23,7 @@ class Cutscene_engine():
         self.name=type(self).__name__
         self.finished=False
         self.timer=0
+        self.const = 0.8#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
 
         self.game_objects=objects
         self.player = objects.player
@@ -93,9 +95,15 @@ class Boss_deer_encounter(Cutscene_engine):
 class Defeated_boss(Cutscene_engine):
     def __init__(self,objects):
         super().__init__(objects)
-        self.image=pygame.image.load("Sprites/UI/Menu/select/inventory1.png").convert_alpha()
-        self.step1=False
-        self.abillity='dash'
+        self.image = pygame.image.load("Sprites/UI/Menu/select/inventory1.png").convert_alpha()
+        self.step3 = False
+        self.step1 = False
+        self.step2 = False
+        self.abillity = 'dash'
+        pos = [self.player.rect.x,self.player.rect.y]
+        self.particles = particles.Absorb_particles(self.game_objects.cosmetics,pos)
+        self.set_image()
+        self.const = 0.5#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
 
     def set_image(self):
         img=self.player.sprites.sprite_dict['main'][self.abillity][0]
@@ -105,20 +113,31 @@ class Defeated_boss(Cutscene_engine):
         self.timer+=1
         if self.timer==1:
             self.player.currentstate.change_state('Idle')#should only enter these states once
-        elif self.timer<75:
-            self.player.velocity[1]=-2
-        elif self.timer>75:
-            self.player.velocity[1]=-1
-        if self.timer >200:
-            self.player.velocity[1]=2
+        elif self.timer < 75:
+            self.player.velocity[1] = -2
+        elif self.timer > 75:
+            self.player.velocity[1] = -1#compensates for gravity
+            self.step1 = True
 
-        if self.timer>300:
-            self.step1=True
+        if self.timer > 200:
+            self.step2=True
+
+        if self.step3:
+            self.player.velocity[1] = 2
 
     def render(self):
         if self.step1:
-            self.set_image()
+            self.game_objects.cosmetics.draw(self.game_objects.game.screen)
+            self.game_objects.players.draw(self.game_objects.game.screen)
+            self.particles.create_particles()
+
+        if self.step2 and not self.step3:
             self.game_objects.game.screen.blit(self.image,(100, 50))
+
+        if self.step3:
+            if self.game_objects.player.collision_types['bottom']:
+                self.finished=True
+                self.game_objects.cosmetics.empty()
 
 class Death(Cutscene_engine):
     def __init__(self,objects):

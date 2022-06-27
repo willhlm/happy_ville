@@ -1,12 +1,13 @@
 import pygame, math, random, sys
 
 class Weather():#maybe should just be a function
-    def __init__(self,weather_group):
-        self.group = weather_group
+    def __init__(self,game_objects):
+        self.game_objects = game_objects
+        self.group = game_objects.weather
 
     def create_particles(self,type,number_particles=100):
         for i in range(0,number_particles):
-            obj = getattr(sys.modules[__name__], type)()
+            obj = getattr(sys.modules[__name__], type)(self.game_objects)
             self.group.add(obj)
 
 class Sword_GFX():#maybe should just be a function
@@ -18,6 +19,16 @@ class Sword_GFX():#maybe should just be a function
             obj2 = Sword_particles(pos,dir)
             self.group.add(obj2)
             obj1 = Sword_sparks(pos,dir)
+            self.group.add(obj1)
+
+class Absorb_particles():
+    def __init__(self,cosmetics_group,pos):
+        self.group = cosmetics_group
+        self.pos = pos
+
+    def create_particles(self,number_particles = 10):
+        for i in range(0,number_particles):
+            obj1 = Absorb_particle(self.pos)
             self.group.add(obj1)
 
 class Particles(pygame.sprite.Sprite):
@@ -57,6 +68,61 @@ class Particles(pygame.sprite.Sprite):
         img_copy.blit(self.image,(0,0))
         self.image=img_copy
         self.image.set_colorkey((0,0,0,255))
+
+class Absorb_particle(Particles):
+    def __init__(self,pos):
+        super().__init__()
+        angle=random.randint(-180, 180)#the ejection anglex
+
+        self.angle = -(2*math.pi*angle)/360
+        self.fade = 255
+        self.radius = 400
+        self.pos = [pos[0]+self.radius*math.cos(self.angle),pos[1]+self.radius*math.sin(self.angle)]
+        self.lifetime = 60
+
+        self.scale = 1
+        amp=random.randint(5, 10)
+        self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
+        self.colour = [255,255,255,self.fade]
+
+        self.make_sparks()
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.lifetime -= 1
+        self.speed()
+        self.fading()
+        self.destroy()
+        self.update_spark()
+
+    def speed(self):
+        self.velocity[0] -= 0.02*self.velocity[0]#0.1*math.cos(self.angle)
+        self.velocity[1] -= 0.02*self.velocity[1]#0.1*math.sin(self.angle)
+
+    def fading(self):
+        self.fade-=3
+        self.image.set_alpha(self.fade)
+
+    def destroy(self):
+        if self.lifetime < 0:
+            self.kill()
+
+    def update_spark(self):
+        self.image = self.surface.copy()
+        self.spark_shape()
+        pygame.draw.polygon(self.image,self.colour,self.points)
+
+    def spark_shape(self):
+        vel=math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
+        offsetx=30
+        offsety=30
+
+        self.points = [
+        [offsetx+math.cos(self.angle)*vel*self.scale,offsety+math.sin(self.angle)*vel*self.scale],
+        [offsetx+math.cos(self.angle+math.pi*0.5)*vel*self.scale*0.3,offsety+math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3],
+        [offsetx-math.cos(self.angle)*vel*self.scale*3.5,offsety-math.sin(self.angle)*vel*self.scale*3.5],
+        [offsetx+math.cos(self.angle-math.pi*0.5)*vel*self.scale*0.3,offsety-math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3]
+        ]
 
 class Sword_effects(Particles):
     def __init__(self,pos,dir):
@@ -135,9 +201,12 @@ class Sword_particles(Sword_effects):
         self.make_circle()
 
 class Weather_particles(Particles):
-    def __init__(self):
+    def __init__(self,game_objects):
         super().__init__()
-        self.pos = [random.randint(-500, 500),random.randint(-500, -100)]#starting position
+        self.game_objects = game_objects
+        self.width = self.game_objects.game.WINDOW_SIZE[0] + 0.2*self.game_objects.game.WINDOW_SIZE[0]
+        self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.1*self.game_objects.game.WINDOW_SIZE[1]
+        self.pos = [random.randint(-int(self.width), int(self.width)),random.randint(-700, -50)]#starting position
         self.wind = 2
 
     def update(self,scroll):
@@ -146,19 +215,18 @@ class Weather_particles(Particles):
         self.speed()
 
     def boundary(self):
-        if self.rect.y>300:#if on the lower side of screen.
-            self.true_pos[1]=random.randint(-500, -100)
+        if self.rect.y > self.height:#if on the lower side of screen.
+            self.true_pos[1]=random.randint(-700, -50)
 
         #continiouse falling, horizontally
         if self.true_pos[0]<-100:
-            self.true_pos[0]+=580
-        elif self.true_pos[0]>600:
-            self.true_pos[0]-=700
+            self.true_pos[0] += self.width
+        elif self.true_pos[0] > self.width:
+            self.true_pos[0] -= self.width
 
 class Snow(Weather_particles):
-
-    def __init__(self):
-        super().__init__()
+    def __init__(self,game_objects):
+        super().__init__(game_objects)
         self.colour = (255,255,255)
         self.radius = 2
         self.make_circle()
@@ -173,22 +241,22 @@ class Snow(Weather_particles):
             self.time=0
 
 class Sakura(Snow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,game_objects):
+        super().__init__(game_objects)
         colors=[[255,192,203],[255,105,180],[255,100,180]]
         self.colour=colors[random.randint(0, len(colors)-1)]
         self.make_circle()
 
 class Autumn(Snow):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,game_objects):
+        super().__init__(game_objects)
         colors=[[178,34,34],[139,69,19],[128,128,0],[255,228,181]]
         self.colour=colors[random.randint(0, len(colors)-1)]
         self.make_circle()
 
 class Rain(Weather_particles):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,game_objects):
+        super().__init__(game_objects)
         colors=[[10,191,255],[152,245,255],[61,89,171],[100,149,237]]
         self.colour=colors[random.randint(0, len(colors)-1)]
 

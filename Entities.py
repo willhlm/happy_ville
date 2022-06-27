@@ -367,7 +367,7 @@ class Enemy(Character):
         self.attack_distance = 0
 
     def update(self,pos,playerpos):
-        #self.group_distance()#need to be before currentstate.update()
+        #self.group_distance()#need to be before currentstate.update(): fails sometimes
         super().update(pos)
         self.AI(playerpos)
 
@@ -387,13 +387,13 @@ class Enemy(Character):
     def loots(self):
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj=getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y])#make a class based on the name of the key: need to import sys
+                obj = getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y])#make a class based on the name of the key: need to import sys
                 self.loot_group.add(obj)
             self.inventory[key]=0
 
     def countered(self):#player shield
-        self.velocity[0]=-30*self.dir[0]
-        duration=30
+        self.velocity[0] = -30*self.dir[0]
+        duration = 30
         self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
 
     def AI(self,playerpos):
@@ -427,7 +427,7 @@ class Enemy(Character):
             if self.player_distance[0] > self.attack_distance:
                 self.dir[0] = 1
                 self.currentstate.handle_input('Walk')
-            elif abs(self.player_distance[0])<self.attack_distance:
+            elif abs(self.player_distance[0]) < self.attack_distance:
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
@@ -645,20 +645,18 @@ class Svampis(Enemy):
         self.projectiles.add(Explosion(self,dmg=10))
         self.game_objects.camera[-1].camera_shake(amp=2,duration=30)#amplitude and duration
 
-class Egg(Enemy):
+class Egg(Enemy):#change design
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/egg/')
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
-        #self.attack_distance = 30
         self.health = 1
-        self.number = 4
+        self.number = random.randint(1, 4)
 
     def knock_back(self,dir):
         pass
-
 
     def death(self):
         self.spawn_minions()
@@ -677,6 +675,53 @@ class Egg(Enemy):
     def aggroAI(self):
         pass
 
+class Skeleton_warrior(Enemy):#change design
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/skeleton_warrior/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 100
+        self.attack = Sword
+
+    def knock_back(self,dir):
+        pass
+
+class Liemannen(Enemy):#change design
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/liemannen/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 100
+        self.attack = Sword
+
+    def knock_back(self,dir):
+        pass
+
+class Skeleton_archer(Enemy):#change design
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/skeleton_archer/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 300
+        self.attack = Arrow
+
+    def knock_back(self,dir):
+        pass
+
+    def updateAI(self):#move these into AI methods, or maybe in group distance?
+        if abs(self.player_distance[0])<400 and self.AImethod.__name__ != 'aggroAI':
+            self.AImethod=self.aggroAI
+        elif abs(self.player_distance[0])>400 and self.AImethod.__name__ != 'peaceAI':
+            self.AImethod=self.peaceAI
 
 class Player(Character):
 
@@ -693,7 +738,7 @@ class Player(Character):
 
         self.max_health = 250
         self.max_spirit = 100
-        self.health = 100
+        self.health = 250
         self.spirit = 100
 
         self.cosmetics = game_objects.cosmetics
@@ -976,7 +1021,7 @@ class Reindeer(Boss):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.currentstate = states_reindeer.Idle(self)
 
-        self.health = 100
+        self.health = 1
         self.spirit = 1
         self.attack = Sword
 
@@ -991,7 +1036,6 @@ class Reindeer(Boss):
             pass
         else:
             if self.player_distance[0] > self.attack_distance:
-                self.acceleration[0]=-abs(self.acceleration[0])
                 self.dir[0] = 1
 
                 if random.randint(0, 100)==100:
@@ -1003,8 +1047,8 @@ class Reindeer(Boss):
             elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
+
             elif self.player_distance[0] < -self.attack_distance:
-                self.acceleration[0]=abs(self.acceleration[0])
                 self.dir[0] = -1
 
                 if random.randint(0, 100)==100:
