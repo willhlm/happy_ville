@@ -290,6 +290,7 @@ class Dynamicentity(Staticentity):
     def __init__(self,pos):
         super().__init__(pos)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
+        self.go_through = False#a flag for entities to go through ramps from side or top
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -315,7 +316,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack=[animation.Entity_animation(self)]
         self.max_vel=7
         self.game_objects = game_objects
-        self.go_through = False#a flag for entities to go through ramps from side or top
 
     def update(self,pos):
         self.update_pos(pos)
@@ -611,7 +611,7 @@ class Kusa(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = 30
-        self.health = 100
+        self.health = 1
 
     def updateAI(self):#move these into AI methods, or maybe in group distance?
         pass
@@ -634,7 +634,7 @@ class Svampis(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = 30
-        self.health = 100
+        self.health = 1
 
     def updateAI(self):#move these into AI methods, or maybe in group distance?
         pass
@@ -749,7 +749,7 @@ class Player(Character):
 
         self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
         self.equip='Hammer'#ability pointer
-        self.sword=Sword(self)
+        self.sword=Sword
         self.shield=Shield
         self.dash=True
         self.wall=True
@@ -1108,6 +1108,7 @@ class Abilities(pygame.sprite.Sprite):
         self.entity = entity
         self.state = 'main'
         self.animation = animation.Ability_animation(self)
+        self.image = self.sprites['main'][0]
 
     def update(self,pos):
         self.lifetime-=1

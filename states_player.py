@@ -352,11 +352,12 @@ class Dash_attack(Player_states):
         self.phases=['main','post']
         self.phase=self.phases[0]
         self.done=False
+        self.sword = self.entity.sword(self.entity)
 
-        self.entity.sword.lifetime=10#swrod hitbox duration
-        self.entity.sword.dir[1]=0
-        self.entity.sword.dir=self.dir.copy()#sword direction
-        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+        self.sword.lifetime=10#swrod hitbox duration
+        self.sword.dir[1]=0
+        self.sword.dir=self.dir.copy()#sword direction
+        self.entity.projectiles.add(self.sword)#add sword to group but in main phase
 
     def update_state(self):
         self.entity.velocity[1]=0
@@ -452,16 +453,16 @@ class Sword(Player_states):
         self.done=False#animation flag
         self.sword2=False#flag to check if we shoudl go to next sword attack
         self.sword3=False#flag to check if we shoudl go to third sword attack
+        self.sword=self.entity.sword(self.entity)
         self.dir=self.entity.dir.copy()#animation direction
-        self.entity.sword.dir=self.dir.copy()#sword direction
+        self.sword.dir=self.dir.copy()#sword direction
         sound.Sound.play_sfx(self.entity.sfx_sword)
-
 
     def increase_phase(self):
         if self.phase==self.phases[-1]:
             self.done=True
         elif self.phase=='pre':
-            self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+            self.entity.projectiles.add(self.sword)#add sword to group but in main phase
             self.phase='main'
         elif self.phase=='main':
             self.phase=self.phases[-1]
@@ -469,9 +470,9 @@ class Sword(Player_states):
 class Sword_run1(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime=10#swrod hitbox duration
-        self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.dir[1]=0
+        self.sword.lifetime=10#swrod hitbox duration
+        self.entity.projectiles.add(self.sword)#add sword to group
+        self.sword.dir[1]=0
 
     def update_state(self):
         if self.done and self.sword2:
@@ -489,9 +490,9 @@ class Sword_run1(Sword):
 class Sword_run2(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime=10#swrod hitbox duration
-        self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.dir[1]=0
+        self.sword.lifetime=10#swrod hitbox duration
+        self.entity.projectiles.add(self.sword)#add sword to group
+        self.sword.dir[1]=0
 
     def update_state(self):
         if self.done and self.entity.acceleration[0]==0:
@@ -504,8 +505,8 @@ class Sword1_stand(Sword):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.entity.sword.lifetime=10#swrod hitbox duration
-        self.entity.sword.dir[1]=0
+        self.sword.lifetime=10#swrod hitbox duration
+        self.sword.dir[1]=0
 
 
     def update_state(self):
@@ -524,9 +525,9 @@ class Sword1_stand(Sword):
 class Sword2_stand(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime=10#swrod hitbox duration
-        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
-        self.entity.sword.dir[1]=0
+        self.sword.lifetime=10#swrod hitbox duration
+        self.entity.projectiles.add(self.sword)#add sword to group but in main phase
+        self.sword.dir[1]=0
 
     def update_state(self):
         if self.done and self.sword3:
@@ -544,8 +545,8 @@ class Sword3_stand(Sword):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.entity.sword.lifetime=15#swrod hitbox duration
-        self.entity.sword.dir[1]=0
+        self.sword.lifetime=15#swrod hitbox duration
+        self.sword.dir[1]=0
 
     def update_state(self):
         if self.done:#if animation is done
@@ -557,9 +558,9 @@ class Sword3_stand(Sword):
 class Air_sword2(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime=10#swrod hitbox duration
-        self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.dir[1]=0
+        self.sword.lifetime=10#swrod hitbox duration
+        self.entity.projectiles.add(self.sword)#add sword to group
+        self.sword.dir[1]=0
 
     def update_state(self):
         if self.done:
@@ -587,7 +588,7 @@ class Sword_up(Sword):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.entity.sword.lifetime=10
+        self.sword.lifetime=10
 
     def update_state(self):
         if self.done:
@@ -599,8 +600,8 @@ class Sword_up(Sword):
 class Sword_down(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime=10
-        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+        self.sword.lifetime=10
+        self.entity.projectiles.add(self.sword)#add sword to group but in main phase
 
     def update_state(self):
         if self.done:
