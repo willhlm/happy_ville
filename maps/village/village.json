@@ -399,31 +399,13 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Kusa"
+                         "value":"Shroompolin"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
                  "x":656,
-                 "y":384
-                }, 
-                {
-                 "gid":3,
-                 "height":16,
-                 "id":187,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"class",
-                         "type":"string",
-                         "value":"Svampis"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":944,
                  "y":384
                 }, 
                 {
@@ -461,24 +443,6 @@
                  "width":16,
                  "x":240,
                  "y":384
-                }, 
-                {
-                 "gid":3,
-                 "height":16,
-                 "id":196,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"class",
-                         "type":"string",
-                         "value":"Skeleton_warrior"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":448,
-                 "y":304
                 }, 
                 {
                  "gid":3,
@@ -526,7 +490,7 @@
  "nextobjectid":200,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.8.2",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -652,6 +616,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.6",
  "width":1200
 }
