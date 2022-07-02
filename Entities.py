@@ -418,6 +418,7 @@ class Enemy(Character):
             if rand==0:
                 self.currentstate.handle_input('Idle')
             else:
+                self.dir[0] = -self.dir[0]
                 self.currentstate.handle_input('Walk')
 
     def aggroAI(self):
@@ -428,6 +429,12 @@ class Enemy(Character):
                 self.dir[0] = 1
                 self.currentstate.handle_input('Walk')
             elif abs(self.player_distance[0]) < self.attack_distance:
+
+                if self.player_distance[0]>0:
+                    self.dir[0]=1
+                else:
+                    self.dir[0]=-1
+
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
@@ -722,6 +729,28 @@ class Skeleton_archer(Enemy):#change design
             self.AImethod=self.aggroAI
         elif abs(self.player_distance[0])>400 and self.AImethod.__name__ != 'peaceAI':
             self.AImethod=self.peaceAI
+
+class Cultist_rogue(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_rogue/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 80
+        self.attack = Sword
+
+class Cultist_warrior(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_warrior/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 80
+        self.attack = Sword
 
 class Player(Character):
 

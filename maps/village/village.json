@@ -471,7 +471,7 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Skeleton_warrior"
+                         "value":"Cultist_rogue"
                         }],
                  "rotation":0,
                  "type":"",
@@ -515,6 +515,24 @@
                  "width":16,
                  "x":1360,
                  "y":336
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":200,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Cultist_warrior"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":576,
+                 "y":336
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -523,7 +541,7 @@
          "y":0
         }],
  "nextlayerid":58,
- "nextobjectid":200,
+ "nextobjectid":201,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
