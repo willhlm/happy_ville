@@ -1,4 +1,6 @@
 import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, math, sound, states
+import time
+
 
 pygame.mixer.init()
 
@@ -321,6 +323,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack[-1].update()
 
     def take_dmg(self,dmg):
+        #time.sleep(0.1)
         if dmg>0:
             self.health-=dmg
             if self.health>0:#check if dead¨
@@ -1217,11 +1220,15 @@ class Sword(Melee):
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
         collision_enemy.knock_back(self.dir[0])
-        slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
-        self.effect.create_particles([collision_enemy.rect.x,collision_enemy.rect.y],self.dir[0])
+        #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
+        #self.effect.create_particles([collision_enemy.rect.x,collision_enemy.rect.y],self.dir[0])
+        if self.dir[0]>0:
+            self.effect.create_particles([self.rect.center[0],self.rect.center[1]],self.dir[0])
+        else:
+            self.effect.create_particles([self.rect.left,self.rect.center[1]],self.dir[0])
         #clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
         #self.entity.cosmetics.add(clash)
-        self.entity.cosmetics.add(slash)
+        #self.entity.cosmetics.add(slash)
         self.kill()
 
     def sword_jump(self):
