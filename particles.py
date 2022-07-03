@@ -10,17 +10,6 @@ class Weather():#maybe should just be a function
             obj = getattr(sys.modules[__name__], type)(self.game_objects)
             self.group.add(obj)
 
-class Sword_GFX():#maybe should just be a function
-    def __init__(self,cosmetics_group):
-        self.group = cosmetics_group
-
-    def create_particles(self,pos,dir,number_particles=random.randint(5,7)):
-        for i in range(0,number_particles):
-            #obj2 = Sword_particles(pos,dir)
-            #self.group.add(obj2)
-            obj1 = Sword_sparks(pos,dir)
-            self.group.add(obj1)
-
 class Absorb_particles():
     def __init__(self,cosmetics_group,pos):
         self.group = cosmetics_group

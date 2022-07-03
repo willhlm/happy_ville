@@ -421,6 +421,7 @@ class Enemy(Character):
             if rand==0:
                 self.currentstate.handle_input('Idle')
             else:
+                self.dir[0] = -self.dir[0]
                 self.currentstate.handle_input('Walk')
 
     def aggroAI(self):
@@ -431,6 +432,12 @@ class Enemy(Character):
                 self.dir[0] = 1
                 self.currentstate.handle_input('Walk')
             elif abs(self.player_distance[0]) < self.attack_distance:
+
+                if self.player_distance[0]>0:
+                    self.dir[0]=1
+                else:
+                    self.dir[0]=-1
+
                 self.currentstate.handle_input('Attack')
                 self.counter = 0
             elif self.player_distance[0] < -self.attack_distance:
@@ -726,6 +733,39 @@ class Skeleton_archer(Enemy):#change design
         elif abs(self.player_distance[0])>400 and self.AImethod.__name__ != 'peaceAI':
             self.AImethod=self.peaceAI
 
+class Cultist_rogue(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_rogue/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 80
+        self.attack = Sword
+
+class Cultist_warrior(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_warrior/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 80
+        self.attack = Sword
+
+class John(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/john/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 50
+        self.attack_distance = 80
+        self.attack = Sword
+
 class Player(Character):
 
     sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
@@ -1011,8 +1051,8 @@ class Boss(Enemy):
     def give_abillity(self):
         self.game_objects.player.abilities[self.ability]=getattr(sys.modules[__name__], self.ability)
 
-    def updateAI(self):
-        pass
+#    def updateAI(self):
+#        pass
 
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
@@ -1061,6 +1101,74 @@ class Reindeer(Boss):
             else:
                 self.counter = 0
                 self.currentstate.handle_input('Idle')
+
+class Idun(Boss):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/idun/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
+        self.health = 50
+        self.attack_distance = 100
+        self.attack = Sword
+
+    def death(self):
+        self.kill()
+
+    def give_abillity(self):
+        pass
+
+class Freja(Boss):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/freja/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
+        self.health = 50
+        self.attack_distance = 100
+        self.attack = Sword
+
+    def death(self):
+        self.kill()
+
+    def give_abillity(self):
+        self.game_objects.player.dash=True
+
+class Tyr(Boss):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/tyr/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
+        self.health = 50
+        self.attack_distance = 100
+        self.attack = Sword
+
+    def death(self):
+        self.kill()
+
+    def give_abillity(self):
+        self.game_objects.player.dash=True
+
+class Fenrisulven(Boss):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/fenrisulven/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
+        self.health = 50
+        self.attack_distance = 100
+        self.attack = Sword
+
+    def death(self):
+        self.kill()
+
+    def give_abillity(self):
+        self.game_objects.player.dash=True
 
 class Path_col(Staticentity):
 
@@ -1186,7 +1294,6 @@ class Sword(Melee):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=10
-        self.effect =  particles.Sword_GFX(self.entity.cosmetics)
 
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
@@ -1200,8 +1307,15 @@ class Sword(Melee):
         self.kill()
 
     def sword_jump(self):
-        if self.dir[1]==-1:
-            self.entity.velocity[1]=-11
+        if self.dir[1] == -1:
+            self.entity.velocity[1] = -11
+
+    def clash_particles(self,pos,dir,number_particles=12):
+        for i in range(0,number_particles):
+            #obj2 = Sword_particles(pos,dir)
+            #self.group.add(obj2)
+            obj1 = particles.Sword_sparks(pos,dir)
+            self.entity.cosmetics.add(obj1)
 
 class Darksaber(Sword):
     def __init__(self,entity):
