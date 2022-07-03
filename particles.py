@@ -14,7 +14,7 @@ class Sword_GFX():#maybe should just be a function
     def __init__(self,cosmetics_group):
         self.group = cosmetics_group
 
-    def create_particles(self,pos,dir,number_particles=12):
+    def create_particles(self,pos,dir,number_particles=random.randint(5,7)):
         for i in range(0,number_particles):
             #obj2 = Sword_particles(pos,dir)
             #self.group.add(obj2)
@@ -127,16 +127,20 @@ class Absorb_particle(Particles):
 class Sword_effects(Particles):
     def __init__(self,pos,dir):
         super().__init__()
-        spawn_angle = 30
-        if dir > 0:#rigth hit
+        spawn_angle = 40
+        if dir[0] > 0:#rigth hit
             angle=random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
-        else:#left hit
+        elif dir[0] < 0:#left hit
             angle=random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex
+        elif dir[1] > 0:
+            angle=random.randint(90-spawn_angle, 90+spawn_angle)#the ejection anglex
+        else:
+            angle=random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex
 
         self.angle = -(2*math.pi*angle)/360
         self.fade = 255
         self.pos = pos #spawn position
-        self.lifetime = 15
+        self.lifetime = 14
 
     def update(self,scroll):
         super().update(scroll)
@@ -146,11 +150,11 @@ class Sword_effects(Particles):
         self.destroy()
 
     def speed(self):
-        self.velocity[0] -= 0.02*self.velocity[0]#0.1*math.cos(self.angle)
-        self.velocity[1] -= 0.02*self.velocity[1]#0.1*math.sin(self.angle)
+        self.velocity[0] -= 0.17*self.velocity[0]#0.1*math.cos(self.angle)
+        self.velocity[1] -= 0.17*self.velocity[1]#0.1*math.sin(self.angle)
 
     def fading(self):
-        self.fade-=40
+        self.fade-=5
         self.image.set_alpha(self.fade)
 
     def destroy(self):
@@ -160,9 +164,10 @@ class Sword_effects(Particles):
 class Sword_sparks(Sword_effects):
     def __init__(self,pos,dir):
         super().__init__(pos,dir)
-        self.scale = 1
-        amp=random.randint(10, 14)
+        self.scale = 0.8
+        amp=random.randint(17, 21)
         self.velocity = [amp*math.cos(self.angle),amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
+        self.fade = 250
         self.colour = [255,255,255,self.fade]
 
         self.make_sparks()
@@ -175,6 +180,7 @@ class Sword_sparks(Sword_effects):
         self.image = self.surface.copy()
         self.spark_shape()
         pygame.draw.polygon(self.image,self.colour,self.points)
+        self.fading()
 
     def spark_shape(self):
         vel=math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
