@@ -117,7 +117,7 @@
          "name":"bg_fixed6",
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":700,
          "x":0,
          "y":0
@@ -517,18 +517,6 @@
                  "width":16,
                  "x":704,
                  "y":560
-                }, 
-                {
-                 "gid":21,
-                 "height":16,
-                 "id":194,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":736,
-                 "y":544
                 }],
          "opacity":1,
          "type":"objectgroup",

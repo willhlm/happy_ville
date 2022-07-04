@@ -169,9 +169,13 @@ class Level():
                 new_spawn = Entities.Spawner(object_position,self.game_objects,values)
                 self.game_objects.cosmetics.add(new_spawn)
 
-            elif id == 20:#Shroompolin
-                new_shroompolin = Entities.Shroompolin(object_position,self.game_objects)
-                self.game_objects.enemies.add(new_shroompolin)
+            elif id == 20:#bushes
+                for property in obj['properties']:
+                    if property['name'] == 'type':
+                        bush_type = property['value']
+                new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
+                self.game_objects.interacting_cosmetics.add(new_bush)
+
 
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):

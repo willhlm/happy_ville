@@ -8,6 +8,7 @@ import sound
 import states
 import camera
 import json
+import weather
 
 class Game_Objects():
 
@@ -18,7 +19,7 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
-        self.weather_paricles=particles.Weather(self)#initiate weather
+        self.weather_paricles=weather.Weather(self)#initiate weather
         self.weather_paricles.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
         #self.reflection=BG.Reflection()
@@ -51,6 +52,8 @@ class Game_Objects():
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
         self.all_Entities = pygame.sprite.Group()
+        self.interacting_cosmetics = pygame.sprite.Group()
+
 
         #initiate player
         self.player = Entities.Player([200,50],self)
@@ -82,6 +85,7 @@ class Game_Objects():
         self.all_fgs.empty()
         self.camera_blocks.empty()
         self.triggers.empty()
+        self.interacting_cosmetics.empty()
 
         #load all objects and art
         self.map.load_statics()
@@ -97,6 +101,8 @@ class Game_Objects():
         self.collisions.check_enemy_collision(self.player,self.enemies)
 
         self.collisions.check_trigger(self.player,self.triggers)
+
+        self.collisions.interact_cosmetics()
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
@@ -118,6 +124,7 @@ class Game_Objects():
         self.entity_pause.update(scroll,self.player.rect.center)#should be before enemies and npcs group
         self.enemies.update(scroll,self.player.rect.center)
         self.npcs.update(scroll,self.player.rect.center)
+        self.interacting_cosmetics.update(scroll,scroll)
         self.interactables.update(scroll)
         self.weather.update(scroll)
         self.fprojectiles.update(scroll)
@@ -141,6 +148,7 @@ class Game_Objects():
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
+        self.interacting_cosmetics.draw(self.game.screen)
         self.weather.draw(self.game.screen)
 
         #self.triggers.draw(self.game.screen)
@@ -159,6 +167,8 @@ class Game_Objects():
             #for loot in self.loot.sprites():#go through the group
             #    pygame.draw.rect(self.game.screen, (0,0,255), loot.hitbox,2)#draw hitbox
             #    pygame.draw.rect(self.game.screen, (255,0,255), loot.rect,2)#draw hitbox
+            for cos in self.interacting_cosmetics.sprites():#go through the group
+                pygame.draw.rect(self.game.screen, (0,0,255), cos.hitbox,2)#draw hitbox
 
             pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
             pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox

@@ -39,7 +39,7 @@ class Hurt_animation(Entity_animation):#become white
     def update(self):
         super().update()
         self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
-        self.duration -=1
+        self.duration -= 1
 
         if self.duration<0:
             self.exit_state()
