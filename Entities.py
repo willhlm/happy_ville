@@ -323,7 +323,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack[-1].update()
 
     def take_dmg(self,dmg):
-        #time.sleep(0.1)
         if dmg>0:
             self.health-=dmg
             if self.health>0:#check if dead¨
@@ -341,7 +340,7 @@ class Character(Dynamicentity):#enemy, NPC,player
             new_animation=animation.Hurt_animation(self)
             new_animation.enter_state()
 
-    def group_distance(self):
+    def group_distance(self):#doesn't work
         bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
         if self.rect[0]<bounds[0] or self.rect[0]>bounds[1] or self.rect[1]<bounds[2] or self.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             self.remove(self.group)#remove from group
@@ -1677,7 +1676,7 @@ class Animatedentity(Staticentity):
 class Corpse(Animatedentity):
     def __init__(self,pos):
         super().__init__(pos)
-        self.currentstate = states_basic.Once(self,30)
+        self.currentstate = states_basic.Once(self)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/corpse/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
@@ -1729,6 +1728,39 @@ class Interactable(Animatedentity):
     def interact(self):
         self.interacted=True
 
+class Interactable_bushes(Interactable):
+    def __init__(self,pos,game_objects,type):
+        super().__init__(pos)
+        self.group = game_objects.interacting_cosmetics
+        self.pause_group = game_objects.entity_pause
+
+        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/'+type+'/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+
+    def update(self,scroll,test):
+        super().update(scroll)
+        #self.distance()
+
+    def collide(self):
+        if not self.interacted:
+            self.currentstate.handle_input('Hurt')
+            self.interacted = True
+
+    def cut(self):
+        self.currentstate.handle_input('Cut')
+
+    def distance(self):#doesn't work
+        bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
+        if self.rect[0]<bounds[0] or self.rect[0]>bounds[1] or self.rect[1]<bounds[2] or self.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+            self.remove(self.group)#remove from group
+            self.add(self.pause_group)#add to pause
+        else:
+            self.add(self.group)#add to group
+            self.remove(self.pause_group)#remove from pause
+
 class Door(Interactable):
 
     def __init__(self,pos):
@@ -1741,7 +1773,7 @@ class Door(Interactable):
 
     def interact(self):
         super().interact()
-        self.state='opening'
+        self.currentstate.handle_input('Opening')
         try:
             self.game_objects.change_map(collision.next_map)
         except:

@@ -10,7 +10,7 @@ class Entity_States():
         self.update_state()
 
     def enter_state(self,newstate):
-        self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def update_state(self):
         pass
@@ -18,15 +18,8 @@ class Entity_States():
     def increase_phase(self):
         pass
 
-class Once(Entity_States):
-    def __init__(self,entity,duration):
-        super().__init__(entity)
-        self.duration=duration
-
-    def update_state(self):
-        self.duration-=1
-        if self.duration<0:
-            self.enter_state('Idle')
+    def handle_input(self,input):
+        pass
 
 class Idle(Entity_States):
     def __init__(self,entity):
@@ -35,65 +28,43 @@ class Idle(Entity_States):
     def handle_input(self,input):
         if input=='Hurt':
              self.enter_state('Hurt')
+        elif input == 'Cut':
+             self.enter_state('Cut')
+        elif input == 'Opening':
+            self.enter_state('Opening')
 
-class Hurt(Entity_States):
+class Once(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
         self.flag = False#to make sure it doesn't finish in the first frame = 0
-        self.entity.state = 'hurt'
 
     def update_state(self):
-        if self.entity.animation.frame==0 and self.flag:
-            self.entity.state = 'idle'
-            self.enter_state('Idle')
-            
+        if self.entity.animation.frame==0 and self.flag:#enter when animation is finished
+            self.finish()
+
         self.flag = True
 
-    def handle_input(self,input):
-        pass
+    def finish(self):
+        self.enter_state('Idle')
 
-class Opening(Entity_States):
+class Hurt(Once):
     def __init__(self,entity):
         super().__init__(entity)
-        self.lifetime=10
 
-    def update_state(self):
-        self.lifetime-=1
-        self.open()
+class Cut(Once):
+    def __init__(self,entity):
+        super().__init__(entity)
 
-    def open(self):
-        if self.lifetime<0:
-            self.enter_state('Open')
+    def finish(self):
+        self.entity.kill()
+
+class Opening(Once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def finish(self):
+        self.enter_state('Open')
 
 class Open(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
-
-class Fall(Entity_States):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update_state(self):
-        self.entity.speed()
-
-    def change_state(self):
-        self.enter_state('Death')
-
-class Death(Entity_States):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.lifetime=10
-        self.entity.velocity=[0,0]
-
-    def update_state(self):
-        self.lifetime-=1
-        self.destroy()
-
-    def destroy(self):
-        if self.lifetime<0:
-            statename=str(type(self.entity).__name__)
-            self.entity.create_particles(statename,1)
-            self.entity.kill()
-
-    def change_state(self):
-        pass

@@ -513,8 +513,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":576,
-                 "y":336
+                 "x":1440,
+                 "y":176
                 }, 
                 {
                  "gid":3,
@@ -531,8 +531,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":752,
-                 "y":336
+                 "x":1600,
+                 "y":176
                 }, 
                 {
                  "gid":3,
@@ -549,8 +549,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":368,
-                 "y":320
+                 "x":1376,
+                 "y":176
                 }, 
                 {
                  "gid":3,
@@ -567,8 +567,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":496,
-                 "y":320
+                 "x":1680,
+                 "y":176
                 }, 
                 {
                  "gid":3,
@@ -605,6 +605,42 @@
                  "width":16,
                  "x":1504,
                  "y":160
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":206,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Shroompolin"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":336,
+                 "y":368
+                }, 
+                {
+                 "gid":21,
+                 "height":16,
+                 "id":208,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Grass"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":400,
+                 "y":368
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -613,7 +649,7 @@
          "y":0
         }],
  "nextlayerid":58,
- "nextobjectid":206,
+ "nextobjectid":209,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

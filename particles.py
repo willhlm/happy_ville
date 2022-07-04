@@ -224,7 +224,7 @@ class Snow(Weather_particles):
     def __init__(self,game_objects):
         super().__init__(game_objects)
         self.colour = (255,255,255)
-        self.radius = 2
+        self.radius = random.randint(1, 3)
         self.make_circle()
         self.phase = random.randint(0, 100)
         self.time = 0

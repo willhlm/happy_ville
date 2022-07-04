@@ -11,6 +11,19 @@ class Collisions():
             self.game_objects.player.velocity[1] = 0
             self.game_objects.player.go_through = True
 
+    def interact_cosmetics(self):
+        for cosmetic in self.game_objects.interacting_cosmetics.sprites():
+
+            collision_entity = pygame.sprite.spritecollideany(cosmetic,self.game_objects.players,Collisions.collided)
+            if collision_entity:
+                cosmetic.collide()
+            else:
+                cosmetic.interacted=False
+
+            collision_fprojectile = pygame.sprite.spritecollideany(cosmetic,self.game_objects.fprojectiles,Collisions.collided)
+            if collision_fprojectile:
+                cosmetic.cut()
+
     @staticmethod
     def counter(fprojectiles,eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group
