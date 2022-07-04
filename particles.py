@@ -114,9 +114,9 @@ class Absorb_particle(Particles):
         ]
 
 class Sword_effects(Particles):
-    def __init__(self,pos,dir):
+    def __init__(self,pos,dir, spawn_angle):
         super().__init__()
-        spawn_angle = 40
+        #spawn_angle = 40
         if dir[0] > 0:#rigth hit
             angle=random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
         elif dir[0] < 0:#left hit
@@ -151,8 +151,8 @@ class Sword_effects(Particles):
             self.kill()
 
 class Sword_sparks(Sword_effects):
-    def __init__(self,pos,dir):
-        super().__init__(pos,dir)
+    def __init__(self,pos,dir, spawn_angle = 100):
+        super().__init__(pos,dir, spawn_angle)
         self.scale = 0.8
         amp=random.randint(17, 21)
         self.velocity = [amp*math.cos(self.angle),amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#

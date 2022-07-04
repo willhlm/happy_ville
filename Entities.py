@@ -1300,7 +1300,7 @@ class Sword(Melee):
         collision_enemy.knock_back(self.dir[0])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
         #self.effect.create_particles([collision_enemy.rect.x,collision_enemy.rect.y],self.dir[0])
-        self.effect.create_particles([self.rect.center[0],self.rect.center[1]],self.dir)
+        self.clash_particles([self.rect.center[0],self.rect.center[1]],self.dir)
         #clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
         #self.entity.cosmetics.add(clash)
         #self.entity.cosmetics.add(slash)
