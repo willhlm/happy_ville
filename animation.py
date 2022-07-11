@@ -61,8 +61,7 @@ class Ability_animation(Basic_animation):
 
     def reset_timer(self):
         super().reset_timer()
-        if self.entity.state=='post':
-            self.entity.kill()#kill the object after post animation
+        self.entity.reset_timer()
 
 class Simple_animation(Animation):#no state or phase
     def __init__(self,entity):

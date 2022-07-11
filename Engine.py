@@ -24,6 +24,9 @@ class Collisions():
             if collision_fprojectile:
                 cosmetic.cut()
 
+    def thunder_attack(self,aura):
+        return pygame.sprite.spritecollide(aura,self.game_objects.enemies,False,Collisions.collided)#check collision
+
     @staticmethod
     def counter(fprojectiles,eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group

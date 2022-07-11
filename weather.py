@@ -51,7 +51,7 @@ class Weather_particles(Animatedentity):
 class Leafs(Weather_particles):
     def __init__(self,game_objects):
         super().__init__(game_objects)
-        rand=random.randint(1, 1)
+        rand=random.randint(1,1)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/weather/leaf'+str(rand)+'/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()

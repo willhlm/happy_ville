@@ -536,7 +536,7 @@ class Larv(Enemy):
         self.health = 40
         self.spirit=10
         self.attack=Poisonblobb
-        self.attack_distance=60
+        self.attack_distance=150
 
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
@@ -786,8 +786,8 @@ class Player(Character):
         self.cosmetics = game_objects.cosmetics
         self.projectiles = game_objects.fprojectiles#pygame.sprite.Group()
 
-        self.abilities={'Hammer':Hammer,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
-        self.equip='Hammer'#ability pointer
+        self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
+        self.equip='Thunder'#ability pointer
         self.sword=Sword
         self.shield=Shield
         self.dash=True
@@ -1215,7 +1215,11 @@ class Abilities(pygame.sprite.Sprite):
         self.entity = entity
         self.state = 'main'
         self.animation = animation.Ability_animation(self)
-        self.image = self.sprites['main'][0]
+        self.image = self.sprites[self.state][0]
+
+    def rectangle(self):
+        self.rect = self.image.get_rect()
+        self.hitbox = self.rect.copy()
 
     def update(self,pos):
         self.lifetime-=1
@@ -1226,30 +1230,6 @@ class Abilities(pygame.sprite.Sprite):
     def destroy(self):
         if self.lifetime<0:
             self.kill()
-
-    def collision_enemy(self,collision_enemy):
-        self.kill()
-
-    def collision_plat(self):
-        pass
-
-class Heal(Abilities):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Melee(Abilities):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.dir = entity.dir.copy()
-        self.rectangle()
-
-    def rectangle(self):
-        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
-        self.hitbox = self.rect.copy()
-
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
-        self.hitbox.center = self.rect.center
 
     def update_hitbox(self):#make this a dictionary?
         if self.dir[1] > 0:#up
@@ -1264,6 +1244,26 @@ class Melee(Abilities):
             self.hitbox.midright=self.entity.hitbox.midleft
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
+    def collision_enemy(self,collision_enemy):
+        self.kill()
+
+    def collision_plat(self):
+        pass
+
+    def reset_timer(self):
+        if self.state == 'post':
+            self.kill()
+
+class Melee(Abilities):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir = entity.dir.copy()
+        self.rectangle()
+
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+        self.hitbox.center = self.rect.center
+
     def update(self,pos):
         super().update(pos)
         self.update_hitbox()
@@ -1271,6 +1271,10 @@ class Melee(Abilities):
     def countered(self):
         self.entity.countered()
         self.kill()
+
+class Heal(Melee):
+    def __init__(self,entity):
+        super().__init__(entity)
 
 class Explosion(Melee):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/invisible/')
@@ -1287,12 +1291,64 @@ class Explosion(Melee):
     def update_hitbox(self):
         pass
 
+class Shield(Melee):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/invisible/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg=0
+        self.lifetime=15
+
+    def rectangle(self):
+        self.rect = self.entity.hitbox.copy()#pygame.Rect(self.entity.rect[0],self.entity.rect[1],20,40)
+        self.hitbox = self.rect.copy()
+
+    def update_hitbox(self):
+        if self.dir[0] > 0:#right
+            self.hitbox.midleft=self.entity.hitbox.midright
+        elif self.dir[0] < 0:#left
+            self.hitbox.midright=self.entity.hitbox.midleft
+        self.rect.center=self.hitbox.center#match the positions of hitboxes
+
+    def collision_enemy(self,collision_enemy):
+        collision_enemy.countered()
+        self.kill()
+
+class Thunder_aura(Melee):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/thunder_aura/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.lifetime = 1000
+        self.dmg = 0
+        self.state = 'pre'
+
+    def rectangle(self):
+        self.rect = self.image.get_rect()
+        self.rect.center = self.entity.rect.center
+        self.hitbox = self.rect.copy()
+
+    def update_hitbox(self):
+        pass
+
+    def reset_timer(self):
+        if self.state=='pre':
+            self.state='main'
+        elif self.state=='main':
+            pass
+        elif self.state=='post':
+            self.kill()
+
 class Sword(Melee):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Sword/')
 
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg=10
+
+    def rectangle(self):
+        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
+        self.hitbox = self.rect.copy()
 
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
@@ -1332,59 +1388,16 @@ class Darksaber(Sword):
             collision_enemy.loot_group.add(spirits)
         self.kill()
 
-class Shield(Melee):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/invisible/')
-
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.dmg=0
-        self.lifetime=15
-
-    def rectangle(self):
-        self.rect = self.entity.hitbox.copy()#pygame.Rect(self.entity.rect[0],self.entity.rect[1],20,40)
-        self.hitbox = self.rect.copy()
-
-    def update_hitbox(self):
-        if self.dir[0] > 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-        elif self.dir[0] < 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-    def collision_enemy(self,collision_enemy):
-        collision_enemy.countered()
-        self.kill()
-
 class Projectiles(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
-        self.dir=self.entity.dir.copy()
+        self.dir = entity.dir.copy()
         self.rectangle()
         self.velocity=[0,0]
-
-    def rectangle(self):
-        self.image = self.sprites[self.state][0]
-        self.rect = self.image.get_rect()
-        self.hitbox=self.rect.copy()
 
     def update_pos(self,scroll):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
-
-    def update_hitbox(self):
-        if self.dir[1] > 0:#up
-            self.hitbox.midbottom=self.entity.hitbox.midtop
-            self.velocity[1]=-self.speed[1]
-        elif self.dir[1] < 0:#down
-            self.hitbox.midtop=self.entity.hitbox.midbottom
-            self.velocity[1]=self.speed[1]
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-            self.velocity[0]=self.speed[0]
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-            self.velocity[0]=-self.speed[1]
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def knock_back(self):
         self.velocity[0]=-self.velocity[0]
@@ -1394,17 +1407,15 @@ class Projectiles(Abilities):
         projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
         self.knock_back()
 
-class Hammer(Projectiles):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Hammer/')
+class Thunder(Projectiles):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Thunder/')
 
-    def __init__(self,entity):
+    def __init__(self,entity,rect):
         super().__init__(entity)
         self.dmg=10
+        self.rect.midbottom = rect.midbottom
         self.lifetime=25
-        self.speed=[0,0]
-        self.update_hitbox()
-
-        self.rect.bottom=self.entity.rect.bottom
+        self.velocity=[0,0]
         self.hitbox.center = self.rect.center
 
     def collision_enemy(self,collision_enemy):
@@ -1417,7 +1428,7 @@ class Poisoncloud(Projectiles):
         super().__init__(entity)
         self.dmg=1
         self.lifetime=400
-        self.speed=[0,0]
+        self.velocity=[0,0]
         self.update_hitbox()
 
     def collision_ene(self,collision_ene):
@@ -1439,7 +1450,7 @@ class Poisonblobb(Projectiles):
         super().__init__(entity)
         self.dmg=10
         self.lifetime=100
-        self.speed=[4,4]
+        self.velocity=[entity.dir[0]*5,-1]
         self.hitbox=pygame.Rect(self.rect.x,self.rect.y,16,16)
         self.update_hitbox()
 
@@ -1456,85 +1467,6 @@ class Poisonblobb(Projectiles):
             self.animation.reset_timer()
             self.state='post'
 
-class Stone(Abilities):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Stone/')
-
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.lifetime=100
-        self.dmg=10
-        self.charge_velocity=0
-        self.action='small'
-        self.initiate()
-        self.hitbox=pygame.Rect(self.rect.x,self.rect.y,10,10)
-
-    def update_hitbox(self):
-        if self.dir[1] > 0:#up
-            self.hitbox.midbottom=self.entity.hitbox.midtop
-        elif self.dir[1] < 0:#down
-            self.hitbox.midtop=self.entity.hitbox.midbottom
-        elif self.dir[0] > 0 and self.dir[1] == 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-        elif self.dir[0] < 0 and self.dir[1] == 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
-    def update(self,pos):
-        self.update_pos(pos)
-        self.update_animation()#has to be here
-        self.speed()#set the speed
-        self.destroy()
-
-    def increase_phase(self):
-        if self.phase=='pre':
-            self.phase='charge'
-        elif self.phase=='main':
-            pass
-        elif self.phase=='post':
-            self.kill()
-
-    def speed(self):
-        if self.phase=='charge':#charging
-            self.charge_velocity=self.charge_velocity+0.5*self.dir[0]
-            self.charge_velocity=self.dir[0]*min(20,self.dir[0]*self.charge_velocity)#set max velocity
-
-            if abs(self.charge_velocity)>=20:#increase the ball size when max velocity is reached
-                self.action='medium'
-                self.shake=2#add shake effect if the ball is big
-
-        elif self.phase=='main':#main pahse
-            self.lifetime-=1#affect only the lifetime in main state
-            if self.action=='small':#only have gravity if small
-                self.velocity[1]+=0.1#graivity
-
-    def collision_enemy(self,collision_enemy):
-        self.velocity=[0,0]
-        self.dmg=0
-        self.phase='post'
-
-    def collision_plat(self):
-        self.velocity=[0,0]
-        self.dmg=0
-        self.phase='post'
-
-    def rotate(self):
-        angle=self.dir[0]*max(-self.dir[0]*self.velocity[0]*self.velocity[1],-60)
-
-        self.image=pygame.transform.rotate(self.original_image,angle)#fig,angle,scale
-        x, y = self.rect.center  # Save its current center.
-        self.rect = self.image.get_rect()  # Replace old rect with new rect.
-        self.hitbox=pygame.Rect(x,y,10,10)
-
-        self.rect.center = (x, y)  # Put the new rect's center at old center.
-
-    def knock_back(self):
-        self.velocity[0]=-self.velocity[0]
-        self.velocity[1]=-self.velocity[1]
-
-    def countered(self):
-        super().countered()
-        self.knock_back()
-
 class Force(Projectiles):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Force/')
 
@@ -1543,7 +1475,7 @@ class Force(Projectiles):
         self.lifetime=30
         self.dmg=0
         self.state='pre'
-        self.speed=[10,10]
+        self.velocity=[entity.dir[0]*10,0]
         self.update_hitbox()
 
     def collision_plat(self):
@@ -1566,9 +1498,8 @@ class Arrow(Projectiles):
         super().__init__(entity)
         self.lifetime=100
         self.dmg=10
-        self.speed=[10,10]
+        self.velocity=[entity.dir[0]*30,0]
         self.update_hitbox()
-
 
     def collision_enemy(self,collision_enemy):
         self.velocity=[0,0]
@@ -1577,6 +1508,16 @@ class Arrow(Projectiles):
     def collision_plat(self):
         self.velocity=[0,0]
         self.dmg=0
+
+    def rotate(self):#not in use
+        angle=self.dir[0]*max(-self.dir[0]*self.velocity[0]*self.velocity[1],-60)
+
+        self.image=pygame.transform.rotate(self.original_image,angle)#fig,angle,scale
+        x, y = self.rect.center  # Save its current center.
+        self.rect = self.image.get_rect()  # Replace old rect with new rect.
+        self.hitbox=pygame.Rect(x,y,10,10)
+
+        self.rect.center = (x, y)  # Put the new rect's center at old center.
 
 class Loot(Dynamicentity):
     def __init__(self,pos):

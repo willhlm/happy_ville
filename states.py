@@ -703,7 +703,7 @@ class Ability_Menu(Gameplay):
         symbol1=pygame.image.load("Sprites/Attack/Darksaber/symbol/darksaber.png").convert_alpha()
         symbol2=pygame.image.load("Sprites/Attack/Heal/symbol/heal.png").convert_alpha()
         symbol3=pygame.image.load("Sprites/Attack/Force/symbol/force.png").convert_alpha()
-        symbol4=pygame.image.load("Sprites/Attack/Hammer/symbol/hammer.png").convert_alpha()
+        symbol4=pygame.image.load("Sprites/Attack/thunder/symbol/hammer.png").convert_alpha()
         symbol5=pygame.image.load("Sprites/Attack/Arrow/symbol/arrow.png").convert_alpha()
 
         hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
@@ -712,7 +712,7 @@ class Ability_Menu(Gameplay):
         hud5=pygame.image.load("Sprites/Attack/HUD/abilityHUD5.png").convert_alpha()
         hud6=pygame.image.load("Sprites/Attack/HUD/abilityHUD6.png").convert_alpha()
 
-        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Hammer':symbol4,'Arrow':symbol5}
+        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Thunder':symbol4,'Arrow':symbol5}
         self.hud=[hud2,hud3,hud4,hud5,hud6]
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
 

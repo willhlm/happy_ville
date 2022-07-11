@@ -1,4 +1,4 @@
-import sys, sound
+import sys, sound, Entities
 from states_entity import Entity_States
 
 class Player_states(Entity_States):
@@ -646,21 +646,43 @@ class Abillitites(Player_states):
         elif self.phase=='main':
             self.phase='post'
 
-class Hammer(Abillitites):
+class Thunder(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
+        self.stay_still()
+        self.aura=Entities.Thunder_aura(self.entity)
+        self.entity.cosmetics.add(self.aura)
         self.phases=['pre','charge','main']
         self.phase=self.phases[0]
         self.entity.spirit -= 10
 
+    def update_state(self):
+        super().update_state()
+        self.entity.spirit -= 0.5
+
+    def handle_movement(self,input):
+        pass
+
+    def attack(self):
+        self.aura.state='post'
+        self.aura.animation.reset_timer()
+
+        collision_ene = self.entity.game_objects.collisions.thunder_attack(self.aura)
+        if collision_ene:
+            for enemy in collision_ene:
+                ability=self.entity.abilities['Thunder'](self.entity,enemy.rect)
+                self.entity.projectiles.add(ability)#add sword to group
+
     def handle_release_input(self,input):
-        if input[-1]=='b' and self.phase=='charge':#when release the botton
-            self.phase='main'
-            self.entity.animation_stack[-1].reset_timer()
-            ability=self.make_abillity()
-            self.entity.projectiles.add(ability)#add sword to group
-        elif input[-1]=='b' and self.phase=='pre':
-            self.enter_state('Idle')
+        if input[-1]=='b':#when release the botton
+            self.attack()
+
+            if self.phase=='charge':
+                self.phase='main'
+                self.entity.animation_stack[-1].reset_timer()#is this needed?
+
+            elif self.phase=='pre':
+                self.enter_state('Idle')
 
 class Force(Abillitites):
     def __init__(self,entity):
