@@ -54,14 +54,7 @@ class Basic_animation(Animation):#state
 
         if self.frame == len(self.entity.sprites[self.entity.state])*self.framerate:
             self.reset_timer()
-
-class Ability_animation(Basic_animation):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def reset_timer(self):
-        super().reset_timer()
-        self.entity.reset_timer()
+            self.entity.reset_timer()
 
 class Simple_animation(Animation):#no state or phase
     def __init__(self,entity):

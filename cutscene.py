@@ -143,7 +143,7 @@ class Death(Cutscene_engine):
     def __init__(self,objects):
         super().__init__(objects)
         self.game_objects.camera[-1].set_camera('Death')#make the camera not move
-        self.stage=0
+        self.stage = 0
         self.init=False
 
     def update(self):
@@ -167,6 +167,6 @@ class Death(Cutscene_engine):
                 self.player.cosmetics.add(self.spawneffect)
                 self.init=True
 
-            if self.spawneffect.lifetime<0:#when the cosmetic effetc finishes
+            if self.spawneffect.finish:#when the cosmetic effetc finishes
                 self.player.currentstate.change_state('Spawn')
                 self.stage=3

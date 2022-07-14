@@ -1,7 +1,6 @@
 import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, math, sound, states
 import time
 
-
 pygame.mixer.init()
 
 class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
@@ -349,6 +348,107 @@ class Character(Dynamicentity):#enemy, NPC,player
             self.add(self.group)#add to group
             self.remove(self.pause_group)#remove from pause
 
+class Player(Character):
+
+    sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
+
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
+        self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
+        self.max_vel = 4
+
+        self.max_health = 250
+        self.max_spirit = 100
+        self.health = 1
+        self.spirit = 100
+
+        self.cosmetics = game_objects.cosmetics
+        self.projectiles = game_objects.fprojectiles#pygame.sprite.Group()
+
+        self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
+        self.equip='Thunder'#ability pointer
+        self.sword=Sword
+        self.shield=Shield
+        self.dash=True
+        self.wall=True
+        self.dmg = 10
+
+        self.spawn_point=[{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
+        self.inventory={'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':1}#the keys need to have the same name as their respective classes
+        self.omamoris = Omamoris(self)
+        self.currentstate = states_player.Idle(self)
+
+        self.set_abs_dist()
+
+    def set_abs_dist(self):#the absolute distance, i.e. the total scroll
+        self.abs_dist = [247,180]#the coordinate for buring the bone
+
+    def death(self):
+        map=self.game_objects.map.level_name
+        pos=[self.rect[0],self.rect[1]]
+        self.cosmetics.add(Corpse(pos,map))
+        new_game_state = states.Death(self.game_objects.game,'Death')
+        new_game_state.enter_state()
+        self.set_abs_dist()
+
+    def enter_idle(self):
+        self.currentstate = states_player.Idle(self)
+
+    def reset_movement(self):
+        self.velocity = [0,0]
+        self.acceleration = [0,0.7]
+        self.friction = [0.24,0]
+
+    def update(self,pos):
+        super().update(pos)
+        self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
+        self.omamoris.update()
+
+    def equip_omamori(self,omamori_index):
+        new_omamori=self.omamoris.omamori_list[omamori_index]
+        if new_omamori not in self.omamoris.equipped_omamoris:#add the omamori
+            if len(self.omamoris.equipped_omamoris)<3:#maximum number of omamoris to equip
+                self.omamoris.equipped_omamoris.append(new_omamori)
+                new_omamori.attach()
+        else:#remove the omamori
+            old_omamori=self.omamoris.omamori_list[omamori_index]
+            self.omamoris.equipped_omamoris.remove(old_omamori)
+            old_omamori.detach()#call the detach function of omamori
+
+    def to_json(self):#things to save: needs to be a dict
+        health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
+
+        abilities={}
+        for key,ability in self.abilities.items():
+            abilities[key]=True
+        abilities['dash']=self.dash
+        abilities['wall']=self.wall
+
+        save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities}
+        return save_dict
+
+    def from_json(self,data):#things to load. data is a dict
+        self.max_health=data['health']['max_health']
+        self.max_spirit=data['health']['max_spirit']
+        self.health=data['health']['health']
+        self.spirit=data['health']['spirit']
+
+        self.dash=data['abilities']['dash']
+        self.wall=data['abilities']['wall']
+
+        self.inventory=data['inventory']
+
+        self.abilities={}
+        for ability in data['abilities'].keys():
+            if ability == 'dash' or ability == 'wall':
+                pass
+            else:
+                self.abilities[ability]=getattr(sys.modules[__name__], ability)
+
 class Enemy(Character):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -367,6 +467,7 @@ class Enemy(Character):
         self.friction=[0.5,0]
         self.currentstate = states_enemy.Idle(self)
         self.attack_distance = 0
+        self.dmg = 10#sword damage
 
     def update(self,pos,playerpos):
         #self.group_distance()#need to be before currentstate.update(): fails sometimes
@@ -765,104 +866,6 @@ class John(Enemy):
         self.attack_distance = 80
         self.attack = Sword
 
-class Player(Character):
-
-    sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
-
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/')
-        self.image = self.sprites.sprite_dict['main']['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
-        self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
-        self.max_vel = 4
-
-        self.max_health = 250
-        self.max_spirit = 100
-        self.health = 250
-        self.spirit = 100
-
-        self.cosmetics = game_objects.cosmetics
-        self.projectiles = game_objects.fprojectiles#pygame.sprite.Group()
-
-        self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
-        self.equip='Thunder'#ability pointer
-        self.sword=Sword
-        self.shield=Shield
-        self.dash=True
-        self.wall=True
-
-        self.spawn_point=[{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
-        self.inventory={'Amber_Droplet':23,'Bone':2}#the keys need to have the same name as their respective classes
-        self.omamoris = Omamoris(self)
-        self.currentstate = states_player.Idle(self)
-
-        self.set_abs_dist()
-
-    def set_abs_dist(self):#the absolute distance, i.e. the total scroll
-        self.abs_dist=[247,180]#the coordinate for buring the bone
-
-    def death(self):
-        self.cosmetics.add(Corpse([self.rect[0],self.rect[1]]))
-        new_game_state = states.Death(self.game_objects.game,'Death')
-        new_game_state.enter_state()
-        self.set_abs_dist()
-
-    def enter_idle(self):
-        self.currentstate = states_player.Idle(self)
-
-    def reset_movement(self):
-        self.velocity = [0,0]
-        self.acceleration = [0,0.7]
-        self.friction = [0.24,0]
-
-    def update(self,pos):
-        super().update(pos)
-        self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
-        self.omamoris.update()
-
-    def equip_omamori(self,omamori_index):
-        new_omamori=self.omamoris.omamori_list[omamori_index]
-        if new_omamori not in self.omamoris.equipped_omamoris:#add the omamori
-            if len(self.omamoris.equipped_omamoris)<3:#maximum number of omamoris to equip
-                self.omamoris.equipped_omamoris.append(new_omamori)
-                new_omamori.attach()
-        else:#remove the omamori
-            old_omamori=self.omamoris.omamori_list[omamori_index]
-            self.omamoris.equipped_omamoris.remove(old_omamori)
-            old_omamori.detach()#call the detach function of omamori
-
-    def to_json(self):#things to save: needs to be a dict
-        health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
-
-        abilities={}
-        for key,ability in self.abilities.items():
-            abilities[key]=True
-        abilities['dash']=self.dash
-        abilities['wall']=self.wall
-
-        save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities}
-        return save_dict
-
-    def from_json(self,data):#things to load. data is a dict
-        self.max_health=data['health']['max_health']
-        self.max_spirit=data['health']['max_spirit']
-        self.health=data['health']['health']
-        self.spirit=data['health']['spirit']
-
-        self.dash=data['abilities']['dash']
-        self.wall=data['abilities']['wall']
-
-        self.inventory=data['inventory']
-
-        self.abilities={}
-        for ability in data['abilities'].keys():
-            if ability == 'dash' or ability == 'wall':
-                pass
-            else:
-                self.abilities[ability]=getattr(sys.modules[__name__], ability)
-
 class NPC(Character):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -879,6 +882,7 @@ class NPC(Character):
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()  #temp
         self.load_conversation()
+        self.counter=0
 
     def load_conversation(self):
         self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
@@ -923,118 +927,42 @@ class NPC(Character):
             else:
                 self.walk()
 
+    def buisness(self):#enters after conversation
+        pass
+
 class Aslat(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
-        self.counter=0
 
 class Sahkar(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
-        self.counter=0
 
-class Astrid(NPC):
+class Astrid(NPC):#vendor
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
-        self.counter=0
         self.inventory={'Bone':10,'Amber_Droplet':1}#itam+price
 
-    def interact(self):
+    def buisness(self):
         new_state = states.Vendor(self.game_objects.game, self)
         new_state.enter_state()
 
-    def AI(self):
-        pass
+class MrSmith(NPC):
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+
+    def buisness(self):
+        new_state = states.Smith(self.game_objects.game, self)
+        new_state.enter_state()
 
 class MrBanks(NPC):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.name = 'MrBanks'
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = pygame.Rect(pos[0],pos[1],20,48)
-        self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.portrait=pygame.image.load('Sprites/Enteties/NPC/'+self.name+ '/Woman1.png').convert_alpha()
-        self.text_surface=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_BG.png").convert_alpha()
-        self.sprites = Read_files.Sprites_enteties("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.conversation=Read_files.Conversations('Sprites/Enteties/NPC/'+self.name+ '/conversation.txt')#a dictionary of conversations with "world state" as keys
-        self.conv_action=['deposit','withdraw']
-        self.conv_action_BG=pygame.image.load("Sprites/Enteties/NPC/conv/Conv_action_BG.png").convert_alpha()
-        self.conv_possition=[[400],[300]]
+        self.ammount = 0
 
-        self.loot={'Coin':2}#the keys need to have the same name as their respective classes
-        self.business=False
-        self.ammount=0
-
-
-    def AI(self):
-        if abs(self.rect[0])>500 or abs(self.rect[1])>500:#if far away
-            self.stay_still()
-        else:
-            self.move_again()
-
-
-
-    def blit_conv_action(self,game_screen):
-        game_screen.blit(self.conv_action_BG,(850,200))#the text BG
-
-        if not self.business:#if not busness
-
-            if self.conv_idx[1]<=0:
-                self.conv_idx[1]=0
-            elif self.conv_idx[1]>=len(self.conv_action):
-                self.conv_idx[1]=len(self.conv_action)-1
-
-            self.font.render(game_screen,'o',(930,self.conv_possition[1][self.conv_idx[1]]),1)#call the self made aplhabet blit and blit the conversation
-            self.conv_possition=[[],[]]
-
-            scale=[1]*len(self.conv_action)
-            scale[self.conv_idx[1]]=2
-            i=1
-
-            for conv in self.conv_action:
-                self.font.render(game_screen,conv,(950,250+50*i),scale[i-1])#call the self made aplhabet blit and blit the conversation
-                self.conv_possition[1].append(250+50*i)
-                i+=1
-        else:#if buisness
-            game_screen.blit(self.conv_action_BG,(850,200))#the text BG
-            self.font.render(game_screen,str(self.ammount)+' coins?',(940,300),1)#call the self made aplhabet blit and blit the conversation
-            self.font.render(game_screen,self.conv_action[self.conv_idx[1]]+'?',(930,270),1)#call the self made aplhabet blit and blit the conversation
-
-            self.conv_possition[0]=[920,1020]
-
-            if self.conv_idx[0]<=0:
-                self.conv_idx[0]=0
-            elif self.conv_idx[0]>=2:
-                self.conv_idx[0]=1
-            scale=[1,1]#yes or no
-            scale[self.conv_idx[0]]=2
-
-            self.font.render(game_screen,'Yes',(940,400),scale[0])#call the self made aplhabet blit and blit the conversation
-            self.font.render(game_screen,'No',(1040,400),scale[1])#call the self made aplhabet blit and blit the conversation
-            self.font.render(game_screen,'o',(self.conv_possition[0][self.conv_idx[0]],400),1)#call the self made aplhabet blit and blit the conversation
-
-    def trade(self,player):#exchane of money
-        if self.conv_idx[0]==0:#if press yes
-            if self.conv_action[self.conv_idx[1]] == 'deposit':
-                player.loot['Coin']-=self.ammount
-                self.loot['Coin']+=self.ammount
-            elif self.conv_action[self.conv_idx[1]] == 'withdraw':
-                player.loot['Coin']+=self.ammount
-                self.loot['Coin']-=self.ammount
-        else:#if press no
-            self.buisness=False
-            self.ammount=0
-
-    def upinteger(self,player):
-        self.ammount+=1*int(self.business)
-        if self.conv_action[self.conv_idx[1]] == 'deposit':
-            self.ammount=min(player.loot['Coin'],self.ammount)
-        elif self.conv_action[self.conv_idx[1]] == 'withdraw':
-            self.ammount=min(self.loot['Coin'],self.ammount)
-
-    def downinteger(self,player):
-        self.ammount-=1*int(self.business)
-        self.ammount=max(0,self.ammount)#minimum 0
+    def buisness(self):
+        new_state = states.Bank(self.game_objects.game, self)
+        new_state.enter_state()
 
 class Boss(Enemy):
     def __init__(self,pos,game_objects):
@@ -1214,7 +1142,7 @@ class Abilities(pygame.sprite.Sprite):
         super().__init__()
         self.entity = entity
         self.state = 'main'
-        self.animation = animation.Ability_animation(self)
+        self.animation = animation.Basic_animation(self)
         self.image = self.sprites[self.state][0]
 
     def rectangle(self):
@@ -1326,10 +1254,13 @@ class Thunder_aura(Melee):
     def rectangle(self):
         self.rect = self.image.get_rect()
         self.rect.center = self.entity.rect.center
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(self.entity.rect.x,self.entity.rect.y,50,50)
+        self.hitbox.center = self.rect.center
 
     def update_hitbox(self):
-        pass
+        self.hitbox.inflate_ip(3,3)#the speed should match the animation
+        self.hitbox[2]=min(self.hitbox[2],self.rect[2])
+        self.hitbox[3]=min(self.hitbox[3],self.rect[3])
 
     def reset_timer(self):
         if self.state=='pre':
@@ -1344,7 +1275,7 @@ class Sword(Melee):
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg=10
+        self.dmg = entity.dmg
 
     def rectangle(self):
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
@@ -1378,7 +1309,7 @@ class Sword(Melee):
 class Darksaber(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg=0
+        self.dmg = 0
         self.lifetime=10#swrod hitbox duration
 
     def collision_enemy(self,collision_enemy):
@@ -1412,14 +1343,21 @@ class Thunder(Projectiles):
 
     def __init__(self,entity,rect):
         super().__init__(entity)
-        self.dmg=10
+        self.dmg = 10
         self.rect.midbottom = rect.midbottom
-        self.lifetime=25
-        self.velocity=[0,0]
+        self.lifetime = 1000
+        self.velocity = [0,0]
         self.hitbox.center = self.rect.center
+        self.state = 'pre'
 
     def collision_enemy(self,collision_enemy):
-        self.dmg=0
+        self.dmg = 0
+
+    def reset_timer(self):
+        if self.state=='pre':
+            self.state='main'
+        elif self.state=='main':
+            self.kill()
 
 class Poisoncloud(Projectiles):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Poisoncloud/')
@@ -1519,28 +1457,68 @@ class Arrow(Projectiles):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
-class Loot(Dynamicentity):
+class Dynamic_animated(Dynamicentity):#animated stuff that collide with collision block
     def __init__(self,pos):
         super().__init__(pos)
-        self.lifetime=500
-        self.state='idle'
-        self.animation=animation.Basic_animation(self)
-
-    def destory(self):
-        if self.lifetime<0:#remove after a while
-            self.kill()
+        self.animation = animation.Basic_animation(self)
+        self.currentstate = states_basic.Idle(self)
 
     def update(self,scroll):
-        self.lifetime-=1
         self.update_pos(scroll)
         self.update_vel()
+        self.currentstate.update()
         self.animation.update()
-        self.destory()
 
-class Enemy_drop(Loot):
+    def update_vel(self):
+        pass
+
+    def reset_timer(self):
+        pass
+
+class Soul_essence(Dynamic_animated):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/soul_essence/')
+
+    def __init__(self,pos,game_objects = None):
+        super().__init__(pos)
+        self.game_objects = game_objects
+        self.velocity=[0,0]
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=self.rect.copy()
+        self.description = 'A essence container'
+
+    def pickup(self,player):
+        player.inventory['Soul_essence'] += 1
+        #a cutscene?
+        self.kill()
+
+    def update(self,scroll):
+        super().update(scroll)
+        obj1 = particles.Absorb_particle(self.rect.center,radius=100,lifetime=20,vel=[2,4])
+        self.game_objects.cosmetics.add(obj1)
+
+class Tungsten(Dynamic_animated):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/tungsten/')
+
+    def __init__(self,pos,game_objects = None):
+        super().__init__(pos)
+        self.game_objects = game_objects
+        self.velocity=[0,0]
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=self.rect.copy()
+        self.description = 'A heavy rock'
+
+    def pickup(self,player):
+        player.inventory['Tungsten'] += 1
+        #a cutscene?
+        self.kill()
+
+class Enemy_drop(Dynamic_animated):
     def __init__(self,pos):
         super().__init__(pos)
         self.velocity=[random.randint(-3, 3),-4]
+        self.lifetime=500
 
     def check_collisions(self):
         if self.collision_types['bottom']:
@@ -1554,7 +1532,13 @@ class Enemy_drop(Loot):
 
     def update(self,pos):
         self.check_collisions()#need to be before super.update
+        self.lifetime-=1
         super().update(pos)
+        self.destory()
+
+    def destory(self):
+        if self.lifetime < 0:#remove after a while
+            self.kill()
 
     def pickup(self,player):
         obj=(self.__class__.__name__)#get the loot in question
@@ -1589,7 +1573,7 @@ class Bone(Enemy_drop):
             player.spawn_point.append({'map':player.game_objects.map.level_name, 'point':player.abs_dist})
             player.currentstate = states_player.Plant_bone(player)
 
-class Spiritsorb(Loot):
+class Spiritsorb(Enemy_drop):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')
 
     def __init__(self,pos):
@@ -1606,7 +1590,7 @@ class Spiritsorb(Loot):
         player.spirit += 10
         self.kill()
 
-class Animatedentity(Staticentity):
+class Animatedentity(Staticentity):#animated stuff that doesn't move around
     def __init__(self,pos):
         super().__init__(pos)
         self.animation = animation.Basic_animation(self)
@@ -1617,31 +1601,24 @@ class Animatedentity(Staticentity):
         self.currentstate.update()
         self.animation.update()
 
+    def reset_timer(self):
+        pass
+
 class Corpse(Animatedentity):
-    def __init__(self,pos):
+    sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/corpse/')
+
+    def __init__(self,pos,map):
         super().__init__(pos)
         self.currentstate = states_basic.Once(self)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/corpse/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-
         self.map = map
 
-class Cosmetics(Animatedentity):
-    def __init__(self,pos):
-        super().__init__(pos)
+    def reset_timer(self):
+        self.currentstate.handle_input('Idle')
 
-    def update(self,scroll):
-        self.lifetime-=1
-        super().update(scroll)
-        self.destroy()
-
-    def destroy(self):
-        if self.lifetime<0:
-            self.kill()
-
-class Spawneffect(Cosmetics):
+class Spawneffect(Animatedentity):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/GFX/respawn/')
 
     def __init__(self,pos):
@@ -1649,16 +1626,22 @@ class Spawneffect(Cosmetics):
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-        self.lifetime=10
+        self.finish = False
 
-class Slash(Cosmetics):
+    def reset_timer(self):
+        self.finish = True
+        self.kill()
+
+class Slash(Animatedentity):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/GFX/slash/')
 
     def __init__(self,pos):
         super().__init__(pos)
         self.state=str(random.randint(1, 3))
         self.image = self.sprites[self.state][0]
-        self.lifetime=10
+
+    def reset_timer(self):
+        self.kill()
 
 class Interactable(Animatedentity):
     def __init__(self,pos):
@@ -1695,6 +1678,9 @@ class Interactable_bushes(Interactable):
 
     def cut(self):
         self.currentstate.handle_input('Cut')
+
+    def reset_timer(self):
+        self.currentstate.handle_input('Idle')
 
     def distance(self):#doesn't work
         bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
@@ -1766,10 +1752,16 @@ class Spawnpoint(Interactable):
         self.map = map
 
     def interact(self,entity):
-        if self.state != 'once':
-            self.currentstate = states_basic.Once(self,80)
-        entity.spawn_point[0]['map']=self.map
-        entity.spawn_point[0]['point']=self.init_cor
+        if type(self.currentstate).__name__ == 'Idle':
+            entity.spawn_point[0]['map']=self.map
+            entity.spawn_point[0]['point']=self.init_cor
+            self.currentstate.handle_input('Once')
+        else:#once
+            new_state = states.Soul_essence(entity.game_objects.game)
+            new_state.enter_state()
+
+    def reset_timer(self):
+        self.currentstate.handle_input('Idle')
 
 class Menu_Arrow():
 
@@ -1786,7 +1778,7 @@ class Menu_Arrow():
 
 class Menu_Box():
     def __init__(self):
-        self.img = pygame.image.load("Sprites/UI/Menu/box.png").convert_alpha()#select box
+        self.img = pygame.image.load("Sprites/utils/box.png").convert_alpha()#select box
         self.rect = self.img.get_rect()
 
     def update(self,pos):
@@ -1828,6 +1820,9 @@ class Omamori():
     def attach(self):
         self.state='equip'
         self.animation.reset_timer()
+
+    def reset_timer(self):
+        pass
 
 class Double_jump(Omamori):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_jump/')#for inventory

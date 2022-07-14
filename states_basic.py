@@ -4,7 +4,7 @@ class Entity_States():
     def __init__(self,entity):
         self.entity=entity
         self.entity.state=str(type(self).__name__).lower()#the name of the class
-        self.entity.animation.reset_timer()
+        self.entity.animation.frame = 0
 
     def update(self):
         self.update_state()
@@ -32,20 +32,16 @@ class Idle(Entity_States):
              self.enter_state('Cut')
         elif input == 'Opening':
             self.enter_state('Opening')
+        elif input == 'Once':
+            self.enter_state('Once')
 
 class Once(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
-        self.flag = False#to make sure it doesn't finish in the first frame = 0
 
-    def update_state(self):
-        if self.entity.animation.frame==0 and self.flag:#enter when animation is finished
-            self.finish()
-
-        self.flag = True
-
-    def finish(self):
-        self.enter_state('Idle')
+    def handle_input(self,input):
+        if input=='Idle':
+             self.enter_state('Idle')
 
 class Hurt(Once):
     def __init__(self,entity):
@@ -55,8 +51,9 @@ class Cut(Once):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def finish(self):
-        self.entity.kill()
+    def handle_input(self,input):
+        if input=='Idle':
+            self.entity.kill()
 
 class Opening(Once):
     def __init__(self,entity):

@@ -6,7 +6,7 @@ import cutscene
 
 class Game_State():
     def __init__(self,game):
-        self.font = Read_files.Alphabet("Sprites/UI/Alphabet/Alphabet.png")#intitilise the alphabet class, scale of alphabet
+        self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
         self.game = game
 
     def update(self):
@@ -429,50 +429,197 @@ class Gameplay(Game_State):
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-class Fadein(Gameplay):
-    def __init__(self,game):
+class Ability_Menu(Gameplay):
+    def __init__(self, game):
         super().__init__(game)
-        self.game.game_objects.player.reset_movement()
+        self.abilities=list(self.game.game_objects.player.abilities.keys())
+        self.index=self.abilities.index(self.game.game_objects.player.equip)
 
-        self.count = 0
-        self.fade_length = 20
+        symbol1=pygame.image.load("Sprites/Attack/Darksaber/symbol/darksaber.png").convert_alpha()
+        symbol2=pygame.image.load("Sprites/Attack/Heal/symbol/heal.png").convert_alpha()
+        symbol3=pygame.image.load("Sprites/Attack/Force/symbol/force.png").convert_alpha()
+        symbol4=pygame.image.load("Sprites/Attack/thunder/symbol/hammer.png").convert_alpha()
+        symbol5=pygame.image.load("Sprites/Attack/Arrow/symbol/arrow.png").convert_alpha()
 
-        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
-        self.fade_surface.set_alpha(255)
-        self.fade_surface.fill((0,0,0))
+        hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
+        hud3=pygame.image.load("Sprites/Attack/HUD/abilityHUD3.png").convert_alpha()
+        hud4=pygame.image.load("Sprites/Attack/HUD/abilityHUD4.png").convert_alpha()
+        hud5=pygame.image.load("Sprites/Attack/HUD/abilityHUD5.png").convert_alpha()
+        hud6=pygame.image.load("Sprites/Attack/HUD/abilityHUD6.png").convert_alpha()
+
+        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Thunder':symbol4,'Arrow':symbol5}
+        self.hud=[hud2,hud3,hud4,hud5,hud6]
+        self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
 
     def update(self):
         super().update()
-        self.count += 1
-        if self.count > self.fade_length:
-            self.exit()
-
-    def exit(self):
-        self.game.game_objects.load_bg_music()
-        self.exit_state()
+        pygame.time.wait(100)#slow motion
 
     def render(self):
         super().render()
-        self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
-        self.game.screen.blit(self.fade_surface, (0,0))
+        self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)
+
+        hud=self.hud[self.index]
+        for index,ability in enumerate(self.abilities):
+            hud.blit(self.symbols[ability],self.coordinates[index])
+
+        self.game.screen.blit(hud,(250,100))
 
     def handle_events(self, input):
-        pass
+        if input[0]:#press
+            if input[-1] == 'right':
+                self.index+=1
+                if self.index>len(self.abilities)-1:
+                    self.index=0
+            elif input[-1] =='left':
+                self.index-=1
+                if self.index<0:
+                    self.index=len(self.abilities)-1
+        elif input [1]:#release
+            if input[-1]=='rb':
+                self.game.game_objects.player.equip=self.abilities[self.index]
+                self.exit_state()
 
-class Fadeout(Fadein):
-    def __init__(self,game):
+class Select_Menu(Gameplay):
+    def __init__(self, game):
         super().__init__(game)
-        self.fade_length = 60
-        self.fade_surface.set_alpha(int(255/self.fade_length))
+        self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
+        self.box = Entities.Menu_Box()
 
-    def exit(self):
-        self.exit_state()
-        new_state=Fadein(self.game)#
-        new_state.enter_state()
+        self.page=1
+        self.pages=[self.map_menu,self.inventory_menu,self.omamori_menu]#what to render
+
+        #invenotory stuff
+        self.use_items=[]
+        self.key_items=[]
+        self.key_number=[]
+        self.use_number=[]
+        for key in self.game.game_objects.player.inventory.keys():
+            item=getattr(sys.modules[Entities.__name__], key)([0,0])#make the object based on the string
+            if hasattr(item, 'use_item'):
+                self.use_items.append(item)
+                self.use_number.append(self.game.game_objects.player.inventory[key])
+
+            else:
+                self.key_items.append(item)
+                self.key_number.append(self.game.game_objects.player.inventory[key])
+
+        self.item_index=[0,0]
+        self.item_positions=(270,150)
+        self.keyitem_positions=(320,50)
+
+        #omamori stuff
+        self.omamori_index=[0,0]
+        self.positions=(255,120)
+        self.equip_positions=(260,25)
+
+    def blit_inventory(self):
+        width=self.inventory_BG[self.page].get_width()
+        self.game.screen.blit(self.inventory_BG[self.page],((self.game.WINDOW_SIZE[0]-width)/2,20))
 
     def render(self):
-        self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
-        self.game.screen.blit(self.fade_surface, (0,0))
+        super().render()
+        self.blit_inventory()
+        self.pages[self.page]()
+
+    def map_menu(self):
+        pass
+
+    def inventory_menu(self):
+        width=self.game.game_objects.player.image.get_width()
+        height=self.game.game_objects.player.image.get_height()
+        scale=2
+        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(105,0))#player position
+
+        for index, item in enumerate(self.use_items):#items we can use
+            item.animation.update()
+            pos=[self.item_positions[0]+20*index,self.item_positions[1]]
+            self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),pos)
+            number = self.font.render(text = str(self.use_number[index]))
+            self.game.screen.blit(number,pos)
+
+        for index, item in enumerate(self.key_items):
+            item.animation.update()
+            pos=[self.keyitem_positions[0]+20*index,self.keyitem_positions[1]]
+            self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),pos)
+            number = self.font.render(text = str(self.key_number[index]))
+            self.game.screen.blit(number,pos)
+
+        self.game.screen.blit(self.box.img,(self.item_positions[0]-16+20*self.item_index[0],135+20*self.item_index[1]))#pointer
+
+    def omamori_menu(self):
+        for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):#equipped ones
+            pos=[self.equip_positions[0]+50*index,self.equip_positions[1]]
+            self.game.screen.blit(omamori.image,pos)
+
+        for index, omamori in enumerate(self.game.game_objects.player.omamoris.omamori_list):#the ones in inventory
+            omamori.animation.update()
+            pos=[self.positions[0]+20*index,self.positions[1]]
+            self.game.screen.blit(omamori.image,pos)
+
+        self.game.screen.blit(self.box.img,(self.positions[0]+20*self.omamori_index[0],135+20*self.omamori_index[1]))#pointer
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'select':
+                self.exit_state()
+            elif input[-1] == 'rb':
+                self.page+=1
+                self.page=min(self.page,2)
+            elif input[-1] == 'lb':
+                self.page-=1
+                self.page=max(self.page,0)
+
+            if self.page==0:#map stuff
+                pass
+
+
+            elif self.page==1:#inventory stuff
+                if input[-1] =='right':
+                    self.item_index[0]+=1
+                    self.item_index[0]=min(self.item_index[0],5)
+                elif input[-1] =='left':
+                    self.item_index[0]-=1
+                    self.item_index[0]=max(self.item_index[0],0)
+                elif input[-1] =='down':
+                    self.item_index[1]+=1
+                    self.item_index[1]=min(self.item_index[1],1)
+                elif input[-1] =='up':
+                    self.item_index[1]-=1
+                    self.item_index[1]=max(self.item_index[1],0)
+                elif input[-1]=='a' or input[-1]=='return':
+                    self.use_item()
+
+            elif self.page==2:#omamori stuff
+                if input[-1] =='right':
+                    self.omamori_index[0]+=1
+                    self.omamori_index[0]=min(self.omamori_index[0],5)
+                elif input[-1] =='left':
+                    self.omamori_index[0]-=1
+                    self.omamori_index[0]=max(self.omamori_index[0],0)
+                elif input[-1] =='down':
+                    self.omamori_index[1]+=1
+                    self.omamori_index[1]=min(self.omamori_index[1],1)
+                elif input[-1] =='up':
+                    self.omamori_index[1]-=1
+                    self.omamori_index[1]=max(self.omamori_index[1],0)
+                elif input[-1]=='a':
+                    self.choose_omamori()
+
+    def choose_omamori(self):
+        omamori_index=self.omamori_index[0]
+        if self.omamori_index[1]==1:#if on the bottom row
+            omamori_index+=5
+        if omamori_index<len(self.game.game_objects.player.omamoris.omamori_list):
+            self.game.game_objects.player.equip_omamori(omamori_index)
+
+    def use_item(self):
+        item_index=self.item_index[0]
+        if self.item_index[1]==1:#if on the bottom row
+            item_index+=5
+        if item_index<len(self.use_items):
+            self.use_items[item_index].use_item(self.game.game_objects.player)
+            self.exit_state()
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -514,6 +661,171 @@ class Conversation(Gameplay):
                     self.conv = self.npc.get_conversation('state_1')
                     if not self.conv:
                         self.exit_state()
+
+    def exit_state(self):
+        super().exit_state()
+        self.npc.buisness()
+
+class Smith(Gameplay):
+    def __init__(self, game, npc):
+        super().__init__(game)
+        self.npc = npc
+        self.pointer_index = [0,0]#position of box
+        self.init()
+
+    def init(self):
+        self.pointer = Entities.Menu_Arrow()
+        self.bg = self.font.fill_text_bg([64,32])
+
+        self.buy_sur = self.font.render(text = 'upgrade')
+        self.cancel_sur= self.font.render(text = 'Cancel')
+
+    def blit_BG(self):
+        self.bg.blit(self.buy_sur,(30,10))#
+        self.bg.blit(self.cancel_sur,(30,20))#
+        self.game.screen.blit(self.bg,(280,120))#box position
+
+    def render(self):
+        super().render()
+        self.blit_BG()
+        self.blit_response()
+        self.update_pointer()
+
+    def blit_response(self):
+        self.game.screen.blit(self.respond,(190,150))
+
+    def update_pointer(self):
+        self.game.screen.blit(self.pointer.img,(300,130+10*self.pointer_index[1]))#pointer
+
+    def select_item(self):
+        if self.pointer_index[1] == 0:#if we select buy
+            self.upgrade()
+        else:#select cancel
+            self.set_response('What do you want?')
+            self.exit_state()
+
+    def upgrade(self):
+        if self.game.game_objects.player.inventory['Tungsten']>=1:
+            self.game.game_objects.player.inventory['Tungsten'] -= 1
+            self.game.game_objects.player.dmg+=5
+            self.set_response('Now it is better')
+        else:#not enough tungsten
+            self.set_response('You do not have enought heavy rocks')
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'y':
+                self.exit_state()
+
+            elif input[-1] =='down':
+                self.pointer_index[1] += 1
+                self.pointer_index[1] = min(self.pointer_index[1],1)
+            elif input[-1] =='up':
+                self.pointer_index[1] -= 1
+                self.pointer_index[1] = max(self.pointer_index[1],0)
+            elif input[-1]=='a' or input[-1]=='return':
+                self.select_item()
+
+class Bank(Gameplay):
+    def __init__(self, game, npc):
+        super().__init__(game)
+        self.npc = npc
+        self.init()
+        self.pointer_index = [0,0]#position of box
+        self.ammount = 0
+        self.buissness  = False
+
+    def init(self):
+        self.pointer = Entities.Menu_Arrow()
+        self.bg = self.font.fill_text_bg([64,64])
+
+        self.withdraw_surf = self.font.render(text = 'withdraw')
+        self.deposit_surf= self.font.render(text = 'deposit')
+        self.cancel_surf= self.font.render(text = 'cancel')
+
+    def blit_BG(self):
+        if not self.buissness:
+            self.bg.blit(self.withdraw_surf,(30,10))#
+            self.bg.blit(self.deposit_surf,(30,20))#
+            self.bg.blit(self.cancel_surf,(30,30))#
+        self.game.screen.blit(self.bg,(280,120))#box position
+        if self.buissness:
+            self.blit_ammount()#should be at the end
+
+    def update_pointer(self):
+        self.game.screen.blit(self.pointer.img,(300,130+10*self.pointer_index[1]))#pointer
+
+    def update(self):
+        super().update()
+
+    def render(self):
+        super().render()
+        self.blit_BG()
+        self.update_pointer()
+
+    def blit_ammount(self):
+        self.amount_surf = self.font.render(text = str(self.ammount))
+        self.game.screen.blit(self.amount_surf,(310,130))#box position
+
+    def trade(self):#exchane of money
+        if not self.buissness:
+            if self.pointer_index[1]==2:#cancel
+                self.exit_state()
+            elif self.pointer_index[1]==0:#widthdraw
+                self.buissness=True
+                self.bg = self.font.fill_text_bg([64,64])
+            elif self.pointer_index[1]==1:#deposit
+                self.buissness=True
+                self.bg = self.font.fill_text_bg([64,64])
+
+        elif self.buissness:
+            if self.pointer_index[1]==0:#widthdraw
+                self.game.game_objects.player.inventory['Amber_Droplet']+=self.ammount
+                self.npc.ammount-=self.ammount
+            elif self.pointer_index[1]==1:#deposit
+                self.game.game_objects.player.inventory['Amber_Droplet']-=self.ammount
+                self.npc.ammount+=self.ammount
+            self.buissness=False
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'y':
+                self.exit_state()
+
+            if not self.buissness:
+                if input[-1] =='down':
+                    self.pointer_index[1] += 1
+                    self.pointer_index[1] = min(self.pointer_index[1],2)
+                elif input[-1] =='up':
+                    self.pointer_index[1] -= 1
+                    self.pointer_index[1] = max(self.pointer_index[1],0)
+                elif input[-1]=='a' or input[-1]=='return':
+                    self.trade()
+
+            else:#if widhdraw or deposit
+                if input[-1] =='down':
+                    self.ammount -= 1
+                    self.ammount = max(self.ammount,0)
+                elif input[-1] =='up':
+                    self.ammount += 1
+                    if self.pointer_index[1]==0:#widthdraw
+                        self.ammount = min(self.ammount,self.npc.ammount)
+                    else:
+                        self.ammount = min(self.ammount,self.game.game_objects.player.inventory['Amber_Droplet'])
+
+                elif input[-1] =='right':
+                    self.ammount += 100
+                    if self.pointer_index[1]==0:#widthdraw
+                        self.ammount = min(self.ammount,self.npc.ammount)
+                    else:
+                        self.ammount = min(self.ammount,self.game.game_objects.player.inventory['Amber_Droplet'])
+                elif input[-1] == 'left':
+                    self.ammount -= 100
+                    self.ammount = max(self.ammount,0)
+
+
+                elif input[-1]=='a' or input[-1]=='return':
+                    self.trade()
 
 class Vendor(Gameplay):
     def __init__(self, game, npc):
@@ -694,180 +1006,110 @@ class Selecting_items(Vendor):
         else:#not enough money
             self.game.state_stack[-2].set_response('Get loss you poor piece of shit')
 
-class Ability_Menu(Gameplay):
+class Soul_essence(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.abilities=list(self.game.game_objects.player.abilities.keys())
-        self.index=self.abilities.index(self.game.game_objects.player.equip)
+        self.pointer_index = [0,0]#position of box
+        self.init()
+        self.cost = 4
 
-        symbol1=pygame.image.load("Sprites/Attack/Darksaber/symbol/darksaber.png").convert_alpha()
-        symbol2=pygame.image.load("Sprites/Attack/Heal/symbol/heal.png").convert_alpha()
-        symbol3=pygame.image.load("Sprites/Attack/Force/symbol/force.png").convert_alpha()
-        symbol4=pygame.image.load("Sprites/Attack/thunder/symbol/hammer.png").convert_alpha()
-        symbol5=pygame.image.load("Sprites/Attack/Arrow/symbol/arrow.png").convert_alpha()
+    def init(self):
+        self.pointer = Entities.Menu_Arrow()
+        self.bg = self.font.fill_text_bg([64,64])
 
-        hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
-        hud3=pygame.image.load("Sprites/Attack/HUD/abilityHUD3.png").convert_alpha()
-        hud4=pygame.image.load("Sprites/Attack/HUD/abilityHUD4.png").convert_alpha()
-        hud5=pygame.image.load("Sprites/Attack/HUD/abilityHUD5.png").convert_alpha()
-        hud6=pygame.image.load("Sprites/Attack/HUD/abilityHUD6.png").convert_alpha()
+        self.heath_sur = self.font.render(text = 'health')
+        self.spirit_sur = self.font.render(text = 'spirit')
+        self.cancel_sur= self.font.render(text = 'Cancel')
 
-        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Thunder':symbol4,'Arrow':symbol5}
-        self.hud=[hud2,hud3,hud4,hud5,hud6]
-        self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
-
-    def update(self):
-        super().update()
-        pygame.time.wait(100)#slow motion
+    def blit_BG(self):
+        self.bg.blit(self.heath_sur,(30,10))#
+        self.bg.blit(self.spirit_sur,(30,20))#
+        self.bg.blit(self.cancel_sur,(30,30))#
+        self.game.screen.blit(self.bg,(280,120))#box position
 
     def render(self):
         super().render()
-        self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)
+        self.blit_BG()
+        self.update_pointer()
 
-        hud=self.hud[self.index]
-        for index,ability in enumerate(self.abilities):
-            hud.blit(self.symbols[ability],self.coordinates[index])
+    def select(self):
+        if self.pointer_index[1] == 0:#if we select health
+            if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
+                self.game.game_objects.player.max_health += 10
+                self.game.game_objects.player.inventory['Soul_essence']-=self.cost
 
-        self.game.screen.blit(hud,(250,100))
+        elif self.pointer_index[1] == 1:#if we select spirit
+            if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
+                self.game.game_objects.player.max_spirit += 10
+                self.game.game_objects.player.inventory['Soul_essence']-=self.cost                
+        else:#select cancel
+            self.exit_state()
 
-    def handle_events(self, input):
-        if input[0]:#press
-            if input[-1] == 'right':
-                self.index+=1
-                if self.index>len(self.abilities)-1:
-                    self.index=0
-            elif input[-1] =='left':
-                self.index-=1
-                if self.index<0:
-                    self.index=len(self.abilities)-1
-        elif input [1]:#release
-            if input[-1]=='rb':
-                self.game.game_objects.player.equip=self.abilities[self.index]
-                self.exit_state()
-
-class Select_Menu(Gameplay):
-    def __init__(self, game):
-        super().__init__(game)
-        self.inventory_BG=Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/select/")['']
-        self.box = Entities.Menu_Box()
-
-        self.page=1
-        self.pages=[self.map_menu,self.inventory_menu,self.omamori_menu]#what to render
-
-        #invenotory stuff
-        self.use_items=[]
-        self.key_items=[]
-        for item in self.game.game_objects.player.inventory.keys():
-            item=getattr(sys.modules[Entities.__name__], item)([0,0])#make the object based on the string
-            if hasattr(item, 'use_item'):
-                self.use_items.append(item)
-            else:
-                self.key_items.append(item)
-        self.item_index=[0,0]
-
-        #omamori stuff
-        self.omamori_index=[0,0]
-        self.positions=(165,120)
-        self.equip_positions=(170,25)
-
-    def blit_inventory(self):
-        width=self.inventory_BG[self.page].get_width()
-        self.game.screen.blit(self.inventory_BG[self.page],((self.game.WINDOW_SIZE[0]-width)/2,20))
-
-    def render(self):
-        super().render()
-        self.blit_inventory()
-        self.pages[self.page]()
-
-    def map_menu(self):
-        pass
-
-    def inventory_menu(self):
-        width=self.game.game_objects.player.image.get_width()
-        height=self.game.game_objects.player.image.get_height()
-        scale=2
-        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(105,0))#player position
-
-        for index, item in enumerate(self.use_items):
-            item.animation.update()
-            self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(185+20*index,155))
-
-        for index, item in enumerate(self.key_items):
-            item.animation.update()
-            self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240+20*index,60))
-
-        self.game.screen.blit(self.box.img,(165+20*self.item_index[0],135+20*self.item_index[1]))#pointer
-
-    def omamori_menu(self):
-        for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):#equipped ones
-            pos=[self.equip_positions[0]+50*index,self.equip_positions[1]]
-            self.game.screen.blit(omamori.image,pos)
-
-        for index, omamori in enumerate(self.game.game_objects.player.omamoris.omamori_list):#the ones in inventory
-            omamori.animation.update()
-            pos=[self.positions[0]+20*index,self.positions[1]]
-            self.game.screen.blit(omamori.image,pos)
-
-        self.game.screen.blit(self.box.img,(165+20*self.omamori_index[0],135+20*self.omamori_index[1]))#pointer
+    def update_pointer(self):
+        self.game.screen.blit(self.pointer.img,(300,130+10*self.pointer_index[1]))#pointer
 
     def handle_events(self,input):
         if input[0]:#press
-            if input[-1] == 'select':
+            if input[-1] == 'y':
                 self.exit_state()
-            elif input[-1] == 'rb':
-                self.page+=1
-                self.page=min(self.page,2)
-            elif input[-1] == 'lb':
-                self.page-=1
-                self.page=max(self.page,0)
 
+            elif input[-1] =='down':
+                self.pointer_index[1] += 1
+                self.pointer_index[1] = min(self.pointer_index[1],2)
+            elif input[-1] =='up':
+                self.pointer_index[1] -= 1
+                self.pointer_index[1] = max(self.pointer_index[1],0)
+            elif input[-1]=='a' or input[-1]=='return':
+                self.select()
 
-            if self.page==1:#inventory stuff
-                if input[-1] =='right':
-                    self.item_index[0]+=1
-                    self.item_index[0]=min(self.item_index[0],5)
-                elif input[-1] =='left':
-                    self.item_index[0]-=1
-                    self.item_index[0]=max(self.item_index[0],0)
-                elif input[-1] =='down':
-                    self.item_index[1]+=1
-                    self.item_index[1]=min(self.item_index[1],1)
-                elif input[-1] =='up':
-                    self.item_index[1]-=1
-                    self.item_index[1]=max(self.item_index[1],0)
-                elif input[-1]=='a' or input[-1]=='return':
-                    self.use_item()
+class Fading(Gameplay):#fades out and then in
+    def __init__(self,game):
+        super().__init__(game)
+        self.page = 0
+        self.render_fade=[self.render_out,self.render_in]
+        self.game.game_objects.player.reset_movement()
+        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
+        self.fade_surface.fill((0,0,0))
+        self.init_out()
 
-            if self.page==2:#omamori stuff
-                if input[-1] =='right':
-                    self.omamori_index[0]+=1
-                    self.omamori_index[0]=min(self.omamori_index[0],5)
-                elif input[-1] =='left':
-                    self.omamori_index[0]-=1
-                    self.omamori_index[0]=max(self.omamori_index[0],0)
-                elif input[-1] =='down':
-                    self.omamori_index[1]+=1
-                    self.omamori_index[1]=min(self.omamori_index[1],1)
-                elif input[-1] =='up':
-                    self.omamori_index[1]-=1
-                    self.omamori_index[1]=max(self.omamori_index[1],0)
-                elif input[-1]=='a':
-                    self.choose_omamori()
+    def init_in(self):
+        self.count = 0
+        self.fade_length = 20
+        self.fade_surface.set_alpha(255)
 
-    def choose_omamori(self):
-        omamori_index=self.omamori_index[0]
-        if self.omamori_index[1]==1:#if on the bottom row
-            omamori_index+=5
-        if omamori_index<len(self.game.game_objects.player.omamoris.omamori_list):
-            self.game.game_objects.player.equip_omamori(omamori_index)
+    def init_out(self):
+        self.count = 0
+        self.fade_length = 60
+        self.fade_surface.set_alpha(int(255/self.fade_length))
 
-    def use_item(self):
-        item_index=self.item_index[0]
-        if self.item_index[1]==1:#if on the bottom row
-            item_index+=5
-        if item_index<len(self.use_items):
-            self.use_items[item_index].use_item(self.game.game_objects.player)
-            self.exit_state()
+    def update(self):
+        super().update()
+        self.count += 1
+        if self.count > self.fade_length:
+            self.page += 1
+            self.init_in()
+            if self.page == 2:
+                self.exit()
+
+    def exit(self):
+        self.game.game_objects.load_bg_music()
+        self.exit_state()
+
+    def render(self):
+        self.render_fade[self.page]()
+        self.game.screen.blit(self.fade_surface, (0,0))
+
+    def render_in(self):
+        super().render()
+        self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
+
+    def render_out(self):
+        self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
+
+    def handle_events(self, input):
+        pass
+
+## cutscenens
 
 class Cutscene_engine(Gameplay):
     def __init__(self, game,scene):

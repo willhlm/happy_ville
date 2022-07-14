@@ -56,4 +56,9 @@
    <property name="type" value=""/>
   </properties>
  </tile>
+ <tile id="21">
+  <properties>
+   <property name="name" value=""/>
+  </properties>
+ </tile>
 </tileset>

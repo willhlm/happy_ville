@@ -63,7 +63,7 @@ class Game_Objects():
     def load_map(self, map_name, spawn = '1'):
         self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
-        new_game_state = states.Fadeout(self.game)
+        new_game_state = states.Fading(self.game)
         new_game_state.enter_state()
 
     def load_bg_music(self):
@@ -179,7 +179,6 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,2)#draw hitbox
-
 
     def to_json(self):#stuff to save
         save_dict={'cutscenes_complete':self.cutscenes_complete}

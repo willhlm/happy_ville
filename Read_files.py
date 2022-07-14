@@ -150,7 +150,7 @@ class Sprites_Player(Sprites):
 
 #class for reading and rendering fonts
 class Alphabet():
-    def __init__(self, path):
+    def __init__(self):
 
         self.char_size = (4,6)
         self.character_order=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?']

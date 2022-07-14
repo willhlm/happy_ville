@@ -59,18 +59,18 @@ class Particles(pygame.sprite.Sprite):
         self.image.set_colorkey((0,0,0,255))
 
 class Absorb_particle(Particles):
-    def __init__(self,pos):
+    def __init__(self,pos,radius=400,lifetime=60,vel=[7,13]):
         super().__init__()
         angle=random.randint(-180, 180)#the ejection anglex
 
         self.angle = -(2*math.pi*angle)/360
         self.fade = 255
-        self.radius = 400
+        self.radius = radius
         self.pos = [pos[0]+self.radius*math.cos(self.angle),pos[1]+self.radius*math.sin(self.angle)]
-        self.lifetime = 60
+        self.lifetime = lifetime
 
         self.scale = 1
-        amp=random.randint(7, 13)
+        amp=random.randint(vel[0], vel[1])
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
         self.colour = [255,255,255,self.fade]
 

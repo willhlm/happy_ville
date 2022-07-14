@@ -654,11 +654,11 @@ class Thunder(Abillitites):
         self.entity.cosmetics.add(self.aura)
         self.phases=['pre','charge','main']
         self.phase=self.phases[0]
-        self.entity.spirit -= 10
 
     def update_state(self):
         super().update_state()
         self.entity.spirit -= 0.5
+        self.aura.update_hitbox()
 
     def handle_movement(self,input):
         pass
@@ -671,7 +671,7 @@ class Thunder(Abillitites):
         if collision_ene:
             for enemy in collision_ene:
                 ability=self.entity.abilities['Thunder'](self.entity,enemy.rect)
-                self.entity.projectiles.add(ability)#add sword to group
+                self.entity.projectiles.add(ability)#add attack to group
 
     def handle_release_input(self,input):
         if input[-1]=='b':#when release the botton
