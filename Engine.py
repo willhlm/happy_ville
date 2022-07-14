@@ -54,8 +54,8 @@ class Collisions():
             #if hit enemy
             if collision_enemy:
                 if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':
-                    collision_enemy.take_dmg(projectile.dmg)
                     projectile.collision_enemy(collision_enemy)
+                    collision_enemy.take_dmg(projectile.dmg)
             #hit platform
             elif collision_plat:
                 projectile.collision_plat()

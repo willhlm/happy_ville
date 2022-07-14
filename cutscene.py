@@ -53,7 +53,7 @@ class Deer_encounter(Cutscene_engine):
             self.player.velocity[0]=0
             self.entity.velocity[0]=5
 
-        if self.timer>100:
+        if self.timer>200:
             self.finished=True
             self.game_objects.camera[-1].exit_state()
             self.entity.kill()
@@ -100,8 +100,6 @@ class Defeated_boss(Cutscene_engine):
         self.step1 = False
         self.step2 = False
         self.abillity = 'dash'
-        pos = [self.player.rect.x,self.player.rect.y]
-        self.particles = particles.Absorb_particles(self.game_objects.cosmetics,pos)
         self.set_image()
         self.const = 0.5#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
 
@@ -127,9 +125,11 @@ class Defeated_boss(Cutscene_engine):
 
     def render(self):
         if self.step1:
+            particle = particles.General_particle(self.player.rect.center)
+            self.game_objects.cosmetics.add(particle)
+
             self.game_objects.cosmetics.draw(self.game_objects.game.screen)
             self.game_objects.players.draw(self.game_objects.game.screen)
-            self.particles.create_particles()
 
         if self.step2 and not self.step3:
             self.game_objects.game.screen.blit(self.image,(100, 50))
@@ -149,9 +149,6 @@ class Death(Cutscene_engine):
     def update(self):
         if self.stage==0:
             self.timer+=1
-
-            if self.timer>100:#fly to sky
-                self.player.velocity[1]=-20
 
             if self.timer>120:
                 self.stage=1

@@ -672,6 +672,7 @@ class Smith(Gameplay):
         self.npc = npc
         self.pointer_index = [0,0]#position of box
         self.init()
+        self.set_response('Welcome')
 
     def init(self):
         self.pointer = Entities.Menu_Arrow()
@@ -679,6 +680,9 @@ class Smith(Gameplay):
 
         self.buy_sur = self.font.render(text = 'upgrade')
         self.cancel_sur= self.font.render(text = 'Cancel')
+
+    def set_response(self,text):
+        self.respond = self.font.render(text = text)
 
     def blit_BG(self):
         self.bg.blit(self.buy_sur,(30,10))#
@@ -836,7 +840,7 @@ class Vendor(Gameplay):
         self.init()
 
     def init(self):
-        self.vendor_BG = Read_files.Sprites().load_all_sprites("Sprites/UI/Menu/vendor/")['']
+        self.vendor_BG = self.font.fill_text_bg([300,200])
 
         self.items = []
         for item in self.npc.inventory.keys():
@@ -863,8 +867,8 @@ class Vendor(Gameplay):
         self.respond = self.font.render(text = text)
 
     def blit_BG(self):
-        width=self.vendor_BG[0].get_width()
-        self.game.screen.blit(self.vendor_BG[0],((self.game.WINDOW_SIZE[0]-width)/2,20))
+        width=self.vendor_BG.get_width()
+        self.game.screen.blit(self.vendor_BG,((self.game.WINDOW_SIZE[0]-width)/2,20))
 
     def update(self):
         super().update()
@@ -1035,13 +1039,16 @@ class Soul_essence(Gameplay):
     def select(self):
         if self.pointer_index[1] == 0:#if we select health
             if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
-                self.game.game_objects.player.max_health += 10
+                pos = [self.game.game_objects.player.rect[0],-100]
+                heart=Entities.Heart_container(pos)
+                self.game.game_objects.loot.add(heart)
                 self.game.game_objects.player.inventory['Soul_essence']-=self.cost
-
         elif self.pointer_index[1] == 1:#if we select spirit
             if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
-                self.game.game_objects.player.max_spirit += 10
-                self.game.game_objects.player.inventory['Soul_essence']-=self.cost                
+                pos = [self.game.game_objects.player.rect[0],-100]
+                spirit=Entities.Spirit_container(pos)
+                self.game.game_objects.loot.add(spirit)
+                self.game.game_objects.player.inventory['Soul_essence']-=self.cost
         else:#select cancel
             self.exit_state()
 

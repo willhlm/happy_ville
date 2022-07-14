@@ -377,8 +377,8 @@ class Player(Character):
         self.wall=True
         self.dmg = 10
 
-        self.spawn_point=[{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
-        self.inventory={'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':1}#the keys need to have the same name as their respective classes
+        self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
+        self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':1}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)
         self.currentstate = states_player.Idle(self)
 
@@ -390,7 +390,7 @@ class Player(Character):
     def death(self):
         map=self.game_objects.map.level_name
         pos=[self.rect[0],self.rect[1]]
-        self.cosmetics.add(Corpse(pos,map))
+        self.cosmetics.add(Player_Soul(pos))
         new_game_state = states.Death(self.game_objects.game,'Death')
         new_game_state.enter_state()
         self.set_abs_dist()
@@ -1001,6 +1001,9 @@ class Reindeer(Boss):
     def update(self,pos,playerpos):
         super().update(pos,playerpos)
 
+    def peaceAI(self):
+        pass
+
     def aggroAI(self):
         if self.counter < 40:
             pass
@@ -1303,7 +1306,8 @@ class Sword(Melee):
         for i in range(0,number_particles):
             #obj2 = Sword_particles(pos,dir)
             #self.group.add(obj2)
-            obj1 = particles.Sword_sparks(pos,dir)
+            obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=15,vel=[7,14],dir=dir,scale=1)
+            #obj1 = particles.Sword_sparks(pos,dir)
             self.entity.cosmetics.add(obj1)
 
 class Darksaber(Sword):
@@ -1457,7 +1461,7 @@ class Arrow(Projectiles):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
-class Dynamic_animated(Dynamicentity):#animated stuff that collide with collision block
+class Dynamic_animated(Dynamicentity):#animated stuff with hitbox
     def __init__(self,pos):
         super().__init__(pos)
         self.animation = animation.Basic_animation(self)
@@ -1474,6 +1478,50 @@ class Dynamic_animated(Dynamicentity):#animated stuff that collide with collisio
 
     def reset_timer(self):
         pass
+
+class Heart_container(Dynamic_animated):
+
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/heart_container/')
+
+    def __init__(self,pos,game_objects = None):
+        super().__init__(pos)
+        self.game_objects = game_objects
+        self.velocity=[0,0]
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=self.rect.copy()
+        self.description = 'A heart container'
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.velocity[1]=3
+
+    def pickup(self,player):
+        player.max_health += 1
+        #a cutscene?
+        self.kill()
+
+class Spirit_container(Dynamic_animated):
+
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spirit_container/')
+
+    def __init__(self,pos,game_objects = None):
+        super().__init__(pos)
+        self.game_objects = game_objects
+        self.velocity=[0,0]
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=self.rect.copy()
+        self.description = 'A spirit container'
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.velocity[1]=3
+
+    def pickup(self,player):
+        player.max_spirit += 1
+        #a cutscene?
+        self.kill()
 
 class Soul_essence(Dynamic_animated):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/soul_essence/')
@@ -1494,7 +1542,7 @@ class Soul_essence(Dynamic_animated):
 
     def update(self,scroll):
         super().update(scroll)
-        obj1 = particles.Absorb_particle(self.rect.center,radius=100,lifetime=20,vel=[2,4])
+        obj1 = particles.General_particle(self.rect.center,distance=100,lifetime=20,vel=[2,4],type='spark',dir='isotropic')
         self.game_objects.cosmetics.add(obj1)
 
 class Tungsten(Dynamic_animated):
@@ -1604,19 +1652,32 @@ class Animatedentity(Staticentity):#animated stuff that doesn't move around
     def reset_timer(self):
         pass
 
-class Corpse(Animatedentity):
-    sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/corpse/')
+class Player_Soul(Animatedentity):
+    sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/soul/')
 
-    def __init__(self,pos,map):
+    def __init__(self,pos):
         super().__init__(pos)
         self.currentstate = states_basic.Once(self)
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-        self.map = map
+        self.timer=0
+        self.velocity=[0,0]
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
+
+    def update(self,scroll):
+        super().update(scroll)
+
+        self.timer +=1
+        if self.timer>100:#fly to sky
+            self.velocity[1]=-20
+        elif self.timer>200:
+            self.kill()
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0]+self.velocity[0], self.rect.topleft[1] + pos[1]+self.velocity[1]]
 
 class Spawneffect(Animatedentity):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/GFX/respawn/')
@@ -1752,11 +1813,11 @@ class Spawnpoint(Interactable):
         self.map = map
 
     def interact(self,entity):
-        if type(self.currentstate).__name__ == 'Idle':
+        if type(self.currentstate).__name__ == 'Idle':#single click
             entity.spawn_point[0]['map']=self.map
             entity.spawn_point[0]['point']=self.init_cor
             self.currentstate.handle_input('Once')
-        else:#once
+        else:#odoulbe click
             new_state = states.Soul_essence(entity.game_objects.game)
             new_state.enter_state()
 

@@ -399,14 +399,27 @@ class Counter(Player_states):
 class Death(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['pre','main']
-        self.phase=self.phases[0]
+        self.phase='pre'
         self.stay_still()
         self.entity.death()
+        self.entity.velocity[1]=-3
+        
+        if self.entity.velocity[0]<0:
+            self.dir[0]=1
+        else:
+            self.dir[0]=-1
 
     def increase_phase(self):
         if self.phase=='pre':
-            self.phase='main'
+            if self.entity.collision_types['bottom']:
+                self.phase='main'
+            else:
+                self.phase='charge'
+        elif self.phase=='main':
+            self.phase='post'
+        elif self.phase == 'charge':
+            if self.entity.collision_types['bottom']:
+                self.phase='main'
 
 class Invisible(Player_states):
     def __init__(self,entity):
