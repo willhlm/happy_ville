@@ -1,15 +1,5 @@
 import pygame, math, random, sys
 
-class Weather():#maybe should just be a function
-    def __init__(self,game_objects):
-        self.game_objects = game_objects
-        self.group = game_objects.weather
-
-    def create_particles(self,type,number_particles=100):
-        for i in range(0,number_particles):
-            obj = getattr(sys.modules[__name__], type)(self.game_objects)
-            self.group.add(obj)
-
 class Particles(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()

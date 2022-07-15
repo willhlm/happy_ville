@@ -378,7 +378,7 @@ class Player(Character):
         self.dmg = 10
 
         self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
-        self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':1}#the keys need to have the same name as their respective classes
+        self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)
         self.currentstate = states_player.Idle(self)
 
