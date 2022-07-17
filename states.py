@@ -723,6 +723,7 @@ class Facilities(Gameplay):
         self.render_list=[self.blit_frame1]
         self.handle_list=[self.handle_frame1]
         self.select_list=[self.select_frame1]
+        self.pointer_list = [self.pointer_frame1]
         self.frame = 1
 
     def init_canvas(self,size=[64,64]):
@@ -739,7 +740,7 @@ class Facilities(Gameplay):
     def render(self):
         super().render()
         self.render_list[-1]()
-        self.update_pointer()
+        self.pointer_list[-1]()
         self.blit_response()
 
     def handle_events(self,input):
@@ -751,7 +752,7 @@ class Facilities(Gameplay):
     def blit_response(self):
         self.game.screen.blit(self.respond,(190,150))
 
-    def update_pointer(self):
+    def pointer_frame1(self):
         self.game.screen.blit(self.pointer.img,(300,130+10*self.pointer_index[1]))#pointer
 
     def select(self):
@@ -765,11 +766,13 @@ class Facilities(Gameplay):
         self.render_list.append(getattr(self,'blit_frame'+str(self.frame)))
         self.select_list.append(getattr(self,'select_frame'+str(self.frame)))
         self.handle_list.append(getattr(self,'handle_frame'+str(self.frame)))
+        self.pointer_list.append(getattr(self,'pointer_frame'+str(self.frame)))
 
     def previouse_frame(self):
         self.render_list.pop()
         self.select_list.pop()
         self.handle_list.pop()
+        self.pointer_list.pop()
         self.frame-=1
 
     def handle_frame1(self,input):
@@ -832,6 +835,9 @@ class Bank(Facilities):
             self.game.game_objects.player.inventory['Amber_Droplet']-=self.ammount
             self.npc.ammount+=self.ammount
         self.previouse_frame()
+
+    def pointer_frame2(self):
+        pass
 
     def handle_frame2(self,input):
         if input[0]:#press
@@ -955,8 +961,11 @@ class Vendor(Facilities):
                 item.image.set_alpha(100)
                 self.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,140))
 
-    def update_pointer(self):
+    def pointer_frame1(self):
         self.game.screen.blit(self.pointer.img,(220+20*self.pointer_index[0],60+20*self.pointer_index[1]))#pointer
+
+    def pointer_frame2(self):
+        self.game.screen.blit(self.pointer.img,(300,130+10*self.pointer_index[1]))#pointer
 
     def select_frame1(self):
         self.next_frame()
@@ -970,6 +979,7 @@ class Vendor(Facilities):
         else:
             self.set_response('What do you want?')
         self.previouse_frame()
+        self.pointer = Entities.Menu_Box()
 
     def buy(self):
         if self.game.game_objects.player.inventory['Amber_Droplet']>=self.npc.inventory[self.item]:
@@ -1026,7 +1036,6 @@ class Vendor(Facilities):
                 self.pointer_index[1] = max(self.pointer_index[1],0)
             elif input[-1]=='a' or input[-1]=='return':
                 self.select()
-
 
 ## cutscenens
 

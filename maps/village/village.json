@@ -707,6 +707,24 @@
                  "width":16,
                  "x":96,
                  "y":384
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":213,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"MrBanks"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":272,
+                 "y":368
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -715,7 +733,7 @@
          "y":0
         }],
  "nextlayerid":58,
- "nextobjectid":213,
+ "nextobjectid":214,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
