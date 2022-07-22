@@ -84,7 +84,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('village')
+            self.game.game_objects.load_map('forest_path')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -1037,77 +1037,41 @@ class Vendor(Facilities):
             elif input[-1]=='a' or input[-1]=='return':
                 self.select()
 
-## cutscenens
-
 class Cutscene_engine(Gameplay):
     def __init__(self, game,scene):
         super().__init__(game)
-        self.init(scene)
-        self.game.game_objects.cutscenes_complete.append(self.current_scene.name)
-
-    def init(self,scene):
         self.game.game_objects.player.reset_movement()
-        self.pos = [-self.game.WINDOW_SIZE[1],self.game.WINDOW_SIZE[1]]
-        self.current_scene = getattr(cutscene, scene)(self.game.game_objects)#make an object based on string: send in player, group and camera
+        self.current_scene = getattr(cutscene, scene)(self)#make an object based on string: send in player, group and camera
+        if scene != 'Death':
+            self.game.game_objects.cutscenes_complete.append(scene)
 
     def update(self):
         super().update()
         self.current_scene.update()
-        if self.current_scene.finished:
-            self.exit_state()
 
     def render(self):
         super().render()#want the BG to keep rendering
-        self.cinematic()
         self.current_scene.render()#to plot the abilities. Maybe better with another state?
 
-    def cinematic(self):#black box stuff
-        self.pos[0]+=1#the upper balck box
-        rect1=(0, self.pos[0], self.game.WINDOW_SIZE[0], self.game.WINDOW_SIZE[1])
-        pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
+    def handle_events(self, input):
+        self.current_scene.handle_events(input)
 
-        self.pos[1]-=1#the lower balck box
-        rect2=(0, self.pos[1], self.game.WINDOW_SIZE[0], self.game.WINDOW_SIZE[1])
-        pygame.draw.rect(self.game.screen, (0, 0, 0), rect2)
+class Cutscene_file(Gameplay):
+    def __init__(self, game,scene):
+        super().__init__(game)
+        self.sprites = Read_files.load_sprites('cutscene/'+scene)
+        self.image=self.sprites[0]
+        self.animation=animation.Cutscene_animation(self)
 
-        self.pos[0]=min(-self.game.WINDOW_SIZE[1]*self.current_scene.const,self.pos[0])
-        self.pos[1]=max(self.game.WINDOW_SIZE[1]*self.current_scene.const,self.pos[1])
+        self.game.game_objects.cutscenes_complete.append(scene)
+
+    def update(self):
+        self.animation.update()
+
+    def render(self):
+        self.game.screen.blit(self.image,(0, 0))
 
     def handle_events(self, input):
         if input[0]:#press
             if input[-1] == 'start':
                 self.exit_state()
-            elif input[-1] == 'a':
-                self.current_scene.step3 = True
-
-class Death(Gameplay):
-    def __init__(self, game,scene):
-        super().__init__(game)
-        self.current_scene = getattr(cutscene, scene)(self.game.game_objects)#make an object based on string: send in player, group and camera
-
-    def update(self):
-        super().update()
-        self.current_scene.update()
-
-        if self.current_scene.stage==1:
-            self.game.game_objects.load_map(self.game.game_objects.player.spawn_point[-1]['map'],self.game.game_objects.player.spawn_point[-1]['point'])
-            self.game.game_objects.player.currentstate.change_state('Invisible')
-            self.game.game_objects.camera[-1].exit_state()#go to auto camera
-            self.current_scene.stage=2
-        elif self.current_scene.stage==3:
-            if len(self.game.game_objects.player.spawn_point)==2:#if the respawn was a bone
-                self.game.game_objects.player.spawn_point.pop()
-            self.exit_state()
-
-    def handle_events(self, input):
-        pass
-
-class Cutscene_file(Cutscene_engine):
-    def __init__(self, game,scene):
-        super().__init__(game,scene)
-
-    def init(self,scene):
-        self.current_scene=cutscene.Cutscene_files(scene)
-
-    def render(self):
-        self.current_scene.render(self.game.screen)

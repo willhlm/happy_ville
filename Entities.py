@@ -391,8 +391,10 @@ class Player(Character):
         map=self.game_objects.map.level_name
         pos=[self.rect[0],self.rect[1]]
         self.cosmetics.add(Player_Soul(pos))
-        new_game_state = states.Death(self.game_objects.game,'Death')
+        new_game_state = states.Cutscene_engine(self.game_objects.game,'Death')
         new_game_state.enter_state()
+        #new_game_state = states.Death(self.game_objects.game,'Death')
+        #new_game_state.enter_state()
         self.set_abs_dist()
 
     def enter_idle(self):
@@ -978,9 +980,6 @@ class Boss(Enemy):
     def give_abillity(self):
         self.game_objects.player.abilities[self.ability]=getattr(sys.modules[__name__], self.ability)
 
-#    def updateAI(self):
-#        pass
-
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1004,6 +1003,9 @@ class Reindeer(Boss):
     def peaceAI(self):
         pass
 
+    def updateAI(self):
+        pass
+
     def aggroAI(self):
         if self.counter < 40:
             pass
@@ -1015,7 +1017,6 @@ class Reindeer(Boss):
                     self.currentstate.handle_input('Dash')
                 else:
                     self.currentstate.handle_input('Walk')
-
 
             elif abs(self.player_distance[0])<self.attack_distance:
                 self.currentstate.handle_input('Attack')
