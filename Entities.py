@@ -29,14 +29,12 @@ class PauseGroup(pygame.sprite.Group):#I guess we don't need it
     def update(self, *args):
         pos,playerpos=args
         for s in self.sprites():
-            s.update_pos(pos)
-            self.group_distance(s)
+            self.group_distance(s,pos)
 
     @staticmethod
-    def group_distance(s):
-        bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
-        if s.rect[0]<bounds[0] or s.rect[0]>bounds[1] or s.rect[1]<bounds[2] or s.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
-            pass
+    def group_distance(s,pos):
+        if s.rect[0]<s.bounds[0] or s.rect[0]>s.bounds[1] or s.rect[1]<s.bounds[2] or s.rect[1]>s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+            s.update_pos(pos)
         else:
             s.add(s.group)#add to group
             s.remove(s.pause_group)#remove from pause
@@ -263,6 +261,11 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
 
+    def group_distance(self):
+        if self.rect[0]<self.bounds[0] or self.rect[0]>self.bounds[1] or self.rect[1]<self.bounds[2] or self.rect[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+            self.remove(self.group)#remove from group
+            self.add(self.pause_group)#add to pause
+
 class BG_Block(Staticentity):
     def __init__(self,pos,img,parallax=1):
         super().__init__(pos,img)
@@ -315,6 +318,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack=[animation.Entity_animation(self)]
         self.max_vel=7
         self.game_objects = game_objects
+        self.bounds=[-200,800,-100,350]#-x,+x,-y,+y.
 
     def update(self,pos):
         self.update_pos(pos)
@@ -334,19 +338,10 @@ class Character(Dynamicentity):#enemy, NPC,player
     def knock_back(self,dir):
         self.velocity[0]=dir*30
 
-    def group_distance(self):#doesn't work
-        bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
-        if self.rect[0]<bounds[0] or self.rect[0]>bounds[1] or self.rect[1]<bounds[2] or self.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
-            self.remove(self.group)#remove from group
-            self.add(self.pause_group)#add to pause
-        else:
-            self.add(self.group)#add to group
-            self.remove(self.pause_group)#remove from pause
-
-    def particles(self,dir,number_particles=12):
+    def hurt_particles(self,dir,number_particles=12):
         for i in range(0,number_particles):
             obj1=particles.General_particle(self.rect.center,distance=0,type='circle',lifetime=20,vel=[1,10],dir=dir,scale=1)
-            self.cosmetics.add(obj1)
+            self.game_objects.cosmetics.add(obj1)
 
 class Player(Character):
 
@@ -366,10 +361,9 @@ class Player(Character):
         self.health = 100
         self.spirit = 100
 
-        self.cosmetics = game_objects.cosmetics
-        self.projectiles = game_objects.fprojectiles#pygame.sprite.Group()
+        self.projectiles = game_objects.fprojectiles
 
-        self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
+        self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but created in states
         self.equip='Thunder'#ability pointer
         self.sword=Aila_sword(self)
         self.shield=Shield
@@ -389,11 +383,9 @@ class Player(Character):
     def death(self):
         map=self.game_objects.map.level_name
         pos=[self.rect[0],self.rect[1]]
-        self.cosmetics.add(Player_Soul(pos))
+        self.game_objects.cosmetics.add(Player_Soul(pos))
         new_game_state = states.Cutscene_engine(self.game_objects.game,'Death')
         new_game_state.enter_state()
-        #new_game_state = states.Death(self.game_objects.game,'Death')
-        #new_game_state.enter_state()
         self.set_abs_dist()
 
     def enter_idle(self):
@@ -443,10 +435,8 @@ class Enemy(Character):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.projectiles = game_objects.eprojectiles
-        self.loot_group = game_objects.loot
         self.group = game_objects.enemies
         self.pause_group = game_objects.entity_pause
-        self.cosmetics = game_objects.cosmetics
 
         self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}#random.randint(0, 10)
         self.counter=0
@@ -458,13 +448,15 @@ class Enemy(Character):
         self.currentstate = states_enemy.Idle(self)
         self.attack_distance = 0
         self.dmg = 10#sword damage
+        self.aggro_distance = 200
+        self.spirit = 100
 
     def update(self,pos,playerpos):
-        #self.group_distance()#need to be before currentstate.update(): fails sometimes
         super().update(pos)
         self.AI(playerpos)
+        self.group_distance()#need to be before currentstate.update(): fails sometimes
 
-    def player_collision(self):
+    def player_collision(self):#when lpayer collides with enemy
         if self.aggro:
             self.game_objects.player.take_dmg(10)
             sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
@@ -481,7 +473,7 @@ class Enemy(Character):
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
                 obj = getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y])#make a class based on the name of the key: need to import sys
-                self.loot_group.add(obj)
+                self.game_objects.loot.add(obj)
             self.inventory[key]=0
 
     def countered(self):#player shield
@@ -492,14 +484,7 @@ class Enemy(Character):
     def AI(self,playerpos):
         self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[1]-self.rect.centerx]#check plater distance
         self.counter += 1
-        self.updateAI()#decide aggro or peace
         self.AImethod()#run ether aggro- or peace-AI
-
-    def updateAI(self):#move these into AI methods, or maybe in group distance?
-        if abs(self.player_distance[0])<200 and self.AImethod.__name__ != 'aggroAI':
-            self.AImethod=self.aggroAI
-        elif abs(self.player_distance[0])>200 and self.AImethod.__name__ != 'peaceAI':
-            self.AImethod=self.peaceAI
 
     def cutsceneAI(self):#do nothing
         pass
@@ -513,6 +498,8 @@ class Enemy(Character):
             else:
                 self.dir[0] = -self.dir[0]
                 self.currentstate.handle_input('Walk')
+        if abs(self.player_distance[0])<self.aggro_distance:
+            self.AImethod=self.aggroAI
 
     def aggroAI(self):
         if self.counter < 40:
@@ -536,6 +523,9 @@ class Enemy(Character):
             else:
                 self.counter = 0
                 self.currentstate.handle_input('Idle')
+
+        if abs(self.player_distance[0])>self.aggro_distance:
+            self.AImethod=self.peaceAI
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -643,12 +633,6 @@ class Blue_bird(Enemy):
     def knock_back(self,dir):
         pass
 
-    def update(self,pos,playerpos):
-        super().update(pos,playerpos)
-
-    def updateAI(self):
-        pass
-
     def peaceAI(self):
         if abs(self.player_distance[0])<100:
             self.currentstate.handle_input('Fly')
@@ -690,9 +674,6 @@ class Shroompolin(Enemy):
     def take_dmg(self,dmg):
         pass
 
-    def updateAI(self):
-        pass
-
     def peaceAI(self):
         pass
 
@@ -707,11 +688,8 @@ class Kusa(Enemy):
         self.attack_distance = 30
         self.health = 1
 
-    def updateAI(self):#move these into AI methods, or maybe in group distance?
-        pass
-
     def peaceAI(self):
-        if abs(self.player_distance[0])<150 and self.AImethod.__name__ != 'aggroAI':
+        if abs(self.player_distance[0])<150:
             self.AImethod=self.aggroAI
             self.currentstate.handle_input('Transform')
 
@@ -730,11 +708,8 @@ class Svampis(Enemy):
         self.attack_distance = 30
         self.health = 1
 
-    def updateAI(self):#move these into AI methods, or maybe in group distance?
-        pass
-
     def peaceAI(self):
-        if abs(self.player_distance[0])<150 and self.AImethod.__name__ != 'aggroAI':
+        if abs(self.player_distance[0])<150:
             self.AImethod=self.aggroAI
             self.currentstate.handle_input('Transform')
 
@@ -810,15 +785,10 @@ class Skeleton_archer(Enemy):#change design
         self.health = 50
         self.attack_distance = 300
         self.attack = Arrow
+        self.aggro_distance = 400
 
     def knock_back(self,dir):
         pass
-
-    def updateAI(self):#move these into AI methods, or maybe in group distance?
-        if abs(self.player_distance[0])<400 and self.AImethod.__name__ != 'aggroAI':
-            self.AImethod=self.aggroAI
-        elif abs(self.player_distance[0])>400 and self.AImethod.__name__ != 'peaceAI':
-            self.AImethod=self.peaceAI
 
 class Cultist_rogue(Enemy):
     def __init__(self,pos,game_objects):
@@ -835,9 +805,6 @@ class Cultist_rogue(Enemy):
     def cutsceneAI(self):
         pass
 
-    def updateAI(self):
-        pass
-
 class Cultist_warrior(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -850,9 +817,6 @@ class Cultist_warrior(Enemy):
         self.attack = Sword
 
     def cutsceneAI(self):
-        pass
-
-    def updateAI(self):
         pass
 
 class John(Enemy):
@@ -999,9 +963,6 @@ class Reindeer(Boss):
         super().update(pos,playerpos)
 
     def peaceAI(self):
-        pass
-
-    def updateAI(self):
         pass
 
     def aggroAI(self):
@@ -1289,7 +1250,7 @@ class Sword(Melee):
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
         collision_enemy.knock_back(self.dir[0])
-        collision_enemy.particles(self.dir[0])
+        collision_enemy.hurt_particles(self.dir[0])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         if self.dir[0]>0:
             self.clash_particles(self.rect.midright,self.dir[0])
@@ -1308,7 +1269,7 @@ class Sword(Melee):
             #self.group.add(obj2)
             obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3)
             #obj1 = particles.Sword_sparks(pos,dir)
-            self.entity.cosmetics.add(obj1)
+            self.entity.game_objects.cosmetics.add(obj1)
 
 class Aila_sword(Sword):
     def __init__(self,entity):
@@ -1319,9 +1280,9 @@ class Aila_sword(Sword):
     def init(self):
         self.potrait = Read_files.Sprites().load_all_sprites("Sprites/Enteties/Items/sword")
         self.equip = 'idle'#stone pointer
-        self.frame = 0
+        self.frame = 0#potrait frame
         self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#,'purple':Red_infinity_stone(self)]
-        self.colour = {'idle':[255,255,255,255],'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}
+        self.colour = {'idle':[255,255,255,255],'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
 
     def potrait_animation(self):#called from inventory
         self.potrait_image = self.potrait[self.equip][self.frame//4].copy()
@@ -1330,7 +1291,7 @@ class Aila_sword(Sword):
         if self.frame == len(self.potrait[self.equip])*4:
             self.frame = 0
 
-    def set_stone(self,stone_str):
+    def set_stone(self,stone_str):#set from inventory
         if self.equip!='idle':#if not first time
             self.stones[self.equip].detach()
 
@@ -1339,16 +1300,16 @@ class Aila_sword(Sword):
 
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
-        if self.equip!='idle':
+        if self.equip != 'idle':
             self.stones[self.equip].collision()#call collision specific for stone
 
     def clash_particles(self,pos,dir,number_particles=12):
         angle = random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
             obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3,colour=self.colour[self.equip])
-            self.entity.cosmetics.add(obj1)
+            self.entity.game_objects.cosmetics.add(obj1)
 
-class Darksaber(Sword):
+class Darksaber(Aila_sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.dmg = 0
@@ -1358,7 +1319,7 @@ class Darksaber(Sword):
         if collision_enemy.spirit>=10:
             collision_enemy.spirit-=10
             spirits=Spiritsorb([collision_enemy.rect.x,collision_enemy.rect.y])
-            collision_enemy.loot_group.add(spirits)
+            collision_enemy.game_objects.loot.add(spirits)
         self.kill()
 
 class Projectiles(Abilities):
@@ -1523,7 +1484,7 @@ class Heart_container(Dynamic_animated):
 
     def __init__(self,pos,game_objects = None):
         super().__init__(pos)
-        self.game_objects = game_objects
+        self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
         self.velocity=[0,0]
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
@@ -1545,7 +1506,7 @@ class Spirit_container(Dynamic_animated):
 
     def __init__(self,pos,game_objects = None):
         super().__init__(pos)
-        self.game_objects = game_objects
+        self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
         self.velocity=[0,0]
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
@@ -1588,7 +1549,7 @@ class Tungsten(Dynamic_animated):
 
     def __init__(self,pos,game_objects = None):
         super().__init__(pos)
-        self.game_objects = game_objects
+        self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
         self.velocity=[0,0]
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
@@ -1757,18 +1718,20 @@ class Interactable(Animatedentity):
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects,type):
         super().__init__(pos)
+        self.game_objects = game_objects
         self.group = game_objects.interacting_cosmetics
-        self.pause_group = game_objects.entity_pause
+        self.pause_group=game_objects.entity_pause
 
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/'+type+'/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
+        self.bounds=[-200,800,-100,350]#-x,+x,-y,+y.
 
     def update(self,scroll,test):
         super().update(scroll)
-        #self.distance()
+        self.group_distance()
 
     def collide(self):
         if not self.interacted:
@@ -1780,15 +1743,6 @@ class Interactable_bushes(Interactable):
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
-
-    def distance(self):#doesn't work
-        bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
-        if self.rect[0]<bounds[0] or self.rect[0]>bounds[1] or self.rect[1]<bounds[2] or self.rect[1]>bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
-            self.remove(self.group)#remove from group
-            self.add(self.pause_group)#add to pause
-        else:
-            self.add(self.group)#add to group
-            self.remove(self.pause_group)#remove from pause
 
 class Door(Interactable):
 
@@ -1906,9 +1860,6 @@ class Infinity_stones():
     def collision(self):
         pass
 
-    def slash_speed(self):
-        pass
-
 class Red_infinity_stone(Infinity_stones):#more dmg
 
     def __init__(self,sword):
@@ -1929,28 +1880,12 @@ class Green_infinity_stone(Infinity_stones):#faster slash, changing framerate
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/infinity_stones/green/')#for inventory
         self.colour = 'green'
 
-    def slash_speed(self):
-        self.sword.entity.animation_stack[-1].framerate=3
-
-    def attach(self):
-        pass
-        #self.entity.animation_stack[-1].framerate=3
-
-    def detach(self):
-        pass
-
 class Blue_infinity_stone(Infinity_stones):#get spirit at collision
 
     def __init__(self,sword):
         super().__init__(sword)
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/infinity_stones/blue/')#for inventory
         self.colour = 'blue'
-
-    def attach(self):
-        pass
-
-    def detach(self):
-        pass
 
     def collision(self):
         self.sword.entity.spirit += 5

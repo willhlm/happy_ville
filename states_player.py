@@ -465,14 +465,14 @@ class Sword(Player_states):
         self.done=False#animation flag
         self.sword2=False#flag to check if we shoudl go to next sword attack
         self.sword3=False#flag to check if we shoudl go to third sword attack
-        self.dir=self.entity.dir.copy()#animation direction
+        self.dir = self.entity.dir.copy()#animation direction
         self.entity.sword.dir=self.dir.copy()#sword direction
         sound.Sound.play_sfx(self.entity.sfx_sword)
         self.slash_speed()
 
     def slash_speed(self):
-        if self.entity.sword.equip!='idle':
-            self.entity.sword.stones[self.entity.sword.equip].slash_speed()#call speed specific for stone
+        if self.entity.sword.equip=='green':
+            self.entity.animation_stack[-1].framerate=3
 
     def increase_phase(self):
         if self.phase==self.phases[-1]:
@@ -484,7 +484,7 @@ class Sword(Player_states):
             self.phase=self.phases[-1]
 
     def enter_state(self,input):
-        self.entity.animation_stack[-1].framerate=4
+        self.entity.animation_stack[-1].framerate = 4
         super().enter_state(input)
 
 class Sword_run1(Sword):
@@ -670,7 +670,7 @@ class Thunder(Abillitites):
         super().__init__(entity)
         self.stay_still()
         self.aura=Entities.Thunder_aura(self.entity)
-        self.entity.cosmetics.add(self.aura)
+        self.entity.game_objects.cosmetics.add(self.aura)
         self.phases=['pre','charge','main']
         self.phase=self.phases[0]
 

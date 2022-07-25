@@ -579,7 +579,7 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Tyr"
+                         "value":"Svampis"
                         }],
                  "rotation":0,
                  "type":"",
@@ -725,6 +725,24 @@
                  "width":16,
                  "x":272,
                  "y":368
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":214,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Kusa"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1024,
+                 "y":336
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -733,7 +751,7 @@
          "y":0
         }],
  "nextlayerid":58,
- "nextobjectid":214,
+ "nextobjectid":216,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

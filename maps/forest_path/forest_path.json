@@ -209,6 +209,24 @@
                  "width":16,
                  "x":864,
                  "y":592
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":201,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"MrSmith"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1104,
+                 "y":544
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -240,7 +258,7 @@
          "y":0
         }],
  "nextlayerid":45,
- "nextobjectid":201,
+ "nextobjectid":202,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

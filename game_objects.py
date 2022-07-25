@@ -47,7 +47,7 @@ class Game_Objects():
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
-        self.entity_pause = pygame.sprite.Group()#Entities.PauseGroup() #include all Entities that are far away,Entities.PauseGroup()
+        self.entity_pause = Entities.PauseGroup() #include all Entities that are far away,Entities.PauseGroup()
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()

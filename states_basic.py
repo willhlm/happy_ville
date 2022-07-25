@@ -43,9 +43,15 @@ class Once(Entity_States):
         if input=='Idle':
              self.enter_state('Idle')
 
-class Hurt(Once):
+class Hurt(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def handle_input(self,input):
+        if input == 'Cut':
+            self.enter_state('Cut')
+        elif input=='Idle':
+             self.enter_state('Idle')            
 
 class Cut(Once):
     def __init__(self,entity):
