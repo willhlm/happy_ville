@@ -59,9 +59,12 @@ class Deer_encounter(Cutscene_engine):
             self.entity.velocity[0]=5
 
         if self.timer>200:
-            self.parent_class.game.game_objects.camera[-1].exit_state()
-            self.entity.kill()
             self.exit_state()
+
+    def exit_state(self):
+        self.parent_class.game.game_objects.camera[-1].exit_state()
+        self.entity.kill()
+        super().exit_state()
 
 class Boss_deer_encounter(Cutscene_engine):
     def __init__(self,objects):
@@ -147,26 +150,24 @@ class Death(Cutscene_engine):
         super().__init__(objects)
         self.parent_class.game.game_objects.camera[-1].set_camera('Death')#make the camera not move
         self.stage = 0
-        self.init=False
 
     def update(self):
+        self.timer+=1
         if self.stage==0:
-            self.timer+=1
 
             if self.timer>120:
                 self.state1()
 
         elif self.stage==1:
-            if not self.init:#enter only once
+            if self.timer==1:
                 pos=(0,0)#
                 offset=100#depends on the effect animation
                 self.spawneffect=Entities.Spawneffect(pos)
                 self.spawneffect.rect.midbottom=self.parent_class.game.game_objects.player.rect.midbottom
                 self.spawneffect.rect.bottom+=offset
                 self.parent_class.game.game_objects.cosmetics.add(self.spawneffect)
-                self.init=True
 
-            if self.spawneffect.finish:#when the cosmetic effetc finishes
+            elif self.spawneffect.finish:#when the cosmetic effetc finishes
                 self.parent_class.game.game_objects.player.currentstate.change_state('Spawn')
                 self.exit_state()
 
@@ -175,6 +176,7 @@ class Death(Cutscene_engine):
         self.parent_class.game.game_objects.player.currentstate.change_state('Invisible')
         self.parent_class.game.game_objects.camera[-1].exit_state()#go to auto camera
         self.stage=1
+        self.timer=0
 
     def exit_state(self):
         if len(self.parent_class.game.game_objects.player.spawn_point)==2:#if the respawn was a bone
@@ -186,3 +188,44 @@ class Death(Cutscene_engine):
 
     def cinematic(self):
         pass
+
+class Cultist_encounter(Cutscene_engine):
+    def __init__(self,objects):
+        super().__init__(objects)
+        spawn_pos=(-150,100)
+        self.stage = 0
+        self.entity1=Entities.Cultist_warrior(spawn_pos, self.parent_class.game.game_objects)
+        self.parent_class.game.game_objects.camera[-1].set_camera('Cultist_encounter')
+        self.entity1.AImethod=self.entity1.cutsceneAI
+        self.parent_class.game.game_objects.enemies.add(self.entity1)
+
+    def update(self):
+        self.timer+=1
+        if self.stage==0:#encounter Cultist_warrior
+            if self.timer==1:
+                self.parent_class.game.game_objects.player.currentstate.change_state('Walk')#should only enter these states once
+            elif self.timer<50:
+                self.parent_class.game.game_objects.player.velocity[0]=-4
+            elif self.timer==50:
+                self.parent_class.game.game_objects.player.currentstate.change_state('Idle')#should only enter these states once
+                self.parent_class.game.game_objects.player.velocity[0]=0
+            elif self.timer>200:
+                self.stage=1
+                self.timer=0
+
+        elif self.stage==1:#sapawn cultist_rogue
+            if self.timer==1:
+                spawn_pos = self.parent_class.game.game_objects.player.rect.topright
+                self.entity2=Entities.Cultist_rogue(spawn_pos, self.parent_class.game.game_objects)
+                self.entity2.dir[0]=-1
+                self.entity2.currentstate.change_state('Ambush')
+                self.entity2.AImethod=self.entity2.cutsceneAI
+                self.parent_class.game.game_objects.enemies.add(self.entity2)
+            elif self.timer>100:
+                self.exit_state()
+
+    def exit_state(self):
+        self.entity1.AImethod=self.entity1.aggroAI
+        self.entity2.AImethod=self.entity2.aggroAI
+        self.parent_class.game.game_objects.camera[-1].exit_state()
+        super().exit_state()

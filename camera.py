@@ -139,6 +139,15 @@ class Deer_encounter(Auto):
         self.center[0]=max(100,self.center[0])
         super().update()
 
+class Cultist_encounter(Auto):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+
+    def update(self):
+        self.center[0]+=2
+        self.center[0] = min(500,self.center[0])
+        super().update()
+
 class Death(Camera):
     def __init__(self, game_objects):
         super().__init__(game_objects)

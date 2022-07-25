@@ -3,7 +3,7 @@ import pygame
 class Animation():
     def __init__(self,entity):
         self.entity=entity
-        self.framerate=4
+        self.framerate = 4
         self.frame=0
 
     def enter_state(self):
@@ -30,6 +30,10 @@ class Entity_animation(Animation):#phase and state
             self.reset_timer()
             self.entity.currentstate.increase_phase()
 
+    def handle_input(self,input):
+        if input=='Hurt':
+            Hurt_animation(self.entity).enter_state()
+
 class Hurt_animation(Entity_animation):#become white
     def __init__(self,entity):
         super().__init__(entity)
@@ -43,6 +47,9 @@ class Hurt_animation(Entity_animation):#become white
 
         if self.duration<0:
             self.exit_state()
+
+    def handle_input(self,input):
+        pass
 
 class Basic_animation(Animation):#state
     def __init__(self,entity):

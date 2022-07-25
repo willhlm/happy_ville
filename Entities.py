@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, math, sound, states
+import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, math, sound, states
 import time
 
 pygame.mixer.init()
@@ -233,7 +233,7 @@ class Collision_right_angle(Platform):
 class Spikes(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
-        self.image=pygame.image.load("Sprites/level_sheets/Spkies.png").convert_alpha()
+        self.image=pygame.image.load("Sprites/block/spkies.png").convert_alpha()
         self.dmg = 10
 
     def collide_x(self,entity):
@@ -325,7 +325,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         if dmg>0:
             self.health-=dmg
             if self.health>0:#check if dead¨
-                self.hurt_animation()#become white
+                self.animation_stack[-1].handle_input('Hurt')
                 self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             else:
                 if self.currentstate.state_name!='death':#if not already dead
@@ -333,11 +333,6 @@ class Character(Dynamicentity):#enemy, NPC,player
 
     def knock_back(self,dir):
         self.velocity[0]=dir*30
-
-    def hurt_animation(self):
-        if str(type(self.animation_stack[-1]).__name__) != 'Hurt_animation':#making sure to not append more than one hurt animation at time
-            new_animation=animation.Hurt_animation(self)
-            new_animation.enter_state()
 
     def group_distance(self):#doesn't work
         bounds=[-100,600,-100,350]#-x,+x,-y,+y. #shuodl change to player distance?
@@ -347,6 +342,11 @@ class Character(Dynamicentity):#enemy, NPC,player
         else:
             self.add(self.group)#add to group
             self.remove(self.pause_group)#remove from pause
+
+    def particles(self,dir,number_particles=12):
+        for i in range(0,number_particles):
+            obj1=particles.General_particle(self.rect.center,distance=0,type='circle',lifetime=20,vel=[1,10],dir=dir,scale=1)
+            self.cosmetics.add(obj1)
 
 class Player(Character):
 
@@ -363,7 +363,7 @@ class Player(Character):
 
         self.max_health = 250
         self.max_spirit = 100
-        self.health = 1
+        self.health = 100
         self.spirit = 100
 
         self.cosmetics = game_objects.cosmetics
@@ -371,11 +371,10 @@ class Player(Character):
 
         self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but made in states
         self.equip='Thunder'#ability pointer
-        self.sword=Sword
+        self.sword=Aila_sword(self)
         self.shield=Shield
         self.dash=True
         self.wall=True
-        self.dmg = 10
 
         self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
         self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
@@ -409,17 +408,6 @@ class Player(Character):
         super().update(pos)
         self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
         self.omamoris.update()
-
-    def equip_omamori(self,omamori_index):
-        new_omamori=self.omamoris.omamori_list[omamori_index]
-        if new_omamori not in self.omamoris.equipped_omamoris:#add the omamori
-            if len(self.omamoris.equipped_omamoris)<3:#maximum number of omamoris to equip
-                self.omamoris.equipped_omamoris.append(new_omamori)
-                new_omamori.attach()
-        else:#remove the omamori
-            old_omamori=self.omamoris.omamori_list[omamori_index]
-            self.omamoris.equipped_omamoris.remove(old_omamori)
-            old_omamori.detach()#call the detach function of omamori
 
     def to_json(self):#things to save: needs to be a dict
         health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
@@ -464,7 +452,7 @@ class Enemy(Character):
         self.counter=0
         self.AImethod=self.peaceAI
         self.player_distance=[0,0]
-        self.aggro=True
+        self.aggro=True#colliding with player
         self.max_vel=3
         self.friction=[0.5,0]
         self.currentstate = states_enemy.Idle(self)
@@ -640,9 +628,6 @@ class Larv(Enemy):
         self.spirit=10
         self.attack=Poisonblobb
         self.attack_distance=150
-
-    def update(self,pos,playerpos):
-        super().update(pos,playerpos)
 
 class Blue_bird(Enemy):
     def __init__(self,pos,game_objects):
@@ -845,6 +830,13 @@ class Cultist_rogue(Enemy):
         self.health = 50
         self.attack_distance = 80
         self.attack = Sword
+        self.currentstate = states_rogue_cultist.Idle(self)
+
+    def cutsceneAI(self):
+        pass
+
+    def updateAI(self):
+        pass
 
 class Cultist_warrior(Enemy):
     def __init__(self,pos,game_objects):
@@ -856,6 +848,12 @@ class Cultist_warrior(Enemy):
         self.health = 50
         self.attack_distance = 80
         self.attack = Sword
+
+    def cutsceneAI(self):
+        pass
+
+    def updateAI(self):
+        pass
 
 class John(Enemy):
     def __init__(self,pos,game_objects):
@@ -1279,7 +1277,10 @@ class Sword(Melee):
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg = entity.dmg
+        self.init()
+
+    def init(self):
+        self.dmg = self.entity.dmg
 
     def rectangle(self):
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
@@ -1288,15 +1289,12 @@ class Sword(Melee):
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
         collision_enemy.knock_back(self.dir[0])
-        #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])
-        #self.effect.create_particles([collision_enemy.rect.x,collision_enemy.rect.y],self.dir[0])
+        collision_enemy.particles(self.dir[0])
+        #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         if self.dir[0]>0:
-            self.clash_particles([self.rect.center[0],self.rect.center[1]],self.dir[0])
+            self.clash_particles(self.rect.midright,self.dir[0])
         else:
-            self.clash_particles([self.rect.left,self.rect.center[1]],self.dir[0])
-        #clash = Particle_effect_attack([collision_enemy.rect.x,collision_enemy.rect.y])
-        #self.entity.cosmetics.add(clash)
-        #self.entity.cosmetics.add(slash)
+            self.clash_particles(self.rect.midleft,self.dir[0])
         self.kill()
 
     def sword_jump(self):
@@ -1304,11 +1302,50 @@ class Sword(Melee):
             self.entity.velocity[1] = -11
 
     def clash_particles(self,pos,dir,number_particles=12):
+        angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
             #obj2 = Sword_particles(pos,dir)
             #self.group.add(obj2)
-            obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=15,vel=[7,14],dir=dir,scale=1)
+            obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3)
             #obj1 = particles.Sword_sparks(pos,dir)
+            self.entity.cosmetics.add(obj1)
+
+class Aila_sword(Sword):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg = 10
+
+    #potrait stuff
+    def init(self):
+        self.potrait = Read_files.Sprites().load_all_sprites("Sprites/Enteties/Items/sword")
+        self.equip = 'idle'#stone pointer
+        self.frame = 0
+        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#,'purple':Red_infinity_stone(self)]
+        self.colour = {'idle':[255,255,255,255],'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}
+
+    def potrait_animation(self):#called from inventory
+        self.potrait_image = self.potrait[self.equip][self.frame//4].copy()
+        self.frame += 1
+
+        if self.frame == len(self.potrait[self.equip])*4:
+            self.frame = 0
+
+    def set_stone(self,stone_str):
+        if self.equip!='idle':#if not first time
+            self.stones[self.equip].detach()
+
+        self.equip = stone_str
+        self.stones[stone_str].attach()
+
+    def collision_enemy(self,collision_enemy):
+        super().collision_enemy(collision_enemy)
+        if self.equip!='idle':
+            self.stones[self.equip].collision()#call collision specific for stone
+
+    def clash_particles(self,pos,dir,number_particles=12):
+        angle = random.randint(-180, 180)#the ejection anglex
+        for i in range(0,number_particles):
+            obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3,colour=self.colour[self.equip])
             self.entity.cosmetics.add(obj1)
 
 class Darksaber(Sword):
@@ -1329,7 +1366,7 @@ class Projectiles(Abilities):
         super().__init__(entity)
         self.dir = entity.dir.copy()
         self.rectangle()
-        self.velocity=[0,0]
+        self.velocity = [0,0]
 
     def update_pos(self,scroll):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
@@ -1356,7 +1393,7 @@ class Thunder(Projectiles):
         self.state = 'pre'
 
     def collision_enemy(self,collision_enemy):
-        self.dmg = 0
+        self.dmg=0
 
     def reset_timer(self):
         if self.state=='pre':
@@ -1850,6 +1887,102 @@ class Menu_Box():
         pass
         #screen.blit(self.img, self.rect.topleft)
 
+class Infinity_stones():
+
+    def __init__(self,sword):
+        self.sword = sword
+        self.state = 'idle'
+        self.animation = animation.Basic_animation(self)#it is called from inventory
+
+    def reset_timer(self):
+        pass
+
+    def attach(self):
+        pass
+
+    def detach(self):
+        pass
+
+    def collision(self):
+        pass
+
+    def slash_speed(self):
+        pass
+
+class Red_infinity_stone(Infinity_stones):#more dmg
+
+    def __init__(self,sword):
+        super().__init__(sword)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/infinity_stones/red/')#for inventory
+        self.colour = 'red'
+
+    def attach(self):
+        self.sword.dmg*=1.1
+
+    def detach(self):
+        self.sword.dmg*=(1/1.1)
+
+class Green_infinity_stone(Infinity_stones):#faster slash, changing framerate
+
+    def __init__(self,sword):
+        super().__init__(sword)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/infinity_stones/green/')#for inventory
+        self.colour = 'green'
+
+    def slash_speed(self):
+        self.sword.entity.animation_stack[-1].framerate=3
+
+    def attach(self):
+        pass
+        #self.entity.animation_stack[-1].framerate=3
+
+    def detach(self):
+        pass
+
+class Blue_infinity_stone(Infinity_stones):#get spirit at collision
+
+    def __init__(self,sword):
+        super().__init__(sword)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/infinity_stones/blue/')#for inventory
+        self.colour = 'blue'
+
+    def attach(self):
+        pass
+
+    def detach(self):
+        pass
+
+    def collision(self):
+        self.sword.entity.spirit += 5
+
+class Orange_infinity_stone(Infinity_stones):#bigger hitbox
+
+    def __init__(self,sword):
+        super().__init__(sword)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/infinity_stones/orange/')#for inventory
+        self.colour = 'orange'
+
+    def detach(self):
+        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,40,40)
+        self.sword.hitbox = self.sword.rect.copy()
+
+    def attach(self):
+        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,80,40)
+        self.sword.hitbox = self.sword.rect.copy()
+
+class Purple_infinity_stone(Infinity_stones):#donno
+
+    def __init__(self,sword):
+        super().__init__(sword)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/infinity_stones/purple/')#for inventory
+        self.colour = 'purple'
+
+    def attach(self):
+        pass
+
+    def detach(self):
+        pass
+
 class Omamoris():
     def __init__(self,entity):
         self.equipped_omamoris=[]#equiped omamoris
@@ -1863,11 +1996,22 @@ class Omamoris():
         for omamori in self.equipped_omamoris:
             omamori.handle_input(input)
 
+    def equip_omamori(self,omamori_index):
+        new_omamori=self.omamori_list[omamori_index]
+        if new_omamori not in self.equipped_omamoris:#add the omamori
+            if len(self.equipped_omamoris)<3:#maximum number of omamoris to equip
+                self.equipped_omamoris.append(new_omamori)
+                new_omamori.attach()
+        else:#remove the omamori
+            old_omamori=self.omamori_list[omamori_index]
+            self.equipped_omamoris.remove(old_omamori)
+            old_omamori.detach()#call the detach function of omamori
+
 class Omamori():
     def __init__(self,entity):
-        self.entity=entity
-        self.state='idle'
-        self.animation=animation.Basic_animation(self)
+        self.entity = entity
+        self.state = 'idle'
+        self.animation = animation.Basic_animation(self)#it is called from inventory
 
     def update(self):
         pass

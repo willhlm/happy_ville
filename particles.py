@@ -30,17 +30,21 @@ class Particles(pygame.sprite.Sprite):
         self.true_pos = self.pos
 
 class General_particle(Particles):#a general one
-    def __init__(self,pos,distance=400,lifetime=60,vel=[7,13],type='spark',dir='isotropic',scale=1):
+    def __init__(self,pos,distance=400,lifetime=60,vel=[7,13],type='spark',dir='isotropic',scale=1, colour=[255,255,255,255]):
         super().__init__()
         if dir=='isotropic':
             angle=random.randint(-180, 180)#the ejection anglex
-
-        elif dir < 0:#rigth hit
+        elif dir == -1:#rigth hit
             spawn_angle = 30
             angle=random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
-        else:#left hit
+        elif dir == 1:#left hit
             spawn_angle = 30
             angle=random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex
+        else:#integer
+            sign=random.randint(0,1)
+            dir=dir+180*sign
+            spawn_angle = 10
+            angle=random.randint(dir-spawn_angle, dir+spawn_angle)#the ejection anglex
 
         self.angle = -(2*math.pi*angle)/360
         self.scale = scale
@@ -49,8 +53,8 @@ class General_particle(Particles):#a general one
         self.pos = [pos[0]+self.distance*math.cos(self.angle),pos[1]+self.distance*math.sin(self.angle)]
         amp=random.randint(vel[0], vel[1])
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
-        self.fade = 255
-        self.colour = [255,255,255,self.fade]
+        self.fade = colour[-1]
+        self.colour = colour        
 
         if type=='spark':
             self.make_sparks()

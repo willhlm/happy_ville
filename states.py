@@ -84,7 +84,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('forest_path')
+            self.game.game_objects.load_map('village')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -504,6 +504,8 @@ class Select_Menu(Gameplay):
                 self.key_items.append(item)
                 self.key_number.append(self.game.game_objects.player.inventory[key])
 
+        self.stone_pos = [[135,3],[168,27],[168,90],[103,27],[103,90]]#infinity stone blit positions
+
         self.item_index=[0,0]
         self.item_positions=(270,150)
         self.keyitem_positions=(320,50)
@@ -513,24 +515,19 @@ class Select_Menu(Gameplay):
         self.positions=(255,120)
         self.equip_positions=(260,25)
 
-    def blit_inventory(self):
+    def blit_inventory_BG(self):
         width=self.inventory_BG[self.page].get_width()
         self.game.screen.blit(self.inventory_BG[self.page],((self.game.WINDOW_SIZE[0]-width)/2,20))
 
     def render(self):
         super().render()
-        self.blit_inventory()
+        self.blit_inventory_BG()
         self.pages[self.page]()
 
     def map_menu(self):
         pass
 
     def inventory_menu(self):
-        width=self.game.game_objects.player.image.get_width()
-        height=self.game.game_objects.player.image.get_height()
-        scale=2
-        self.game.screen.blit(pygame.transform.scale(self.game.game_objects.player.image,(scale*width,scale*height)),(105,0))#player position
-
         for index, item in enumerate(self.use_items):#items we can use
             item.animation.update()
             pos=[self.item_positions[0]+20*index,self.item_positions[1]]
@@ -546,6 +543,15 @@ class Select_Menu(Gameplay):
             self.game.screen.blit(number,pos)
 
         self.game.screen.blit(self.box.img,(self.item_positions[0]-16+20*self.item_index[0],135+20*self.item_index[1]))#pointer
+        self.blit_sword()
+
+    def blit_sword(self):
+        self.game.game_objects.player.sword.potrait_animation()
+        self.game.screen.blit(self.game.game_objects.player.sword.potrait_image,(105,0))#player position
+
+        for index, stone in enumerate(self.game.game_objects.player.sword.stones):
+            self.game.game_objects.player.sword.stones[stone].animation.update()
+            self.game.screen.blit(self.game.game_objects.player.sword.stones[stone].image,self.stone_pos[index])#player position
 
     def omamori_menu(self):
         for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):#equipped ones
@@ -611,7 +617,7 @@ class Select_Menu(Gameplay):
         if self.omamori_index[1]==1:#if on the bottom row
             omamori_index+=5
         if omamori_index<len(self.game.game_objects.player.omamoris.omamori_list):
-            self.game.game_objects.player.equip_omamori(omamori_index)
+            self.game.game_objects.player.omamoris.equip_omamori(omamori_index)
 
     def use_item(self):
         item_index=self.item_index[0]
@@ -791,19 +797,51 @@ class Facilities(Gameplay):
 class Smith(Facilities):
     def __init__(self, game, npc):
         super().__init__(game,npc)
-        self.actions=['upgrade','cancel']
-        self.init_canvas([64,32])#specific for each facility
+        self.actions=['upgrade','enhance','cancel']
+        self.init_canvas([64,22*len(self.actions)])#specific for each facility
+
+    def select_frame2(self):
+        if self.pointer_index[1] < len(self.actions)-1:#if we select upgrade
+            stone_str=self.actions[self.pointer_index[1]]
+            self.game.game_objects.player.sword.set_stone(stone_str)
+            self.set_response('Now it is ' + self.game.game_objects.player.sword.equip)
+        else:#select cancel
+            self.previouse_frame()
+
+    def pointer_frame2(self):
+        self.pointer_frame1()
+
+    def handle_frame2(self,input):
+        self.handle_frame1(input)
+
+    def blit_frame2(self):
+        self.blit_frame1()
+
+    def previouse_frame(self):
+        super().previouse_frame()
+        self.actions=['upgrade','enhance','cancel']
+        self.init_canvas([64,22*len(self.actions)])#specific for each facility
+
+    def next_frame(self):
+        super().next_frame()
+        self.actions=[]
+        for index, stones in enumerate(self.game.game_objects.player.sword.stones):
+            self.actions.append(stones)
+        self.actions.append('cancel')
+        self.init_canvas([64,22*len(self.actions)])
 
     def select_frame1(self):
-        if self.pointer_index[1] == 0:#if we select buy
+        if self.pointer_index[1] == 0:#if we select upgrade
             self.upgrade()
+        elif self.pointer_index[1] == 1:
+            self.next_frame()
         else:#select cancel
             self.exit_state()
 
     def upgrade(self):
         if self.game.game_objects.player.inventory['Tungsten']>=1:
             self.game.game_objects.player.inventory['Tungsten'] -= 1
-            self.game.game_objects.player.dmg+=5
+            self.game.game_objects.player.sword.dmg+=5
             self.set_response('Now it is better')
         else:#not enough tungsten
             self.set_response('You do not have enought heavy rocks')
