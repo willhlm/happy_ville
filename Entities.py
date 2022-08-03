@@ -1313,7 +1313,7 @@ class Sword(Melee):
         for i in range(0,number_particles):
             #obj2 = Sword_particles(pos,dir)
             #self.group.add(obj2)
-            obj1 = particles.Sword_sparks(pos,dir)
+            obj1 = particles.Sword_sparks(pos,dir,180)
             self.entity.cosmetics.add(obj1)
 
 class Darksaber(Sword):
