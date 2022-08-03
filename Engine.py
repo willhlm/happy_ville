@@ -11,7 +11,7 @@ class Collisions():
             self.game_objects.player.velocity[1] = 0
             self.game_objects.player.go_through = True
 
-    def interact_cosmetics(self):
+    def interact_cosmetics(self):#bushes
         for cosmetic in self.game_objects.interacting_cosmetics.sprites():
 
             collision_entity = pygame.sprite.spritecollideany(cosmetic,self.game_objects.players,Collisions.collided)
@@ -30,11 +30,9 @@ class Collisions():
     @staticmethod
     def counter(fprojectiles,eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group
-            if type(projectile).__name__ == 'Shield':
-                collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
-                if collision_epro:
-                    collision_epro.countered(projectile)
-                    projectile.kill()#kill the shoeld
+            collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
+            if collision_epro:
+                projectile.collision_projectile(collision_epro)
 
     @staticmethod
     def weather_paricles(weathers,platforms):
@@ -53,10 +51,10 @@ class Collisions():
 
             #if hit enemy
             if collision_enemy:
-                if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':
+                if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':#change to some invinsibillity thingy maybe
                     collision_enemy.take_dmg(projectile.dmg)
                     projectile.collision_enemy(collision_enemy)
-                    
+
             #hit platform
             elif collision_plat:
                 projectile.collision_plat()

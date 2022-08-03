@@ -13,7 +13,6 @@ import weather
 class Game_Objects():
 
     def __init__(self, game):
-
         self.game = game
         self.controller = Read_files.Controller('xbox')
         self.sound = sound.Sound()
@@ -54,7 +53,6 @@ class Game_Objects():
         self.all_Entities = pygame.sprite.Group()
         self.interacting_cosmetics = pygame.sprite.Group()
 
-
         #initiate player
         self.player = Entities.Player([200,50],self)
         self.players = pygame.sprite.Group(self.player)
@@ -75,7 +73,7 @@ class Game_Objects():
 
     def initiate_groups(self):
         #clean all groups
-        self.npcs.empty()
+        self.npcs.empty()#maybe a problem if we have a bank?
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
@@ -105,9 +103,9 @@ class Game_Objects():
         self.collisions.interact_cosmetics()
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
+        self.collisions.counter(self.fprojectiles,self.eprojectiles)
         self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
         self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
-        self.collisions.counter(self.fprojectiles,self.eprojectiles)
         #self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino.
 
     def scrolling(self):
@@ -121,10 +119,10 @@ class Game_Objects():
         self.all_bgs.update(scroll)
         self.all_fgs.update(scroll)
         self.players.update(scroll)
-        self.entity_pause.update(scroll,self.player.rect.center)#should be before enemies and npcs group
-        self.enemies.update(scroll,self.player.rect.center)
-        self.npcs.update(scroll,self.player.rect.center)
-        self.interacting_cosmetics.update(scroll,scroll)
+        self.entity_pause.update(scroll)#should be before enemies and npcs group
+        self.enemies.update(scroll)
+        self.npcs.update(scroll)
+        self.interacting_cosmetics.update(scroll)#bushes, maybye move to enemy?
         self.interactables.update(scroll)
         self.weather.update(scroll)
         self.fprojectiles.update(scroll)
@@ -148,7 +146,7 @@ class Game_Objects():
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
-        self.interacting_cosmetics.draw(self.game.screen)
+        self.interacting_cosmetics.draw(self.game.screen)#bushes move to enemy?
         self.weather.draw(self.game.screen)
 
         #self.triggers.draw(self.game.screen)

@@ -26,8 +26,7 @@ class PauseGroup(pygame.sprite.Group):#I guess we don't need it
     def __init__(self):
         super().__init__()
 
-    def update(self, *args):
-        pos,playerpos=args
+    def update(self, pos):
         for s in self.sprites():
             self.group_distance(s,pos)
 
@@ -254,6 +253,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.image = img
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
+        self.bounds=[-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
 
     def update(self,pos):
         self.update_pos(pos)
@@ -318,7 +318,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack=[animation.Entity_animation(self)]
         self.max_vel=7
         self.game_objects = game_objects
-        self.bounds=[-200,800,-100,350]#-x,+x,-y,+y.
 
     def update(self,pos):
         self.update_pos(pos)
@@ -333,14 +332,14 @@ class Character(Dynamicentity):#enemy, NPC,player
                 self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             else:
                 if self.currentstate.state_name!='death':#if not already dead
-                    self.currentstate.change_state('Death')#overrite any state and go to death
+                    self.currentstate.enter_state('Death')#overrite any state and go to death
 
     def knock_back(self,dir):
         self.velocity[0]=dir*30
 
     def hurt_particles(self,dir,number_particles=12):
         for i in range(0,number_particles):
-            obj1=particles.General_particle(self.rect.center,distance=0,type='circle',lifetime=20,vel=[1,10],dir=dir,scale=1)
+            obj1=particles.General_particle(self.hitbox.center,distance=0,type='circle',lifetime=20,vel=[1,10],dir=dir,scale=1)
             self.game_objects.cosmetics.add(obj1)
 
 class Player(Character):
@@ -446,17 +445,17 @@ class Enemy(Character):
         self.max_vel=3
         self.friction=[0.5,0]
         self.currentstate = states_enemy.Idle(self)
-        self.attack_distance = 0
+        self.attack_distance = 0#when try to hit
         self.dmg = 10#sword damage
-        self.aggro_distance = 200
+        self.aggro_distance = 200#when ot become aggro
         self.spirit = 100
 
-    def update(self,pos,playerpos):
+    def update(self,pos):
         super().update(pos)
-        self.AI(playerpos)
+        self.AI()
         self.group_distance()#need to be before currentstate.update(): fails sometimes
 
-    def player_collision(self):#when lpayer collides with enemy
+    def player_collision(self):#when player collides with enemy
         if self.aggro:
             self.game_objects.player.take_dmg(10)
             sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
@@ -481,8 +480,8 @@ class Enemy(Character):
         duration = 30
         self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
 
-    def AI(self,playerpos):
-        self.player_distance=[playerpos[0]-self.rect.centerx,playerpos[1]-self.rect.centerx]#check plater distance
+    def AI(self):
+        self.player_distance=[self.game_objects.player.rect.center[0]-self.rect.centerx,self.game_objects.player.rect.center[1]-self.rect.centerx]#check plater distance
         self.counter += 1
         self.AImethod()#run ether aggro- or peace-AI
 
@@ -537,8 +536,8 @@ class Slime(Enemy):
         self.health = 50
         self.spirit=100
 
-    def update(self,pos,playerpos):
-        super().update(pos,playerpos)
+    def update(self,pos):
+        super().update(pos)
 
 class Woopie(Enemy):
     def __init__(self,pos,game_objects):
@@ -569,7 +568,7 @@ class Vatt(Enemy):
 
     def updateAI(self):
         if Vatt.aggro and not self.aggro:
-            self.currentstate.change_state('Transform')#also sets to aggro AI
+            self.currentstate.enter_state('Transform')#also sets to aggro AI
             self.aggro = True
             #self.AImethod=self.aggroAI
 
@@ -662,14 +661,14 @@ class Shroompolin(Enemy):
         if self.game_objects.player.velocity[1]>0:#going down
             if self.game_objects.player.hitbox.bottom<self.jump_box.top+offset:
                 self.game_objects.player.velocity[1] = -10
-                self.currentstate.change_state('Hurt')
+                self.currentstate.enter_state('Hurt')
 
     def update_hitbox(self):
         super().update_hitbox()
         self.jump_box.midtop = self.rect.midtop
 
-    def update(self,pos,playerpos):
-        super().update(pos,playerpos)
+    def update(self,pos):
+        super().update(pos)
 
     def take_dmg(self,dmg):
         pass
@@ -866,7 +865,7 @@ class NPC(Character):
     def increase_conv_index(self):
         self.conv_index += 1
 
-    def update(self, pos,playerpos):
+    def update(self,pos):
         super().update(pos)
         self.AI()
         self.group_distance()
@@ -959,8 +958,8 @@ class Reindeer(Boss):
     def give_abillity(self):
         self.game_objects.player.dash=True
 
-    def update(self,pos,playerpos):
-        super().update(pos,playerpos)
+    def update(self,pos):
+        super().update(pos)
 
     def peaceAI(self):
         pass
@@ -1122,6 +1121,9 @@ class Abilities(pygame.sprite.Sprite):
         if self.lifetime<0:
             self.kill()
 
+    def collision_projectile(self,eprojectile):
+        pass
+
     def update_hitbox(self):#make this a dictionary?
         if self.dir[1] > 0:#up
             self.hitbox.midbottom=self.entity.hitbox.midtop
@@ -1203,6 +1205,11 @@ class Shield(Melee):
 
     def collision_enemy(self,collision_enemy):
         collision_enemy.countered()
+        self.kill()
+
+    def collision_projectile(self,eprojectile):
+        self.entity.projectiles.add(eprojectile)#add the projectilce to Ailas projectile group
+        eprojectile.countered()
         self.kill()
 
 class Thunder_aura(Melee):
@@ -1333,13 +1340,9 @@ class Projectiles(Abilities):
         self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
-    def knock_back(self):
+    def countered(self):
         self.velocity[0]=-self.velocity[0]
         self.velocity[1]=-self.velocity[1]
-
-    def countered(self,projectile):
-        projectile.entity.projectiles.add(self)#add the projectilce to Ailas projectile group
-        self.knock_back()
 
 class Thunder(Projectiles):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Thunder/')
@@ -1468,14 +1471,13 @@ class Dynamic_animated(Dynamicentity):#animated stuff with hitbox
 
     def update(self,scroll):
         self.update_pos(scroll)
-        self.update_vel()
         self.currentstate.update()
         self.animation.update()
 
-    def update_vel(self):
+    def reset_timer(self):
         pass
 
-    def reset_timer(self):
+    def attract(self,pos):#the omamori calls on this in loot group
         pass
 
 class Heart_container(Dynamic_animated):
@@ -1579,9 +1581,14 @@ class Enemy_drop(Dynamic_animated):
 
     def update(self,pos):
         self.check_collisions()#need to be before super.update
+        self.update_vel()
         self.lifetime-=1
         super().update(pos)
         self.destory()
+
+    def attract(self,pos):#the omamori calls on this in loot group
+        if self.lifetime < 350:
+            self.velocity=[0.1*(pos[0]-self.rect.center[0]),0.1*(pos[1]-self.rect.center[1])]
 
     def destory(self):
         if self.lifetime < 0:#remove after a while
@@ -1727,9 +1734,8 @@ class Interactable_bushes(Interactable):
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        self.bounds=[-200,800,-100,350]#-x,+x,-y,+y.
 
-    def update(self,scroll,test):
+    def update(self,scroll):
         super().update(scroll)
         self.group_distance()
 
@@ -1921,7 +1927,7 @@ class Purple_infinity_stone(Infinity_stones):#donno
 class Omamoris():
     def __init__(self,entity):
         self.equipped_omamoris=[]#equiped omamoris
-        self.omamori_list=[Double_jump(entity),Double_sword(entity),More_spirit(entity)]#omamoris inventory.
+        self.omamori_list=[Double_jump(entity),Loot_magnet(entity),More_spirit(entity)]#omamoris inventory.
 
     def update(self):
         for omamori in self.equipped_omamoris:
@@ -1985,21 +1991,15 @@ class Double_jump(Omamori):
     def reset_counter(self):
         self.counter=0
 
-class Double_sword(Omamori):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/double_sword/')#for inventory
+class Loot_magnet(Omamori):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/loot_magnet/')#for inventory
 
     def __init__(self,entity):
         super().__init__(entity)
 
-    def detach(self):
-        super().detach()
-        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
-        self.entity.sword.hitbox = self.entity.sword.rect.copy()
-
-    def attach(self):
-        super().attach()
-        self.entity.sword.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,80,40)
-        self.entity.sword.hitbox = self.entity.sword.rect.copy()
+    def update(self):
+        for loot in self.entity.game_objects.loot.sprites():
+            loot.attract(self.entity.rect.center)
 
 class More_spirit(Omamori):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/more_spirit/')#for inventory

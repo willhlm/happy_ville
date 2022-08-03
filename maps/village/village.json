@@ -495,8 +495,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":2448,
-                 "y":240
+                 "x":576,
+                 "y":352
                 }, 
                 {
                  "gid":3,
@@ -633,14 +633,14 @@
                         {
                          "name":"type",
                          "type":"string",
-                         "value":"Grass"
+                         "value":"Cave_grass"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
                  "x":400,
-                 "y":368
+                 "y":352
                 }, 
                 {
                  "gid":22,

@@ -29,9 +29,6 @@ class Player_states(Entity_States):
     def increase_phase(self):
         pass
 
-    def change_state(self,input):
-        self.enter_state(input)
-
     def handle_press_input(self,input):#all states should inehrent this function
         pass
 
@@ -698,7 +695,7 @@ class Thunder(Abillitites):
 
             if self.phase=='charge':
                 self.phase='main'
-                self.entity.animation_stack[-1].reset_timer()#is this needed?
+                self.entity.animation_stack[-1].reset_timer()
 
             elif self.phase=='pre':
                 self.enter_state('Idle')

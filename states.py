@@ -84,7 +84,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('forest_path')
+            self.game.game_objects.load_map('village')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -428,6 +428,31 @@ class Gameplay(Game_State):
                 self.game.game_objects.player.omamoris.handle_input(input)
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
+
+class Dark_gameplay(Gameplay):
+    def __init__(self,game):
+        super().__init__(game)
+        self.light()
+        self.dark = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])))
+        self.dark.fill((0,0,0))
+
+    def render(self):
+        super().render()
+        self.dark.fill((0,0,0))
+
+        pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
+        self.dark.blit(self.glow,pos)
+        self.game.screen.blit(self.dark,(0,0),special_flags=pygame.BLEND_RGB_MULT)
+
+    def light(self):
+        self.radius = 200
+        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA)
+        layers = 40
+        const=int(255/layers)
+        for i in range(layers):
+            k = i*const
+            k = min(k,255)
+            pygame.draw.circle(self.glow,(k,k,k),self.glow.get_rect().center,self.radius-i*5)
 
 class Ability_Menu(Gameplay):
     def __init__(self, game):

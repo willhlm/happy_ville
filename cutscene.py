@@ -48,12 +48,12 @@ class Deer_encounter(Cutscene_engine):
     def update(self):#write how you want the player/group to act
         self.timer+=1
         if self.timer==1:
-            self.parent_class.game.game_objects.player.currentstate.change_state('Walk')#should only enter these states once
+            self.parent_class.game.game_objects.player.currentstate.enter_state('Walk')#should only enter these states once
         elif self.timer<50:
             self.parent_class.game.game_objects.player.velocity[0]=4
         elif self.timer==50:
-            self.parent_class.game.game_objects.player.currentstate.change_state('Idle')#should only enter these states once
-            self.entity.currentstate.change_state('Walk')
+            self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
+            self.entity.currentstate.enter_state('Walk')
         elif self.timer>50:
             self.parent_class.game.game_objects.player.velocity[0]=0
             self.entity.velocity[0]=5
@@ -79,12 +79,12 @@ class Boss_deer_encounter(Cutscene_engine):
         self.entity.velocity[1]=0
         self.timer+=1
         if self.timer==1:
-            self.parent_class.game.game_objects.player.currentstate.change_state('Walk')#should only enter these states once
+            self.parent_class.game.game_objects.player.currentstate.enter_state('Walk')#should only enter these states once
         elif self.timer<100:
             self.parent_class.game.game_objects.player.velocity[0]=4
         elif self.timer==100:
-            self.parent_class.game.game_objects.player.currentstate.change_state('Idle')#should only enter these states once
-            self.entity.currentstate.change_state('Transform')
+            self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
+            self.entity.currentstate.enter_state('Transform')
             self.parent_class.game.game_objects.player.velocity[0]=-20
             self.parent_class.game.game_objects.camera[-1].camera_shake()#amplitude, duration
         elif self.timer>100:
@@ -115,7 +115,7 @@ class Defeated_boss(Cutscene_engine):
     def update(self):
         self.timer+=1
         if self.timer==1:
-            self.parent_class.game.game_objects.player.currentstate.change_state('Idle')#should only enter these states once
+            self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
         elif self.timer < 75:
             self.parent_class.game.game_objects.player.velocity[1] = -2
         elif self.timer > 75:
@@ -168,12 +168,12 @@ class Death(Cutscene_engine):
                 self.parent_class.game.game_objects.cosmetics.add(self.spawneffect)
 
             elif self.spawneffect.finish:#when the cosmetic effetc finishes
-                self.parent_class.game.game_objects.player.currentstate.change_state('Spawn')
+                self.parent_class.game.game_objects.player.currentstate.enter_state('Spawn')
                 self.exit_state()
 
     def state1(self):
         self.parent_class.game.game_objects.load_map(self.parent_class.game.game_objects.player.spawn_point[-1]['map'],self.parent_class.game.game_objects.player.spawn_point[-1]['point'])
-        self.parent_class.game.game_objects.player.currentstate.change_state('Invisible')
+        self.parent_class.game.game_objects.player.currentstate.enter_state('Invisible')
         self.parent_class.game.game_objects.camera[-1].exit_state()#go to auto camera
         self.stage=1
         self.timer=0
@@ -203,22 +203,22 @@ class Cultist_encounter(Cutscene_engine):
         self.timer+=1
         if self.stage==0:#encounter Cultist_warrior
             if self.timer==1:
-                self.parent_class.game.game_objects.player.currentstate.change_state('Walk')#should only enter these states once
+                self.parent_class.game.game_objects.player.currentstate.enter_state('Walk')#should only enter these states once
             elif self.timer<50:
                 self.parent_class.game.game_objects.player.velocity[0]=-4
             elif self.timer==50:
-                self.parent_class.game.game_objects.player.currentstate.change_state('Idle')#should only enter these states once
+                self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
                 self.parent_class.game.game_objects.player.velocity[0]=0
             elif self.timer>200:
                 self.stage=1
                 self.timer=0
 
         elif self.stage==1:#sapawn cultist_rogue
-            if self.timer==1:
+            if self.timer==1:#enter once
                 spawn_pos = self.parent_class.game.game_objects.player.rect.topright
                 self.entity2=Entities.Cultist_rogue(spawn_pos, self.parent_class.game.game_objects)
                 self.entity2.dir[0]=-1
-                self.entity2.currentstate.change_state('Ambush')
+                self.entity2.currentstate.enter_state('Ambush')
                 self.entity2.AImethod=self.entity2.cutsceneAI
                 self.parent_class.game.game_objects.enemies.add(self.entity2)
             elif self.timer>100:

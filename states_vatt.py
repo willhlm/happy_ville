@@ -20,9 +20,6 @@ class Vatt_states(Entity_States):
         elif self.phase=='post':
             self.done=True
 
-    def change_state(self,input):
-        self.enter_state(input)
-
     def update_state(self):
         pass
 
@@ -65,7 +62,7 @@ class Walk(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
-        self.entity.acceleration[0] = 0.4 
+        self.entity.acceleration[0] = 0.4
 
     def handle_input(self,input):
         if input=='Hurt':

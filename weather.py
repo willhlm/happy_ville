@@ -47,6 +47,9 @@ class Weather_particles(Animatedentity):
                 image.set_colorkey(replace_color)#the color key will not be drawn
                 image.blit(img_copy,(0,0),special_flags=pygame.BLEND_RGB_ADD)
 
+    def reset_timer(self):
+        self.currentstate.enter_state('Idle')
+
 class Leafs(Weather_particles):
     def __init__(self,game_objects):
         super().__init__(game_objects)
