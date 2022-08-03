@@ -250,8 +250,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":9184,
-                 "y":416
+                 "x":432,
+                 "y":560
                 }, 
                 {
                  "gid":16,
@@ -814,7 +814,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":7389,
+                 "x":7392,
                  "y":480
                 }, 
                 {
@@ -956,7 +956,7 @@
          "y":0
         }],
  "nextlayerid":40,
- "nextobjectid":195,
+ "nextobjectid":200,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

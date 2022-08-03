@@ -18,9 +18,6 @@ class Enemy_states(Entity_States):
         elif self.phase=='post':
             self.done=True
 
-    def change_state(self,input):
-        self.enter_state(input)
-
     def handle_input(self,input):
         pass
 
@@ -52,7 +49,7 @@ class Walk(Enemy_states):
              self.enter_state('Fly')
         elif input=='Eat':
              self.enter_state('Eat')
-             
+
 class Eat(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)

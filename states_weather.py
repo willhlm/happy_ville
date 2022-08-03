@@ -34,25 +34,8 @@ class Idle(Entity_States):
         if rand==1:
             self.enter_state('Flip')
 
-class Once(Entity_States):
+class Flip(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
-        self.flag = False#to make sure it doesn't finish in the first frame = 0
-
-    def update_state(self):
-        if self.entity.animation.frame==0 and self.flag:#enter when animation is finished
-            self.finish()
-
-        self.flag = True
-
-    def finish(self):
-        self.enter_state('Idle')
-
-class Flip(Once):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.velocity[1]=self.entity.velocity[1]*0.8
+        self.entity.velocity[1]=self.entity.velocity[1]*0.8#slow down
         self.entity.velocity[0]=self.entity.velocity[0]*0.8
-
-    def update_state(self):
-        super().update_state()

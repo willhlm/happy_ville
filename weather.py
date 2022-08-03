@@ -4,21 +4,20 @@ from Entities import Animatedentity
 class Weather():#maybe should just be a function
     def __init__(self,game_objects):
         self.game_objects = game_objects
-        self.group = game_objects.weather
 
     def create_particles(self,type,number_particles=100):
         for i in range(0,number_particles):
             obj = getattr(sys.modules[__name__], type)(self.game_objects)
-            self.group.add(obj)
+            self.game_objects.weather.add(obj)
 
 class Weather_particles(Animatedentity):
     def __init__(self,game_objects):
         super().__init__(pos=[0,0])
         self.game_objects = game_objects
         self.currentstate = states_weather.Idle(self)
-        self.width = self.game_objects.game.WINDOW_SIZE[0] + 0.5*self.game_objects.game.WINDOW_SIZE[0]
+        self.width = self.game_objects.game.WINDOW_SIZE[0] + 0.6*self.game_objects.game.WINDOW_SIZE[0]
         self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.1*self.game_objects.game.WINDOW_SIZE[1]
-        self.pos = [random.randint(-int(self.width), int(self.width)),random.randint(-700, -50)]#starting position
+        self.pos = [random.randint(0, int(self.width)),random.randint(-700, -50)]#starting position
         self.wind = -2
         self.vel_y = random.randint(1, 3)
 
@@ -30,14 +29,14 @@ class Weather_particles(Animatedentity):
         self.boundary()
 
     def boundary(self):
-        if self.rect.y > self.height:#if on the lower side of screen.
-            self.rect.y=random.randint(-700, -50)
+        if self.rect.centery > self.height:#if on the lower side of screen.
+            self.rect.centery=random.randint(-700, -50)
 
         #continiouse falling, horizontally
-        if self.rect.x < -300:
-            self.rect.x += self.width
-        elif self.rect.x > self.width:
-            self.rect.x -= self.width
+        elif self.rect.centerx < -100:
+            self.rect.centerx += self.width
+        elif self.rect.centerx > self.width:
+            self.rect.centerx -= self.width
 
     def set_color(self,new_colour):
         replace_color=(255,0,0)
@@ -48,10 +47,13 @@ class Weather_particles(Animatedentity):
                 image.set_colorkey(replace_color)#the color key will not be drawn
                 image.blit(img_copy,(0,0),special_flags=pygame.BLEND_RGB_ADD)
 
+    def reset_timer(self):
+        self.currentstate.enter_state('Idle')
+
 class Leafs(Weather_particles):
     def __init__(self,game_objects):
         super().__init__(game_objects)
-        rand=random.randint(1, 1)
+        rand=random.randint(1,1)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/weather/leaf'+str(rand)+'/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()

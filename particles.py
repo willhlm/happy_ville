@@ -1,25 +1,5 @@
 import pygame, math, random, sys
 
-class Weather():#maybe should just be a function
-    def __init__(self,game_objects):
-        self.game_objects = game_objects
-        self.group = game_objects.weather
-
-    def create_particles(self,type,number_particles=100):
-        for i in range(0,number_particles):
-            obj = getattr(sys.modules[__name__], type)(self.game_objects)
-            self.group.add(obj)
-
-class Absorb_particles():
-    def __init__(self,cosmetics_group,pos):
-        self.group = cosmetics_group
-        self.pos = pos
-
-    def create_particles(self,number_particles = 10):
-        for i in range(0,number_particles):
-            obj1 = Absorb_particle(self.pos)
-            self.group.add(obj1)
-
 class Particles(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -28,9 +8,9 @@ class Particles(pygame.sprite.Sprite):
         self.update_pos(scroll)
 
     def update_pos(self,scroll):
-        self.true_pos= [self.true_pos[0] + scroll[0]+self.velocity[0], self.true_pos[1] + scroll[1]+self.velocity[1]]
+        self.pos = [self.pos[0] + scroll[0]+self.velocity[0], self.pos[1] + scroll[1]+self.velocity[1]]
         #self.rect.topleft = [self.rect.topleft[0] + scroll[0]+self.velocity[0], self.rect.topleft[1] + scroll[1]+self.velocity[1]]
-        self.rect.center = self.true_pos
+        self.rect.center = self.pos
 
     def make_circle(self):
         image = pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32)
@@ -38,63 +18,18 @@ class Particles(pygame.sprite.Sprite):
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
-        self.true_pos = self.pos
 
     def make_sparks(self):
+        self.canvas_size = 60
         self.spark_shape()#define the shape of spark
-        self.surface = pygame.Surface((60,60), pygame.SRCALPHA, 32).convert_alpha()
+        self.surface = pygame.Surface((self.canvas_size,self.canvas_size), pygame.SRCALPHA, 32).convert_alpha()
         self.image = self.surface.copy()
         pygame.draw.polygon(self.image,self.colour,self.points)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
-        self.true_pos = self.pos
 
-    def set_color(self):#not using for now
-        replace_color=(251,242,54)#=self.image.get_at((4,4))
-        img_copy=pygame.Surface(self.image.get_size())
-        img_copy.fill(self.colour)
-        self.image.set_colorkey(replace_color)#the color key will not be drawn
-        img_copy.blit(self.image,(0,0))
-        self.image=img_copy
-        self.image.set_colorkey((0,0,0,255))
-
-class Absorb_particle(Particles):
-    def __init__(self,pos):
-        super().__init__()
-        angle=random.randint(-180, 180)#the ejection anglex
-
-        self.angle = -(2*math.pi*angle)/360
-        self.fade = 255
-        self.radius = 400
-        self.pos = [pos[0]+self.radius*math.cos(self.angle),pos[1]+self.radius*math.sin(self.angle)]
-        self.lifetime = 60
-
-        self.scale = 1
-        amp=random.randint(7, 13)
-        self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]#[random.randint(-6, 6),random.randint(-6, 6)]#
-        self.colour = [255,255,255,self.fade]
-
-        self.make_sparks()
-
-    def update(self,scroll):
-        super().update(scroll)
-        self.lifetime -= 1
-        self.speed()
-        self.fading()
-        self.destroy()
-        self.update_spark()
-
-    def speed(self):
-        self.velocity[0] -= 0.01*self.velocity[0]#0.1*math.cos(self.angle)
-        self.velocity[1] -= 0.01*self.velocity[1]#0.1*math.sin(self.angle)
-
-    def fading(self):
-        self.fade-=5
-        self.image.set_alpha(self.fade)
-
-    def destroy(self):
-        if self.lifetime < 0:
-            self.kill()
+    def update_circle(self):
+        pass
 
     def update_spark(self):
         self.image = self.surface.copy()
@@ -103,16 +38,15 @@ class Absorb_particle(Particles):
 
     def spark_shape(self):
         vel=math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
-        offsetx=30
-        offsety=30
 
         self.points = [
-        [offsetx+math.cos(self.angle)*vel*self.scale,offsety+math.sin(self.angle)*vel*self.scale],
-        [offsetx+math.cos(self.angle+math.pi*0.5)*vel*self.scale*0.3,offsety+math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3],
-        [offsetx-math.cos(self.angle)*vel*self.scale*3.5,offsety-math.sin(self.angle)*vel*self.scale*3.5],
-        [offsetx+math.cos(self.angle-math.pi*0.5)*vel*self.scale*0.3,offsety-math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3]
+        [self.canvas_size*0.5+math.cos(self.angle)*vel*self.scale,self.canvas_size*0.5+math.sin(self.angle)*vel*self.scale],
+        [self.canvas_size*0.5+math.cos(self.angle+math.pi*0.5)*vel*self.scale*0.3,self.canvas_size*0.5+math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3],
+        [self.canvas_size*0.5-math.cos(self.angle)*vel*self.scale*3.5,self.canvas_size*0.5-math.sin(self.angle)*vel*self.scale*3.5],
+        [self.canvas_size*0.5+math.cos(self.angle-math.pi*0.5)*vel*self.scale*0.3,self.canvas_size*0.5-math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3]
         ]
 
+<<<<<<< HEAD
 class Sword_effects(Particles):
     def __init__(self,pos,dir, spawn_angle):
         super().__init__()
@@ -130,6 +64,44 @@ class Sword_effects(Particles):
         self.fade = 255
         self.pos = pos #spawn position
         self.lifetime = 14
+=======
+class General_particle(Particles):#a general one
+    def __init__(self,pos,distance=400,lifetime=60,vel=[7,13],type='spark',dir='isotropic',scale=1, colour=[255,255,255,255]):
+        super().__init__()
+        if dir=='isotropic':
+            angle=random.randint(-180, 180)#the ejection anglex
+        elif dir == -1:#rigth hit
+            spawn_angle = 30
+            angle=random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
+        elif dir == 1:#left hit
+            spawn_angle = 30
+            angle=random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex
+        else:#integer
+            sign=random.randint(0,1)
+            dir=dir+180*sign
+            spawn_angle = 10
+            angle=random.randint(dir-spawn_angle, dir+spawn_angle)#the ejection anglex
+
+        self.angle = -(2*math.pi*angle)/360
+        self.distance = distance
+        self.lifetime = lifetime
+        self.pos = [pos[0]+self.distance*math.cos(self.angle),pos[1]+self.distance*math.sin(self.angle)]
+        amp=random.randint(vel[0], vel[1])
+        self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
+        self.fade = colour[-1]
+        self.colour = colour
+
+        if type=='spark':
+            self.scale = scale
+            self.make_sparks()
+            self.update_particle=self.update_spark
+        else:#circles
+            self.update_particle=self.update_circle
+            vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
+            low = max(int(vel*0.3),1)#trying so that higher velocities have larger radius
+            self.radius = low
+            self.make_circle()
+>>>>>>> e55f523a382630b894b8cee8b0cddf324c855874
 
     def update(self,scroll):
         super().update(scroll)
@@ -137,18 +109,28 @@ class Sword_effects(Particles):
         self.speed()
         self.fading()
         self.destroy()
+        self.update_particle()
 
     def speed(self):
+<<<<<<< HEAD
         self.velocity[0] -= 0.17*self.velocity[0]#0.1*math.cos(self.angle)
         self.velocity[1] -= 0.17*self.velocity[1]#0.1*math.sin(self.angle)
 
     def fading(self):
         self.fade-=5
+=======
+        self.velocity[0] -= 0.01*self.velocity[0]#0.1*math.cos(self.angle)
+        self.velocity[1] -= 0.01*self.velocity[1]#0.1*math.sin(self.angle)
+
+    def fading(self):
+        self.fade-=3
+>>>>>>> e55f523a382630b894b8cee8b0cddf324c855874
         self.image.set_alpha(self.fade)
 
     def destroy(self):
         if self.lifetime < 0:
             self.kill()
+<<<<<<< HEAD
 
 class Sword_sparks(Sword_effects):
     def __init__(self,pos,dir, spawn_angle = 100):
@@ -289,3 +271,5 @@ class Reflection():
         offset=60
         position=[250,100+offset]
         gamescreen.blit(reflection_image,position,special_flags=pygame.BLEND_RGBA_MULT)
+=======
+>>>>>>> e55f523a382630b894b8cee8b0cddf324c855874

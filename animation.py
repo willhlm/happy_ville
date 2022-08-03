@@ -3,7 +3,7 @@ import pygame
 class Animation():
     def __init__(self,entity):
         self.entity=entity
-        self.framerate=4
+        self.framerate = 4
         self.frame=0
 
     def enter_state(self):
@@ -23,12 +23,16 @@ class Entity_animation(Animation):#phase and state
     def update(self):
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
         self.frame += 1
-    #    if str(type(self.entity).__name__)=='Shroompolin':
-    #        print(self.entity.currentstate.state_name,self.frame)
+#        if str(type(self.entity).__name__)=='Player':
+#            print(self.entity.currentstate.state_name,self.entity.currentstate.phase)
 
         if self.frame == self.entity.sprites.get_frame_number(self.entity.currentstate.state_name,self.entity.currentstate.phase)*self.framerate:
             self.reset_timer()
             self.entity.currentstate.increase_phase()
+
+    def handle_input(self,input):
+        if input=='Hurt':
+            Hurt_animation(self.entity).enter_state()
 
 class Hurt_animation(Entity_animation):#become white
     def __init__(self,entity):
@@ -44,6 +48,9 @@ class Hurt_animation(Entity_animation):#become white
         if self.duration<0:
             self.exit_state()
 
+    def handle_input(self,input):
+        pass
+
 class Basic_animation(Animation):#state
     def __init__(self,entity):
         super().__init__(entity)
@@ -54,15 +61,7 @@ class Basic_animation(Animation):#state
 
         if self.frame == len(self.entity.sprites[self.entity.state])*self.framerate:
             self.reset_timer()
-
-class Ability_animation(Basic_animation):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def reset_timer(self):
-        super().reset_timer()
-        if self.entity.state=='post':
-            self.entity.kill()#kill the object after post animation
+            self.entity.reset_timer()
 
 class Simple_animation(Animation):#no state or phase
     def __init__(self,entity):

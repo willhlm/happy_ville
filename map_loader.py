@@ -176,6 +176,12 @@ class Level():
                 new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interacting_cosmetics.add(new_bush)
 
+            elif id == 21:#bushes
+                for property in obj['properties']:
+                    if property['name'] == 'name':
+                        keyitem = property['value']
+                new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
+                self.game_objects.loot.add(new_keyitem)
 
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):

@@ -495,8 +495,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":2448,
-                 "y":240
+                 "x":576,
+                 "y":352
                 }, 
                 {
                  "gid":3,
@@ -579,7 +579,7 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Tyr"
+                         "value":"Svampis"
                         }],
                  "rotation":0,
                  "type":"",
@@ -633,14 +633,116 @@
                         {
                          "name":"type",
                          "type":"string",
-                         "value":"Grass"
+                         "value":"Cave_grass"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
                  "x":400,
+                 "y":352
+                }, 
+                {
+                 "gid":22,
+                 "height":16,
+                 "id":209,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Soul_essence"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":304,
+                 "y":336
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":210,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Astrid"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":208,
                  "y":368
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":211,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"MrSmith"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":128,
+                 "y":368
+                }, 
+                {
+                 "gid":19,
+                 "height":16,
+                 "id":212,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":96,
+                 "y":384
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":213,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"MrBanks"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":272,
+                 "y":368
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":214,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Kusa"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1024,
+                 "y":336
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -649,7 +751,7 @@
          "y":0
         }],
  "nextlayerid":58,
- "nextobjectid":209,
+ "nextobjectid":216,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -18,9 +18,6 @@ class Enemy_states(Entity_States):
         elif self.phase=='post':
             self.done=True
 
-    def change_state(self,input):
-        self.enter_state(input)
-
     def handle_input(self,input):
         pass
 

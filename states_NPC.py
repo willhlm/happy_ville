@@ -16,9 +16,6 @@ class NPC_states(Entity_States):
     def update_state(self):
         pass
 
-    def change_state(self,input):
-        self.enter_state(input)
-
 class Walk(NPC_states):#this object will never pop
     def __init__(self,entity):
         super().__init__(entity)
