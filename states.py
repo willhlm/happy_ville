@@ -85,7 +85,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('rhoutta_encounter')
+            self.game.game_objects.load_map('village')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)

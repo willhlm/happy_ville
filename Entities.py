@@ -253,7 +253,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.image = img
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-        self.bounds=[-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.bounds = [-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
 
     def update(self,pos):
         self.update_pos(pos)
@@ -296,6 +296,11 @@ class Dynamicentity(Staticentity):
         super().__init__(pos)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
+        self.velocity = [0,0]
+
+    def update(self,pos):
+        super().update(pos)
+        self.update_vel()
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
@@ -311,21 +316,33 @@ class Dynamicentity(Staticentity):
         self.rect.center = (pos[0],pos[1])
         self.hitbox.midbottom = self.rect.midbottom
 
+    def update_vel(self):
+        pass
+
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
         super().__init__(pos)
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.acceleration=[1,0.7]
-        self.velocity=[0,0]
         self.friction=[0.2,0]
         self.animation_stack=[animation.Entity_animation(self)]
         self.max_vel=7
         self.game_objects = game_objects
 
     def update(self,pos):
-        self.update_pos(pos)
+        super().update(pos)
         self.currentstate.update()
         self.animation_stack[-1].update()
+
+    def update_vel(self):
+        self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[1]=min(self.velocity[1],7.5)#set a y max speed
+
+        self.velocity[0]+=self.dir[0]*self.acceleration[0]-self.friction[0]*self.velocity[0]
+        #if self.entity.velocity[0]>0:
+        #    self.entity.velocity[0]=min(self.entity.velocity[0],self.entity.max_vel)
+        #else:
+        #    self.entity.velocity[0]=max(self.entity.velocity[0],-self.entity.max_vel)
 
     def take_dmg(self,dmg):
         if dmg>0:
@@ -334,8 +351,8 @@ class Character(Dynamicentity):#enemy, NPC,player
                 self.animation_stack[-1].handle_input('Hurt')
                 self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             else:
-                if self.currentstate.state_name!='death':#if not already dead
-                    self.currentstate.enter_state('Death')#overrite any state and go to death
+                if self.currentstate.state_name!='death' and self.currentstate.state_name!='dead':#if not already dead
+                    self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
         self.velocity[0]=dir*30
@@ -551,6 +568,12 @@ class Wall_slime(Enemy):
         self.currentstate = states_slime_wall.Walk(self)
         self.dir=[0,0]
         self.direction='top'
+
+    def update_vel(self):
+        self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        #self.entity.velocity[1]=min(self.entity.velocity[1],7.5)#set a y max speed
+
+        self.velocity[0]+=self.acceleration[0]-self.velocity[0]*self.friction[0]
 
     def peaceAI(self):
         if self.collision_types['bottom']:
@@ -985,9 +1008,6 @@ class Reindeer(Boss):
 
     def give_abillity(self):
         self.game_objects.player.dash=True
-
-    def update(self,pos):
-        super().update(pos)
 
     def peaceAI(self):
         pass
@@ -1520,7 +1540,7 @@ class Dynamic_animated(Dynamicentity):#animated stuff with hitbox
         self.currentstate = states_basic.Idle(self)
 
     def update(self,scroll):
-        self.update_pos(scroll)
+        super().update(scroll)#update_pos and update_vel
         self.currentstate.update()
         self.animation.update()
 
@@ -1537,7 +1557,6 @@ class Heart_container(Dynamic_animated):
     def __init__(self,pos,game_objects = None):
         super().__init__(pos)
         self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
-        self.velocity=[0,0]
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1545,6 +1564,8 @@ class Heart_container(Dynamic_animated):
 
     def update(self,scroll):
         super().update(scroll)
+
+    def update_vel(self):
         self.velocity[1]=3
 
     def pickup(self,player):
@@ -1559,7 +1580,6 @@ class Spirit_container(Dynamic_animated):
     def __init__(self,pos,game_objects = None):
         super().__init__(pos)
         self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
-        self.velocity=[0,0]
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1567,6 +1587,8 @@ class Spirit_container(Dynamic_animated):
 
     def update(self,scroll):
         super().update(scroll)
+
+    def update_vel(self):
         self.velocity[1]=3
 
     def pickup(self,player):
@@ -1580,7 +1602,6 @@ class Soul_essence(Dynamic_animated):
     def __init__(self,pos,game_objects = None):
         super().__init__(pos)
         self.game_objects = game_objects
-        self.velocity=[0,0]
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1602,7 +1623,6 @@ class Tungsten(Dynamic_animated):
     def __init__(self,pos,game_objects = None):
         super().__init__(pos)
         self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
-        self.velocity=[0,0]
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1616,8 +1636,8 @@ class Tungsten(Dynamic_animated):
 class Enemy_drop(Dynamic_animated):
     def __init__(self,pos):
         super().__init__(pos)
-        self.velocity=[random.randint(-3, 3),-4]
-        self.lifetime=500
+        self.velocity = [random.randint(-3, 3),-4]
+        self.lifetime = 500
 
     def check_collisions(self):
         if self.collision_types['bottom']:
@@ -1630,10 +1650,9 @@ class Enemy_drop(Dynamic_animated):
         self.velocity[1] += 0.5
 
     def update(self,pos):
-        self.check_collisions()#need to be before super.update
-        self.update_vel()
-        self.lifetime-=1
         super().update(pos)
+        self.check_collisions()
+        self.lifetime-=1
         self.destory()
 
     def attract(self,pos):#the omamori calls on this in loot group
@@ -1644,7 +1663,7 @@ class Enemy_drop(Dynamic_animated):
         if self.lifetime < 0:#remove after a while
             self.kill()
 
-    def pickup(self,player):
+    def pickup(self,player):#when the player collides with this object
         obj=(self.__class__.__name__)#get the loot in question
         player.inventory[obj]+=1
         self.kill()

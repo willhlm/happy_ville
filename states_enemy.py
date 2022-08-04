@@ -60,24 +60,6 @@ class Death(Enemy_states):
     def increase_phase(self):
         self.done=True
 
-    def change_state(self,input):
-        pass
-
-class Dead(Enemy_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.stay_still()
-        self.entity.death()
-
-    def update_state(self):
-        pass
-
-    def increase_phase(self):
-        pass
-
-    def change_state(self,input):
-        pass
-
 class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -91,9 +73,6 @@ class Hurt(Enemy_states):
     def increase_phase(self):
         self.done=True
 
-    def change_state(self,input):
-        pass
-
 class Stun(Enemy_states):
     def __init__(self,entity,duration):
         super().__init__(entity)
@@ -104,9 +83,6 @@ class Stun(Enemy_states):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
-
-    def change_state(self,input):
-        pass
 
 class Attack(Enemy_states):
     def __init__(self,entity):

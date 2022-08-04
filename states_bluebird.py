@@ -92,6 +92,3 @@ class Death(Enemy_states):
 
     def increase_phase(self):
         self.done=True
-
-    def change_state(self,input):
-        pass

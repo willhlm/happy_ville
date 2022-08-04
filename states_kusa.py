@@ -84,9 +84,6 @@ class Death(Enemy_states):
     def increase_phase(self):
         self.done=True
 
-    def change_state(self,input):
-        pass
-
 class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)

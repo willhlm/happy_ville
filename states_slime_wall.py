@@ -9,17 +9,10 @@ class Enemy_states():
         self.phase='main'
 
     def update(self):
-        self.update_vel()
         self.update_state()
 
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
-
-    def update_vel(self):
-        self.entity.velocity[1]+=self.entity.acceleration[1]-self.entity.velocity[1]*self.entity.friction[1]#gravity
-        #self.entity.velocity[1]=min(self.entity.velocity[1],7.5)#set a y max speed
-
-        self.entity.velocity[0]+=self.entity.acceleration[0]-self.entity.velocity[0]*self.entity.friction[0]
 
     def handle_input(self,input):
         pass

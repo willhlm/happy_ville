@@ -57,12 +57,9 @@ class Death(Reindeer_states):
             self.entity.loots()
             self.enter_state('Dead')
 
-
     def increase_phase(self):
         self.done=True
 
-    def change_state(self,input):
-        pass
 
 class Dead(Reindeer_states):
     def __init__(self,entity):
@@ -74,9 +71,6 @@ class Dead(Reindeer_states):
         pass
 
     def increase_phase(self):
-        pass
-
-    def change_state(self,input):
         pass
 
 class Hurt(Reindeer_states):
@@ -92,9 +86,6 @@ class Hurt(Reindeer_states):
     def increase_phase(self):
         self.done=True
 
-    def change_state(self,input):
-        pass
-
 class Transform(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -105,9 +96,6 @@ class Transform(Reindeer_states):
         if self.done:
             self.entity.attack_distance=60
             self.enter_state('Transform_idle')
-
-    def change_state(self,input):
-        pass
 
     def increase_phase(self):
         self.done=True
@@ -148,9 +136,6 @@ class Stun(Reindeer_states):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
-
-    def change_state(self,input):
-        pass
 
 class Attack(Reindeer_states):
     def __init__(self,entity):

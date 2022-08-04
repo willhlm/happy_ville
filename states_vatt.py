@@ -140,9 +140,6 @@ class Death(Vatt_states):
     def increase_phase(self):
         self.done=True
 
-    def change_state(self,input):
-        pass
-
 class Hurt(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -156,9 +153,6 @@ class Hurt(Vatt_states):
     def increase_phase(self):
         self.done=True
 
-    def change_state(self,input):
-        pass
-
 class Hurt_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -171,9 +165,6 @@ class Hurt_aggro(Vatt_states):
 
     def increase_phase(self):
         self.done=True
-
-    def change_state(self,input):
-        pass
 
 class Transform(Vatt_states):
     def __init__(self,entity):
@@ -205,9 +196,6 @@ class Stun(Vatt_states):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
-
-    def change_state(self,input):
-        pass
 
 class Javelin(Vatt_states):
     def __init__(self,entity):
