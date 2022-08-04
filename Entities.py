@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, math, sound, states
+import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_slime_wall, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, math, sound, states
 import time
 
 pygame.mixer.init()
@@ -288,6 +288,9 @@ class BG_Animated(BG_Block):
         self.update_pos(pos)
         self.animation.update()
 
+    def reset_timer(self):
+        pass
+
 class Dynamicentity(Staticentity):
     def __init__(self,pos):
         super().__init__(pos)
@@ -535,6 +538,31 @@ class Slime(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
         self.health = 50
         self.spirit=100
+
+class Wall_slime(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/wall_slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
+        self.health = 50
+        self.acceleration=[0,1]
+        self.currentstate = states_slime_wall.Walk(self)
+        self.dir=[0,0]
+        self.direction='top'
+
+    def peaceAI(self):
+        if self.collision_types['bottom']:
+            self.direction='bottom'
+            self.dir=[1,0]
+
+        if self.direction=='bottom' and not self.collision_types['bottom']:
+            self.acceleration=[-1,0]
+            self.dir=[0,-1]
+
+        #self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
+
 
     def update(self,pos):
         super().update(pos)
@@ -1058,6 +1086,28 @@ class Fenrisulven(Boss):
 
     def give_abillity(self):
         self.game_objects.player.dash=True
+
+class Rhoutta_encounter(Boss):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/rhoutta/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
+        self.health = 50
+        self.attack_distance = 100
+        self.attack = Sword
+        self.count=0
+        self.dmg = 0
+
+    def take_dmg(self,dmg):
+        self.count += 1
+        self.animation_stack[-1].handle_input('Hurt')
+        if self.count > 1:
+            new_game_state = states.Cutscene_file(self.game_objects.game,'rhoutta_encounter')
+            new_game_state.enter_state()
+            #new_game_state = states.Fading(self.game_objects.game,1)
+            #new_game_state.enter_state()
 
 class Path_col(Staticentity):
 

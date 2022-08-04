@@ -378,6 +378,18 @@
                  "width":0,
                  "x":14832,
                  "y":416
+                }, 
+                {
+                 "gid":7,
+                 "height":128,
+                 "id":217,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":448,
+                 "y":352
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -489,14 +501,14 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Skeleton_archer"
+                         "value":"Wall_slime"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":576,
-                 "y":352
+                 "x":448,
+                 "y":208
                 }, 
                 {
                  "gid":3,
@@ -621,8 +633,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":336,
-                 "y":368
+                 "x":720,
+                 "y":352
                 }, 
                 {
                  "gid":21,
@@ -639,7 +651,7 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":400,
+                 "x":528,
                  "y":352
                 }, 
                 {
@@ -751,7 +763,7 @@
          "y":0
         }],
  "nextlayerid":58,
- "nextobjectid":216,
+ "nextobjectid":218,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -1,4 +1,3 @@
-import animation
 import Read_files
 import Entities
 import pygame
@@ -229,3 +228,32 @@ class Cultist_encounter(Cutscene_engine):
         self.entity2.AImethod=self.entity2.aggroAI
         self.parent_class.game.game_objects.camera[-1].exit_state()
         super().exit_state()
+
+class Title_screen(Cutscene_engine):
+    def __init__(self,objects):
+        super().__init__(objects)
+        self.title_name = self.parent_class.font.render(text = 'Happy Ville')
+        self.text1 = self.parent_class.font.render(text = 'A game by Hjortron games')
+
+    def update(self):
+        self.timer+=1
+
+    def render(self):
+        if self.timer>400:
+            self.parent_class.game.screen.blit(self.title_name,(190,150))
+        if self.timer>1000:
+            self.parent_class.game.screen.blit(self.text1,(190,200))
+
+        if self.timer >1010:
+            self.exit_state()
+            #self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')
+            #self.parent_class.game.game_objects.load_map('village')
+
+    def handle_events(self,input):
+        #restric the speed
+        if input[2][0] > 0.3:
+            input[2][0]=0.3
+        elif input[2][0]< -0.3:
+            input[2][0]=-0.3
+
+        self.parent_class.game.game_objects.player.currentstate.handle_movement(input)

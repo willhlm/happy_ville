@@ -73,10 +73,4 @@ class Simple_animation(Animation):#no state or phase
 
         if self.frame == len(self.entity.sprites)*self.framerate:
             self.reset_timer()
-
-class Cutscene_animation(Simple_animation):#no state or phase
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def reset_timer(self):
-        self.entity.finished=True
+            self.entity.reset_timer()

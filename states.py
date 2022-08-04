@@ -3,6 +3,7 @@ import Read_files
 import Engine
 import Entities
 import cutscene
+import animation
 
 class Game_State():
     def __init__(self,game):
@@ -84,7 +85,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('village')
+            self.game.game_objects.load_map('rhoutta_encounter')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -653,9 +654,10 @@ class Select_Menu(Gameplay):
             self.exit_state()
 
 class Fading(Gameplay):#fades out and then in
-    def __init__(self,game):
+    def __init__(self,game,number_of_fades=2):
         super().__init__(game)
         self.page = 0
+        self.number_of_fades=number_of_fades
         self.render_fade=[self.render_out,self.render_in]
         self.game.game_objects.player.reset_movement()
         self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
@@ -678,7 +680,7 @@ class Fading(Gameplay):#fades out and then in
         if self.count > self.fade_length:
             self.page += 1
             self.init_in()
-            if self.page == 2:
+            if self.page == self.number_of_fades:
                 self.exit()
 
     def exit(self):
@@ -1122,13 +1124,25 @@ class Cutscene_engine(Gameplay):
 class Cutscene_file(Gameplay):
     def __init__(self, game,scene):
         super().__init__(game)
+        if scene=='rhoutta_encounter':
+            self.game.game_objects.load_map('wakeup_forest',fade=False)#load map without appending fade
+
+        self.scene = scene
         self.sprites = Read_files.load_sprites('cutscene/'+scene)
         self.image=self.sprites[0]
-        self.animation=animation.Cutscene_animation(self)
-
+        self.animation=animation.Simple_animation(self)
         self.game.game_objects.cutscenes_complete.append(scene)
+        self.game.game_objects.player.reset_movement()
+
+    def reset_timer(self):#called when cutscene is finshed
+        self.exit_state()
+
+        if self.scene=='rhoutta_encounter':
+            new_state=Cutscene_engine(self.game,'Title_screen')
+            new_state.enter_state()
 
     def update(self):
+        super().update()
         self.animation.update()
 
     def render(self):
@@ -1137,4 +1151,4 @@ class Cutscene_file(Gameplay):
     def handle_events(self, input):
         if input[0]:#press
             if input[-1] == 'start':
-                self.exit_state()
+                self.reset_timer()

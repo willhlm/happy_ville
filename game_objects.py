@@ -58,11 +58,12 @@ class Game_Objects():
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(2*self.game.WINDOW_SIZE[1]/3))
 
-    def load_map(self, map_name, spawn = '1'):
+    def load_map(self, map_name, spawn = '1',fade=True):
         self.map = map_loader.Level(map_name, self, spawn)
         self.initiate_groups()
-        new_game_state = states.Fading(self.game)
-        new_game_state.enter_state()
+        if fade:
+            new_game_state = states.Fading(self.game)
+            new_game_state.enter_state()
 
     def load_bg_music(self):
         try:
