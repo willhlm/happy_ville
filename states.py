@@ -3,7 +3,6 @@ import Read_files
 import Engine
 import Entities
 import cutscene
-import animation
 
 class Game_State():
     def __init__(self,game):
@@ -654,10 +653,9 @@ class Select_Menu(Gameplay):
             self.exit_state()
 
 class Fading(Gameplay):#fades out and then in
-    def __init__(self,game,number_of_fades=2):
+    def __init__(self,game):
         super().__init__(game)
         self.page = 0
-        self.number_of_fades=number_of_fades
         self.render_fade=[self.render_out,self.render_in]
         self.game.game_objects.player.reset_movement()
         self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
@@ -680,7 +678,7 @@ class Fading(Gameplay):#fades out and then in
         if self.count > self.fade_length:
             self.page += 1
             self.init_in()
-            if self.page == self.number_of_fades:
+            if self.page == 2:
                 self.exit()
 
     def exit(self):
@@ -1102,53 +1100,21 @@ class Vendor(Facilities):
             elif input[-1]=='a' or input[-1]=='return':
                 self.select()
 
-class Cutscene_engine(Gameplay):
+class Cutscenes(Gameplay):#basically, this class in not needed but would be nice to have the cutscene classes in a seperate file
     def __init__(self, game,scene):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()
         self.current_scene = getattr(cutscene, scene)(self)#make an object based on string: send in player, group and camera
         if scene != 'Death':
-            self.game.game_objects.cutscenes_complete.append(scene)
+            self.game.game_objects.cutscenes_complete.append(scene)#scenes will not run if the scnene is in this list
 
     def update(self):
         super().update()
         self.current_scene.update()
 
     def render(self):
-        super().render()#want the BG to keep rendering
+        super().render()#want the BG to keep rendering for engine. It is not needed for file cut scnene
         self.current_scene.render()#to plot the abilities. Maybe better with another state?
 
     def handle_events(self, input):
         self.current_scene.handle_events(input)
-
-class Cutscene_file(Gameplay):
-    def __init__(self, game,scene):
-        super().__init__(game)
-        if scene=='rhoutta_encounter':
-            self.game.game_objects.load_map('wakeup_forest',fade=False)#load map without appending fade
-
-        self.scene = scene
-        self.sprites = Read_files.load_sprites('cutscene/'+scene)
-        self.image=self.sprites[0]
-        self.animation=animation.Simple_animation(self)
-        self.game.game_objects.cutscenes_complete.append(scene)
-        self.game.game_objects.player.reset_movement()
-
-    def reset_timer(self):#called when cutscene is finshed
-        self.exit_state()
-
-        if self.scene=='rhoutta_encounter':
-            new_state=Cutscene_engine(self.game,'Title_screen')
-            new_state.enter_state()
-
-    def update(self):
-        super().update()
-        self.animation.update()
-
-    def render(self):
-        self.game.screen.blit(self.image,(0, 0))
-
-    def handle_events(self, input):
-        if input[0]:#press
-            if input[-1] == 'start':
-                self.reset_timer()

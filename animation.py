@@ -23,8 +23,8 @@ class Entity_animation(Animation):#phase and state
     def update(self):
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir,self.entity.currentstate.phase).copy()
         self.frame += 1
-#        if str(type(self.entity).__name__)=='Player':
-#            print(self.entity.currentstate.state_name,self.entity.currentstate.phase)
+    #    if str(type(self.entity).__name__)=='Wall_slime':
+    #        pass#print(self.entity.currentstate.dir)
 
         if self.frame == self.entity.sprites.get_frame_number(self.entity.currentstate.state_name,self.entity.currentstate.phase)*self.framerate:
             self.reset_timer()

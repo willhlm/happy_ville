@@ -8,7 +8,49 @@ class Weather():#maybe should just be a function
     def create_particles(self,type,number_particles=100):
         for i in range(0,number_particles):
             obj = getattr(sys.modules[__name__], type)(self.game_objects)
-            self.game_objects.weather.add(obj)
+            self.game_objects.weather_paricles.add(obj)
+
+    def lightning(self):
+        self.game_objects.weather_paricles.add(Lightning(self.game_objects))
+
+class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
+    def __init__(self,game_objects):
+        super().__init__()
+        self.page = 0
+        self.update_img=[self.img_out,self.img_in]
+        self.image = pygame.Surface(game_objects.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
+        self.image.fill((255,255,255,255))
+        self.rect = self.image.get_rect()
+        self.init_out()
+
+    def init_in(self):
+        self.count = 0
+        self.fade_length = 10
+        self.image.set_alpha(255)
+
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+
+    def init_out(self):
+        self.count = 0
+        self.fade_length = 20
+        self.image.set_alpha(int(255/self.fade_length))
+
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.update_img[self.page]()
+        self.count += 1
+        if self.count > self.fade_length:
+            self.page += 1
+            self.init_in()
+            if self.page == 2:
+                self.kill()
+
+    def img_out(self):
+        self.image.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
+
+    def img_in(self):
+        self.image.set_alpha(int(self.count*(255/self.fade_length)))
 
 class Weather_particles(Animatedentity):
     def __init__(self,game_objects):

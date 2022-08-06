@@ -343,7 +343,7 @@
                         {
                          "name":"event_type",
                          "type":"string",
-                         "value":"cutscene_engine"
+                         "value":"cutscene"
                         }],
                  "rotation":0,
                  "type":"",
@@ -366,7 +366,7 @@
                         {
                          "name":"event_type",
                          "type":"string",
-                         "value":"cutscene_engine"
+                         "value":"cutscene"
                         }],
                  "rotation":0,
                  "type":"",

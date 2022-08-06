@@ -189,7 +189,7 @@ class Level():
         base_bg_list = ['bg_behindfar','bg_far','bg_behindmid','bg_mid','bg_behindnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
         #bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
         bg_list = []
-        parallax_values = {'bg_behindfar': 0.01,
+        parallax_values = {'bg_behindfar': 0.1,
                             'bg_far': 0.03,
                             'bg_behindmid': 0.4,
                             'bg_mid': 0.5,
@@ -280,9 +280,7 @@ class Level():
                             y = math.floor(index/cols)
                             x = (index - (y*cols))
                             parallax = parallax_values[bg]
-                            #print(new_map_diff[0], ' ', x)
-                            #blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
-                            blit_pos = (x * self.TILE_SIZE -int((1-parallax)*new_map_diff[0]) + int((self.init_player_pos[0]-x*self.TILE_SIZE)*(1-parallax)), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]) + int((self.init_player_pos[1]-y*self.TILE_SIZE)*(1-parallax)))
+                            blit_pos = (x * self.TILE_SIZE - int((new_map_diff[0])*(1-parallax)), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
                             new_animation = Entities.BG_Animated(blit_pos,path,parallax)
                             try:
                                 animation_entities[bg].append(new_animation)

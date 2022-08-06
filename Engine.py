@@ -101,12 +101,9 @@ class Collisions():
                 self.game_objects.load_map(trigger.destination, trigger.spawn)
 
             elif type(trigger).__name__ == 'Trigger':
-                if trigger.event not in self.game_objects.cutscenes_complete:#if the cutscene has not been shown before
-                    if trigger.event_type=='cutscene_file':
-                        new_game_state = states.Cutscene_file(self.game_objects.game,trigger.event)
-                        new_game_state.enter_state()
-                    elif trigger.event_type=='cutscene_engine':
-                        new_game_state = states.Cutscene_engine(self.game_objects.game,trigger.event)
+                if trigger.event_type=='cutscene':
+                    if trigger.event not in self.game_objects.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?    
+                        new_game_state = states.Cutscenes(self.game_objects.game,trigger.event)
                         new_game_state.enter_state()
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions

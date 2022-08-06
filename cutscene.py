@@ -2,12 +2,43 @@ import Read_files
 import Entities
 import pygame
 import particles
+import animation
+import states
 
-class Cutscene_engine():
+class Cutscene_file():#cutscneens that will run based on file. The name of the file should be the same as the class name
+    def __init__(self,parent_class):
+        self.parent_class = parent_class
+        self.animation=animation.Simple_animation(self)
+        self.sprites = Read_files.load_sprites('cutscene/'+type(self).__name__.lower())
+        self.image=self.sprites[0]
+
+    def update(self):
+        self.animation.update()
+
+    def render(self):
+        self.parent_class.game.screen.blit(self.image,(0, 0))
+
+    def reset_timer(self):#called when cutscene is finshed
+        pass
+
+    def handle_events(self,input):
+        pass
+
+class Rhoutta_encounter(Cutscene_file):
+    def __init__(self,objects):
+        super().__init__(objects)
+        self.parent_class.game.game_objects.load_map('wakeup_forest',fade=False)#load map without appending fade
+
+    def reset_timer(self):#called when cutscene is finshed
+        self.parent_class.exit_state()
+        new_state=states.Cutscenes(self.parent_class.game,'Title_screen')
+        new_state.enter_state()
+
+class Cutscene_engine():#cut scenens that is based on game engien
     def __init__(self,parent_class):
         self.parent_class = parent_class
 
-        self.timer=0
+        self.timer = 0
         self.pos = [-self.parent_class.game.WINDOW_SIZE[1],self.parent_class.game.WINDOW_SIZE[1]]
         self.const = 0.8#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
 
@@ -229,7 +260,7 @@ class Cultist_encounter(Cutscene_engine):
         self.parent_class.game.game_objects.camera[-1].exit_state()
         super().exit_state()
 
-class Title_screen(Cutscene_engine):
+class Title_screen(Cutscene_engine):#screen played after waking up from boss dream
     def __init__(self,objects):
         super().__init__(objects)
         self.title_name = self.parent_class.font.render(text = 'Happy Ville')

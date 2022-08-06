@@ -132,7 +132,6 @@ class Sprites_Player(Sprites):
 
     def __init__(self,path):
         super().__init__()
-
         pre_dict = self.load_all_sprites(path+'pre/')
         main_dict = self.load_all_sprites(path+'main/')
         post_dict = self.load_all_sprites(path+'post/')
@@ -147,6 +146,20 @@ class Sprites_Player(Sprites):
 
     def get_frame_number(self, input,phase):
         return len(self.sprite_dict[phase][input])
+
+class Sprites_wallslime(Sprites_Player):
+    def __init__(self,path):
+        super().__init__(path)
+
+    def get_image(self, input, timer, dir, phase):#phase pre, main, post, input=action,timer=frame
+        if dir[0] > 0:
+            return self.sprite_dict[phase][input][timer]
+        elif dir[0] < 0:
+            return pygame.transform.rotate(self.sprite_dict[phase][input][timer],-180)
+        elif dir[1] > 0:
+            return pygame.transform.rotate(self.sprite_dict[phase][input][timer],-270)
+        elif dir[1] < 0:
+            return pygame.transform.rotate(self.sprite_dict[phase][input][timer],-90)
 
 #class for reading and rendering fonts
 class Alphabet():

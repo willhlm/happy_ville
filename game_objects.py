@@ -18,8 +18,8 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
-        self.weather_paricles=weather.Weather(self)#initiate weather
-        self.weather_paricles.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
+        self.weather=weather.Weather(self)#initiate weather
+        self.weather.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
         #self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
@@ -41,7 +41,7 @@ class Game_Objects():
         self.platforms_ramps = pygame.sprite.Group()
         self.all_bgs = pygame.sprite.LayeredUpdates()
         self.all_fgs = pygame.sprite.LayeredUpdates()
-        self.weather = pygame.sprite.Group()
+        self.weather_paricles = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
@@ -125,7 +125,7 @@ class Game_Objects():
         self.npcs.update(scroll)
         self.interacting_cosmetics.update(scroll)#bushes, maybye move to enemy?
         self.interactables.update(scroll)
-        self.weather.update(scroll)
+        self.weather_paricles.update(scroll)
         self.fprojectiles.update(scroll)
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
@@ -148,7 +148,7 @@ class Game_Objects():
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
         self.interacting_cosmetics.draw(self.game.screen)#bushes move to enemy?
-        self.weather.draw(self.game.screen)
+        self.weather_paricles.draw(self.game.screen)
 
         #self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)

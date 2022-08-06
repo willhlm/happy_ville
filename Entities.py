@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_slime_wall, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, math, sound, states
+import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, math, sound, states
 import time
 
 pygame.mixer.init()
@@ -403,7 +403,7 @@ class Player(Character):
         map=self.game_objects.map.level_name
         pos=[self.rect[0],self.rect[1]]
         self.game_objects.cosmetics.add(Player_Soul(pos))
-        new_game_state = states.Cutscene_engine(self.game_objects.game,'Death')
+        new_game_state = states.Cutscenes(self.game_objects.game,'Death')
         new_game_state.enter_state()
         self.set_abs_dist()
 
@@ -559,36 +559,50 @@ class Slime(Enemy):
 class Wall_slime(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/wall_slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = Read_files.Sprites_wallslime('Sprites/Enteties/enemies/wall_slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
+        self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
         self.health = 50
-        self.acceleration=[0,1]
-        self.currentstate = states_slime_wall.Walk(self)
-        self.dir=[0,0]
-        self.direction='top'
+        self.currentstate.enter_state('Walk')
+        self.direction='te'
 
     def update_vel(self):
-        self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
-        #self.entity.velocity[1]=min(self.entity.velocity[1],7.5)#set a y max speed
+        self.velocity[1]=self.acceleration[1]-self.dir[1]#*self.velocity[1]#-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[0]=self.acceleration[0]+self.dir[0]#*self.velocity[0]#-self.velocity[0]*self.friction[0]
 
-        self.velocity[0]+=self.acceleration[0]-self.velocity[0]*self.friction[0]
-
-    def peaceAI(self):
+    def peaceAI(self):#probably mabye better to write different states (wall_left, wall_top etc.)
         if self.collision_types['bottom']:
             self.direction='bottom'
-            self.dir=[1,0]
+            self.currentstate.dir=[1,0]#animation direction
 
-        if self.direction=='bottom' and not self.collision_types['bottom']:
+        elif self.collision_types['left']:
+            self.direction='left'
+            self.currentstate.dir=[0,-1]
+
+        elif self.collision_types['top']:
+            self.direction='top'
+            self.currentstate.dir=[-1,0]
+
+        elif self.collision_types['right']:
+            self.direction='right'
+            self.currentstate.dir=[0,1]
+
+        if self.direction=='bottom' and not self.collision_types['bottom']:#right side
             self.acceleration=[-1,0]
-            self.dir=[0,-1]
+            self.dir=[0,-1]#walking direction
 
-        #self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
+        elif self.direction=='left' and not self.collision_types['left']:
+            self.acceleration=[0,-1]
+            self.dir=[-1,0]
 
+        elif self.direction=='top' and not self.collision_types['top']:
+            self.acceleration=[1,0]
+            self.dir=[0,1]
 
-    def update(self,pos):
-        super().update(pos)
+        elif self.direction=='right' and not self.collision_types['right']:
+            self.acceleration=[0,1]
+            self.dir=[1,0]
 
 class Woopie(Enemy):
     def __init__(self,pos,game_objects):
@@ -986,7 +1000,7 @@ class Boss(Enemy):
         self.aggro=False
         self.AImethod = self.cutsceneAI
         self.give_abillity()
-        new_game_state = states.Cutscene_engine(self.game_objects.game,'Defeated_boss')
+        new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
         new_game_state.enter_state()
 
     def give_abillity(self):
@@ -1124,7 +1138,7 @@ class Rhoutta_encounter(Boss):
         self.count += 1
         self.animation_stack[-1].handle_input('Hurt')
         if self.count > 1:
-            new_game_state = states.Cutscene_file(self.game_objects.game,'rhoutta_encounter')
+            new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
             new_game_state.enter_state()
             #new_game_state = states.Fading(self.game_objects.game,1)
             #new_game_state.enter_state()
