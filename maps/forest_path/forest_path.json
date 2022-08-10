@@ -227,6 +227,29 @@
                  "width":16,
                  "x":1104,
                  "y":544
+                }, 
+                {
+                 "gid":10,
+                 "height":176,
+                 "id":202,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"path_to",
+                         "type":"string",
+                         "value":"village"
+                        }, 
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1472,
+                 "y":592
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -258,7 +281,7 @@
          "y":0
         }],
  "nextlayerid":45,
- "nextobjectid":202,
+ "nextobjectid":203,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

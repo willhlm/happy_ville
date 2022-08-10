@@ -189,8 +189,8 @@ class Level():
         base_bg_list = ['bg_behindfar','bg_far','bg_behindmid','bg_mid','bg_behindnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
         #bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
         bg_list = []
-        parallax_values = {'bg_behindfar': 0.1,
-                            'bg_far': 0.03,
+        parallax_values = {'bg_behindfar': 0.01,
+                            'bg_far': 0.1,
                             'bg_behindmid': 0.4,
                             'bg_mid': 0.5,
                             'bg_behindnear': 0.7,

@@ -565,13 +565,13 @@ class Wall_slime(Enemy):
         self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
         self.health = 50
         self.currentstate.enter_state('Walk')
-        self.direction='te'
+        self.direction='air'
 
     def update_vel(self):
-        self.velocity[1]=self.acceleration[1]-self.dir[1]#*self.velocity[1]#-self.velocity[1]*self.friction[1]#gravity
-        self.velocity[0]=self.acceleration[0]+self.dir[0]#*self.velocity[0]#-self.velocity[0]*self.friction[0]
+        self.velocity[1]=self.acceleration[1]-self.dir[1]
+        self.velocity[0]=self.acceleration[0]+self.dir[0]
 
-    def peaceAI(self):#probably mabye better to write different states (wall_left, wall_top etc.)
+    def peaceAI(self):#is there a better way to write?
         if self.collision_types['bottom']:
             self.direction='bottom'
             self.currentstate.dir=[1,0]#animation direction
