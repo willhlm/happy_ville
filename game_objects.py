@@ -56,7 +56,7 @@ class Game_Objects():
         #initiate player
         self.player = Entities.Player([200,50],self)
         self.players = pygame.sprite.Group(self.player)
-        self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(2*self.game.WINDOW_SIZE[1]/3))
+        self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(self.game.WINDOW_SIZE[1]/2))
 
     def load_map(self, map_name, spawn = '1',fade=True):
         self.map = map_loader.Level(map_name, self, spawn)
@@ -92,22 +92,21 @@ class Game_Objects():
         self.map.load_bg()
 
     def collide_all(self):
-        self.collisions.collide(self.players,self.platforms, self.platforms_ramps)
-        self.collisions.collide(self.enemies,self.platforms, self.platforms_ramps)
-        self.collisions.collide(self.npcs,self.platforms, self.platforms_ramps)
-        self.collisions.collide(self.loot,self.platforms, self.platforms_ramps)
-        self.collisions.pickup_loot(self.player,self.loot)
-        self.collisions.check_enemy_collision(self.player,self.enemies)
+        self.collisions.platform_collision(self.players)
+        self.collisions.platform_collision(self.enemies)
+        self.collisions.platform_collision(self.npcs)
+        self.collisions.platform_collision(self.loot)
 
-        self.collisions.check_trigger(self.player,self.triggers)
+        self.collisions.check_player_collision(self.loot)
+        self.collisions.check_player_collision(self.enemies)
+        self.collisions.check_player_collision(self.triggers)
 
         self.collisions.interact_cosmetics()
 
         #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
-        self.collisions.action_collision(self.fprojectiles,self.platforms,self.enemies)
-        self.collisions.action_collision(self.eprojectiles,self.platforms,self.players)
-        #self.collisions.weather_paricles(self.weather,self.platforms)#weather collisino.
+        self.collisions.projectile_collision(self.fprojectiles,self.enemies)
+        self.collisions.projectile_collision(self.eprojectiles,self.players)
 
     def scrolling(self):
         self.camera[-1].update()
@@ -123,7 +122,7 @@ class Game_Objects():
         self.entity_pause.update(scroll)#should be before enemies and npcs group
         self.enemies.update(scroll)
         self.npcs.update(scroll)
-        self.interacting_cosmetics.update(scroll)#bushes, maybye move to enemy?
+        self.interacting_cosmetics.update(scroll)#bushes, maybye move interacting_cosmetics to enemy?
         self.interactables.update(scroll)
         self.weather_paricles.update(scroll)
         self.fprojectiles.update(scroll)

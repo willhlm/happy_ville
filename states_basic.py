@@ -51,7 +51,7 @@ class Hurt(Entity_States):
         if input == 'Cut':
             self.enter_state('Cut')
         elif input=='Idle':
-             self.enter_state('Idle')            
+             self.enter_state('Idle')
 
 class Cut(Once):
     def __init__(self,entity):
@@ -65,8 +65,9 @@ class Opening(Once):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def finish(self):
-        self.enter_state('Open')
+    def handle_input(self,input):
+        if input=='Open':
+             self.enter_state('Open')
 
 class Open(Entity_States):
     def __init__(self,entity):

@@ -125,7 +125,7 @@ class Level():
                         destination = property['value']
                     if property['name'] == 'spawn':
                         spawn = property['value']
-                new_path = Entities.Path_col(object_position,object_size,destination,spawn)
+                new_path = Entities.Path_col(object_position,self.game_objects,object_size,destination,spawn)
                 self.game_objects.triggers.add(new_path)
             elif id == 12:
                 object_size = (int(obj['width']),int(obj['height']))
@@ -146,14 +146,17 @@ class Level():
 
             elif id == 17:#trigger
                 values={}
+                object_size = (int(obj['width']),int(obj['height']))
+                
                 for property in obj['properties']:
                     if property['name'] == 'event':
                         values['event'] = property['value']
                     elif property['name'] == 'event_type':
                         values['event_type']=property['value']
-                object_size = (int(obj['width']),int(obj['height']))
-                new_trigger = Entities.Trigger(object_position,object_size ,values)
-                self.game_objects.triggers.add(new_trigger)
+
+                if values['event_type'] == 'cutscene':
+                    new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
+                    self.game_objects.triggers.add(new_trigger)
 
             elif id == 18:#Spawpoint
                 new_int = Entities.Spawnpoint(object_position,self.level_name)
@@ -169,19 +172,21 @@ class Level():
                 new_spawn = Entities.Spawner(object_position,self.game_objects,values)
                 self.game_objects.cosmetics.add(new_spawn)
 
-            elif id == 20:#bushes
+            elif id == 20:#bushes, chests etc
                 for property in obj['properties']:
                     if property['name'] == 'type':
-                        bush_type = property['value']
-                new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
-                self.game_objects.interacting_cosmetics.add(new_bush)
+                        interactable_type = property['value']
+                new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
+                #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
+                self.game_objects.interacting_cosmetics.add(new_interacable)
 
-            elif id == 21:#bushes
+            elif id == 21:#key items
                 for property in obj['properties']:
                     if property['name'] == 'name':
                         keyitem = property['value']
                 new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
                 self.game_objects.loot.add(new_keyitem)
+
 
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
@@ -302,28 +307,3 @@ class Level():
             except KeyError:
                 pass
         del blit_surfaces, bg_sheets, bg_maps
-
-class Sprite_sheet():
-
-    def __init__(self, filename):
-        try:
-            self.sheet =  pygame.image.load(filename).convert()
-        except:
-            #print(f"Unable to load spritesheet image: {filename}")
-            raise SystemExit(e)
-
-    def image_at(self, rectangle, colorkey = None):
-        #Loads image from x, y, x+tilesize, y+tilesize.
-
-        rect = pygame.Rect(rectangle)
-        image = pygame.Surface(rect.size).convert()
-        image.blit(self.sheet, (0, 0), rect)
-        if colorkey is not None:
-            if colorkey is -1:
-                colorkey = image.get_at((0,0))
-            image.set_colorkey(colorkey, pygame.RLEACCEL)
-        return image
-
-    def images_at(self, rects, colorkey = None):
-        #returns list of all images in sheet
-        return [self.image_at(rect, colorkey) for rect in rects]

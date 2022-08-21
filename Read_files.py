@@ -161,6 +161,31 @@ class Sprites_wallslime(Sprites_Player):
         elif dir[1] < 0:
             return pygame.transform.rotate(self.sprite_dict[phase][input][timer],-90)
 
+class Sprite_sheet():#don't need it?
+
+    def __init__(self, filename):
+        try:
+            self.sheet =  pygame.image.load(filename).convert()
+        except:
+            #print(f"Unable to load spritesheet image: {filename}")
+            raise SystemExit(e)
+
+    def image_at(self, rectangle, colorkey = None):
+        #Loads image from x, y, x+tilesize, y+tilesize.
+
+        rect = pygame.Rect(rectangle)
+        image = pygame.Surface(rect.size).convert()
+        image.blit(self.sheet, (0, 0), rect)
+        if colorkey is not None:
+            if colorkey is -1:
+                colorkey = image.get_at((0,0))
+            image.set_colorkey(colorkey, pygame.RLEACCEL)
+        return image
+
+    def images_at(self, rects, colorkey = None):
+        #returns list of all images in sheet
+        return [self.image_at(rect, colorkey) for rect in rects]
+
 #class for reading and rendering fonts
 class Alphabet():
     def __init__(self):
