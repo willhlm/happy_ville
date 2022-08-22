@@ -1164,6 +1164,27 @@ class Path_col(Staticentity):
         self.game_objects.player.reset_movement()
         self.game_objects.load_map(self.destination, self.spawn)
 
+class Path_inter(Staticentity):
+
+    def __init__(self, pos, game_objects, size, destination, spawn, image):
+        super().__init__(pos, pygame.Surface(size))
+        self.game_objects=game_objects
+        self.rect.bottomleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.destination = destination
+        self.spawn = spawn
+        self.image = pygame.image.load("Sprites/invisible.png").convert_alpha()
+
+    def update(self, pos):
+        super().update(pos)
+        self.hitbox.center = self.rect.center
+
+    def interact(self):
+        self.game_objects.sound.pause_bg_sound()
+        self.game_objects.player.enter_idle()
+        self.game_objects.player.reset_movement()
+        self.game_objects.load_map(self.destination, self.spawn)
+
 class Camera_Stop(Staticentity):
 
     def __init__(self,size,pos,dir):
@@ -1240,6 +1261,9 @@ class Abilities(pygame.sprite.Sprite):
         if self.state == 'post':
             self.kill()
 
+    def collision_inetractables(self,interactable):
+        pass
+
 class Melee(Abilities):
     def __init__(self,entity):
         super().__init__(entity)
@@ -1271,7 +1295,7 @@ class Explosion(Melee):
         self.dmg = dmg
 
     def rectangle(self):
-        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,100,100)
+        self.rect = pygame.Rect(self.entity.rect.centerx-50,self.entity.rect.centery-50,100,100)
         self.hitbox = self.rect.copy()
 
     def update_hitbox(self):
@@ -1354,9 +1378,9 @@ class Sword(Melee):
         collision_enemy.hurt_particles(self.dir[0])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         if self.dir[0]>0:
-            self.clash_particles(self.rect.midright,self.dir[0])
+            self.clash_particles(self.rect.midright)
         else:
-            self.clash_particles(self.rect.midleft,self.dir[0])
+            self.clash_particles(self.rect.midleft)
 
         self.kill()
 
@@ -1364,11 +1388,15 @@ class Sword(Melee):
         if self.dir[1] == -1:
             self.entity.velocity[1] = -11
 
-    def clash_particles(self,pos,dir,number_particles=12):
+    def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
             obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3)
             self.entity.game_objects.cosmetics.add(obj1)
+
+    def collision_inetractables(self,interactable):
+        interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
+        self.kill()
 
 class Aila_sword(Sword):
     def __init__(self,entity):
@@ -1402,7 +1430,7 @@ class Aila_sword(Sword):
         if self.equip != 'idle':
             self.stones[self.equip].collision()#call collision specific for stone
 
-    def clash_particles(self,pos,dir,number_particles=12):
+    def clash_particles(self,pos,number_particles=12):
         angle = random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
             obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3,colour=self.colour[self.equip])
@@ -1556,7 +1584,7 @@ class Arrow(Projectiles):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
-class Dynamic_animated(Dynamicentity):#animated stuff with hitbox
+class Loot(Dynamicentity):#animated stuff with hitbox
     def __init__(self,pos):
         super().__init__(pos)
         self.animation = animation.Basic_animation(self)
@@ -1573,7 +1601,7 @@ class Dynamic_animated(Dynamicentity):#animated stuff with hitbox
     def attract(self,pos):#the omamori calls on this in loot group
         pass
 
-class Heart_container(Dynamic_animated):
+class Heart_container(Loot):
 
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/heart_container/')
 
@@ -1596,7 +1624,7 @@ class Heart_container(Dynamic_animated):
         #a cutscene?
         self.kill()
 
-class Spirit_container(Dynamic_animated):
+class Spirit_container(Loot):
 
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spirit_container/')
 
@@ -1619,7 +1647,7 @@ class Spirit_container(Dynamic_animated):
         #a cutscene?
         self.kill()
 
-class Soul_essence(Dynamic_animated):
+class Soul_essence(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/soul_essence/')
 
     def __init__(self,pos,game_objects):
@@ -1640,7 +1668,7 @@ class Soul_essence(Dynamic_animated):
         obj1 = particles.General_particle(self.rect.center,distance=100,lifetime=20,vel=[2,4],type='spark',dir='isotropic')
         self.game_objects.cosmetics.add(obj1)
 
-class Tungsten(Dynamic_animated):
+class Tungsten(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/tungsten/')
 
     def __init__(self,pos,game_objects):
@@ -1656,7 +1684,7 @@ class Tungsten(Dynamic_animated):
         #a cutscene?
         self.kill()
 
-class Enemy_drop(Dynamic_animated):
+class Enemy_drop(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos)
         self.game_objects = game_objects
@@ -1733,7 +1761,7 @@ class Spiritsorb(Enemy_drop):
     def update_vel(self):
         self.velocity=[0.1*random.randint(-10, 10),0.1*random.randint(-10, 10)]
 
-    def pickup(self):
+    def player_collision(self):
         self.game_objects.player.spirit += 10
         self.kill()
 
@@ -1806,16 +1834,16 @@ class Slash(Animatedentity):
 class Interactable(Animatedentity):
     def __init__(self,pos):
         super().__init__(pos)
-        self.interacted=False
+        self.interacted = False
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
+        self.hitbox.midbottom = self.rect.midbottom
 
     def interact(self):
-        self.interacted=True
+        self.interacted = True
 
-class Interactable_bushes(Interactable):#should it be in enemy?
+class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
         super().__init__(pos)
         self.game_objects = game_objects
@@ -1831,13 +1859,7 @@ class Interactable_bushes(Interactable):#should it be in enemy?
             self.currentstate.handle_input('Hurt')
             self.interacted = True#sets to false when player gos away
 
-    def knock_back(self,dir):
-        pass
-
-    def hurt_particles(self,dir):
-        pass
-
-    def take_dmg(self,dmg):
+    def take_dmg(self,projectile):
         self.currentstate.handle_input('Cut')
 
     def reset_timer(self):
@@ -1850,7 +1872,7 @@ class Cave_grass(Interactable_bushes):
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
 
 class Chest(Interactable):
     def __init__(self,pos,game_objects):
@@ -1862,27 +1884,38 @@ class Chest(Interactable):
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Chest/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1])
-        self.hitbox = self.rect.copy()
-        self.health=30
+        self.rect.topleft = pos
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.health=3
         #self.ID = id
-        self.loot = {'amber_droplet':3}
+        self.inventory = {'Amber_Droplet':3}
     #    if state == "opened":
     #        self.interacted = True
     #        self.currentstate = states_basic.Open(self)
 
-    def knock_back(self,dir):
-        pass
+    def update(self,scroll):
+        super().update(scroll)
+        self.group_distance()
+
+    def loots(self):#this is called when the opening animation is finished
+        for key in self.inventory.keys():#go through all loot
+            for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
+                obj = getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y],self.game_objects)#make a class based on the name of the key: need to import sys
+                self.game_objects.loot.add(obj)
+            self.inventory[key]=0
 
     def player_collision(self):#player collision
         pass
 
     def reset_timer(self):#when animation is finished
-        self.currentstate.handle_input('Open')
+        self.currentstate.handle_input('Idle')
 
-    def take_dmg(self,dmg):
+    def take_dmg(self,projectile):
+        projectile.clash_particles(self.hitbox.center)
         self.health-=1
-        if self.health<0:
+        if self.health>0:
+            self.currentstate.handle_input('Hurt')
+        else:
             self.currentstate.handle_input('Opening')
 
 class Door(Interactable):
@@ -1902,18 +1935,10 @@ class Door(Interactable):
         except:
             pass
 
-class Chest_Big(Chest):
-    def __init__(self,pos,id,loot,state):
-        super().__init__(pos,id,loot,state)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Chest_big/')
-        self.image = self.sprites[self.state][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1]-13)
-        self.hitbox = self.rect.inflate(0,0)
-
 class Spawnpoint(Interactable):
-    def __init__(self,pos,map):
+    def __init__(self,pos,game_objects,map):
         super().__init__(pos)
+        self.game_objects = game_objects
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Spawnpoint/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
@@ -1922,13 +1947,13 @@ class Spawnpoint(Interactable):
         self.init_cor=pos
         self.map = map
 
-    def interact(self,entity):#when player press t/y
+    def interact(self):#when player press t/y
         if type(self.currentstate).__name__ == 'Idle':#single click
-            entity.spawn_point[0]['map']=self.map
-            entity.spawn_point[0]['point']=self.init_cor
+            self.game_objects.player.spawn_point[0]['map']=self.map
+            self.game_objects.player.spawn_point[0]['point']=self.init_cor
             self.currentstate.handle_input('Once')
         else:#odoulbe click
-            new_state = states.Soul_essence(entity.game_objects.game)
+            new_state = states.Soul_essence(self.game_objects.game)
             new_state.enter_state()
 
     def reset_timer(self):

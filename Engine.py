@@ -1,5 +1,4 @@
 import pygame
-import states
 
 class Collisions():
     def __init__(self,game_objects):
@@ -11,14 +10,13 @@ class Collisions():
             self.game_objects.player.velocity[1] = 0
             self.game_objects.player.go_through = True
 
-    def interact_cosmetics(self):#bushes, check plater and projectile collision
+    def cosmetics_collision(self):#bushes, check plater
         for cosmetic in self.game_objects.interacting_cosmetics.sprites():
-
             collision_entity = pygame.sprite.spritecollideany(cosmetic,self.game_objects.players,Collisions.collided)
             if collision_entity:
                 cosmetic.player_collision()
             else:
-                cosmetic.interacted=False
+                cosmetic.interacted = False
 
     def thunder_attack(self,aura):
         return pygame.sprite.spritecollide(aura,self.game_objects.enemies,False,Collisions.collided)#check collision
@@ -40,7 +38,7 @@ class Collisions():
 
             #if hit chest, bushes
             if collision_inetractables:
-                collision_inetractables.take_dmg(projectile)
+                projectile.collision_inetractables(collision_inetractables)
 
             #if hit enemy
             if collision_enemy:
@@ -52,7 +50,7 @@ class Collisions():
                 projectile.collision_plat()
 
     #take damage if collide with enemy
-    def check_player_collision(self,enteties):
+    def player_collision(self,enteties):
         collision_enteties=pygame.sprite.spritecollideany(self.game_objects.player,enteties,Collisions.collided)#check collision
         if collision_enteties:
             collision_enteties.player_collision()
@@ -60,12 +58,12 @@ class Collisions():
     #npc player conversation, when pressing t
     def check_interaction_collision(self):
         npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
+        interactable = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
+
         if npc:
             npc.interact()
-
-        collision = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
-        if collision:
-            collision.interact(self.game_objects.player)
+        elif interactable:
+            interactable.interact()
 
     #collision of player and enemy: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one

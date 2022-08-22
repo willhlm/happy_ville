@@ -66,8 +66,9 @@ class Opening(Once):
         super().__init__(entity)
 
     def handle_input(self,input):
-        if input=='Open':
-             self.enter_state('Open')
+        if input=='Idle':
+            self.entity.loots()
+            self.enter_state('Open')
 
 class Open(Entity_States):
     def __init__(self,entity):

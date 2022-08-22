@@ -113,24 +113,3 @@ class Stun(Enemy_states):
 
     def change_state(self,input):
         pass
-
-class Attack(Enemy_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.dir=self.entity.dir.copy()#animation direction
-        self.done=False
-        self.phases=['pre','main']
-        self.phase=self.phases[0]
-        self.entity.attack.lifetime=10
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
-
-    def increase_phase(self):
-        if self.phase=='pre':
-            self.phase='main'
-            attack=self.entity.attack(self.entity)#make the object
-            self.entity.projectiles.add(attack)#add to group but in main phase
-        elif self.phase=='main':
-            self.done=True

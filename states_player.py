@@ -178,9 +178,19 @@ class Jump_stand(Jump_run):
             if self.entity.acceleration[0]==0:
                 self.enter_state('Fall_stand')
 
-class Double_jump(Jump_run):
+class Double_jump(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
+        self.entity.velocity[1]=-10
+
+#    def handle_movement(self,input):
+#        super().handle_movement(input)
+        #if self.entity.acceleration[0]==0:
+        #    self.enter_state('Jump_stand')
+        #elif self.entity.acceleration[0]!=0:
+        #    self.enter_state('Jump_run')
 
     def update_state(self):
         if self.entity.velocity[1]>0:#falling down
@@ -189,13 +199,6 @@ class Double_jump(Jump_run):
             else:
                 self.enter_state('Fall_run')
 
-    def handle_release_input(self,input):#when release space
-        pass
-
-    def handle_movement(self,input):
-        super().handle_movement(input)
-        if self.entity.acceleration[0]!=0:
-            self.enter_state('Jump_run')
 
 class Fall_run(Player_states):
     def __init__(self,entity):

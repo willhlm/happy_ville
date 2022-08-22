@@ -3,7 +3,7 @@ import Read_files
 import Engine
 import Entities
 import map_loader
-import particles
+import particles#don't need
 import sound
 import states
 import camera
@@ -46,7 +46,7 @@ class Game_Objects():
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
-        self.entity_pause = Entities.PauseGroup() #include all Entities that are far away,Entities.PauseGroup()
+        self.entity_pause = Entities.PauseGroup() #include all Entities that are far away
         self.cosmetics = pygame.sprite.Group() #spirits
         self.camera_blocks = pygame.sprite.Group()
         self.triggers = pygame.sprite.Group()
@@ -54,7 +54,7 @@ class Game_Objects():
         self.interacting_cosmetics = pygame.sprite.Group()
 
         #initiate player
-        self.player = Entities.Player([200,50],self)
+        self.player = Entities.Player([0,0],self)
         self.players = pygame.sprite.Group(self.player)
         self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(self.game.WINDOW_SIZE[1]/2))
 
@@ -97,13 +97,12 @@ class Game_Objects():
         self.collisions.platform_collision(self.npcs)
         self.collisions.platform_collision(self.loot)
 
-        self.collisions.check_player_collision(self.loot)
-        self.collisions.check_player_collision(self.enemies)
-        self.collisions.check_player_collision(self.triggers)
+        self.collisions.player_collision(self.loot)
+        self.collisions.player_collision(self.enemies)
+        self.collisions.player_collision(self.triggers)
 
-        self.collisions.interact_cosmetics()
+        self.collisions.cosmetics_collision()#can this be written so tahth it uses check_player_collision?
 
-        #if we make all abilities spirit based maybe we don't have to collide with all the platforms? and only check for enemy collisions?
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
         self.collisions.projectile_collision(self.fprojectiles,self.enemies)
         self.collisions.projectile_collision(self.eprojectiles,self.players)
@@ -137,6 +136,7 @@ class Game_Objects():
 
         #self.platforms.draw(self.game.screen)
         self.interactables.draw(self.game.screen)
+        self.interacting_cosmetics.draw(self.game.screen)#bushes and chests
         self.enemies.draw(self.game.screen)
         self.npcs.draw(self.game.screen)
         self.players.draw(self.game.screen)
@@ -146,7 +146,6 @@ class Game_Objects():
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
-        self.interacting_cosmetics.draw(self.game.screen)#bushes move to enemy?
         self.weather_paricles.draw(self.game.screen)
 
         #self.triggers.draw(self.game.screen)

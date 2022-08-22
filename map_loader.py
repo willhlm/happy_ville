@@ -68,18 +68,17 @@ class Level():
                 self.game_objects.platforms_ramps.add(new_block)
                 continue
 
-            id = obj['gid'] - (self.map_data['statics_firstgid'] + 6) #the last in depends on postion of COL stamp in stamp png
+            id = obj['gid'] - self.map_data['statics_firstgid']
             #normal collision blocks
-            if id == 0:
+            if id == 7:
                 new_block = Entities.Collision_block(object_position,object_size)
-                #new_block = Entities.Collision_oneway_up(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #spike collision blocks
-            elif id == 1:
+            elif id == 8:
                 new_block = Entities.Spikes(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #one way collision block (currently on top implemented)
-            elif id == 4:
+            elif id == 11:
                 new_block = Entities.Collision_oneway_up(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
 
@@ -125,29 +124,41 @@ class Level():
                         destination = property['value']
                     if property['name'] == 'spawn':
                         spawn = property['value']
+                    if property['name'] == 'image':
+                        image = property['value']
+                new_path = Entities.Path_inter(object_position,self.game_objects,object_size,destination,spawn,image)
+                self.game_objects.interactables.add(new_path)
+
+            elif id == 10:
+                object_size = (int(obj['width']),int(obj['height']))
+                for property in obj['properties']:
+                    if property['name'] == 'path_to':
+                        destination = property['value']
+                    if property['name'] == 'spawn':
+                        spawn = property['value']
                 new_path = Entities.Path_col(object_position,self.game_objects,object_size,destination,spawn)
                 self.game_objects.triggers.add(new_path)
-            elif id == 12:
+            elif id == 14:
                 object_size = (int(obj['width']),int(obj['height']))
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'right')
                 self.game_objects.camera_blocks.add(new_camera_stop)
-            elif id == 13:
+            elif id == 15:
                 object_size = (int(obj['width']),int(obj['height']))
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'top')
                 self.game_objects.camera_blocks.add(new_camera_stop)
-            elif id == 14:
+            elif id == 16:
                 object_size = (int(obj['width']),int(obj['height']))
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'left')
                 self.game_objects.camera_blocks.add(new_camera_stop)
-            elif id == 15:
+            elif id == 17:
                 object_size = (int(obj['width']),int(obj['height']))
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'bottom')
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
-            elif id == 17:#trigger
+            elif id == 19:#trigger
                 values={}
                 object_size = (int(obj['width']),int(obj['height']))
-                
+
                 for property in obj['properties']:
                     if property['name'] == 'event':
                         values['event'] = property['value']
@@ -158,11 +169,11 @@ class Level():
                     new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
                     self.game_objects.triggers.add(new_trigger)
 
-            elif id == 18:#Spawpoint
-                new_int = Entities.Spawnpoint(object_position,self.level_name)
+            elif id == 21:#Spawpoint
+                new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
-            elif id == 19:#Spawner
+            elif id == 22:#Spawner
                 values={}
                 for property in obj['properties']:
                     if property['name'] == 'entity':
@@ -172,7 +183,7 @@ class Level():
                 new_spawn = Entities.Spawner(object_position,self.game_objects,values)
                 self.game_objects.cosmetics.add(new_spawn)
 
-            elif id == 20:#bushes, chests etc
+            elif id == 23:#bushes, chests etc
                 for property in obj['properties']:
                     if property['name'] == 'type':
                         interactable_type = property['value']
@@ -180,13 +191,14 @@ class Level():
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interacting_cosmetics.add(new_interacable)
 
-            elif id == 21:#key items
+            elif id == 24:#key items
                 for property in obj['properties']:
                     if property['name'] == 'name':
                         keyitem = property['value']
                 new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
                 self.game_objects.loot.add(new_keyitem)
-
+            elif id == 20:#reference point
+                self.parallax_reference_pos = object_position
 
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
@@ -227,7 +239,12 @@ class Level():
 
         #all these figures below should be passed and not hardcoded, will break if we change UI etc.
         screen_center = self.PLAYER_CENTER
-        new_map_diff = (self.init_player_pos[0] - screen_center[0], self.init_player_pos[1] - screen_center[1])
+        try:#if a reference point is provided in tiled
+            parallax_reference_pos = [self.parallax_reference_pos[0],self.parallax_reference_pos[1]-32]#where is 32 comming from?
+        except:#if a reference point is not provided in tiled
+            parallax_reference_pos =  self.init_player_pos
+
+        new_map_diff = (parallax_reference_pos[0] - screen_center[0], parallax_reference_pos[1] - screen_center[1])
 
         cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']
         rows = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['height']
@@ -285,7 +302,7 @@ class Level():
                             y = math.floor(index/cols)
                             x = (index - (y*cols))
                             parallax = parallax_values[bg]
-                            blit_pos = (x * self.TILE_SIZE - int((new_map_diff[0])*(1-parallax)), y * self.TILE_SIZE - int((1-parallax)*new_map_diff[1]))
+                            blit_pos = (x * self.TILE_SIZE - math.ceil(new_map_diff[0]*(1-parallax)), y * self.TILE_SIZE - math.ceil((1-parallax)*new_map_diff[1]))
                             new_animation = Entities.BG_Animated(blit_pos,path,parallax)
                             try:
                                 animation_entities[bg].append(new_animation)
@@ -297,7 +314,7 @@ class Level():
 
             if bg in blit_dict.keys():
                 if 'fg' in bg:
-                    self.game_objects.all_fgs.add(Entities.BG_Block((int((1-parallax)*new_map_diff[0]),int((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))
+                    self.game_objects.all_fgs.add(Entities.BG_Block((math.ceil((1-parallax)*new_map_diff[0]),math.ceil((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))
                 else:
                     pos=(-math.ceil((1-parallax)*new_map_diff[0]),-math.ceil((1-parallax)*new_map_diff[1]))
                     self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_surfaces[blit_dict[bg][0]],parallax))#pos,img,parallax
