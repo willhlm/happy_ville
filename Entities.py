@@ -418,6 +418,10 @@ class Player(Character):
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
         self.abs_dist = [247,180]#the coordinate for buring the bone
 
+    def update_vel(self):
+        super().update_vel()
+        print(self.velocity)
+
     def death(self):
         map=self.game_objects.map.level_name
         pos=[self.rect[0],self.rect[1]]
@@ -431,8 +435,8 @@ class Player(Character):
 
     def reset_movement(self):
         self.velocity = [0,0]
-        self.acceleration = [0,0.7]
-        self.friction = [0.24,0]
+        self.acceleration = [0,0.51]#y velocity need to be large than 1/2
+        self.friction = [0.24,0.03]
 
     def update(self,pos):
         super().update(pos)
