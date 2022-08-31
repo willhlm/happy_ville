@@ -56,7 +56,7 @@ class Game_Objects():
         #initiate player
         self.player = Entities.Player([200,50],self)
         self.players = pygame.sprite.Group(self.player)
-        self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(2*self.game.WINDOW_SIZE[1]/3))
+        self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(  self.game.WINDOW_SIZE[1]/2))
 
     def load_map(self, map_name, spawn = '1',fade=True):
         self.map = map_loader.Level(map_name, self, spawn)

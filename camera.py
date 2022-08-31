@@ -99,8 +99,8 @@ class Auto_CapY(Camera):
             self.exit_state()
 
 class Fixed(Camera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
 
     def update(self):
         super().update()
