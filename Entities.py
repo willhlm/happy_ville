@@ -335,7 +335,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.max_vel = [30,7]
 
         self.invincibile = False#a flag to check if one should take damage
-        self.invincibility_timer = 200#should read from a constants file. how long one is invincible
+        self.invincibility_timer = 30#should read from a constants file. how long one is invincible
         self.invincibility_method = [self.none]#to aboid if statement
 
     def update(self,pos):
@@ -379,7 +379,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.invincibility_timer -= 1
         if self.invincibility_timer < 0:
             self.invincibile = False
-            self.invincibility_timer = 200
+            self.invincibility_timer = 30
             self.invincibility_method.pop()
 
 class Player(Character):
@@ -391,7 +391,7 @@ class Player(Character):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/')
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],16,35)
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
         self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
 
         self.max_health = 250
@@ -418,10 +418,6 @@ class Player(Character):
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
         self.abs_dist = [247,180]#the coordinate for buring the bone
 
-    def update_vel(self):
-        super().update_vel()
-        print(self.velocity)
-
     def death(self):
         map=self.game_objects.map.level_name
         pos=[self.rect[0],self.rect[1]]
@@ -442,6 +438,10 @@ class Player(Character):
         super().update(pos)
         self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
         self.omamoris.update()
+
+    def invincibility(self):#this method is called veryloop after damage was taken, until the method is popped
+        super().invincibility()
+        self.animation_stack[-1].handle_input('Invincibile')#turn white
 
     def to_json(self):#things to save: needs to be a dict
         health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
@@ -762,6 +762,7 @@ class Shroompolin(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
         self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
         self.aggro=False
+        self.invincibile=True
 
     def player_collision(self):
         offset=9
@@ -773,12 +774,6 @@ class Shroompolin(Enemy):
     def update_hitbox(self):
         super().update_hitbox()
         self.jump_box.midtop = self.rect.midtop
-
-    def update(self,pos):
-        super().update(pos)
-
-    def take_dmg(self,dmg):
-        pass
 
     def peaceAI(self):
         pass
