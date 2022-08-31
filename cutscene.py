@@ -226,7 +226,7 @@ class Cultist_encounter(Cutscene_engine):
         self.stage = 0
         self.entity1=Entities.Cultist_warrior(spawn_pos, self.parent_class.game.game_objects)
         self.parent_class.game.game_objects.camera[-1].set_camera('Cultist_encounter')
-        self.entity1.AImethod=self.entity1.cutsceneAI
+        self.entity1.AImethod=self.entity1.nothingAI
         self.parent_class.game.game_objects.enemies.add(self.entity1)
 
     def update(self):
@@ -249,7 +249,7 @@ class Cultist_encounter(Cutscene_engine):
                 self.entity2=Entities.Cultist_rogue(spawn_pos, self.parent_class.game.game_objects)
                 self.entity2.dir[0]=-1
                 self.entity2.currentstate.enter_state('Ambush')
-                self.entity2.AImethod=self.entity2.cutsceneAI
+                self.entity2.AImethod=self.entity2.nothingAI
                 self.parent_class.game.game_objects.enemies.add(self.entity2)
             elif self.timer>100:
                 self.exit_state()

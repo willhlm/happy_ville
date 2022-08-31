@@ -327,33 +327,44 @@ class Dynamicentity(Staticentity):
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
         super().__init__(pos)
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.acceleration=[1,0.7]
-        self.friction=[0.2,0]
-        self.animation_stack=[animation.Entity_animation(self)]
-        self.max_vel=7
         self.game_objects = game_objects
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
+        self.acceleration = [1,0.7]
+        self.friction = [0.2,0]
+        self.animation_stack = [animation.Entity_animation(self)]
+        self.max_vel = [30,7]
+
+        self.invincibile = False#a flag to check if one should take damage
+        self.invincibility_timer = 200#should read from a constants file. how long one is invincible
+        self.invincibility_method = [self.none]#to aboid if statement
 
     def update(self,pos):
         super().update(pos)
         self.currentstate.update()
         self.animation_stack[-1].update()
+        self.invincibility_method[-1]()
 
     def update_vel(self):
         self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
-        self.velocity[1]=min(self.velocity[1],self.max_vel)#set a y max speed
+        self.velocity[1]=min(self.velocity[1],self.max_vel[1])#set a y max speed
 
         self.velocity[0]+=self.dir[0]*self.acceleration[0]-self.friction[0]*self.velocity[0]
-        self.velocity[0]=self.dir[0]*min(abs(self.velocity[0]),self.max_vel)#set a y max speed
+        #self.velocity[0]=self.dir[0]*min(abs(self.velocity[0]),self.max_vel[0])#set a x max speed
+
+    def none(self):
+        pass
 
     def take_dmg(self,dmg):
-        if dmg>0:
-            self.health-=dmg
+        if not self.invincibile:
+            self.health -= dmg
+            self.invincibile = True
+            self.invincibility_method.append(self.invincibility)
             if self.health>0:#check if dead¨
-                self.animation_stack[-1].handle_input('Hurt')
+                self.animation_stack[-1].handle_input('Hurt')#turn white
                 self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             else:
-                if self.currentstate.state_name!='death' and self.currentstate.state_name!='dead':#if not already dead
+                if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
+                    self.aggro = False
                     self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
@@ -363,6 +374,13 @@ class Character(Dynamicentity):#enemy, NPC,player
         for i in range(0,number_particles):
             obj1=particles.General_particle(self.hitbox.center,distance=0,type='circle',lifetime=20,vel=[1,10],dir=dir,scale=1)
             self.game_objects.cosmetics.add(obj1)
+
+    def invincibility(self):#this method is called veryloop after damage was taken, until the method is popped
+        self.invincibility_timer -= 1
+        if self.invincibility_timer < 0:
+            self.invincibile = False
+            self.invincibility_timer = 200
+            self.invincibility_method.pop()
 
 class Player(Character):
 
@@ -462,14 +480,16 @@ class Enemy(Character):
         self.counter=0
         self.AImethod=self.peaceAI
         self.player_distance=[0,0]
-        self.aggro=True#colliding with player
-        self.max_vel=3
-        self.friction=[0.5,0]
+        self.aggro = True#colliding with player
+        self.max_vel = [30,3]
+        self.friction = [0.5,0]
         self.currentstate = states_enemy.Idle(self)
         self.attack_distance = 0#when try to hit
         self.dmg = 10#sword damage
         self.aggro_distance = 200#when ot become aggro
         self.spirit = 100
+
+        self.invincibility_timer = 30#should match the time of sword lifetime
 
     def update(self,pos):
         super().update(pos)
@@ -485,9 +505,14 @@ class Enemy(Character):
             else:
                 self.game_objects.player.knock_back(-1)
 
-    def death(self):
-        self.aggro=False
+    def death(self):#called when death animation is finished
+        self.loots()
         self.kill()
+
+    def take_dmg(self,dmg):
+        super().take_dmg(dmg)
+        self.counter = 0
+        self.AImethod = self.pauseAI
 
     def loots(self):
         for key in self.inventory.keys():#go through all loot
@@ -506,8 +531,13 @@ class Enemy(Character):
         self.counter += 1
         self.AImethod()#run ether aggro- or peace-AI
 
-    def cutsceneAI(self):#do nothing
+    def nothingAI(self):#do nothing AI
         pass
+
+    def pauseAI(self):#when enemy takes dmg. it does this. Can be called after an attack
+        self.currentstate.handle_input('Idle')
+        if self.counter > 100:
+            self.AImethod=self.aggroAI
 
     def peaceAI(self):
         if self.counter>20:
@@ -518,8 +548,9 @@ class Enemy(Character):
             else:
                 self.dir[0] = -self.dir[0]
                 self.currentstate.handle_input('Walk')
-        if abs(self.player_distance[0])<self.aggro_distance:
-            self.AImethod=self.aggroAI
+
+            if abs(self.player_distance[0])<self.aggro_distance:
+                self.AImethod=self.aggroAI
 
     def aggroAI(self):
         if self.counter < 40:
@@ -567,6 +598,12 @@ class Wall_slime(Enemy):
         self.health = 50
         self.currentstate.enter_state('Walk')
         self.direction='air'
+
+    def knock_back(self,dir):
+        pass
+
+    def pauseAI(self):#when enemy takes dmg. it does this. Can be called after an attack
+        self.AImethod = self.peaceAI
 
     def update_vel(self):
         self.velocity[1]=self.acceleration[1]-self.dir[1]
@@ -867,9 +904,6 @@ class Cultist_rogue(Enemy):
         self.attack = Sword
         self.currentstate = states_rogue_cultist.Idle(self)
 
-    def cutsceneAI(self):
-        pass
-
 class Cultist_warrior(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -880,9 +914,6 @@ class Cultist_warrior(Enemy):
         self.health = 50
         self.attack_distance = 80
         self.attack = Sword
-
-    def cutsceneAI(self):
-        pass
 
 class John(Enemy):
     def __init__(self,pos,game_objects):
@@ -999,7 +1030,8 @@ class Boss(Enemy):
 
     def death(self):
         self.aggro=False
-        self.AImethod = self.cutsceneAI
+        self.AImethod = self.nothingAI
+        self.loots()
         self.give_abillity()
         new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
         new_game_state.enter_state()
@@ -1372,17 +1404,20 @@ class Sword(Melee):
         self.hitbox = self.rect.copy()
 
     def collision_enemy(self,collision_enemy):
-        collision_enemy.take_dmg(self.dmg)
         self.sword_jump()
-        collision_enemy.knock_back(self.dir[0])
-        collision_enemy.hurt_particles(self.dir[0])
-        #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
-        if self.dir[0]>0:
-            self.clash_particles(self.rect.midright)
-        else:
-            self.clash_particles(self.rect.midleft)
 
-        self.kill()
+        print(collision_enemy.invincibile)
+        if not collision_enemy.invincibile:
+            collision_enemy.take_dmg(self.dmg)
+            collision_enemy.knock_back(self.dir[0])
+            collision_enemy.hurt_particles(self.dir[0])
+        #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
+            if self.dir[0]>0:
+                self.clash_particles(self.rect.midright)
+            else:
+                self.clash_particles(self.rect.midleft)
+
+        #self.kill()
 
     def sword_jump(self):
         if self.dir[1] == -1:
@@ -1748,7 +1783,7 @@ class Bone(Enemy_drop):
             self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.player.abs_dist})
             self.game_objects.player.currentstate = states_player.Plant_bone(self.game_objects.player)
 
-class Spiritsorb(Enemy_drop):
+class Spiritsorb(Enemy_drop):#the thing dark saber produces
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')
 
     def __init__(self,pos,game_objects):

@@ -54,7 +54,6 @@ class Death(Enemy_states):
 
     def update_state(self):
         if self.done:
-            self.entity.loots()
             self.entity.death()
 
     def increase_phase(self):

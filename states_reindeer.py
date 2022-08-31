@@ -54,12 +54,10 @@ class Death(Reindeer_states):
 
     def update_state(self):
         if self.done:
-            self.entity.loots()
             self.enter_state('Dead')
 
     def increase_phase(self):
         self.done=True
-
 
 class Dead(Reindeer_states):
     def __init__(self,entity):
@@ -174,6 +172,7 @@ class Dash(Reindeer_states):
             self.entity.velocity[0]=self.dir[0]*max(20,abs(self.entity.velocity[0]))#max horizontal speed
 
         if self.done:
+            self.entity.AImethod = self.entity.pauseAI#make a pause before continiuing
             if self.entity.acceleration[0]==0:
                 self.enter_state('Transform_idle')
             else:
