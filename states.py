@@ -84,7 +84,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('light_forest_cave')
+            self.game.game_objects.load_map('village')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -520,7 +520,7 @@ class Select_Menu(Gameplay):
         self.key_number=[]
         self.use_number=[]
         for key in self.game.game_objects.player.inventory.keys():
-            item=getattr(sys.modules[Entities.__name__], key)([0,0])#make the object based on the string
+            item=getattr(sys.modules[Entities.__name__], key)([0,0],self.game.game_objects)#make the object based on the string
             if hasattr(item, 'use_item'):
                 self.use_items.append(item)
                 self.use_number.append(self.game.game_objects.player.inventory[key])
@@ -649,7 +649,7 @@ class Select_Menu(Gameplay):
         if self.item_index[1]==1:#if on the bottom row
             item_index+=5
         if item_index<len(self.use_items):
-            self.use_items[item_index].use_item(self.game.game_objects.player)
+            self.use_items[item_index].use_item()
             self.exit_state()
 
 class Fading(Gameplay):#fades out and then in
@@ -938,13 +938,13 @@ class Soul_essence(Facilities):
         if self.pointer_index[1] == 0:#if we select health
             if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
                 pos = [self.game.game_objects.player.rect[0],-100]
-                heart=Entities.Heart_container(pos)
+                heart=Entities.Heart_container(pos,self.game.game_objects)
                 self.game.game_objects.loot.add(heart)
                 self.game.game_objects.player.inventory['Soul_essence']-=self.cost
         elif self.pointer_index[1] == 1:#if we select spirit
             if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
                 pos = [self.game.game_objects.player.rect[0],-100]
-                spirit=Entities.Spirit_container(pos)
+                spirit=Entities.Spirit_container(pos,self.game.game_objects)
                 self.game.game_objects.loot.add(spirit)
                 self.game.game_objects.player.inventory['Soul_essence']-=self.cost
         else:#select cancel
@@ -963,15 +963,15 @@ class Vendor(Facilities):
 
         self.items = []
         for item in self.npc.inventory.keys():
-            item=getattr(sys.modules[Entities.__name__], item)([0,0])#make the object based on the string
+            item=getattr(sys.modules[Entities.__name__], item)([0,0],self.game.game_objects)#make the object based on the string
             self.items.append(item)
 
-        self.amber = getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0])#make the object based on the string
+        self.amber = getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0],self.game.game_objects)#make the object based on the string
 
         #tempporary to have many items to test scrollingl list
         for i in range(0,3):
-            self.items.append(getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0]))
-        self.items.append(getattr(sys.modules[Entities.__name__], 'Bone')([0,0]))
+            self.items.append(getattr(sys.modules[Entities.__name__], 'Amber_Droplet')([0,0],self.game.game_objects))
+        self.items.append(getattr(sys.modules[Entities.__name__], 'Bone')([0,0],self.game.game_objects))
 
         self.display_number = min(3,len(self.items))#number of items to list
         self.sale_items=self.items[0:self.display_number+1]

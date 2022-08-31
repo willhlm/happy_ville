@@ -116,14 +116,20 @@ class Jump_run(Player_states):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.jumping()
+        self.jump()
+        self.timer = 0#jump length
 
     def jumping(self):
+        self.entity.velocity[1]-=0.8
+
+    def jump(self):
         if self.entity.velocity[1]>=0:
-            self.entity.velocity[1] = -10.5
+            self.entity.velocity[1] = -5#10.5
 
     def update_state(self):
-        if self.entity.velocity[1]>0:
+        self.jumping()
+        self.timer+=1
+        if self.timer>10:
             self.enter_state('Fall_run')
 
     def handle_press_input(self,input):
@@ -133,6 +139,11 @@ class Jump_run(Player_states):
             self.swing_sword()
         elif input[-1]=='b':
             self.enter_state(self.entity.equip)
+
+    def handle_release_input(self,input):#when release space
+        if input[-1]=='a':
+            if self.entity.acceleration[0]!=0:
+                self.enter_state('Fall_run')
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -152,7 +163,9 @@ class Jump_stand(Jump_run):
         super().__init__(entity)
 
     def update_state(self):
-        if self.entity.velocity[1]>0:
+        self.jumping()
+        self.timer+=1
+        if self.timer>10:
             self.enter_state('Fall_stand')
 
     def handle_movement(self,input):
@@ -160,21 +173,32 @@ class Jump_stand(Jump_run):
         if self.entity.acceleration[0]!=0:
             self.enter_state('Jump_run')
 
-class Double_jump(Jump_run):
+    def handle_release_input(self,input):#when release space
+        if input[-1]=='a':
+            if self.entity.acceleration[0]==0:
+                self.enter_state('Fall_stand')
+
+class Double_jump(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
+        self.entity.velocity[1]=-10
+
+#    def handle_movement(self,input):
+#        super().handle_movement(input)
+        #if self.entity.acceleration[0]==0:
+        #    self.enter_state('Jump_stand')
+        #elif self.entity.acceleration[0]!=0:
+        #    self.enter_state('Jump_run')
 
     def update_state(self):
-        if self.entity.velocity[1]>0:
+        if self.entity.velocity[1]>0:#falling down
             if self.entity.acceleration[0]==0:
                 self.enter_state('Fall_stand')
             else:
                 self.enter_state('Fall_run')
 
-    def handle_movement(self,input):
-        super().handle_movement(input)
-        if self.entity.acceleration[0]!=0:
-            self.enter_state('Jump_run')
 
 class Fall_run(Player_states):
     def __init__(self,entity):
