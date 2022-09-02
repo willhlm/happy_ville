@@ -513,7 +513,7 @@ class Enemy(Character):
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
-        self.AI_stack[-1].handle_input('Pause')
+        self.AI_stack[-1].handle_input('Pause',duration=100)
 
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
@@ -580,6 +580,12 @@ class Vatt(Enemy):
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
         self.AI_stack = [AI_vatt.Peace(self)]
+
+    def turn_clan(self):#this is acalled when tranformation is finished
+        for enemy in self.game_objects.enemies.sprites():
+            if type(enemy).__name__=='Vatt':
+                enemy.aggro = True
+                enemy.currentstate.handle_input('Transform')
 
 class Flowy(Enemy):
     def __init__(self,pos,game_objects):

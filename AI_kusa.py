@@ -12,7 +12,7 @@ class AI():
     def exit_AI(self):
         self.entity.AI_stack.pop()
 
-    def handle_input(self,input):
+    def handle_input(self,input,duration=100):
         pass
 
     def update(self):
@@ -29,7 +29,7 @@ class Peace(AI):
     def update(self):
         super().update()
         if abs(self.player_distance[0])<150:
-            self.entity.currentstate.handle_input('Transform')            
+            self.entity.currentstate.handle_input('Transform')
             new_AI = Aggro1(self.entity)
             new_AI.enter_AI()
 

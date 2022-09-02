@@ -12,7 +12,7 @@ class AI():
     def exit_AI(self):
         self.entity.AI_stack.pop()
 
-    def handle_input(self,input):
+    def handle_input(self,input,duration=100):
         pass
 
     def update(self):
@@ -28,18 +28,19 @@ class Peace(AI):
 
     def update(self):
         super().update()
-        rand=random.randint(0,1)
-        if rand==0:
+        rand=random.randint(0,1000)
+        if rand>970:
             self.entity.currentstate.handle_input('Idle')
-            self.handle_input('Pause',duration=120)
-        else:
+            #self.handle_input('Pause',duration=120)
             self.entity.dir[0] = -self.entity.dir[0]
+        else:
+
             self.entity.currentstate.handle_input('Walk')
-            self.handle_input('Pause',duration=120)
+            #self.handle_input('Pause',duration=120)
 
         if abs(self.player_distance[0])<self.entity.aggro_distance:
             new_AI = Aggro1(self.entity)
-            new_AI.enter_AI()        
+            new_AI.enter_AI()
 
     def handle_input(self,input,duration = 100):
         if input == 'Aggro':
@@ -57,6 +58,7 @@ class Pause(AI):#the entity should just stay and do nothing for a while
     def __init__(self,entity,duration):
         super().__init__(entity)
         self.duration = duration
+        self.entity.currentstate.handle_input('Idle')
 
     def update(self):
         self.duration -= 1

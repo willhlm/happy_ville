@@ -172,7 +172,6 @@ class Dash(Reindeer_states):
             self.entity.velocity[0]=self.dir[0]*max(20,abs(self.entity.velocity[0]))#max horizontal speed
 
         if self.done:
-            self.entity.AImethod = self.entity.pauseAI#make a pause before continiuing
             if self.entity.acceleration[0]==0:
                 self.enter_state('Transform_idle')
             else:

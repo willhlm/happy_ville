@@ -12,7 +12,7 @@ class AI():
     def exit_AI(self):
         self.entity.AI_stack.pop()
 
-    def handle_input(self,input):
+    def handle_input(self,input,duration=100):
         pass
 
     def update(self):

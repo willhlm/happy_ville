@@ -174,19 +174,12 @@ class Transform(Vatt_states):
         self.stay_still()
         self.done = False
 
-    def turn_clan(self):#turn all vatt on screen aggro
-        for enemy in self.entity.game_objects.enemies.sprites():
-            if type(enemy).__name__=='Vatt':
-                enemy.aggro = True
-                enemy.currentstate.handle_input('Transform')
-
     def update_state(self):
         if self.done:
             self.enter_state('Idle_aggro')
             self.entity.AI_stack[-1].handle_input('Aggro')
             if not self.entity.aggro:
-                self.turn_clan()
-
+                self.entity.turn_clan()
 
     def increase_phase(self):
         self.done=True
