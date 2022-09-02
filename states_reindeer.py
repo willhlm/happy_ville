@@ -32,8 +32,6 @@ class Idle(Reindeer_states):
     def handle_input(self,input):
         if input=='Walk':
              self.enter_state('Walk')
-        elif input =='Attack':
-             self.enter_state('Attack')
 
 class Walk(Reindeer_states):
     def __init__(self,entity):
@@ -43,8 +41,6 @@ class Walk(Reindeer_states):
     def handle_input(self,input):
         if input=='Idle':
              self.enter_state('Idle')
-        elif input =='Attack':
-             self.enter_state('Attack')
 
 class Death(Reindeer_states):
     def __init__(self,entity):
@@ -110,6 +106,8 @@ class Transform_idle(Reindeer_states):
              self.enter_state('Attack')
         elif input =='Dash':
              self.enter_state('Dash')
+        elif input =='Special_attack':
+             self.enter_state('Special_attack')
 
 class Transform_walk(Reindeer_states):
     def __init__(self,entity):
@@ -123,6 +121,8 @@ class Transform_walk(Reindeer_states):
              self.enter_state('Attack')
         elif input =='Dash':
              self.enter_state('Dash')
+        elif input =='Special_attack':
+             self.enter_state('Special_attack')
 
 class Stun(Reindeer_states):
     def __init__(self,entity,duration):
@@ -185,4 +185,24 @@ class Dash(Reindeer_states):
         elif self.phase=='main':
             self.phase=self.phases[-1]
         elif self.phase=='post':
+            self.done=True
+
+class Special_attack(Reindeer_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir=self.entity.dir.copy()#animation direction
+        self.done=False
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
+
+    def update_state(self):
+        if self.done:
+            self.enter_state('Transform_idle')#idle
+
+    def increase_phase(self):
+        if self.phase=='pre':
+            self.phase='main'
+            attack=self.entity.special_attack(self.entity)#make the object
+            self.entity.projectiles.add(attack)#add to group but in main phase
+        elif self.phase=='main':
             self.done=True

@@ -41,6 +41,9 @@ class Idle(Vatt_states):
         elif input == 'Walk':
             self.entity.dir[0] = random.choice((1,-1))
             self.enter_state('Walk')
+        elif input == 'Transform':
+            self.enter_state('Transform')
+
 
 class Idle_aggro(Vatt_states):
     def __init__(self,entity):
@@ -57,7 +60,6 @@ class Idle_aggro(Vatt_states):
         elif input == 'Run':
             self.enter_state('Run_aggro')
 
-
 class Walk(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -69,8 +71,8 @@ class Walk(Vatt_states):
             self.enter_state('Hurt')
         elif input == 'Idle':
             self.enter_state('Idle')
-        #if not self.entity.collision_types['bottom']:
-        #    self.enter_state('Fall_run')
+        elif input == 'Transform':
+            self.enter_state('Transform')
 
 class Fall_stand(Vatt_states):
     def __init__(self,entity):
@@ -84,6 +86,8 @@ class Fall_stand(Vatt_states):
     def handle_input(self, input):
         if input=='Hurt':
             self.enter_state('Hurt')
+        elif input == 'Transform':
+            self.enter_state('Transform')
 
 class Fall_stand_aggro(Vatt_states):
     def __init__(self,entity):
@@ -109,6 +113,8 @@ class Run(Vatt_states):
     def handle_input(self, input):
         if input == 'Run':
             pass
+        elif input == 'Transform':
+            self.enter_state('Transform')
         #if not self.entity.collision_types['bottom']:
         #    self.enter_state('Fall_run')
 
@@ -116,9 +122,6 @@ class Run_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.acceleration[0] = 1.2
-
-    def update_state(self):
-        pass
 
     def handle_input(self, input):
         if input == 'Run':
@@ -171,15 +174,19 @@ class Transform(Vatt_states):
         self.stay_still()
         self.done = False
 
-    def update_state(self):
-        pass
+    def turn_clan(self):#turn all vatt on screen aggro
+        for enemy in self.entity.game_objects.enemies.sprites():
+            if type(enemy).__name__=='Vatt':
+                enemy.aggro = True
+                enemy.currentstate.handle_input('Transform')
 
     def update_state(self):
         if self.done:
-            self.entity.aggro=True
-            type(self.entity).aggro = True
-            self.entity.AImethod=self.entity.aggroAI
             self.enter_state('Idle_aggro')
+            self.entity.AI_stack[-1].handle_input('Aggro')
+            if not self.entity.aggro:
+                self.turn_clan()
+
 
     def increase_phase(self):
         self.done=True

@@ -123,7 +123,7 @@ class Boss_deer_encounter(Cutscene_engine):
 
         if self.timer>200:
             self.parent_class.game.game_objects.camera[-1].exit_state()
-            self.entity.AImethod=self.entity.aggroAI
+            self.entity.AI_stack[-1].set_AI('Aggro1')
             self.exit_state()
             #self.entity.kill()
 

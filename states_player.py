@@ -112,24 +112,17 @@ class Walk(Player_states):
             self.enter_state('Sword_up')
 
 class Jump_run(Player_states):
-    def __init__(self,entity):
+    def __init__(self,entity,timer=5):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.jump()
-        self.timer = 0#jump length
-
-    def jumping(self):
-        self.entity.velocity[1]-=0.8
-
-    def jump(self):
-        if self.entity.velocity[1]>=0:
-            self.entity.velocity[1] = -5#10.5
+        self.timer = timer#jump length
 
     def update_state(self):
-        self.jumping()
-        self.timer+=1
-        if self.timer>10:
+        self.entity.velocity[1] -= 2
+
+        self.timer-=1
+        if self.timer < 0:
             self.enter_state('Fall_run')
 
     def handle_press_input(self,input):
@@ -148,7 +141,7 @@ class Jump_run(Player_states):
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0]==0:
-            self.enter_state('Jump_stand')
+            self.entity.currentstate = Jump_stand(self.entity,self.timer)
 
     def swing_sword(self):
         if self.entity.dir[1]>0:
@@ -158,25 +151,45 @@ class Jump_run(Player_states):
         else:#right or left
             self.enter_state('Air_sword1')
 
-class Jump_stand(Jump_run):
-    def __init__(self,entity):
+class Jump_stand(Player_states):
+    def __init__(self,entity,timer=5):
         super().__init__(entity)
+        self.phases=['pre','main']
+        self.phase=self.phases[0]
+        self.timer = timer#jump length
 
     def update_state(self):
-        self.jumping()
-        self.timer+=1
-        if self.timer>10:
+        self.entity.velocity[1] -= 2
+
+        self.timer -= 1
+        if self.timer < 0:
             self.enter_state('Fall_stand')
 
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0]!=0:
-            self.enter_state('Jump_run')
+            self.entity.currentstate = Jump_run(self.entity,self.timer)
+
+    def handle_press_input(self,input):
+        if input[-1]=='lb':
+            self.enter_condition('Dash')
+        elif input[-1]=='x':
+            self.swing_sword()
+        elif input[-1]=='b':
+            self.enter_state(self.entity.equip)
 
     def handle_release_input(self,input):#when release space
         if input[-1]=='a':
             if self.entity.acceleration[0]==0:
                 self.enter_state('Fall_stand')
+
+    def swing_sword(self):
+        if self.entity.dir[1]>0:
+            self.enter_state('Sword_up')
+        elif self.entity.dir[1]<0:
+            self.enter_state('Sword_down')
+        else:#right or left
+            self.enter_state('Air_sword1')
 
 class Double_jump(Player_states):
     def __init__(self,entity):
@@ -198,7 +211,6 @@ class Double_jump(Player_states):
                 self.enter_state('Fall_stand')
             else:
                 self.enter_state('Fall_run')
-
 
 class Fall_run(Player_states):
     def __init__(self,entity):

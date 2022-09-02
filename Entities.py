@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, math, sound, states
+import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound, states
 import time
 
 pygame.mixer.init()
@@ -330,7 +330,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.game_objects = game_objects
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
         self.acceleration = [1,0.7]
-        self.friction = [0.2,0]
+        self.friction = [0.5,0]
         self.animation_stack = [animation.Entity_animation(self)]
         self.max_vel = [30,7]
 
@@ -359,16 +359,16 @@ class Character(Dynamicentity):#enemy, NPC,player
             self.health -= dmg
             self.invincibile = True
             self.invincibility_method.append(self.invincibility)
-            if self.health>0:#check if dead¨
+            if self.health > 0:#check if dead¨
                 self.animation_stack[-1].handle_input('Hurt')#turn white
                 self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            else:
+            else:#if dead
                 if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
                     self.aggro = False
                     self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
-        self.velocity[0]=dir*30
+        self.velocity[0] = dir*30
 
     def hurt_particles(self,dir,number_particles=12):
         for i in range(0,number_particles):
@@ -418,7 +418,7 @@ class Player(Character):
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
         self.abs_dist = [247,180]#the coordinate for buring the bone
 
-    def death(self):
+    def death(self):#called when dead
         map=self.game_objects.map.level_name
         pos=[self.rect[0],self.rect[1]]
         self.game_objects.cosmetics.add(Player_Soul(pos))
@@ -441,7 +441,7 @@ class Player(Character):
 
     def invincibility(self):#this method is called veryloop after damage was taken, until the method is popped
         super().invincibility()
-        self.animation_stack[-1].handle_input('Invincibile')#turn white
+        self.animation_stack[-1].handle_input('Invincibile')#make some animation
 
     def to_json(self):#things to save: needs to be a dict
         health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
@@ -480,25 +480,23 @@ class Enemy(Character):
         self.group = game_objects.enemies
         self.pause_group = game_objects.entity_pause
 
-        self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}#random.randint(0, 10)
-        self.counter=0
-        self.AImethod=self.peaceAI
-        self.player_distance=[0,0]
-        self.aggro = True#colliding with player
-        self.max_vel = [30,3]
-        self.friction = [0.5,0]
         self.currentstate = states_enemy.Idle(self)
-        self.attack_distance = 0#when try to hit
-        self.dmg = 10#sword damage
-        self.aggro_distance = 200#when ot become aggro
-        self.spirit = 100
 
-        self.invincibility_timer = 30#should match the time of sword lifetime
+        self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}#random.randint(0, 10)
+        self.spirit = 100
+        self.health = 100
+        self.aggro = True#colliding with player
+        self.dmg = 10#projectile damage
+
+        self.AI_stack = [AI_enemy.Peace(self)]
+        self.attack_distance = 0#when try to hit
+        self.aggro_distance = 200#when ot become aggro
+        self.invincibility_timer = 30#should match the time of sword/projectile lifetime
 
     def update(self,pos):
         super().update(pos)
-        self.AI()
-        self.group_distance()#need to be before currentstate.update(): fails sometimes
+        self.AI_stack[-1].update()#tell what the entity should do
+        self.group_distance()
 
     def player_collision(self):#when player collides with enemy
         if self.aggro:
@@ -515,10 +513,9 @@ class Enemy(Character):
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
-        self.counter = 0
-        self.AImethod = self.pauseAI
+        self.AI_stack[-1].handle_input('Pause')
 
-    def loots(self):
+    def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
                 obj = getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y],self.game_objects)#make a class based on the name of the key: need to import sys
@@ -527,60 +524,7 @@ class Enemy(Character):
 
     def countered(self):#player shield
         self.velocity[0] = -30*self.dir[0]
-        duration = 30
-        self.currentstate = states_enemy.Stun(self,duration)#should it overwrite?
-
-    def AI(self):
-        self.player_distance=[self.game_objects.player.rect.center[0]-self.rect.centerx,self.game_objects.player.rect.center[1]-self.rect.centerx]#check plater distance
-        self.counter += 1
-        self.AImethod()#run ether aggro- or peace-AI
-
-    def nothingAI(self):#do nothing AI
-        pass
-
-    def pauseAI(self):#when enemy takes dmg. it does this. Can be called after an attack
-        self.currentstate.handle_input('Idle')
-        if self.counter > 100:
-            self.AImethod=self.aggroAI
-
-    def peaceAI(self):
-        if self.counter>20:
-            self.counter=0
-            rand=random.randint(0,1)
-            if rand==0:
-                self.currentstate.handle_input('Idle')
-            else:
-                self.dir[0] = -self.dir[0]
-                self.currentstate.handle_input('Walk')
-
-            if abs(self.player_distance[0])<self.aggro_distance:
-                self.AImethod=self.aggroAI
-
-    def aggroAI(self):
-        if self.counter < 40:
-            pass
-        else:
-            if self.player_distance[0] > self.attack_distance:
-                self.dir[0] = 1
-                self.currentstate.handle_input('Walk')
-            elif abs(self.player_distance[0]) < self.attack_distance:
-
-                if self.player_distance[0]>0:
-                    self.dir[0]=1
-                else:
-                    self.dir[0]=-1
-
-                self.currentstate.handle_input('Attack')
-                self.counter = 0
-            elif self.player_distance[0] < -self.attack_distance:
-                self.dir[0] = -1
-                self.currentstate.handle_input('Walk')
-            else:
-                self.counter = 0
-                self.currentstate.handle_input('Idle')
-
-        if abs(self.player_distance[0])>self.aggro_distance:
-            self.AImethod=self.peaceAI
+        self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -601,50 +545,14 @@ class Wall_slime(Enemy):
         self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
         self.health = 50
         self.currentstate.enter_state('Walk')
-        self.direction='air'
+        self.AI_stack = [AI_wall_slime.Peace(self)]
 
     def knock_back(self,dir):
         pass
 
-    def pauseAI(self):#when enemy takes dmg. it does this. Can be called after an attack
-        self.AImethod = self.peaceAI
-
     def update_vel(self):
         self.velocity[1]=self.acceleration[1]-self.dir[1]
         self.velocity[0]=self.acceleration[0]+self.dir[0]
-
-    def peaceAI(self):#is there a better way to write?
-        if self.collision_types['bottom']:
-            self.direction='bottom'
-            self.currentstate.dir=[1,0]#animation direction
-
-        elif self.collision_types['left']:
-            self.direction='left'
-            self.currentstate.dir=[0,-1]
-
-        elif self.collision_types['top']:
-            self.direction='top'
-            self.currentstate.dir=[-1,0]
-
-        elif self.collision_types['right']:
-            self.direction='right'
-            self.currentstate.dir=[0,1]
-
-        if self.direction=='bottom' and not self.collision_types['bottom']:#right side
-            self.acceleration=[-1,0]
-            self.dir=[0,-1]#walking direction
-
-        elif self.direction=='left' and not self.collision_types['left']:
-            self.acceleration=[0,-1]
-            self.dir=[-1,0]
-
-        elif self.direction=='top' and not self.collision_types['top']:
-            self.acceleration=[1,0]
-            self.dir=[0,1]
-
-        elif self.direction=='right' and not self.collision_types['right']:
-            self.acceleration=[0,1]
-            self.dir=[1,0]
 
 class Woopie(Enemy):
     def __init__(self,pos,game_objects):
@@ -659,7 +567,6 @@ class Woopie(Enemy):
 
 class Vatt(Enemy):
 
-    aggro = False  #remember to turn false when changing maps
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.image = pygame.image.load("Sprites/Enteties/enemies/vatt/main/idle/idle1.png").convert_alpha()
@@ -668,39 +575,11 @@ class Vatt(Enemy):
         self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 30
         self.spirit = 30
+        self.aggro = False
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.currentstate = states_vatt.Idle(self)
-        self.aggro=False
         self.attack_distance = 60
-
-    def updateAI(self):
-        if Vatt.aggro and not self.aggro:
-            self.currentstate.enter_state('Transform')#also sets to aggro AI
-            self.aggro = True
-            #self.AImethod=self.aggroAI
-
-    def peaceAI(self):
-        if self.counter>70:
-            self.counter=0
-            rand=random.randint(0,6)
-            if rand<2:
-                self.currentstate.handle_input('Idle')
-            else:
-                self.currentstate.handle_input('Walk')
-
-    def aggroAI(self):
-        if self.counter < 40:
-            pass
-        else:
-            if self.player_distance[0] > self.attack_distance:
-                self.dir[0] = 1
-                self.currentstate.handle_input('Run')
-            elif self.player_distance[0] < -self.attack_distance:
-                self.dir[0] = -1
-                self.currentstate.handle_input('Run')
-            else:
-                self.counter = 0
-                self.currentstate.handle_input('Javelin')
+        self.AI_stack = [AI_vatt.Peace(self)]
 
 class Flowy(Enemy):
     def __init__(self,pos,game_objects):
@@ -735,23 +614,10 @@ class Blue_bird(Enemy):
         self.currentstate = states_bluebird.Idle(self)
         self.aggro=False
         self.health=1
+        self.AI_stack = [AI_bluebird.Peace(self)]
 
     def knock_back(self,dir):
         pass
-
-    def peaceAI(self):
-        if abs(self.player_distance[0])<100:
-            self.currentstate.handle_input('Fly')
-        else:
-            rand=random.randint(0,100)
-            if rand==1:
-                self.currentstate.handle_input('Idle')
-            elif rand==2:
-                self.currentstate.handle_input('Walk')
-            elif rand==3:
-                self.currentstate.handle_input('Eat')
-            elif rand==4:
-                self.dir[0]=-self.dir[0]
 
 class Shroompolin(Enemy):
     def __init__(self,pos,game_objects):
@@ -763,6 +629,7 @@ class Shroompolin(Enemy):
         self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
         self.aggro=False
         self.invincibile=True
+        self.AI_stack = [AI_shroompoline.Peace(self)]
 
     def player_collision(self):
         offset=9
@@ -775,9 +642,6 @@ class Shroompolin(Enemy):
         super().update_hitbox()
         self.jump_box.midtop = self.rect.midtop
 
-    def peaceAI(self):
-        pass
-
 class Kusa(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -788,11 +652,7 @@ class Kusa(Enemy):
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = 30
         self.health = 1
-
-    def peaceAI(self):
-        if abs(self.player_distance[0])<150:
-            self.AImethod=self.aggroAI
-            self.currentstate.handle_input('Transform')
+        self.AI_stack = [AI_kusa.Peace(self)]
 
     def suicide(self):
         self.projectiles.add(Explosion(self,dmg=10))
@@ -808,11 +668,7 @@ class Svampis(Enemy):
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = 30
         self.health = 1
-
-    def peaceAI(self):
-        if abs(self.player_distance[0])<150:
-            self.AImethod=self.aggroAI
-            self.currentstate.handle_input('Transform')
+        self.AI_stack = [AI_kusa.Peace(self)]
 
     def suicide(self):
         self.projectiles.add(Explosion(self,dmg=10))
@@ -827,6 +683,7 @@ class Egg(Enemy):#change design
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
         self.health = 1
         self.number = random.randint(1, 4)
+        self.aggro_distance = -1 #if negative, it will not go into aggro
 
     def knock_back(self,dir):
         pass
@@ -841,12 +698,6 @@ class Egg(Enemy):#change design
             obj=Slime(pos,self.game_objects)
             obj.velocity=[random.randint(-100, 100),random.randint(-10, -5)]
             self.game_objects.enemies.add(obj)
-
-    def peaceAI(self):
-        pass
-
-    def aggroAI(self):
-        pass
 
 class Skeleton_warrior(Enemy):#change design
     def __init__(self,pos,game_objects):
@@ -1028,8 +879,8 @@ class Boss(Enemy):
         super().__init__(pos,game_objects)
 
     def death(self):
-        self.aggro=False
-        self.AImethod = self.nothingAI
+        self.aggro = False
+        self.AI_stack[-1].set_AI('Nothing')
         self.loots()
         self.give_abillity()
         new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
@@ -1048,42 +899,22 @@ class Reindeer(Boss):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.currentstate = states_reindeer.Idle(self)
 
-        self.health = 1
+        self.health = 210
         self.spirit = 1
         self.attack = Sword
+        self.special_attack = Ground_shock
 
-    def give_abillity(self):
-        self.game_objects.player.dash=True
+        self.AI_stack = [AI_reindeer.Peace(self)]
 
-    def peaceAI(self):
-        pass
+    def give_abillity(self):#called when reindeer dies
+        self.game_objects.player.dash = True
 
-    def aggroAI(self):
-        if self.counter < 40:
-            pass
-        else:
-            if self.player_distance[0] > self.attack_distance:
-                self.dir[0] = 1
-
-                if random.randint(0, 100)==100:
-                    self.currentstate.handle_input('Dash')
-                else:
-                    self.currentstate.handle_input('Walk')
-
-            elif abs(self.player_distance[0])<self.attack_distance:
-                self.currentstate.handle_input('Attack')
-                self.counter = 0
-
-            elif self.player_distance[0] < -self.attack_distance:
-                self.dir[0] = -1
-
-                if random.randint(0, 100)==100:
-                    self.currentstate.handle_input('Dash')
-                else:
-                    self.currentstate.handle_input('Walk')
-            else:
-                self.counter = 0
-                self.currentstate.handle_input('Idle')
+    def take_dmg(self,dmg):
+        super().take_dmg(dmg)
+        if self.health < 100:
+            self.AI_stack[-1].handle_input('stage3')
+        elif self.health < 200:
+            self.AI_stack[-1].handle_input('stage2')
 
 class Idun(Boss):
     def __init__(self,pos,game_objects):
@@ -1405,7 +1236,6 @@ class Sword(Melee):
     def collision_enemy(self,collision_enemy):
         self.sword_jump()
 
-        print(collision_enemy.invincibile)
         if not collision_enemy.invincibile:
             collision_enemy.take_dmg(self.dmg)
             collision_enemy.knock_back(self.dir[0])
@@ -1564,6 +1394,18 @@ class Poisonblobb(Projectiles):
         if self.state=='main':
             self.animation.reset_timer()
             self.state='post'
+
+class Ground_shock(Projectiles):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/ground_shock/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dmg = self.entity.dmg
+        self.lifetime=100
+        self.velocity=[entity.dir[0]*5,0]
+        self.rect.bottom = self.entity.rect.bottom
+        self.hitbox=pygame.Rect(self.rect.x,self.rect.y,64,32)
+        self.update_hitbox()
 
 class Force(Projectiles):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Attack/Force/')
