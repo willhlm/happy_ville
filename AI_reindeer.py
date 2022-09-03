@@ -64,7 +64,7 @@ class Aggro1(AI):
 
         elif abs(self.player_distance[0]) < self.entity.attack_distance:
             self.entity.currentstate.handle_input('Attack')
-            self.handle_input('Rest',duration=120)
+            self.handle_input('Rest',duration=50)
 
         elif self.player_distance[0] < -self.entity.attack_distance:
             self.entity.dir[0] = -1
@@ -83,6 +83,7 @@ class Aggro1(AI):
 class Aggro2(AI):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.currentstate.enter_state('Angry')
 
     def update(self):
         super().update()
@@ -119,6 +120,7 @@ class Aggro2(AI):
 class Aggro3(AI):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.currentstate.enter_state('Angry')
 
     def update(self):
         super().update()

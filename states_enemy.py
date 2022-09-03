@@ -34,6 +34,8 @@ class Idle(Enemy_states):
              self.enter_state('Walk')
         elif input =='Attack':
              self.enter_state('Attack')
+        elif input == 'Hurt':
+            self.enter_state('Hurt')
 
 class Walk(Enemy_states):
     def __init__(self,entity):
@@ -45,6 +47,8 @@ class Walk(Enemy_states):
              self.enter_state('Idle')
         elif input =='Attack':
              self.enter_state('Attack')
+        elif input == 'Hurt':
+            self.enter_state('Hurt')
 
 class Death(Enemy_states):
     def __init__(self,entity):

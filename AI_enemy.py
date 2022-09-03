@@ -63,7 +63,18 @@ class Pause(AI):#the entity should just stay and do nothing for a while
     def update(self):
         self.duration -= 1
         if self.duration < 0:
-            self.exit_AI()#return to previous AI
+            self.exit()#return to previous AI
+
+    def exit(self):
+        self.exit_AI()#return to previous AI
+
+class Trun_around(Pause):#when the player jumps over, should be a delays before the entity turns around
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def exit(self):
+        super().exit()
+        self.entity.dir[0] = -self.entity.dir[0]
 
 class Aggro1(AI):
     def __init__(self,entity):
@@ -72,8 +83,12 @@ class Aggro1(AI):
     def update(self):
         super().update()
         if self.player_distance[0] > self.entity.attack_distance:
-            self.entity.dir[0] = 1
-            self.entity.currentstate.handle_input('Walk')
+
+            if self.entity.dir[0] == -1:#turn around
+                self.handle_input('Trun_around',duration=20)#short pause
+            else:
+                self.entity.currentstate.handle_input('Walk')
+
         elif abs(self.player_distance[0]) < self.entity.attack_distance:
 
             if self.player_distance[0]>0:
@@ -85,8 +100,11 @@ class Aggro1(AI):
             self.handle_input('Pause',duration=120)
 
         elif self.player_distance[0] < -self.entity.attack_distance:
-            self.entity.dir[0] = -1
-            self.entity.currentstate.handle_input('Walk')
+
+            if self.entity.dir[0] == 1:#turn aroud
+                self.handle_input('Trun_around',duration=20)#short pause
+            else:
+                self.entity.currentstate.handle_input('Walk')
         else:
             self.entity.currentstate.handle_input('Idle')
 
@@ -96,4 +114,7 @@ class Aggro1(AI):
     def handle_input(self,input,duration=100):
         if input == 'Pause':
             new_AI = Pause(self.entity,duration)
+            new_AI.enter_AI()
+        elif input == 'Trun_around':
+            new_AI = Trun_around(self.entity,duration)
             new_AI.enter_AI()

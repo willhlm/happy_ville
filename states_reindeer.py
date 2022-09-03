@@ -124,6 +124,11 @@ class Transform_walk(Reindeer_states):
         elif input =='Special_attack':
              self.enter_state('Special_attack')
 
+class Angry(Transform):#changing AI method
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.game_objects.camera[-1].camera_shake(amp=3,duration=50)#amplitude, duration
+
 class Stun(Reindeer_states):
     def __init__(self,entity,duration):
         super().__init__(entity)

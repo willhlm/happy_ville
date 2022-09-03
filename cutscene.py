@@ -99,33 +99,38 @@ class Deer_encounter(Cutscene_engine):
 class Boss_deer_encounter(Cutscene_engine):
     def __init__(self,objects):
         super().__init__(objects)
-        pos=(650,140)
-        self.entity=Entities.Reindeer(pos, self.parent_class.game.game_objects)
+        pos=(900,140)
+        self.entity=Entities.Reindeer(pos, self.parent_class.game.game_objects)#make the boss
         self.parent_class.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
         self.parent_class.game.game_objects.camera[-1].set_camera('Deer_encounter')
+        self.entity.AI_stack[-1].set_AI('Nothing')
+        self.stage = 0
+        self.parent_class.game.game_objects.player.currentstate.handle_input('Walk')#should only enter these states once
 
     def update(self):#write how you want the player/group to act
-        self.entity.velocity[1]=0
+        self.entity.velocity[1] = 0
         self.timer+=1
-        if self.timer==1:
-            self.parent_class.game.game_objects.player.currentstate.enter_state('Walk')#should only enter these states once
-        elif self.timer<100:
+        if self.stage == 0:
             self.parent_class.game.game_objects.player.velocity[0]=4
-        elif self.timer==100:
-            self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
-            self.entity.currentstate.enter_state('Transform')
-            self.parent_class.game.game_objects.player.velocity[0]=-20
-            self.parent_class.game.game_objects.camera[-1].camera_shake()#amplitude, duration
-        elif self.timer>100:
-            pass
-            #self.deer.velocity[0]=5
 
-        if self.timer>200:
-            self.parent_class.game.game_objects.camera[-1].exit_state()
-            self.entity.AI_stack[-1].set_AI('Aggro1')
-            self.exit_state()
-            #self.entity.kill()
+            if self.timer >160:
+                self.stage=1
+                self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
+                self.parent_class.game.game_objects.player.velocity[0]=0
+
+        elif self.stage==1:
+            if self.timer>200:
+                self.entity.currentstate.enter_state('Transform')
+                self.parent_class.game.game_objects.player.velocity[0]=-20
+                self.parent_class.game.game_objects.camera[-1].camera_shake(amp=3,duration=100)#amplitude, duration
+                self.stage=2
+
+        elif self.stage==2:
+            if self.timer > 400:
+                self.parent_class.game.game_objects.camera[-1].exit_state()#exsiting deer encounter camera
+                self.entity.AI_stack[-1].exit_AI()
+                self.exit_state()
 
 class Defeated_boss(Cutscene_engine):
     def __init__(self,objects):

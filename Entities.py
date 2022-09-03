@@ -355,17 +355,18 @@ class Character(Dynamicentity):#enemy, NPC,player
         pass
 
     def take_dmg(self,dmg):
-        if not self.invincibile:
-            self.health -= dmg
-            self.invincibile = True
-            self.invincibility_method.append(self.invincibility)
-            if self.health > 0:#check if dead¨
-                self.animation_stack[-1].handle_input('Hurt')#turn white
-                self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            else:#if dead
-                if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
-                    self.aggro = False
-                    self.currentstate.enter_state('Death')#overrite any state and go to deat
+        if self.invincibile:
+            return
+        self.health -= dmg
+        self.invincibile = True
+        self.invincibility_method.append(self.invincibility)
+        if self.health > 0:#check if dead¨
+            self.animation_stack[-1].handle_input('Hurt')#turn white
+            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+        else:#if dead
+            if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
+                self.aggro = False
+                self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
         self.velocity[0] = dir*30
@@ -510,10 +511,6 @@ class Enemy(Character):
     def death(self):#called when death animation is finished
         self.loots()
         self.kill()
-
-    def take_dmg(self,dmg):
-        super().take_dmg(dmg)
-        self.AI_stack[-1].handle_input('Pause',duration=100)
 
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
@@ -918,9 +915,9 @@ class Reindeer(Boss):
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
         if self.health < 100:
-            self.AI_stack[-1].handle_input('stage3')
+            self.AI_stack[-1].handle_input('stage3')#enter stage 3
         elif self.health < 200:
-            self.AI_stack[-1].handle_input('stage2')
+            self.AI_stack[-1].handle_input('stage2')#enter stage 2
 
 class Idun(Boss):
     def __init__(self,pos,game_objects):

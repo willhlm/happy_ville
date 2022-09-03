@@ -135,8 +135,8 @@ class Deer_encounter(Auto):
         super().__init__(game_objects)
 
     def update(self):
-        self.center[0]-=5
-        self.center[0]=max(100,self.center[0])
+        self.center[0] -= 5
+        self.center[0] = max(300,self.center[0])
         super().update()
 
 class Cultist_encounter(Auto):
