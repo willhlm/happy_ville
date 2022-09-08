@@ -69,7 +69,6 @@ class Collisions():
     #collisions between entities-groups: a dynamic and a static one
 
     def platform_collision(self,dynamic_Entities):
-
         for entity in dynamic_Entities.sprites():
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 

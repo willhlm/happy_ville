@@ -82,22 +82,16 @@ class Collision_block(Platform):
     def collide_x(self,entity):
         #check for collisions and get a dictionary of sprites that collides
         if entity.velocity[0]>0:#going to the right
-            entity.hitbox.right = self.hitbox.left
-            entity.collision_types['right'] = True
+            entity.right_collision(self.hitbox.left)
         else:#going to the left
-            entity.hitbox.left = self.hitbox.right
-            entity.collision_types['left'] = True
+            entity.left_collision(self.hitbox.right)
         entity.update_rect()
 
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
-            entity.hitbox.bottom = self.hitbox.top
-            entity.collision_types['bottom'] = True
-            entity.velocity[1] = 0
+            entity.down_collision(self.hitbox.top)
         else:#going up
-            entity.hitbox.top = self.hitbox.bottom
-            entity.collision_types['top'] = True
-            entity.velocity[1] = 0 #knock back
+            entity.top_collision(self.hitbox.bottom)
         entity.update_rect()
 
 class Collision_oneway_up(Platform):
@@ -324,6 +318,25 @@ class Dynamicentity(Staticentity):
     def update_vel(self):
         pass
 
+    #pltform collisions.
+    def right_collision(self,hitbox):
+        self.hitbox.right = hitbox
+        self.collision_types['right'] = True
+
+    def left_collision(self,hitbox):
+        self.hitbox.left = hitbox
+        self.collision_types['left'] = True
+
+    def down_collision(self,hitbox):
+        self.hitbox.bottom = hitbox
+        self.collision_types['bottom'] = True
+        #self.velocity[1] = 0
+
+    def top_collision(self,hitbox):
+        self.hitbox.top = hitbox
+        self.collision_types['top'] = True
+        self.velocity[1] = 0
+
 class Character(Dynamicentity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
         super().__init__(pos)
@@ -415,6 +428,27 @@ class Player(Character):
         self.currentstate = states_player.Idle(self)
 
         self.set_abs_dist()
+
+        self.jump_timer = 0
+        self.jumping = False#a flag to check so that you cannot jump in air
+
+    def jump(self):#called when pressing jump button. Will jump as long as jump_timer > 0
+        self.velocity[1] = 0
+        self.jump_timer = 7
+        self.jumping = True
+
+    def right_collision(self,hitbox):
+        super().right_collision(hitbox)
+        self.jumping = False
+
+    def left_collision(self,hitbox):
+        super().left_collision(hitbox)
+        self.jumping = False
+
+    def down_collision(self,hitbox):
+        super().down_collision(hitbox)
+        self.jumping = False
+
 
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
         self.abs_dist = [247,180]#the coordinate for buring the bone
@@ -1570,19 +1604,11 @@ class Enemy_drop(Loot):
         self.velocity = [random.randint(-3, 3),-4]
         self.lifetime = 500
 
-    def check_collisions(self):
-        if self.collision_types['bottom']:
-            self.velocity[0] = 0.5*self.velocity[0]
-            self.velocity[1] = -0.7*self.velocity[1]
-        elif self.collision_types['right'] or self.collision_types['left']:
-            self.velocity[0] = -self.velocity[0]
-
     def update_vel(self):
         self.velocity[1] += 0.5
 
     def update(self,pos):
         super().update(pos)
-        self.check_collisions()
         self.lifetime-=1
         self.destory()
 
@@ -1598,6 +1624,20 @@ class Enemy_drop(Loot):
         obj=(self.__class__.__name__)#get the loot in question
         self.game_objects.player.inventory[obj]+=1
         self.kill()
+
+    #plotfprm collisions
+    def down_collision(self,hitbox):
+        super().down_collision(hitbox)
+        self.velocity[0] = 0.5*self.velocity[0]
+        self.velocity[1] = -0.7*self.velocity[1]
+
+    def right_collision(self,hitbox):
+        super().right_collision(hitbox)
+        self.velocity[0] = -self.velocity[0]
+
+    def left_collision(self,hitbox):
+        super().left_collision(hitbox)
+        self.velocity[0] = -self.velocity[0]
 
 class Amber_Droplet(Enemy_drop):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/amber_droplet/')

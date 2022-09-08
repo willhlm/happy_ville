@@ -10,6 +10,7 @@ class Player_states(Entity_States):
     def update(self):
         super().update()
         self.increase_spirit()
+        self.jumping()
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
@@ -35,6 +36,11 @@ class Player_states(Entity_States):
     def handle_release_input(self,input):#all states should inehrent this function
         pass
 
+    def jumping(self):
+        self.entity.jump_timer -= 1
+        if self.entity.jump_timer > 0:
+            self.entity.velocity[1] -= 2
+
     def handle_movement(self,input):
         value = input[2]
         self.entity.acceleration[0] = abs(value[0])
@@ -44,6 +50,14 @@ class Player_states(Entity_States):
             self.entity.dir[0] = 1
         elif value[0] < -0.2:#x
             self.entity.dir[0] = -1
+
+        #jumping
+        if input[-1] == 'a':
+            if input[0]:
+                if not self.entity.jumping:# if not jumping already
+                    self.entity.jump()
+            elif input[1]:
+                self.entity.jump_timer = 0
 
 class Idle(Player_states):
     def __init__(self,entity):
@@ -119,8 +133,7 @@ class Jump_run(Player_states):
         self.timer = timer#jump length
 
     def update_state(self):
-        self.entity.velocity[1] -= 2
-
+        #self.entity.velocity[1] -= 3
         self.timer-=1
         if self.timer < 0:
             self.enter_state('Fall_run')
@@ -140,7 +153,7 @@ class Jump_run(Player_states):
 
     def handle_movement(self,input):
         super().handle_movement(input)
-        if self.entity.acceleration[0]==0:
+        if self.entity.acceleration[0] == 0:
             self.entity.currentstate = Jump_stand(self.entity,self.timer)
 
     def swing_sword(self):
@@ -159,8 +172,7 @@ class Jump_stand(Player_states):
         self.timer = timer#jump length
 
     def update_state(self):
-        self.entity.velocity[1] -= 2
-
+        #self.entity.velocity[1] -= 3
         self.timer -= 1
         if self.timer < 0:
             self.enter_state('Fall_stand')
