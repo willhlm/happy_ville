@@ -418,7 +418,7 @@ class Player(Character):
         self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but created in states
         self.equip='Thunder'#ability pointer
         self.sword=Aila_sword(self)
-        self.shield=Shield
+        self.shield=Shield    
         self.dash=True
         self.wall=True
 
@@ -447,8 +447,8 @@ class Player(Character):
 
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
+        self.velocity[1] = 0
         self.jumping = False
-
 
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
         self.abs_dist = [247,180]#the coordinate for buring the bone
@@ -544,6 +544,10 @@ class Enemy(Character):
 
     def death(self):#called when death animation is finished
         self.loots()
+        self.game_objects.statistics['kill'][type(self).__name__.lower()] += 1#add to kill statisics
+        if self.game_objects.statistics['kill'][type(self).__name__.lower()] > 100:
+            for omamori in self.game_objects.player.omamoris.omamori_list:
+                omamori.level_up()
         self.kill()
 
     def loots(self):#called when dead
@@ -1984,6 +1988,7 @@ class Omamoris():
     def __init__(self,entity):
         self.equipped_omamoris=[]#equiped omamoris
         self.omamori_list=[Double_jump(entity),Loot_magnet(entity),More_spirit(entity)]#omamoris in inventory.
+        self.level = 0
 
     def update(self):
         for omamori in self.equipped_omamoris:
@@ -2003,6 +2008,9 @@ class Omamoris():
             old_omamori=self.omamori_list[omamori_index]
             self.equipped_omamoris.remove(old_omamori)
             old_omamori.detach()#call the detach function of omamori
+
+    def level_up(self):
+        self.level += 1
 
 class Omamori():
     def __init__(self,entity):
