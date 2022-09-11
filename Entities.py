@@ -417,9 +417,9 @@ class Player(Character):
 
         self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but created in states
         self.equip='Thunder'#ability pointer
-        self.sword=Aila_sword(self)
-        self.shield=Shield    
-        self.dash=True
+        self.sword = Aila_sword(self)
+        self.shield = Shield
+        self.dash = True
         self.wall=True
 
         self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
