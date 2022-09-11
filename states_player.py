@@ -58,6 +58,7 @@ class Player_states(Entity_States):
                     self.entity.jump()
             elif input[1]:
                 self.entity.jump_timer = 0
+                self.entity.velocity[1] = 0.7*self.entity.velocity[1]
 
 class Idle(Player_states):
     def __init__(self,entity):
