@@ -21,6 +21,7 @@ class Game_Objects():
         self.weather=weather.Weather(self)#initiate weather
         self.weather.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
+        self.statistics = {'kill':{'slime':0,'Larv':0},'ambers':0}
         #self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)

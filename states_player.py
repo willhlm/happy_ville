@@ -126,16 +126,14 @@ class Walk(Player_states):
             self.enter_state('Sword_up')
 
 class Jump_run(Player_states):
-    def __init__(self,entity,timer=5):
+    def __init__(self,entity):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.timer = timer#jump length
 
     def update_state(self):
         #self.entity.velocity[1] -= 3
-        self.timer-=1
-        if self.timer < 0:
+        if self.entity.velocity[1] > 0.7:
             self.enter_state('Fall_run')
 
     def handle_press_input(self,input):
@@ -154,7 +152,7 @@ class Jump_run(Player_states):
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0] == 0:
-            self.entity.currentstate = Jump_stand(self.entity,self.timer)
+            self.enter_state('Jump_stand')
 
     def swing_sword(self):
         if self.entity.dir[1]>0:
@@ -165,22 +163,20 @@ class Jump_run(Player_states):
             self.enter_state('Air_sword1')
 
 class Jump_stand(Player_states):
-    def __init__(self,entity,timer=5):
+    def __init__(self,entity):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.timer = timer#jump length
 
     def update_state(self):
         #self.entity.velocity[1] -= 3
-        self.timer -= 1
-        if self.timer < 0:
+        if self.entity.velocity[1] > 0.7:
             self.enter_state('Fall_stand')
 
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0]!=0:
-            self.entity.currentstate = Jump_run(self.entity,self.timer)
+            self.enter_state('Jump_run')
 
     def handle_press_input(self,input):
         if input[-1]=='lb':
