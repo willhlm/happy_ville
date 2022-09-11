@@ -12,7 +12,7 @@ class Game():
         #initiate all screens
         self.WINDOW_SIZE = (480,270)
         self.WINDOW_SIZE = (480*1.35,270*1.35)
-        self.scale_size()#get the scale according to your display size
+        self.scale_size(1)#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         flags = pygame.SCALED# | pygame.FULLSCREEN

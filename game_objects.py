@@ -14,7 +14,7 @@ class Game_Objects():
 
     def __init__(self, game):
         self.game = game
-        self.controller = Read_files.Controller('xbox')
+        self.controller = Read_files.Controller('ps4')
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()

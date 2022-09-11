@@ -55,6 +55,7 @@ class Title_Menu(Game_State):
         self.arrow.draw(self.game.screen)
 
     def handle_events(self, event):
+        #print(event)
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1

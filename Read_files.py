@@ -288,7 +288,8 @@ class Controller():
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
 
     def buttonmapping(self,controller_type):
-        file = controller_type+'keys.jason'
+        #self.methods.append(self.joystick)
+        file = controller_type+'keys.json'
         with open(join(file),'r+') as file:
             mapping=json.load(file)
             self.buttons=mapping['buttons']
@@ -301,7 +302,7 @@ class Controller():
                                 pygame.K_UP: 'up',
                                 pygame.K_DOWN: 'down',
                                 pygame.K_TAB: 'rb',
-                                pygame.K_SPACE: 'a',
+                                pygame.K_SPACE: 'a',     #jump, should be X on PS4
                                 pygame.K_t: 'y',
                                 pygame.K_e: 'b',
                                 pygame.K_f: 'x',
@@ -315,7 +316,10 @@ class Controller():
     def map_inputs(self,event):
         self.keyup=False
         self.keydown=False
-        self.methods[-1](event)
+        try:
+            self.methods[-1](event)
+        except:
+            pass
 
     def keybord(self,event):
         if event.type == pygame.KEYDOWN:
@@ -356,6 +360,8 @@ class Controller():
             self.methods.append(self.joystick)
 
     def joystick(self,event):
+        print(event)
+        pass
         if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
             self.initiate_controls()
             self.methods.pop()
