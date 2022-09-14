@@ -105,9 +105,7 @@ class Collision_oneway_up(Platform):
         offset=9
         if entity.velocity[1]>0:#going down
             if entity.hitbox.bottom<self.hitbox.top+offset:
-                entity.hitbox.bottom = self.hitbox.top
-                entity.collision_types['bottom'] = True
-                entity.velocity[1] = 0
+                entity.down_collision(self.hitbox.top)
                 entity.update_rect()
         else:#going up
             pass
@@ -330,7 +328,6 @@ class Dynamicentity(Staticentity):
     def down_collision(self,hitbox):
         self.hitbox.bottom = hitbox
         self.collision_types['bottom'] = True
-        #self.velocity[1] = 0
 
     def top_collision(self,hitbox):
         self.hitbox.top = hitbox
@@ -406,7 +403,7 @@ class Player(Character):
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
-        self.rect.midbottom=self.hitbox.midbottom#match the positions of hitboxes
+        self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
         self.max_health = 250
         self.max_spirit = 100
@@ -418,14 +415,14 @@ class Player(Character):
         self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but created in states
         self.equip='Thunder'#ability pointer
         self.sword = Aila_sword(self)
-        self.shield = Shield
-        self.dash = True
-        self.wall=True
 
-        self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of len 2. First if sejt, always tehre. Can append positino for bone, which will pop after use
+        self.states = {'Idle':states_player.Idle,'Walk':states_player.Walk,'Jump_run':states_player.Jump_run,'Jump_stand':states_player.Jump_stand,'Fall_run':states_player.Fall_run,'Fall_stand':states_player.Fall_stand,'Death':states_player.Death,'Invisible':states_player.Invisible,'Hurt':states_player.Hurt,'Spawn':states_player.Spawn,'Sword_run1':states_player.Sword_run1,'Sword_run2':states_player.Sword_run2,'Sword1_stand':states_player.Sword1_stand,'Sword2_stand':states_player.Sword2_stand,'Sword3_stand':states_player.Sword3_stand,'Air_sword2':states_player.Air_sword2,'Air_sword1':states_player.Air_sword1,'Sword_up':states_player.Sword_up,'Sword_down':states_player.Sword_down,'Plant_bone':states_player.Plant_bone,'Thunder':states_player.Thunder,'Force':states_player.Force,'Heal':states_player.Heal,'Darksaber':states_player.Darksaber,'Arrow':states_player.Arrow,'Counter':states_player.Counter,'Wall':states_player.Wall,'Dash':states_player.Dash}
+        self.currentstate = self.states['Idle'](self)
+        #self.currentstate=states_player.Idle(self)
+
+        self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of max len 2. First if sejt, always there. Can append positino for bone, which will pop after use
         self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)
-        self.currentstate = states_player.Idle(self)
 
         self.set_abs_dist()
 
@@ -718,10 +715,10 @@ class Svampis(Enemy):
 class Egg(Enemy):#change design
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/egg/')
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/egg/')
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
+        self.hitbox = pygame.Rect(pos[0],pos[1],64,64)
         self.health = 1
         self.number = random.randint(1, 4)
         self.aggro_distance = -1 #if negative, it will not go into aggro
@@ -948,7 +945,7 @@ class Reindeer(Boss):
         self.AI_stack = [AI_reindeer.Peace(self)]
 
     def give_abillity(self):#called when reindeer dies
-        self.game_objects.player.dash = True
+        self.game_objects.player.states['Dash'] = states_player.Dash#append dash abillity to available states
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
