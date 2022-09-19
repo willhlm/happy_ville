@@ -1,4 +1,5 @@
-import sys, sound, Entities
+
+import sound, Entities, sys
 from states_entity import Entity_States
 
 class Player_states(Entity_States):
@@ -12,16 +13,20 @@ class Player_states(Entity_States):
         self.increase_spirit()
         self.jumping()
 
-    def enter_state(self,newstate):
-        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+    def jumping(self):
+        self.entity.jump_timer -= 1
+        if self.entity.jump_timer > 0:
+            self.entity.velocity[1] -= 2
 
-    def enter_condition(self,newstate):
-        if newstate=='Dash':
-            if self.entity.dash:
-                self.enter_state(newstate)
-        elif newstate=='Wall':
-            if self.entity.wall:
-                self.enter_state(newstate)
+    def enter_state(self,newstate):
+        if newstate in self.entity.states:
+            self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+            #self.entity.currentstate = self.entity.states[newstate](self.entity)
+    #    try:#try to enter state, if it is available
+    #        self.entity.currentstate = self.entity.states[newstate](self.entity)
+    #    except:#if we don't have the state, do nothing
+    #        pass
+    #    self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def increase_spirit(self):
         self.entity.spirit += 0.1
@@ -36,11 +41,6 @@ class Player_states(Entity_States):
     def handle_release_input(self,input):#all states should inehrent this function
         pass
 
-    def jumping(self):
-        self.entity.jump_timer -= 1
-        if self.entity.jump_timer > 0:
-            self.entity.velocity[1] -= 2
-
     def handle_movement(self,input):
         value = input[2]
         self.entity.acceleration[0] = abs(value[0])
@@ -53,10 +53,10 @@ class Player_states(Entity_States):
 
         #jumping
         if input[-1] == 'a':
-            if input[0]:
+            if input[0]:#press
                 if not self.entity.jumping:# if not jumping already
                     self.entity.jump()
-            elif input[1]:
+            elif input[1]:#release
                 self.entity.jump_timer = 0
                 self.entity.velocity[1] = 0.7*self.entity.velocity[1]
 
@@ -73,7 +73,7 @@ class Idle(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_stand')
         elif input[-1]=='lb':
-            self.enter_condition('Dash')
+            self.enter_state('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -107,7 +107,7 @@ class Walk(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_run')
         elif input[-1]=='lb':
-            self.enter_condition('Dash')
+            self.enter_state('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1] == 'b':
@@ -139,7 +139,7 @@ class Jump_run(Player_states):
 
     def handle_press_input(self,input):
         if input[-1]=='lb':
-            self.enter_condition('Dash')
+            self.enter_state('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -181,7 +181,7 @@ class Jump_stand(Player_states):
 
     def handle_press_input(self,input):
         if input[-1]=='lb':
-            self.enter_condition('Dash')
+            self.enter_state('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -237,13 +237,13 @@ class Fall_run(Player_states):
         if self.entity.collision_types['bottom']:
             self.enter_state('Walk')
         elif self.entity.collision_types['right'] or self.entity.collision_types['left']:#on wall and not on ground
-            self.enter_condition('Wall')
+            self.enter_state('Wall')
 
     def handle_press_input(self,input):
         if input[-1]=='b':
             self.enter_state(self.entity.equip)
         elif input[-1]=='lb':
-            self.enter_condition('Dash')
+            self.enter_state('Dash')
         elif input[-1]=='x':
             self.swing_sword()
         elif input=='double_jump':
@@ -290,7 +290,7 @@ class Fall_stand(Player_states):
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='lb':
-            self.enter_condition('Dash')
+            self.enter_state('Dash')
         elif input=='double_jump':
             self.enter_state('Double_jump')
 
@@ -423,19 +423,14 @@ class Counter(Player_states):
         self.phase=self.phases[0]
         self.dir=self.entity.dir.copy()
         self.entity.spirit -= 10
-        self.done=False#animation flag
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
 
     def increase_phase(self):
         if self.phase=='pre':
             self.phase='main'
-            shield=self.entity.shield(self.entity)
+            shield=Entities.Shield(self.entity)
             self.entity.projectiles.add(shield)#add sword to group
         elif self.phase=='main':
-            self.done=True
+            self.enter_state('Idle')
 
 class Death(Player_states):
     def __init__(self,entity):
@@ -470,15 +465,10 @@ class Invisible(Player_states):
 class Hurt(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.done=False
         self.next_state='Idle'
 
-    def update_state(self):
-        if self.done:
-            self.enter_state(self.next_state)
-
     def increase_phase(self):
-        self.done = True
+        self.enter_state(self.next_state)
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -491,15 +481,10 @@ class Spawn(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            self.entity.health=self.entity.max_health
-            self.enter_state('Idle')
 
     def increase_phase(self):
-        self.done=True
+        self.entity.health=self.entity.max_health
+        self.enter_state('Idle')
 
 class Sword(Player_states):
     def __init__(self,entity):
@@ -514,7 +499,7 @@ class Sword(Player_states):
 
     def slash_speed(self):
         if self.entity.sword.equip=='green':
-            self.entity.animation_stack[-1].framerate=3
+            self.entity.animation_stack[-1].framerate = 3
 
     def increase_phase(self):
         if self.phase==self.phases[-1]:
@@ -711,10 +696,10 @@ class Thunder(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.aura=Entities.Thunder_aura(self.entity)
+        self.aura = Entities.Thunder_aura(self.entity)
         self.entity.game_objects.cosmetics.add(self.aura)
-        self.phases=['pre','charge','main']
-        self.phase=self.phases[0]
+        self.phases = ['pre','charge','main']
+        self.phase = self.phases[0]
 
     def update_state(self):
         super().update_state()

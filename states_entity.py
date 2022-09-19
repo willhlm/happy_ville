@@ -1,3 +1,5 @@
+import constants as C
+
 class Entity_States():
     def __init__(self,entity):
         self.entity=entity
@@ -12,10 +14,11 @@ class Entity_States():
         pass
 
     def walk(self):
-        self.entity.acceleration=[1,0.7]
+        self.entity.acceleration=[1,C.acceleration[1]]
 
     def stay_still(self):
-        self.entity.acceleration=[0,0.7]
+        self.entity.acceleration=C.acceleration.copy()
+
 
     def handle_input(self,input):
         pass

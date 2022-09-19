@@ -92,7 +92,6 @@ class General_particle(Particles):#a general one
         self.update_particle()
 
     def speed(self):
-
         self.velocity[0] -= 0.01*self.velocity[0]#0.1*math.cos(self.angle)
         self.velocity[1] -= 0.01*self.velocity[1]#0.1*math.sin(self.angle)
 
