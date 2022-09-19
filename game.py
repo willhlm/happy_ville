@@ -10,14 +10,8 @@ class Game():
 
         #initiate should implement a init file to read values for thing sin game, like screen scale, fps etc.
         #initiate all screens
-<<<<<<< HEAD
-        self.WINDOW_SIZE = (480,270)
-        self.WINDOW_SIZE = (480*1.35,270*1.35)
-        self.scale_size(1)#get the scale according to your display size
-=======
         self.WINDOW_SIZE = C.window_size.copy()
         self.scale_size()#get the scale according to your display size
->>>>>>> 474854b866518863dedf40235f6c0ef3a6f3a0f4
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
         flags = pygame.SCALED# | pygame.FULLSCREEN
