@@ -9,6 +9,8 @@ import states
 import camera
 import json
 import weather
+import constants as C
+
 
 class Game_Objects():
 
@@ -21,7 +23,7 @@ class Game_Objects():
         self.weather=weather.Weather(self)#initiate weather
         self.weather.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
-        self.statistics = {'kill':{'slime':0,'Larv':0},'ambers':0}
+        self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0},'ambers':0}
         #self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)
@@ -57,7 +59,7 @@ class Game_Objects():
         #initiate player
         self.player = Entities.Player([0,0],self)
         self.players = pygame.sprite.Group(self.player)
-        self.player_center = (int(self.game.WINDOW_SIZE[0]/2),int(self.game.WINDOW_SIZE[1]/2))
+        self.player_center = C.player_center
 
     def load_map(self, map_name, spawn = '1',fade=True):
         self.map = map_loader.Level(map_name, self, spawn)

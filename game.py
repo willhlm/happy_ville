@@ -3,15 +3,14 @@ import states
 import game_objects
 import Read_files
 import sys
+import constants as C
 
 class Game():
     def __init__(self):
 
         #initiate should implement a init file to read values for thing sin game, like screen scale, fps etc.
-
         #initiate all screens
-        self.WINDOW_SIZE = (480,270)
-        self.WINDOW_SIZE = (480*1.35,270*1.35)
+        self.WINDOW_SIZE = C.window_size.copy()
         self.scale_size()#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         self.screen = pygame.Surface(self.WINDOW_SIZE)
@@ -22,7 +21,7 @@ class Game():
         pygame.mixer.init()
         self.game_objects = game_objects.Game_Objects(self)
         self.clock = pygame.time.Clock()
-        self.fps = 60
+        self.fps = C.fps
         self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}
 
         #debug flags

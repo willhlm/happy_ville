@@ -3,6 +3,7 @@ import Read_files
 import Engine
 import Entities
 import cutscene
+import constants as C
 
 class Game_State():
     def __init__(self,game):
@@ -348,10 +349,12 @@ class Gameplay(Game_State):
         super().__init__(game)
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
+        self.pause_cooldown = 0#a flag so that pause_game play doesn't get appended in series
 
     def update(self):
         self.game.game_objects.scrolling()
         self.game.game_objects.collide_all()
+        self.pause_cooldown -= 1
 
     def render(self):
         self.game.screen.fill((207,238,250))
@@ -429,7 +432,29 @@ class Gameplay(Game_State):
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-class Dark_gameplay(Gameplay):
+    def handle_input(self,input):
+        if input == 'dmg':
+            if self.pause_cooldown < 0:
+                new_game_state = Pause_gameplay(self.game,duration=10)
+                new_game_state.enter_state()
+                self.pause_cooldown = C.invincibility_time+5
+        elif input =='dark':
+            new_game_state = Dark_gameplay(self.game)
+            new_game_state.enter_state()
+
+class Pause_gameplay(Gameplay):
+    def __init__(self,game,duration=10):
+        super().__init__(game)
+        self.duration = duration
+
+    def update(self):
+        self.game.game_objects.weather_paricles.update([0,0])
+
+        self.duration -= 1
+        if self.duration < 0:
+            self.exit_state()
+
+class Dark_gameplay(Gameplay):#for caves etc. makes everything arounf dark except a light circle around aila.
     def __init__(self,game):
         super().__init__(game)
         self.light()

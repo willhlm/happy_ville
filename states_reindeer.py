@@ -8,7 +8,7 @@ class Reindeer_states(Entity_States):
         self.phase=self.phases[0]
 
     def enter_state(self,newstate):
-        self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def increase_phase(self):
         if self.phase=='pre':
@@ -66,19 +66,6 @@ class Dead(Reindeer_states):
 
     def increase_phase(self):
         pass
-
-class Hurt(Reindeer_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
-
-    def increase_phase(self):
-        self.done=True
 
 class Transform(Reindeer_states):
     def __init__(self,entity):

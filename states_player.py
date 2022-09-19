@@ -1,4 +1,4 @@
-import sound, Entities#, sys
+import sound, Entities, sys
 from states_entity import Entity_States
 
 class Player_states(Entity_States):
@@ -18,10 +18,13 @@ class Player_states(Entity_States):
             self.entity.velocity[1] -= 2
 
     def enter_state(self,newstate):
-        try:#try to enter state, if it is available
-            self.entity.currentstate = self.entity.states[newstate](self.entity)
-        except:#if we don't have the state, do nothing
-            pass
+        if newstate in self.entity.states:
+            self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+            #self.entity.currentstate = self.entity.states[newstate](self.entity)
+    #    try:#try to enter state, if it is available
+    #        self.entity.currentstate = self.entity.states[newstate](self.entity)
+    #    except:#if we don't have the state, do nothing
+    #        pass
     #    self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def increase_spirit(self):

@@ -1,5 +1,6 @@
-import pygame, random, sys, Read_files, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound, states
+import pygame, random, sys, Read_files, states, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
 import time
+import constants as C
 
 pygame.mixer.init()
 
@@ -339,37 +340,35 @@ class Character(Dynamicentity):#enemy, NPC,player
         super().__init__(pos)
         self.game_objects = game_objects
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.acceleration = [1,0.7]
-        self.friction = [0.5,0]
+        self.acceleration = C.acceleration.copy()
+        self.friction = C.friction.copy()
+        self.max_vel = C.max_vel.copy()
         self.animation_stack = [animation.Entity_animation(self)]
-        self.max_vel = [30,7]
 
         self.invincibile = False#a flag to check if one should take damage
-        self.invincibility_timer = 30#should read from a constants file. how long one is invincible
-        self.invincibility_method = [self.none]#to aboid if statement
+        self.invincibility_timer = 0#a timer to check how long one has been invincible
 
     def update(self,pos):
         super().update(pos)
         self.currentstate.update()
         self.animation_stack[-1].update()
-        self.invincibility_method[-1]()
+        self.invincibility()
 
     def update_vel(self):
         self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
         self.velocity[1]=min(self.velocity[1],self.max_vel[1])#set a y max speed
 
         self.velocity[0]+=self.dir[0]*self.acceleration[0]-self.friction[0]*self.velocity[0]
-        #self.velocity[0]=self.dir[0]*min(abs(self.velocity[0]),self.max_vel[0])#set a x max speed
-
-    def none(self):
-        pass
 
     def take_dmg(self,dmg):
         if self.invincibile:
             return
         self.health -= dmg
-        self.invincibile = True
-        self.invincibility_method.append(self.invincibility)
+
+        self.invincibile = True#invincibile flag
+        self.invincibility_timer = C.invincibility_time# how long one is invincible
+        self.dmg_pause()#makes the game freezy for few frames
+
         if self.health > 0:#check if dead¨
             self.animation_stack[-1].handle_input('Hurt')#turn white
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
@@ -377,6 +376,9 @@ class Character(Dynamicentity):#enemy, NPC,player
             if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
                 self.aggro = False
                 self.currentstate.enter_state('Death')#overrite any state and go to deat
+
+    def dmg_pause(self):#makes the game freezy for few frames
+        self.game_objects.game.state_stack[-1].handle_input('dmg')
 
     def knock_back(self,dir):
         self.velocity[0] = dir*30
@@ -390,8 +392,6 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.invincibility_timer -= 1
         if self.invincibility_timer < 0:
             self.invincibile = False
-            self.invincibility_timer = 30
-            self.invincibility_method.pop()
 
 class Player(Character):
 
@@ -412,15 +412,14 @@ class Player(Character):
 
         self.projectiles = game_objects.fprojectiles
 
-        self.abilities={'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but created in states
-        self.equip='Thunder'#ability pointer
+        self.abilities = {'Thunder':Thunder,'Force':Force,'Arrow':Arrow,'Heal':Heal,'Darksaber':Darksaber}#the objects are referensed but created in states
+        self.equip = 'Thunder'#ability pointer
         self.sword = Aila_sword(self)
 
-        self.states = {'Idle':states_player.Idle,'Walk':states_player.Walk,'Jump_run':states_player.Jump_run,'Jump_stand':states_player.Jump_stand,'Fall_run':states_player.Fall_run,'Fall_stand':states_player.Fall_stand,'Death':states_player.Death,'Invisible':states_player.Invisible,'Hurt':states_player.Hurt,'Spawn':states_player.Spawn,'Sword_run1':states_player.Sword_run1,'Sword_run2':states_player.Sword_run2,'Sword1_stand':states_player.Sword1_stand,'Sword2_stand':states_player.Sword2_stand,'Sword3_stand':states_player.Sword3_stand,'Air_sword2':states_player.Air_sword2,'Air_sword1':states_player.Air_sword1,'Sword_up':states_player.Sword_up,'Sword_down':states_player.Sword_down,'Plant_bone':states_player.Plant_bone,'Thunder':states_player.Thunder,'Force':states_player.Force,'Heal':states_player.Heal,'Darksaber':states_player.Darksaber,'Arrow':states_player.Arrow,'Counter':states_player.Counter,'Wall':states_player.Wall,'Dash':states_player.Dash}
-        self.currentstate = self.states['Idle'](self)
-        #self.currentstate=states_player.Idle(self)
+        self.states = set(['Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword1_stand','Sword2_stand','Sword3_stand','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter','Wall'])#all states that are available to Aila, convert to set to make lookup faster
+        self.currentstate=states_player.Idle(self)
 
-        self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of max len 2. First if sejt, always there. Can append positino for bone, which will pop after use
+        self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
         self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)
 
@@ -448,7 +447,7 @@ class Player(Character):
         self.jumping = False
 
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
-        self.abs_dist = [247,180]#the coordinate for buring the bone
+        self.abs_dist = C.player_center.copy()#the coordinate for buring the bone
 
     def death(self):#called when dead
         map=self.game_objects.map.level_name
@@ -463,8 +462,8 @@ class Player(Character):
 
     def reset_movement(self):
         self.velocity = [0,0]
-        self.acceleration = [0,0.51]#y velocity need to be large than 1/2
-        self.friction = [0.24,0.03]
+        self.acceleration = C.acceleration.copy()#y velocity need to be large than 1/2
+        self.friction = C.player_friction.copy()
 
     def update(self,pos):
         super().update(pos)
@@ -523,7 +522,6 @@ class Enemy(Character):
         self.AI_stack = [AI_enemy.Peace(self)]
         self.attack_distance = 0#when try to hit
         self.aggro_distance = 200#when ot become aggro
-        self.invincibility_timer = 30#should match the time of sword/projectile lifetime
 
     def update(self,pos):
         super().update(pos)
@@ -927,6 +925,9 @@ class Boss(Enemy):
     def give_abillity(self):
         self.game_objects.player.abilities[self.ability]=getattr(sys.modules[__name__], self.ability)
 
+    def dmg_pause(self):#it doesn't pasue for bosses
+        pass
+
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -945,7 +946,7 @@ class Reindeer(Boss):
         self.AI_stack = [AI_reindeer.Peace(self)]
 
     def give_abillity(self):#called when reindeer dies
-        self.game_objects.player.states['Dash'] = states_player.Dash#append dash abillity to available states
+        self.game_objects.player.states.add('Dash')#append dash abillity to available states
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
