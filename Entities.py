@@ -462,7 +462,7 @@ class Player(Character):
 
     def reset_movement(self):
         self.velocity = [0,0]
-        self.acceleration = C.acceleration.copy()#y velocity need to be large than 1/2
+        self.acceleration =  [0,C.acceleration[1]]#y velocity need to be large than 1/2
         self.friction = C.player_friction.copy()
 
     def update(self,pos):
