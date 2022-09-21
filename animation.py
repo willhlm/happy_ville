@@ -3,15 +3,15 @@ import pygame
 class Animation():
     def __init__(self,entity):
         self.entity=entity
-        self.framerate = 4
-        self.frame=0
+        self.framerate = 4#depends on FPS
+        self.frame = 0
 
     def enter_state(self):
         self.entity.animation_stack.append(self)
 
     def exit_state(self):
         self.entity.animation_stack.pop()
-        self.entity.animation_stack[-1].frame=self.frame#send back the frame number
+        self.entity.animation_stack[-1].frame = self.frame#send back the frame number
 
     def reset_timer(self):
         self.frame=0

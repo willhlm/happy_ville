@@ -373,18 +373,12 @@ class Controller():
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value[0]=event.value
                 if abs(event.value)<0.2:
-                    self.value[0]=0
+                    self.value[0] = 0
 
             if event.axis==self.analogs['lv']:#left vertical
                 self.value[1]=event.value
                 if abs(event.value)<0.2:
-                    self.value[1]=0
-
-        #    if event.axis==self.analogs['rh']:#right horizonal
-        #        pass
-                #self.value=[event.value,0]
-                #if abs(event.value)<0.5:
-                    #self.value[0]=0
+                    self.value[1] = 0
 
         if event.type==pygame.JOYHATMOTION:
             pass

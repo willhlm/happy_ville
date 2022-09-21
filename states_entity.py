@@ -14,11 +14,10 @@ class Entity_States():
         pass
 
     def walk(self):
-        self.entity.acceleration=[1,C.acceleration[1]]
-
-    def stay_still(self):
         self.entity.acceleration=C.acceleration.copy()
 
+    def stay_still(self):
+        self.entity.acceleration=[0,C.acceleration[1]]
 
     def handle_input(self,input):
         pass

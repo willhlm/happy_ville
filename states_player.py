@@ -1,5 +1,6 @@
 import sound, Entities, sys
 from states_entity import Entity_States
+import constants as C
 
 class Player_states(Entity_States):
     def __init__(self,entity):
@@ -57,7 +58,7 @@ class Player_states(Entity_States):
                     self.entity.jump()
             elif input[1]:#release
                 self.entity.jump_timer = 0
-                self.entity.velocity[1] = 0.7*self.entity.velocity[1]
+                #self.entity.velocity[1] = 0.7*self.entity.velocity[1]
 
 class Idle(Player_states):
     def __init__(self,entity):
@@ -319,22 +320,22 @@ class Wall(Player_states):
 
     def update_state(self):
         if self.entity.collision_types['bottom']:
-            self.entity.friction[1]=0
+            self.entity.friction[1] = C.player_friction[1]
             self.enter_state('Walk')
 
         elif not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
-            self.entity.friction[1]=0
+            self.entity.friction[1] = C.player_friction[1]
             self.enter_state('Fall_run')
 
     def handle_press_input(self,input):
         if input[-1]=='a':
-            self.entity.friction[1] = 0
+            self.entity.friction[1] = C.player_friction[1]
             self.entity.velocity[0] = -self.dir[0]*10
             self.enter_state('Jump_run')
 
         elif input[-1] == 'right' and self.entity.dir[0]==1 or input[-1] == 'left' and self.entity.dir[0]==-1:
-            self.entity.collision_types['right']=False
-            self.entity.collision_types['left']=False
+            self.entity.collision_types['right'] = False
+            self.entity.collision_types['left'] = False
             self.fall()
             self.enter_state('Fall_run')
 
@@ -345,7 +346,7 @@ class Wall(Player_states):
             self.enter_state('Fall_run')
 
     def fall(self):
-        self.entity.friction[1] = 0
+        self.entity.friction[1] = C.player_friction[1]
         self.entity.velocity[0] = -self.entity.dir[0]*2
 
 class Dash(Player_states):
@@ -488,15 +489,15 @@ class Spawn(Player_states):
 class Sword(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.done=False#animation flag
-        self.sword2=False#flag to check if we shoudl go to next sword attack
-        self.sword3=False#flag to check if we shoudl go to third sword attack
+        self.done = False#animation flag
+        self.sword2 = False#flag to check if we shoudl go to next sword attack
+        #self.sword3=False#flag to check if we shoudl go to third sword attack
         self.dir = self.entity.dir.copy()#animation direction
         self.entity.sword.dir=self.dir.copy()#sword direction
         sound.Sound.play_sfx(self.entity.sfx_sword)
         self.slash_speed()
 
-    def slash_speed(self):
+    def slash_speed(self):#if we have green infinity stone
         if self.entity.sword.equip=='green':
             self.entity.animation_stack[-1].framerate = 3
 
@@ -549,9 +550,8 @@ class Sword_run2(Sword):
 class Sword1_stand(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['pre','main']
-        self.phase=self.phases[0]
         self.entity.sword.lifetime = 10#swrod hitbox duration
+        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
         self.entity.sword.dir[1]=0
 
     def update_state(self):
@@ -565,7 +565,7 @@ class Sword1_stand(Sword):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='x':
-            self.sword2=True
+            self.sword2 = True
 
 class Sword2_stand(Sword):
     def __init__(self,entity):
@@ -575,15 +575,15 @@ class Sword2_stand(Sword):
         self.entity.sword.dir[1]=0
 
     def update_state(self):
-        if self.done and self.sword3:
-            self.enter_state('Sword3_stand')
-        elif self.done:#if animation is done
+        #if self.done and self.sword3:
+#            self.enter_state('Sword3_stand')
+        if self.done:#if animation is done
             self.enter_state('Idle')
 
-    def handle_press_input(self,input):
-        super().handle_press_input(input)
-        if input[-1]=='x' and input[0]:
-            self.sword3=True
+#    def handle_press_input(self,input):
+#        super().handle_press_input(input)
+#        if input[-1]=='x' and input[0]:
+#            self.sword3=True
 
 class Sword3_stand(Sword):
     def __init__(self,entity):
