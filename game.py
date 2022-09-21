@@ -4,6 +4,7 @@ import game_objects
 import Read_files
 import sys
 import constants as C
+import time
 
 class Game():
     def __init__(self):
@@ -41,7 +42,7 @@ class Game():
     def run(self):
         while True:
             #tick clock
-            self.clock.tick(self.fps)#=dt
+            self.clock.tick(self.fps)#*0.001#=dt
 
             #handle event
             self.event_loop()

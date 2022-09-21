@@ -202,8 +202,7 @@ class Collision_right_angle(Platform):
         target = rel_x*self.ratio + self.hitbox.top
 
         if entity.hitbox.top < target:
-            entity.hitbox.top = target
-            entity.collision_types['top'] = True
+            entity.top_collision(target)
             entity.velocity[1] = 1 #need to have a value to avoid "dragin in air" while running
             entity.update_rect()
 
@@ -221,8 +220,7 @@ class Collision_right_angle(Platform):
 
         if not entity.go_through:
             if entity.hitbox.bottom > target:
-                entity.hitbox.bottom = target
-                entity.collision_types['bottom'] = True
+                entity.down_collision(target)
                 entity.update_rect()
 
 class Spikes(Platform):
@@ -340,7 +338,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         super().__init__(pos)
         self.game_objects = game_objects
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]
-        self.acceleration = C.acceleration.copy()
+        self.acceleration = [0,C.acceleration[1]]
         self.friction = C.friction.copy()
         self.max_vel = C.max_vel.copy()
         self.animation_stack = [animation.Entity_animation(self)]
