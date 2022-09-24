@@ -18,11 +18,7 @@ class Player_states(Entity_States):
     def jumping(self):
         self.entity.jump_timer -= 1
         if self.entity.jump_timer > 0:
-<<<<<<< HEAD
-            self.entity.velocity[1] = self.entity.velocity[1] - 0.2*(C.max_vel[1]-self.entity.velocity[1])
-=======
             self.entity.velocity[1] -= 0.4*(C.max_vel[1]+self.entity.velocity[1])#2
->>>>>>> 3d1f88b06a59e3107dcd8a1408b49113ee1c9c4b
 
     def enter_state(self,newstate):
         if newstate in self.entity.states:

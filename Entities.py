@@ -430,7 +430,7 @@ class Player(Character):
 
     def jump(self):#called when pressing jump button. Will jump as long as jump_timer > 0
         self.velocity[1] = 0
-        self.jump_timer = 9#how long you jump
+        self.jump_timer = 11#how long you jump
         self.jumping = True
 
     def down_collision(self,hitbox):
