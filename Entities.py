@@ -431,14 +431,6 @@ class Player(Character):
         self.jump_timer = 7
         self.jumping = True
 
-    def right_collision(self,hitbox):
-        super().right_collision(hitbox)
-        self.jumping = False
-
-    def left_collision(self,hitbox):
-        super().left_collision(hitbox)
-        self.jumping = False
-
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
         self.velocity[1] = 0

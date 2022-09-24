@@ -332,6 +332,7 @@ class Wall(Player_states):
         if input[-1]=='a':
             self.entity.friction[1] = C.player_friction[1]
             self.entity.velocity[0] = -self.dir[0]*10
+            self.entity.jump()
             self.enter_state('Jump_run')
 
         elif input[-1] == 'right' and self.entity.dir[0]==1 or input[-1] == 'left' and self.entity.dir[0]==-1:
