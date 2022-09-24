@@ -4,6 +4,7 @@ import Engine
 import Entities
 import cutscene
 import constants as C
+import random
 
 class Game_State():
     def __init__(self,game):
@@ -436,7 +437,7 @@ class Gameplay(Game_State):
     def handle_input(self,input):
         if input == 'dmg':
             if self.pause_cooldown < 0:
-                new_game_state = Pause_gameplay(self.game,duration=10)
+                new_game_state = Pause_gameplay(self.game,duration=6)
                 new_game_state.enter_state()
                 self.pause_cooldown = C.invincibility_time+5
         elif input =='dark':
@@ -444,16 +445,23 @@ class Gameplay(Game_State):
             new_game_state.enter_state()
 
 class Pause_gameplay(Gameplay):
-    def __init__(self,game,duration=10):
+    def __init__(self,game, duration=10, amplitude = 20):
         super().__init__(game)
         self.duration = duration
+        self.temp_surface = self.game.screen.copy()
+        self.amp = amplitude
 
     def update(self):
         self.game.game_objects.weather_paricles.update([0,0])
-
         self.duration -= 1
+        self.amp = int(0.8*self.amp)
         if self.duration < 0:
             self.exit_state()
+
+    def render(self):
+        super().render()
+        self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
+
 
 class Dark_gameplay(Gameplay):#for caves etc. makes everything arounf dark except a light circle around aila.
     def __init__(self,game):
