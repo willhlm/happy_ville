@@ -8,6 +8,7 @@ acceleration = [1,0.51]#y velocity need to be large than 1/2
 friction = [0.5,0]
 player_friction = [0.24,0.01]
 max_vel = [30,7]
+player_sword_timer = 15
 
 #combat
 invincibility_time = 30

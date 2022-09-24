@@ -414,7 +414,7 @@ class Player(Character):
         self.equip = 'Thunder'#ability pointer
         self.sword = Aila_sword(self)
 
-        self.states = set(['Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword1_stand','Sword2_stand','Sword3_stand','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter','Wall'])#all states that are available to Aila, convert to set to make lookup faster
+        self.states = set(['Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Sword_stand3','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter','Wall'])#all states that are available to Aila, convert to set to make lookup faster
         self.currentstate=states_player.Idle(self)
 
         self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -423,7 +423,9 @@ class Player(Character):
 
         self.set_abs_dist()
 
-        self.jump_timer = 0
+        self.sword_timer = 0#a timer to check when you can swing the sword again
+        self.sword_swing = 0#a flag to check which swing we are at (0 or 1)
+        self.jump_timer = 0#a timer to check how long we can jump
         self.jumping = False#a flag to check so that you cannot jump in air
 
     def jump(self):#called when pressing jump button. Will jump as long as jump_timer > 0
@@ -519,7 +521,7 @@ class Enemy(Character):
         self.group_distance()
 
     def player_collision(self):#when player collides with enemy
-        if self.aggro:
+        if self.aggro and not self.game_objects.player.invincibile:
             self.game_objects.player.take_dmg(10)
             sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
             if sign>0:
