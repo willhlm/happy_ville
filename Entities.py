@@ -218,7 +218,7 @@ class Collision_right_angle(Platform):
         elif entity.hitbox.bottom < target:
             entity.go_through = False
 
-        if not entity.go_through:
+        if not entity.go_through and not entity.jumping:
             if entity.hitbox.bottom > target:
                 entity.down_collision(target)
                 entity.update_rect()
@@ -430,7 +430,7 @@ class Player(Character):
 
     def jump(self):#called when pressing jump button. Will jump as long as jump_timer > 0
         self.velocity[1] = 0
-        self.jump_timer = 9
+        self.jump_timer = 9#how long you jump
         self.jumping = True
 
     def down_collision(self,hitbox):

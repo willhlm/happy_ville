@@ -3,10 +3,10 @@ import random, sys
 class Camera():
     def __init__(self,game_objects):
         self.game_objects = game_objects
-        self.scroll=[0,0]
-        self.true_scroll=[0,0]
+        self.scroll = [0,0]
+        self.true_scroll = [0,0]
         self.center = list(game_objects.player_center)
-        self.shake=[0,0]
+        self.shake = [0,0]
 
     def update(self):
         self.check_camera_border()
