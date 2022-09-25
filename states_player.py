@@ -49,7 +49,7 @@ class Player_states(Entity_States):
 
     def handle_movement(self,input):#all states should inehrent this function
         value = input[2]
-        self.entity.acceleration[0] = abs(value[0])
+        self.entity.acceleration[0] = abs(value[0])*C.acceleration[0]
         self.entity.dir[1] = -value[1]
 
         if value[0] > 0.2:#x
@@ -472,9 +472,9 @@ class Death(Player_states):
         super().__init__(entity)
         self.phase='pre'
         self.stay_still()
-        self.entity.death()
+        self.entity.game_objects.cosmetics.add(Entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]]))
         self.entity.velocity[1]=-3
-
+        self.once = True
         if self.entity.velocity[0]<0:
             self.dir[0]=1
         else:
@@ -491,6 +491,11 @@ class Death(Player_states):
         elif self.phase == 'charge':
             if self.entity.collision_types['bottom']:
                 self.phase='main'
+        elif self.phase=='post':
+            if self.once:
+                self.entity.dead()
+            self.once = False
+
 
 class Invisible(Player_states):
     def __init__(self,entity):

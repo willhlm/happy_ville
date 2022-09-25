@@ -293,6 +293,7 @@ class Dynamicentity(Staticentity):
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
+        self.jumping = False
 
     def update(self,pos):
         super().update(pos)
@@ -345,6 +346,7 @@ class Character(Dynamicentity):#enemy, NPC,player
 
         self.invincibile = False#a flag to check if one should take damage
         self.invincibility_timer = 0#a timer to check how long one has been invincible
+        self.invincibility_time = C.invincibility_time_player
 
     def update(self,pos):
         super().update(pos)
@@ -361,29 +363,29 @@ class Character(Dynamicentity):#enemy, NPC,player
     def take_dmg(self,dmg):
         if self.invincibile:
             return
-        self.health -= dmg
 
+        self.health -= dmg
         self.invincibile = True#invincibile flag
-        self.invincibility_timer = C.invincibility_time# how long one is invincible
-        self.dmg_pause()#makes the game freezy for few frames
+        self.invincibility_timer = self.invincibility_time# how long one is invincible
 
         if self.health > 0:#check if dead¨
-            self.animation_stack[-1].handle_input('Hurt')#turn white
-            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            self.hurt()
         else:#if dead
             if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
                 self.aggro = False
+                self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
                 self.currentstate.enter_state('Death')#overrite any state and go to deat
 
-    def dmg_pause(self):#makes the game freezy for few frames
-        self.game_objects.game.state_stack[-1].handle_input('dmg')
+    def hurt(self):
+        self.animation_stack[-1].handle_input('Hurt')#turn white
+        self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
 
     def knock_back(self,dir):
         self.velocity[0] = dir*30
 
-    def hurt_particles(self,dir,number_particles=12):
+    def hurt_particles(self,distance=0,lifetime=20,vel=[1,10],type='circle',dir='isotropic',scale=1,colour=[255,255,255,255],number_particles=12):
         for i in range(0,number_particles):
-            obj1=particles.General_particle(self.hitbox.center,distance=0,type='circle',lifetime=20,vel=[1,10],dir=dir,scale=1)
+            obj1=particles.General_particle(self.hitbox.center,distance,lifetime,vel,type,dir,scale,colour)
             self.game_objects.cosmetics.add(obj1)
 
     def invincibility(self):#this method is called veryloop after damage was taken, until the method is popped
@@ -438,13 +440,17 @@ class Player(Character):
         self.velocity[1] = 0
         self.jumping = False
 
+    def hurt(self):#called when taking dmg but health > 0
+        self.animation_stack[-1].handle_input('Invincibile')#make some animation. should be before super
+        super().hurt()
+        self.hurt_particles(lifetime=40,vel=[3,8],colour=[0,0,0,255],scale=3,number_particles=60)
+        self.game_objects.cosmetics.add(Slash(self.hitbox.center))#make a slash animation appear during the "pasue"
+        self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
         self.abs_dist = C.player_center.copy()#the coordinate for buring the bone
 
-    def death(self):#called when dead
-        map=self.game_objects.map.level_name
-        pos=[self.rect[0],self.rect[1]]
-        self.game_objects.cosmetics.add(Player_Soul(pos))
+    def dead(self):#called when death animation is finished
         new_game_state = states.Cutscenes(self.game_objects.game,'Death')
         new_game_state.enter_state()
         self.set_abs_dist()
@@ -461,10 +467,6 @@ class Player(Character):
         super().update(pos)
         self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
         self.omamoris.update()
-
-    def invincibility(self):#this method is called veryloop after damage was taken, until the method is popped
-        super().invincibility()
-        self.animation_stack[-1].handle_input('Invincibile')#make some animation
 
     def to_json(self):#things to save: needs to be a dict
         health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
@@ -514,6 +516,7 @@ class Enemy(Character):
         self.AI_stack = [AI_enemy.Peace(self)]
         self.attack_distance = 0#when try to hit
         self.aggro_distance = 200#when ot become aggro
+        self.invincibility_time = C.invincibility_time_enemy# how long one is invincible
 
     def update(self,pos):
         super().update(pos)
@@ -521,7 +524,9 @@ class Enemy(Character):
         self.group_distance()
 
     def player_collision(self):#when player collides with enemy
-        if self.aggro and not self.game_objects.player.invincibile:
+        if not self.aggro:
+            return
+        if not self.game_objects.player.invincibile and not self.game_objects.player.currentstate.state_name == 'death':
             self.game_objects.player.take_dmg(10)
             sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
             if sign>0:
@@ -529,7 +534,7 @@ class Enemy(Character):
             else:
                 self.game_objects.player.knock_back(-1)
 
-    def death(self):#called when death animation is finished
+    def dead(self):#called when death animation is finished
         self.loots()
         self.game_objects.statistics['kill'][type(self).__name__.lower()] += 1#add to kill statisics
         if self.game_objects.statistics['kill'][type(self).__name__.lower()] > 100:
@@ -579,10 +584,10 @@ class Wall_slime(Enemy):
 class Woopie(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.image = pygame.image.load("Sprites/Enteties/enemies/woopie/main/Idle/Kodama_stand1.png").convert_alpha()
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 1
         self.spirit=100
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -591,14 +596,13 @@ class Vatt(Enemy):
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.image = pygame.image.load("Sprites/Enteties/enemies/vatt/main/idle/idle1.png").convert_alpha()
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
         self.health = 30
         self.spirit = 30
         self.aggro = False
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
         self.AI_stack = [AI_vatt.Peace(self)]
@@ -1270,7 +1274,7 @@ class Sword(Melee):
         if not collision_enemy.invincibile:
             collision_enemy.take_dmg(self.dmg)
             collision_enemy.knock_back(self.dir[0])
-            collision_enemy.hurt_particles(self.dir[0])
+            collision_enemy.hurt_particles(dir=self.dir[0])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
             if self.dir[0]>0:
                 self.clash_particles(self.rect.midright)
@@ -1286,7 +1290,7 @@ class Sword(Melee):
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3)
+            obj1=particles.General_particle(pos,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def collision_inetractables(self,interactable):
@@ -1328,7 +1332,7 @@ class Aila_sword(Sword):
     def clash_particles(self,pos,number_particles=12):
         angle = random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,distance=0,type='spark',lifetime=10,vel=[7,14],dir=angle,scale=0.3,colour=self.colour[self.equip])
+            obj1=particles.General_particle(pos,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3,colour=self.colour[self.equip])
             self.entity.game_objects.cosmetics.add(obj1)
 
 class Darksaber(Aila_sword):
@@ -1689,7 +1693,7 @@ class Animatedentity(Staticentity):#animated stuff that doesn't move around
         self.currentstate.update()
         self.animation.update()
 
-    def reset_timer(self):
+    def reset_timer(self):#called whe animation finshes
         pass
 
 class Player_Soul(Animatedentity):
@@ -1738,10 +1742,12 @@ class Slash(Animatedentity):
 
     def __init__(self,pos):
         super().__init__(pos)
-        self.state=str(random.randint(1, 3))
+        self.state = str(random.randint(1, 3))
         self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.rect.center = pos
 
-    def reset_timer(self):
+    def reset_timer(self):#called whe animation finshes
         self.kill()
 
 class Interactable(Animatedentity):

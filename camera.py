@@ -126,7 +126,7 @@ class Camera_shake(Camera):
         self.exit_state()
 
     def exit_state(self):
-        if self.duration<0:
+        if self.duration < 0:
             self.curr_camera.shake=[0,0]
             super().exit_state()
 
@@ -147,10 +147,3 @@ class Cultist_encounter(Auto):
         self.center[0]+=2
         self.center[0] = min(500,self.center[0])
         super().update()
-
-class Death(Camera):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
-
-    def update(self):
-        pass

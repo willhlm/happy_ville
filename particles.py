@@ -79,8 +79,7 @@ class General_particle(Particles):#a general one
         else:#circles
             self.update_particle=self.update_circle
             vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
-            low = max(int(vel*0.3),1)#trying so that higher velocities have larger radius
-            self.radius = low
+            self.radius = random.randint(max(scale-1,1), scale+1)
             self.make_circle()
 
     def update(self,scroll):

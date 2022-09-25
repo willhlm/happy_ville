@@ -133,14 +133,9 @@ class Death(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            self.entity.death()
 
     def increase_phase(self):
-        self.done=True
+        self.entity.dead()
 
 class Hurt(Vatt_states):
     def __init__(self,entity):

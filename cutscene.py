@@ -4,6 +4,7 @@ import pygame
 import particles
 import animation
 import states
+import random
 
 class Cutscene_file():#cutscneens that will run based on file. The name of the file should be the same as the class name
     def __init__(self,parent_class):
@@ -183,7 +184,6 @@ class Defeated_boss(Cutscene_engine):
 class Death(Cutscene_engine):
     def __init__(self,objects):
         super().__init__(objects)
-        self.parent_class.game.game_objects.camera[-1].set_camera('Death')#make the camera not move
         self.stage = 0
 
     def update(self):
@@ -209,7 +209,6 @@ class Death(Cutscene_engine):
     def state1(self):
         self.parent_class.game.game_objects.load_map(self.parent_class.game.game_objects.player.spawn_point[-1]['map'],self.parent_class.game.game_objects.player.spawn_point[-1]['point'])
         self.parent_class.game.game_objects.player.currentstate.enter_state('Invisible')
-        self.parent_class.game.game_objects.camera[-1].exit_state()#go to auto camera
         self.stage=1
         self.timer=0
 

@@ -437,9 +437,9 @@ class Gameplay(Game_State):
     def handle_input(self,input):
         if input == 'dmg':
             if self.pause_cooldown < 0:
-                new_game_state = Pause_gameplay(self.game,duration=6)
+                new_game_state = Pause_gameplay(self.game,duration=11)
                 new_game_state.enter_state()
-                self.pause_cooldown = C.invincibility_time+5
+                self.pause_cooldown = C.invincibility_time_enemy
         elif input =='dark':
             new_game_state = Dark_gameplay(self.game)
             new_game_state.enter_state()
@@ -461,7 +461,6 @@ class Pause_gameplay(Gameplay):
     def render(self):
         super().render()
         self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
-
 
 class Dark_gameplay(Gameplay):#for caves etc. makes everything arounf dark except a light circle around aila.
     def __init__(self,game):

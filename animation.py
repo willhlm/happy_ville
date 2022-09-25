@@ -1,4 +1,6 @@
 import pygame
+import constants as C
+import math
 
 class Animation():
     def __init__(self,entity):
@@ -33,11 +35,13 @@ class Entity_animation(Animation):#phase and state
     def handle_input(self,input):
         if input=='Hurt':
             Hurt_animation(self.entity).enter_state()
+        elif input == 'Invincibile':
+            Invincibile_animation(self.entity).enter_state()
 
 class Hurt_animation(Entity_animation):#become white
     def __init__(self,entity):
         super().__init__(entity)
-        self.duration=15#hurt animation duration
+        self.duration = 15#hurt animation duration
         self.frame=entity.animation_stack[0].frame#set the initial frame
 
     def update(self):
@@ -50,6 +54,26 @@ class Hurt_animation(Entity_animation):#become white
 
     def handle_input(self,input):
         pass
+
+class Invincibile_animation(Entity_animation):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.duration = C.invincibility_time_player-16#Invincibile_animation duration. need to subtract hurt animation duration + 1
+        self.time = 0
+
+    def update(self):
+        super().update()
+        colour=[int(0.5*255*math.sin(self.time)+255*0.5),int(0.5*255*math.sin(self.time)+255*0.5),int(0.5*255*math.sin(self.time)+255*0.5)]
+        self.entity.image.fill(colour,special_flags=pygame.BLEND_ADD)
+        self.duration -= 1
+        self.time += 0.5
+
+        if self.duration<0:
+            self.exit_state()
+
+    def handle_input(self,input):
+        if input=='Hurt':
+            Hurt_animation(self.entity).enter_state()
 
 class Basic_animation(Animation):#state
     def __init__(self,entity):

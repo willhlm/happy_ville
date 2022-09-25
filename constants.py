@@ -11,4 +11,5 @@ max_vel = [30,7]
 player_sword_timer = 15#how long one can swing the sword again
 
 #combat
-invincibility_time = 30
+invincibility_time_player = 50
+invincibility_time_enemy = 20

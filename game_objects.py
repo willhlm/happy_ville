@@ -21,7 +21,7 @@ class Game_Objects():
         self.cutscenes_complete = []
         self.create_groups()
         self.weather=weather.Weather(self)#initiate weather
-        self.weather.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
+        #self.weather.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
         self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0},'ambers':0}
         #self.reflection=BG.Reflection()
