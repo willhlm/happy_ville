@@ -24,6 +24,9 @@ class Reindeer_states(Entity_States):
     def update_state(self):
         pass
 
+    def rest(self,duration):
+        self.entity.currentstate = Rest(self.entity,duration)
+
 class Idle(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -96,6 +99,17 @@ class Transform_idle(Reindeer_states):
         elif input =='Special_attack':
              self.enter_state('Special_attack')
 
+class Rest(Reindeer_states):#enters here after attakes to "rest"
+    def __init__(self,entity,duration):
+        super().__init__(entity)
+        self.stay_still()
+        self.duration = duration
+
+    def update(self):
+        self.duration -= 1
+        if self.duration < 0:
+            self.enter_state('Transform_idle')
+
 class Transform_walk(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -138,7 +152,7 @@ class Attack(Reindeer_states):
 
     def update_state(self):
         if self.done:
-            self.enter_state('Transform_idle')#idle
+            self.rest(duration = 50)
 
     def increase_phase(self):
         if self.phase=='pre':
@@ -164,10 +178,7 @@ class Dash(Reindeer_states):
             self.entity.velocity[0]=self.dir[0]*max(20,abs(self.entity.velocity[0]))#max horizontal speed
 
         if self.done:
-            if self.entity.acceleration[0]==0:
-                self.enter_state('Transform_idle')
-            else:
-                self.enter_state('Transform_walk')
+            self.rest(duration = 50)
 
     def increase_phase(self):
         if self.phase=='pre':
@@ -188,7 +199,7 @@ class Special_attack(Reindeer_states):
 
     def update_state(self):
         if self.done:
-            self.enter_state('Transform_idle')#idle
+            self.rest(duration = 50)
 
     def increase_phase(self):
         if self.phase=='pre':

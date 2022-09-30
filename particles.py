@@ -13,17 +13,16 @@ class Particles(pygame.sprite.Sprite):
         self.rect.center = self.pos
 
     def make_circle(self):
-        image = pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32)
-        self.image = image.convert_alpha()
+        self.image = pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
     def make_sparks(self):
         self.canvas_size = 60
-        self.spark_shape()#define the shape of spark
         self.surface = pygame.Surface((self.canvas_size,self.canvas_size), pygame.SRCALPHA, 32).convert_alpha()
         self.image = self.surface.copy()
+        self.spark_shape()#define the shape of spark        
         pygame.draw.polygon(self.image,self.colour,self.points)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
@@ -75,9 +74,9 @@ class General_particle(Particles):#a general one
         if type=='spark':
             self.scale = scale
             self.make_sparks()
-            self.update_particle=self.update_spark
+            self.update_particle = self.update_spark
         else:#circles
-            self.update_particle=self.update_circle
+            self.update_particle = self.update_circle
             vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
             self.radius = random.randint(max(scale-1,1), scale+1)
             self.make_circle()

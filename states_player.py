@@ -12,13 +12,6 @@ class Player_states(Entity_States):
     def update(self):
         super().update()
         self.increase_spirit()
-        self.jumping()
-        self.entity.sword_timer -= 1
-
-    def jumping(self):
-        self.entity.jump_timer -= 1
-        if self.entity.jump_timer > 0:
-            self.entity.velocity[1] -= 0.4*(C.max_vel[1]+self.entity.velocity[1])#2
 
     def enter_state(self,newstate):
         if newstate in self.entity.states:
@@ -40,12 +33,11 @@ class Player_states(Entity_States):
     def handle_press_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
             if not self.entity.jumping:# if not jumping already
-                self.entity.jump()
+                self.entity.timer_jobs['jump'].activate()
 
     def handle_release_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
-            self.entity.jump_timer = 0
-            #self.entity.velocity[1] = 0.7*self.entity.velocity[1]
+            self.entity.timer_jobs['jump'].deactivate()
 
     def handle_movement(self,input):#all states should inehrent this function
         value = input[2]
@@ -87,8 +79,9 @@ class Idle(Player_states):
             self.enter_state('Walk')
 
     def swing_sword(self):
-        if self.entity.sword_timer < 0:
-            self.entity.sword_timer = C.player_sword_timer
+        if not self.entity.sword_swinging:
+            self.entity.timer_jobs['sword'].activate()
+
             if self.entity.dir[1]==0:
 
                 state='Sword_stand'+str(int(self.entity.sword_swing)+1)
@@ -126,8 +119,8 @@ class Walk(Player_states):
             self.enter_state('Idle')
 
     def swing_sword(self):
-        if self.entity.sword_timer < 0:
-            self.entity.sword_timer = C.player_sword_timer
+        if not self.entity.sword_swinging:
+            self.entity.timer_jobs['sword'].activate()
             if abs(self.entity.dir[1])<0.8:
 
                 state='Sword_run'+str(int(self.entity.sword_swing)+1)
@@ -169,8 +162,8 @@ class Jump_run(Player_states):
             self.enter_state('Jump_stand')
 
     def swing_sword(self):
-        if self.entity.sword_timer < 0:
-            self.entity.sword_timer = C.player_sword_timer
+        if not self.entity.sword_swinging:
+            self.entity.timer_jobs['sword'].activate()
             if self.entity.dir[1]>0:
                 self.enter_state('Sword_up')
             elif self.entity.dir[1]<0:
@@ -211,8 +204,8 @@ class Jump_stand(Player_states):
                 self.enter_state('Fall_stand')
 
     def swing_sword(self):
-        if self.entity.sword_timer < 0:
-            self.entity.sword_timer = C.player_sword_timer
+        if not self.entity.sword_swinging:
+            self.entity.timer_jobs['sword'].activate()
             if self.entity.dir[1]>0:
                 self.enter_state('Sword_up')
             elif self.entity.dir[1]<0:
@@ -278,8 +271,8 @@ class Fall_run(Player_states):
             self.enter_state('Fall_stand')
 
     def swing_sword(self):
-        if self.entity.sword_timer < 0:
-            self.entity.sword_timer = C.player_sword_timer
+        if not self.entity.sword_swinging:
+            self.entity.timer_jobs['sword'].activate()
             if self.entity.dir[1]>0:
                 self.enter_state('Sword_up')
             elif self.entity.dir[1]<0:
@@ -328,8 +321,8 @@ class Fall_stand(Player_states):
             self.enter_state('Fall_run')
 
     def swing_sword(self):
-        if self.entity.sword_timer < 0:
-            self.entity.sword_timer = C.player_sword_timer
+        if not self.entity.sword_swinging:
+            self.entity.timer_jobs['sword'].activate()
             if self.entity.dir[1]==1:
                 self.enter_state('Sword_up')
             elif self.entity.dir[1]==-1:
@@ -352,19 +345,19 @@ class Wall(Player_states):
 
     def update_state(self):
         if self.entity.collision_types['bottom']:
-            self.entity.friction[1] = C.player_friction[1]
+            self.entity.friction[1] = C.friction_player[1]
             self.enter_state('Walk')
 
         elif not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
-            self.entity.friction[1] = C.player_friction[1]
+            self.entity.friction[1] = C.friction_player[1]
             self.enter_state('Fall_run')
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1] == 'a':
-            self.entity.friction[1] = C.player_friction[1]
+            self.entity.friction[1] = C.friction_player[1]
             self.entity.velocity[0] = -self.dir[0]*10
-            self.entity.jump()
+            self.entity.timer_jobs['jump'].activate()
             self.enter_state('Jump_run')
 
         elif input[-1] == 'right' and self.entity.dir[0] == 1 or input[-1] == 'left' and self.entity.dir[0] == -1:
@@ -380,7 +373,7 @@ class Wall(Player_states):
             self.enter_state('Fall_run')
 
     def fall(self):
-        self.entity.friction[1] = C.player_friction[1]
+        self.entity.friction[1] = C.friction_player[1]
         self.entity.velocity[0] = -self.entity.dir[0]*2
 
 class Dash(Player_states):
@@ -495,7 +488,6 @@ class Death(Player_states):
             if self.once:
                 self.entity.dead()
             self.once = False
-
 
 class Invisible(Player_states):
     def __init__(self,entity):

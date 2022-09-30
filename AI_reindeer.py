@@ -42,16 +42,6 @@ class Nothing(AI):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Pause(AI):#the entity should just stay and do nothing for a while
-    def __init__(self,entity,duration):
-        super().__init__(entity)
-        self.duration = duration
-
-    def update(self):
-        self.duration -= 1
-        if self.duration < 0:
-            self.exit_AI()#return to previous AI
-
 class Aggro1(AI):
     def __init__(self,entity):
         super().__init__(entity)
@@ -64,7 +54,6 @@ class Aggro1(AI):
 
         elif abs(self.player_distance[0]) < self.entity.attack_distance:
             self.entity.currentstate.handle_input('Attack')
-            self.handle_input('Rest',duration=50)
 
         elif self.player_distance[0] < -self.entity.attack_distance:
             self.entity.dir[0] = -1
@@ -75,9 +64,6 @@ class Aggro1(AI):
     def handle_input(self,input,duration=100):
         if input == 'stage2':
             new_AI = Aggro2(self.entity)
-            new_AI.enter_AI()
-        elif input == 'Rest':
-            new_AI = Pause(self.entity,duration)
             new_AI.enter_AI()
 
 class Aggro2(AI):
@@ -97,7 +83,6 @@ class Aggro2(AI):
 
         elif abs(self.player_distance[0])<self.entity.attack_distance:
             self.entity.currentstate.handle_input('Attack')
-            self.handle_input('Rest',duration=120)
 
         elif self.player_distance[0] < -self.entity.attack_distance:
             self.entity.dir[0] = -1
@@ -112,9 +97,6 @@ class Aggro2(AI):
     def handle_input(self,input,duration=100):
         if input == 'stage3':
             new_AI = Aggro3(self.entity)
-            new_AI.enter_AI()
-        elif input == 'Rest':
-            new_AI = Pause(self.entity,duration)
             new_AI.enter_AI()
 
 class Aggro3(AI):
@@ -131,7 +113,6 @@ class Aggro3(AI):
                 self.entity.currentstate.handle_input('Dash')
             elif random.randint(0, 100)==99:
                 self.entity.currentstate.handle_input('Special_attack')
-                self.handle_input('Rest',duration=120)
             else:
                 self.entity.currentstate.handle_input('Walk')
 
@@ -146,13 +127,7 @@ class Aggro3(AI):
                 self.entity.currentstate.handle_input('Dash')
             elif random.randint(0, 100)==99:
                 self.entity.currentstate.handle_input('Special_attack')
-                self.handle_input('Rest',duration=120)
             else:
                 self.entity.currentstate.handle_input('Walk')
         else:
             self.entity.currentstate.handle_input('Idle')
-
-    def handle_input(self,input,duration=100):
-        if input == 'Rest':
-            new_AI = Pause(self.entity,duration)
-            new_AI.enter_AI()

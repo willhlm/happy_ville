@@ -1,59 +1,7 @@
 {
-    "village1" : {
-        "pathways" : {
-            "0" : "light_forest",
-            "1" : "light_forest",
-            "2" : "light_forest2",
-            "3" : "light_forest",
-            "4" : "village2"
-        },
-        "chests" : {
-            "0" : ["Amber_Droplet", "closed"],
-            "1" : ["Amber_Droplet", "opened"],
-            "2" : ["Amber_Droplet", "closed"],
-            "3" : ["Amber_Droplet", "closed"],
-            "4" : ["Amber_Droplet", "closed"]
-        }
-    },
-    "village2" : {
-        "pathways" : {
-            "0" : "village1"
-        },
-        "chests" : {
-            "0" : ["amber_droplet", "closed"]
-        }
-    },
-    "mine" : {
-        "pathways" : {
-            "0" : "light_forest2",
-            "1" : "light_forest2",
-            "2" : "light_forest2"
-        },
-        "chests" : {
-            "0" : ["amber_droplet", "closed"]
-        }
-    },
-    "light_forest2" : {
-        "pathways" : {
-            "0" : "light_forest2",
-            "1" : "light_forest2",
-            "2" : "light_forest2"
-        },
-        "chests" : {
-            "0" : ["amber_droplet", "closed"]
-        }
-    },
-    "light_forest" : {
-        "pathways" : {
-            "0" : "mine",
-            "1" : "village1"
-        },
-        "chests" : {
-            "0" : ["amber_droplet", "closed"],
-            "1" : ["amber_droplet", "closed"],
-            "2" : ["amber_droplet", "closed"],
-            "3" : ["amber_droplet", "opened"],
-            "4" : ["amber_droplet", "opened"]
+    "placeholder_level" : {
+        "placeholder_object" : {
+            "placeholder_int" : "placeholder_state"
         }
     }
 }

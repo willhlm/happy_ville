@@ -541,6 +541,65 @@
                  "width":16,
                  "x":8704,
                  "y":352
+                }, 
+                {
+                 "gid":24,
+                 "height":16,
+                 "id":231,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Chest"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":848,
+                 "y":560
+                }, 
+                {
+                 "gid":24,
+                 "height":16,
+                 "id":232,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Chest"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1232,
+                 "y":496
+                }, 
+                {
+                 "gid":11,
+                 "height":160,
+                 "id":234,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"path_to",
+                         "type":"string",
+                         "value":"Village"
+                        }, 
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"3"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":112,
+                 "y":608
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -968,7 +1027,7 @@
          "y":0
         }],
  "nextlayerid":40,
- "nextobjectid":230,
+ "nextobjectid":235,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

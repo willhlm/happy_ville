@@ -1,16 +1,31 @@
 import pygame, csv, Entities, math, Read_files
 
 class Level():
-    def __init__(self, level, game_objects, spawn):
+    def __init__(self, game_objects):
+        self.game_objects = game_objects
         self.PLAYER_CENTER = game_objects.player_center
         self.SCREEN_SIZE = game_objects.game.WINDOW_SIZE
         self.TILE_SIZE = 16
-        self.game_objects = game_objects
-        self.level_name = level
-        self.spawn = spawn
         self.init_player_pos = (0,0)
-        self.load_map_data()
         self.state = Read_files.read_json("map_state.json") #check this file for structure of object
+
+    def load_map(self,map_name,spawn):
+        self.game_objects.game.state_stack[-1].handle_input('exit')#remove any light effects
+        self.level_name = map_name
+        self.spawn = spawn
+        self.parallax_reference_pos = []# reset any reference point
+        self.load_map_data()
+        self.init_state_file()#make a state file if it is the first time loading this map
+        self.load_statics()
+        self.load_collision_layer()
+        self.load_bg()
+        self.append_light_effet()#append any light effects
+
+    def append_light_effet(self):
+        if self.level_name == 'light_forest_cave':
+            self.game_objects.game.state_stack[-1].handle_input('dark')#make a dark effect gameplay state
+        elif self.level_name == 'village_cave':
+            self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
 
     def load_map_data(self):
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
@@ -19,6 +34,36 @@ class Level():
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
                 self.map_data['statics_firstgid'] = tileset['firstgid']
+
+    def init_state_file(self):
+        try:#first time?
+            self.state[self.level_name]
+        except:#if first time loading a map, prepare a state file
+            chest_int = 0
+            soul_essence_int = 0
+            map_statics = self.map_data["statics"]
+            self.state[self.level_name] = {'chest':{},'soul_essence':{}}#a place holder for things that should depend on map state
+
+            for obj in map_statics:
+                id = obj['gid'] - self.map_data['statics_firstgid']
+
+                if id == 23:#bushes, chests etc
+                    for property in obj['properties']:
+                        if property['name'] == 'type':
+                            interactable_type = property['value']
+
+                    if interactable_type == 'Chest':
+                        self.state[self.level_name]['chest'][str(chest_int)] = 'closed'
+                        chest_int += 1
+
+                elif id == 24:#key items: Soul_essence etc.
+                    for property in obj['properties']:
+                        if property['name'] == 'name':
+                            keyitem = property['value']
+
+                    if keyitem == 'Soul_essence':
+                        self.state[self.level_name]['soul_essence'][str(soul_essence_int)] = 'available'
+                        soul_essence_int += 1
 
     def read_all_spritesheets(self):
         sprites = {}
@@ -48,7 +93,6 @@ class Level():
         return pygame.mixer.Sound("Audio/" + self.level_name + "/default.wav")
 
     def load_collision_layer(self):#load the whole map
-
         map_collisions = self.map_data["collision"]
 
         def convert_points_to_list(points):
@@ -83,6 +127,9 @@ class Level():
                 self.game_objects.platforms.add(new_block)
 
     def load_statics(self):
+        chest_int = 0
+        soul_essence_int = 0
+
         map_statics = self.map_data["statics"]
 
         for obj in map_statics:
@@ -108,6 +155,7 @@ class Level():
                         npc_name = property['value']
                 new_npc = getattr(Entities, npc_name)
                 self.game_objects.npcs.add(new_npc(object_position,self.game_objects))
+
             #enemies
             elif id == 2:
                 properties = obj['properties']
@@ -138,6 +186,7 @@ class Level():
                         spawn = property['value']
                 new_path = Entities.Path_col(object_position,self.game_objects,object_size,destination,spawn)
                 self.game_objects.triggers.add(new_path)
+
             elif id == 14:
                 object_size = (int(obj['width']),int(obj['height']))
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'right')
@@ -169,11 +218,11 @@ class Level():
                     new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
                     self.game_objects.triggers.add(new_trigger)
 
-            elif id == 21:#Spawpoint
+            elif id == 21:#re-spawpoint
                 new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
-            elif id == 22:#Spawner
+            elif id == 22:#Spawner: spawn enemies
                 values={}
                 for property in obj['properties']:
                     if property['name'] == 'entity':
@@ -187,16 +236,26 @@ class Level():
                 for property in obj['properties']:
                     if property['name'] == 'type':
                         interactable_type = property['value']
-                new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
+
+                if interactable_type == 'Chest':
+                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects,self.state[self.level_name]['chest'][str(chest_int)],str(chest_int))
+                    chest_int += 1
+                else:
+                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interacting_cosmetics.add(new_interacable)
 
-            elif id == 24:#key items
+            elif id == 24:#key items: genkidama etc.
                 for property in obj['properties']:
                     if property['name'] == 'name':
                         keyitem = property['value']
-                new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
-                self.game_objects.loot.add(new_keyitem)
+
+                if self.state[self.level_name][str(keyitem).lower()][str(soul_essence_int)] == 'available':#if player hasn't picked it up
+                    new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects,str(soul_essence_int))
+                    self.game_objects.loot.add(new_keyitem)
+                    if keyitem == 'Soul_essence':
+                        soul_essence_int += 1
+
             elif id == 20:#reference point
                 self.parallax_reference_pos = object_position
 

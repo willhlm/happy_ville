@@ -10,7 +10,7 @@ class Collisions():
             self.game_objects.player.velocity[1] = 0
             self.game_objects.player.go_through = True
 
-    def cosmetics_collision(self):#bushes, check plater
+    def cosmetics_collision(self):#bushes, chest
         for cosmetic in self.game_objects.interacting_cosmetics.sprites():
             collision_entity = pygame.sprite.spritecollideany(cosmetic,self.game_objects.players,Collisions.collided)
             if collision_entity:

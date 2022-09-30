@@ -87,7 +87,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('light_forest','2')
+            self.game.game_objects.load_map('Rhoutta_encounter')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -363,6 +363,9 @@ class Gameplay(Game_State):
         self.game.game_objects.draw()
         self.blit_screen_info()
 
+    def render_effect(self):
+        pass
+
     def blit_screen_info(self):
         self.blit_health()
         self.blit_spirit()
@@ -443,13 +446,17 @@ class Gameplay(Game_State):
         elif input =='dark':
             new_game_state = Dark_gameplay(self.game)
             new_game_state.enter_state()
+        elif input =='light':
+            new_game_state = Light_gameplay(self.game)
+            new_game_state.enter_state()
 
-class Pause_gameplay(Gameplay):
+class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
     def __init__(self,game, duration=10, amplitude = 20):
         super().__init__(game)
         self.duration = duration
-        self.temp_surface = self.game.screen.copy()
         self.amp = amplitude
+        super().render()#make sure that everything is plotted before making a screen copy
+        self.temp_surface = self.game.screen.copy()
 
     def update(self):
         self.game.game_objects.weather_paricles.update([0,0])
@@ -459,33 +466,64 @@ class Pause_gameplay(Gameplay):
             self.exit_state()
 
     def render(self):
-        super().render()
         self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
 
-class Dark_gameplay(Gameplay):#for caves etc. makes everything arounf dark except a light circle around aila.
+class Dark_gameplay(Gameplay):#for caves etc. makes everything dark except a light circle around aila.
     def __init__(self,game):
         super().__init__(game)
-        self.light()
-        self.dark = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])))
-        self.dark.fill((0,0,0))
+        self.make_glow()
+        self.dark = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1]))).convert_alpha()
 
     def render(self):
         super().render()
-        self.dark.fill((0,0,0))
+        self.render_effect()
+
+    def render_effect(self):
+        self.dark.fill((80,80,80))
 
         pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
-        self.dark.blit(self.glow,pos)
-        self.game.screen.blit(self.dark,(0,0),special_flags=pygame.BLEND_RGB_MULT)
+        self.dark.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_ADD)
+        self.game.screen.blit(self.dark,(0,0),special_flags = pygame.BLEND_RGBA_MULT)
 
-    def light(self):
+    def make_glow(self):
         self.radius = 200
-        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA)
+        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
         layers = 40
         const=int(255/layers)
         for i in range(layers):
             k = i*const
             k = min(k,255)
             pygame.draw.circle(self.glow,(k,k,k),self.glow.get_rect().center,self.radius-i*5)
+
+    def handle_input(self,input):
+        if input == 'exit':
+            self.exit_state()
+
+class Light_gameplay(Gameplay):#adds a light circle around aila.
+    def __init__(self,game):
+        super().__init__(game)
+        self.make_glow()
+
+    def render(self):
+        super().render()
+        self.render_effect()
+
+    def render_effect(self):
+        pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
+        self.game.screen.blit(self.glow,pos,special_flags=pygame.BLEND_RGBA_ADD)
+
+    def make_glow(self):
+        self.radius = 200
+        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
+
+        layers = 40
+        for i in range(layers):
+            k = i
+            pygame.draw.circle(self.glow,(k,k,k),self.glow.get_rect().center,self.radius-i*5)
+
+    def handle_input(self,input):
+        if input == 'exit':
+            self.exit_state()
 
 class Ability_Menu(Gameplay):
     def __init__(self, game):
@@ -725,6 +763,7 @@ class Fading(Gameplay):#fades out and then in
     def render_in(self):
         super().render()
         self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
+        self.game.state_stack[-2].render_effect()#render light or dark effects, if exist
 
     def render_out(self):
         self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
@@ -735,13 +774,14 @@ class Fading(Gameplay):#fades out and then in
 class Conversation(Gameplay):
     def __init__(self, game, npc):
         super().__init__(game)
+        self.game.game_objects.player.reset_movement()
         self.npc = npc
         self.print_frame_rate = 3
         self.text_WINDOW_SIZE = (352, 96)
         self.blit_x = int((self.game.WINDOW_SIZE[0]-self.text_WINDOW_SIZE[0])/2)
         self.clean_slate()
 
-        self.conv = self.npc.get_conversation('state_1')
+        self.conv = self.npc.get_conversation()
 
     def clean_slate(self):
         self.letter_frame = 0
@@ -764,12 +804,12 @@ class Conversation(Gameplay):
                 self.exit_state()
 
             elif input[-1] == 'y':
-                if self.letter_frame//self.print_frame_rate < len(self.npc.get_conversation('state_1')):
+                if self.letter_frame//self.print_frame_rate < len(self.npc.get_conversation()):
                     self.letter_frame = 10000
                 else:
                     self.clean_slate()
                     self.npc.increase_conv_index()
-                    self.conv = self.npc.get_conversation('state_1')
+                    self.conv = self.npc.get_conversation()
                     if not self.conv:
                         self.exit_state()
 
@@ -1133,11 +1173,11 @@ class Vendor(Facilities):
             elif input[-1]=='a' or input[-1]=='return':
                 self.select()
 
-class Cutscenes(Gameplay):#basically, this class in not needed but would be nice to have the cutscene classes in a seperate file
+class Cutscenes(Gameplay):#basically, this class is not needed but would be nice to have the cutscene classes in a seperate file
     def __init__(self, game,scene):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()
-        self.current_scene = getattr(cutscene, scene)(self)#make an object based on string: send in player, group and camera
+        self.current_scene = getattr(cutscene, scene)(self)#make an object based on string
         if scene != 'Death':
             self.game.game_objects.cutscenes_complete.append(scene)#scenes will not run if the scnene is in this list
 
@@ -1151,3 +1191,45 @@ class Cutscenes(Gameplay):#basically, this class in not needed but would be nice
 
     def handle_events(self, input):
         self.current_scene.handle_events(input)
+
+class New_ability(Gameplay):
+    def __init__(self, game,ability):
+        super().__init__(game)
+        self.page = 0
+        self.render_fade=[self.render_in,self.render_out]
+
+        self.img = self.game.game_objects.player.sprites.sprite_dict['main'][ability][0].copy()
+        self.game.game_objects.player.reset_movement()
+
+        self.surface = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])), pygame.SRCALPHA, 32).convert_alpha()
+        self.surface.fill((0,0,0))
+
+        self.fade = 0
+        self.surface.set_alpha(self.fade)
+
+    def render(self):
+        super().render()
+        self.surface.set_alpha(int(self.fade))
+        self.render_fade[self.page]()
+        self.game.screen.blit(self.surface,(0, 0))
+        self.game.screen.blit(self.img,(200, 200))#blit directly on screen to avoid alpha change on this
+
+    def render_in(self):
+        self.fade += 1
+        self.fade = min(self.fade,150)
+        self.img.set_alpha((255-150)+int(self.fade))
+
+    def render_out(self):
+        self.fade -= 1
+        self.fade = max(self.fade,0)
+        self.img.set_alpha(int(self.fade))
+
+        if self.fade == 0:
+            self.exit_state()
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'start':
+                self.page = 1
+            elif input[-1] == 'a':
+                self.page = 1

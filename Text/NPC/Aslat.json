@@ -1,11 +1,10 @@
 {
-    "state_1" : {
-        "0" : "You got passion. hahahahha ahahha haha hahahha hahah hah hah a a a a ha h ahahaah aha hahahahahahah hahahahahahahaha hahahahahahahah ahahhahahaha hahahaha",
-        "1" : "Will this game ever see the light of the sun I wonder",
-        "2" : "Once upon a time there was a programmer dreaming of the perfect algorithm, and that wasnt me for sure"
-    },
+  "state_1" : {
+      "0" : "You been having those dreams again? Hmm, ominous",
+      "1" : "You were always suceptibile to spirits."
+  },
     "state_2" : {
-        "0" : "hej",
-        "1" : "pa dig"
+        "0" : "Shakar's deer transformed? hmm, this is indeed trouble some. Probably it is those dammed cultists. You better protect your self. Here, takes these shoes.",
+        "1" : "Be careful out there, don't fall off a cliff"
     }
 }

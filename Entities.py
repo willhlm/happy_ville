@@ -4,26 +4,7 @@ import constants as C
 
 pygame.mixer.init()
 
-class ExtendedGroup(pygame.sprite.Group):#adds a white glow around enteties
-    def __init__(self):
-        super().__init__()
-
-    def draw(self, surface):
-        sprites = self.sprites()
-        surface_blit = surface.blit
-        for spr in sprites:
-            self.spritedict[spr] = surface_blit(spr.image, spr.rect)
-            ExtendedGroup.add_colour(20,(20,20,20),surface,spr.hitbox)#addded this
-        self.lostsprites = []
-
-    @staticmethod
-    def add_colour(radius,colour,screen,rect):
-        surf=pygame.Surface((2*radius,2*radius))
-        pygame.draw.circle(surf,colour,(radius,radius),radius)
-        surf.set_colorkey((0,0,0))
-        screen.blit(surf,(rect.x,rect.y),special_flags=pygame.BLEND_RGB_ADD)
-
-class PauseGroup(pygame.sprite.Group):#I guess we don't need it
+class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries
     def __init__(self):
         super().__init__()
 
@@ -33,7 +14,7 @@ class PauseGroup(pygame.sprite.Group):#I guess we don't need it
 
     @staticmethod
     def group_distance(s,pos):
-        if s.rect[0]<s.bounds[0] or s.rect[0]>s.bounds[1] or s.rect[1]<s.bounds[2] or s.rect[1]>s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+        if s.rect[0]<s.bounds[0] or s.rect[0]>s.bounds[1] or s.rect[1]<s.bounds[2] or s.rect[1]>s.bounds[3]:#this means it is outside of screen
             s.update_pos(pos)
         else:
             s.add(s.group)#add to group
@@ -218,7 +199,7 @@ class Collision_right_angle(Platform):
         elif entity.hitbox.bottom < target:
             entity.go_through = False
 
-        if not entity.go_through and not entity.jumping:
+        if not entity.go_through:
             if entity.hitbox.bottom > target:
                 entity.down_collision(target)
                 entity.update_rect()
@@ -266,11 +247,11 @@ class BG_Block(Staticentity):
     def __init__(self,pos,img,parallax=1):
         super().__init__(pos,img)
         self.true_pos = self.rect.topleft
-        self.parallax=parallax
+        self.parallax = parallax
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + self.parallax*pos[0], self.rect.topleft[1] + self.parallax*pos[1]]
-        self.true_pos= [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
+        self.true_pos = [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
         self.rect.topleft = self.true_pos
 
 class BG_Animated(BG_Block):
@@ -293,7 +274,6 @@ class Dynamicentity(Staticentity):
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        self.jumping = False
 
     def update(self,pos):
         super().update(pos)
@@ -345,14 +325,13 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack = [animation.Entity_animation(self)]
 
         self.invincibile = False#a flag to check if one should take damage
-        self.invincibility_timer = 0#a timer to check how long one has been invincible
-        self.invincibility_time = C.invincibility_time_player
+        self.timers=[]#a list containing timers, e.g. jump, invincibility etc.
 
     def update(self,pos):
         super().update(pos)
         self.currentstate.update()
         self.animation_stack[-1].update()
-        self.invincibility()
+        self.update_timers()
 
     def update_vel(self):
         self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
@@ -365,8 +344,7 @@ class Character(Dynamicentity):#enemy, NPC,player
             return
 
         self.health -= dmg
-        self.invincibile = True#invincibile flag
-        self.invincibility_timer = self.invincibility_time# how long one is invincible
+        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
 
         if self.health > 0:#check if dead¨
             self.hurt()
@@ -388,10 +366,9 @@ class Character(Dynamicentity):#enemy, NPC,player
             obj1=particles.General_particle(self.hitbox.center,distance,lifetime,vel,type,dir,scale,colour)
             self.game_objects.cosmetics.add(obj1)
 
-    def invincibility(self):#this method is called veryloop after damage was taken, until the method is popped
-        self.invincibility_timer -= 1
-        if self.invincibility_timer < 0:
-            self.invincibile = False
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
 
 class Player(Character):
 
@@ -416,7 +393,7 @@ class Player(Character):
         self.equip = 'Thunder'#ability pointer
         self.sword = Aila_sword(self)
 
-        self.states = set(['Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Sword_stand3','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter','Wall'])#all states that are available to Aila, convert to set to make lookup faster
+        self.states = set(['Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster
         self.currentstate=states_player.Idle(self)
 
         self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -425,17 +402,13 @@ class Player(Character):
 
         self.set_abs_dist()
 
-        self.sword_timer = 0#a timer to check when you can swing the sword again
         self.sword_swing = 0#a flag to check which swing we are at (0 or 1)
-        self.jump_timer = 0#a timer to check how long we can jump
         self.jumping = False#a flag to check so that you cannot jump in air
+        self.sword_swinging = False#a flag to make sure you can only swing sword when this is False
 
-    def jump(self):#called when pressing jump button. Will jump as long as jump_timer > 0
-        self.velocity[1] = 0
-        self.jump_timer = 11#how long you jump
-        self.jumping = True
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player)}
 
-    def down_collision(self,hitbox):
+    def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
         self.velocity[1] = 0
         self.jumping = False
@@ -444,7 +417,7 @@ class Player(Character):
         self.animation_stack[-1].handle_input('Invincibile')#make some animation. should be before super
         super().hurt()
         self.hurt_particles(lifetime=40,vel=[3,8],colour=[0,0,0,255],scale=3,number_particles=60)
-        self.game_objects.cosmetics.add(Slash(self.hitbox.center))#make a slash animation appear during the "pasue"
+        self.game_objects.cosmetics.add(Slash(self.hitbox.center))#make a slash animation
         self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
 
     def set_abs_dist(self):#the absolute distance, i.e. the total scroll
@@ -458,10 +431,10 @@ class Player(Character):
     def enter_idle(self):
         self.currentstate = states_player.Idle(self)
 
-    def reset_movement(self):
+    def reset_movement(self):#called when loading new map or entering conversations
         self.velocity = [0,0]
-        self.acceleration =  [0,C.acceleration[1]]#y velocity need to be large than 1/2
-        self.friction = C.player_friction.copy()
+        self.acceleration =  [0,C.acceleration[1]]
+        self.friction = C.friction_player.copy()
 
     def update(self,pos):
         super().update(pos)
@@ -469,15 +442,13 @@ class Player(Character):
         self.omamoris.update()
 
     def to_json(self):#things to save: needs to be a dict
-        health={'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
+        health = {'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
 
-        abilities={}
+        abilities = {}
         for key,ability in self.abilities.items():
-            abilities[key]=True
-        abilities['dash']=self.dash
-        abilities['wall']=self.wall
+            abilities[key] = True
 
-        save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities}
+        save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities,'states':self.states}
         return save_dict
 
     def from_json(self,data):#things to load. data is a dict
@@ -486,17 +457,12 @@ class Player(Character):
         self.health=data['health']['health']
         self.spirit=data['health']['spirit']
 
-        self.dash=data['abilities']['dash']
-        self.wall=data['abilities']['wall']
-
+        self.states=data['states']
         self.inventory=data['inventory']
 
         self.abilities={}
         for ability in data['abilities'].keys():
-            if ability == 'dash' or ability == 'wall':
-                pass
-            else:
-                self.abilities[ability]=getattr(sys.modules[__name__], ability)
+                self.abilities[ability] = getattr(sys.modules[__name__], ability)
 
 class Enemy(Character):
     def __init__(self,pos,game_objects):
@@ -506,17 +472,20 @@ class Enemy(Character):
         self.pause_group = game_objects.entity_pause
 
         self.currentstate = states_enemy.Idle(self)
+        self.AI_stack = [AI_enemy.Peace(self)]
 
-        self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}#random.randint(0, 10)
+        self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}
         self.spirit = 100
         self.health = 100
+
         self.aggro = True#colliding with player
         self.dmg = 10#projectile damage
 
-        self.AI_stack = [AI_enemy.Peace(self)]
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+
+        #move these to AI classes?
         self.attack_distance = 0#when try to hit
         self.aggro_distance = 200#when ot become aggro
-        self.invincibility_time = C.invincibility_time_enemy# how long one is invincible
 
     def update(self,pos):
         super().update(pos)
@@ -824,15 +793,15 @@ class NPC(Character):
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
         self.portrait=pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()  #temp
         self.load_conversation()
-        self.counter=0
+        self.counter = 0
+        self.state = 'state_1'#a flag to decide what do say. Should we have a world state instead?
 
     def load_conversation(self):
         self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
 
-    #returns conversation depdening on worldstate input. increases index
-    def get_conversation(self, flag):
+    def get_conversation(self):#returns the conversation depending on the NPC state and conversation index
         try:
-            conv = self.conversation[flag][str(self.conv_index)]
+            conv = self.conversation[self.game_objects.world_state][str(self.conv_index)]
         except:
             self.conv_index -= 1
             return None
@@ -860,11 +829,11 @@ class NPC(Character):
         self.currentstate.handle_input('Walk')
 
     def AI(self):
-        self.counter+=1
-        if self.counter>100:
-            self.counter=0
+        self.counter += 1
+        if self.counter > 100:
+            self.counter = 0
             rand=random.randint(0,1)
-            if rand==0:
+            if rand == 0:
                 self.idle()
             else:
                 self.walk()
@@ -876,7 +845,14 @@ class Aslat(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
-class Sahkar(NPC):
+    def buisness(self):#enters after conversation
+        if self.game_objects.world_state == 'state_2':#if player has deafated the reindeer
+            if 'Wall' not in self.game_objects.player.states:#if player doesn't have wall yet
+                new_game_state = states.New_ability(self.game_objects.game,'wall')
+                new_game_state.enter_state()
+                self.game_objects.player.states.add('Wall')#append wall abillity to available states
+
+class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
@@ -889,7 +865,7 @@ class Astrid(NPC):#vendor
         new_state = states.Vendor(self.game_objects.game, self)
         new_state.enter_state()
 
-class MrSmith(NPC):
+class MrSmith(NPC):#balck smith
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
@@ -897,7 +873,7 @@ class MrSmith(NPC):
         new_state = states.Smith(self.game_objects.game, self)
         new_state.enter_state()
 
-class MrBanks(NPC):
+class MrBanks(NPC):#bank
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.ammount = 0
@@ -910,19 +886,19 @@ class Boss(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
 
-    def death(self):
+    def dead(self):
         self.aggro = False
         self.AI_stack[-1].set_AI('Nothing')
         self.loots()
         self.give_abillity()
+        self.game_objects.increase_world_state()
+        new_game_state = states.New_ability(self.game_objects.game,self.abillity)
+        new_game_state.enter_state()
         new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
         new_game_state.enter_state()
 
     def give_abillity(self):
-        self.game_objects.player.abilities[self.ability]=getattr(sys.modules[__name__], self.ability)
-
-    def dmg_pause(self):#it doesn't pasue for bosses
-        pass
+        self.game_objects.player.abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
 
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
@@ -933,7 +909,7 @@ class Reindeer(Boss):
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.currentstate = states_reindeer.Idle(self)
-
+        self.abillity = 'dash'
         self.health = 210
         self.spirit = 1
         self.attack = Sword
@@ -1035,7 +1011,7 @@ class Rhoutta_encounter(Boss):
     def take_dmg(self,dmg):
         self.count += 1
         self.animation_stack[-1].handle_input('Hurt')
-        if self.count > 1:
+        if self.count > 3:
             new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
             new_game_state.enter_state()
             #new_game_state = states.Fading(self.game_objects.game,1)
@@ -1561,17 +1537,19 @@ class Spirit_container(Loot):
 class Soul_essence(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/soul_essence/')
 
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects,ID_key = None):
         super().__init__(pos)
         self.game_objects = game_objects
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
-        self.description = 'A essence container'
+        self.description = 'An essence container'#for shops
+        self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
     def player_collision(self):
         self.game_objects.player.inventory['Soul_essence'] += 1
-        #a cutscene?
+        self.game_objects.map.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = 'gone'#write in the state file that this has been picked up
+        #make a cutscene?
         self.kill()
 
     def update(self,scroll):
@@ -1794,7 +1772,7 @@ class Cave_grass(Interactable_bushes):
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
 
 class Chest(Interactable):
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects,state,ID_key):
         super().__init__(pos)
         self.game_objects = game_objects
         self.group = game_objects.interacting_cosmetics
@@ -1806,11 +1784,10 @@ class Chest(Interactable):
         self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.health=3
-        #self.ID = id
         self.inventory = {'Amber_Droplet':3}
-    #    if state == "opened":
-    #        self.interacted = True
-    #        self.currentstate = states_basic.Open(self)
+        self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
+        if state != "closed":
+            self.currentstate = states_basic.Open(self)
 
     def update(self,scroll):
         super().update(scroll)
@@ -1836,6 +1813,7 @@ class Chest(Interactable):
             self.currentstate.handle_input('Hurt')
         else:
             self.currentstate.handle_input('Opening')
+            self.game_objects.map.state[self.game_objects.map.level_name]['chest'][self.ID_key] = 'open'#write in the state file that this has been picked up
 
 class Door(Interactable):
     def __init__(self,pos):
@@ -2069,3 +2047,63 @@ class More_spirit(Omamori):
 
     def update(self):
         self.entity.spirit += 0.5
+
+#timer toools: activate with the attrubute activate, which will run until the specified duration is run out
+class Timer():
+    def __init__(self,entity,duration):
+        self.entity = entity
+        self.duration = duration
+
+    def activate(self):#add timer to the entity timer list
+        self.lifetime = self.duration
+        self.entity.timers.append(self)
+
+    def deactivate(self):
+        if self in self.entity.timers:
+            self.entity.timers.remove(self)
+
+    def update(self):
+        self.lifetime -= 1
+        if self.lifetime < 0:
+            self.deactivate()
+
+class Invincibility_timer(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def activate(self):
+        super().activate()
+        self.entity.invincibile = True
+
+    def deactivate(self):
+        super().deactivate()
+        self.entity.invincibile = False
+
+class Sword_timer(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def activate(self):
+        super().activate()
+        self.entity.sword_swinging = True
+
+    def deactivate(self):
+        super().deactivate()
+        self.entity.sword_swinging = False
+
+class Jump_timer(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def update(self):
+        super().update()
+        self.entity.velocity[1] -= 0.4*(C.max_vel[1]+self.entity.velocity[1])
+
+    def activate(self):
+        super().activate()
+        self.entity.velocity[1] = 0
+        self.entity.jumping = True
+
+    def deactivate(self):
+        super().deactivate()
+        #self.entity.velocity[1] = 0.7*self.entity.velocity[1]

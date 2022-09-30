@@ -24,17 +24,12 @@ class Game_Objects():
         #self.weather.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
         self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0},'ambers':0}
+        self.state = 1
+        self.world_state = 'state_'+str(self.state)#a flag that describes the progression of the game
         #self.reflection=BG.Reflection()
         self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)
-
-    def save_game(self):#save_obj calls to_json method in the object: write the to_json mthod such that it save the attributes of interest.
-        Read_files.save_obj(self.player)
-        Read_files.save_obj(self)
-
-    def load_game(self):
-        Read_files.load_obj(self.player)
-        Read_files.load_obj(self)
+        self.map = map_loader.Level(self)
 
     def create_groups(self):
         #define all sprite groups
@@ -61,9 +56,10 @@ class Game_Objects():
         self.players = pygame.sprite.Group(self.player)
         self.player_center = C.player_center
 
-    def load_map(self, map_name, spawn = '1',fade=True):
-        self.map = map_loader.Level(map_name, self, spawn)
-        self.initiate_groups()
+    def load_map(self, map_name, spawn = '1',fade = True):
+        self.clean_groups()
+        self.map.load_map(map_name,spawn)
+
         if fade:
             new_game_state = states.Fading(self.game)
             new_game_state.enter_state()
@@ -75,12 +71,12 @@ class Game_Objects():
         except FileNotFoundError:
             print("No BG music found")
 
-    def initiate_groups(self):
-        #clean all groups
+    def clean_groups(self):
         self.npcs.empty()#maybe a problem if we have a bank?
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
+        self.loot.empty()
         self.platforms_ramps.empty()
         self.entity_pause.empty()
         self.all_bgs.empty()
@@ -88,11 +84,6 @@ class Game_Objects():
         self.camera_blocks.empty()
         self.triggers.empty()
         self.interacting_cosmetics.empty()
-
-        #load all objects and art
-        self.map.load_statics()
-        self.map.load_collision_layer()
-        self.map.load_bg()
 
     def collide_all(self):
         self.collisions.platform_collision(self.players)
@@ -180,9 +171,21 @@ class Game_Objects():
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,2)#draw hitbox
 
+    def increase_world_state(self):#called when a boss dies
+        self.state += 1
+        self.world_state = 'state_'+str(self.state)
+
+    def save_game(self):#save_obj calls to_json method in the object: write the to_json mthod such that it save the attributes of interest.
+        Read_files.save_obj(self.player)
+        Read_files.save_obj(self)
+
+    def load_game(self):
+        Read_files.load_obj(self.player)
+        Read_files.load_obj(self)
+
     def to_json(self):#stuff to save
-        save_dict={'cutscenes_complete':self.cutscenes_complete}
+        save_dict = {'cutscenes_complete':self.cutscenes_complete}
         return save_dict
 
     def from_json(self,data):#stuff to load
-        self.cutscenes_complete=data['cutscenes_complete']
+        self.cutscenes_complete = data['cutscenes_complete']

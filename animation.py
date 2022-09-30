@@ -41,7 +41,7 @@ class Entity_animation(Animation):#phase and state
 class Hurt_animation(Entity_animation):#become white
     def __init__(self,entity):
         super().__init__(entity)
-        self.duration = 15#hurt animation duration
+        self.duration = C.hurt_animation_length#hurt animation duration
         self.frame=entity.animation_stack[0].frame#set the initial frame
 
     def update(self):
@@ -58,7 +58,7 @@ class Hurt_animation(Entity_animation):#become white
 class Invincibile_animation(Entity_animation):
     def __init__(self,entity):
         super().__init__(entity)
-        self.duration = C.invincibility_time_player-16#Invincibile_animation duration. need to subtract hurt animation duration + 1
+        self.duration = C.invincibility_time_player-(C.hurt_animation_length+1)
         self.time = 0
 
     def update(self):

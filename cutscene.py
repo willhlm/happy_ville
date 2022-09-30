@@ -133,36 +133,28 @@ class Boss_deer_encounter(Cutscene_engine):
                 self.entity.AI_stack[-1].exit_AI()
                 self.exit_state()
 
-class Defeated_boss(Cutscene_engine):
+class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
     def __init__(self,objects):
         super().__init__(objects)
-        self.image = pygame.image.load("Sprites/UI/Menu/select/inventory1.png").convert_alpha()
-        self.press = False
+        self.press = False#turns true when pressing A/space
         self.step1 = False
-        self.step2 = False
-        self.abillity = 'dash'
-        self.set_image()
         self.const = 0.5#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
-
-    def set_image(self):
-        img=self.parent_class.game.game_objects.player.sprites.sprite_dict['main'][self.abillity][0]
-        self.image.blit(img,(50, 0))
 
     def update(self):
         self.timer+=1
-        if self.timer==1:
+        if self.timer == 1:
             self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
         elif self.timer < 75:
             self.parent_class.game.game_objects.player.velocity[1] = -2
         elif self.timer > 75:
-            self.parent_class.game.game_objects.player.velocity[1] = -1#compensates for gravity
+            self.parent_class.game.game_objects.player.velocity[1] = -1#compensates for gravity, levitates
             self.step1 = True
 
-        if self.timer > 200:
-            self.step2=True
-
-        if self.press:
-            self.parent_class.game.game_objects.player.velocity[1] = 2
+        if self.timer > 250:
+            self.parent_class.game.game_objects.player.velocity[1] = 2#go down again
+            if self.parent_class.game.game_objects.player.collision_types['bottom']:
+                self.parent_class.game.game_objects.cosmetics.empty()
+                self.exit_state()            
 
     def render(self):
         super().render()
@@ -173,15 +165,7 @@ class Defeated_boss(Cutscene_engine):
             self.parent_class.game.game_objects.cosmetics.draw(self.parent_class.game.game_objects.game.screen)
             self.parent_class.game.game_objects.players.draw(self.parent_class.game.game_objects.game.screen)
 
-        if self.step2 and not self.press:
-            self.parent_class.game.game_objects.game.screen.blit(self.image,(100, 50))
-
-        if self.press:
-            if self.parent_class.game.game_objects.player.collision_types['bottom']:
-                self.parent_class.game.game_objects.cosmetics.empty()
-                self.exit_state()
-
-class Death(Cutscene_engine):
+class Death(Cutscene_engine):#when aila dies
     def __init__(self,objects):
         super().__init__(objects)
         self.stage = 0
