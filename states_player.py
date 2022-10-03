@@ -1,4 +1,3 @@
-
 import sound, Entities, sys
 from states_entity import Entity_States
 import constants as C
@@ -94,11 +93,20 @@ class Idle(Player_states):
 class Walk(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.particle_timer = 0
 
     def update_state(self):
+        self.particle_timer -= 1
+        if self.particle_timer < 0:
+            self.running_particles()
+
         if not self.entity.collision_types['bottom']:
-            #self.entity.velocity[1]=0
             self.enter_state('Fall_run')
+
+    def running_particles(self):
+        particle = self.entity.running_particles(self.entity.hitbox.midbottom)
+        self.entity.game_objects.cosmetics.add(particle)
+        self.particle_timer = 10
 
     def handle_press_input(self,input):
         super().handle_press_input(input)

@@ -21,6 +21,11 @@
    <property name="class" value=""/>
   </properties>
  </tile>
+ <tile id="7">
+  <properties>
+   <property name="run_paricles" value="dust"/>
+  </properties>
+ </tile>
  <tile id="9">
   <properties>
    <property name="image" value=""/>
@@ -37,6 +42,7 @@
  <tile id="11">
   <properties>
    <property name="direction" value=""/>
+   <property name="run_particle" value="dust"/>
   </properties>
  </tile>
  <tile id="19">

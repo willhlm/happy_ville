@@ -58,11 +58,11 @@ class Invisible_block(Platform):
             entity.dir[0] = -entity.dir[0]#turn around
 
 class Collision_block(Platform):
-    def __init__(self,pos,size):
+    def __init__(self,pos,size, run_particle = 'dust'):
         super().__init__(pos,size)
+        self.run_particles = {'dust':Dust_running_particles,'water':Water_running_particles,'grass':Grass_running_particles}[run_particle]
 
     def collide_x(self,entity):
-        #check for collisions and get a dictionary of sprites that collides
         if entity.velocity[0]>0:#going to the right
             entity.right_collision(self.hitbox.left)
         else:#going to the left
@@ -72,6 +72,7 @@ class Collision_block(Platform):
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
             entity.down_collision(self.hitbox.top)
+            entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect()
@@ -274,6 +275,7 @@ class Dynamicentity(Staticentity):
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
+        self.running_particles = 'dust'
 
     def update(self,pos):
         super().update(pos)
@@ -1002,20 +1004,20 @@ class Rhoutta_encounter(Boss):
         self.image = self.sprites.sprite_dict['main']['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 50
+        self.health = 100
         self.attack_distance = 100
         self.attack = Sword
-        self.count=0
         self.dmg = 0
+        self.count = 0
 
-    def take_dmg(self,dmg):
+    def hurt(self):
+        super().hurt()
         self.count += 1
-        self.animation_stack[-1].handle_input('Hurt')
         if self.count > 3:
             new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
             new_game_state.enter_state()
-            #new_game_state = states.Fading(self.game_objects.game,1)
-            #new_game_state.enter_state()
+        #new_game_state = states.Fading(self.game_objects.game,1)
+        #new_game_state.enter_state()
 
 class Path_col(Staticentity):
 
@@ -1673,6 +1675,42 @@ class Animatedentity(Staticentity):#animated stuff that doesn't move around
 
     def reset_timer(self):#called whe animation finshes
         pass
+
+class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
+    sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/running_particles/water/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+
+    def reset_timer(self):#called whe animation finshes
+        self.kill()
+
+class Grass_running_particles(Animatedentity):#should make for grass, dust, water etc
+    sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/running_particles/grass/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+
+    def reset_timer(self):#called whe animation finshes
+        self.kill()
+
+class Dust_running_particles(Animatedentity):#should make for grass, dust, water etc
+    sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/running_particles/dust/')
+
+    def __init__(self,pos):
+        super().__init__(pos)
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+
+    def reset_timer(self):#called whe animation finshes
+        self.kill()
 
 class Player_Soul(Animatedentity):
     sprites=Read_files.Sprites().load_all_sprites('Sprites/Enteties/soul/')

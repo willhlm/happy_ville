@@ -5,6 +5,7 @@ import particles
 import animation
 import states
 import random
+import constants as C
 
 class Cutscene_file():#cutscneens that will run based on file. The name of the file should be the same as the class name
     def __init__(self,parent_class):
@@ -154,7 +155,7 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
             self.parent_class.game.game_objects.player.velocity[1] = 2#go down again
             if self.parent_class.game.game_objects.player.collision_types['bottom']:
                 self.parent_class.game.game_objects.cosmetics.empty()
-                self.exit_state()            
+                self.exit_state()
 
     def render(self):
         super().render()
@@ -253,6 +254,7 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
         super().__init__(objects)
         self.title_name = self.parent_class.font.render(text = 'Happy Ville')
         self.text1 = self.parent_class.font.render(text = 'A game by Hjortron games')
+        C.acceleration = [0.3,0.51]#restrict the speed
 
     def update(self):
         self.timer+=1
@@ -264,15 +266,20 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
             self.parent_class.game.screen.blit(self.text1,(190,200))
 
         if self.timer >1010:
-            self.exit_state()
+            self.exit()
             #self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')
             #self.parent_class.game.game_objects.load_map('village')
 
     def handle_events(self,input):
-        #restric the speed
-        if input[2][0] > 0.3:
-            input[2][0]=0.3
-        elif input[2][0]< -0.3:
-            input[2][0]=-0.3
-
         self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
+
+    def exit(self):
+        C.acceleration = [1,0.51]#reset to normal movement
+        if self.parent_class.game.game_objects.player.acceleration[0] != 0:#if moving
+            sign = self.parent_class.game.game_objects.player.dir[0]
+        else:#standing still
+            sign = 0
+        input = [0,0,[sign,0],0]
+        self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
+
+        self.exit_state()

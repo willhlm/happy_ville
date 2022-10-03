@@ -115,6 +115,10 @@ class Level():
             id = obj['gid'] - self.map_data['statics_firstgid']
             #normal collision blocks
             if id == 7:
+            #    properties = obj['properties']
+            #    for property in properties:
+            #        if property['name'] == 'run_particles':
+            #            run_particle = property['value']
                 new_block = Entities.Collision_block(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #spike collision blocks
