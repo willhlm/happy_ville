@@ -1840,16 +1840,16 @@ class Cave_grass(Interactable_bushes):
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/cave_grass/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect.bottomleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
 
 class Chest(Interactable):
     def __init__(self,pos,game_objects,state,ID_key):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Chest/')
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Chest/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect.bottomleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.health=3
         self.inventory = {'Amber_Droplet':3}
@@ -1868,7 +1868,7 @@ class Chest(Interactable):
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y],self.game_objects)#make a class based on the name of the key: need to import sys
+                obj = getattr(sys.modules[__name__], key)([self.hitbox.x,self.hitbox.y],self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
 
@@ -1914,7 +1914,7 @@ class Spawnpoint(Interactable):#save point
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Spawnpoint/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.center = (pos[0],pos[1]-16)
+        self.rect.bottomleft = pos
         self.hitbox=self.rect.copy()
         self.init_cor=pos
         self.map = map
@@ -1941,7 +1941,7 @@ class Sign(Interactable):#save point
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/sign/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.center = (pos[0],pos[1]-16)
+        self.rect.bottomleft = pos
         self.hitbox=self.rect.copy()
 
     def player_collision(self):#player collision

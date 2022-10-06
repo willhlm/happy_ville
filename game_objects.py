@@ -37,6 +37,7 @@ class Game_Objects():
         self.platforms_ramps = pygame.sprite.Group()
         self.all_bgs = pygame.sprite.LayeredUpdates()
         self.all_fgs = pygame.sprite.LayeredUpdates()
+        self.bg_ground = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
@@ -75,6 +76,7 @@ class Game_Objects():
         self.all_bgs.empty()
         self.all_fgs.empty()
         self.camera_blocks.empty()
+        self.bg_ground.empty()
 
     def collide_all(self):
         self.collisions.platform_collision(self.players)
@@ -99,6 +101,7 @@ class Game_Objects():
         self.platforms.update(scroll)
         self.platforms_ramps.update(scroll)
         self.all_bgs.update(scroll)
+        self.bg_ground.update(scroll)
         self.all_fgs.update(scroll)
         self.players.update(scroll)
         self.entity_pause.update(scroll)#should be before enemies and npcs group
@@ -113,9 +116,10 @@ class Game_Objects():
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
-
         #self.platforms.draw(self.game.screen)
         self.interactables.draw(self.game.screen)
+        self.bg_ground.draw(self.game.screen)
+
         self.enemies.draw(self.game.screen)
         self.npcs.draw(self.game.screen)
         self.players.draw(self.game.screen)

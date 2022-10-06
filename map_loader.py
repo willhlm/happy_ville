@@ -150,7 +150,6 @@ class Level():
             if id == 0:
                 for property in obj['properties']:
                     if property['name'] == 'spawn':
-
                         if type(self.spawn).__name__ != 'str':#if respawn
                             self.game_objects.player.set_pos(self.spawn)
                             self.init_player_pos = self.spawn
@@ -284,11 +283,9 @@ class Level():
                 new_sign = Entities.Sign(object_position,self.game_objects,values)
                 self.game_objects.interactables.add(new_sign)
 
-
-    #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
-        base_bg_list = ['bg_behindfar','bg_far','bg_behindmid','bg_mid','bg_behindnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
+        base_bg_list = ['bg_behindfar','bg_far','bg_behindmid','bg_mid','bg_behindnear','bg_near','bg_fixed','ground','fg_fixed','fg_near','fg_mid']
         #bg_list = ['bg_farfar','bg_far','bg_midmid','bg_mid','bg_nearnear','bg_near','bg_fixed','fg_fixed','fg_near','fg_mid']
         bg_list = []
         parallax_values = {'bg_behindfar': 0.01,
@@ -298,6 +295,7 @@ class Level():
                             'bg_behindnear': 0.7,
                             'bg_near': 0.8,
                             'bg_fixed': 1,
+                            'ground': 1,
                             'fg_fixed': 1,
                             'fg_near': 1.25,
                             'fg_mid': 1.5}
@@ -400,6 +398,8 @@ class Level():
             if bg in blit_dict.keys():
                 if 'fg' in bg:
                     self.game_objects.all_fgs.add(Entities.BG_Block((math.ceil((1-parallax)*new_map_diff[0]),math.ceil((1-parallax)*new_map_diff[1])),blit_surfaces[blit_dict[bg][0]],parallax))
+                elif bg =='ground':#the small grass stuff that should go in front of interactables
+                        self.game_objects.bg_ground.add(Entities.BG_Block(pos,blit_surfaces[blit_dict[bg][0]],parallax))#pos,img,parallax
                 else:
                     pos=(-math.ceil((1-parallax)*new_map_diff[0]),-math.ceil((1-parallax)*new_map_diff[1]))
                     self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_surfaces[blit_dict[bg][0]],parallax))#pos,img,parallax
