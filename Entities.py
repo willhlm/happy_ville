@@ -34,17 +34,8 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center=self.rect.center
 
-class Cutscene_trigger(Platform):
-    def __init__(self,pos,game_objects,size,event):
-        super().__init__(pos,size)
-        #will crach if values do not exist
-        self.game_objects = game_objects
-        self.event=event
-
-    def player_collision(self):
-        if self.event not in self.game_objects.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
-            new_game_state = states.Cutscenes(self.game_objects.game,self.event)
-            new_game_state.enter_state()
+    def take_dmg(self):
+        pass
 
 class Invisible_block(Platform):
     def __init__(self,pos,size):
@@ -205,10 +196,35 @@ class Collision_right_angle(Platform):
                 entity.down_collision(target)
                 entity.update_rect()
 
+class Collision_breakable(Collision_block):
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.health = 3
+        self.invincibile = False
+        self.timers = []#a list containing timers, e.g. jump, invincibility etc.
+
+    def update(self,pos):
+        super().update(pos)
+        self.update_timers()
+
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
+
+    def take_dmg(self):
+        if self.invincibile:
+            return
+        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+
+        self.health -= 1
+        if self.health < 0:
+            self.kill()
+
 class Spikes(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
-        self.image=pygame.image.load("Sprites/block/spkies.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/block/spkies.png").convert_alpha()
         self.dmg = 10
 
     def collide_x(self,entity):
@@ -228,7 +244,7 @@ class Spikes(Platform):
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def __init__(self,pos,img=pygame.Surface((16,16))):
         super().__init__()
-        self.image = img
+        self.image = img.convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.bounds = [-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
@@ -1019,57 +1035,12 @@ class Rhoutta_encounter(Boss):
         #new_game_state = states.Fading(self.game_objects.game,1)
         #new_game_state.enter_state()
 
-class Path_col(Staticentity):
-
-    def __init__(self, pos, game_objects,size, destination, spawn):
-        super().__init__(pos, pygame.Surface(size))
-        self.game_objects=game_objects
-        self.rect.bottomleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-        self.destination = destination
-        self.spawn = spawn
-
-    def update(self, pos):
-        super().update(pos)
-        self.hitbox.center = self.rect.center
-
-    def player_collision(self):
-        self.game_objects.sound.pause_bg_sound()
-        self.game_objects.player.enter_idle()
-        self.game_objects.player.reset_movement()
-        self.game_objects.load_map(self.destination, self.spawn)
-
-class Path_inter(Staticentity):
-
-    def __init__(self, pos, game_objects, size, destination, spawn, image):
-        super().__init__(pos, pygame.Surface(size))
-        self.game_objects=game_objects
-        self.rect.bottomleft = pos
-        self.hitbox = self.rect.inflate(0,0)
-        self.destination = destination
-        self.spawn = spawn
-        self.image = pygame.image.load("Sprites/invisible.png").convert_alpha()
-
-    def update(self, pos):
-        super().update(pos)
-        self.hitbox.center = self.rect.center
-
-    def interact(self):
-        self.game_objects.sound.pause_bg_sound()
-        self.game_objects.player.enter_idle()
-        self.game_objects.player.reset_movement()
-        self.game_objects.load_map(self.destination, self.spawn)
-
 class Camera_Stop(Staticentity):
 
     def __init__(self,size,pos,dir):
         super().__init__(pos,pygame.Surface(size))
         self.hitbox = self.rect.inflate(0,0)
         self.dir = dir
-
-    def update(self, pos):
-        super().update(pos)
-        self.hitbox.center = self.rect.center
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
@@ -1087,7 +1058,7 @@ class Spawner(Staticentity):#an entity spawner
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
 
-class Abilities(pygame.sprite.Sprite):
+class Abilities(pygame.sprite.Sprite):#projectiels
     def __init__(self,entity):
         super().__init__()
         self.entity = entity
@@ -1129,8 +1100,8 @@ class Abilities(pygame.sprite.Sprite):
         collision_enemy.take_dmg(self.dmg)
         self.kill()
 
-    def collision_plat(self):
-        pass
+    def collision_plat(self,platform):
+        platform.take_dmg()
 
     def reset_timer(self):
         if self.state == 'post':
@@ -1243,7 +1214,7 @@ class Sword(Melee):
         self.dmg = self.entity.dmg
 
     def rectangle(self):
-        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,40)
+        self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,35)
         self.hitbox = self.rect.copy()
 
     def collision_enemy(self,collision_enemy):
@@ -1259,8 +1230,6 @@ class Sword(Melee):
             else:
                 self.clash_particles(self.rect.midleft)
 
-        #self.kill()
-
     def sword_jump(self):
         if self.dir[1] == -1:
             self.entity.velocity[1] = -11
@@ -1271,9 +1240,8 @@ class Sword(Melee):
             obj1=particles.General_particle(pos,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3)
             self.entity.game_objects.cosmetics.add(obj1)
 
-    def collision_inetractables(self,interactable):
+    def collision_inetractables(self,interactable):#called when projectile hits interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
-        self.kill()
 
 class Aila_sword(Sword):
     def __init__(self,entity):
@@ -1502,9 +1470,6 @@ class Heart_container(Loot):
         self.hitbox=self.rect.copy()
         self.description = 'A heart container'
 
-    def update(self,scroll):
-        super().update(scroll)
-
     def update_vel(self):
         self.velocity[1]=3
 
@@ -1524,9 +1489,6 @@ class Spirit_container(Loot):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
         self.description = 'A spirit container'
-
-    def update(self,scroll):
-        super().update(scroll)
 
     def update_vel(self):
         self.velocity[1]=3
@@ -1662,7 +1624,7 @@ class Spiritsorb(Enemy_drop):#the thing dark saber produces
         self.game_objects.player.spirit += 10
         self.kill()
 
-class Animatedentity(Staticentity):#animated stuff that doesn't move around
+class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos):
         super().__init__(pos)
         self.animation = animation.Basic_animation(self)
@@ -1766,28 +1728,97 @@ class Slash(Animatedentity):
     def reset_timer(self):#called whe animation finshes
         self.kill()
 
-class Interactable(Animatedentity):
-    def __init__(self,pos):
-        super().__init__(pos)
-        self.interacted = False
-
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.midbottom = self.rect.midbottom
-
-    def interact(self):
-        self.interacted = True
-
-class Interactable_bushes(Interactable):
+class Interactable(Animatedentity):#interactables
     def __init__(self,pos,game_objects):
         super().__init__(pos)
         self.game_objects = game_objects
-        self.group = game_objects.interacting_cosmetics
+        self.group = game_objects.interactables
         self.pause_group=game_objects.entity_pause
 
     def update(self,scroll):
         super().update(scroll)
         self.group_distance()
+
+    def update_pos(self,pos):
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.hitbox.midbottom = self.rect.midbottom
+
+    def interact(self):#when player press T
+        pass
+
+    def player_collision(self):#player collision
+        pass
+
+    def player_noncollision(self):#when player doesn't collide
+        pass
+
+    def take_dmg(self,projectile):#when player hits with sword
+        pass
+
+class Path_col(Interactable):
+
+    def __init__(self, pos, game_objects,size, destination, spawn):
+        super().__init__(pos,game_objects)
+        self.rect = pygame.Rect(pos,size)
+        self.rect.bottomleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.destination = destination
+        self.spawn = spawn
+        self.image.set_alpha(0)#make them transparent
+
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.group_distance()
+
+    def player_collision(self):
+        self.game_objects.sound.pause_bg_sound()
+        self.game_objects.player.enter_idle()
+        self.game_objects.player.reset_movement()
+        self.game_objects.load_map(self.destination, self.spawn)
+
+class Path_inter(Interactable):
+
+    def __init__(self, pos, game_objects, size, destination, spawn, image):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos,size)
+        self.rect.bottomleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.destination = destination
+        self.spawn = spawn
+        self.image.set_alpha(0)#make them transparent
+
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.group_distance()
+
+    def interact(self):
+        self.game_objects.sound.pause_bg_sound()
+        self.game_objects.player.enter_idle()
+        self.game_objects.player.reset_movement()
+        self.game_objects.load_map(self.destination, self.spawn)
+
+class Cutscene_trigger(Interactable):
+    def __init__(self,pos,game_objects,size,event):
+        super().__init__(pos,game_objects)
+        self.rect = pygame.Rect(pos,size)
+        self.rect.bottomleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+        self.event = event
+        self.image.set_alpha(0)#make them transparent
+
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.group_distance()
+
+    def player_collision(self):
+        if self.event not in self.game_objects.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
+            new_game_state = states.Cutscenes(self.game_objects.game,self.event)
+            new_game_state.enter_state()
+
+class Interactable_bushes(Interactable):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.interacted = False
 
     def player_collision(self):#player collision
         if not self.interacted:
@@ -1800,6 +1831,9 @@ class Interactable_bushes(Interactable):
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
 
+    def player_noncollision(self):#when player doesn't collide
+        self.interacted = False
+
 class Cave_grass(Interactable_bushes):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1811,11 +1845,7 @@ class Cave_grass(Interactable_bushes):
 
 class Chest(Interactable):
     def __init__(self,pos,game_objects,state,ID_key):
-        super().__init__(pos)
-        self.game_objects = game_objects
-        self.group = game_objects.interacting_cosmetics
-        self.pause_group=game_objects.entity_pause
-
+        super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Chest/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
@@ -1824,12 +1854,16 @@ class Chest(Interactable):
         self.health=3
         self.inventory = {'Amber_Droplet':3}
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
+        self.timers = []
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.invincibile = False
+
         if state != "closed":
             self.currentstate = states_basic.Open(self)
 
     def update(self,scroll):
         super().update(scroll)
-        self.group_distance()
+        self.update_timers()#invincibililty
 
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
@@ -1838,24 +1872,29 @@ class Chest(Interactable):
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
 
-    def player_collision(self):#player collision
-        pass
-
     def reset_timer(self):#when animation is finished
         self.currentstate.handle_input('Idle')
 
     def take_dmg(self,projectile):
+        if self.invincibile:
+            return
         projectile.clash_particles(self.hitbox.center)
         self.health-=1
-        if self.health>0:
+        self.timer_jobs['invincibility'].activate()
+
+        if self.health > 0:
             self.currentstate.handle_input('Hurt')
         else:
             self.currentstate.handle_input('Opening')
             self.game_objects.map.state[self.game_objects.map.level_name]['chest'][self.ID_key] = 'open'#write in the state file that this has been picked up
 
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
+
 class Door(Interactable):
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Door/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
@@ -1863,17 +1902,15 @@ class Door(Interactable):
         self.hitbox = self.rect.inflate(0,0)
 
     def interact(self):
-        super().interact()
         self.currentstate.handle_input('Opening')
         try:
             self.game_objects.change_map(collision.next_map)
         except:
             pass
 
-class Spawnpoint(Interactable):
+class Spawnpoint(Interactable):#save point
     def __init__(self,pos,game_objects,map):
-        super().__init__(pos)
-        self.game_objects = game_objects
+        super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/Spawnpoint/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
@@ -1882,8 +1919,11 @@ class Spawnpoint(Interactable):
         self.init_cor=pos
         self.map = map
 
+    def player_collision(self):#player collision
+        self.currentstate.handle_input('Outline')
+
     def interact(self):#when player press t/y
-        if type(self.currentstate).__name__ == 'Idle':#single click
+        if type(self.currentstate).__name__ == 'Outline':#single click
             self.game_objects.player.spawn_point[0]['map']=self.map
             self.game_objects.player.spawn_point[0]['point']=self.init_cor
             self.currentstate.handle_input('Once')
@@ -1893,6 +1933,26 @@ class Spawnpoint(Interactable):
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
+
+class Sign(Interactable):#save point
+    def __init__(self,pos,game_objects,directions):
+        super().__init__(pos,game_objects)
+        self.directions = directions
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/sign/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = (pos[0],pos[1]-16)
+        self.hitbox=self.rect.copy()
+
+    def player_collision(self):#player collision
+        self.currentstate.handle_input('Outline')
+
+    def player_noncollision(self):#when player doesn't collide
+        self.currentstate.handle_input('Idle')
+
+    def interact(self):#when player press t/y
+        new_state = states.Signpost(self.game_objects.game,self)
+        new_state.enter_state()
 
 class Menu_Arrow():
 
@@ -1951,7 +2011,7 @@ class Red_infinity_stone(Infinity_stones):#more dmg
     def detach(self):
         self.sword.dmg*=(1/1.1)
 
-class Green_infinity_stone(Infinity_stones):#faster slash, changing framerate
+class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
 
     def __init__(self,sword):
         super().__init__(sword)

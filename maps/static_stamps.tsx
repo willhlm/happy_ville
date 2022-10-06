@@ -23,7 +23,7 @@
  </tile>
  <tile id="7">
   <properties>
-   <property name="run_paricles" value="dust"/>
+   <property name="running_particles" value="dust"/>
   </properties>
  </tile>
  <tile id="9">
@@ -65,6 +65,14 @@
  <tile id="24">
   <properties>
    <property name="name" value=""/>
+  </properties>
+ </tile>
+ <tile id="25">
+  <properties>
+   <property name="down" value=""/>
+   <property name="left" value=""/>
+   <property name="right" value=""/>
+   <property name="up" value=""/>
   </properties>
  </tile>
 </tileset>

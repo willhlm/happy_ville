@@ -8,17 +8,17 @@ class Weather():#maybe should just be a function
     def create_particles(self,type,number_particles=100):
         for i in range(0,number_particles):
             obj = getattr(sys.modules[__name__], type)(self.game_objects)
-            self.game_objects.weather_paricles.add(obj)
+            self.game_objects.cosmetics.add(obj)
 
     def lightning(self):
-        self.game_objects.weather_paricles.add(Lightning(self.game_objects))
+        self.game_objects.cosmetics.add(Lightning(self.game_objects))
 
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
         super().__init__()
         self.page = 0
         self.update_img=[self.img_out,self.img_in]
-        self.image = pygame.Surface(game_objects.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
+        self.image = pygame.Surface(game_objects.game.WINDOW_SIZE, pygame.SRCALPHA, 32).convert_alpha()
         self.image.fill((255,255,255,255))
         self.rect = self.image.get_rect()
         self.init_out()
@@ -119,7 +119,7 @@ class Snow(Weather_particles):
         self.velocity=[math.sin(self.currentstate.time//10+self.phase)+self.wind,self.vel_y]
 
     def make_circle(self):
-        image = pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32)
+        image = pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
         self.image = image.convert_alpha()
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
         self.rect = self.image.get_rect()

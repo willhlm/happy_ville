@@ -4,19 +4,19 @@ class Collisions():
     def __init__(self,game_objects):
         self.game_objects = game_objects
 
-    def pass_through(self):#for ramps
+    def pass_through(self):#for ramps, called when pressing down
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
             self.game_objects.player.velocity[1] = 0
             self.game_objects.player.go_through = True
 
-    def cosmetics_collision(self):#bushes, chest
-        for cosmetic in self.game_objects.interacting_cosmetics.sprites():
-            collision_entity = pygame.sprite.spritecollideany(cosmetic,self.game_objects.players,Collisions.collided)
+    def interactables_collision(self):#interactables
+        for interactable in self.game_objects.interactables.sprites():
+            collision_entity = pygame.sprite.spritecollideany(interactable,self.game_objects.players,Collisions.collided)
             if collision_entity:
-                cosmetic.player_collision()
+                interactable.player_collision()
             else:
-                cosmetic.interacted = False
+                interactable.player_noncollision()
 
     def thunder_attack(self,aura):
         return pygame.sprite.spritecollide(aura,self.game_objects.enemies,False,Collisions.collided)#check collision
@@ -34,7 +34,7 @@ class Collisions():
             #projectile collision?
             collision_plat = pygame.sprite.spritecollideany(projectile,self.game_objects.platforms,Collisions.collided)
             collision_enemy = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
-            collision_inetractables = pygame.sprite.spritecollideany(projectile,self.game_objects.interacting_cosmetics,Collisions.collided)
+            collision_inetractables = pygame.sprite.spritecollideany(projectile,self.game_objects.interactables,Collisions.collided)
 
             #if hit chest, bushes
             if collision_inetractables:
@@ -47,7 +47,7 @@ class Collisions():
 
             #hit platform
             elif collision_plat:
-                projectile.collision_plat()
+                projectile.collision_plat(collision_plat)
 
     #take damage if collide with enemy
     def player_collision(self,enteties):

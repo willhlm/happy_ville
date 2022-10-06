@@ -34,6 +34,8 @@ class Idle(Entity_States):
             self.enter_state('Opening')
         elif input == 'Once':
             self.enter_state('Once')
+        elif input =='Outline':
+            self.enter_state('Outline')
 
 class Once(Entity_States):
     def __init__(self,entity):
@@ -73,3 +75,13 @@ class Opening(Once):
 class Open(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
+
+class Outline(Entity_States):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input=='Idle':
+             self.enter_state('Idle')
+        elif input == 'Once':
+            self.enter_state('Once')

@@ -1,11 +1,12 @@
 import random, sys
 
+
 class Camera():
     def __init__(self,game_objects):
         self.game_objects = game_objects
         self.scroll = [0,0]
         self.true_scroll = [0,0]
-        self.center = list(game_objects.player_center)
+        self.center = list(game_objects.map.PLAYER_CENTER)
         self.shake = [0,0]
 
     def update(self):
@@ -31,19 +32,19 @@ class Camera():
         xflag, yflag = False, False
         for stop in self.game_objects.camera_blocks:
             if stop.dir == 'right':
-                if (self.game_objects.player.hitbox.centery - stop.rect.bottom < self.game_objects.player_center[1]) and (stop.rect.top - self.game_objects.player.hitbox.centery < self.game_objects.game.WINDOW_SIZE[1] - self.game_objects.player_center[1]):
+                if (self.game_objects.player.hitbox.centery - stop.rect.bottom < self.center[1]) and (stop.rect.top - self.game_objects.player.hitbox.centery < self.game_objects.game.WINDOW_SIZE[1] - self.center[1]):
                     #if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
-                    if -self.game_objects.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.game_objects.player_center[0]) < self.game_objects.player_center[0] and self.game_objects.player.hitbox.centerx >= self.game_objects.player_center[0]:
+                    if -self.game_objects.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.center[0]) < self.center[0] and self.game_objects.player.hitbox.centerx >= self.center[0]:
                         xflag = True
             elif stop.dir == 'left':
-                if stop.rect.right >= 0 and self.game_objects.player.hitbox.centerx < self.game_objects.player_center[0]:
+                if stop.rect.right >= 0 and self.game_objects.player.hitbox.centerx < self.center[0]:
                     xflag = True
             elif stop.dir == 'bottom':
-                if (stop.rect.left - self.game_objects.player.hitbox.centerx < self.game_objects.player_center[0]) and (self.game_objects.player.hitbox.centerx - stop.rect.right < self.game_objects.player_center[0]):
-                    if (-self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.centery - self.game_objects.player.hitbox.centery) < (self.game_objects.game.WINDOW_SIZE[1] - self.game_objects.player_center[1])):
+                if (stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) and (self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
+                    if (-self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.centery - self.game_objects.player.hitbox.centery) < (self.game_objects.game.WINDOW_SIZE[1] - self.center[1])):
                         yflag = True
             elif stop.dir == 'top':
-                if (0 < stop.rect.left - self.game_objects.player.hitbox.centerx < self.game_objects.player_center[0]) or (0 < self.game_objects.player.hitbox.centerx - stop.rect.right < self.game_objects.player_center[0]):
+                if (0 < stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) or (0 < self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
                     if self.game_objects.player.hitbox.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
                         yflag = True
 

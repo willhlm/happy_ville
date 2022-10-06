@@ -3,7 +3,6 @@ import Read_files
 import Engine
 import Entities
 import map_loader
-import particles#don't need
 import sound
 import states
 import camera
@@ -21,15 +20,14 @@ class Game_Objects():
         self.cutscenes_complete = []
         self.create_groups()
         self.weather=weather.Weather(self)#initiate weather
-        #self.weather.create_particles('Sakura')#this should be callen when loading the map I suppose, or trigegr
 
         self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0},'ambers':0}
         self.state = 1
         self.world_state = 'state_'+str(self.state)#a flag that describes the progression of the game
         #self.reflection=BG.Reflection()
-        self.camera = [camera.Auto(self)]
         self.collisions = Engine.Collisions(self)
         self.map = map_loader.Level(self)
+        self.camera = [camera.Auto(self)]
 
     def create_groups(self):
         #define all sprite groups
@@ -39,22 +37,17 @@ class Game_Objects():
         self.platforms_ramps = pygame.sprite.Group()
         self.all_bgs = pygame.sprite.LayeredUpdates()
         self.all_fgs = pygame.sprite.LayeredUpdates()
-        self.weather_paricles = pygame.sprite.Group()
-        self.interactables = pygame.sprite.Group()
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
-        self.entity_pause = Entities.PauseGroup() #include all Entities that are far away
-        self.cosmetics = pygame.sprite.Group() #spirits
+        self.entity_pause = Entities.PauseGroup() #all Entities that are far away
+        self.cosmetics = pygame.sprite.Group()#things we just want to blit
         self.camera_blocks = pygame.sprite.Group()
-        self.triggers = pygame.sprite.Group()
-        self.all_Entities = pygame.sprite.Group()
-        self.interacting_cosmetics = pygame.sprite.Group()
+        self.interactables = pygame.sprite.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
 
         #initiate player
         self.player = Entities.Player([0,0],self)
         self.players = pygame.sprite.Group(self.player)
-        self.player_center = C.player_center
 
     def load_map(self, map_name, spawn = '1',fade = True):
         self.clean_groups()
@@ -82,8 +75,6 @@ class Game_Objects():
         self.all_bgs.empty()
         self.all_fgs.empty()
         self.camera_blocks.empty()
-        self.triggers.empty()
-        self.interacting_cosmetics.empty()
 
     def collide_all(self):
         self.collisions.platform_collision(self.players)
@@ -93,9 +84,7 @@ class Game_Objects():
 
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
-        self.collisions.player_collision(self.triggers)
-
-        self.collisions.cosmetics_collision()#can this be written so tahth it uses check_player_collision?
+        self.collisions.interactables_collision()
 
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
         self.collisions.projectile_collision(self.fprojectiles,self.enemies)
@@ -115,22 +104,18 @@ class Game_Objects():
         self.entity_pause.update(scroll)#should be before enemies and npcs group
         self.enemies.update(scroll)
         self.npcs.update(scroll)
-        self.interacting_cosmetics.update(scroll)#bushes, maybye move interacting_cosmetics to enemy?
-        self.interactables.update(scroll)
-        self.weather_paricles.update(scroll)
         self.fprojectiles.update(scroll)
         self.eprojectiles.update(scroll)
         self.loot.update(scroll)
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
-        self.triggers.update(scroll)
+        self.interactables.update(scroll)
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
 
         #self.platforms.draw(self.game.screen)
         self.interactables.draw(self.game.screen)
-        self.interacting_cosmetics.draw(self.game.screen)#bushes and chests
         self.enemies.draw(self.game.screen)
         self.npcs.draw(self.game.screen)
         self.players.draw(self.game.screen)
@@ -140,9 +125,7 @@ class Game_Objects():
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
-        self.weather_paricles.draw(self.game.screen)
 
-        #self.triggers.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
         #self.reflection.draw(self.game.screen)
         #temporaries draws. Shuold be removed
@@ -158,7 +141,7 @@ class Game_Objects():
             #for loot in self.loot.sprites():#go through the group
             #    pygame.draw.rect(self.game.screen, (0,0,255), loot.hitbox,2)#draw hitbox
             #    pygame.draw.rect(self.game.screen, (255,0,255), loot.rect,2)#draw hitbox
-            for cos in self.interacting_cosmetics.sprites():#go through the group
+            for cos in self.interactables.sprites():#go through the group
                 pygame.draw.rect(self.game.screen, (0,0,255), cos.hitbox,2)#draw hitbox
 
             pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox

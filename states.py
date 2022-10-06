@@ -87,7 +87,7 @@ class Title_Menu(Game_State):
             new_state = Gameplay(self.game)
             new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('Rhoutta_encounter')
+            self.game.game_objects.load_map('Village')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -455,11 +455,11 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
         super().__init__(game)
         self.duration = duration
         self.amp = amplitude
-        super().render()#make sure that everything is plotted before making a screen copy
+        self.game.state_stack[-1].render()#make sure that everything is plotted before making a screen copy
         self.temp_surface = self.game.screen.copy()
 
     def update(self):
-        self.game.game_objects.weather_paricles.update([0,0])
+        self.game.game_objects.cosmetics.update([0,0])
         self.duration -= 1
         self.amp = int(0.8*self.amp)
         if self.duration < 0:
@@ -1192,7 +1192,54 @@ class Cutscenes(Gameplay):#basically, this class is not needed but would be nice
     def handle_events(self, input):
         self.current_scene.handle_events(input)
 
-class New_ability(Gameplay):
+class Signpost(Gameplay):
+    def __init__(self, game,sign_post):
+        super().__init__(game)
+        self.game.game_objects.player.reset_movement()
+
+        self.page = 0
+        self.render_fade=[self.render_in,self.render_out]
+
+        self.sign_post = sign_post
+        self.img = sign_post.sprites['bg'][0]#maybe the img should not be in signpost but somewhere more accesable
+        self.dir_pos = {'left':[0,150],'up':[100,50],'right':[200,150],'down':[100,300]}
+
+        self.surface = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])), pygame.SRCALPHA, 32).convert_alpha()
+        self.surface.fill((0,0,0))
+
+        self.fade = 0
+        self.surface.set_alpha(self.fade)
+
+    def render(self):
+        super().render()
+        self.surface.set_alpha(int(self.fade))
+        self.render_fade[self.page]()
+        self.game.screen.blit(self.surface,(0, 0))
+        self.game.screen.blit(self.img,(0, 0))#blit directly on screen to avoid alpha change on this
+        for dir in self.sign_post.directions.keys():
+            self.game.screen.blit(self.font.render(text = self.sign_post.directions[dir]),self.dir_pos[dir])
+
+    def render_in(self):
+        self.fade += 1
+        self.fade = min(self.fade,150)
+        self.img.set_alpha((255-150)+int(self.fade))
+
+    def render_out(self):
+        self.fade -= 1
+        self.fade = max(self.fade,0)
+        self.img.set_alpha(int(self.fade))
+
+        if self.fade == 0:
+            self.exit_state()
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'start':
+                self.page = 1
+            elif input[-1] == 'a':
+                self.page = 1
+
+class New_ability(Gameplay):#when player obtaines a new ability
     def __init__(self, game,ability):
         super().__init__(game)
         self.page = 0

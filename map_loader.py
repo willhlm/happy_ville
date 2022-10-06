@@ -1,11 +1,12 @@
 import pygame, csv, Entities, math, Read_files
+import constants as C
 
 class Level():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.PLAYER_CENTER = game_objects.player_center
-        self.SCREEN_SIZE = game_objects.game.WINDOW_SIZE
-        self.TILE_SIZE = 16
+        self.PLAYER_CENTER = C.player_center
+        self.SCREEN_SIZE = C.window_size
+        self.TILE_SIZE = C.tile_size
         self.init_player_pos = (0,0)
         self.state = Read_files.read_json("map_state.json") #check this file for structure of object
 
@@ -20,6 +21,9 @@ class Level():
         self.load_collision_layer()
         self.load_bg()
         self.append_light_effet()#append any light effects
+
+    def set_weather(self,particle):
+        self.game_objects.weather.create_particles(particle)
 
     def append_light_effet(self):
         if self.level_name == 'light_forest_cave':
@@ -129,6 +133,9 @@ class Level():
             elif id == 11:
                 new_block = Entities.Collision_oneway_up(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
+            elif id == 13:#breakable collision block
+                new_block = Entities.Collision_breakable(object_position,object_size)
+                self.game_objects.platforms.add(new_block)
 
     def load_statics(self):
         chest_int = 0
@@ -189,7 +196,7 @@ class Level():
                     if property['name'] == 'spawn':
                         spawn = property['value']
                 new_path = Entities.Path_col(object_position,self.game_objects,object_size,destination,spawn)
-                self.game_objects.triggers.add(new_path)
+                self.game_objects.interactables.add(new_path)
 
             elif id == 14:
                 object_size = (int(obj['width']),int(obj['height']))
@@ -220,9 +227,9 @@ class Level():
 
                 if values['event_type'] == 'cutscene':
                     new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
-                    self.game_objects.triggers.add(new_trigger)
+                    self.game_objects.interactables.add(new_trigger)
 
-            elif id == 21:#re-spawpoint
+            elif id == 21:#re-spawpoint, save point
                 new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
@@ -247,7 +254,7 @@ class Level():
                 else:
                     new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
-                self.game_objects.interacting_cosmetics.add(new_interacable)
+                self.game_objects.interactables.add(new_interacable)
 
             elif id == 24:#key items: genkidama etc.
                 for property in obj['properties']:
@@ -262,6 +269,21 @@ class Level():
 
             elif id == 20:#reference point
                 self.parallax_reference_pos = object_position
+
+            elif id == 25:#sign
+                values={}
+                for property in obj['properties']:
+                    if property['name'] == 'left':
+                        values['left'] = property['value']
+                    elif property['name'] == 'up':
+                        values['up']=property['value']
+                    elif property['name'] == 'right':
+                        values['right']=property['value']
+                    elif property['name'] == 'down':
+                        values['down']=property['value']
+                new_sign = Entities.Sign(object_position,self.game_objects,values)
+                self.game_objects.interactables.add(new_sign)
+
 
     #TODO: Make sure all FG layers are added to all_fgs!!
     def load_bg(self):
