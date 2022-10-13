@@ -19,11 +19,11 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.cutscenes_complete = []
         self.create_groups()
-        self.weather=weather.Weather(self)#initiate weather
+        self.weather = weather.Weather(self)#initiate weather
 
-        self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0},'ambers':0}
-        self.state = 1
-        self.world_state = 'state_'+str(self.state)#a flag that describes the progression of the game
+        self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0,'cultist_warrior':0,'cultist_rogue':0},'ambers':0}
+        self.state = 2
+        self.world_state = 'state_' + str(self.state)#a flag that describes the progression of the game
         #self.reflection=BG.Reflection()
         self.collisions = Engine.Collisions(self)
         self.map = map_loader.Level(self)
@@ -132,8 +132,8 @@ class Game_Objects():
 
         #self.camera_blocks.draw(self.game.screen)
         #self.reflection.draw(self.game.screen)
-        #temporaries draws. Shuold be removed
 
+        #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
             for projectile in self.fprojectiles.sprites():#go through the group
                 pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox

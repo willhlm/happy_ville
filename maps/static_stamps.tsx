@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="static_stamps" tilewidth="16" tileheight="16" tilecount="28" columns="7">
- <image source="static_stamps.png" width="112" height="64"/>
+<tileset version="1.8" tiledversion="1.8.2" name="static_stamps" tilewidth="16" tileheight="16" tilecount="35" columns="7">
+ <image source="static_stamps.png" width="112" height="80"/>
  <tile id="0">
   <properties>
    <property name="spawn" value=""/>
@@ -23,7 +23,7 @@
  </tile>
  <tile id="7">
   <properties>
-   <property name="running_particles" value="dust"/>
+   <property name="particles" value=""/>
   </properties>
  </tile>
  <tile id="9">
@@ -42,7 +42,12 @@
  <tile id="11">
   <properties>
    <property name="direction" value=""/>
-   <property name="run_particle" value="dust"/>
+   <property name="particles" value=""/>
+  </properties>
+ </tile>
+ <tile id="13">
+  <properties>
+   <property name="sprite" value=""/>
   </properties>
  </tile>
  <tile id="19">
@@ -73,6 +78,11 @@
    <property name="left" value=""/>
    <property name="right" value=""/>
    <property name="up" value=""/>
+  </properties>
+ </tile>
+ <tile id="28">
+  <properties>
+   <property name="name" value=""/>
   </properties>
  </tile>
 </tileset>

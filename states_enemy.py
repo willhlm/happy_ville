@@ -62,14 +62,9 @@ class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
 
     def increase_phase(self):
-        self.done=True
+        self.enter_state('Idle')
 
 class Stun(Enemy_states):
     def __init__(self,entity,duration):
@@ -88,7 +83,7 @@ class Attack(Enemy_states):
         self.dir=self.entity.dir.copy()#animation direction
         self.done=False
         self.phases=['pre','main']
-        self.phase=self.phases[0]
+        self.phase = self.phases[0]
         self.entity.attack.lifetime=10
 
     def update_state(self):

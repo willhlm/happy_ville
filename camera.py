@@ -145,6 +145,16 @@ class Cultist_encounter(Auto):
         super().__init__(game_objects)
 
     def update(self):
-        self.center[0]+=2
+        self.center[0] += 2
         self.center[0] = min(500,self.center[0])
+        super().update()
+
+class New_game(Auto):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        self.center[1] = 1000
+
+    def update(self):
+        self.center[1] -= 2
+        self.center[1] = max(self.game_objects.map.PLAYER_CENTER[1],self.center[1])
         super().update()

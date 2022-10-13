@@ -28,8 +28,8 @@ class Idle(Entity_States):
     def handle_input(self,input):
         if input=='Hurt':
              self.enter_state('Hurt')
-        elif input == 'Cut':
-             self.enter_state('Cut')
+        elif input == 'Death':
+             self.enter_state('Death')
         elif input == 'Opening':
             self.enter_state('Opening')
         elif input == 'Once':
@@ -50,12 +50,12 @@ class Hurt(Entity_States):
         super().__init__(entity)
 
     def handle_input(self,input):
-        if input == 'Cut':
-            self.enter_state('Cut')
+        if input == 'Death':
+            self.enter_state('Death')
         elif input=='Idle':
              self.enter_state('Idle')
 
-class Cut(Once):
+class Death(Once):
     def __init__(self,entity):
         super().__init__(entity)
 

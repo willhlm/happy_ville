@@ -11,7 +11,7 @@ class Level():
         self.state = Read_files.read_json("map_state.json") #check this file for structure of object
 
     def load_map(self,map_name,spawn):
-        self.game_objects.game.state_stack[-1].handle_input('exit')#remove any light effects
+        self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states
         self.level_name = map_name
         self.spawn = spawn
         self.parallax_reference_pos = []# reset any reference point
@@ -29,6 +29,8 @@ class Level():
         if self.level_name == 'light_forest_cave':
             self.game_objects.game.state_stack[-1].handle_input('dark')#make a dark effect gameplay state
         elif self.level_name == 'village_cave':
+            self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
+        elif self.level_name == 'dark_forest':
             self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
 
     def load_map_data(self):
@@ -60,7 +62,7 @@ class Level():
                         self.state[self.level_name]['chest'][str(chest_int)] = 'closed'
                         chest_int += 1
 
-                elif id == 24:#key items: Soul_essence etc.
+                elif id == 28:#key items: Soul_essence etc.
                     for property in obj['properties']:
                         if property['name'] == 'name':
                             keyitem = property['value']
@@ -119,11 +121,13 @@ class Level():
             id = obj['gid'] - self.map_data['statics_firstgid']
             #normal collision blocks
             if id == 7:
-            #    properties = obj['properties']
-            #    for property in properties:
-            #        if property['name'] == 'run_particles':
-            #            run_particle = property['value']
-                new_block = Entities.Collision_block(object_position,object_size)
+                try:
+                    for property in obj['properties']:
+                        if property['name'] == 'particles':
+                            type = property['value']
+                    new_block = Entities.Collision_block(object_position,object_size,type)
+                except:
+                    new_block = Entities.Collision_block(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #spike collision blocks
             elif id == 8:
@@ -131,11 +135,21 @@ class Level():
                 self.game_objects.platforms.add(new_block)
             #one way collision block (currently on top implemented)
             elif id == 11:
-                new_block = Entities.Collision_oneway_up(object_position,object_size)
+                try:
+                    for property in obj['properties']:
+                        if property['name'] == 'particles':
+                            type = property['value']
+                    new_block = Entities.Collision_oneway_up(object_position,object_size,type)
+                except:
+                    new_block = Entities.Collision_oneway_up(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             elif id == 13:#breakable collision block
-                new_block = Entities.Collision_breakable(object_position,object_size)
-                self.game_objects.platforms.add(new_block)
+                for property in obj['properties']:
+                    if property['name'] == 'sprite':
+                        type = property['value']
+
+                new_block = Entities.Collision_breakable(object_position,self.game_objects,type)
+                self.game_objects.enemies.add(new_block)
 
     def load_statics(self):
         chest_int = 0
@@ -255,7 +269,7 @@ class Level():
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interactables.add(new_interacable)
 
-            elif id == 24:#key items: genkidama etc.
+            elif id == 28:#key items: genkidama etc.
                 for property in obj['properties']:
                     if property['name'] == 'name':
                         keyitem = property['value']
@@ -268,6 +282,20 @@ class Level():
 
             elif id == 20:#reference point
                 self.parallax_reference_pos = object_position
+
+            elif id == 24:#sign
+                values={}
+                for property in obj['properties']:
+                    if property['name'] == 'name':
+                        interactable = property['value']
+
+                    #write specefic conditions if thse should spawn
+                    if interactable == 'Bridge_block':
+                        if self.game_objects.state > 1:#if reindeer hasn't been defeated
+                            return
+
+                new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
+                self.game_objects.interactables.add(new_interactable)
 
             elif id == 25:#sign
                 values={}

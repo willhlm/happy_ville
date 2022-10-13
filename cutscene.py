@@ -194,11 +194,11 @@ class Death(Cutscene_engine):#when aila dies
     def state1(self):
         self.parent_class.game.game_objects.load_map(self.parent_class.game.game_objects.player.spawn_point[-1]['map'],self.parent_class.game.game_objects.player.spawn_point[-1]['point'])
         self.parent_class.game.game_objects.player.currentstate.enter_state('Invisible')
-        self.stage=1
-        self.timer=0
+        self.stage = 1
+        self.timer = 0
 
     def exit_state(self):
-        if len(self.parent_class.game.game_objects.player.spawn_point)==2:#if the respawn was a bone
+        if len(self.parent_class.game.game_objects.player.spawn_point) == 2:#if the respawn was a bone
             self.parent_class.game.game_objects.player.spawn_point.pop()
         super().exit_state()
 
@@ -211,7 +211,7 @@ class Death(Cutscene_engine):#when aila dies
 class Cultist_encounter(Cutscene_engine):
     def __init__(self,objects):
         super().__init__(objects)
-        spawn_pos=(-150,100)
+        spawn_pos = (-150,100)
         self.stage = 0
         self.entity1=Entities.Cultist_warrior(spawn_pos, self.parent_class.game.game_objects)
         self.parent_class.game.game_objects.camera[-1].set_camera('Cultist_encounter')
@@ -283,3 +283,20 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
         self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
 
         self.exit_state()
+
+class New_game(Cutscene_engine):#first screen to be played when starying a new game
+    def __init__(self,objects):
+        super().__init__(objects)
+        self.parent_class.game.game_objects.camera[-1].set_camera('New_game')
+
+    def cinematic(self):
+        pass
+
+    def update(self):
+        self.timer+=1
+        if self.timer>500:
+            self.exit_state()
+
+    def exit_state(self):
+        self.parent_class.game.game_objects.camera[-1].exit_state()
+        super().exit_state()

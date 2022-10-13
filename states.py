@@ -83,11 +83,15 @@ class Title_Menu(Game_State):
             y_pos += 20
 
     def change_state(self):
-        if self.current_button == 0:
+        if self.current_button == 0:#new game
             new_state = Gameplay(self.game)
             new_state.enter_state()
+
+            #when starting a new game, should be a cutscene
+            new_state = Cutscenes(self.game,'New_game')
+            new_state.enter_state()
             #load new game level
-            self.game.game_objects.load_map('rhoutta_encounter')
+            self.game.game_objects.load_map('Rhoutta_encounter')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -449,6 +453,8 @@ class Gameplay(Game_State):
         elif input =='light':
             new_game_state = Light_gameplay(self.game)
             new_game_state.enter_state()
+        elif input == 'death':
+            self.game.game_objects.player.death()
 
 class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
     def __init__(self,game, duration=10, amplitude = 20):
@@ -498,6 +504,8 @@ class Dark_gameplay(Gameplay):#for caves etc. makes everything dark except a lig
     def handle_input(self,input):
         if input == 'exit':
             self.exit_state()
+        elif input == 'death':
+            self.game.game_objects.player.death()
 
 class Light_gameplay(Gameplay):#adds a light circle around aila.
     def __init__(self,game):
@@ -524,6 +532,20 @@ class Light_gameplay(Gameplay):#adds a light circle around aila.
     def handle_input(self,input):
         if input == 'exit':
             self.exit_state()
+        elif input == 'death':
+            self.game.game_objects.player.death()
+
+class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not respawned but transffered to cultist hideout
+    def __init__(self,game):
+        super().__init__(game)
+        self.game.game_objects.player.health = max(30,self.game.game_objects.player.health)#the player should have atleast some lives if it get hit in cutsene.
+
+    def handle_input(self,input):
+        if input == 'exit':
+            self.exit_state()
+        elif input == 'death':
+            self.game.game_objects.player.reset_movement()
+            self.game.game_objects.load_map('cultist_hideout','2')
 
 class Ability_Menu(Gameplay):
     def __init__(self, game):

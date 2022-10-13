@@ -42,8 +42,7 @@ class Collisions():
 
             #if hit enemy
             if collision_enemy:
-                if str(type(collision_enemy.currentstate).__name__) is not 'Hurt':#change to some invinsibillity thingy maybe
-                    projectile.collision_enemy(collision_enemy)
+                projectile.collision_enemy(collision_enemy)
 
             #hit platform
             elif collision_plat:

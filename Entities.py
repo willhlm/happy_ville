@@ -32,7 +32,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center=self.rect.center
+        self.hitbox.center = self.rect.center
 
     def take_dmg(self):
         pass
@@ -69,8 +69,9 @@ class Collision_block(Platform):
         entity.update_rect()
 
 class Collision_oneway_up(Platform):
-    def __init__(self,pos,size):
+    def __init__(self,pos,size,run_particle = 'dust'):
         super().__init__(pos,size)
+        self.run_particles = {'dust':Dust_running_particles,'water':Water_running_particles,'grass':Grass_running_particles}[run_particle]
 
     def collide_x(self,entity):
         pass
@@ -80,6 +81,7 @@ class Collision_oneway_up(Platform):
         if entity.velocity[1]>0:#going down
             if entity.hitbox.bottom<self.hitbox.top+offset:
                 entity.down_collision(self.hitbox.top)
+                entity.running_particles = self.run_particles#save the particles to make
                 entity.update_rect()
         else:#going up
             pass
@@ -196,49 +198,24 @@ class Collision_right_angle(Platform):
                 entity.down_collision(target)
                 entity.update_rect()
 
-class Collision_breakable(Collision_block):
-    def __init__(self,pos,size):
-        super().__init__(pos,size)
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
-        self.health = 3
-        self.invincibile = False
-        self.timers = []#a list containing timers, e.g. jump, invincibility etc.
-
-    def update(self,pos):
-        super().update(pos)
-        self.update_timers()
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
-
-    def take_dmg(self):
-        if self.invincibile:
-            return
-        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
-
-        self.health -= 1
-        if self.health < 0:
-            self.kill()
-
 class Spikes(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
-        self.image = pygame.image.load("Sprites/block/spkies.png").convert_alpha()
+        self.image = pygame.image.load("Sprites/block/spikes/spkies.png").convert_alpha()
         self.dmg = 10
 
     def collide_x(self,entity):
         if entity.velocity[0]>0:#going to the right
-            entity.velocity[0]=-6#knock back
+            entity.velocity[0] = -6#knock back
         else:#going to the left
-            entity.velocity[0]=6#knock back
+            entity.velocity[0] = 6#knock back
         entity.take_dmg(self.dmg)
 
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
-            entity.velocity[1]=-6#knock back
+            entity.velocity[1] = -6#knock back
         else:#going up
-            entity.velocity[1]=6#knock back
+            entity.velocity[1] = 6#knock back
         entity.take_dmg(self.dmg)
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
@@ -299,7 +276,7 @@ class Dynamicentity(Staticentity):
 
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.bottom=self.rect.bottom
+        self.hitbox.bottom = self.rect.bottom
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom#[self.rect.bottom + self.hitbox_offset[0], self.rect.bottom + self.hitbox_offset[1]]
@@ -358,23 +335,20 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.velocity[0]+=self.dir[0]*self.acceleration[0]-self.friction[0]*self.velocity[0]
 
     def take_dmg(self,dmg):
-        if self.invincibile:
-            return
-
+        if self.invincibile: return
         self.health -= dmg
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+        self.hurt()
 
+    def hurt(self):
         if self.health > 0:#check if dead¨
-            self.hurt()
+            self.animation_stack[-1].handle_input('Hurt')#turn white
+            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
         else:#if dead
             if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
                 self.aggro = False
                 self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
                 self.currentstate.enter_state('Death')#overrite any state and go to deat
-
-    def hurt(self):
-        self.animation_stack[-1].handle_input('Hurt')#turn white
-        self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
 
     def knock_back(self,dir):
         self.velocity[0] = dir*30
@@ -402,7 +376,7 @@ class Player(Character):
 
         self.max_health = 250
         self.max_spirit = 100
-        self.health = 100
+        self.health = 30
         self.spirit = 100
 
         self.projectiles = game_objects.fprojectiles
@@ -431,20 +405,29 @@ class Player(Character):
         self.velocity[1] = 0
         self.jumping = False
 
-    def hurt(self):#called when taking dmg but health > 0
-        self.animation_stack[-1].handle_input('Invincibile')#make some animation. should be before super
-        super().hurt()
-        self.hurt_particles(lifetime=40,vel=[3,8],colour=[0,0,0,255],scale=3,number_particles=60)
-        self.game_objects.cosmetics.add(Slash(self.hitbox.center))#make a slash animation
-        self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+    def hurt(self):#called when taking dmg
+        if self.health > 0:#check if dead¨
+            self.animation_stack[-1].handle_input('Invincibile')#make some animation. should be first
+            self.animation_stack[-1].handle_input('Hurt')#turn white
+            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            self.hurt_particles(lifetime=40,vel=[3,8],colour=[0,0,0,255],scale=3,number_particles=60)
+            self.game_objects.cosmetics.add(Slash(self.hitbox.center))#make a slash animation
+            self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+        else:#if health < 0
+            self.game_objects.game.state_stack[-1].handle_input('death')#depending on gameplay state, different death stuff should happen
 
-    def set_abs_dist(self):#the absolute distance, i.e. the total scroll
-        self.abs_dist = C.player_center.copy()#the coordinate for buring the bone
+    def death(self):#"normal" gameplay states calls this
+        if self.currentstate.state_name != 'death':#if not already dead
+            self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+            self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def dead(self):#called when death animation is finished
         new_game_state = states.Cutscenes(self.game_objects.game,'Death')
         new_game_state.enter_state()
         self.set_abs_dist()
+
+    def set_abs_dist(self):#the absolute distance, i.e. the total scroll
+        self.abs_dist = C.player_center.copy()#the coordinate for buring the bone
 
     def enter_idle(self):
         self.currentstate = states_player.Idle(self)
@@ -540,15 +523,46 @@ class Enemy(Character):
         self.velocity[0] = -30*self.dir[0]
         self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
 
+class Collision_breakable(Enemy):#a breakable collision block
+    def __init__(self, pos,game_objects,type = 'type1'):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/'+type+'/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+
+        self.health = 40
+
+    def player_collision(self):#only sideways collision checks, for now
+        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
+        if sign>0:#plaer on right
+            self.game_objects.player.hitbox.left = self.hitbox.right
+        else:#plyer on left
+            self.game_objects.player.hitbox.right = self.hitbox.left
+        self.game_objects.player.update_rect()
+
+    def knock_back(self,dir):
+        pass
+
+    def update(self,pos):
+        self.update_pos(pos)
+        self.currentstate.update()
+        self.animation_stack[-1].update()
+        self.update_timers()
+        self.group_distance()
+
+    def dead(self):#called when death animatin finishes
+        self.kill()
+
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites.sprite_dict['main']['idle'][0]
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.health = 50
-        self.spirit=100
 
 class Wall_slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -900,6 +914,10 @@ class MrBanks(NPC):#bank
         new_state = states.Bank(self.game_objects.game, self)
         new_state.enter_state()
 
+class Bridge_keeper(NPC):#bridge block spawn this
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+
 class Boss(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1217,7 +1235,7 @@ class Sword(Melee):
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,35)
         self.hitbox = self.rect.copy()
 
-    def collision_enemy(self,collision_enemy):
+    def collision_enemy(self, collision_enemy):
         self.sword_jump()
 
         if not collision_enemy.invincibile:
@@ -1246,10 +1264,9 @@ class Sword(Melee):
 class Aila_sword(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg = 10
 
-    #potrait stuff
     def init(self):
+        self.dmg = 10
         self.potrait = Read_files.Sprites().load_all_sprites("Sprites/Enteties/Items/sword")
         self.equip = 'idle'#stone pointer
         self.frame = 0#potrait frame
@@ -1755,6 +1772,28 @@ class Interactable(Animatedentity):#interactables
     def take_dmg(self,projectile):#when player hits with sword
         pass
 
+class Bridge_block(Interactable):
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/cart/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,120)
+        self.npc = Bridge_keeper(self.rect.midright,self.game_objects)
+        self.game_objects.npcs.add(self.npc)
+
+    def take_dmg(self,dmg):
+        pass
+
+    def player_collision(self):#player collision
+        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
+        if sign>0:#plaer on right
+            self.game_objects.player.hitbox.left = self.hitbox.right
+        else:#plyer on left
+            self.game_objects.player.hitbox.right = self.hitbox.left
+        self.game_objects.player.update_rect()
+
 class Path_col(Interactable):
 
     def __init__(self, pos, game_objects,size, destination, spawn):
@@ -1812,7 +1851,13 @@ class Cutscene_trigger(Interactable):
 
     def player_collision(self):
         if self.event not in self.game_objects.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
+            self.specific()
             new_game_state = states.Cutscenes(self.game_objects.game,self.event)
+            new_game_state.enter_state()
+
+    def specific(self):
+        if self.event == 'Cultist_encounter':
+            new_game_state = states.Cultist_encounter_gameplay(self.game_objects.game)
             new_game_state.enter_state()
 
 class Interactable_bushes(Interactable):
@@ -1826,7 +1871,7 @@ class Interactable_bushes(Interactable):
             self.interacted = True#sets to false when player gos away
 
     def take_dmg(self,projectile):
-        self.currentstate.handle_input('Cut')
+        self.currentstate.handle_input('Death')
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
@@ -1933,6 +1978,23 @@ class Spawnpoint(Interactable):#save point
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
+
+class Rhoutta_alter(Interactable):#save point
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Spawnpoint/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox=self.rect.copy()
+
+    def player_collision(self):#player collision
+        self.currentstate.handle_input('Outline')
+
+    def interact(self):#when player press t/y
+        self.currentstate.handle_input('Once')
+        new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
+        new_game_state.enter_state()
 
 class Sign(Interactable):#save point
     def __init__(self,pos,game_objects,directions):
