@@ -22,7 +22,7 @@ class Game_Objects():
         self.weather = weather.Weather(self)#initiate weather
 
         self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0,'cultist_warrior':0,'cultist_rogue':0},'ambers':0}
-        self.state = 1
+        self.state = 2
         self.world_state = 'state_' + str(self.state)#a flag that describes the progression of the game
         #self.reflection=BG.Reflection()
         self.collisions = Engine.Collisions(self)

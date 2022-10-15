@@ -191,6 +191,47 @@
                  "width":16,
                  "x":80,
                  "y":592
+                }, 
+                {
+                 "gid":11,
+                 "height":192,
+                 "id":212,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"path_to",
+                         "type":"string",
+                         "value":"village_wakeupforest"
+                        }, 
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"3"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":3232,
+                 "y":592
+                }, 
+                {
+                 "gid":1,
+                 "height":16,
+                 "id":213,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"2"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":3296,
+                 "y":560
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -234,7 +275,7 @@
          "y":0
         }],
  "nextlayerid":46,
- "nextobjectid":212,
+ "nextobjectid":214,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

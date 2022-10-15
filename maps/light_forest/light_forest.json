@@ -587,7 +587,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"Village"
+                         "value":"village_lightforest"
                         }, 
                         {
                          "name":"spawn",
