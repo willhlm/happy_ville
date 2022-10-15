@@ -196,7 +196,7 @@
                         {
                          "name":"spawn",
                          "type":"string",
-                         "value":"1"
+                         "value":"2"
                         }],
                  "rotation":0,
                  "type":"",
@@ -237,7 +237,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"village"
+                         "value":"village_wakeupforest"
                         }, 
                         {
                          "name":"spawn",
@@ -261,7 +261,7 @@
                  "visible":true,
                  "width":16,
                  "x":928,
-                 "y":640
+                 "y":592
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -274,18 +274,6 @@
          "id":5,
          "name":"collision",
          "objects":[
-                {
-                 "gid":7,
-                 "height":16,
-                 "id":197,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":1600,
-                 "x":0,
-                 "y":608
-                }, 
                 {
                  "gid":8,
                  "height":208,
@@ -312,7 +300,7 @@
                 }, 
                 {
                  "gid":8,
-                 "height":176,
+                 "height":160,
                  "id":207,
                  "name":"",
                  "rotation":0,
@@ -320,7 +308,7 @@
                  "visible":true,
                  "width":64,
                  "x":912,
-                 "y":816
+                 "y":800
                 }],
          "opacity":1,
          "type":"objectgroup",
