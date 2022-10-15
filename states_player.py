@@ -40,7 +40,7 @@ class Player_states(Entity_States):
 
     def handle_movement(self,input):#all states should inehrent this function
         value = input[2]
-        self.entity.acceleration[0] = abs(value[0])*C.acceleration[0]
+        self.entity.acceleration[0] = abs(value[0])*C.acceleration[0]#always positive 
         self.entity.dir[1] = -value[1]
 
         if value[0] > 0.2:#x

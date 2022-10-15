@@ -26,10 +26,10 @@ class Cutscene_file():#cutscneens that will run based on file. The name of the f
     def handle_events(self,input):
         pass
 
-class Rhoutta_encounter(Cutscene_file):
+class Rhoutta_encounter(Cutscene_file):#play the first cutscene encountering rhoutta
     def __init__(self,objects):
         super().__init__(objects)
-        self.parent_class.game.game_objects.load_map('wakeup_forest',fade=False)#load map without appending fade
+        self.parent_class.game.game_objects.load_map('wakeup_forest',fade = False)#load map without appending fade
 
     def reset_timer(self):#called when cutscene is finshed
         self.parent_class.exit_state()
@@ -69,7 +69,96 @@ class Cutscene_engine():#cut scenens that is based on game engien
     def exit_state(self):
         self.parent_class.exit_state()
 
-class Deer_encounter(Cutscene_engine):
+class New_game(Cutscene_engine):#first screen to be played when starying a new game
+    def __init__(self,objects):
+        super().__init__(objects)
+        self.parent_class.game.game_objects.camera[-1].set_camera('New_game')
+
+    def cinematic(self):
+        pass
+
+    def update(self):
+        self.timer+=1
+        if self.timer>500:
+            self.exit_state()
+
+    def exit_state(self):
+        self.parent_class.game.game_objects.camera[-1].exit_state()
+        super().exit_state()
+
+class Title_screen(Cutscene_engine):#screen played after waking up from boss dream
+    def __init__(self,objects):
+        super().__init__(objects)
+        self.title_name = self.parent_class.font.render(text = 'Happy Ville')
+        self.text1 = self.parent_class.font.render(text = 'A game by Hjortron games')
+        C.acceleration = [0.3,0.51]#restrict the speed
+        self.stage = 0
+        self.press = False
+
+    def update(self):
+        self.timer+=1
+
+    def render(self):
+        if self.stage == 0:#running slowly and blit title, Hjortron games etc.
+            if self.timer>400:
+                self.parent_class.game.screen.blit(self.title_name,(190,150))
+
+            if self.timer>1000:
+                self.parent_class.game.screen.blit(self.text1,(190,170))
+
+            if self.timer >1200:
+                self.stage += 1
+                self.init_stage1()
+
+        elif self.stage == 1:#camera moves up and aila runs away
+            if self.timer == 1300:
+                self.parent_class.game.game_objects.player.acceleration[0] = 0
+                self.parent_class.game.game_objects.player.enter_idle()
+
+            if self.timer > 1500:
+                self.parent_class.game.screen.blit(self.title_name,(190,150))
+
+
+            if self.timer > 1550:
+                if self.press:
+                    self.stage += 1
+                    self.parent_class.game.game_objects.camera[-1].exit_state()
+                    self.parent_class.game.game_objects.load_map('village')
+                    self.timer = 0
+                    self.pos = [-self.parent_class.game.WINDOW_SIZE[1],self.parent_class.game.WINDOW_SIZE[1]]
+
+        elif self.stage == 2:#cutscenen in village
+            self.cinematic()
+            if self.timer == 200:#make him movev to aila
+                spawn_pos=(0,130)
+
+                self.entity = Entities.Aslat(spawn_pos, self.parent_class.game.game_objects)
+
+                self.parent_class.game.game_objects.npcs.add(self.entity)
+                self.entity.currentstate.enter_state('Walk')
+            elif self.timer == 320:#make it stay still
+                self.entity.currentstate.enter_state('Idle')
+            elif self.timer == 400:#start conversation
+                self.entity.interact()
+            elif self.timer > 410:
+                self.exit_state()
+
+
+    def handle_events(self,input):
+        super().handle_events(input)
+        if self.stage == 0:
+            #can only go left
+            if input[2][0] > 0: return
+            self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
+
+    def init_stage1(self):
+        C.acceleration = [1,0.51]#reset to normal movement
+        input = [0,0,[-1,0],0]
+        self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
+        self.parent_class.game.game_objects.camera[-1].set_camera('Title_screen')
+
+
+class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,objects):
         super().__init__(objects)
         spawn_pos=(700,130)
@@ -98,7 +187,7 @@ class Deer_encounter(Cutscene_engine):
         self.entity.kill()
         super().exit_state()
 
-class Boss_deer_encounter(Cutscene_engine):
+class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
         pos=(900,140)
@@ -137,7 +226,6 @@ class Boss_deer_encounter(Cutscene_engine):
 class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
     def __init__(self,objects):
         super().__init__(objects)
-        self.press = False#turns true when pressing A/space
         self.step1 = False
         self.const = 0.5#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
 
@@ -154,7 +242,6 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
         if self.timer > 250:
             self.parent_class.game.game_objects.player.velocity[1] = 2#go down again
             if self.parent_class.game.game_objects.player.collision_types['bottom']:
-                self.parent_class.game.game_objects.cosmetics.empty()
                 self.exit_state()
 
     def render(self):
@@ -246,57 +333,5 @@ class Cultist_encounter(Cutscene_engine):
     def exit_state(self):
         self.entity1.AI_stack[-1].exit_AI()
         self.entity2.AI_stack[-1].exit_AI()
-        self.parent_class.game.game_objects.camera[-1].exit_state()
-        super().exit_state()
-
-class Title_screen(Cutscene_engine):#screen played after waking up from boss dream
-    def __init__(self,objects):
-        super().__init__(objects)
-        self.title_name = self.parent_class.font.render(text = 'Happy Ville')
-        self.text1 = self.parent_class.font.render(text = 'A game by Hjortron games')
-        C.acceleration = [0.3,0.51]#restrict the speed
-
-    def update(self):
-        self.timer+=1
-
-    def render(self):
-        if self.timer>400:
-            self.parent_class.game.screen.blit(self.title_name,(190,150))
-        if self.timer>1000:
-            self.parent_class.game.screen.blit(self.text1,(190,200))
-
-        if self.timer >1010:
-            self.exit()
-            #self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')
-            #self.parent_class.game.game_objects.load_map('village')
-
-    def handle_events(self,input):
-        self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
-
-    def exit(self):
-        C.acceleration = [1,0.51]#reset to normal movement
-        if self.parent_class.game.game_objects.player.acceleration[0] != 0:#if moving
-            sign = self.parent_class.game.game_objects.player.dir[0]
-        else:#standing still
-            sign = 0
-        input = [0,0,[sign,0],0]
-        self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
-
-        self.exit_state()
-
-class New_game(Cutscene_engine):#first screen to be played when starying a new game
-    def __init__(self,objects):
-        super().__init__(objects)
-        self.parent_class.game.game_objects.camera[-1].set_camera('New_game')
-
-    def cinematic(self):
-        pass
-
-    def update(self):
-        self.timer+=1
-        if self.timer>500:
-            self.exit_state()
-
-    def exit_state(self):
         self.parent_class.game.game_objects.camera[-1].exit_state()
         super().exit_state()

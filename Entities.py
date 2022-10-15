@@ -1961,7 +1961,7 @@ class Spawnpoint(Interactable):#save point
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox=self.rect.copy()
-        self.init_cor=pos
+        self.init_cor = pos
         self.map = map
 
     def player_collision(self):#player collision
@@ -1979,10 +1979,10 @@ class Spawnpoint(Interactable):#save point
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
 
-class Rhoutta_alter(Interactable):#save point
+class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginning
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/Spawnpoint/')
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/rhoutta_altar/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
@@ -1995,6 +1995,9 @@ class Rhoutta_alter(Interactable):#save point
         self.currentstate.handle_input('Once')
         new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
         new_game_state.enter_state()
+
+    def reset_timer(self):
+        self.currentstate.handle_input('Idle')
 
 class Sign(Interactable):#save point
     def __init__(self,pos,game_objects,directions):

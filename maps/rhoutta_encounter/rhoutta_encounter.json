@@ -142,8 +142,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":720,
-                 "y":480
+                 "x":5136,
+                 "y":304
                 }, 
                 {
                  "gid":24,
@@ -172,7 +172,7 @@
                         {
                          "name":"type",
                          "type":"string",
-                         "value":"Rhoutta_alter"
+                         "value":"Rhoutta_altar"
                         }],
                  "rotation":0,
                  "type":"",

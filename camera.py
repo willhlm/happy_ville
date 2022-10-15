@@ -158,3 +158,16 @@ class New_game(Auto):
         self.center[1] -= 2
         self.center[1] = max(self.game_objects.map.PLAYER_CENTER[1],self.center[1])
         super().update()
+
+class Title_screen(Auto):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+
+    def update(self):
+        self.center[1] += 2
+        self.center[1] = min(1000,self.center[1])
+
+        self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
+        self.check_camera_border()
+        self.scroll=self.true_scroll.copy()
+        self.scroll[1]=int(self.scroll[1])+self.shake[1]
