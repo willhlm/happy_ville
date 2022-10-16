@@ -15,12 +15,6 @@ class Player_states(Entity_States):
     def enter_state(self,newstate):
         if newstate in self.entity.states:
             self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
-            #self.entity.currentstate = self.entity.states[newstate](self.entity)
-    #    try:#try to enter state, if it is available
-    #        self.entity.currentstate = self.entity.states[newstate](self.entity)
-    #    except:#if we don't have the state, do nothing
-    #        pass
-    #    self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def increase_spirit(self):
         self.entity.spirit += 0.1
@@ -40,7 +34,7 @@ class Player_states(Entity_States):
 
     def handle_movement(self,input):#all states should inehrent this function
         value = input[2]
-        self.entity.acceleration[0] = abs(value[0])*C.acceleration[0]#always positive 
+        self.entity.acceleration[0] = abs(value[0])*C.acceleration[0]#always positive
         self.entity.dir[1] = -value[1]
 
         if value[0] > 0.2:#x
@@ -248,6 +242,7 @@ class Fall_run(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.initial_phase()
+        self.entity.jumping = True
 
     def initial_phase(self):
         if self.entity.velocity[1]>6:
@@ -300,6 +295,7 @@ class Fall_stand(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.initial_phase()
+        self.entity.jumping = True
 
     def initial_phase(self):
         if self.entity.velocity[1]>6:

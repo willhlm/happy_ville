@@ -388,7 +388,7 @@ class Player(Character):
         self.states = set(['Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster
         self.currentstate=states_player.Idle(self)
 
-        self.spawn_point = [{'map':'light_forest', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
+        self.spawn_point = [{'map':'light_forest1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
         self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)
 
@@ -1772,16 +1772,16 @@ class Interactable(Animatedentity):#interactables
     def take_dmg(self,projectile):#when player hits with sword
         pass
 
-class Bridge_block(Interactable):
+class Bridge(Interactable):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/cart/')
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/bridge/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
-        self.hitbox = pygame.Rect(pos[0],pos[1],32,120)
-        self.npc = Bridge_keeper(self.rect.midright,self.game_objects)
-        self.game_objects.npcs.add(self.npc)
+        self.hitbox = pygame.Rect(pos[0],pos[1],11*16,16)
+        #self.npc = Bridge_keeper(self.rect.midright,self.game_objects)
+        #self.game_objects.npcs.add(self.npc)
 
     def take_dmg(self,dmg):
         pass
