@@ -27,7 +27,8 @@ class Game_Objects():
         #self.reflection=BG.Reflection()
         self.collisions = Engine.Collisions(self)
         self.map = map_loader.Level(self)
-        self.camera = [camera.Auto(self)]
+        self.camera = camera.Auto(self)
+        #self.camera = camera.New_Camera(self)
 
     def create_groups(self):
         #define all sprite groups
@@ -93,8 +94,10 @@ class Game_Objects():
         self.collisions.projectile_collision(self.eprojectiles,self.players)
 
     def scrolling(self):
-        self.camera[-1].update()
-        scroll = [-self.camera[-1].scroll[0],-self.camera[-1].scroll[1]]
+        #self.camera[-1].update()
+        #scroll = [-self.camera[-1].scroll[0],-self.camera[-1].scroll[1]]
+        self.camera.update()
+        scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):

@@ -1,11 +1,63 @@
 import random, sys
 
-
-class Camera():
+class New_Camera():
     def __init__(self,game_objects):
         self.game_objects = game_objects
         self.scroll = [0,0]
         self.true_scroll = [0,0]
+        self.center = list(game_objects.map.PLAYER_CENTER)
+        self.shake = [0,0]
+        self.xflag = False
+        self.yflag = False
+
+    def update(self):
+        self.check_camera_border()
+        if self.xflag:
+            if self.yflag:
+                pass
+            else:
+                self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
+        elif self.yflag:
+            self.true_scroll[0]+=(self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
+        else:
+            self.true_scroll[0]+=(self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
+            self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
+
+        self.scroll=self.true_scroll.copy()
+        self.scroll[0]=int(self.scroll[0])+self.shake[0]
+        self.scroll[1]=int(self.scroll[1])+self.shake[1]
+        print(self.yflag)
+
+
+    def camera_shake(self,amp=3,duration=100):
+        self.game_objects.camera.append(Camera_shake(self,amp,duration))
+
+
+    def check_camera_border(self):
+        self.xflag, self.yflag = False, False
+        for stop in self.game_objects.camera_blocks:
+            if stop.dir == 'right':
+                if (self.game_objects.player.hitbox.centery - stop.rect.bottom < self.center[1]) and (stop.rect.top - self.game_objects.player.hitbox.centery < self.game_objects.game.WINDOW_SIZE[1] - self.center[1]):
+                    #if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
+                    if -self.game_objects.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.center[0]) < self.center[0] and self.game_objects.player.hitbox.centerx >= self.center[0]:
+                        self.xflag = True
+            elif stop.dir == 'left':
+                if stop.rect.right >= 0 and self.game_objects.player.hitbox.centerx < self.center[0]:
+                    self.xflag = True
+            elif stop.dir == 'bottom':
+                if (stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) and (self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
+                    if (-self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.centery - self.game_objects.player.hitbox.centery) < (self.game_objects.game.WINDOW_SIZE[1] - self.center[1])):
+                        self.yflag = True
+            elif stop.dir == 'top':
+                if (0 < stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) or (0 < self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
+                    if self.game_objects.player.hitbox.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
+                        self.yflag = True
+
+class Camera():
+    def __init__(self,game_objects,true_scroll = [0,0]):
+        self.game_objects = game_objects
+        self.true_scroll = true_scroll
+        self.scroll = true_scroll
         self.center = list(game_objects.map.PLAYER_CENTER)
         self.shake = [0,0]
 
@@ -16,8 +68,8 @@ class Camera():
         self.scroll[1]=int(self.scroll[1])+self.shake[1]
 
     def set_camera(self, camera):
-        new_camera=getattr(sys.modules[__name__], camera)(self.game_objects)
-        self.game_objects.camera.append(new_camera)
+        new_camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll)
+        self.game_objects.camera = new_camera
 
     def camera_shake(self,amp=3,duration=100):
         self.game_objects.camera.append(Camera_shake(self,amp,duration))
@@ -25,8 +77,9 @@ class Camera():
     def exit_state(self):
         self.game_objects.camera.pop()
 
-    def handle_input(self,x,y):
+    def handle_input(self,xflag,yflag):
         pass
+
 
     def check_camera_border(self):
         xflag, yflag = False, False
@@ -51,8 +104,8 @@ class Camera():
         self.handle_input(xflag, yflag)
 
 class Auto(Camera):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, true_scroll = [0,0]):
+        super().__init__(game_objects, true_scroll)
 
     def update(self):
         self.true_scroll[0]+=(self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
@@ -68,8 +121,9 @@ class Auto(Camera):
             self.set_camera('Auto_CapY')
 
 class Auto_CapX(Camera):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, true_scroll = [0,0]):
+        true_scroll[0] = 0
+        super().__init__(game_objects, true_scroll)
 
     def update(self):
         self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
@@ -79,13 +133,14 @@ class Auto_CapX(Camera):
         if xflag and yflag:
             self.set_camera('Fixed')
         elif not xflag:
-            self.exit_state()
+            self.set_camera('Auto')
         elif yflag:
             self.set_camera('Auto_CapY')
 
 class Auto_CapY(Camera):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, true_scroll = [0,0]):
+        true_scroll[1] = 0
+        super().__init__(game_objects, true_scroll)
 
     def update(self):
         self.true_scroll[0]+=(self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
@@ -97,18 +152,23 @@ class Auto_CapY(Camera):
         elif xflag:
             self.set_camera('Auto_CapX')
         elif not yflag:
-            self.exit_state()
+            self.set_camera('Auto')
 
 class Fixed(Camera):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, true_scroll):
+        super().__init__(game_objects, [0,0])
 
     def update(self):
         super().update()
 
     def handle_input(self,xflag, yflag):
         if not xflag and not yflag:
-            self.exit_state()
+            self.set_camera('Auto')
+        elif not xflag:
+            self.set_camera('Auto_CapY')
+        elif not yflag:
+            self.set_camera('Auto_CapX')
+
 
 class Camera_shake(Camera):
     def __init__(self, curr_camera,amp,duration):
