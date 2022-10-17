@@ -29,7 +29,7 @@ class Cutscene_file():#cutscneens that will run based on file. The name of the f
 class Rhoutta_encounter(Cutscene_file):#play the first cutscene encountering rhoutta
     def __init__(self,objects):
         super().__init__(objects)
-        self.parent_class.game.game_objects.load_map('wakeup_forest',fade = False)#load map without appending fade
+        self.parent_class.game.game_objects.load_map('wakeup_forest1',fade = False)#load map without appending fade
 
     def reset_timer(self):#called when cutscene is finshed
         self.parent_class.exit_state()
@@ -123,7 +123,7 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
                 if self.press:
                     self.stage += 1
                     self.parent_class.game.game_objects.camera[-1].exit_state()
-                    self.parent_class.game.game_objects.load_map('village')
+                    self.parent_class.game.game_objects.load_map('village1')
                     self.timer = 0
                     self.pos = [-self.parent_class.game.WINDOW_SIZE[1],self.parent_class.game.WINDOW_SIZE[1]]
 

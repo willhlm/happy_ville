@@ -34,8 +34,10 @@ class Level():
             self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
 
     def load_map_data(self):
-        self.map_data = Read_files.read_json("maps/%s/%s.json" % (self.level_name,self.level_name))
+        level_name = self.level_name[:-1]
+        self.map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
         self.map_data = Read_files.format_tiled_json(self.map_data)
+
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
@@ -78,7 +80,8 @@ class Level():
             if 'source' in tileset.keys():
                 continue
 
-            sheet = pygame.image.load("maps/%s/%s" % (self.level_name, tileset['image'])).convert_alpha()
+            level_name = self.level_name[:-1]
+            sheet = pygame.image.load("maps/%s/%s" % (level_name, tileset['image'])).convert_alpha()
             rows = int(sheet.get_rect().h/self.TILE_SIZE)
             columns = int(sheet.get_rect().w/self.TILE_SIZE)
             n = tileset['firstgid']
@@ -283,19 +286,17 @@ class Level():
             elif id == 20:#reference point
                 self.parallax_reference_pos = object_position
 
-            elif id == 24:#sign
+            elif id == 24:#event
                 values={}
                 for property in obj['properties']:
                     if property['name'] == 'name':
                         interactable = property['value']
 
                     #write specefic conditions if thse should spawn
-                    if interactable == 'Bridge_block':
+                    if interactable == 'Bridge':
                         if self.game_objects.state > 1:#if reindeer hasn't been defeated
-                            return
-
-                new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
-                self.game_objects.interactables.add(new_interactable)
+                            new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
+                            self.game_objects.interactables.add(new_interactable)
 
             elif id == 25:#sign
                 values={}
@@ -402,6 +403,7 @@ class Level():
 
         animation_entities = {}
         #create animation layers
+        level_name = self.level_name[:-1]
         for bg in animation_list.keys():
             for index, tile_number in enumerate(self.map_data['tile_layers'][animation_list[bg]]['data']):
                 if tile_number == 0:
@@ -409,7 +411,7 @@ class Level():
                 else:
                     for tileset in self.map_data['tilesets']:
                         if tile_number == tileset['firstgid']:
-                            path = 'maps/%s/%s' % (self.level_name, Read_files.get_folder(tileset['image']))
+                            path = 'maps/%s/%s' % (level_name, Read_files.get_folder(tileset['image']))
                             y = math.floor(index/cols)
                             x = (index - (y*cols))
                             parallax = parallax_values[bg]
