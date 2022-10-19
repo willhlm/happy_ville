@@ -131,6 +131,8 @@ class Camera_shake(Camera):
             self.curr_camera.shake=[0,0]
             super().exit_state()
 
+
+#cutscenes
 class Deer_encounter(Auto):
     def __init__(self, game_objects):
         super().__init__(game_objects)

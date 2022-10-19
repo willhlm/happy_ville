@@ -1766,7 +1766,7 @@ class Interactable(Animatedentity):#interactables
     def player_collision(self):#player collision
         pass
 
-    def player_noncollision(self):#when player doesn't collide
+    def player_noncollision(self):#when player doesn't collide: for grass
         pass
 
     def take_dmg(self,projectile):#when player hits with sword
@@ -1783,16 +1783,11 @@ class Bridge(Interactable):
         #self.npc = Bridge_keeper(self.rect.midright,self.game_objects)
         #self.game_objects.npcs.add(self.npc)
 
-    def take_dmg(self,dmg):
-        pass
-
     def player_collision(self):#player collision
-        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-        if sign>0:#plaer on right
-            self.game_objects.player.hitbox.left = self.hitbox.right
-        else:#plyer on left
-            self.game_objects.player.hitbox.right = self.hitbox.left
-        self.game_objects.player.update_rect()
+        sign=(self.game_objects.player.hitbox.bottom-self.hitbox.top)
+        if sign > 0:#plaer on top
+            self.game_objects.player.down_collision(self.hitbox.top)
+            self.game_objects.player.update_rect()
 
 class Path_col(Interactable):
 
