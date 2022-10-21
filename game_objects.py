@@ -17,18 +17,19 @@ class Game_Objects():
         self.game = game
         self.controller = Read_files.Controller('ps4')
         self.sound = sound.Sound()
-        self.cutscenes_complete = []
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
 
+        #should these be a world state class? which stores game information stuff
+        self.cutscenes_complete = []
         self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0,'cultist_warrior':0,'cultist_rogue':0},'ambers':0}
         self.state = 2
         self.world_state = 'state_' + str(self.state)#a flag that describes the progression of the game
         #self.reflection=BG.Reflection()
+
         self.collisions = Engine.Collisions(self)
         self.map = map_loader.Level(self)
         self.camera = camera.Auto(self)
-        #self.camera = camera.New_Camera(self)
 
     def create_groups(self):
         #define all sprite groups
@@ -94,8 +95,6 @@ class Game_Objects():
         self.collisions.projectile_collision(self.eprojectiles,self.players)
 
     def scrolling(self):
-        #self.camera[-1].update()
-        #scroll = [-self.camera[-1].scroll[0],-self.camera[-1].scroll[1]]
         self.camera.update()
         scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
         self.update_groups(scroll)
@@ -119,7 +118,6 @@ class Game_Objects():
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
-        #self.platforms.draw(self.game.screen)
         self.interactables.draw(self.game.screen)
         self.bg_ground.draw(self.game.screen)
 
@@ -134,7 +132,6 @@ class Game_Objects():
         self.all_fgs.draw(self.game.screen)
 
         #self.camera_blocks.draw(self.game.screen)
-        #self.reflection.draw(self.game.screen)
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:

@@ -1779,7 +1779,7 @@ class Bridge(Interactable):
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
-        self.hitbox = pygame.Rect(pos[0],pos[1],11*16,16)
+        self.hitbox = pygame.Rect(pos[0],pos[1],14*16,16*2)
         #self.npc = Bridge_keeper(self.rect.midright,self.game_objects)
         #self.game_objects.npcs.add(self.npc)
 
