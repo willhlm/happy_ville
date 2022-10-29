@@ -19,7 +19,7 @@ class Level():
         self.init_state_file()#make a state file if it is the first time loading this map
         self.load_statics()
         self.load_collision_layer()
-        self.load_bg()
+        self.load_bgs()
         self.append_light_effet()#append any light effects
 
     def set_weather(self,particle):
@@ -76,7 +76,7 @@ class Level():
         sprites = {}
 
         for tileset in self.map_data['tilesets']:
-            if 'source' in tileset.keys():
+            if 'source' in tileset.keys():#objexts have source in dict
                 continue
 
             level_name = self.level_name[:-1]
@@ -90,7 +90,7 @@ class Level():
                     y = row * self.TILE_SIZE
                     x = column * self.TILE_SIZE
                     rect = pygame.Rect(x, y, x + self.TILE_SIZE, y + self.TILE_SIZE)
-                    image = pygame.Surface((self.TILE_SIZE,self.TILE_SIZE),pygame.SRCALPHA,32)
+                    image = pygame.Surface((self.TILE_SIZE,self.TILE_SIZE),pygame.SRCALPHA,32).convert_alpha()
                     image.blit(sheet,(0,0),rect)
                     sprites[n] = image
                     n += 1
@@ -293,7 +293,7 @@ class Level():
 
                     #write specefic conditions if thse should spawn
                     if interactable == 'Bridge':
-                        if self.game_objects.state > 1:#if reindeer hasn't been defeated
+                        if self.game_objects.state > 1:#if reindeer has been defeated
                             new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
                             self.game_objects.interactables.add(new_interactable)
 
@@ -310,6 +310,103 @@ class Level():
                         values['down']=property['value']
                 new_sign = Entities.Sign(object_position,self.game_objects,values)
                 self.game_objects.interactables.add(new_sign)
+
+    def load_bgs(self):
+        #sort the data
+        bg_list = {}#a place hodler for tiled data
+        animation_list = {}#a place holder for animation objects
+        for tile_layer in self.map_data['tile_layers'].keys():
+            animation_list[tile_layer] = []
+            parallax = []
+            try:#save parallax value
+                parallax.append(self.map_data['tile_layers'][tile_layer]['parallaxx'])
+            except:#save parallax value
+                parallax.append(1)
+
+            try:#save parallax value
+                parallax.append(self.map_data['tile_layers'][tile_layer]['parallaxy'])
+            except:#save parallax value
+                parallax.append(1)
+
+            bg_list[tile_layer] = {'parallax':parallax}
+
+            try:#save offset value
+                bg_list[tile_layer].update({'offset':(self.map_data['tile_layers'][tile_layer]['offsetx'],self.map_data['tile_layers'][tile_layer]['offsety'])})
+            except:#save offset value
+                bg_list[tile_layer].update({'offset':(0,0)})
+
+            bg_list[tile_layer].update({'data':(self.map_data['tile_layers'][tile_layer]['data'])})
+            bg_list[tile_layer].update({'reference_point':(self.map_data['tile_layers'][tile_layer]['x'],self.map_data['tile_layers'][tile_layer]['y'])})
+
+        #make empty surfaces
+        cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']#number of columns
+        rows = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['height']#number of rows
+
+        blit_surfaces = {}#every layer from tiled
+        blit_compress_surfaces = {}#the ones with the same paralax are merged
+        for tile_layer in bg_list.keys():#make a blank surface
+            if not 'animated' in tile_layer:
+                blit_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
+                blit_compress_surfaces[tile_layer[0:tile_layer.find('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
+
+        #blit the BG sprites to a surface, mapping tile set data to image data. make also animated objects
+        spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats
+        new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
+        for tile_layer in bg_list.keys():
+            for index, tile_number in enumerate(bg_list[tile_layer]['data']):
+                if tile_number == 0:
+                    continue
+                y = math.floor(index/cols)
+                x = (index - (y*cols))
+
+                if 'animated' in tile_layer:#if animation
+                    for tileset in self.map_data['tilesets']:
+                        if tile_number == tileset['firstgid']:
+                            path = 'maps/%s/%s' % (self.level_name[:-1], Read_files.get_folder(tileset['image']))
+                            parallax = bg_list[tile_layer]['parallax']
+                            blit_pos = (x * self.TILE_SIZE - math.ceil(new_map_diff[0]*(1-parallax[0])) + bg_list[tile_layer]['offset'][0], y * self.TILE_SIZE - math.ceil((1-parallax[1])*new_map_diff[1])+bg_list[tile_layer]['offset'][1])
+                            new_animation = Entities.BG_Animated(blit_pos,path,parallax)
+                            animation_list[tile_layer].append(new_animation)
+                else:#if statics
+                    blit_pos = (x * self.TILE_SIZE , y * self.TILE_SIZE)
+                    blit_surfaces[tile_layer].blit(spritesheet_dict[tile_number], blit_pos)
+
+        #blit all static sublayers onto one single parallax layer in order as drawn in Tiled. And sort the animations into the key grouops
+        parallax = {}
+        offset = {}
+        animation_entities = {}
+        for layer in bg_list.keys():
+            bg = layer[0:layer.find('_')]#bg2_2 -> bg2
+            if 'animated' in layer:#animations
+                try:#make a dictionary of list
+                    animation_entities[bg].append(animation_list[layer])
+                except KeyError:
+                    animation_entities[bg] = [animation_list[layer]]
+            else:#statics
+                blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
+                parallax[bg] = bg_list[layer]['parallax']
+                offset[bg] = bg_list[layer]['offset']
+
+        #make the BG blocks
+        for tile_layer in blit_compress_surfaces.keys():
+            if 'fg' in tile_layer:
+                pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
+                self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+            elif 'interact' in tile_layer:#the stuff that blits in front of interactables
+                pos=(-math.ceil((1 - parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
+                self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+            elif 'bg' in tile_layer:#bg
+                pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
+                self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+
+            try:#add animations to group
+                for bg_animation in animation_entities[tile_layer]:
+                    if 'fg' in tile_layer:
+                        self.game_objects.all_fgs.add(bg_animation)
+                    elif 'bg' in tile_layer:
+                        self.game_objects.all_bgs.add(bg_animation)
+            except:
+                pass
 
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
