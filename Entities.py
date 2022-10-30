@@ -238,7 +238,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
             self.add(self.pause_group)#add to pause
 
 class BG_Block(Staticentity):
-    def __init__(self,pos,img,parallax=(1,1)):
+    def __init__(self,pos,img,parallax = 1):
         super().__init__(pos,img)
         self.true_pos = self.rect.topleft
         self.parallax = parallax
@@ -251,10 +251,9 @@ class BG_Block(Staticentity):
 class BG_Animated(BG_Block):
     def __init__(self,pos,sprite_folder_path,parallax=(1,1)):
         super().__init__(pos,pygame.Surface((16,16)),parallax)
-        print(parallax)
         self.sprites = Read_files.load_sprites(sprite_folder_path)
         self.image = self.sprites[0]
-        self.animation=animation.Simple_animation(self)
+        self.animation = animation.Simple_animation(self)
 
     def update(self, pos):
         self.update_pos(pos)
@@ -1779,7 +1778,7 @@ class Bridge(Interactable):
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/bridge/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = (pos[0]-1,pos[1])#for some reason, the f**ing rect pos is one pixel off. But the platform is at correct pos
+        self.rect.bottomleft = (pos[0],pos[1])#for some reason, the f**ing rect pos is one pixel off. But the platform is at correct pos
         self.hitbox = self.rect.copy()
         platform = Collision_block(pos,(self.image.get_width(),32))
         self.game_objects.platforms.add(platform)

@@ -97,7 +97,7 @@ class Game_Objects():
         self.camera.update()
         scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
         self.update_groups(scroll)
-
+        
     def update_groups(self, scroll = (0,0)):
         self.platforms.update(scroll)
         self.platforms_ramps.update(scroll)

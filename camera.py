@@ -10,9 +10,9 @@ class Camera():
 
     def update(self):
         self.check_camera_border()
-        self.scroll=self.true_scroll.copy()
-        self.scroll[0] = int(self.scroll[0])+self.shake[0]
-        self.scroll[1] = int(self.scroll[1])+self.shake[1]
+        self.game_objects.camera.scroll = self.game_objects.camera.true_scroll.copy()
+        self.game_objects.camera.scroll[0] = int(self.game_objects.camera.scroll[0])+self.shake[0]
+        self.game_objects.camera.scroll[1] = int(self.game_objects.camera.scroll[1])+self.shake[1]
 
     def set_camera(self, camera):
         new_camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll)
@@ -121,7 +121,7 @@ class Camera_shake(Camera):
 
     def update(self):
         self.duration -= 1
-        
+
         self.curr_camera.shake[0] = random.randint(-self.amp,self.amp)
         self.curr_camera.shake[1] = random.randint(-self.amp,self.amp)
         self.curr_camera.update()

@@ -74,7 +74,6 @@
          "id":67,
          "name":"bg3_animated3",
          "opacity":1,
-         "parallaxy":0.7,
          "type":"tilelayer",
          "visible":true,
          "width":300,

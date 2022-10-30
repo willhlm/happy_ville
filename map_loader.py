@@ -5,9 +5,9 @@ class Level():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.PLAYER_CENTER = C.player_center
-        self.SCREEN_SIZE = C.window_size
+        #self.SCREEN_SIZE = C.window_size
         self.TILE_SIZE = C.tile_size
-        self.init_player_pos = (0,0)
+        #self.init_player_pos = (0,0)
         self.state = Read_files.read_json("map_state.json") #check this file for structure of object
 
     def load_map(self,map_name,spawn):
@@ -318,16 +318,14 @@ class Level():
         for tile_layer in self.map_data['tile_layers'].keys():
             animation_list[tile_layer] = []
             parallax = []
-            try:#save parallax value
+            try:#save parallax x value
                 parallax.append(self.map_data['tile_layers'][tile_layer]['parallaxx'])
-            except:#save parallax value
+            except:#save parallax x value
                 parallax.append(1)
-
-            try:#save parallax value
+            try:#save parallax y value
                 parallax.append(self.map_data['tile_layers'][tile_layer]['parallaxy'])
-            except:#save parallax value
+            except:#save parallax y value
                 parallax.append(1)
-
             bg_list[tile_layer] = {'parallax':parallax}
 
             try:#save offset value
@@ -336,7 +334,7 @@ class Level():
                 bg_list[tile_layer].update({'offset':(0,0)})
 
             bg_list[tile_layer].update({'data':(self.map_data['tile_layers'][tile_layer]['data'])})
-            bg_list[tile_layer].update({'reference_point':(self.map_data['tile_layers'][tile_layer]['x'],self.map_data['tile_layers'][tile_layer]['y'])})
+            bg_list[tile_layer].update({'reference_point':(self.map_data['tile_layers'][tile_layer]['x'],self.map_data['tile_layers'][tile_layer]['y'])})#not used
 
         #make empty surfaces
         cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']#number of columns
@@ -349,7 +347,7 @@ class Level():
                 blit_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
                 blit_compress_surfaces[tile_layer[0:tile_layer.find('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
 
-        #blit the BG sprites to a surface, mapping tile set data to image data. make also animated objects
+        #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
         spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
         for tile_layer in bg_list.keys():
@@ -387,7 +385,7 @@ class Level():
                 parallax[bg] = bg_list[layer]['parallax']
                 offset[bg] = bg_list[layer]['offset']
 
-        #make the BG blocks
+        #add the bg, fg and animations to the group
         for tile_layer in blit_compress_surfaces.keys():
             if 'fg' in tile_layer:
                 pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
