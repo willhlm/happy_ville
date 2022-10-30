@@ -17,28 +17,27 @@ class Game_Objects():
         self.game = game
         self.controller = Read_files.Controller('ps4')
         self.sound = sound.Sound()
-        self.cutscenes_complete = []
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
-
-        self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0,'cultist_warrior':0,'cultist_rogue':0},'ambers':0}
-        self.state = 2
-        self.world_state = 'state_' + str(self.state)#a flag that describes the progression of the game
-        #self.reflection=BG.Reflection()
         self.collisions = Engine.Collisions(self)
         self.map = map_loader.Level(self)
         self.camera = camera.Auto(self)
-        #self.camera = camera.New_Camera(self)
+
+        #should these be a world state class? which stores game information stuff
+        self.cutscenes_complete = []
+        self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0,'cultist_warrior':0,'cultist_rogue':0},'ambers':0}
+        self.state = 2
+        self.world_state = 'state_' + str(self.state)#a flag that describes the progression of the game
 
     def create_groups(self):
         #define all sprite groups
-        self.enemies = pygame.sprite.Group()# pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.platforms_ramps = pygame.sprite.Group()
         self.all_bgs = pygame.sprite.LayeredUpdates()
         self.all_fgs = pygame.sprite.LayeredUpdates()
-        self.bg_ground = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
+        self.bg_interact = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
         self.eprojectiles = pygame.sprite.Group()#arrows and sword
         self.fprojectiles = pygame.sprite.Group()#arrows and sword
         self.loot = pygame.sprite.Group()
@@ -53,6 +52,7 @@ class Game_Objects():
 
     def load_map(self, map_name, spawn = '1',fade = True):
         self.clean_groups()
+        self.game.game_objects.player.reset_movement()
         self.map.load_map(map_name,spawn)
 
         if fade:
@@ -77,7 +77,7 @@ class Game_Objects():
         self.all_bgs.empty()
         self.all_fgs.empty()
         self.camera_blocks.empty()
-        self.bg_ground.empty()
+        self.bg_interact.empty()
 
     def collide_all(self):
         self.collisions.platform_collision(self.players)
@@ -93,21 +93,19 @@ class Game_Objects():
         self.collisions.projectile_collision(self.fprojectiles,self.enemies)
         self.collisions.projectile_collision(self.eprojectiles,self.players)
 
-    def scrolling(self):
-        #self.camera[-1].update()
-        #scroll = [-self.camera[-1].scroll[0],-self.camera[-1].scroll[1]]
+    def update(self):
         self.camera.update()
         scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
         self.update_groups(scroll)
-
+        
     def update_groups(self, scroll = (0,0)):
         self.platforms.update(scroll)
         self.platforms_ramps.update(scroll)
         self.all_bgs.update(scroll)
-        self.bg_ground.update(scroll)
+        self.bg_interact.update(scroll)
         self.all_fgs.update(scroll)
         self.players.update(scroll)
-        self.entity_pause.update(scroll)#should be before enemies and npcs group
+        self.entity_pause.update(scroll)#should be before enemies, npcs and interactable groups
         self.enemies.update(scroll)
         self.npcs.update(scroll)
         self.fprojectiles.update(scroll)
@@ -119,9 +117,8 @@ class Game_Objects():
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
-        #self.platforms.draw(self.game.screen)
         self.interactables.draw(self.game.screen)
-        self.bg_ground.draw(self.game.screen)
+        self.bg_interact.draw(self.game.screen)
 
         self.enemies.draw(self.game.screen)
         self.npcs.draw(self.game.screen)
@@ -134,7 +131,6 @@ class Game_Objects():
         self.all_fgs.draw(self.game.screen)
 
         #self.camera_blocks.draw(self.game.screen)
-        #self.reflection.draw(self.game.screen)
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
@@ -155,11 +151,11 @@ class Game_Objects():
             pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
 
             for platform in self.platforms:#go through the group
-                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,2)#draw hitbox
+                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,1)#draw hitbox
             for ramp in self.platforms_ramps:
-                pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,2)#draw hitbox
+                pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,1)#draw hitbox
             for int in self.interactables:
-                pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,2)#draw hitbox
+                pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,1)#draw hitbox
 
     def increase_world_state(self):#called when a boss dies
         self.state += 1
@@ -169,7 +165,7 @@ class Game_Objects():
         Read_files.save_obj(self.player)
         Read_files.save_obj(self)
 
-    def load_game(self):
+    def load_game(self):#load_obj class from_json: load the stiff from dictionary of interest
         Read_files.load_obj(self.player)
         Read_files.load_obj(self)
 

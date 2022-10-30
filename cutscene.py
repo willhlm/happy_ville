@@ -72,7 +72,7 @@ class Cutscene_engine():#cut scenens that is based on game engien
 class New_game(Cutscene_engine):#first screen to be played when starying a new game
     def __init__(self,objects):
         super().__init__(objects)
-        self.parent_class.game.game_objects.camera[-1].set_camera('New_game')
+        self.parent_class.game.game_objects.camera.set_camera('New_game')
 
     def cinematic(self):
         pass
@@ -83,7 +83,7 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
             self.exit_state()
 
     def exit_state(self):
-        self.parent_class.game.game_objects.camera[-1].exit_state()
+        self.parent_class.game.game_objects.camera.exit_state()
         super().exit_state()
 
 class Title_screen(Cutscene_engine):#screen played after waking up from boss dream
@@ -122,7 +122,7 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
             if self.timer > 1550:
                 if self.press:
                     self.stage += 1
-                    self.parent_class.game.game_objects.camera[-1].exit_state()
+                    self.parent_class.game.game_objects.camera.exit_state()
                     self.parent_class.game.game_objects.load_map('village1')
                     self.timer = 0
                     self.pos = [-self.parent_class.game.WINDOW_SIZE[1],self.parent_class.game.WINDOW_SIZE[1]]
@@ -155,7 +155,7 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
         C.acceleration = [1,0.51]#reset to normal movement
         input = [0,0,[-1,0],0]
         self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
-        self.parent_class.game.game_objects.camera[-1].set_camera('Title_screen')
+        self.parent_class.game.game_objects.camera.set_camera('Title_screen')
 
 
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
@@ -164,7 +164,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
         spawn_pos=(700,130)
         self.entity=Entities.Reindeer(spawn_pos, self.parent_class.game.game_objects)
         self.parent_class.game.game_objects.enemies.add(self.entity)
-        self.parent_class.game.game_objects.camera[-1].set_camera('Deer_encounter')
+        self.parent_class.game.game_objects.camera.set_camera('Deer_encounter')
 
     def update(self):#write how you want the player/group to act
         self.timer+=1
@@ -183,7 +183,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
             self.exit_state()
 
     def exit_state(self):
-        self.parent_class.game.game_objects.camera[-1].exit_state()
+        self.parent_class.game.game_objects.camera.exit_state()
         self.entity.kill()
         super().exit_state()
 
@@ -194,7 +194,7 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         self.entity=Entities.Reindeer(pos, self.parent_class.game.game_objects)#make the boss
         self.parent_class.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
-        self.parent_class.game.game_objects.camera[-1].set_camera('Deer_encounter')
+        self.parent_class.game.game_objects.camera.set_camera('Deer_encounter')
         self.entity.AI_stack[-1].set_AI('Nothing')
         self.stage = 0
         self.parent_class.game.game_objects.player.currentstate.handle_input('Walk')#should only enter these states once
@@ -214,12 +214,12 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
             if self.timer>200:
                 self.entity.currentstate.enter_state('Transform')
                 self.parent_class.game.game_objects.player.velocity[0]=-20
-                self.parent_class.game.game_objects.camera[-1].camera_shake(amp=3,duration=100)#amplitude, duration
+                self.parent_class.game.game_objects.camera.camera_shake(amp=3,duration=100)#amplitude, duration
                 self.stage=2
 
         elif self.stage==2:
             if self.timer > 400:
-                self.parent_class.game.game_objects.camera[-1].exit_state()#exsiting deer encounter camera
+                self.parent_class.game.game_objects.camera.exit_state()#exsiting deer encounter camera
                 self.entity.AI_stack[-1].exit_AI()
                 self.exit_state()
 
@@ -301,7 +301,7 @@ class Cultist_encounter(Cutscene_engine):
         spawn_pos = (-150,100)
         self.stage = 0
         self.entity1=Entities.Cultist_warrior(spawn_pos, self.parent_class.game.game_objects)
-        self.parent_class.game.game_objects.camera[-1].set_camera('Cultist_encounter')
+        self.parent_class.game.game_objects.camera.set_camera('Cultist_encounter')
         self.entity1.AI_stack[-1].set_AI('Nothing')
         self.parent_class.game.game_objects.enemies.add(self.entity1)
 
@@ -333,5 +333,5 @@ class Cultist_encounter(Cutscene_engine):
     def exit_state(self):
         self.entity1.AI_stack[-1].exit_AI()
         self.entity2.AI_stack[-1].exit_AI()
-        self.parent_class.game.game_objects.camera[-1].exit_state()
+        self.parent_class.game.game_objects.camera.exit_state()
         super().exit_state()

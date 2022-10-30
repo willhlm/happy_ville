@@ -91,13 +91,13 @@ class Collision_right_angle(Platform):
         self.define_values(pos, points)
         super().__init__(self.new_pos,self.size)
         self.ratio = self.size[1]/self.size[0]
-
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
     #0 = tilting to the right, flatside down
     #1 = tilting to the left, flatside down
     #2 = tilting to the right, flatside up
     #3 = tilting to the left, flatside up
+
     def define_values(self, pos, points):
         self.new_pos = (0,0)
         self.size = (0,0)
@@ -232,28 +232,28 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
 
-    def group_distance(self):
+    def group_distance(self):#instead of bound, could calculate distance from center. But maybe cost
         if self.rect[0]<self.bounds[0] or self.rect[0]>self.bounds[1] or self.rect[1]<self.bounds[2] or self.rect[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             self.remove(self.group)#remove from group
             self.add(self.pause_group)#add to pause
 
 class BG_Block(Staticentity):
-    def __init__(self,pos,img,parallax=1):
+    def __init__(self,pos,img,parallax = 1):
         super().__init__(pos,img)
         self.true_pos = self.rect.topleft
         self.parallax = parallax
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.parallax*pos[0], self.rect.topleft[1] + self.parallax*pos[1]]
-        self.true_pos = [self.true_pos[0] + self.parallax*pos[0], self.true_pos[1] + self.parallax*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]
+        self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
         self.rect.topleft = self.true_pos
 
 class BG_Animated(BG_Block):
-    def __init__(self,pos,sprite_folder_path,parallax=1):
+    def __init__(self,pos,sprite_folder_path,parallax=(1,1)):
         super().__init__(pos,pygame.Surface((16,16)),parallax)
         self.sprites = Read_files.load_sprites(sprite_folder_path)
         self.image = self.sprites[0]
-        self.animation=animation.Simple_animation(self)
+        self.animation = animation.Simple_animation(self)
 
     def update(self, pos):
         self.update_pos(pos)
@@ -893,7 +893,7 @@ class Astrid(NPC):#vendor
         super().__init__(pos,game_objects)
         self.inventory={'Bone':10,'Amber_Droplet':1}#itam+price
 
-    def buisness(self):
+    def buisness(self):#enters after conversation
         new_state = states.Vendor(self.game_objects.game, self)
         new_state.enter_state()
 
@@ -901,7 +901,7 @@ class MrSmith(NPC):#balck smith
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
-    def buisness(self):
+    def buisness(self):#enters after conversation
         new_state = states.Smith(self.game_objects.game, self)
         new_state.enter_state()
 
@@ -910,7 +910,7 @@ class MrBanks(NPC):#bank
         super().__init__(pos,game_objects)
         self.ammount = 0
 
-    def buisness(self):
+    def buisness(self):#enters after conversation
         new_state = states.Bank(self.game_objects.game, self)
         new_state.enter_state()
 
@@ -1766,7 +1766,7 @@ class Interactable(Animatedentity):#interactables
     def player_collision(self):#player collision
         pass
 
-    def player_noncollision(self):#when player doesn't collide
+    def player_noncollision(self):#when player doesn't collide: for grass
         pass
 
     def take_dmg(self,projectile):#when player hits with sword
@@ -1778,21 +1778,10 @@ class Bridge(Interactable):
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/bridge/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
-        self.hitbox = pygame.Rect(pos[0],pos[1],11*16,16)
-        #self.npc = Bridge_keeper(self.rect.midright,self.game_objects)
-        #self.game_objects.npcs.add(self.npc)
-
-    def take_dmg(self,dmg):
-        pass
-
-    def player_collision(self):#player collision
-        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-        if sign>0:#plaer on right
-            self.game_objects.player.hitbox.left = self.hitbox.right
-        else:#plyer on left
-            self.game_objects.player.hitbox.right = self.hitbox.left
-        self.game_objects.player.update_rect()
+        self.rect.bottomleft = (pos[0],pos[1])#for some reason, the f**ing rect pos is one pixel off. But the platform is at correct pos
+        self.hitbox = self.rect.copy()
+        platform = Collision_block(pos,(self.image.get_width(),32))
+        self.game_objects.platforms.add(platform)
 
 class Path_col(Interactable):
 
