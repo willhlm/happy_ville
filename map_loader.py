@@ -312,6 +312,18 @@ class Level():
                 new_sign = Entities.Sign(object_position,self.game_objects,values)
                 self.game_objects.interactables.add(new_sign)
 
+    def load_bg_new(self):
+        bg_list = []
+        fg_list = []
+        parallax_values = {}
+        animation_list = {}
+        top_left = {}
+        bg_flags = {}
+        blit_dict = {}
+
+
+
+
     def load_bg(self):
     #returns one surface with all backround images blitted onto it, for each bg/fg layer
         base_bg_list = ['bg_behindfar','bg_far','bg_behindmid','bg_mid','bg_behindnear','bg_near','bg_fixed','ground','fg_fixed','fg_near','fg_mid']
@@ -354,7 +366,8 @@ class Level():
         try:#if a reference point is provided in tiled
             parallax_reference_pos = [self.parallax_reference_pos[0],self.parallax_reference_pos[1]-32]#where is 32 comming from?
         except:#if a reference point is not provided in tiled
-            parallax_reference_pos =  self.init_player_pos
+            #parallax_reference_pos =  self.init_player_pos
+            parallax_reference_pos = [0,0]
 
         new_map_diff = (parallax_reference_pos[0] - screen_center[0], parallax_reference_pos[1] - screen_center[1])
 
