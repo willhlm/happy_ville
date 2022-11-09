@@ -5,9 +5,7 @@ class Level():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.PLAYER_CENTER = C.player_center
-        #self.SCREEN_SIZE = C.window_size
         self.TILE_SIZE = C.tile_size
-        #self.init_player_pos = (0,0)
         self.state = Read_files.read_json("map_state.json") #check this file for structure of object
 
     def load_map(self,map_name,spawn):
@@ -26,11 +24,11 @@ class Level():
         self.game_objects.weather.create_particles(particle)
 
     def append_light_effet(self):
-        if self.level_name == 'light_forest_cave':
+        if self.level_name[:-1] == 'light_forest_cave':
             self.game_objects.game.state_stack[-1].handle_input('dark')#make a dark effect gameplay state
-        elif self.level_name == 'village_cave':
+        elif self.level_name[:-1] == 'village_cave':
             self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
-        elif self.level_name == 'dark_forest':
+        elif self.level_name[:-1] == 'dark_forest':
             self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
 
     def load_map_data(self):
@@ -40,7 +38,10 @@ class Level():
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
-                self.map_data['statics_firstgid'] = tileset['firstgid']
+                if 'static' in tileset['source']:
+                    self.map_data['statics_firstgid'] =  tileset['firstgid']
+                elif 'interactables' in tileset['source']:
+                    self.map_data['interactables_firstgid'] = tileset['firstgid']
 
     def init_state_file(self):
         try:#first time?
@@ -191,6 +192,16 @@ class Level():
                 new_enemy = getattr(Entities, enemy_name)
                 self.game_objects.enemies.add(new_enemy(object_position, self.game_objects))
 
+            elif id == 4:#Spawner: spawn enemies
+                values={}
+                for property in obj['properties']:
+                    if property['name'] == 'entity':
+                        values['entity'] = property['value']
+                    elif property['name'] == 'number':
+                        values['number']=property['value']
+                new_spawn = Entities.Spawner(object_position,self.game_objects,values)
+                self.game_objects.cosmetics.add(new_spawn)
+
             elif id == 9:
                 object_size = (int(obj['width']),int(obj['height']))
                 for property in obj['properties']:
@@ -247,16 +258,6 @@ class Level():
             elif id == 21:#re-spawpoint, save point
                 new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
-
-            elif id == 22:#Spawner: spawn enemies
-                values={}
-                for property in obj['properties']:
-                    if property['name'] == 'entity':
-                        values['entity'] = property['value']
-                    elif property['name'] == 'number':
-                        values['number']=property['value']
-                new_spawn = Entities.Spawner(object_position,self.game_objects,values)
-                self.game_objects.cosmetics.add(new_spawn)
 
             elif id == 23:#bushes, chests etc
                 for property in obj['properties']:
@@ -334,7 +335,7 @@ class Level():
                 bg_list[tile_layer].update({'offset':(0,0)})
 
             bg_list[tile_layer].update({'data':(self.map_data['tile_layers'][tile_layer]['data'])})
-            bg_list[tile_layer].update({'reference_point':(self.map_data['tile_layers'][tile_layer]['x'],self.map_data['tile_layers'][tile_layer]['y'])})#not used
+            #bg_list[tile_layer].update({'reference_point':(self.map_data['tile_layers'][tile_layer]['x'],self.map_data['tile_layers'][tile_layer]['y'])})#not used
 
         #make empty surfaces
         cols = self.map_data['tile_layers'][list(self.map_data['tile_layers'].keys())[0]]['width']#number of columns
