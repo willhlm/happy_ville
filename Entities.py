@@ -77,7 +77,7 @@ class Collision_oneway_up(Platform):
         pass
 
     def collide_y(self,entity):
-        offset=9
+        offset = entity.velocity[1]+1
         if entity.velocity[1]>0:#going down
             if entity.hitbox.bottom<self.hitbox.top+offset:
                 entity.down_collision(self.hitbox.top)
