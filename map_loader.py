@@ -219,6 +219,7 @@ class Level():
                 self.game_objects.camera_blocks.add(new_camera_stop)
             elif id == 15:
                 object_size = (int(obj['width']),int(obj['height']))
+                print(object_position)
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'top')
                 self.game_objects.camera_blocks.add(new_camera_stop)
             elif id == 16:

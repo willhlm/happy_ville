@@ -223,7 +223,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         super().__init__()
         self.image = img.convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect.bottomleft = pos
         self.bounds = [-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
 
     def update(self,pos):
@@ -240,7 +240,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
 class BG_Block(Staticentity):
     def __init__(self,pos,img,parallax = 1):
         super().__init__(pos,img)
-        self.true_pos = self.rect.topleft
+        self.true_pos = self.rect.bottomleft
         self.parallax = parallax
 
     def update_pos(self,pos):
@@ -385,7 +385,7 @@ class Player(Character):
         self.equip = 'Thunder'#ability pointer
         self.sword = Aila_sword(self)
 
-        self.states = set(['Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster
+        self.states = set(['Idle','Walk','Jump_run','Dash','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster
         self.currentstate=states_player.Idle(self)
 
         self.spawn_point = [{'map':'light_forest1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -1056,6 +1056,7 @@ class Rhoutta_encounter(Boss):
 class Camera_Stop(Staticentity):
 
     def __init__(self,size,pos,dir):
+        #pos = (pos[0],pos[1]-size[1])
         super().__init__(pos,pygame.Surface(size))
         self.hitbox = self.rect.inflate(0,0)
         self.dir = dir
