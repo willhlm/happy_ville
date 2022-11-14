@@ -230,6 +230,7 @@ class Level():
                 self.game_objects.camera_blocks.add(new_camera_stop)
             elif id == 15:
                 object_size = (int(obj['width']),int(obj['height']))
+                print(object_position)
                 new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'top')
                 self.game_objects.camera_blocks.add(new_camera_stop)
             elif id == 16:
@@ -449,7 +450,8 @@ class Level():
         try:#if a reference point is provided in tiled
             parallax_reference_pos = [self.parallax_reference_pos[0],self.parallax_reference_pos[1]-32]#where is 32 comming from?
         except:#if a reference point is not provided in tiled
-            parallax_reference_pos =  self.init_player_pos
+            #parallax_reference_pos =  self.init_player_pos
+            parallax_reference_pos = [0,0]
 
         new_map_diff = (parallax_reference_pos[0] - screen_center[0], parallax_reference_pos[1] - screen_center[1])
 

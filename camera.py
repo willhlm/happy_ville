@@ -4,12 +4,15 @@ class Camera():
     def __init__(self,game_objects,true_scroll = [0,0]):
         self.game_objects = game_objects
         self.true_scroll = true_scroll
-        self.scroll = true_scroll
+        self.scroll = true_scroll.copy()
         self.center = list(game_objects.map.PLAYER_CENTER)
         self.shake = [0,0]
+        self.xflag = False
+        self.yflag = False
 
     def update(self):
-        self.check_camera_border()
+        #self.check_camera_border()  #outdated method
+        self.check_camera_border_new()
         self.game_objects.camera.scroll = self.game_objects.camera.true_scroll.copy()
         self.game_objects.camera.scroll[0] = int(self.game_objects.camera.scroll[0])+self.shake[0]
         self.game_objects.camera.scroll[1] = int(self.game_objects.camera.scroll[1])+self.shake[1]
@@ -24,8 +27,52 @@ class Camera():
     def handle_input(self,xflag,yflag):
         pass
 
+    def check_camera_border_new(self):
+        xflag = True
+        yflag = True
+        for stop in self.game_objects.camera_blocks:
+            if stop.dir == 'right':
+                if (stop.rect.bottom > 0) and (stop.rect.top < self.game_objects.game.WINDOW_SIZE[1]):
+                    if -self.game_objects.game.WINDOW_SIZE[0] < (stop.rect.left - self.game_objects.player.hitbox.centerx) < self.game_objects.game.WINDOW_SIZE[0]/2:
+                        self.center[0] = self.game_objects.game.WINDOW_SIZE[0] - (stop.rect.left - self.game_objects.player.hitbox.centerx)
+                        xflag = False
+                    else:
+                        self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+                else:
+                    self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+
+            if stop.dir == 'left' and xflag:
+                if (stop.rect.bottom > 0) and (stop.rect.top < self.game_objects.game.WINDOW_SIZE[1]):
+                    if -self.game_objects.game.WINDOW_SIZE[0] < (self.game_objects.player.hitbox.centerx - stop.rect.right) < self.game_objects.game.WINDOW_SIZE[0]/2:
+                        self.center[0] =  self.game_objects.player.hitbox.centerx - stop.rect.right
+                    else:
+                        self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+                else:
+                    self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+
+            if stop.dir == 'bottom':
+                if (stop.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (stop.rect.right > 0):
+                    if -self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.top - self.game_objects.player.hitbox.centery) < self.game_objects.game.WINDOW_SIZE[1]/2:
+                        self.center[1] = self.game_objects.game.WINDOW_SIZE[1] - (stop.rect.top - self.game_objects.player.hitbox.centery)
+                        yflag = False
+                    else:
+                        self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                else:
+                    self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+
+            if stop.dir == 'top' and yflag:
+                print(stop.rect.bottom)
+                if (stop.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (stop.rect.right > 0):
+                    if -self.game_objects.game.WINDOW_SIZE[1] < (self.game_objects.player.hitbox.centery - stop.rect.bottom) < self.game_objects.game.WINDOW_SIZE[1]/2:
+                        self.center[1] = self.game_objects.player.hitbox.centery - stop.rect.bottom
+                    else:
+                        self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                else:
+                    self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+
+    #old camera border check,
     def check_camera_border(self):
-        xflag, yflag = False, False
+        self.xflag, self.yflag = False, False
         for stop in self.game_objects.camera_blocks:
             if stop.dir == 'right':
                 if (self.game_objects.player.hitbox.centery - stop.rect.bottom < self.center[1]) and (stop.rect.top - self.game_objects.player.hitbox.centery < self.game_objects.game.WINDOW_SIZE[1] - self.center[1]):
@@ -37,8 +84,8 @@ class Camera():
                     xflag = True
             elif stop.dir == 'bottom':
                 if (stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) and (self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
-                    if (-self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.centery - self.game_objects.player.hitbox.centery) < (self.game_objects.game.WINDOW_SIZE[1] - self.center[1])):
-                        yflag = True
+                    if (-self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.top - self.game_objects.player.hitbox.centery) < (self.game_objects.game.WINDOW_SIZE[1] - self.center[1])):
+                        self.yflag = True
             elif stop.dir == 'top':
                 if (0 < stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) or (0 < self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
                     if self.game_objects.player.hitbox.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
@@ -52,7 +99,8 @@ class Auto(Camera):
 
     def update(self):
         self.true_scroll[0]+=(self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
-        self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
+        self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]*8-self.center[1])/15
+
         super().update()
 
     def handle_input(self,xflag, yflag):
