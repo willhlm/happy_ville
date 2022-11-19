@@ -385,7 +385,7 @@ class Player(Character):
         self.equip = 'Thunder'#ability pointer
         self.sword = Aila_sword(self)
 
-        self.states = set(['Dash','Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster
+        self.states = set(['Wall','Dash','Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster
         self.currentstate=states_player.Idle(self)
 
         self.spawn_point = [{'map':'light_forest1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -1388,7 +1388,7 @@ class Poisonblobb(Projectiles):
     def update_vel(self):
         self.velocity[1]+=0.1#graivity
 
-    def collision_plat(self):
+    def collision_plat(self,platform):
         self.velocity=[0,0]
         if self.state=='main':
             self.animation.reset_timer()
@@ -1417,7 +1417,7 @@ class Force(Projectiles):
         self.velocity=[entity.dir[0]*10,0]
         self.update_hitbox()
 
-    def collision_plat(self):
+    def collision_plat(self,platform):
         self.animation.reset_timer()
         self.state='post'
         self.velocity=[0,0]
@@ -1445,7 +1445,7 @@ class Arrow(Projectiles):
         self.velocity=[0,0]
         self.kill()
 
-    def collision_plat(self):
+    def collision_plat(self,platform):
         self.velocity=[0,0]
         self.dmg=0
 
