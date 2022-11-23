@@ -49,10 +49,12 @@ class Game_Objects():
         self.player = Entities.Player([0,0],self)
         self.players = pygame.sprite.Group(self.player)
 
+
     def load_map(self, map_name, spawn = '1',fade = True):
         self.clean_groups()
         self.game.game_objects.player.reset_movement()
         self.map.load_map(map_name,spawn)
+        self.camera.reset_player_center()
 
         if fade:
             new_game_state = states.Fading(self.game)
@@ -127,6 +129,8 @@ class Game_Objects():
         self.loot.draw(self.game.screen)
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
+        for sprite in self.cosmetics:
+            sprite.special()
         self.all_fgs.draw(self.game.screen)
 
         #self.camera_blocks.draw(self.game.screen)

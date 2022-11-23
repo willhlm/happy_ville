@@ -23,6 +23,10 @@ class Camera():
     def camera_shake(self,amp=3,duration=100):
         self.game_objects.camera = Camera_shake(self.game_objects,amp,duration)
 
+    def reset_player_center(self):
+        self.center = self.original_center.copy()
+        print(self.center)
+
     def check_camera_border_new(self):
         xflag = True
         yflag = True

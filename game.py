@@ -17,7 +17,7 @@ class Game():
 
         #initiate game related values and mixer
         pygame.mixer.init()
-        self.clock = pygame.time.Clock()        
+        self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
         self.fps = C.fps
         self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}

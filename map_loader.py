@@ -253,6 +253,19 @@ class Level():
                     new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
                     self.game_objects.interactables.add(new_trigger)
 
+            #reflection object
+            elif id == 20:
+                object_size = (int(obj['width']),int(obj['height']))
+                try:
+                    for property in obj['properties']:
+                        if property['name'] == 'direction':
+                            dir = property['value']
+                except:
+                    pass
+                dir = 'up'
+                reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
+                self.game_objects.cosmetics.add(reflection)
+
             elif id == 21:#re-spawpoint, save point
                 new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
