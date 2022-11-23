@@ -92,7 +92,8 @@ class Walk(Player_states):
     def update_state(self):
         self.particle_timer -= 1
         if self.particle_timer < 0:
-            self.running_particles()
+            #self.running_particles()
+            pass
 
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_run')

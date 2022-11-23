@@ -5,7 +5,8 @@ class Camera():
         self.game_objects = game_objects
         self.true_scroll = true_scroll
         self.scroll = true_scroll.copy()
-        self.center = list(game_objects.map.PLAYER_CENTER)
+        self.original_center = list(game_objects.map.PLAYER_CENTER)
+        self.center = self.original_center.copy()
         self.shake = [0,0]
         self.xflag = False
         self.yflag = False
@@ -26,6 +27,10 @@ class Camera():
 
     def handle_input(self,xflag,yflag):
         pass
+
+    def reset_player_center(self):
+        self.center = self.original_center.copy()
+        print(self.center)
 
     def check_camera_border_new(self):
         xflag = True
