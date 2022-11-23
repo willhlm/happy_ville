@@ -25,8 +25,10 @@ class Player_states(Entity_States):
 
     def handle_press_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
+            self.entity.timer_jobs['shroomjump'].activate()            
             if not self.entity.jumping:# if not jumping already
                 self.entity.timer_jobs['jump'].activate()
+
 
     def handle_release_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':

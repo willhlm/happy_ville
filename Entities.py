@@ -1,5 +1,5 @@
-import pygame, random, sys, Read_files, states, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
-import time
+import pygame, random, sys, Read_files, states, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
+#import time
 import constants as C
 
 pygame.mixer.init()
@@ -319,8 +319,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.max_vel = C.max_vel.copy()
         self.animation_stack = [animation.Entity_animation(self)]
 
-        self.invincibile = False#a flag to check if one should take damage
-        self.timers=[]#a list containing timers, e.g. jump, invincibility etc.
+        self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
 
     def update(self,pos):
         super().update(pos)
@@ -351,7 +350,8 @@ class Character(Dynamicentity):#enemy, NPC,player
                 self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
-        self.velocity[0] = dir*30
+        self.velocity[0] = dir[0]*30
+        self.velocity[1] = -dir[1]*30
 
     def hurt_particles(self,distance=0,lifetime=20,vel=[1,10],type='circle',dir='isotropic',scale=1,colour=[255,255,255,255],number_particles=12):
         for i in range(0,number_particles):
@@ -395,10 +395,7 @@ class Player(Character):
         self.set_abs_dist()
 
         self.sword_swing = 0#a flag to check which swing we are at (0 or 1)
-        self.jumping = False#a flag to check so that you cannot jump in air
-        self.sword_swinging = False#a flag to make sure you can only swing sword when this is False
-
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player)}
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -500,9 +497,9 @@ class Enemy(Character):
             self.game_objects.player.take_dmg(10)
             sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
             if sign>0:
-                self.game_objects.player.knock_back(1)
+                self.game_objects.player.knock_back([1,0])
             else:
-                self.game_objects.player.knock_back(-1)
+                self.game_objects.player.knock_back([-1,0])
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -554,6 +551,19 @@ class Collision_breakable(Enemy):#a breakable collision block
 
     def dead(self):#called when death animatin finishes
         self.kill()
+
+class Mygga(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['main']['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+        self.currentstate = states_mygga.Idle(self)
+        self.health = 50
+        self.acceleration = [0,0]
+        self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
+        self.max_vel = [C.max_vel[0],C.max_vel[0]]
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -660,16 +670,18 @@ class Shroompolin(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
         self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
-        self.aggro=False
-        self.invincibile=True
+        self.aggro = False
+        self.invincibile = True
         self.AI_stack = [AI_shroompoline.Peace(self)]
 
     def player_collision(self):
-        offset=9
         if self.game_objects.player.velocity[1]>0:#going down
-            if self.game_objects.player.hitbox.bottom<self.jump_box.top+offset:
-                self.game_objects.player.velocity[1] = -10
+            offset=self.game_objects.player.velocity[1]+1
+            if self.game_objects.player.hitbox.bottom < self.jump_box.top+offset:
                 self.currentstate.enter_state('Hurt')
+                self.game_objects.player.currentstate.enter_state('Jump_stand')
+                self.game_objects.player.velocity[1] = -10
+                self.game_objects.player.timer_jobs['shroomjump'].activate()
 
     def update_hitbox(self):
         super().update_hitbox()
@@ -1241,7 +1253,7 @@ class Sword(Melee):
 
         if not collision_enemy.invincibile:
             collision_enemy.take_dmg(self.dmg)
-            collision_enemy.knock_back(self.dir[0])
+            collision_enemy.knock_back(self.dir)
             collision_enemy.hurt_particles(dir=self.dir[0])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
             if self.dir[0]>0:
@@ -2223,8 +2235,9 @@ class Timer():
 class Invincibility_timer(Timer):
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
+        self.entity.invincibile = False#a flag to check if one should take damage
 
-    def activate(self):
+    def activate(self):#called when taking a dmg
         super().activate()
         self.entity.invincibile = True
 
@@ -2235,8 +2248,9 @@ class Invincibility_timer(Timer):
 class Sword_timer(Timer):
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
+        self.entity.sword_swinging = False#a flag to make sure you can only swing sword when this is False
 
-    def activate(self):
+    def activate(self):#called when sword is swang
         super().activate()
         self.entity.sword_swinging = True
 
@@ -2247,12 +2261,13 @@ class Sword_timer(Timer):
 class Jump_timer(Timer):
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
+        self.entity.jumping = False
 
     def update(self):
         super().update()
         self.entity.velocity[1] -= 0.4*(C.max_vel[1]+self.entity.velocity[1])
 
-    def activate(self):
+    def activate(self):#called when jump button is pressed
         super().activate()
         self.entity.velocity[1] = 0
         self.entity.jumping = True
@@ -2260,3 +2275,20 @@ class Jump_timer(Timer):
     def deactivate(self):
         super().deactivate()
         #self.entity.velocity[1] = 0.7*self.entity.velocity[1]
+
+class Shroomjump_timer(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+        self.shrooming = False
+
+    def activate(self):#called when pressed jump putton or landing on a shroom
+        if self.shrooming:#second time entering
+            self.entity.velocity[1] = -15
+            return
+
+        super().activate()
+        self.shrooming = True
+
+    def deactivate(self):#called when timer expires
+        super().deactivate()
+        self.shrooming = False

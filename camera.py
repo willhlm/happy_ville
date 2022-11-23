@@ -1,31 +1,27 @@
 import random, sys
 
 class Camera():
-    def __init__(self,game_objects,true_scroll = [0,0]):
+    def __init__(self,game_objects):
         self.game_objects = game_objects
-        self.true_scroll = true_scroll
-        self.scroll = true_scroll.copy()
+        self.true_scroll = [0,0]
+        self.scroll = [0,0]
         self.center = list(game_objects.map.PLAYER_CENTER)
         self.shake = [0,0]
-        self.xflag = False
-        self.yflag = False
 
     def update(self):
-        #self.check_camera_border()  #outdated method
         self.check_camera_border_new()
-        self.game_objects.camera.scroll = self.game_objects.camera.true_scroll.copy()
-        self.game_objects.camera.scroll[0] = int(self.game_objects.camera.scroll[0])+self.shake[0]
-        self.game_objects.camera.scroll[1] = int(self.game_objects.camera.scroll[1])+self.shake[1]
+        self.true_scroll[0] += (self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
+        self.true_scroll[1] += (self.game_objects.player.rect.center[1]-8*self.true_scroll[1]-self.center[1])/15
+        self.scroll = self.true_scroll.copy()
+        self.scroll[0] = int(self.scroll[0])+self.shake[0]
+        self.scroll[1] = int(self.scroll[1])+self.shake[1]
 
     def set_camera(self, camera):
-        new_camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll)
+        new_camera = getattr(sys.modules[__name__], camera)(self.game_objects)
         self.game_objects.camera = new_camera
 
     def camera_shake(self,amp=3,duration=100):
-        self.game_objects.camera = Camera_shake(self,amp,duration)
-
-    def handle_input(self,xflag,yflag):
-        pass
+        self.game_objects.camera = Camera_shake(self.game_objects,amp,duration)
 
     def check_camera_border_new(self):
         xflag = True
@@ -61,7 +57,6 @@ class Camera():
                     self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
 
             if stop.dir == 'top' and yflag:
-                print(stop.rect.bottom)
                 if (stop.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (stop.rect.right > 0):
                     if -self.game_objects.game.WINDOW_SIZE[1] < (self.game_objects.player.hitbox.centery - stop.rect.bottom) < self.game_objects.game.WINDOW_SIZE[1]/2:
                         self.center[1] = self.game_objects.player.hitbox.centery - stop.rect.bottom
@@ -70,146 +65,73 @@ class Camera():
                 else:
                     self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
 
-    #old camera border check,
-    def check_camera_border(self):
-        self.xflag, self.yflag = False, False
-        for stop in self.game_objects.camera_blocks:
-            if stop.dir == 'right':
-                if (self.game_objects.player.hitbox.centery - stop.rect.bottom < self.center[1]) and (stop.rect.top - self.game_objects.player.hitbox.centery < self.game_objects.game.WINDOW_SIZE[1] - self.center[1]):
-                    #if -self.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.player.hitbox.centerx) < self.player_center[0]:
-                    if -self.game_objects.game.WINDOW_SIZE[0] < (stop.rect.centerx - self.center[0]) < self.center[0] and self.game_objects.player.hitbox.centerx >= self.center[0]:
-                        xflag = True
-            elif stop.dir == 'left':
-                if stop.rect.right >= 0 and self.game_objects.player.hitbox.centerx < self.center[0]:
-                    xflag = True
-            elif stop.dir == 'bottom':
-                if (stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) and (self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
-                    if (-self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.top - self.game_objects.player.hitbox.centery) < (self.game_objects.game.WINDOW_SIZE[1] - self.center[1])):
-                        self.yflag = True
-            elif stop.dir == 'top':
-                if (0 < stop.rect.left - self.game_objects.player.hitbox.centerx < self.center[0]) or (0 < self.game_objects.player.hitbox.centerx - stop.rect.right < self.center[0]):
-                    if self.game_objects.player.hitbox.centery - stop.rect.centery < 180 and stop.rect.bottom >= 0:
-                        yflag = True
-
-        self.handle_input(xflag, yflag)
-
-class Auto(Camera):
-    def __init__(self, game_objects, true_scroll = [0,0]):
-        super().__init__(game_objects, true_scroll)
-
-    def update(self):
-        self.true_scroll[0]+=(self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
-        self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]*8-self.center[1])/15
-
-        super().update()
-
-    def handle_input(self,xflag, yflag):
-        if xflag and yflag:
-            self.set_camera('Fixed')
-        elif xflag:
-            self.set_camera('Auto_CapX')
-        elif yflag:
-            self.set_camera('Auto_CapY')
-
-class Auto_CapX(Camera):
-    def __init__(self, game_objects, true_scroll = [0,0]):
-        true_scroll[0] = 0
-        super().__init__(game_objects, true_scroll)
-
-    def update(self):
-        self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
-        super().update()
-
-    def handle_input(self,xflag, yflag):
-        if xflag and yflag:
-            self.set_camera('Fixed')
-        elif not xflag:
-            self.set_camera('Auto')
-        elif yflag:
-            self.set_camera('Auto_CapY')
-
-class Auto_CapY(Camera):
-    def __init__(self, game_objects, true_scroll = [0,0]):
-        true_scroll[1] = 0
-        super().__init__(game_objects, true_scroll)
-
-    def update(self):
-        self.true_scroll[0]+=(self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
-        super().update()
-
-    def handle_input(self,xflag, yflag):
-        if xflag and yflag:
-            self.set_camera('Fixed')
-        elif xflag:
-            self.set_camera('Auto_CapX')
-        elif not yflag:
-            self.set_camera('Auto')
-
-class Fixed(Camera):
-    def __init__(self, game_objects, true_scroll):
-        super().__init__(game_objects, [0,0])
-
-    def update(self):
-        super().update()
-
-    def handle_input(self,xflag, yflag):
-        if not xflag and not yflag:
-            self.set_camera('Auto')
-        elif not xflag:
-            self.set_camera('Auto_CapY')
-        elif not yflag:
-            self.set_camera('Auto_CapX')
-
 class Camera_shake(Camera):
-    def __init__(self, curr_camera,amp,duration):
-        super().__init__(curr_camera.game_objects)
-        self.curr_camera = curr_camera
+    def __init__(self, game_objects,amp,duration):
+        super().__init__(game_objects)
         self.amp = amp
         self.duration = duration
 
+    def camera_shake(self,amp=3,duration=100):
+        pass
+
     def update(self):
+        self.shake[0] = random.randint(-self.amp,self.amp)
+        self.shake[1] = random.randint(-self.amp,self.amp)
+        super().update()
         self.duration -= 1
-
-        self.curr_camera.shake[0] = random.randint(-self.amp,self.amp)
-        self.curr_camera.shake[1] = random.randint(-self.amp,self.amp)
-        self.curr_camera.update()
-        self.scroll = self.curr_camera.scroll#update the calculated scroll
-
         self.exit_state()
 
     def exit_state(self):#go back to the cameera we came from
         if self.duration < 0:
-            self.curr_camera.shake = [0,0]
-            self.set_camera(type(self.curr_camera).__name__)
+            self.set_camera('Camera')
 
-#cutscenes
-class Deer_encounter(Auto):
-    def __init__(self, game_objects,true_scroll):
-        super().__init__(game_objects,true_scroll)
+#cutscene cameras
+class Cutscenes(Camera):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        self.shaking = False
+
+    def update(self):
+        super().update()
+        self.shakeit()
+
+    def camera_shake(self,amp = 3, duration = 100):
+        self.shaking = True
+        self.amp = amp
+        self.duration = duration
+
+    def shakeit(self):
+        if self.shaking:
+            self.duration -= 1
+            self.shake[0] = random.randint(-self.amp,self.amp)
+            self.shake[1] = random.randint(-self.amp,self.amp)
+            if self.duration < 0:
+                self.shaking = False
+
+    def exit_state(self):
+        self.set_camera('Camera')
+
+class Deer_encounter(Cutscenes):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
 
     def update(self):
         self.center[0] -= 5
-        self.center[0] = max(300,self.center[0])
+        self.center[0] = max(200,self.center[0])
         super().update()
 
-    def exit_state(self):
-        self.set_camera('Auto')
-
-class Cultist_encounter(Auto):
-    def __init__(self, game_objects,true_scroll):
-        super().__init__(game_objects,true_scroll)
+class Cultist_encounter(Cutscenes):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
 
     def update(self):
         self.center[0] += 2
         self.center[0] = min(500,self.center[0])
         super().update()
 
-    def exit_state(self):
-        self.set_camera('Auto')
-
-class New_game(Auto):
-    def __init__(self, game_objects,true_scroll):
-        super().__init__(game_objects,true_scroll)
+class New_game(Cutscenes):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
         self.center[1] = 1000
 
     def update(self):
@@ -217,21 +139,15 @@ class New_game(Auto):
         self.center[1] = max(self.game_objects.map.PLAYER_CENTER[1],self.center[1])
         super().update()
 
-    def exit_state(self):
-        self.set_camera('Auto')
-
-class Title_screen(Auto):
-    def __init__(self, game_objects,true_scroll):
-        super().__init__(game_objects,true_scroll)
+class Title_screen(Cutscenes):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
 
     def update(self):
         self.center[1] += 2
         self.center[1] = min(1000,self.center[1])
 
         self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
-        self.check_camera_border()
+        self.check_camera_border_new()
         self.scroll=self.true_scroll.copy()
         self.scroll[1]=int(self.scroll[1])+self.shake[1]
-
-    def exit_state(self):
-        self.set_camera('Auto')
