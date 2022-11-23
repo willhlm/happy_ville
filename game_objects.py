@@ -20,7 +20,7 @@ class Game_Objects():
         self.weather = weather.Weather(self)#initiate weather
         self.collisions = Engine.Collisions(self)
         self.map = map_loader.Level(self)
-        self.camera = camera.Auto(self)
+        self.camera = camera.Camera(self)
 
         #should these be a world state class? which stores game information stuff
         self.cutscenes_complete = []
@@ -37,9 +37,9 @@ class Game_Objects():
         self.all_bgs = pygame.sprite.LayeredUpdates()
         self.all_fgs = pygame.sprite.LayeredUpdates()
         self.bg_interact = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
-        self.eprojectiles = pygame.sprite.Group()#arrows and sword
-        self.fprojectiles = pygame.sprite.Group()#arrows and sword
-        self.loot = pygame.sprite.Group()
+        self.eprojectiles = pygame.sprite.Group()#arrows and sword for enemies
+        self.fprojectiles = pygame.sprite.Group()#arrows and sword for aila
+        self.loot = pygame.sprite.Group()#coins and stuff the player can collide can pickup
         self.entity_pause = Entities.PauseGroup() #all Entities that are far away
         self.cosmetics = pygame.sprite.Group()#things we just want to blit
         self.camera_blocks = pygame.sprite.Group()

@@ -157,7 +157,6 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
         self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
         self.parent_class.game.game_objects.camera.set_camera('Title_screen')
 
-
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,objects):
         super().__init__(objects)
@@ -190,7 +189,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
-        pos=(900,140)
+        pos=(900,100)
         self.entity=Entities.Reindeer(pos, self.parent_class.game.game_objects)#make the boss
         self.parent_class.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1

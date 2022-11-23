@@ -11,6 +11,7 @@ friction = [0.5,0]
 friction_player = [0.24,0.01]
 max_vel = [30,7]
 jump_time_player = 9#how long one goes vertically while pressing the jump button
+shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
 
 #combat
 invincibility_time_player = 50
