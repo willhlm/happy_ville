@@ -434,7 +434,7 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Aslat"
+                         "value":"Bierdna"
                         }],
                  "rotation":0,
                  "type":"",
@@ -452,7 +452,7 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Sahkar"
+                         "value":"MrSmith"
                         }],
                  "rotation":0,
                  "type":"",
@@ -601,18 +601,6 @@
                  "width":16,
                  "x":9264,
                  "y":416
-                }, 
-                {
-                 "gid":18,
-                 "height":16,
-                 "id":249,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":352,
-                 "x":4208,
-                 "y":672
                 }],
          "opacity":1,
          "type":"objectgroup",

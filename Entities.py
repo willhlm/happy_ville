@@ -900,6 +900,10 @@ class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
+class Bierdna(NPC):#bartender
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+
 class Astrid(NPC):#vendor
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
