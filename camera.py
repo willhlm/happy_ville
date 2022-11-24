@@ -6,6 +6,7 @@ class Camera():
         self.true_scroll = [0,0]
         self.scroll = [0,0]
         self.center = list(game_objects.map.PLAYER_CENTER)
+        self.original_center = self.center.copy()
         self.shake = [0,0]
 
     def update(self):
@@ -25,7 +26,6 @@ class Camera():
 
     def reset_player_center(self):
         self.center = self.original_center.copy()
-        print(self.center)
 
     def check_camera_border_new(self):
         xflag = True

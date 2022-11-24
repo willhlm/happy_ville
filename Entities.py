@@ -4,6 +4,14 @@ import constants as C
 
 pygame.mixer.init()
 
+class RefelctionGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries
+    def __init__(self):
+        super().__init__()
+
+    def draw(self):
+        for s in self.sprites():
+            s.draw()
+
 class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries
     def __init__(self):
         super().__init__()
@@ -270,24 +278,13 @@ class Reflection(Staticentity):
         self.dir = dir
         self.game_objects = game_objects
 
-    def update(self,pos):
-        super().update(pos)
-
-    def special(self):
+    def draw(self):
         reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1] - 30, self.size[0], self.size[1])
         reflect_rect.center = [reflect_rect.center[0],self.game_objects.game.screen.get_height() - reflect_rect.center[1]]
-        temp = self.game_objects.game.screen.copy()
-        temp=temp.convert_alpha()
-        temp.set_alpha(90)
-        temp = pygame.transform.flip(temp, False, True)
-        self.game_objects.game.screen.blit(temp, (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect)
-
-        #reflection_image = pygame.transform.flip(sub, False, True)#flip in y
-        #self.image = reflection_image
-
-
-
-        #gamescreen.blit(reflection_image,self.pos,special_flags=pygame.BLEND_RGBA_MULT)
+        reflect_surface = self.game_objects.game.screen.copy()
+        reflect_surface.convert_alpha()#do we need this?
+        #reflect_surface.set_alpha(10)
+        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)
 
 class Dynamicentity(Staticentity):
     def __init__(self,pos):

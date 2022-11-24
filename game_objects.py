@@ -44,11 +44,11 @@ class Game_Objects():
         self.cosmetics = pygame.sprite.Group()#things we just want to blit
         self.camera_blocks = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
+        self.reflections = Entities.RefelctionGroup()
 
         #initiate player
         self.player = Entities.Player([0,0],self)
         self.players = pygame.sprite.Group(self.player)
-
 
     def load_map(self, map_name, spawn = '1',fade = True):
         self.clean_groups()
@@ -115,6 +115,7 @@ class Game_Objects():
         self.cosmetics.update(scroll)
         self.camera_blocks.update(scroll)
         self.interactables.update(scroll)
+        self.reflections.update(scroll)
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
@@ -129,8 +130,7 @@ class Game_Objects():
         self.loot.draw(self.game.screen)
         self.entity_pause.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)
-        for sprite in self.cosmetics:
-            sprite.special()
+        self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw(self.game.screen)
 
         #self.camera_blocks.draw(self.game.screen)
