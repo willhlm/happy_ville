@@ -1,0 +1,10 @@
+{
+    "state_1" : {
+        "0" : "Hello my deer Aila. Mr pinky has dissaperaed again. Probably in the forest again. Could you be kind and get him back, as usual?",
+        "1" : "Thanks"
+    },
+    "state_2" : {
+        "0" : "Mr pink did what? Oh, my poor dear. What happened to him. You better seek out Aslat.",
+        "1" : "Could you seek out Aslat?"
+    }
+}

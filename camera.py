@@ -26,7 +26,6 @@ class Camera():
 
     def reset_player_center(self):
         self.center = self.original_center.copy()
-        print(self.center)
 
     def check_camera_border_new(self):
         xflag = True

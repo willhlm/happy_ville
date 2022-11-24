@@ -264,7 +264,7 @@ class Level():
                     pass
                 dir = 'up'
                 reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
-                self.game_objects.cosmetics.add(reflection)
+                self.game_objects.reflections.add(reflection)
 
             elif id == 21:#re-spawpoint, save point
                 new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
