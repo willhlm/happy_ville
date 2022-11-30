@@ -283,8 +283,8 @@ class Reflection(Staticentity):
         reflect_rect.center = [reflect_rect.center[0],self.game_objects.game.screen.get_height() - reflect_rect.center[1]]
         reflect_surface = self.game_objects.game.screen.copy()
         reflect_surface.convert_alpha()#do we need this?
-        #reflect_surface.set_alpha(10)
-        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)
+        #reflect_surface.set_alpha(100)
+        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
 
 class Dynamicentity(Staticentity):
     def __init__(self,pos):
