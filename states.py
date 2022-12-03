@@ -92,7 +92,11 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
+<<<<<<< HEAD
             self.game.game_objects.load_map('village1','1')
+=======
+            self.game.game_objects.load_map('village4','1')
+>>>>>>> 83c789117c25e0c27828cfa90efed0d358999473
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
