@@ -186,7 +186,8 @@ class Collision_right_angle(Platform):
 
         if entity.hitbox.top < target:
             entity.top_collision(target)
-            entity.velocity[1] = 1 #need to have a value to avoid "dragin in air" while running
+            entity.velocity[1] = 2 #need to have a value to avoid "dragin in air" while running
+            entity.velocity[0] = 0 #need to have a value to avoid "dragin in air" while running
             entity.update_rect()
 
     def shift_up(self,rel_x,other_side,entity):
