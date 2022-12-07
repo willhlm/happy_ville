@@ -86,8 +86,8 @@ class Collision_oneway_up(Platform):
 
     def collide_y(self,entity):
         offset = entity.velocity[1]+1
-        if entity.velocity[1]>0:#going down
-            if entity.hitbox.bottom<self.hitbox.top+offset:
+        if entity.velocity[1] > 0:#going down
+            if entity.hitbox.bottom <= self.hitbox.top+offset:
                 entity.down_collision(self.hitbox.top)
                 entity.running_particles = self.run_particles#save the particles to make
                 entity.update_rect()
@@ -528,10 +528,7 @@ class Enemy(Character):
 
     def dead(self):#called when death animation is finished
         self.loots()
-        self.game_objects.statistics['kill'][type(self).__name__.lower()] += 1#add to kill statisics
-        if self.game_objects.statistics['kill'][type(self).__name__.lower()] > 100:
-            for omamori in self.game_objects.player.omamoris.omamori_list:
-                omamori.level_up()
+        self.game_objects.world_state.update_kill_statistics(type(self).__name__.lower())
         self.kill()
 
     def loots(self):#called when dead
@@ -870,7 +867,8 @@ class NPC(Character):
 
     def get_conversation(self):#returns the conversation depending on the NPC state and conversation index
         try:
-            conv = self.conversation[self.game_objects.world_state][str(self.conv_index)]
+            state = 'state_' + self.game_objects.world_state.progress
+            conv = self.conversation[state][str(self.conv_index)]
         except:
             self.conv_index -= 1
             return None
@@ -915,7 +913,7 @@ class Aslat(NPC):
         super().__init__(pos,game_objects)
 
     def buisness(self):#enters after conversation
-        if self.game_objects.world_state == 'state_2':#if player has deafated the reindeer
+        if self.game_objects.world_state.progress == 2:#if player has deafated the reindeer
             if 'Wall' not in self.game_objects.player.states:#if player doesn't have wall yet
                 new_game_state = states.New_ability(self.game_objects.game,'wall')
                 new_game_state.enter_state()
@@ -968,7 +966,7 @@ class Boss(Enemy):
         self.AI_stack[-1].set_AI('Nothing')
         self.loots()
         self.give_abillity()
-        self.game_objects.increase_world_state()
+        self.game_objects.world_state.increase_progress()
         new_game_state = states.New_ability(self.game_objects.game,self.abillity)
         new_game_state.enter_state()
         new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
@@ -1647,6 +1645,10 @@ class Amber_Droplet(Enemy_drop):
         self.hitbox = self.rect.copy()
         self.description = 'moneyy'
 
+    def player_collision(self):#when the player collides with this object
+        super().player_collision()
+        self.game_objects.world_state.update_money_statistcis()
+
 class Bone(Enemy_drop):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/bone/')
 
@@ -1881,7 +1883,7 @@ class Cutscene_trigger(Interactable):
         self.group_distance()
 
     def player_collision(self):
-        if self.event not in self.game_objects.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
+        if self.event not in self.game_objects.world_state.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
             self.specific()
             new_game_state = states.Cutscenes(self.game_objects.game,self.event)
             new_game_state.enter_state()
@@ -1919,6 +1921,25 @@ class Cave_grass(Interactable_bushes):
         self.rect.bottomleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
 
+class Runestones(Interactable):
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/runestones/' + ID_key)
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
+
+        if state != "idle":
+            self.currentstate = states_basic.Interacted(self)
+
+    def interact(self):
+        self.currentstate.handle_input('Transform')
+
+    def reset_timer(self):#when animation is finished
+        self.currentstate.handle_input('Idle')
+
 class Chest(Interactable):
     def __init__(self,pos,game_objects,state,ID_key):
         super().__init__(pos,game_objects)
@@ -1929,13 +1950,13 @@ class Chest(Interactable):
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.health=3
         self.inventory = {'Amber_Droplet':3}
-        self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
+        self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
         self.invincibile = False
 
-        if state != "closed":
-            self.currentstate = states_basic.Open(self)
+        if state != "idle":
+            self.currentstate = states_basic.Interacted(self)
 
     def update(self,scroll):
         super().update(scroll)

@@ -36,6 +36,8 @@ class Idle(Entity_States):
             self.enter_state('Once')
         elif input =='Outline':
             self.enter_state('Outline')
+        elif input == 'Transform':
+            self.enter_state('Transform')
 
 class Once(Entity_States):
     def __init__(self,entity):
@@ -70,9 +72,17 @@ class Opening(Once):
     def handle_input(self,input):
         if input=='Idle':
             self.entity.loots()
-            self.enter_state('Open')
+            self.enter_state('Interacted')
 
-class Open(Entity_States):
+class Transform(Once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input=='Idle':
+            self.enter_state('Interacted')
+
+class Interacted(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 

@@ -25,7 +25,7 @@ class Player_states(Entity_States):
 
     def handle_press_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
-            self.entity.timer_jobs['shroomjump'].activate()            
+            self.entity.timer_jobs['shroomjump'].activate()
             if not self.entity.jumping:# if not jumping already
                 self.entity.timer_jobs['jump'].activate()
 
@@ -94,8 +94,7 @@ class Walk(Player_states):
     def update_state(self):
         self.particle_timer -= 1
         if self.particle_timer < 0:
-            #self.running_particles()
-            pass
+            self.running_particles()
 
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_run')
@@ -394,7 +393,7 @@ class Dash(Player_states):
         self.entity.spirit -= 10
 
     def update_state(self):
-        self.entity.velocity[1]=0
+        self.entity.velocity[1] = 0
         self.entity.velocity[0]=self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
 
         if self.done:

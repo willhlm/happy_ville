@@ -92,11 +92,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-<<<<<<< HEAD
-            self.game.game_objects.load_map('village1','1')
-=======
-            self.game.game_objects.load_map('village4','1')
->>>>>>> 83c789117c25e0c27828cfa90efed0d358999473
+            self.game.game_objects.load_map('light_forest_cave1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -1206,7 +1202,7 @@ class Cutscenes(Gameplay):#basically, this class is not needed but would be nice
         self.game.game_objects.player.reset_movement()
         self.current_scene = getattr(cutscene, scene)(self)#make an object based on string
         if scene != 'Death':
-            self.game.game_objects.cutscenes_complete.append(scene)#scenes will not run if the scnene is in this list
+            self.game.game_objects.world_state.cutscenes_complete.append(scene)#scenes will not run if the scnene is in this list
 
     def update(self):
         super().update()
