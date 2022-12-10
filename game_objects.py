@@ -9,6 +9,7 @@ import camera
 import json
 import weather
 import constants as C
+import world_state
 
 class Game_Objects():
 
@@ -21,12 +22,7 @@ class Game_Objects():
         self.collisions = Engine.Collisions(self)
         self.map = map_loader.Level(self)
         self.camera = camera.Camera(self)
-
-        #should these be a world state class? which stores game information stuff
-        self.cutscenes_complete = []
-        self.statistics = {'kill':{'slime':0,'larv':0,'blue_bird':0,'cultist_warrior':0,'cultist_rogue':0},'ambers':0}
-        self.state = 2
-        self.world_state = 'state_' + str(self.state)#a flag that describes the progression of the game
+        self.world_state = world_state.World_state(self)#save/handle all world state stuff here
 
     def create_groups(self):
         #define all sprite groups
@@ -161,10 +157,6 @@ class Game_Objects():
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,1)#draw hitbox
 
-    def increase_world_state(self):#called when a boss dies
-        self.state += 1
-        self.world_state = 'state_'+str(self.state)
-
     def save_game(self):#save_obj calls to_json method in the object: write the to_json mthod such that it save the attributes of interest.
         Read_files.save_obj(self.player)
         Read_files.save_obj(self)
@@ -174,8 +166,8 @@ class Game_Objects():
         Read_files.load_obj(self)
 
     def to_json(self):#stuff to save
-        save_dict = {'cutscenes_complete':self.cutscenes_complete}
+        save_dict = {'cutscenes_complete':self.world_state.cutscenes_complete}
         return save_dict
 
     def from_json(self,data):#stuff to load
-        self.cutscenes_complete = data['cutscenes_complete']
+        self.world_state.cutscenes_complete = data['cutscenes_complete']

@@ -6,18 +6,23 @@ class Level():
         self.game_objects = game_objects
         self.PLAYER_CENTER = C.player_center
         self.TILE_SIZE = C.tile_size
-        self.state = Read_files.read_json("map_state.json") #check this file for structure of object
 
     def load_map(self,map_name,spawn):
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. light effect
         self.level_name = map_name
         self.spawn = spawn
         self.load_map_data()
-        self.init_state_file()#make a state file if it is the first time loading this map
+        self.init_state_file()#need to be before load statics
         self.load_statics()
         self.load_collision_layer()
         self.load_bgs()
         self.append_light_effet()#append any light effects
+
+    def init_state_file(self):
+        try:
+            self.game_objects.world_state.state[self.level_name]
+        except:#make a state file if it is the first time loading this map
+            self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
 
     def set_weather(self,particle):
         self.game_objects.weather.create_particles(particle)
@@ -41,36 +46,6 @@ class Level():
                     self.map_data['statics_firstgid'] =  tileset['firstgid']
                 elif 'interactables' in tileset['source']:
                     self.map_data['interactables_firstgid'] = tileset['firstgid']
-
-    def init_state_file(self):
-        try:#first time?
-            self.state[self.level_name]
-        except:#if first time loading a map, prepare a state file
-            chest_int = 0
-            soul_essence_int = 0
-            map_statics = self.map_data["statics"]
-            self.state[self.level_name] = {'chest':{},'soul_essence':{}}#a place holder for things that should depend on map state
-
-            for obj in map_statics:
-                id = obj['gid'] - self.map_data['statics_firstgid']
-
-                if id == 23:#bushes, chests etc
-                    for property in obj['properties']:
-                        if property['name'] == 'type':
-                            interactable_type = property['value']
-
-                    if interactable_type == 'Chest':
-                        self.state[self.level_name]['chest'][str(chest_int)] = 'closed'
-                        chest_int += 1
-
-                elif id == 28:#key items: Soul_essence etc.
-                    for property in obj['properties']:
-                        if property['name'] == 'name':
-                            keyitem = property['value']
-
-                    if keyitem == 'Soul_essence':
-                        self.state[self.level_name]['soul_essence'][str(soul_essence_int)] = 'available'
-                        soul_essence_int += 1
 
     def read_all_spritesheets(self):
         sprites = {}
@@ -155,8 +130,8 @@ class Level():
                 self.game_objects.enemies.add(new_block)
 
     def load_statics(self):
-        chest_int = 0
-        soul_essence_int = 0
+        chest_int = 1
+        soul_essence_int = 1
 
         map_statics = self.map_data["statics"]
 
@@ -270,13 +245,21 @@ class Level():
                 new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
+            elif id == 22:#runestones, colectable
+                for property in obj['properties']:
+                    if property['name'] == 'ID':
+                        ID = property['value']
+
+                new_rune = Entities.Runestones(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['runestone'][ID],ID)
+                self.game_objects.interactables.add(new_rune)
+
             elif id == 23:#bushes, chests etc
                 for property in obj['properties']:
                     if property['name'] == 'type':
                         interactable_type = property['value']
 
                 if interactable_type == 'Chest':
-                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects,self.state[self.level_name]['chest'][str(chest_int)],str(chest_int))
+                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['chest'][str(chest_int)],str(chest_int))
                     chest_int += 1
                 else:
                     new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
@@ -288,7 +271,7 @@ class Level():
                     if property['name'] == 'name':
                         keyitem = property['value']
 
-                if self.state[self.level_name][str(keyitem).lower()][str(soul_essence_int)] == 'available':#if player hasn't picked it up
+                if self.game_objects.world_state.state[self.level_name][str(keyitem).lower()][str(soul_essence_int)] == 'idle':#if player hasn't picked it up
                     new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects,str(soul_essence_int))
                     self.game_objects.loot.add(new_keyitem)
                     if keyitem == 'Soul_essence':
@@ -302,7 +285,7 @@ class Level():
 
                     #write specefic conditions if thse should spawn
                     if interactable == 'Bridge':
-                        if self.game_objects.state > 1:#if reindeer has been defeated
+                        if self.game_objects.world_state.state > 1:#if reindeer has been defeated
                             new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
                             self.game_objects.interactables.add(new_interactable)
 
