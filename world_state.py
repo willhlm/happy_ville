@@ -53,3 +53,5 @@ class World_state():
                 if keyitem == 'Soul_essence':
                     self.state[level_name]['soul_essence'][str(soul_essence_int)] = 'idle'
                     soul_essence_int += 1
+
+        self.state.pop('placeholder_level', 0)#removes the placeholder tag

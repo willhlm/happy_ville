@@ -16,41 +16,26 @@ class Weather():#maybe should just be a function
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
         super().__init__()
-        self.page = 0
-        self.update_img=[self.img_out,self.img_in]
-        self.image = pygame.Surface(game_objects.game.WINDOW_SIZE, pygame.SRCALPHA, 32).convert_alpha()
+        self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0]*2,game_objects.game.WINDOW_SIZE[1]*2], pygame.SRCALPHA, 32).convert_alpha()
         self.image.fill((255,255,255,255))
         self.rect = self.image.get_rect()
-        self.init_out()
-
-    def init_in(self):
-        self.count = 0
-        self.fade_length = 10
-        self.image.set_alpha(255)
-
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
-
-    def init_out(self):
+        self.rect.center = [game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]]
         self.count = 0
         self.fade_length = 20
         self.image.set_alpha(int(255/self.fade_length))
 
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+
     def update(self,scroll):
         self.update_pos(scroll)
-        self.update_img[self.page]()
+        self.update_img()
         self.count += 1
         if self.count > self.fade_length:
-            self.page += 1
-            self.init_in()
-            if self.page == 2:
-                self.kill()
+            self.kill()
 
-    def img_out(self):
+    def update_img(self):
         self.image.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
-
-    def img_in(self):
-        self.image.set_alpha(int(self.count*(255/self.fade_length)))
 
 class Weather_particles(Animatedentity):
     def __init__(self,game_objects):
@@ -174,16 +159,3 @@ class Rain(Weather_particles):
         [offsetx-math.cos(self.angle)*self.scale*3.5,offsety-math.sin(self.angle)*self.scale*3.5],
         [offsetx+math.cos(self.angle-math.pi*0.5)*self.scale*0.3,offsety-math.sin(self.angle+math.pi*0.5)*self.scale*0.3]
         ]
-
-class Reflection():
-    def __init__(self):
-        pass
-
-    def draw(self, gamescreen):
-        rect = pygame.Rect(25, 25, 100, 50)#size and position of interest
-        sub = gamescreen.subsurface(rect)#cut off the interest
-
-        reflection_image = pygame.transform.flip(sub, False, True)#flip in y
-        offset=60
-        position=[250,100+offset]
-        gamescreen.blit(reflection_image,position,special_flags=pygame.BLEND_RGBA_MULT)

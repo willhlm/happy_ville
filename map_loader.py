@@ -17,7 +17,7 @@ class Level():
         self.load_collision_layer()
         self.load_bgs()
         self.append_light_effet()#append any light effects
-
+        
     def init_state_file(self):
         try:
             self.game_objects.world_state.state[self.level_name]
@@ -265,6 +265,10 @@ class Level():
                     new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interactables.add(new_interacable)
+
+            elif id == 26:#key items: soul_essence etc.
+                runestone = Entities.Uber_runestone(object_position,self.game_objects)
+                self.game_objects.interactables.add(runestone)
 
             elif id == 28:#key items: soul_essence etc.
                 for property in obj['properties']:
