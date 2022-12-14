@@ -272,18 +272,21 @@ class BG_Animated(BG_Block):
         pass
 
 class Reflection(Staticentity):
-    def __init__(self,pos,size,dir,game_objects):
+    def __init__(self,pos,size,dir,game_objects, offset = 12):
         super().__init__(pos,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.pos = list(pos)
         self.size = size
         self.dir = dir
         self.game_objects = game_objects
+        self.offset = offset
 
     def draw(self):
-        reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1] - 30, self.size[0], self.size[1])
+        squeeze = 0.85
+        reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1]*squeeze - self.offset, self.size[0], self.size[1])
         reflect_rect.center = [reflect_rect.center[0],self.game_objects.game.screen.get_height() - reflect_rect.center[1]]
         reflect_surface = self.game_objects.game.screen.copy()
         reflect_surface.convert_alpha()#do we need this?
+        reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*squeeze))
         #reflect_surface.set_alpha(100)
         self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
 
