@@ -36,5 +36,5 @@ class Idle(Entity_States):
 class Flip(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.velocity[1]=self.entity.velocity[1]*0.8#slow down
-        self.entity.velocity[0]=self.entity.velocity[0]*0.8
+        #self.entity.velocity[1]=self.entity.velocity[1]*0.8#slow down
+        #self.entity.velocity[0]=self.entity.velocity[0]*0.8

@@ -43,7 +43,7 @@ class Bound_entity(Animatedentity):#entities bound to the scereen
         self.game_objects = game_objects
         self.parallax = parallax
         self.width = self.game_objects.game.WINDOW_SIZE[0] + 0.6*self.game_objects.game.WINDOW_SIZE[0]
-        self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.1*self.game_objects.game.WINDOW_SIZE[1]
+        self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.6*self.game_objects.game.WINDOW_SIZE[1]
         self.velocity = [0,0]
 
     def update(self,scroll):
@@ -54,10 +54,11 @@ class Bound_entity(Animatedentity):#entities bound to the scereen
         self.true_pos = [self.true_pos[0] + (scroll[0]+self.velocity[0])*self.parallax[0], self.true_pos[1] + (scroll[1]+self.velocity[1])*self.parallax[1]]
         self.rect.topleft = self.true_pos
 
-    def boundary(self):
+    def boundary(self):#continiouse falling
         if self.rect.centery > self.height:#if on the lower side of screen.
-            self.true_pos[1] = random.randint(-700, -50)
-        #continiouse falling, horizontally
+            self.true_pos[1] -= self.height
+        elif self.rect.centery < -100:#if on the higher side of screen.
+            self.true_pos[1] += self.height
         elif self.rect.centerx < -100:
             self.true_pos[0] += self.width
         elif self.rect.centerx > self.width:
@@ -67,10 +68,12 @@ class Bound_entity(Animatedentity):#entities bound to the scereen
 class Circles(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.colour = (255,255,255,255)
+        self.colour = [255,255,255,160]
 
-        self.glow_radius = 40
-        self.radius = round(5*self.parallax[0])#particle radius
+        self.radius = round(5*self.parallax[0])#particle radius depends on parallax
+        self.layers = 5#number of layers in the glow
+        self.glow_radius = self.layers*self.radius#determines the canvas size needed
+
         self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
         self.true_pos = self.pos.copy()
         self.make_circle()
@@ -85,10 +88,8 @@ class Circles(Bound_entity):
     def update_image(self):
         self.image = self.surface.copy()
         self.time += 1
-        fade = 80*math.sin(self.time*0.01+self.phase)+80
-        self.colour = (255,255,255,fade)
-        radius = (self.radius*math.sin(self.time*0.01+self.phase)+self.radius)*0.5
-        glow_radius = (self.glow_radius*math.sin(self.time*0.01+self.phase)+self.glow_radius)*0.5
+        self.colour[-1] = 80*math.sin(self.time*0.01+self.phase)+80#set fade
+        radius = (self.radius*math.sin(self.time*0.01+self.phase)+self.radius)*0.5#modify redious
 
         self.make_glow(radius)
         pygame.draw.circle(self.image,self.colour,(self.glow_radius,self.glow_radius),radius)
@@ -96,17 +97,15 @@ class Circles(Bound_entity):
     def make_circle(self):
         self.surface = pygame.Surface((self.glow_radius * 2, self.glow_radius * 2),pygame.SRCALPHA,32).convert_alpha()
         self.image = self.surface.copy()
-        pygame.draw.circle(self.image,self.colour,self.surface.get_rect().center,self.radius)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
     def make_glow(self,radius):
         temp = self.surface.copy()
-        layers = 5
-        for i in range(layers):
+        for i in range(self.layers):
             k = 255
-            pygame.draw.circle(temp,(k,k,k,50),self.surface.get_rect().center,i*radius)
-            self.image.blit(temp,(0,0))
+            pygame.draw.circle(temp,(k,k,k,10),self.surface.get_rect().center,i*radius)
+            self.image.blit(temp,(0,0))#need to blit in order to "stack" the alpha
 
 class Blink(Bound_entity):
     def __init__(self,game_objects, parallax):
@@ -199,12 +198,11 @@ class Snow(Weather_particles):
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
+
         self.trans_prob = 0#the higher the number, the lwoer the probabillity for the leaf to flip. 0 is 0 %
         self.colour = (255,255,255)
         self.set_color(self.colour)
 
-        self.radius = random.randint(1, 3)
-        self.make_circle()
         self.phase = random.randint(0, 180)
 
     def speed(self):
