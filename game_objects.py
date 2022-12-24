@@ -116,7 +116,7 @@ class Game_Objects():
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
-        self.interactables.draw(self.game.screen)
+        self.interactables.draw(self.game.screen)#should be before bg_interact
         self.bg_interact.draw(self.game.screen)
 
         self.enemies.draw(self.game.screen)

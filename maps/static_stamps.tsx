@@ -50,6 +50,17 @@
    <property name="sprite" value=""/>
   </properties>
  </tile>
+ <tile id="14">
+  <properties>
+   <property name="direction" value=""/>
+  </properties>
+ </tile>
+ <tile id="15">
+  <properties>
+   <property name="layers" value=""/>
+   <property name="particle" value=""/>
+  </properties>
+ </tile>
  <tile id="19">
   <properties>
    <property name="event" value=""/>

@@ -95,7 +95,6 @@ class Title_Menu(Game_State):
 
             self.game.game_objects.load_map('village1','1')
 
-
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
             new_state.enter_state()

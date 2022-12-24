@@ -28,9 +28,8 @@ class Idle(Entity_States):
 
     def update_state(self):
         self.time+=1
-        self.entity.speed()
 
-        rand=random.randint(0, 100)
+        rand=random.randint(0, self.entity.trans_prob)
         if rand==1:
             self.enter_state('Flip')
 

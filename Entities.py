@@ -2,7 +2,7 @@ import pygame, random, sys, Read_files, states, particles, animation, states_bas
 #import time
 import constants as C
 
-pygame.mixer.init()    
+pygame.mixer.init()
 
 class RefelctionGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries
     def __init__(self):
@@ -253,7 +253,7 @@ class BG_Block(Staticentity):
         self.parallax = parallax
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]#do you need this?
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
         self.rect.topleft = self.true_pos
 

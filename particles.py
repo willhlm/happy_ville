@@ -13,7 +13,8 @@ class Particles(pygame.sprite.Sprite):
         self.rect.center = self.pos
 
     def make_circle(self):
-        self.image = pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
+        self.surface =pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
+        self.image = self.surface.copy()
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
@@ -22,7 +23,7 @@ class Particles(pygame.sprite.Sprite):
         self.canvas_size = 60
         self.surface = pygame.Surface((self.canvas_size,self.canvas_size), pygame.SRCALPHA, 32).convert_alpha()
         self.image = self.surface.copy()
-        self.spark_shape()#define the shape of spark        
+        self.spark_shape()#define the shape of spark
         pygame.draw.polygon(self.image,self.colour,self.points)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
