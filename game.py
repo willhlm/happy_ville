@@ -26,6 +26,7 @@ class Game():
         self.DEBUG_MODE = True
         self.RENDER_FPS_FLAG = True
         self.RENDER_HITBOX_FLAG = True
+        #pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
 
     def event_loop(self):
         for event in pygame.event.get():
@@ -64,6 +65,7 @@ class Game():
 
 
 if __name__ == '__main__':
+    #pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
     pygame.init()#initilise
     g=Game()
     g.run()

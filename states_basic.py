@@ -1,4 +1,4 @@
-import sys
+import sys, random
 
 class Entity_States():
     def __init__(self,entity):
@@ -26,7 +26,9 @@ class Idle(Entity_States):
         super().__init__(entity)
 
     def handle_input(self,input):
-        if input=='Hurt':
+        if input == 'Invisible':
+            self.enter_state('Invisible')
+        elif input=='Hurt':
              self.enter_state('Hurt')
         elif input == 'Death':
              self.enter_state('Death')
@@ -38,6 +40,14 @@ class Idle(Entity_States):
             self.enter_state('Outline')
         elif input == 'Transform':
             self.enter_state('Transform')
+
+class Invisible(Entity_States):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update_state(self):
+        if random.randint(0,500) == 1:
+            self.enter_state('Idle')
 
 class Once(Entity_States):
     def __init__(self,entity):

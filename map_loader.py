@@ -1,4 +1,4 @@
-import pygame, csv, Entities, math, Read_files
+import pygame, csv, Entities, math, Read_files, weather
 import constants as C
 
 class Level():
@@ -23,9 +23,6 @@ class Level():
             self.game_objects.world_state.state[self.level_name]
         except:#make a state file if it is the first time loading this map
             self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
-
-    def set_weather(self,particle):
-        self.game_objects.weather.create_particles(particle)
 
     def append_light_effet(self):
         if self.level_name[:-1] == 'light_forest_cave':
@@ -197,22 +194,25 @@ class Level():
                 new_path = Entities.Path_col(object_position,self.game_objects,object_size,destination,spawn)
                 self.game_objects.interactables.add(new_path)
 
-            elif id == 14:
+            elif id == 14:#camera stop
+                for property in obj['properties']:
+                    if property['name'] == 'direction':
+                        values = property['value']
+
                 object_size = (int(obj['width']),int(obj['height']))
-                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'right')
+                new_camera_stop = Entities.Camera_Stop(object_size, object_position, values)
                 self.game_objects.camera_blocks.add(new_camera_stop)
-            elif id == 15:
-                object_size = (int(obj['width']),int(obj['height']))
-                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'top')
-                self.game_objects.camera_blocks.add(new_camera_stop)
-            elif id == 16:
-                object_size = (int(obj['width']),int(obj['height']))
-                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'left')
-                self.game_objects.camera_blocks.add(new_camera_stop)
-            elif id == 17:
-                object_size = (int(obj['width']),int(obj['height']))
-                new_camera_stop = Entities.Camera_Stop(object_size, object_position, 'bottom')
-                self.game_objects.camera_blocks.add(new_camera_stop)
+
+            elif id == 15:#bg_particles
+                self.particles = {}
+                for property in obj['properties']:
+                    if property['name'] == 'particle':
+                        particle_type = property['value']
+                    elif property['name'] == 'layers':
+                        layers = property['value'].split(",")
+
+                for layer in layers:
+                    self.particles[layer] = particle_type
 
             elif id == 19:#trigger
                 values={}
@@ -265,6 +265,10 @@ class Level():
                     new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interactables.add(new_interacable)
+
+            elif id == 26:#key items: soul_essence etc.
+                runestone = Entities.Uber_runestone(object_position,self.game_objects)
+                self.game_objects.interactables.add(runestone)
 
             elif id == 28:#key items: soul_essence etc.
                 for property in obj['properties']:
@@ -382,6 +386,7 @@ class Level():
 
         #add the bg, fg and animations to the group
         for tile_layer in blit_compress_surfaces.keys():
+
             if 'fg' in tile_layer:
                 pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
                 self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
@@ -398,5 +403,13 @@ class Level():
                         self.game_objects.all_fgs.add(bg_animation)
                     elif 'bg' in tile_layer:
                         self.game_objects.all_bgs.add(bg_animation)
+            except:
+                pass
+
+            try:#add particles inbetween layers
+                if 'fg' in tile_layer:
+                    self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_fgs)
+                elif 'bg' in tile_layer:
+                    self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_bgs)
             except:
                 pass

@@ -253,7 +253,7 @@ class BG_Block(Staticentity):
         self.parallax = parallax
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]#do you need this?
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
         self.rect.topleft = self.true_pos
 
@@ -1792,6 +1792,14 @@ class Slash(Animatedentity):
     def reset_timer(self):#called whe animation finshes
         self.kill()
 
+class Rune_symbol(Animatedentity):
+    def __init__(self,pos,ID_key):
+        super().__init__(pos)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/rune_symbol/' + ID_key)
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.rect.center = pos
+
 class Interactable(Animatedentity):#interactables
     def __init__(self,pos,game_objects):
         super().__init__(pos)
@@ -1895,6 +1903,8 @@ class Cutscene_trigger(Interactable):
         if self.event == 'Cultist_encounter':
             new_game_state = states.Cultist_encounter_gameplay(self.game_objects.game)
             new_game_state.enter_state()
+        elif self.event == 'test':
+            pass
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
@@ -1939,9 +1949,33 @@ class Runestones(Interactable):
 
     def interact(self):
         self.currentstate.handle_input('Transform')
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
 
     def reset_timer(self):#when animation is finished
         self.currentstate.handle_input('Idle')
+
+class Uber_runestone(Interactable):
+    def __init__(self, pos, game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/uber_runestone/')
+        self.image = self.sprites[self.state][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.runestone_number = 0#a counter of number of activated runestrones
+        self.count_runestones()
+
+    def count_runestones(self):#append all runestone ID that have been activated.
+        for level in self.game_objects.world_state.state.keys():
+            for runestoneID in self.game_objects.world_state.state[level]['runestone'].keys():
+                if self.game_objects.world_state.state[level]['runestone'][runestoneID] != 'idle':
+                    pos = [self.rect.x+int(runestoneID)*16,self.rect.y]
+                    self.game_objects.cosmetics.add(Rune_symbol(pos,runestoneID))
+                    self.runestone_number += 1
+
+    def interact(self):#when player press T
+        if self.runestone_number == 25:
+            pass#do a cutscene?
 
 class Chest(Interactable):
     def __init__(self,pos,game_objects,state,ID_key):
@@ -1956,7 +1990,6 @@ class Chest(Interactable):
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
-        self.invincibile = False
 
         if state != "idle":
             self.currentstate = states_basic.Interacted(self)
@@ -1986,7 +2019,7 @@ class Chest(Interactable):
             self.currentstate.handle_input('Hurt')
         else:
             self.currentstate.handle_input('Opening')
-            self.game_objects.map.state[self.game_objects.map.level_name]['chest'][self.ID_key] = 'open'#write in the state file that this has been picked up
+            self.game_objects.world_state.state[self.game_objects.map.level_name]['chest'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
 
     def update_timers(self):
         for timer in self.timers:
