@@ -70,13 +70,13 @@ class Circles(Bound_entity):
         super().__init__(game_objects, parallax)
         self.colour = [255,255,255,160]
 
-        self.radius = round(5*self.parallax[0])#particle radius depends on parallax
+        self.radius = round(5*self.parallax[0])#particle radius, depends on parallax
         self.layers = 5#number of layers in the glow
         self.glow_radius = self.layers*self.radius#determines the canvas size needed
 
         self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
         self.true_pos = self.pos.copy()
-        self.make_circle()
+        self.prepare_canvas()
         self.time = 0
         self.phase = random.randint(0, 180)
 
@@ -94,7 +94,7 @@ class Circles(Bound_entity):
         self.make_glow(radius)
         pygame.draw.circle(self.image,self.colour,(self.glow_radius,self.glow_radius),radius)
 
-    def make_circle(self):
+    def prepare_canvas(self):
         self.surface = pygame.Surface((self.glow_radius * 2, self.glow_radius * 2),pygame.SRCALPHA,32).convert_alpha()
         self.image = self.surface.copy()
         self.rect = self.image.get_rect()
