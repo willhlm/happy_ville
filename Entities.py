@@ -279,9 +279,10 @@ class Reflection(Staticentity):
         self.dir = dir
         self.game_objects = game_objects
         self.offset = offset
+        self.squeeze = 0.75
 
     def draw(self):
-        squeeze = 0.85
+        squeeze = self.squeeze
         reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1]*squeeze - self.offset, self.size[0], self.size[1])
         reflect_rect.center = [reflect_rect.center[0],self.game_objects.game.screen.get_height() - reflect_rect.center[1]]
         reflect_surface = self.game_objects.game.screen.copy()

@@ -1,0 +1,10 @@
+Animated objects sprite sheet block size:
+
+NPC:
+
+
+
+Animated objects:
+
+Light1 - 32x32
+Light2 - 32x64
