@@ -365,7 +365,7 @@ class Gameplay(Game_State):
         self.pause_cooldown -= 1
 
     def render(self):
-        self.game.screen.fill((207,238,250))
+        self.game.screen.fill((17,22,22))
         self.game.game_objects.draw()
         self.blit_screen_info()
 
