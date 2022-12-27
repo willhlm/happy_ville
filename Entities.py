@@ -349,6 +349,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         self.animation_stack = [animation.Entity_animation(self)]
 
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
+        self.running_particles = Dust_running_particles
 
     def update(self,pos):
         super().update(pos)
@@ -1103,6 +1104,10 @@ class Camera_Stop(Staticentity):
         super().__init__(pos,pygame.Surface(size))
         self.hitbox = self.rect.inflate(0,0)
         self.dir = dir
+        #self.methods = {'right':self.right,'left':self.left,'top':self.top,'bottom':self.bottom}[dir]
+
+    def update(self,scroll):
+        pass
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
