@@ -1100,14 +1100,10 @@ class Rhoutta_encounter(Boss):
 class Camera_Stop(Staticentity):
 
     def __init__(self,size,pos,dir):
-        #pos = (pos[0],pos[1]-size[1])
         super().__init__(pos,pygame.Surface(size))
         self.hitbox = self.rect.inflate(0,0)
         self.dir = dir
-        #self.methods = {'right':self.right,'left':self.left,'top':self.top,'bottom':self.bottom}[dir]
 
-    def update(self,scroll):
-        pass
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
