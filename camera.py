@@ -69,6 +69,10 @@ class Camera():
                 else:
                     self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
 
+            if stop.dir == 'center':
+                self.center[0] = self.game_objects.player.hitbox.centerx - (stop.rect.centerx - self.game_objects.game.WINDOW_SIZE[0]/2)
+                self.center[1] = self.game_objects.player.hitbox.centery - (stop.rect.centery - self.game_objects.game.WINDOW_SIZE[1]/2)
+
 class Camera_shake(Camera):
     def __init__(self, game_objects,amp,duration):
         super().__init__(game_objects)
