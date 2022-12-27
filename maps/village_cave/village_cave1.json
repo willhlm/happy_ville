@@ -13,7 +13,7 @@
          "parallaxx":0.1,
          "parallaxy":0.1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -29,7 +29,7 @@
          "parallaxx":0.2,
          "parallaxy":0.2,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -43,7 +43,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -57,7 +57,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -71,7 +71,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -85,7 +85,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -97,7 +97,7 @@
          "name":"bg1_3",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -109,7 +109,7 @@
          "name":"bg1_2",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -121,7 +121,7 @@
          "name":"bg1_1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -133,7 +133,7 @@
          "name":"fg1_1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":300,
          "x":0,
          "y":0
@@ -262,8 +262,8 @@
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":848,
-                 "x":512,
+                 "width":1280,
+                 "x":80,
                  "y":992
                 }, 
                 {
@@ -820,7 +820,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
