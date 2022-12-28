@@ -1099,11 +1099,61 @@ class Rhoutta_encounter(Boss):
 
 class Camera_Stop(Staticentity):
 
-    def __init__(self,size,pos,dir):
+    def __init__(self,game_objects, size,pos,dir):
         super().__init__(pos,pygame.Surface(size))
+        self.game_objects = game_objects
+        self.flag = False#a flag such that the recentering only occures once
         self.hitbox = self.rect.inflate(0,0)
         self.dir = dir
+        self.methods = {'right':self.right,'left':self.left,'bottom':self.bottom,'top':self.top,'center':self.center}[dir]
 
+    def update(self,scroll):
+        super().update(scroll)
+        #self.methods()
+
+    def right(self):
+        if (self.rect.bottom > 0) and (self.rect.top < self.game_objects.game.WINDOW_SIZE[1]):#just enters the screen vertically (the top and bottom)
+            if -self.game_objects.game.WINDOW_SIZE[0] < (self.rect.left - self.game_objects.player.hitbox.centerx) < self.game_objects.game.WINDOW_SIZE[0]*0.5:
+                self.game_objects.camera.center[0] = self.game_objects.game.WINDOW_SIZE[0] - (self.rect.left - self.game_objects.player.hitbox.centerx)
+                self.flag = True
+        else:
+            if self.flag:
+                self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+                self.flag = False
+
+    def left(self):
+        if (self.rect.bottom > 0) and (self.rect.top < self.game_objects.game.WINDOW_SIZE[1]):#just enters the screen vertically (the top and bottom)
+            if -self.game_objects.game.WINDOW_SIZE[0] < (self.game_objects.player.hitbox.centerx - self.rect.right) < self.game_objects.game.WINDOW_SIZE[0]*0.5:
+                self.game_objects.camera.center[0] =  self.game_objects.player.hitbox.centerx - self.rect.right
+                self.flag = True
+        else:
+            if self.flag:
+                self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+                self.flag = False
+
+    def bottom(self):
+        if (self.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (self.rect.right > 0):
+            if -self.game_objects.game.WINDOW_SIZE[1] < (self.rect.top - self.game_objects.player.hitbox.centery) < self.game_objects.game.WINDOW_SIZE[1]*0.5:
+                self.game_objects.camera.center[1] = self.game_objects.game.WINDOW_SIZE[1] - (self.rect.top - self.game_objects.player.hitbox.centery)
+                self.flag = True
+        else:
+            if self.flag:
+                self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                self.flag = False
+
+    def top(self):
+        if (self.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (self.rect.right > 0):
+            if -self.game_objects.game.WINDOW_SIZE[1] < (self.game_objects.player.hitbox.centery - self.rect.bottom) < self.game_objects.game.WINDOW_SIZE[1]*0.5:
+                self.game_objects.camera.center[1] = self.game_objects.player.hitbox.centery - self.rect.bottom
+                self.flag = True
+        else:
+            if self.flag:
+                self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                self.flag=False
+
+    def center(self):
+        self.game_objects.camera.center[0] = self.game_objects.player.hitbox.centerx - (self.rect.centerx - self.game_objects.game.WINDOW_SIZE[0]*0.5)
+        self.game_objects.camera.center[1] = self.game_objects.player.hitbox.centery - (self.rect.centery - self.game_objects.game.WINDOW_SIZE[1]*0.5)
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):

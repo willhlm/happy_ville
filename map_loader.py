@@ -25,15 +25,17 @@ class Level():
             self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
 
     def append_light_effet(self):
-        if self.level_name[:-1] == 'light_forest_cave':
+        level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
+        if level_name == 'light_forest_cave':
             self.game_objects.game.state_stack[-1].handle_input('dark')#make a dark effect gameplay state
-        elif self.level_name[:-1] == 'village_cave':
+        elif level_name == 'village_cave':
             self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
-        elif self.level_name[:-1] == 'dark_forest':
+        elif level_name == 'dark_forest':
             self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
 
     def load_map_data(self):
-        level_name = self.level_name[:-1]
+        level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
+
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
         self.map_data = Read_files.format_tiled_json(self.map_data)
 
@@ -51,7 +53,7 @@ class Level():
             if 'source' in tileset.keys():#objexts have source in dict
                 continue
 
-            level_name = self.level_name[:-1]
+            level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
             sheet = pygame.image.load("maps/%s/%s" % (level_name, tileset['image'])).convert_alpha()
             rows = int(sheet.get_rect().h/self.TILE_SIZE)
             columns = int(sheet.get_rect().w/self.TILE_SIZE)
@@ -200,7 +202,7 @@ class Level():
                         values = property['value']
 
                 object_size = (int(obj['width']),int(obj['height']))
-                new_camera_stop = Entities.Camera_Stop(object_size, object_position, values)
+                new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values)
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
             elif id == 15:#bg_particles
@@ -359,7 +361,9 @@ class Level():
                 if 'animated' in tile_layer:#if animation
                     for tileset in self.map_data['tilesets']:
                         if tile_number == tileset['firstgid']:
-                            path = 'maps/%s/%s' % (self.level_name[:-1], Read_files.get_folder(tileset['image']))
+                            level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
+
+                            path = 'maps/%s/%s' % (level_name, Read_files.get_folder(tileset['image']))
                             parallax = bg_list[tile_layer]['parallax']
                             blit_pos = (x * self.TILE_SIZE - math.ceil(new_map_diff[0]*(1-parallax[0])) + bg_list[tile_layer]['offset'][0], y * self.TILE_SIZE - math.ceil((1-parallax[1])*new_map_diff[1])+bg_list[tile_layer]['offset'][1])
                             new_animation = Entities.BG_Animated(blit_pos,path,parallax)
@@ -396,6 +400,10 @@ class Level():
             elif 'bg' in tile_layer:#bg
                 pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
                 self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+
+                #add fog to BG
+                if tile_layer != 'bg1':
+                    self.game_objects.weather.fog(self.game_objects.all_bgs)
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:
