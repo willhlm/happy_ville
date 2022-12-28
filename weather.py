@@ -13,6 +13,27 @@ class Weather():
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
 
+    def fog(self,group):
+        group.add(Fog(self.game_objects))
+
+class Fog(pygame.sprite.Sprite):
+    def __init__(self,game_objects):
+        super().__init__()
+        self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (0,0)
+        self.colour = [255,255,255,5]
+        self.draw_rectangle()
+
+    def draw_rectangle(self):
+        pygame.draw.rect(self.image,self.colour,self.rect)
+
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+
+    def update(self,scroll):
+        self.rect.topleft = (0,0)
+
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
         super().__init__()
