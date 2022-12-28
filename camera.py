@@ -31,26 +31,27 @@ class Camera():
         xflag = True
         yflag = True
         for stop in self.game_objects.camera_blocks:
-            if stop.dir == 'right':
+            if stop.dir == 'right' and xflag:
                 if (stop.rect.bottom > 0) and (stop.rect.top < self.game_objects.game.WINDOW_SIZE[1]):
                     if -self.game_objects.game.WINDOW_SIZE[0] < (stop.rect.left - self.game_objects.player.hitbox.centerx) < self.game_objects.game.WINDOW_SIZE[0]/2:
                         self.center[0] = self.game_objects.game.WINDOW_SIZE[0] - (stop.rect.left - self.game_objects.player.hitbox.centerx)
                         xflag = False
                     else:
                         self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+
                 else:
                     self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
-
             if stop.dir == 'left' and xflag:
                 if (stop.rect.bottom > 0) and (stop.rect.top < self.game_objects.game.WINDOW_SIZE[1]):
                     if -self.game_objects.game.WINDOW_SIZE[0] < (self.game_objects.player.hitbox.centerx - stop.rect.right) < self.game_objects.game.WINDOW_SIZE[0]/2:
                         self.center[0] =  self.game_objects.player.hitbox.centerx - stop.rect.right
+                        xflag = False
                     else:
                         self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
                 else:
                     self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
 
-            if stop.dir == 'bottom':
+            if stop.dir == 'bottom' and yflag:
                 if (stop.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (stop.rect.right > 0):
                     if -self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.top - self.game_objects.player.hitbox.centery) < self.game_objects.game.WINDOW_SIZE[1]/2:
                         self.center[1] = self.game_objects.game.WINDOW_SIZE[1] - (stop.rect.top - self.game_objects.player.hitbox.centery)
@@ -64,6 +65,7 @@ class Camera():
                 if (stop.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (stop.rect.right > 0):
                     if -self.game_objects.game.WINDOW_SIZE[1] < (self.game_objects.player.hitbox.centery - stop.rect.bottom) < self.game_objects.game.WINDOW_SIZE[1]/2:
                         self.center[1] = self.game_objects.player.hitbox.centery - stop.rect.bottom
+                        yflag = False
                     else:
                         self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
                 else:
