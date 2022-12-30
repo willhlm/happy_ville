@@ -505,8 +505,8 @@
                  "type":"",
                  "visible":true,
                  "width":1847,
-                 "x":2226,
-                 "y":80
+                 "x":2225,
+                 "y":97
                 }, 
                 {
                  "gid":1,
@@ -568,7 +568,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"village7"
+                         "value":"village_7"
                         }, 
                         {
                          "name":"spawn",
@@ -813,7 +813,7 @@
  "nextobjectid":64,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.8.2",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -1082,6 +1082,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.6",
  "width":300
 }

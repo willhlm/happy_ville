@@ -226,7 +226,7 @@
                         {
                          "name":"spawn",
                          "type":"string",
-                         "value":"3"
+                         "value":"2"
                         }],
                  "rotation":0,
                  "type":"",
@@ -375,7 +375,7 @@
  "nextobjectid":271,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.8.2",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -527,6 +527,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.6",
  "width":140
 }

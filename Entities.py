@@ -1898,6 +1898,7 @@ class Path_col(Interactable):
         self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.destination = destination
+        self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
         self.image.set_alpha(0)#make them transparent
 
@@ -1906,9 +1907,6 @@ class Path_col(Interactable):
         self.group_distance()
 
     def player_collision(self):
-        self.game_objects.sound.pause_bg_sound()
-        self.game_objects.player.enter_idle()
-        self.game_objects.player.reset_movement()
         self.game_objects.load_map(self.destination, self.spawn)
 
 class Path_inter(Interactable):
@@ -1919,6 +1917,7 @@ class Path_inter(Interactable):
         self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.destination = destination
+        self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
         self.image.set_alpha(0)#make them transparent
 
@@ -1927,9 +1926,6 @@ class Path_inter(Interactable):
         self.group_distance()
 
     def interact(self):
-        self.game_objects.sound.pause_bg_sound()
-        self.game_objects.player.enter_idle()
-        self.game_objects.player.reset_movement()
         self.game_objects.load_map(self.destination, self.spawn)
 
 class Cutscene_trigger(Interactable):

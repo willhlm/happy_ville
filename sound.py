@@ -17,13 +17,13 @@ class Sound():
         self.channels[0].set_volume(0.4)
 
     def play_bg_sound(self):
-        self.channels[0].play(self.bg, loops = -1, fade_ms = 500)
+        self.channels[0].play(self.bg, loops = -1, fade_ms = 300)
 
     def pause_bg_sound(self):
-        self.channels[0].fadeout(1000)
+        self.channels[0].fadeout(700)
 
     def load_bg_sound(self, name):
-        self.bg = pygame.mixer.Sound("Audio/maps/" + name + "/bg_1.mp3")
+        self.bg = pygame.mixer.Sound("maps/" + name + "/music/default.wav")
 
     #finds an available channel and playts SFX sounds
     #takes mixer.Sound objects
