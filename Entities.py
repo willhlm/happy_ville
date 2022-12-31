@@ -1,4 +1,4 @@
-import pygame, random, sys, Read_files, states, particles, animation, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
+import pygame, random, sys, Read_files, states, particles, animation, states_health, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
 #import time
 import constants as C
 
@@ -367,9 +367,7 @@ class Character(Dynamicentity):#enemy, NPC,player
         if self.invincibile: return
         self.health -= dmg
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
-        self.hurt()
 
-    def hurt(self):
         if self.health > 0:#check if dead¨
             self.animation_stack[-1].handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
@@ -405,10 +403,10 @@ class Player(Character):
         self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
-        self.max_health = 250
-        self.max_spirit = 100
-        self.health = 100
-        self.spirit = 100
+        self.max_health = 10
+        self.max_spirit = 10
+        self.health = 3
+        self.spirit = 3
 
         self.projectiles = game_objects.fprojectiles
 
@@ -426,15 +424,18 @@ class Player(Character):
         self.set_abs_dist()
 
         self.sword_swing = 0#a flag to check which swing we are at (0 or 1)
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
         self.velocity[1] = 0
-        #self.jumping = False
         self.ground = True
 
-    def hurt(self):#called when taking dmg
+    def take_dmg(self,dmg = 1):
+        if self.invincibile: return
+        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+        self.health -= dmg
+        self.game_objects.UI.remove_health(dmg)#update UI
         if self.health > 0:#check if dead¨
             self.animation_stack[-1].handle_input('Invincibile')#make some animation. should be first
             self.animation_stack[-1].handle_input('Hurt')#turn white
@@ -444,6 +445,18 @@ class Player(Character):
             self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
         else:#if health < 0
             self.game_objects.game.state_stack[-1].handle_input('death')#depending on gameplay state, different death stuff should happen
+
+    def heal(self, health = 1):
+        self.health += health
+        self.game_objects.UI.add_health()#update UI
+
+    def consume_spirit(self, spirit = 1):
+        self.spirit -= spirit
+        self.game_objects.UI.remove_spirit(spirit)#update UI
+
+    def add_spirit(self, spirit = 1):
+        self.spirit += spirit
+        self.game_objects.UI.add_spirit(spirit)#update UI
 
     def death(self):#"normal" gameplay states calls this
         if self.currentstate.state_name != 'death':#if not already dead
@@ -509,7 +522,7 @@ class Enemy(Character):
         self.health = 100
 
         self.aggro = True#colliding with player
-        self.dmg = 10#projectile damage
+        self.dmg = 1#projectile damage
 
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
 
@@ -523,10 +536,9 @@ class Enemy(Character):
         self.group_distance()
 
     def player_collision(self):#when player collides with enemy
-        if not self.aggro:
-            return
+        if not self.aggro: return
         if not self.game_objects.player.invincibile and not self.game_objects.player.currentstate.state_name == 'death':
-            self.game_objects.player.take_dmg(10)
+            self.game_objects.player.take_dmg(1)
             sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
             if sign>0:
                 self.game_objects.player.knock_back([1,0])
@@ -1445,7 +1457,7 @@ class Poisoncloud(Projectiles):
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg=1
+        self.dmg = 1
         self.lifetime=400
         self.velocity=[0,0]
         self.update_hitbox()
@@ -1467,7 +1479,7 @@ class Poisonblobb(Projectiles):
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg=10
+        self.dmg = entity.dmg
         self.lifetime=100
         self.velocity=[entity.dir[0]*5,-1]
         self.hitbox=pygame.Rect(self.rect.x,self.rect.y,16,16)
@@ -1481,7 +1493,7 @@ class Poisonblobb(Projectiles):
         self.velocity[1]+=0.1#graivity
 
     def collision_plat(self,platform):
-        self.velocity=[0,0]
+        self.velocity = [0,0]
         if self.state=='main':
             self.animation.reset_timer()
             self.state='post'
@@ -1491,7 +1503,7 @@ class Ground_shock(Projectiles):
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.dmg = self.entity.dmg
+        self.dmg = entity.dmg
         self.lifetime=100
         self.velocity=[entity.dir[0]*5,0]
         self.rect.bottom = self.entity.rect.bottom
@@ -2153,6 +2165,7 @@ class Sign(Interactable):#save point
         new_state = states.Signpost(self.game_objects.game,self)
         new_state.enter_state()
 
+#UI
 class Menu_Arrow():
 
     def __init__(self):
@@ -2177,6 +2190,38 @@ class Menu_Box():
     def draw(self,screen):
         pass
         #screen.blit(self.img, self.rect.topleft)
+
+class Health():
+    sprites=Read_files.Sprites().load_all_sprites('Sprites/UI/gameplay/health/')
+
+    def __init__(self):
+        self.image = self.sprites['death'][0]
+        self.rect = self.image.get_rect()
+        self.animation = animation.Basic_animation(self)
+        self.currentstate = states_health.Death(self)
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+    def reset_timer(self):#called whe animation finshes
+        pass
+
+class Spirit():
+    sprites=Read_files.Sprites().load_all_sprites('Sprites/UI/gameplay/spirit/')
+
+    def __init__(self):
+        self.image = self.sprites['death'][0]
+        self.rect = self.image.get_rect()
+        self.animation = animation.Basic_animation(self)
+        self.currentstate = states_health.Death(self)
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+    def reset_timer(self):#called whe animation finshes
+        pass
 
 class Infinity_stones():
 
@@ -2401,8 +2446,12 @@ class Jump_timer(Timer):#can be combined with shroomjump?
             #self.lifetime = self.duration#reset the lifetime. needed if we want to modify the movement during the jump
             self.jump = True
         #elif self.jump:#while jumping
-            #self.entity.velocity[1] -= 0.2*(C.max_vel[1]+self.entity.velocity[1])#do we need this one to make it feel good? William check
+            #self.entity.velocity[1] -= 0.4*(C.max_vel[1]+self.entity.velocity[1])#do we need this one to make it feel good? William check
         super().update()#need to be after
+
+    def activate(self):#called when sword is swang
+        if self not in self.entity.timers:
+            super().activate()
 
     def deactivate(self):#called when timer runs out or release botton
         super().deactivate()

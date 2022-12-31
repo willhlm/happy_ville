@@ -10,15 +10,10 @@ class Player_states(Entity_States):
 
     def update(self):
         super().update()
-        self.increase_spirit()
 
     def enter_state(self,newstate):
         if newstate in self.entity.states:
             self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
-
-    def increase_spirit(self):
-        self.entity.spirit += 0.1
-        self.entity.spirit = min(self.entity.max_spirit,self.entity.spirit)
 
     def increase_phase(self):
         pass
@@ -384,12 +379,12 @@ class Wall(Player_states):
 class Dash(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.dir=self.entity.dir.copy()
-        self.phases=['pre','main','post']
-        self.phase=self.phases[0]
-        self.done=False#animation flag
+        self.dir = self.entity.dir.copy()
+        self.phases = ['pre','main','post']
+        self.phase = self.phases[0]
+        self.done = False#animation flag
         self.entity.velocity[0] = 20*self.dir[0]
-        self.entity.spirit -= 10
+        self.entity.consume_spirit()
 
     def update_state(self):
         self.entity.velocity[1] = 0
@@ -455,7 +450,7 @@ class Counter(Player_states):
         self.phases=['pre','main']
         self.phase=self.phases[0]
         self.dir=self.entity.dir.copy()
-        self.entity.spirit -= 10
+        self.entity.consume_spirit()
 
     def increase_phase(self):
         if self.phase=='pre':
@@ -664,7 +659,7 @@ class Abillitites(Player_states):
         self.dir=self.entity.dir.copy()#animation direction
 
     def make_abillity(self):
-        abilityname=str(type(self).__name__)
+        abilityname = str(type(self).__name__)
         return self.entity.abilities[abilityname](self.entity)#make the ability object
 
     def update_state(self):
@@ -687,10 +682,10 @@ class Thunder(Abillitites):
         self.entity.game_objects.cosmetics.add(self.aura)
         self.phases = ['pre','charge','main']
         self.phase = self.phases[0]
+        self.entity.consume_spirit()
 
     def update_state(self):
         super().update_state()
-        self.entity.spirit -= 0.5
         self.aura.update_hitbox()
 
     def handle_movement(self,input):
@@ -721,7 +716,7 @@ class Thunder(Abillitites):
 class Force(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.spirit -= 10
+        self.entity.consume_spirit()
         ability=self.make_abillity()
         self.entity.projectiles.add(ability)#add sword to group
         self.force_jump()
@@ -763,12 +758,8 @@ class Heal(Abillitites):
         self.phases=['pre','main']
         self.phase=self.phases[0]
 
-    def heal(self):
-        self.entity.spirit-=20
-        self.entity.health+=20
-
-    def handle_press_input(self,input):
-        super().handle_press_input(input)
+    def handle_release_input(self,input):
+        super().handle_release_input(input)
         if input[1]:
             self.done=True
 
@@ -776,8 +767,9 @@ class Heal(Abillitites):
         if self.phase=='pre':
             self.phase='main'
         elif self.phase=='main':
-            self.heal()
-            self.done=True
+            self.entity.heal()
+            self.entity.consume_spirit()
+            self.done = True
 
 class Stone(Abillitites):
     def __init__(self,entity):
@@ -785,7 +777,7 @@ class Stone(Abillitites):
         self.phases=['pre','charge','main','post']
         self.phase=self.phases[0]
 
-        self.entity.spirit -= 10
+        self.entity.consume_spirit()
 
         self.entity.ability.phase='pre'
         self.entity.ability.action='small'
@@ -818,7 +810,7 @@ class Arrow(Abillitites):
         super().__init__(entity)
         self.phases=['pre','main']
         self.phase=self.phases[0]
-        self.entity.spirit -= 10
+        self.entity.consume_spirit()
 
     def increase_phase(self):
         if self.phase=='pre':

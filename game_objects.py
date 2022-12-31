@@ -10,6 +10,7 @@ import json
 import weather
 import constants as C
 import world_state
+import UI
 
 class Game_Objects():
 
@@ -24,7 +25,7 @@ class Game_Objects():
         self.camera = camera.Camera(self)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.area_change = True
-
+        self.UI = UI.Gameplay_UI(self)
 
     def create_groups(self):
         #define all sprite groups
@@ -163,14 +164,6 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,1)#draw hitbox
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,1)#draw hitbox
-
-    def save_game(self):#save_obj calls to_json method in the object: write the to_json mthod such that it save the attributes of interest.
-        Read_files.save_obj(self.player)
-        Read_files.save_obj(self)
-
-    def load_game(self):#load_obj class from_json: load the stiff from dictionary of interest
-        Read_files.load_obj(self.player)
-        Read_files.load_obj(self)
 
     def to_json(self):#stuff to save
         save_dict = {'cutscenes_complete':self.world_state.cutscenes_complete}

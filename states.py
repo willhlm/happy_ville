@@ -8,7 +8,7 @@ import random
 
 class Game_State():
     def __init__(self,game):
-        self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
+        self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet: this should be moved to game_objects.py
         self.game = game
 
     def update(self):
@@ -92,12 +92,8 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-<<<<<<< HEAD
-            self.game.game_objects.load_map('forest_path_1','2')
-=======
 
-            self.game.game_objects.load_map('village_1','1')
->>>>>>> c27bd00268775e8f7ad05ba6523cca172433e978
+            self.game.game_objects.load_map('village_cave_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -359,62 +355,20 @@ class Pause_Menu(Game_State):
 class Gameplay(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
-        self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
         self.light_effects = []#can append diffeet light effects: dark (caves) or light glow around aila
 
     def update(self):
         self.game.game_objects.update()
         self.game.game_objects.collide_all()
+        self.game.game_objects.UI.update()
 
     def render(self):
         self.game.screen.fill((17,22,22))
         self.game.game_objects.draw()
-        self.blit_screen_info()
-        self.render_effect()
-
-    def render_effect(self):
-        for effect in self.light_effects:
-            effect()
-
-    def blit_screen_info(self):
-        self.blit_health()
-        self.blit_spirit()
+        self.render_effect()#cave light effects
+        self.game.game_objects.UI.render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
-
-    def blit_health(self):
-        #this code is specific to using heart.png sprites
-        sprite_dim = [9,8] #width, height specific to sprites used
-        blit_surface = pygame.Surface((int(self.game.game_objects.player.max_health/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
-        health = self.game.game_objects.player.health
-
-        for i in range(int(self.game.game_objects.player.max_health/20)):
-            health -= 20
-            if health >= 0:
-                blit_surface.blit(self.health_sprites[0],(i*(sprite_dim[0] + 1),0))
-            elif health > -20:
-                blit_surface.blit(self.health_sprites[-(health//4)],(i*(sprite_dim[0] + 1),0))
-            else:
-                blit_surface.blit(self.health_sprites[5],(i*(sprite_dim[0] + 1),0))
-
-        self.game.screen.blit(blit_surface,(20, 20))
-
-    def blit_spirit(self):
-        sprite_dim = [9,9] #width, height specific to sprites used
-        blit_surface = pygame.Surface((int(self.game.game_objects.player.max_spirit/20)*(sprite_dim[0] + 1),sprite_dim[1]),pygame.SRCALPHA,32)
-        spirit = self.game.game_objects.player.spirit
-
-        for i in range(int(self.game.game_objects.player.max_spirit/20)):
-            spirit -= 20
-            if spirit > -10:
-                blit_surface.blit(self.spirit_sprites[0],(i*(sprite_dim[0] + 1),0))
-            elif spirit > -20:
-                blit_surface.blit(self.spirit_sprites[1],(i*(sprite_dim[0] + 1),0))
-            else:
-                blit_surface.blit(self.spirit_sprites[2],(i*(sprite_dim[0] + 1),0))
-
-        self.game.screen.blit(blit_surface,(20, 34))
 
     def blit_fps(self):
         fps_string = str(int(self.game.clock.get_fps()))
@@ -463,6 +417,10 @@ class Gameplay(Game_State):
         elif input == 'exit':#remove any effects
             self.light_effects = []
 
+    def render_effect(self):
+        for effect in self.light_effects:
+            effect()
+
     def blit_glow_effect(self):
         pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
         self.game.screen.blit(self.glow,pos,special_flags=pygame.BLEND_RGBA_ADD)
@@ -500,6 +458,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
             self.exit_state()
 
     def render(self):
+        self.game.game_objects.UI.render()
         self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
 
 class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not respawned but transffered to cultist hideout

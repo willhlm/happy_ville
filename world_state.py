@@ -55,3 +55,9 @@ class World_state():
                     soul_essence_int += 1
 
         self.state.pop('placeholder_level', 0)#removes the placeholder tag
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass
