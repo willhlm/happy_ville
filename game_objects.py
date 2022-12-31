@@ -23,6 +23,8 @@ class Game_Objects():
         self.map = map_loader.Level(self)
         self.camera = camera.Camera(self)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
+        self.area_change = True
+
 
     def create_groups(self):
         #define all sprite groups
@@ -47,8 +49,12 @@ class Game_Objects():
         self.players = pygame.sprite.Group(self.player)
 
     def load_map(self, map_name, spawn = '1',fade = True):
+        self.area_change = map_name[:map_name.rfind('_')] != self.map.area_name
+        if self.area_change:
+            self.sound.pause_bg_sound()
+        self.player.enter_idle()
+        self.player.reset_movement()
         self.clean_groups()
-        self.game.game_objects.player.reset_movement()
         self.map.load_map(map_name,spawn)
         self.camera.reset_player_center()
 
@@ -57,11 +63,12 @@ class Game_Objects():
             new_game_state.enter_state()
 
     def load_bg_music(self):
-        try:
-            self.sound.load_bg_sound(self.map.level_name)
-            self.sound.play_bg_sound()
-        except FileNotFoundError:
-            print("No BG music found")
+        if self.area_change:
+            try:
+                self.sound.load_bg_sound(self.map.area_name)
+                self.sound.play_bg_sound()
+            except FileNotFoundError:
+                print("No BG music found")
 
     def clean_groups(self):
         self.npcs.empty()#maybe a problem if we have a bank?

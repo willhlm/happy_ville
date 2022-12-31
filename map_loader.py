@@ -6,6 +6,8 @@ class Level():
         self.game_objects = game_objects
         self.PLAYER_CENTER = C.player_center
         self.TILE_SIZE = C.tile_size
+        self.level_name = ''
+        self.area_name = ''
 
     def load_map(self,map_name,spawn):
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. light effect
@@ -35,6 +37,7 @@ class Level():
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
+        self.area_name = level_name
 
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
         self.map_data = Read_files.format_tiled_json(self.map_data)
@@ -70,9 +73,6 @@ class Level():
                     n += 1
 
         return sprites
-
-    def load_bg_music(self):
-        return pygame.mixer.Sound("Audio/" + self.level_name + "/default.wav")
 
     def load_collision_layer(self):#load the whole map
         map_collisions = self.map_data["collision"]

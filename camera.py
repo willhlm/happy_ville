@@ -38,9 +38,9 @@ class Camera():
                         xflag = False
                     else:
                         self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+
                 else:
                     self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
-
             if stop.dir == 'left' and xflag:
                 if (stop.rect.bottom > 0) and (stop.rect.top < self.game_objects.game.WINDOW_SIZE[1]):
                     if -self.game_objects.game.WINDOW_SIZE[0] < (self.game_objects.player.hitbox.centerx - stop.rect.right) < self.game_objects.game.WINDOW_SIZE[0]/2:

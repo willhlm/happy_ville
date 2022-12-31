@@ -256,12 +256,21 @@
                  "type":"",
                  "visible":true,
                  "width":16,
+<<<<<<< HEAD:maps/village_cave/village_cave1.json
+                 "x":71,
+                 "y":439
+                }, 
+                {
+                 "gid":15,
+                 "height":240,
+=======
                  "x":80,
                  "y":368
                 }, 
                 {
                  "gid":15,
                  "height":256,
+>>>>>>> bebc68211f57328bec5c67388c6c6d7e35d02f79:maps/village_cave/village_cave_1.json
                  "id":273,
                  "name":"",
                  "properties":[
@@ -274,6 +283,10 @@
                  "type":"",
                  "visible":true,
                  "width":16,
+<<<<<<< HEAD:maps/village_cave/village_cave1.json
+                 "x":2401,
+                 "y":568
+=======
                  "x":2400,
                  "y":624
                 }, 
@@ -312,6 +325,7 @@
                  "width":272,
                  "x":1136,
                  "y":752
+<<<<<<< HEAD
                 }, 
                 {
                  "gid":16,
@@ -353,6 +367,9 @@
                  "width":16,
                  "x":1328,
                  "y":448
+=======
+>>>>>>> bebc68211f57328bec5c67388c6c6d7e35d02f79:maps/village_cave/village_cave_1.json
+>>>>>>> c27bd00268775e8f7ad05ba6523cca172433e978
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -935,8 +952,17 @@
          "x":0,
          "y":0
         }],
+<<<<<<< HEAD
  "nextlayerid":55,
  "nextobjectid":289,
+=======
+ "nextlayerid":54,
+<<<<<<< HEAD:maps/village_cave/village_cave1.json
+ "nextobjectid":274,
+=======
+ "nextobjectid":286,
+>>>>>>> bebc68211f57328bec5c67388c6c6d7e35d02f79:maps/village_cave/village_cave_1.json
+>>>>>>> c27bd00268775e8f7ad05ba6523cca172433e978
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

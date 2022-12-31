@@ -455,42 +455,6 @@
                  "y":493
                 }, 
                 {
-                 "gid":2,
-                 "height":16,
-                 "id":47,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"class",
-                         "type":"string",
-                         "value":"Bierdna"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":1327,
-                 "y":456
-                }, 
-                {
-                 "gid":2,
-                 "height":16,
-                 "id":48,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"class",
-                         "type":"string",
-                         "value":"Aslat"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":1283,
-                 "y":440
-                }, 
-                {
                  "gid":15,
                  "height":16,
                  "id":50,
@@ -541,8 +505,8 @@
                  "type":"",
                  "visible":true,
                  "width":1847,
-                 "x":2226,
-                 "y":80
+                 "x":2225,
+                 "y":97
                 }, 
                 {
                  "gid":1,
@@ -561,6 +525,80 @@
                  "width":16,
                  "x":1504,
                  "y":464
+                }, 
+                {
+                 "gid":10,
+                 "height":47,
+                 "id":60,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"image",
+                         "type":"string",
+                         "value":"None"
+                        }, 
+                        {
+                         "name":"path_to",
+                         "type":"string",
+                         "value":"village_8"
+                        }, 
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":24,
+                 "x":3486,
+                 "y":288
+                }, 
+                {
+                 "gid":10,
+                 "height":39,
+                 "id":61,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"image",
+                         "type":"string",
+                         "value":"None"
+                        }, 
+                        {
+                         "name":"path_to",
+                         "type":"string",
+                         "value":"village_7"
+                        }, 
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"1"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":19,
+                 "x":332,
+                 "y":493
+                }, 
+                {
+                 "gid":1,
+                 "height":16,
+                 "id":63,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"spawn",
+                         "type":"string",
+                         "value":"7"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":356,
+                 "y":461
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -772,10 +810,10 @@
          "y":0
         }],
  "nextlayerid":24,
- "nextobjectid":60,
+ "nextobjectid":64,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.8.2",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -1044,6 +1082,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.6",
  "width":300
 }
