@@ -10,8 +10,8 @@
          "offsetx":-400,
          "offsety":-250,
          "opacity":0.78,
-         "parallaxx":0.01,
-         "parallaxy":0.01,
+         "parallaxx":0.04,
+         "parallaxy":0.04,
          "type":"tilelayer",
          "visible":true,
          "width":300,
@@ -341,7 +341,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"village1"
+                         "value":"village_1"
                         }, 
                         {
                          "name":"spawn",
@@ -399,7 +399,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"wakeup_forest1"
+                         "value":"wakeup_forest_1"
                         }, 
                         {
                          "name":"spawn",
@@ -605,7 +605,7 @@
          "y":0
         }],
  "nextlayerid":66,
- "nextobjectid":238,
+ "nextobjectid":242,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

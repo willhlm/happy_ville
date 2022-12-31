@@ -291,7 +291,7 @@ class Level():
 
                     #write specefic conditions if thse should spawn
                     if interactable == 'Bridge':
-                        if self.game_objects.world_state.state > 1:#if reindeer has been defeated
+                        if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
                             new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
                             self.game_objects.interactables.add(new_interactable)
 
@@ -312,6 +312,7 @@ class Level():
     def load_bgs(self):
         'tiled design notes: all sublayers in bg1_X (x specifies the sublayer) should have the same paralax and offset.'
         'The animated layer, bg1_animatedX, need to have at least one "normal" layer of bg1_1 (which can be emppty).'
+        'The particle/weather effect also need to have at least one "normal" layer of bg1_1'
 
         #sort the data
         bg_list = {}#a place hodler for tiled data
@@ -403,7 +404,7 @@ class Level():
 
                 #add fog to BG
                 if tile_layer != 'bg1':
-                    self.game_objects.weather.fog(self.game_objects.all_bgs)
+                    self.game_objects.weather.fog(self.game_objects.all_bgs,parallax[tile_layer])
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:
@@ -421,3 +422,4 @@ class Level():
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_bgs)
             except:
                 pass
+        self.particles={}#reset particles

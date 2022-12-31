@@ -5,8 +5,8 @@ import constants as C
 class Player_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['main']
-        self.phase=self.phases[0]
+        self.phases = ['main']
+        self.phase = self.phases[0]
 
     def update(self):
         super().update()
@@ -26,13 +26,12 @@ class Player_states(Entity_States):
     def handle_press_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
             self.entity.timer_jobs['shroomjump'].activate()
-            if not self.entity.jumping:# if not jumping already
-                self.entity.timer_jobs['jump'].activate()
-
+            self.entity.timer_jobs['jump'].activate()
 
     def handle_release_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
-            self.entity.timer_jobs['jump'].deactivate()
+            if self.entity.velocity[1] < 0:#if going up
+                self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
     def handle_movement(self,input):#all states should inehrent this function
         value = input[2]
@@ -244,7 +243,7 @@ class Fall_run(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.initial_phase()
-        self.entity.jumping = True
+        self.entity.timer_jobs['ground'].activate()
 
     def initial_phase(self):
         if self.entity.velocity[1]>6:
@@ -297,7 +296,7 @@ class Fall_stand(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.initial_phase()
-        self.entity.jumping = True
+        self.entity.timer_jobs['ground'].activate()
 
     def initial_phase(self):
         if self.entity.velocity[1]>6:

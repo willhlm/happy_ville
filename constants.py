@@ -10,8 +10,9 @@ acceleration = [1,0.51]#y velocity need to be large than 1/2
 friction = [0.5,0]
 friction_player = [0.24,0.01]
 max_vel = [30,7]
-jump_time_player = 9#how long one goes vertically while pressing the jump button
+jump_time_player = 5##how many frames from falling in which the player can jump when landing
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
+ground_timer = 5#how many frames from falling in which the player can still jump
 
 #combat
 invincibility_time_player = 50

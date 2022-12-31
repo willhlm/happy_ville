@@ -4,7 +4,7 @@ import constants as C
 
 pygame.mixer.init()
 
-class RefelctionGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries
+class RefelctionGroup(pygame.sprite.Group):#a group for the reflection object which need a special draw method
     def __init__(self):
         super().__init__()
 
@@ -253,9 +253,9 @@ class BG_Block(Staticentity):
         self.parallax = parallax
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]#do you need this?
+        #self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]#do you need this?
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
-        self.rect.topleft = self.true_pos
+        self.rect.topleft = self.true_pos.copy()
 
 class BG_Animated(BG_Block):
     def __init__(self,pos,sprite_folder_path,parallax=(1,1)):
@@ -372,7 +372,8 @@ class Character(Dynamicentity):#enemy, NPC,player
     def hurt(self):
         if self.health > 0:#check if dead¨
             self.animation_stack[-1].handle_input('Hurt')#turn white
-            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            self.game_objects.camera.camera_shake(3,10)
         else:#if dead
             if self.currentstate.state_name != 'death' and self.currentstate.state_name != 'dead':#if not already dead
                 self.aggro = False
@@ -406,7 +407,7 @@ class Player(Character):
 
         self.max_health = 250
         self.max_spirit = 100
-        self.health = 30
+        self.health = 100
         self.spirit = 100
 
         self.projectiles = game_objects.fprojectiles
@@ -418,19 +419,20 @@ class Player(Character):
         self.states = set(['Wall','Dash','Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Heal','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster
         self.currentstate=states_player.Idle(self)
 
-        self.spawn_point = [{'map':'light_forest1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
+        self.spawn_point = [{'map':'light_forest_1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
         self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)
 
         self.set_abs_dist()
 
         self.sword_swing = 0#a flag to check which swing we are at (0 or 1)
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
         self.velocity[1] = 0
-        self.jumping = False
+        #self.jumping = False
+        self.ground = True
 
     def hurt(self):#called when taking dmg
         if self.health > 0:#check if dead¨
@@ -547,7 +549,7 @@ class Enemy(Character):
         self.velocity[0] = -30*self.dir[0]
         self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
 
-class Collision_breakable(Enemy):#a breakable collision block
+class Collision_breakable(Enemy):#a breakable collision block: should it be inetractable instead?
     def __init__(self, pos,game_objects,type = 'type1'):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/'+type+'/')
@@ -957,10 +959,6 @@ class MrBanks(NPC):#bank
     def buisness(self):#enters after conversation
         new_state = states.Bank(self.game_objects.game, self)
         new_state.enter_state()
-
-class Bridge_keeper(NPC):#bridge block spawn this
-    def __init__(self, pos,game_objects):
-        super().__init__(pos,game_objects)
 
 class Boss(Enemy):
     def __init__(self,pos,game_objects):
@@ -1857,7 +1855,7 @@ class Interactable(Animatedentity):#interactables
         super().__init__(pos)
         self.game_objects = game_objects
         self.group = game_objects.interactables
-        self.pause_group=game_objects.entity_pause
+        self.pause_group = game_objects.entity_pause
 
     def update(self,scroll):
         super().update(scroll)
@@ -1885,7 +1883,7 @@ class Bridge(Interactable):
         self.sprites = Read_files.Sprites().load_all_sprites('Sprites/animations/bridge/')
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = (pos[0],pos[1])#for some reason, the f**ing rect pos is one pixel off. But the platform is at correct pos
+        self.rect.bottomleft = (pos[0],pos[1])
         self.hitbox = self.rect.copy()
         platform = Collision_block(pos,(self.image.get_width(),32))
         self.game_objects.platforms.add(platform)
@@ -2396,31 +2394,44 @@ class Sword_timer(Timer):
         super().deactivate()
         self.entity.sword_swinging = False
 
-class Jump_timer(Timer):
+class Jump_timer(Timer):#can be combined with shroomjump?
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
-        self.entity.jumping = False
+        self.jump = False
 
-    def update(self):
-        super().update()
-        self.entity.velocity[1] -= 0.4*(C.max_vel[1]+self.entity.velocity[1])
+    def update(self):#called everyframe after activation
+        if self.entity.ground and not self.jump:#when landing on a plarform: enters once
+            self.entity.velocity[1] = -10
+            #self.lifetime = self.duration#reset the lifetime. needed if we want to modify the movement during the jump
+            self.jump = True
+        #elif self.jump:#while jumping
+            #self.entity.velocity[1] -= 0.2*(C.max_vel[1]+self.entity.velocity[1])#do we need this one to make it feel good? William check
+        super().update()#need to be after
 
-    def activate(self):#called when jump button is pressed
-        super().activate()
-        self.entity.velocity[1] = 0
-        self.entity.jumping = True
-
-    def deactivate(self):
+    def deactivate(self):#called when timer runs out or release botton
         super().deactivate()
-        #self.entity.velocity[1] = 0.7*self.entity.velocity[1]
+        self.jump = False
+
+class Ground_timer(Timer):#a timer to check how long time one has not been on ground
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+        self.entity.ground = True
+
+    def activate(self):#called when entering fall run or fall stand
+        super().activate()
+        self.entity.ground = True
+
+    def deactivate(self):#called when timer runs out
+        super().deactivate()
+        self.entity.ground = False
 
 class Shroomjump_timer(Timer):
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
         self.shrooming = False
 
-    def activate(self):#called when pressed jump putton or landing on a shroom
-        if self.shrooming:#second time entering
+    def activate(self):#called when pressed jump putton and/or landing on a shroom
+        if self.shrooming:#second time entering (press shroom)
             self.entity.velocity[1] = -15
             return
 

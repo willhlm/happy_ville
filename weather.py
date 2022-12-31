@@ -6,30 +6,24 @@ class Weather():
         self.game_objects = game_objects
 
     def create_particles(self,type,parallax,group,number_particles = 20):
-        for i in range(0,number_particles):
+        for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
 
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
 
-    def fog(self,group):
-        group.add(Fog(self.game_objects))
+    def fog(self,group,paralax):
+        group.add(Fog(self.game_objects,paralax))
 
 class Fog(pygame.sprite.Sprite):
-    def __init__(self,game_objects):
+    def __init__(self,game_objects,parallax):
         super().__init__()
         self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.topleft = (0,0)
-        self.colour = [255,255,255,5]
-        self.draw_rectangle()
-
-    def draw_rectangle(self):
+        self.colour = [255,255,255,7/parallax[0]]#higher alpha for lower parallax
         pygame.draw.rect(self.image,self.colour,self.rect)
-
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
 
     def update(self,scroll):
         self.rect.topleft = (0,0)
@@ -85,35 +79,52 @@ class Bound_entity(Animatedentity):#entities bound to the scereen
         elif self.rect.centerx > self.width:
             self.true_pos[0] -= self.width
 
-#cosmetic particles
 class Circles(Bound_entity):
+    animations = {}
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.colour = [255,255,255,160]
+        self.colour = [255,255,255,160]#center ball colour
+        self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
 
-        self.radius = round(5*self.parallax[0])#particle radius, depends on parallax
-        self.layers = 5#number of layers in the glow
-        self.glow_radius = self.layers*self.radius#determines the canvas size needed
+        self.glow_colour = [255,255,255,2]#colour of each glow
+        self.layers = 40#number of layers in the glow
+        self.glow_spacing_factor = 0.1#a factor to determine the spacing between the glows
+        self.glow_radius = self.layers*self.radius*self.glow_spacing_factor#determines the canvas size needed (the size of the largest glow)
 
         self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
         self.true_pos = self.pos.copy()
-        self.prepare_canvas()
-        self.time = 0
-        self.phase = random.randint(0, 180)
+
+        self.frequency = 0.003#the frequncy of grow and shrinking
+        try:#the images are stored in an class variable such that the animations are only made once. This way, many particles can be made with very small performance.
+            self.images = Circles.animations[str(self.parallax[0])]
+        except:#if it is the first time making that circle size (depends on parallax)
+            self.prepare_animation()#make the circles once and store each frame in a list: takes performance to make many
+            Circles.animations[str(self.parallax[0])] = self.images
+
+        self.frame = random.randint(0, len(self.images)-1)#randomise the starting frame
 
     def update(self,scroll):
         self.update_pos(scroll)
         self.boundary()
-        self.update_image()
+        self.set_image()
 
-    def update_image(self):
-        self.image = self.surface.copy()
-        self.time += 1
-        self.colour[-1] = 80*math.sin(self.time*0.01+self.phase)+80#set fade
-        radius = (self.radius*math.sin(self.time*0.01+self.phase)+self.radius)*0.5#modify redious
+    def set_image(self):
+        self.image = self.images[self.frame]
+        self.frame += 1
 
-        self.make_glow(radius)
-        pygame.draw.circle(self.image,self.colour,(self.glow_radius,self.glow_radius),radius)
+        if self.frame == len(self.images):
+            self.frame = 0
+            #set new positions
+            self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
+            self.true_pos = self.pos.copy()
+
+    def prepare_animation(self):
+        self.prepare_canvas()
+        self.frame = 0
+        Circles.images = []#store each animation frame
+        for i in range(round(1/self.frequency)):#number of frames
+            self.prepare_images()
+            Circles.images.append(self.image)#store each animation frame
 
     def prepare_canvas(self):
         self.surface = pygame.Surface((self.glow_radius * 2, self.glow_radius * 2),pygame.SRCALPHA,32).convert_alpha()
@@ -121,11 +132,24 @@ class Circles(Bound_entity):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
-    def make_glow(self,radius):
+    def prepare_images(self):
+        phase = 3*math.pi*0.5
+        self.image = self.surface.copy()
+        alpha = (self.colour[-1]*math.sin(self.frame*self.frequency*2*math.pi+phase)+self.colour[-1])*0.5#set alpha
+        radius = (self.radius*math.sin(self.frame*self.frequency*2*math.pi+phase)+self.radius)*0.5#modify redious
+        self.prepare_glow(radius)
+
+        temp = self.surface.copy()
+        colour = self.colour[:3]
+        colour.append(alpha)
+        pygame.draw.circle(temp,colour,(self.glow_radius,self.glow_radius),radius)
+        self.image.blit(temp,(0,0))#need to blit in order to "stack" the alpha
+        self.frame += 1
+
+    def prepare_glow(self,radius):
         temp = self.surface.copy()
         for i in range(self.layers):
-            k = 255
-            pygame.draw.circle(temp,(k,k,k,10),self.surface.get_rect().center,i*radius)
+            pygame.draw.circle(temp,self.glow_colour,self.surface.get_rect().center,i*radius*self.glow_spacing_factor)
             self.image.blit(temp,(0,0))#need to blit in order to "stack" the alpha
 
 class Blink(Bound_entity):

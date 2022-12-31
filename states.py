@@ -92,8 +92,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-
-            self.game.game_objects.load_map('village_cave_1','1')
+            self.game.game_objects.load_map('forest_path_1','2')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -357,20 +356,21 @@ class Gameplay(Game_State):
         super().__init__(game)
         self.health_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/health/hearts_black.png",9,8,2,3)
         self.spirit_sprites = Read_files.Sprites().generic_sheet_reader("Sprites/UI/Spirit/spirit_orbs.png",9,9,1,3)
-        self.pause_cooldown = 0#a flag so that pause_game play doesn't get appended in series
+        self.light_effects = []#can append diffeet light effects: dark (caves) or light glow around aila
 
     def update(self):
         self.game.game_objects.update()
         self.game.game_objects.collide_all()
-        self.pause_cooldown -= 1
 
     def render(self):
         self.game.screen.fill((17,22,22))
         self.game.game_objects.draw()
         self.blit_screen_info()
+        self.render_effect()
 
     def render_effect(self):
-        pass
+        for effect in self.light_effects:
+            effect()
 
     def blit_screen_info(self):
         self.blit_health()
@@ -445,18 +445,39 @@ class Gameplay(Game_State):
 
     def handle_input(self,input):
         if input == 'dmg':
-            if self.pause_cooldown < 0:
-                new_game_state = Pause_gameplay(self.game,duration=11)
-                new_game_state.enter_state()
-                self.pause_cooldown = C.invincibility_time_enemy
-        elif input =='dark':
-            new_game_state = Dark_gameplay(self.game)
+            new_game_state = Pause_gameplay(self.game,duration=11)
             new_game_state.enter_state()
-        elif input =='light':
-            new_game_state = Light_gameplay(self.game)
-            new_game_state.enter_state()
-        elif input == 'death':
+        elif input =='dark':#dark around aila
+            self.light_effects.append(self.blit_dark_effect)
+            self.make_glow(6)
+        elif input =='light':#light around aila
+            self.light_effects.append(self.blit_glow_effect)
+            self.make_glow(1)
+        elif input == 'death':#normal death
             self.game.game_objects.player.death()
+        elif input == 'exit':#remove any effects
+            self.light_effects = []
+
+    def blit_glow_effect(self):
+        pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
+        self.game.screen.blit(self.glow,pos,special_flags=pygame.BLEND_RGBA_ADD)
+
+    def blit_dark_effect(self):
+        self.dark.fill((80,80,80))#dark background
+        pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
+        self.dark.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_ADD)
+        self.game.screen.blit(self.dark,(0,0),special_flags = pygame.BLEND_RGBA_MULT)
+
+    def make_glow(self,const=1):#init
+        self.dark = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1]))).convert_alpha()#ONLY USED FOR DARK MODE
+        self.radius = 200
+        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
+        layers = 40
+
+        for i in range(layers):
+            k = i*const
+            k = min(k,255)
+            pygame.draw.circle(self.glow,(k,k,k),self.glow.get_rect().center,self.radius-i*5)
 
 class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
     def __init__(self,game, duration=10, amplitude = 20):
@@ -476,74 +497,16 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
     def render(self):
         self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
 
-class Dark_gameplay(Gameplay):#for caves etc. makes everything dark except a light circle around aila.
-    def __init__(self,game):
-        super().__init__(game)
-        self.make_glow()
-        self.dark = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1]))).convert_alpha()
-
-    def render(self):
-        super().render()
-        self.render_effect()
-
-    def render_effect(self):
-        self.dark.fill((80,80,80))
-
-        pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
-        self.dark.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_ADD)
-        self.game.screen.blit(self.dark,(0,0),special_flags = pygame.BLEND_RGBA_MULT)
-
-    def make_glow(self):
-        self.radius = 200
-        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-        layers = 40
-        const=int(255/layers)
-        for i in range(layers):
-            k = i*const
-            k = min(k,255)
-            pygame.draw.circle(self.glow,(k,k,k),self.glow.get_rect().center,self.radius-i*5)
-
-    def handle_input(self,input):
-        if input == 'exit':
-            self.exit_state()
-        elif input == 'death':
-            self.game.game_objects.player.death()
-
-class Light_gameplay(Gameplay):#adds a light circle around aila.
-    def __init__(self,game):
-        super().__init__(game)
-        self.make_glow()
-
-    def render(self):
-        super().render()
-        self.render_effect()
-
-    def render_effect(self):
-        pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
-        self.game.screen.blit(self.glow,pos,special_flags=pygame.BLEND_RGBA_ADD)
-
-    def make_glow(self):
-        self.radius = 200
-        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-
-        layers = 40
-        for i in range(layers):
-            k = i
-            pygame.draw.circle(self.glow,(k,k,k),self.glow.get_rect().center,self.radius-i*5)
-
-    def handle_input(self,input):
-        if input == 'exit':
-            self.exit_state()
-        elif input == 'death':
-            self.game.game_objects.player.death()
-
 class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not respawned but transffered to cultist hideout
     def __init__(self,game):
         super().__init__(game)
         self.game.game_objects.player.health = max(30,self.game.game_objects.player.health)#the player should have atleast some lives if it get hit in cutsene.
 
     def handle_input(self,input):
-        if input == 'exit':
+        if input == 'dmg':
+            new_game_state = Pause_gameplay(self.game,duration=11)
+            new_game_state.enter_state()
+        elif input == 'exit':
             self.exit_state()
         elif input == 'death':
             self.game.game_objects.player.reset_movement()
