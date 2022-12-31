@@ -337,6 +337,24 @@
                  "width":16,
                  "x":1360,
                  "y":416
+                }, 
+                {
+                 "gid":29,
+                 "height":16,
+                 "id":289,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Spiritorb"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":896,
+                 "y":528
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -920,7 +938,7 @@
          "y":0
         }],
  "nextlayerid":54,
- "nextobjectid":289,
+ "nextobjectid":293,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

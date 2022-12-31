@@ -384,7 +384,7 @@ class Dash(Player_states):
         self.phase = self.phases[0]
         self.done = False#animation flag
         self.entity.velocity[0] = 20*self.dir[0]
-        self.entity.consume_spirit()
+        self.entity.consume_spirit(self.entity.dash_cost)
 
     def update_state(self):
         self.entity.velocity[1] = 0
@@ -515,7 +515,7 @@ class Spawn(Player_states):
         self.stay_still()
 
     def increase_phase(self):
-        self.entity.health=self.entity.max_health
+        self.entity.heal(self.entity.max_health)
         self.enter_state('Idle')
 
 class Sword(Player_states):

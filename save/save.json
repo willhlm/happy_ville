@@ -1,0 +1,1 @@
+{"player": {"spawn_point": [{"map": "light_forest_1", "point": "1"}], "inventory": {"Amber_Droplet": 23, "Bone": 2, "Soul_essence": 10, "Tungsten": 10}, "health": {"max_health": 10, "max_spirit": 5, "health": 4, "spirit": 2}, "abilities": ["Thunder", "Force", "Arrow", "Heal", "Darksaber"], "states": null}, "world_state": {"cutscenes_complete": []}}

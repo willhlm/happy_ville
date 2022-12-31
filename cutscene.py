@@ -270,7 +270,7 @@ class Death(Cutscene_engine):#when aila dies
                 offset=100#depends on the effect animation
                 self.spawneffect=Entities.Spawneffect(pos)
                 self.spawneffect.rect.midbottom=self.parent_class.game.game_objects.player.rect.midbottom
-                self.spawneffect.rect.bottom+=offset
+                self.spawneffect.rect.bottom += offset
                 self.parent_class.game.game_objects.cosmetics.add(self.spawneffect)
 
             elif self.spawneffect.finish:#when the cosmetic effetc finishes

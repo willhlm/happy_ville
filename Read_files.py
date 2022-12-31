@@ -3,22 +3,19 @@ import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
 
-def default(obj):
-    if hasattr(obj, 'to_json'):
-        return obj.to_json()
+def default(dict):
+    if hasattr(dict, 'to_json'):
+        return dict.to_json()
 
-def save_obj(obj):
-    jsonStr=json.dumps(obj, default=default)
-    name=str(type(obj).__name__)
+def save_json(dict, name):#used to save game
+    jsonStr=json.dumps(dict, default=default)
     path="save/" + name + ".json"
     with open(path, "w") as outfile:
         outfile.write(jsonStr)
 
-def load_obj(obj):
-    name=str(type(obj).__name__)
+def load_json(name):#used to load game
     path='save/' + name + '.json'
-    load_data=read_json(path)
-    obj.from_json(load_data)
+    return read_json(path)
 
 def read_json(path):
     with open(path) as f:

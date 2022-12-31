@@ -8,7 +8,6 @@ import random
 
 class Game_State():
     def __init__(self,game):
-        self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet: this should be moved to game_objects.py
         self.game = game
 
     def update(self):
@@ -30,7 +29,7 @@ class Title_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.arrow = Entities.Menu_Arrow()
-        self.title = self.font.render(text = 'HAPPY VILLE') #temporary
+        self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE') #temporary
 
         #create buttons
         self.buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
@@ -78,7 +77,7 @@ class Title_Menu(Game_State):
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            self.button_surfaces[b] = (self.font.render(text = b))
+            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
@@ -111,7 +110,7 @@ class Load_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.arrow = Entities.Menu_Arrow()
-        self.title = self.font.render(text = 'LOAD GAME') #temporary
+        self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
 
         #create buttons
         self.buttons = ['SLOT 1','SLOT 2','SLOT 3','SLOT 4']
@@ -163,7 +162,7 @@ class Load_Menu(Game_State):
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            self.button_surfaces[b] = (self.font.render(text = b))
+            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
@@ -171,7 +170,7 @@ class Start_Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.arrow = Entities.Menu_Arrow()
-        self.title = self.font.render(text = 'OPTIONS') #temporary
+        self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
 
         #create buttons
         self.buttons = ['Option 1','Option 2','Option 3','Option 4','Option 5']
@@ -215,7 +214,7 @@ class Start_Option_Menu(Game_State):
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            self.button_surfaces[b] = (self.font.render(text = b))
+            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
@@ -223,7 +222,7 @@ class Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.arrow = Entities.Menu_Arrow()
-        self.title = self.font.render(text = 'OPTIONS') #temporary
+        self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
 
         #create buttons
         self.buttons = ['Option 1','Option 2','Option 3','Option 4','Option 5']
@@ -271,7 +270,7 @@ class Option_Menu(Game_State):
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            self.button_surfaces[b] = (self.font.render(text = b))
+            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
@@ -287,7 +286,7 @@ class Pause_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.arrow = Entities.Menu_Arrow()
-        self.title = self.font.render(text = 'PAUSE') #temporary
+        self.title = self.game.game_objects.font.render(text = 'PAUSE') #temporary
 
         #create buttons
         self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
@@ -333,7 +332,7 @@ class Pause_Menu(Game_State):
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            self.button_surfaces[b] = (self.font.render(text = b))
+            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
             self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
@@ -372,7 +371,7 @@ class Gameplay(Game_State):
 
     def blit_fps(self):
         fps_string = str(int(self.game.clock.get_fps()))
-        self.game.screen.blit(self.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
+        self.game.screen.blit(self.game.game_objects.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
         self.game.game_objects.player.currentstate.handle_movement(input)
@@ -463,8 +462,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
 
 class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not respawned but transffered to cultist hideout
     def __init__(self,game):
-        super().__init__(game)
-        self.game.game_objects.player.health = max(30,self.game.game_objects.player.health)#the player should have atleast some lives if it get hit in cutsene.
+        super().__init__(game)        
 
     def handle_input(self,input):
         if input == 'dmg':
@@ -579,14 +577,14 @@ class Select_Menu(Gameplay):
             item.animation.update()
             pos=[self.item_positions[0]+20*index,self.item_positions[1]]
             self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),pos)
-            number = self.font.render(text = str(self.use_number[index]))
+            number = self.game.game_objects.font.render(text = str(self.use_number[index]))
             self.game.screen.blit(number,pos)
 
         for index, item in enumerate(self.key_items):
             item.animation.update()
             pos=[self.keyitem_positions[0]+20*index,self.keyitem_positions[1]]
             self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),pos)
-            number = self.font.render(text = str(self.key_number[index]))
+            number = self.game.game_objects.font.render(text = str(self.key_number[index]))
             self.game.screen.blit(number,pos)
 
         self.game.screen.blit(self.box.img,(self.item_positions[0]-16+20*self.item_index[0],135+20*self.item_index[1]))#pointer
@@ -736,7 +734,7 @@ class Conversation(Gameplay):
 
     def clean_slate(self):
         self.letter_frame = 0
-        self.text_window = self.font.fill_text_bg(self.text_WINDOW_SIZE)
+        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_WINDOW_SIZE)
         self.text_window.blit(self.npc.portrait,(0,10))
 
     def update(self):
@@ -745,7 +743,7 @@ class Conversation(Gameplay):
 
     def render(self):
         super().render()
-        text = self.font.render((272,80), self.conv, int(self.letter_frame//self.print_frame_rate))
+        text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame//self.print_frame_rate))
         self.text_window.blit(text,(64,8))
         self.game.screen.blit(self.text_window,(self.blit_x,60))
 
@@ -783,9 +781,9 @@ class Facilities(Gameplay):
 
     def init_canvas(self,size=[64,64]):
         self.surf=[]
-        self.bg = self.font.fill_text_bg(size)
+        self.bg = self.game.game_objects.font.fill_text_bg(size)
         for string in self.actions:
-            self.surf.append(self.font.render(text = string))
+            self.surf.append(self.game.game_objects.font.render(text = string))
 
     def blit_frame1(self):
         for index, surf in enumerate(self.surf):
@@ -802,7 +800,7 @@ class Facilities(Gameplay):
         self.handle_list[-1](input)
 
     def set_response(self,text):
-        self.respond = self.font.render(text = text)
+        self.respond = self.game.game_objects.font.render(text = text)
 
     def blit_response(self):
         self.game.screen.blit(self.respond,(190,150))
@@ -904,14 +902,14 @@ class Bank(Facilities):
 
     def blit_frame2(self):
         self.game.screen.blit(self.bg,(280,120))#box position
-        self.amount_surf = self.font.render(text = str(self.ammount))
+        self.amount_surf = self.game.game_objects.font.render(text = str(self.ammount))
         self.game.screen.blit(self.amount_surf,(310,130))#box position
 
     def select_frame1(self):#exchane of money
         if self.pointer_index[1]==2:#cancel
             self.exit_state()
         else:#widthdraw or deposit
-            self.bg = self.font.fill_text_bg([64,64])
+            self.bg = self.game.game_objects.font.fill_text_bg([64,64])
             self.next_frame()
 
     def select_frame2(self):
@@ -983,7 +981,7 @@ class Vendor(Facilities):
         self.item_index = [0,0]#pointer of item
 
     def init_canvas(self):
-        self.bg1 = self.font.fill_text_bg([300,200])
+        self.bg1 = self.game.game_objects.font.fill_text_bg([300,200])
 
         self.items = []
         for item in self.npc.inventory.keys():
@@ -1000,8 +998,8 @@ class Vendor(Facilities):
         self.display_number = min(3,len(self.items))#number of items to list
         self.sale_items=self.items[0:self.display_number+1]
 
-        self.buy_sur = self.font.render(text = 'Buy')
-        self.cancel_sur= self.font.render(text = 'Cancel')
+        self.buy_sur = self.game.game_objects.font.render(text = 'Buy')
+        self.cancel_sur= self.game.game_objects.font.render(text = 'Cancel')
 
     def update(self):
         super().update()
@@ -1022,14 +1020,14 @@ class Vendor(Facilities):
 
     def blit_money(self):#blit how much gold we have in inventory
         money = self.game.game_objects.player.inventory['Amber_Droplet']
-        count_text = self.font.render(text = str(money))
+        count_text = self.game.game_objects.font.render(text = str(money))
         self.game.screen.blit(count_text,(200,50))
         self.amber.animation.update()
         self.game.screen.blit(self.amber.image,(190,50))
 
     def blit_description(self):
         self.conv=self.items[self.item_index[1]].description
-        text = self.font.render((272,80), self.conv, int(self.letter_frame//2))
+        text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame//2))
         self.game.screen.blit(text,(190,100))
 
     def blit_items(self):
@@ -1040,7 +1038,7 @@ class Vendor(Facilities):
                 #blit cost
                 item_name=str(type(item).__name__)
                 cost=self.npc.inventory[item_name]
-                cost_text = self.font.render(text = str(cost))
+                cost_text = self.game.game_objects.font.render(text = str(cost))
                 self.game.screen.blit(cost_text,(260,80+20*index))
 
             else:#the last index
@@ -1056,7 +1054,7 @@ class Vendor(Facilities):
 
     def select_frame1(self):
         self.next_frame()
-        self.bg2 = self.font.fill_text_bg([64,32])
+        self.bg2 = self.game.game_objects.font.fill_text_bg([64,32])
         self.item = type(self.items[self.item_index[1]]).__name__
         self.pointer = Entities.Menu_Arrow()
 
@@ -1168,7 +1166,7 @@ class Signpost(Gameplay):
         self.game.screen.blit(self.surface,(0, 0))
         self.game.screen.blit(self.img,(0, 0))#blit directly on screen to avoid alpha change on this
         for dir in self.sign_post.directions.keys():
-            self.game.screen.blit(self.font.render(text = self.sign_post.directions[dir]),self.dir_pos[dir])
+            self.game.screen.blit(self.game.game_objects.font.render(text = self.sign_post.directions[dir]),self.dir_pos[dir])
 
     def render_in(self):
         self.fade += 1

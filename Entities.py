@@ -404,9 +404,9 @@ class Player(Character):
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
         self.max_health = 10
-        self.max_spirit = 10
+        self.max_spirit = 5
         self.health = 3
-        self.spirit = 3
+        self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
 
@@ -424,6 +424,7 @@ class Player(Character):
         self.set_abs_dist()
 
         self.sword_swing = 0#a flag to check which swing we are at (0 or 1)
+        self.dash_cost = 1#cost of spirit to perform dash
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def down_collision(self,hitbox):#when colliding with platform beneth
@@ -435,7 +436,7 @@ class Player(Character):
         if self.invincibile: return
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
         self.health -= dmg
-        self.game_objects.UI.remove_health(dmg)#update UI
+        self.game_objects.UI.remove_hearts(dmg)#update UI
         if self.health > 0:#check if dead¨
             self.animation_stack[-1].handle_input('Invincibile')#make some animation. should be first
             self.animation_stack[-1].handle_input('Hurt')#turn white
@@ -448,15 +449,15 @@ class Player(Character):
 
     def heal(self, health = 1):
         self.health += health
-        self.game_objects.UI.add_health()#update UI
+        self.game_objects.UI.update_hearts()#update UI
 
     def consume_spirit(self, spirit = 1):
         self.spirit -= spirit
-        self.game_objects.UI.remove_spirit(spirit)#update UI
+        self.game_objects.UI.remove_spirits(spirit)#update UI
 
     def add_spirit(self, spirit = 1):
         self.spirit += spirit
-        self.game_objects.UI.add_spirit(spirit)#update UI
+        self.game_objects.UI.update_spirits()#update UI
 
     def death(self):#"normal" gameplay states calls this
         if self.currentstate.state_name != 'death':#if not already dead
@@ -483,29 +484,6 @@ class Player(Character):
         super().update(pos)
         self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
         self.omamoris.update()
-
-    def to_json(self):#things to save: needs to be a dict
-        health = {'max_health':self.max_health,'max_spirit':self.max_spirit,'health':self.health,'spirit':self.spirit}
-
-        abilities = {}
-        for key,ability in self.abilities.items():
-            abilities[key] = True
-
-        save_dict = {'spawn_point':self.spawn_point,'inventory':self.inventory,'health':health,'abilities':abilities,'states':self.states}
-        return save_dict
-
-    def from_json(self,data):#things to load. data is a dict
-        self.max_health=data['health']['max_health']
-        self.max_spirit=data['health']['max_spirit']
-        self.health=data['health']['health']
-        self.spirit=data['health']['spirit']
-
-        self.states=data['states']
-        self.inventory=data['inventory']
-
-        self.abilities={}
-        for ability in data['abilities'].keys():
-                self.abilities[ability] = getattr(sys.modules[__name__], ability)
 
 class Enemy(Character):
     def __init__(self,pos,game_objects):
@@ -886,7 +864,7 @@ class NPC(Character):
 
     def get_conversation(self):#returns the conversation depending on the NPC state and conversation index
         try:
-            state = 'state_' + self.game_objects.world_state.progress
+            state = 'state_' + str(self.game_objects.world_state.progress)
             conv = self.conversation[state][str(self.conv_index)]
         except:
             self.conv_index -= 1
@@ -1220,8 +1198,9 @@ class Abilities(pygame.sprite.Sprite):#projectiels
         self.rect.center=self.hitbox.center#match the positions of hitboxes
 
     def collision_enemy(self,collision_enemy):
-        collision_enemy.take_dmg(self.dmg)
-        self.kill()
+        if collision_enemy.currentstate.state_name != 'death':#do not collide if the enemy is dead
+            collision_enemy.take_dmg(self.dmg)
+            self.kill()
 
     def collision_plat(self,platform):
         platform.take_dmg()
@@ -1412,8 +1391,8 @@ class Darksaber(Aila_sword):
     def collision_enemy(self,collision_enemy):
         if collision_enemy.spirit>=10:
             collision_enemy.spirit-=10
-            spirits=Spiritsorb([collision_enemy.rect.x,collision_enemy.rect.y])
-            collision_enemy.game_objects.loot.add(spirits)
+            #spirits=Spiritorb([collision_enemy.rect.x,collision_enemy.rect.y])
+            #collision_enemy.game_objects.loot.add(spirits)
         self.kill()
 
 class Projectiles(Abilities):
@@ -1564,8 +1543,9 @@ class Arrow(Projectiles):
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
 class Loot(Dynamicentity):#animated stuff with hitbox
-    def __init__(self,pos):
+    def __init__(self,pos,game_objects):
         super().__init__(pos)
+        self.game_objects = game_objects
         self.animation = animation.Basic_animation(self)
         self.currentstate = states_basic.Idle(self)
 
@@ -1585,8 +1565,7 @@ class Heart_container(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/heart_container/')
 
     def __init__(self,pos,game_objects):
-        super().__init__(pos)
-        self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
+        super().__init__(pos, game_objects)
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1605,8 +1584,7 @@ class Spirit_container(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spirit_container/')
 
     def __init__(self,pos,game_objects):
-        super().__init__(pos)
-        self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
+        super().__init__(pos, game_objects)
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1624,8 +1602,7 @@ class Soul_essence(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/soul_essence/')
 
     def __init__(self,pos,game_objects,ID_key = None):
-        super().__init__(pos)
-        self.game_objects = game_objects
+        super().__init__(pos, game_objects)
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1634,7 +1611,7 @@ class Soul_essence(Loot):
 
     def player_collision(self):
         self.game_objects.player.inventory['Soul_essence'] += 1
-        self.game_objects.map.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = 'gone'#write in the state file that this has been picked up
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = 'gone'#write in the state file that this has been picked up
         #make a cutscene?
         self.kill()
 
@@ -1647,8 +1624,7 @@ class Tungsten(Loot):
     sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/tungsten/')
 
     def __init__(self,pos,game_objects):
-        super().__init__(pos)
-        self.game_objects = game_objects#Soul_essence requries game_objects and it is the same static stamp
+        super().__init__(pos,game_objects)
         self.image = self.sprites[self.state][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
@@ -1659,10 +1635,22 @@ class Tungsten(Loot):
         #a cutscene?
         self.kill()
 
-class Enemy_drop(Loot):
+class Spiritorb(Loot):#the thing dark saber produces
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')
+
     def __init__(self,pos,game_objects):
-        super().__init__(pos)
-        self.game_objects = game_objects
+        super().__init__(pos, game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=self.rect.copy()
+
+    def player_collision(self):
+        self.game_objects.player.add_spirit(1)
+        self.kill()
+
+class Enemy_drop(Loot):#add gravity
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.velocity = [random.randint(-3, 3),-4]
         self.lifetime = 500
 
@@ -1732,23 +1720,6 @@ class Bone(Enemy_drop):
                 self.game_objects.player.spawn_point.pop()
             self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.player.abs_dist})
             self.game_objects.player.currentstate = states_player.Plant_bone(self.game_objects.player)
-
-class Spiritsorb(Enemy_drop):#the thing dark saber produces
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/Items/spiritorbs/')
-
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        rand_pos=[random.randint(-10, 10),random.randint(-10, 10)]
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0]+rand_pos[0],pos[1]+rand_pos[1],5,5)
-        self.hitbox=self.rect.copy()
-
-    def update_vel(self):
-        self.velocity=[0.1*random.randint(-10, 10),0.1*random.randint(-10, 10)]
-
-    def player_collision(self):
-        self.game_objects.player.spirit += 10
-        self.kill()
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos):
@@ -2239,7 +2210,7 @@ class Infinity_stones():
     def detach(self):
         pass
 
-    def collision(self):
+    def collision(self):#hit enemy
         pass
 
 class Red_infinity_stone(Infinity_stones):#more dmg
@@ -2270,7 +2241,7 @@ class Blue_infinity_stone(Infinity_stones):#get spirit at collision
         self.colour = 'blue'
 
     def collision(self):
-        self.sword.entity.spirit += 5
+        self.sword.entity.add_spirit()
 
 class Orange_infinity_stone(Infinity_stones):#bigger hitbox
 
@@ -2303,7 +2274,7 @@ class Purple_infinity_stone(Infinity_stones):#donno
 class Omamoris():
     def __init__(self,entity):
         self.equipped_omamoris=[]#equiped omamoris
-        self.omamori_list=[Double_jump(entity),Loot_magnet(entity),More_spirit(entity)]#omamoris in inventory.
+        self.omamori_list=[Double_jump(entity),Loot_magnet(entity),Dash_master(entity)]#omamoris in inventory.
         self.level = 0
 
     def update(self):
@@ -2381,14 +2352,19 @@ class Loot_magnet(Omamori):
         for loot in self.entity.game_objects.loot.sprites():
             loot.attract(self.entity.rect.center)
 
-class More_spirit(Omamori):
-    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/more_spirit/')#for inventory
+class Dash_master(Omamori):
+    sprites = Read_files.Sprites().load_all_sprites('Sprites/Enteties/omamori/dash_master/')#for inventory
 
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
-        self.entity.spirit += 0.5
+    def detach(self):
+        super().detach()
+        self.entity.dash_cost = 1
+
+    def attach(self):
+        super().attach()
+        self.entity.dash_cost = 0
 
 #timer toools: activate with the attrubute activate, which will run until the specified duration is run out
 class Timer():
@@ -2443,17 +2419,14 @@ class Jump_timer(Timer):#can be combined with shroomjump?
     def update(self):#called everyframe after activation
         if self.entity.ground and not self.jump:#when landing on a plarform: enters once
             self.entity.velocity[1] = -10
-            #self.lifetime = self.duration#reset the lifetime. needed if we want to modify the movement during the jump
             self.jump = True
-        #elif self.jump:#while jumping
-            #self.entity.velocity[1] -= 0.4*(C.max_vel[1]+self.entity.velocity[1])#do we need this one to make it feel good? William check
         super().update()#need to be after
 
-    def activate(self):#called when sword is swang
+    def activate(self):#called when button is pressed
         if self not in self.entity.timers:
             super().activate()
 
-    def deactivate(self):#called when timer runs out or release botton
+    def deactivate(self):#called when timer runs out or release button
         super().deactivate()
         self.jump = False
 
