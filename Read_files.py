@@ -1,4 +1,3 @@
-
 import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
@@ -269,28 +268,40 @@ class Alphabet():
 
 class Controller():
     def __init__(self, controller_type = False):
+        self.controller_type = controller_type
         self.keydown=False
         self.keyup=False
         self.value=[0,0]
         self.key=False
         self.outputs=[self.keydown,self.keyup,self.value,self.key]
         self.map_keyboard()
-        self.methods=[self.keybord]#joystick may be appended
+        self.methods = [self.keybord]#joystick may be appended
 
         pygame.joystick.init()#initialise joystick module
         self.initiate_controls()#initialise joysticks and add to list
-        self.buttonmapping(controller_type)#read in controler configuration file
+        self.buttonmapping()#read in controler configuration file
 
     def initiate_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
 
-    def buttonmapping(self,controller_type):
+    def rumble(self):#doesn't rumble...
+        self.joysticks[0].rumble(0.4,0.9,1000)#low fre, high fre, duration
+
+    def buttonmapping(self):
+        if not self.controller_type: return
         #self.methods.append(self.joystick)
-        file = controller_type+'keys.json'
+        file = self.controller_type+'keys.json'
         with open(join(file),'r+') as file:
             mapping=json.load(file)
             self.buttons=mapping['buttons']
             self.analogs=mapping['analogs']
+
+    def get_controllertype(self):#called when a device is added
+        for joy in self.joysticks:
+            if 'xbox' in joy.get_name().lower():
+                self.controller_type = 'xbox'
+            elif 'playsation' in joy.get_name().lower():
+                self.controller_type = 'ps4'
 
     def map_keyboard(self):
         self.keyboard_map = {pygame.K_ESCAPE: 'start',
@@ -313,10 +324,9 @@ class Controller():
     def map_inputs(self,event):
         self.keyup=False
         self.keydown=False
-        try:
-            self.methods[-1](event)
-        except:
-            pass
+        for method in self.methods:
+            method(event)
+        #self.methods[-1](event)
 
     def keybord(self,event):
         if event.type == pygame.KEYDOWN:
@@ -355,10 +365,10 @@ class Controller():
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
             self.initiate_controls()
             self.methods.append(self.joystick)
+            self.get_controllertype()
+            self.buttonmapping()#read in controler configuration file
 
     def joystick(self,event):
-        print(event)
-        pass
         if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
             self.initiate_controls()
             self.methods.pop()
@@ -372,7 +382,6 @@ class Controller():
             self.key=self.buttons[str(event.button)]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
-
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value[0]=event.value
                 if abs(event.value)<0.2:
