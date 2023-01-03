@@ -420,7 +420,7 @@ class Level():
                 pass
 
             try:#add particles inbetween layers
-                if 'fg' in tile_layer:
+                if 'fg1' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_fgs)
                 elif 'bg' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_bgs)

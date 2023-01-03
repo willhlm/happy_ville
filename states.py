@@ -462,7 +462,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
 
 class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not respawned but transffered to cultist hideout
     def __init__(self,game):
-        super().__init__(game)        
+        super().__init__(game)
 
     def handle_input(self,input):
         if input == 'dmg':
@@ -472,7 +472,7 @@ class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not re
             self.exit_state()
         elif input == 'death':
             self.game.game_objects.player.reset_movement()
-            self.game.game_objects.load_map('cultist_hideout1','2')
+            self.game.game_objects.load_map('cultist_hideout_1','2')
 
 class Ability_Menu(Gameplay):
     def __init__(self, game):
@@ -1150,7 +1150,7 @@ class Signpost(Gameplay):
         self.render_fade=[self.render_in,self.render_out]
 
         self.sign_post = sign_post
-        self.img = sign_post.sprites['bg'][0]#maybe the img should not be in signpost but somewhere more accesable
+        self.img = sign_post.sprites.sprite_dict['bg'][0]#maybe the img should not be in signpost but somewhere more accesable
         self.dir_pos = {'left':[0,150],'up':[100,50],'right':[200,150],'down':[100,300]}
 
         self.surface = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])), pygame.SRCALPHA, 32).convert_alpha()
@@ -1194,7 +1194,7 @@ class New_ability(Gameplay):#when player obtaines a new ability
         self.page = 0
         self.render_fade=[self.render_in,self.render_out]
 
-        self.img = self.game.game_objects.player.sprites.sprite_dict['main'][ability][0].copy()
+        self.img = self.game.game_objects.player.sprites.sprite_dict[ability+'_main'][0].copy()
         self.game.game_objects.player.reset_movement()
 
         self.surface = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])), pygame.SRCALPHA, 32).convert_alpha()

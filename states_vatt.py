@@ -6,19 +6,12 @@ import random
 class Vatt_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def enter_state(self,newstate):
-        self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def increase_phase(self):
-        if self.phase=='pre':
-            self.phase='main'
-        elif self.phase=='main':
-            self.phase=self.phases[-1]
-        elif self.phase=='post':
-            self.done=True
+        pass
 
     def update_state(self):
         pass
@@ -28,10 +21,9 @@ class Idle(Vatt_states):
         super().__init__(entity)
         self.stay_still()
 
-
     def update_state(self):
         if not self.entity.collision_types['bottom']:
-            self.enter_state('Fall_stand')
+            self.enter_state('Fall_stand_pre')
 
     def handle_input(self,input):
         if input=='Hurt':
@@ -44,7 +36,6 @@ class Idle(Vatt_states):
         elif input == 'Transform':
             self.enter_state('Transform')
 
-
 class Idle_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -52,7 +43,7 @@ class Idle_aggro(Vatt_states):
 
     def update_state(self):
         if not self.entity.collision_types['bottom']:
-            self.enter_state('Fall_stand_aggro')
+            self.enter_state('Fall_stand_aggro_pre')
 
     def handle_input(self,input):
         if input=='Hurt':
@@ -74,33 +65,39 @@ class Walk(Vatt_states):
         elif input == 'Transform':
             self.enter_state('Transform')
 
-class Fall_stand(Vatt_states):
+class Fall_stand_pre(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
-
-    def update_state(self):
-        if self.entity.collision_types['bottom']:
-            self.enter_state('Idle')
 
     def handle_input(self, input):
         if input=='Hurt':
             self.enter_state('Hurt')
         elif input == 'Transform':
             self.enter_state('Transform')
+        elif input == 'Ground':
+            self.enter_state('Idle')
 
-class Fall_stand_aggro(Vatt_states):
+class Fall_stand_main(Fall_stand_pre):
     def __init__(self,entity):
         super().__init__(entity)
         self.walk()
 
-    def update_state(self):
-        if self.entity.collision_types['bottom']:
-            self.enter_state('Idle_aggro')
+class Fall_stand_aggro_pre(Vatt_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.walk()
 
     def handle_input(self, input):
         if input=='Hurt':
             self.enter_state('Hurt_aggro')
+        elif input == 'Ground':
+            self.enter_state('Idle_aggro')
+
+class Fall_stand_aggro_main(Fall_stand_aggro_pre):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.walk()
 
 class Run(Vatt_states):
     def __init__(self,entity):
@@ -127,7 +124,7 @@ class Run_aggro(Vatt_states):
         if input == 'Run':
             pass
         elif input == 'Javelin':
-            self.enter_state('Javelin')
+            self.enter_state('Javelin_pre')
 
 class Death(Vatt_states):
     def __init__(self,entity):
@@ -141,43 +138,29 @@ class Hurt(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Transform')
+        print('hurt')
 
     def increase_phase(self):
-        self.done=True
+        self.enter_state('Transform')
 
 class Hurt_aggro(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.done=False
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
 
     def increase_phase(self):
-        self.done=True
+        self.enter_state('Idle')
 
 class Transform(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        self.done = False
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle_aggro')
-            self.entity.AI_stack[-1].handle_input('Aggro')
-            if not self.entity.aggro:
-                self.entity.turn_clan()
 
     def increase_phase(self):
-        self.done=True
+        self.enter_state('Idle_aggro')
+        self.entity.AI_stack[-1].handle_input('Aggro')
+        if not self.entity.aggro:
+            self.entity.turn_clan()
 
 class Stun(Vatt_states):
     def __init__(self,entity,duration):
@@ -190,39 +173,43 @@ class Stun(Vatt_states):
         if self.lifetime<0:
             self.enter_state('Idle')
 
-class Javelin(Vatt_states):
+class Javelin_pre(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases = ['pre','main','post']
-        self.phase = 'pre'
         self.entity.acceleration = [0,0]
         self.entity.velocity = [0,0]
         self.counter = 0
-        self.done = False
         self.pre_pos_increment = [-3,-2,-1,-1,-1,-1]
 
     def update_state(self):
-        if self.phase == 'pre':
-            if int(self.counter/4) >= len(self.pre_pos_increment):
-                pass
-            elif self.counter%4 == 0:
-                self.entity.update_pos((0,self.pre_pos_increment[int(self.counter/4)]))
-        elif self.phase == 'main':
-            if self.counter > 24:
-                self.phase = 'post'
-        elif self.done:
-            self.enter_state('Fall_stand_aggro')
         self.counter += 1
+        if int(self.counter/4) >= len(self.pre_pos_increment):
+            pass
+        elif self.counter%4 == 0:
+            self.entity.update_pos((0,self.pre_pos_increment[int(self.counter/4)]))
 
     def increase_phase(self):
-        if self.phase=='pre':
-            self.phase='main'
-            self.counter = 0
-            self.entity.acceleration = [3.5,0]
-        elif self.phase=='main':
-            pass
-        elif self.phase=='post':
-            self.done=True
+        self.enter_state('Javelin_main')
+        self.entity.acceleration = [3.5,0]
 
-    def handle_input(self, input):
+class Javelin_main(Javelin_pre):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update_state(self):
+        self.counter += 1
+        if self.counter > 24:
+            self.enter_state('Javelin_post')
+
+    def increase_phase(self):
         pass
+
+class Javelin_post(Javelin_pre):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update_state(self):
+        pass
+
+    def increase_phase(self):
+        self.enter_state('Fall_stand_aggro_pre')
