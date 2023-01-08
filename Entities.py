@@ -1,5 +1,4 @@
-import pygame, random, sys, Read_files, states, particles, animation, states_health, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_shroompoline, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
-#import time
+import pygame, random, sys, Read_files, states, particles, animation, states_health, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
 import constants as C
 
 pygame.mixer.init()
@@ -64,7 +63,7 @@ class Collision_block(Platform):
     def collide_x(self,entity):
         if entity.velocity[0]>0:#going to the right
             entity.right_collision(self.hitbox.left)
-        else:#going to the left
+        else:#going to the leftx
             entity.left_collision(self.hitbox.right)
         entity.update_rect()
 
@@ -207,25 +206,30 @@ class Collision_right_angle(Platform):
                 entity.down_collision(target)
                 entity.update_rect()
 
-class Spikes(Platform):
+class Collision_dmg(Platform):#should be an interactable
     def __init__(self,pos,size):
         super().__init__(pos,size)
-        self.image = pygame.image.load("Sprites/block/spikes/spkies.png").convert_alpha()
-        self.dmg = 10
+        self.dmg = 1
 
     def collide_x(self,entity):
         if entity.velocity[0]>0:#going to the right
-            entity.velocity[0] = -6#knock back
+            entity.right_collision(self.hitbox.left)
+            entity.velocity[0] = -10#knock back
         else:#going to the left
-            entity.velocity[0] = 6#knock back
+            entity.left_collision(self.hitbox.right)
+            entity.velocity[0] = 10#knock back
         entity.take_dmg(self.dmg)
+        entity.update_rect()
 
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
-            entity.velocity[1] = -6#knock back
+            entity.down_collision(self.hitbox.top)
+            entity.velocity[1] = -10#knock back
         else:#going up
-            entity.velocity[1] = 6#knock back
+            entity.top_collision(self.hitbox.bottom)
+            entity.velocity[1] = 10#knock back
         entity.take_dmg(self.dmg)
+        entity.update_rect()
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def __init__(self,pos,img=pygame.Surface((16,16))):
@@ -317,6 +321,9 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         super().update(scroll)
         self.update_vel()
 
+    def take_dmg(self,dmg):#collision dmg will call this
+        pass
+
     def update_pos(self,pos):
         self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.bottom = self.rect.bottom
@@ -335,10 +342,12 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
     def right_collision(self,hitbox):
         self.hitbox.right = hitbox
         self.collision_types['right'] = True
+        self.currentstate.handle_input('Wall')
 
     def left_collision(self,hitbox):
         self.hitbox.left = hitbox
         self.collision_types['left'] = True
+        self.currentstate.handle_input('Wall')
 
     def down_collision(self,hitbox):
         self.hitbox.bottom = hitbox
@@ -413,7 +422,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 5
+        self.health = 10
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -437,16 +446,7 @@ class Player(Character):
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
-        self.velocity[1] = 0
         self.ground = True#used for jumping
-
-    def right_collision(self,hitbox):
-        super().right_collision(hitbox)
-        self.currentstate.handle_input('Wall')
-
-    def left_collision(self,hitbox):
-        super().left_collision(hitbox)
-        self.currentstate.handle_input('Wall')
 
     def take_dmg(self,dmg = 1):
         if self.invincibile: return
@@ -508,11 +508,11 @@ class Enemy(Character):
         self.pause_group = game_objects.entity_pause
 
         self.currentstate = states_enemy.Idle(self)
-        self.AI_stack = [AI_enemy.Peace(self)]
+        self.AI = AI_enemy.Peace(self)
 
         self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}
-        self.spirit = 100
-        self.health = 100
+        self.spirit = 10
+        self.health = 3
 
         self.aggro = True#colliding with player
         self.dmg = 1#projectile damage
@@ -521,11 +521,11 @@ class Enemy(Character):
 
         #move these to AI classes?
         self.attack_distance = 0#when try to hit
-        self.aggro_distance = 200#when ot become aggro
+        self.aggro_distance = 300#when ot become aggro
 
     def update(self,pos):
         super().update(pos)
-        self.AI_stack[-1].update()#tell what the entity should do
+        self.AI.update()#tell what the entity should do
         self.group_distance()
 
     def player_collision(self):#when player collides with enemy
@@ -554,38 +554,6 @@ class Enemy(Character):
         self.velocity[0] = -30*self.dir[0]
         self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
 
-class Collision_breakable(Enemy):#a breakable collision block: should it be inetractable instead?
-    def __init__(self, pos,game_objects,type = 'type1'):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/'+type+'/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-
-        self.health = 40
-
-    def player_collision(self):#only sideways collision checks, for now
-        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-        if sign>0:#plaer on right
-            self.game_objects.player.hitbox.left = self.hitbox.right
-        else:#plyer on left
-            self.game_objects.player.hitbox.right = self.hitbox.left
-        self.game_objects.player.update_rect()
-
-    def knock_back(self,dir):
-        pass
-
-    def update(self,pos):
-        self.update_pos(pos)
-        self.currentstate.update()
-        self.animation.update()
-        self.update_timers()
-        self.group_distance()
-
-    def dead(self):#called when death animatin finishes
-        self.kill()
-
 class Mygga(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -606,7 +574,6 @@ class Slime(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.health = 50
 
 class Wall_slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -615,9 +582,8 @@ class Wall_slime(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
-        self.health = 50
         self.currentstate.enter_state('Walk')
-        self.AI_stack = [AI_wall_slime.Peace(self)]
+        self.AI = AI_wall_slime.Peace(self)
 
     def knock_back(self,dir):
         pass
@@ -645,12 +611,12 @@ class Vatt(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
-        self.health = 30
-        self.spirit = 30
+        self.health = 3
+        self.spirit = 3
         self.aggro = False
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = 60
-        self.AI_stack = [AI_vatt.Peace(self)]
+        self.AI = AI_vatt.Peace(self)
 
     def turn_clan(self):#this is acalled when tranformation is finished
         for enemy in self.game_objects.enemies.sprites():
@@ -666,20 +632,26 @@ class Flowy(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
         self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 10
+        self.health = 1
         self.spirit=10
 
-class Larv(Enemy):
+class Larv_poison(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
-        self.health = 40
-        self.spirit=10
         self.attack=Poisonblobb
         self.attack_distance=150
+
+class Larv_simple(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv_simple/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
 
 class Blue_bird(Enemy):
     def __init__(self,pos,game_objects):
@@ -691,12 +663,12 @@ class Blue_bird(Enemy):
         self.currentstate = states_bluebird.Idle(self)
         self.aggro=False
         self.health=1
-        self.AI_stack = [AI_bluebird.Peace(self)]
+        self.AI = AI_bluebird.Peace(self)
 
     def knock_back(self,dir):
         pass
 
-class Shroompolin(Enemy):
+class Shroompoline(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/shroompolin/')
@@ -704,7 +676,7 @@ class Shroompolin(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
         self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
-        self.AI_stack = [AI_shroompoline.Peace(self)]
+        self.AI = AI_enemy.Nothing(self)
         self.aggro = False#player collision
         self.invincibile = True#taking dmg
 
@@ -731,10 +703,11 @@ class Kusa(Enemy):
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = 30
         self.health = 1
-        self.AI_stack = [AI_kusa.Peace(self)]
+        self.AI = AI_kusa.Peace(self)
+        self.dmg = 2
 
     def suicide(self):
-        self.projectiles.add(Explosion(self,dmg=2))
+        self.projectiles.add(Explosion(self))
         self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
 
 class Svampis(Enemy):
@@ -748,9 +721,10 @@ class Svampis(Enemy):
         self.attack_distance = 30
         self.health = 1
         self.AI_stack = [AI_kusa.Peace(self)]
+        self.dmg = 2
 
     def suicide(self):
-        self.projectiles.add(Explosion(self,dmg=2))
+        self.projectiles.add(Explosion(self))
         self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
 
 class Egg(Enemy):#change design
@@ -760,7 +734,6 @@ class Egg(Enemy):#change design
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],64,64)
-        self.health = 1
         self.number = random.randint(1, 4)
         self.aggro_distance = -1 #if negative, it will not go into aggro
 
@@ -785,7 +758,6 @@ class Skeleton_warrior(Enemy):#change design
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 50
         self.attack_distance = 100
         self.attack = Sword
 
@@ -799,7 +771,6 @@ class Liemannen(Enemy):#change design
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 50
         self.attack_distance = 100
         self.attack = Sword
 
@@ -813,7 +784,6 @@ class Skeleton_archer(Enemy):#change design
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 50
         self.attack_distance = 300
         self.attack = Arrow
         self.aggro_distance = 400
@@ -828,7 +798,7 @@ class Cultist_rogue(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 50
+        self.health = 10
         self.attack_distance = 80
         self.attack = Sword
         self.currentstate = states_rogue_cultist.Idle(self)
@@ -840,7 +810,7 @@ class Cultist_warrior(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 50
+        self.health = 10
         self.attack_distance = 80
         self.attack = Sword
 
@@ -851,7 +821,6 @@ class John(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 50
         self.attack_distance = 80
         self.attack = Sword
 
@@ -960,7 +929,7 @@ class MrBanks(NPC):#bank
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.ammount = 0
-        print('fe')
+
     def buisness(self):#enters after conversation
         new_state = states.Bank(self.game_objects.game, self)
         new_state.enter_state()
@@ -968,6 +937,7 @@ class MrBanks(NPC):#bank
 class Boss(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.health = 30
 
     def dead(self):
         self.aggro = False
@@ -993,22 +963,23 @@ class Reindeer(Boss):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.currentstate = states_reindeer.Idle(self)
         self.abillity = 'dash'
-        self.health = 210
         self.spirit = 1
         self.attack = Sword
         self.special_attack = Ground_shock
+        self.attack_distance = 300
 
-        self.AI_stack = [AI_reindeer.Peace(self)]
+        self.AI = AI_reindeer.Peace(self)
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states.add('Dash')#append dash abillity to available states
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
-        if self.health < 100:
-            self.AI_stack[-1].handle_input('stage3')#enter stage 3
-        elif self.health < 200:
-            self.AI_stack[-1].handle_input('stage2')#enter stage 2
+        #self.AI_stack[-1].handle_input('jumping')#enter stage 3
+        #if self.health < 100:
+    #        self.AI_stack[-1].handle_input('stage3')#enter stage 3
+    #    elif self.health < 200:
+    #        self.AI_stack[-1].handle_input('stage2')#enter stage 2
 
 class Idun(Boss):
     def __init__(self,pos,game_objects):
@@ -1017,7 +988,6 @@ class Idun(Boss):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 50
         self.attack_distance = 100
         self.attack = Sword
 
@@ -1034,7 +1004,6 @@ class Freja(Boss):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 50
         self.attack_distance = 100
         self.attack = Sword
 
@@ -1051,7 +1020,6 @@ class Tyr(Boss):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 50
         self.attack_distance = 100
         self.attack = Sword
 
@@ -1068,7 +1036,6 @@ class Fenrisulven(Boss):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 50
         self.attack_distance = 100
         self.attack = Sword
 
@@ -1085,7 +1052,7 @@ class Rhoutta_encounter(Boss):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 100
+        self.health = 5
         self.attack_distance = 100
         self.attack = Sword
         self.dmg = 0
@@ -1208,7 +1175,7 @@ class Abilities(Animatedentity):#projectiels
     def collision_enemy(self,collision_enemy):
         if not collision_enemy.invincibile:
             collision_enemy.take_dmg(self.dmg)
-            self.kill()
+            #self.kill()
 
     def collision_plat(self,platform):#collision platform
         platform.take_dmg()
@@ -1237,19 +1204,24 @@ class Heal(Melee):
         super().__init__(entity)
 
 class Explosion(Melee):
-    sprites = Read_files.Sprites_Player('Sprites/Attack/invisible/')
+    sprites = Read_files.Sprites_Player('Sprites/Attack/explosion/')
 
-    def __init__(self,entity,dmg):
+    def __init__(self,entity):
         super().__init__(entity)
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = pygame.Rect(self.entity.rect.centerx-50,self.entity.rect.centery-50,100,100)
+        self.rect = self.image.get_rect()
+        self.rect.x = entity.rect.x
+        self.rect.bottom = entity.rect.bottom
         self.hitbox = self.rect.copy()
         self.aggro = False #to not take collision dmg
-        self.lifetime = 10
-        self.dmg = dmg
+        self.lifetime = 100
+        self.dmg = entity.dmg
 
     def update_hitbox(self):
         pass
+
+    def reset_timer(self):
+        self.kill()
 
 class Shield(Melee):
     sprites = Read_files.Sprites_Player('Sprites/Attack/invisible/')
@@ -1342,37 +1314,41 @@ class Aila_sword(Sword):
         super().__init__(entity)
 
     def init(self):
-        self.dmg = 10
-        self.potrait = Read_files.Sprites().load_all_sprites("Sprites/Enteties/Items/sword")
-        self.equip = 'idle'#stone pointer
-        self.frame = 0#potrait frame
-        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#,'purple':Red_infinity_stone(self)]
-        self.colour = {'idle':[255,255,255,255],'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
+        self.dmg = 1
+        self.tungsten_cost = 1#the cost to level up to next level
+        self.level = 0#determines how many stone one can attach
+        self.potrait = Sword_potrait()
+        self.equip = []#stone pointer
+        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#,'purple':Red_infinity_stone(self)]#the ones aila has picked up
+        self.colour = {'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
 
-    def potrait_animation(self):#called from inventory
-        self.potrait_image = self.potrait[self.equip][self.frame//4].copy()
-        self.frame += 1
+    def set_stone(self,stone_str):#called from smith
+        if len(self.equip) < self.level:
+            self.equip.append(stone_str)
+            self.stones[stone_str].attach()
 
-        if self.frame == len(self.potrait[self.equip])*4:
-            self.frame = 0
-
-    def set_stone(self,stone_str):#set from inventory
-        if self.equip!='idle':#if not first time
-            self.stones[self.equip].detach()
-
-        self.equip = stone_str
-        self.stones[stone_str].attach()
+    def remove_stone(self):#not imple,ented
+        pass
+        #if self.equip != 'idle':#if not first time
+        #    self.stones[self.equip].detach()
 
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
-        if self.equip != 'idle':
-            self.stones[self.equip].collision()#call collision specific for stone
+        for stone in self.equip:
+            self.stones[stone].collision()#call collision specific for stone
 
     def clash_particles(self,pos,number_particles=12):
         angle = random.randint(-180, 180)#the ejection anglex
+        color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3,colour=self.colour[self.equip])
+            obj1=particles.General_particle(pos,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3,colour=color)
             self.entity.game_objects.cosmetics.add(obj1)
+
+    def level_up(self):#called when the smith imporoves the sword
+        self.dmg *= 1.2
+        self.level += 1
+        self.potrait.currentstate.enter_state('Level_'+str(self.level))
+        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
 class Darksaber(Aila_sword):
     def __init__(self,entity):
@@ -1411,7 +1387,7 @@ class Thunder(Projectiles):
         self.rect.midbottom = enemy_rect.midbottom
         self.hitbox = self.rect.copy()
         self.lifetime = 1000
-        self.dmg = 10
+        self.dmg = 2
 
     def collision_enemy(self,collision_enemy):
         self.dmg = 0
@@ -1453,7 +1429,7 @@ class Poisonblobb(Projectiles):
         self.update_hitbox()
 
         self.dmg = entity.dmg
-        self.lifetime=100
+        self.lifetime = 100
         self.velocity=[entity.dir[0]*5,-1]
 
     def update(self,scroll):
@@ -1479,7 +1455,7 @@ class Ground_shock(Projectiles):
         self.update_hitbox()
 
         self.dmg = entity.dmg
-        self.lifetime=100
+        self.lifetime = 100
         self.velocity=[entity.dir[0]*5,0]
 
 class Force(Projectiles):
@@ -1665,7 +1641,7 @@ class Enemy_drop(Loot):#add gravity
 
     def attract(self,pos):#the omamori calls on this in loot group
         if self.lifetime < 350:
-            self.velocity=[0.1*(pos[0]-self.rect.center[0]),0.1*(pos[1]-self.rect.center[1])]
+            self.velocity = [0.1*(pos[0]-self.rect.center[0]),0.1*(pos[1]-self.rect.center[1])]
 
     def destory(self):
         if self.lifetime < 0:#remove after a while
@@ -1680,7 +1656,7 @@ class Enemy_drop(Loot):#add gravity
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
         self.velocity[0] = 0.5*self.velocity[0]
-        self.velocity[1] = -0.7*self.velocity[1]
+        self.velocity[1] = -0.6*self.velocity[1]
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
@@ -1851,6 +1827,15 @@ class Interactable(Animatedentity):#interactables
 
     def take_dmg(self,projectile):#when player hits with sword
         pass
+
+class Spikes(Interactable):#should be an interactable
+    def __init__(self,pos,size):
+        super().__init__(pos,size)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/spikes')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = (pos[0],pos[1])
+        self.hitbox = self.rect.copy()
 
 class Bridge(Interactable):
     def __init__(self, pos,game_objects):
@@ -2062,6 +2047,51 @@ class Door(Interactable):
         except:
             pass
 
+class Collision_breakable(Interactable):#a breakable collision block: should it be inetractable instead?
+    def __init__(self, pos,game_objects,type = 'type1'):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/'+type+'/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+        self.timers = []
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.health = 3
+
+    def player_collision(self):#only sideways collision checks, for now
+        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
+        if sign>0:#plaer on right
+            self.game_objects.player.hitbox.left = self.hitbox.right
+        else:#plyer on left
+            self.game_objects.player.hitbox.right = self.hitbox.left
+        self.game_objects.player.update_rect()
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.update_timers()#invincibililty
+
+    def dead(self):#called when death animatin finishes
+        self.kill()
+
+    def take_dmg(self,projectile):
+        if self.invincibile: return
+        self.health -= 1
+        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+        projectile.clash_particles(self.hitbox.center)
+
+        if self.health > 0:#check if dead¨
+            self.animation.handle_input('Hurt')#turn white
+            self.game_objects.camera.camera_shake(3,10)
+        else:#if dead
+            if self.currentstate.state_name != 'death':#if not already dead
+                self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+                self.currentstate.enter_state('Death')#overrite any state and go to deat
+
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
+
 class Spawnpoint(Interactable):#save point
     def __init__(self,pos,game_objects,map):
         super().__init__(pos,game_objects)
@@ -2127,6 +2157,7 @@ class Sign(Interactable):#save point
     def interact(self):#when player press t/y
         new_state = states.Signpost(self.game_objects.game,self)
         new_state.enter_state()
+
 #UI
 class Menu_Arrow():
 
@@ -2181,8 +2212,19 @@ class Spirit():
         self.currentstate.update()
         self.animation.update()
 
-class Infinity_stones():
+class Sword_potrait():
+    def __init__(self):
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/Items/sword")#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.dir = [1,0]#animation and state need this
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle(self)#
 
+    def reset_timer(self):
+        pass
+
+class Infinity_stones():
     def __init__(self,sword):
         self.sword = sword
         self.dir = [1,0]#animation and state need this
@@ -2325,7 +2367,7 @@ class Double_jump(Omamori):
 
     def __init__(self,entity):
         super().__init__(entity)
-        self.counter=0
+        self.counter = 0
 
     def update(self):
         if self.entity.collision_types['bottom'] or self.entity.collision_types['right'] or self.entity.collision_types['left']:
@@ -2350,7 +2392,7 @@ class Loot_magnet(Omamori):
         for loot in self.entity.game_objects.loot.sprites():
             loot.attract(self.entity.rect.center)
 
-class Dash_master(Omamori):
+class Dash_master(Omamori):#makes dash free of charge
     sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/dash_master/')#for inventory
 
     def __init__(self,entity):
@@ -2371,12 +2413,12 @@ class Timer():
         self.duration = duration
 
     def activate(self):#add timer to the entity timer list
+        if self in self.entity.timers: return#do not append if the timer is already inside
         self.lifetime = self.duration
         self.entity.timers.append(self)
 
     def deactivate(self):
-        if self in self.entity.timers:
-            self.entity.timers.remove(self)
+        self.entity.timers.remove(self)
 
     def update(self):
         self.lifetime -= 1
@@ -2412,21 +2454,12 @@ class Sword_timer(Timer):
 class Jump_timer(Timer):#can be combined with shroomjump?
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
-        self.jump = False
 
-    def update(self):#called everyframe after activation
-        if self.entity.ground and not self.jump:#when landing on a plarform: enters once
+    def update(self):#called everyframe after activation (activated after pressing jump)
+        if self.entity.ground:#when landing on a plarform: enters once
             self.entity.velocity[1] = -10
-            self.jump = True
+            self.entity.ground = False
         super().update()#need to be after
-
-    def activate(self):#called when button is pressed
-        if self not in self.entity.timers:
-            super().activate()
-
-    def deactivate(self):#called when timer runs out or release button
-        super().deactivate()
-        self.jump = False
 
 class Ground_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity,duration):
@@ -2434,8 +2467,8 @@ class Ground_timer(Timer):#a timer to check how long time one has not been on gr
         self.entity.ground = True
 
     def activate(self):#called when entering fall run or fall stand
-        super().activate()
-        self.entity.ground = True
+        if self.entity.ground:#if we fall from a plotform
+            super().activate()
 
     def deactivate(self):#called when timer runs out
         super().deactivate()
@@ -2447,10 +2480,9 @@ class Shroomjump_timer(Timer):
         self.shrooming = False
 
     def activate(self):#called when pressed jump putton and/or landing on a shroom
-        if self.shrooming:#second time entering (press shroom)
+        if self.shrooming:#second time entering (pressing or landing on shroom)
             self.entity.velocity[1] = -15
             return
-
         super().activate()
         self.shrooming = True
 

@@ -73,6 +73,7 @@ class Stun(Enemy_states):
 class Attack_pre(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.stay_still()
         self.dir=self.entity.dir.copy()#animation direction
 
     def increase_phase(self):
@@ -81,6 +82,7 @@ class Attack_pre(Enemy_states):
 class Attack_main(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.stay_still()        
         self.dir=self.entity.dir.copy()#animation direction
         self.entity.attack.lifetime=10
         attack=self.entity.attack(self.entity)#make the object
@@ -88,3 +90,4 @@ class Attack_main(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
+        self.entity.AI.finish_action()

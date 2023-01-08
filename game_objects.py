@@ -28,7 +28,6 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = UI.Gameplay_UI(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.area_change = True#should be in maploader, I guess
 
     def create_groups(self):#define all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -52,9 +51,6 @@ class Game_Objects():
         self.players = pygame.sprite.Group(self.player)
 
     def load_map(self, map_name, spawn = '1',fade = True):
-        self.area_change = map_name[:map_name.rfind('_')] != self.map.area_name
-        if self.area_change:
-            self.sound.pause_bg_sound()
         self.player.enter_idle()
         self.player.reset_movement()
         self.clean_groups()
@@ -65,13 +61,13 @@ class Game_Objects():
             new_game_state = states.Fading(self.game)
             new_game_state.enter_state()
 
-    def load_bg_music(self):
-        if self.area_change:
-            try:
-                self.sound.load_bg_sound(self.map.area_name)
-                self.sound.play_bg_sound()
-            except FileNotFoundError:
-                print("No BG music found")
+    def load_bg_music(self):#called from fade
+        if not self.map.area_change: return
+        try:
+            self.sound.load_bg_sound(self.map.area_name)
+            self.sound.play_bg_sound()
+        except FileNotFoundError:
+            print("No BG music found")
 
     def clean_groups(self):
         self.npcs.empty()#maybe a problem if we have a bank? -> save the money to world state

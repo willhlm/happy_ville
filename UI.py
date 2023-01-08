@@ -3,7 +3,7 @@ import Entities, pygame
 class Gameplay_UI():
     def __init__(self,game_objects):
         self.game_objects = game_objects
-        self.surface = pygame.Surface((1000,100),pygame.SRCALPHA,32).convert_alpha()
+        self.surface = pygame.Surface((500,100),pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
         self.init_hearts()
         self.init_spirits()
 
@@ -37,7 +37,7 @@ class Gameplay_UI():
         self.game_objects.game.screen.blit(temp,(20, 10))
 
     def remove_hearts(self,dmg):#dmg is an integer: 1 or 2 and set the rellavant to hurt
-        index = self.game_objects.player.health + dmg - 1
+        index = self.game_objects.player.health
         index = max(index,0)#in principle not needed but make it fool proof
         for i in range(index,index+dmg):
             self.hearts[i].currentstate.handle_input('Hurt')#make heart go white

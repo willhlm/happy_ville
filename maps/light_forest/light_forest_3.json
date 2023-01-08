@@ -13,7 +13,7 @@
          "parallaxx":0.1,
          "parallaxy":0.1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -29,7 +29,7 @@
          "parallaxx":0.2,
          "parallaxy":0.2,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -45,7 +45,7 @@
          "parallaxx":0.2,
          "parallaxy":0.2,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -61,7 +61,7 @@
          "parallaxx":0.3,
          "parallaxy":0.3,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -77,7 +77,7 @@
          "parallaxx":0.3,
          "parallaxy":0.3,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -93,7 +93,7 @@
          "parallaxx":0.3,
          "parallaxy":0.3,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -109,7 +109,7 @@
          "parallaxx":0.3,
          "parallaxy":0.3,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -123,7 +123,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -137,7 +137,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -151,7 +151,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -165,7 +165,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -177,7 +177,7 @@
          "name":"bg3_4",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -191,7 +191,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -205,7 +205,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -219,7 +219,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -247,7 +247,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -261,7 +261,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -275,7 +275,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -289,7 +289,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -301,7 +301,7 @@
          "name":"bg1_5",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -313,7 +313,7 @@
          "name":"bg1_4",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -325,7 +325,7 @@
          "name":"bg1_3",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -337,7 +337,7 @@
          "name":"bg1_2",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -349,7 +349,7 @@
          "name":"bg1_animated1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -361,7 +361,7 @@
          "name":"bg1_1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -373,7 +373,7 @@
          "name":"fg_fixed2",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -385,7 +385,7 @@
          "name":"fg_fixed1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -397,7 +397,7 @@
          "name":"fg_fixed_animated1",
          "opacity":1,
          "type":"tilelayer",
-         "visible":false,
+         "visible":true,
          "width":600,
          "x":0,
          "y":0
@@ -422,8 +422,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":3904,
-                 "y":560
+                 "x":7488,
+                 "y":512
                 }, 
                 {
                  "gid":20,
@@ -577,10 +577,46 @@
                  "width":16,
                  "x":4480,
                  "y":608
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":263,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"MrSmith"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":7232,
+                 "y":544
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":264,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Larv_simple"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":6640,
+                 "y":464
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -927,12 +963,12 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],
  "nextlayerid":56,
- "nextobjectid":257,
+ "nextobjectid":265,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -4,6 +4,7 @@ import game_objects
 import Read_files
 import sys
 import constants as C
+import time
 
 class Game():
     def __init__(self):
@@ -11,7 +12,7 @@ class Game():
         self.WINDOW_SIZE = C.window_size.copy()
         self.scale_size()#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
-        self.screen = pygame.Surface(self.WINDOW_SIZE)
+        self.screen = pygame.Surface(self.WINDOW_SIZE)#do not add .convert_alpha()
         flags = pygame.SCALED# | pygame.FULLSCREEN
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
 
@@ -20,7 +21,7 @@ class Game():
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
         self.fps = C.fps
-        self.state_stack = [states.Title_Menu(self)]#,'Menu':states.Menu:,'Gameplay':states.Gameplay}
+        self.state_stack = [states.Title_Menu(self)]
 
         #debug flags
         self.DEBUG_MODE = True
@@ -38,9 +39,12 @@ class Game():
                 self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
     def run(self):
+        prev_time = time.time()
         while True:
+            self.dt = (time.time()-prev_time) * 60
+            prev_time = time.time()
             #tick clock
-            self.clock.tick(self.fps)#*0.001#=dt
+            self.clock.tick(self.fps)
 
             #handle event
             self.event_loop()
@@ -56,16 +60,16 @@ class Game():
             pygame.display.update()
 
     def scale_size(self, scale = None):
-        scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
-        scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
         if scale:
             self.scale = scale
         else:
+            scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
+            scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
             self.scale = min(scale_w,scale_h)
 
 
 if __name__ == '__main__':
     #pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
     pygame.init()#initilise
-    g=Game()
+    g = Game()
     g.run()
