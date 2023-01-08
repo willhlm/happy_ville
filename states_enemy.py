@@ -4,19 +4,12 @@ from states_entity import Entity_States
 class Enemy_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
-        self.phases=['main']
-        self.phase=self.phases[0]
 
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def increase_phase(self):
-        if self.phase=='pre':
-            self.phase='main'
-        elif self.phase=='main':
-            self.phase=self.phases[-1]
-        elif self.phase=='post':
-            self.done=True
+        pass
 
     def handle_input(self,input):
         pass
@@ -33,7 +26,7 @@ class Idle(Enemy_states):
         if input=='Walk':
              self.enter_state('Walk')
         elif input =='Attack':
-             self.enter_state('Attack')
+             self.enter_state('Attack_pre')
         elif input == 'Hurt':
             self.enter_state('Hurt')
 
@@ -46,7 +39,7 @@ class Walk(Enemy_states):
         if input=='Idle':
              self.enter_state('Idle')
         elif input =='Attack':
-             self.enter_state('Attack')
+             self.enter_state('Attack_pre')
         elif input == 'Hurt':
             self.enter_state('Hurt')
 
@@ -70,30 +63,28 @@ class Stun(Enemy_states):
     def __init__(self,entity,duration):
         super().__init__(entity)
         self.stay_still()
-        self.lifetime=duration
+        self.lifetime = duration
 
     def update_state(self):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
 
-class Attack(Enemy_states):
+class Attack_pre(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()#animation direction
-        self.done=False
-        self.phases=['pre','main']
-        self.phase = self.phases[0]
-        self.entity.attack.lifetime=10
-
-    def update_state(self):
-        if self.done:
-            self.enter_state('Idle')
 
     def increase_phase(self):
-        if self.phase=='pre':
-            self.phase='main'
-            attack=self.entity.attack(self.entity)#make the object
-            self.entity.projectiles.add(attack)#add to group but in main phase
-        elif self.phase=='main':
-            self.done=True
+        self.enter_state('Attack_main')
+
+class Attack_main(Enemy_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir=self.entity.dir.copy()#animation direction
+        self.entity.attack.lifetime=10
+        attack=self.entity.attack(self.entity)#make the object
+        self.entity.projectiles.add(attack)#add to group but in main phase
+
+    def increase_phase(self):
+        self.enter_state('Idle')

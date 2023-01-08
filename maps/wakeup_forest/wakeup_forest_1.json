@@ -200,7 +200,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"forest_path1"
+                         "value":"forest_path_1"
                         }, 
                         {
                          "name":"spawn",

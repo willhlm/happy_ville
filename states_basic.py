@@ -1,27 +1,17 @@
 import sys, random
+from states_entity import Entity_States
 
-class Entity_States():
+class Basic_states(Entity_States):
     def __init__(self,entity):
-        self.entity=entity
-        self.entity.state=str(type(self).__name__).lower()#the name of the class
-        self.entity.animation.frame = 0
-
-    def update(self):
-        self.update_state()
+        super().__init__(entity)
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def update_state(self):
-        pass
-
     def increase_phase(self):
-        pass
+        self.entity.reset_timer()
 
-    def handle_input(self,input):
-        pass
-
-class Idle(Entity_States):
+class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -40,8 +30,37 @@ class Idle(Entity_States):
             self.enter_state('Outline')
         elif input == 'Transform':
             self.enter_state('Transform')
+        elif input == 'Equip':
+            self.enter_state('Equip')
 
-class Invisible(Entity_States):
+class Equip(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input == 'Idle':
+            self.enter_state('Idle')
+
+class Idle_once(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def increase_phase(self):
+        self.entity.kill()
+
+class Slash_1(Idle_once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Slash_2(Idle_once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Slash_3(Idle_once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Invisible(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -49,15 +68,18 @@ class Invisible(Entity_States):
         if random.randint(0,500) == 1:
             self.enter_state('Idle')
 
-class Once(Entity_States):
+class Once(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_input(self,input):
-        if input=='Idle':
-             self.enter_state('Idle')
+    def increase_phase(self):
+        self.enter_state('Idle')
 
-class Hurt(Entity_States):
+    def handle_input(self,input):
+        if input == 'Death':
+            self.enter_state('Death')
+
+class Hurt(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -72,17 +94,18 @@ class Death(Once):
         super().__init__(entity)
 
     def handle_input(self,input):
-        if input=='Idle':
-            self.entity.kill()
+        pass
+
+    def increase_phase(self):
+        self.entity.kill()
 
 class Opening(Once):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_input(self,input):
-        if input=='Idle':
-            self.entity.loots()
-            self.enter_state('Interacted')
+    def increase_phase(self):
+        self.entity.loots()
+        self.enter_state('Interacted')
 
 class Transform(Once):
     def __init__(self,entity):
@@ -92,11 +115,11 @@ class Transform(Once):
         if input=='Idle':
             self.enter_state('Interacted')
 
-class Interacted(Entity_States):
+class Interacted(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Outline(Entity_States):
+class Outline(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 

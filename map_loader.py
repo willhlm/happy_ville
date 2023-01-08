@@ -272,17 +272,6 @@ class Level():
                 runestone = Entities.Uber_runestone(object_position,self.game_objects)
                 self.game_objects.interactables.add(runestone)
 
-            elif id == 28:#key items: soul_essence etc.
-                for property in obj['properties']:
-                    if property['name'] == 'name':
-                        keyitem = property['value']
-
-                if self.game_objects.world_state.state[self.level_name][str(keyitem).lower()][str(soul_essence_int)] == 'idle':#if player hasn't picked it up
-                    new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects,str(soul_essence_int))
-                    self.game_objects.loot.add(new_keyitem)
-                    if keyitem == 'Soul_essence':
-                        soul_essence_int += 1
-
             elif id == 24:#event: e.g. bridge that is built when the reindeer dies
                 values={}
                 for property in obj['properties']:
@@ -308,6 +297,21 @@ class Level():
                         values['down']=property['value']
                 new_sign = Entities.Sign(object_position,self.game_objects,values)
                 self.game_objects.interactables.add(new_sign)
+
+            elif id == 28:#key items: soul_essence etc.
+                for property in obj['properties']:
+                    if property['name'] == 'name':
+                        keyitem = property['value']
+
+                if keyitem == 'Soul_essence':
+                    if self.game_objects.world_state.state[self.level_name][str(keyitem).lower()][str(soul_essence_int)] == 'idle':#if player hasn't picked it up
+                        new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects,str(soul_essence_int))
+                        self.game_objects.loot.add(new_keyitem)
+                        soul_essence_int += 1
+                elif keyitem == 'Spiritorb':
+                        new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
+                        self.game_objects.loot.add(new_keyitem)
+
 
     def load_bgs(self):
         'tiled design notes: all sublayers in bg1_X (x specifies the sublayer) should have the same paralax and offset.'
@@ -416,7 +420,7 @@ class Level():
                 pass
 
             try:#add particles inbetween layers
-                if 'fg' in tile_layer:
+                if 'fg1' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_fgs)
                 elif 'bg' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_bgs)

@@ -1,4 +1,4 @@
-import pygame, math, random, sys, Read_files, states_weather, animation, states_basic
+import pygame, math, random, sys, Read_files, states_weather
 from Entities import Animatedentity
 
 class Weather():
@@ -52,7 +52,7 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def update_img(self):
         self.image.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
 
-class Bound_entity(Animatedentity):#entities bound to the scereen
+class Bound_entity(Animatedentity):#entities bound to the scereen, should it be inheriting from animated entities (if we intendo to use animation) or static entity (if we intend to use pygame for particles)
     def __init__(self,game_objects, parallax):
         super().__init__(pos = [0,0])
         self.game_objects = game_objects
@@ -155,22 +155,24 @@ class Circles(Bound_entity):
 class Blink(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/weather/blink/')
-        self.image = self.sprites['idle'][0]
+        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/blink/')
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
 
         self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
         self.true_pos = self.pos.copy()
         self.rect.topleft = self.true_pos
+        self.animation.frame = random.randint(0, len(self.sprites.sprite_dict['idle']))
 
     def reset_timer(self):#called when animation finishes
-        self.currentstate.handle_input('Invisible')
-        self.true_pos = [random.randint(-100, int(self.width)),random.randint(-50, int(self.height))]#starting position
+        self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
+        self.true_pos = self.pos.copy()
 
 #weather particles: snow, leaf, rain etc
 class Weather_particles(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
+        self.currentstate = states_weather.Idle(self)
         self.pos = [random.randint(0, int(self.width)),random.randint(-700, -50)]#starting position
         self.true_pos = self.pos.copy()
 
@@ -184,20 +186,15 @@ class Weather_particles(Bound_entity):
     def update(self,scroll):
         super().update(scroll)
         self.time+=1
-        self.currentstate.update()
-        self.animation.update()
         self.speed()
-
-    def reset_timer(self):
-        self.currentstate.enter_state('Idle')
 
     def speed(self):
         self.velocity=[math.sin(self.time*0.1+self.phase)+self.wind,self.velocity[1]]
 
     def set_color(self,new_colour):
         replace_color=(255,0,0)
-        for key in self.sprites.keys():
-            for image in self.sprites[key]:
+        for state in self.sprites.sprite_dict.keys():
+            for image in self.sprites.sprite_dict[state]:
                 img_copy=pygame.Surface(self.image.get_size())
                 img_copy.fill(new_colour)
                 image.set_colorkey(replace_color)#the color key will not be drawn
@@ -207,10 +204,8 @@ class Sakura(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
         rand=random.randint(1,1)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/weather/leaf'+str(rand)+'/')
-        self.animation = animation.Basic_animation(self)
-        self.currentstate = states_weather.Idle(self)
-        self.image = self.sprites[self.state][0]
+        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
 
@@ -222,10 +217,8 @@ class Autumn(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
         rand=random.randint(1,1)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/weather/leaf'+str(rand)+'/')
-        self.animation = animation.Basic_animation(self)
-        self.currentstate = states_weather.Idle(self)
-        self.image = self.sprites[self.state][0]
+        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
 
@@ -237,10 +230,8 @@ class Snow(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
         rand=random.randint(1,1)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/weather/snow/')
-        self.animation = animation.Basic_animation(self)
-        self.currentstate = states_weather.Idle(self)
-        self.image = self.sprites[self.state][0]
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/weather/snow/')
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
 
@@ -257,10 +248,8 @@ class Rain(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
         rand=random.randint(1,1)
-        self.sprites=Read_files.Sprites().load_all_sprites('Sprites/animations/weather/rain/')
-        self.animation = animation.Basic_animation(self)
-        self.currentstate = states_weather.Idle(self)
-        self.image = self.sprites[self.state][0]
+        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/rain/')
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
 
@@ -271,7 +260,6 @@ class Rain(Weather_particles):
         self.scale = 0.5
         amp = random.randint(2, 4)
         self.velocity = [amp*math.cos(self.angle),4]
-        self.make_sparks()
         self.trans_prob = 0#the higher the number, the lwoer the probabillity for the leaf to flip. 0 is 0 %
 
     def speed(self):

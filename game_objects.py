@@ -10,12 +10,15 @@ import json
 import weather
 import constants as C
 import world_state
+import UI
+import save_load
 
 class Game_Objects():
 
     def __init__(self, game):
         self.game = game
-        self.controller = Read_files.Controller('ps4')
+        self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
+        self.controller = Read_files.Controller()
         self.sound = sound.Sound()
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
@@ -23,11 +26,11 @@ class Game_Objects():
         self.map = map_loader.Level(self)
         self.camera = camera.Camera(self)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
-        self.area_change = True
+        self.UI = UI.Gameplay_UI(self)
+        self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
+        self.area_change = True#should be in maploader, I guess
 
-
-    def create_groups(self):
-        #define all sprite groups
+    def create_groups(self):#define all sprite groups
         self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
@@ -71,7 +74,7 @@ class Game_Objects():
                 print("No BG music found")
 
     def clean_groups(self):
-        self.npcs.empty()#maybe a problem if we have a bank?
+        self.npcs.empty()#maybe a problem if we have a bank? -> save the money to world state
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
@@ -163,18 +166,3 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,1)#draw hitbox
             for int in self.interactables:
                 pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,1)#draw hitbox
-
-    def save_game(self):#save_obj calls to_json method in the object: write the to_json mthod such that it save the attributes of interest.
-        Read_files.save_obj(self.player)
-        Read_files.save_obj(self)
-
-    def load_game(self):#load_obj class from_json: load the stiff from dictionary of interest
-        Read_files.load_obj(self.player)
-        Read_files.load_obj(self)
-
-    def to_json(self):#stuff to save
-        save_dict = {'cutscenes_complete':self.world_state.cutscenes_complete}
-        return save_dict
-
-    def from_json(self,data):#stuff to load
-        self.world_state.cutscenes_complete = data['cutscenes_complete']

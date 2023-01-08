@@ -10,7 +10,7 @@ class Camera():
         self.shake = [0,0]
 
     def update(self):
-        self.check_camera_border_new()
+        self.check_camera_border_new()#this need to be checked before the camera calculates the scroll
         self.true_scroll[0] += (self.game_objects.player.rect.center[0]-8*self.true_scroll[0]-self.center[0])/15
         self.true_scroll[1] += (self.game_objects.player.rect.center[1]-8*self.true_scroll[1]-self.center[1])/15
         self.scroll = self.true_scroll.copy()
@@ -28,52 +28,69 @@ class Camera():
         self.center = self.original_center.copy()
 
     def check_camera_border_new(self):
+        for stop in self.game_objects.camera_blocks:
+            stop.stops()
+
+    def check_camera_border_old(self):
         xflag = True
         yflag = True
         for stop in self.game_objects.camera_blocks:
+            #print('0')
             if stop.dir == 'right' and xflag:
                 if (stop.rect.bottom > 0) and (stop.rect.top < self.game_objects.game.WINDOW_SIZE[1]):
                     if -self.game_objects.game.WINDOW_SIZE[0] < (stop.rect.left - self.game_objects.player.hitbox.centerx) < self.game_objects.game.WINDOW_SIZE[0]/2:
                         self.center[0] = self.game_objects.game.WINDOW_SIZE[0] - (stop.rect.left - self.game_objects.player.hitbox.centerx)
                         xflag = False
+                        print('1')
                     else:
                         self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
-
+                        print('2')
                 else:
                     self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+                    print('3')
             if stop.dir == 'left' and xflag:
                 if (stop.rect.bottom > 0) and (stop.rect.top < self.game_objects.game.WINDOW_SIZE[1]):
                     if -self.game_objects.game.WINDOW_SIZE[0] < (self.game_objects.player.hitbox.centerx - stop.rect.right) < self.game_objects.game.WINDOW_SIZE[0]/2:
                         self.center[0] =  self.game_objects.player.hitbox.centerx - stop.rect.right
                         xflag = False
+                        print('4')
                     else:
                         self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+                        print('5')
                 else:
                     self.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+                    print('6')
 
             if stop.dir == 'bottom' and yflag:
                 if (stop.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (stop.rect.right > 0):
                     if -self.game_objects.game.WINDOW_SIZE[1] < (stop.rect.top - self.game_objects.player.hitbox.centery) < self.game_objects.game.WINDOW_SIZE[1]/2:
                         self.center[1] = self.game_objects.game.WINDOW_SIZE[1] - (stop.rect.top - self.game_objects.player.hitbox.centery)
                         yflag = False
+                        print('7')
                     else:
                         self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                        print('8')
                 else:
                     self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                    print('9')
 
             if stop.dir == 'top' and yflag:
                 if (stop.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (stop.rect.right > 0):
                     if -self.game_objects.game.WINDOW_SIZE[1] < (self.game_objects.player.hitbox.centery - stop.rect.bottom) < self.game_objects.game.WINDOW_SIZE[1]/2:
                         self.center[1] = self.game_objects.player.hitbox.centery - stop.rect.bottom
                         yflag = False
+                        print('10')
                     else:
                         self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                        print('11')
                 else:
                     self.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+                    print('12')
 
             if stop.dir == 'center':
                 self.center[0] = self.game_objects.player.hitbox.centerx - (stop.rect.centerx - self.game_objects.game.WINDOW_SIZE[0]/2)
                 self.center[1] = self.game_objects.player.hitbox.centery - (stop.rect.centery - self.game_objects.game.WINDOW_SIZE[1]/2)
+                print('13')
 
 class Camera_shake(Camera):
     def __init__(self, game_objects,amp,duration):

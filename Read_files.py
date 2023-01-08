@@ -1,24 +1,20 @@
-
 import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
 
-def default(obj):
-    if hasattr(obj, 'to_json'):
-        return obj.to_json()
+def default(dict):
+    if hasattr(dict, 'to_json'):
+        return dict.to_json()
 
-def save_obj(obj):
-    jsonStr=json.dumps(obj, default=default)
-    name=str(type(obj).__name__)
+def save_json(dict, name):#used to save game
+    jsonStr=json.dumps(dict, default=default)
     path="save/" + name + ".json"
     with open(path, "w") as outfile:
         outfile.write(jsonStr)
 
-def load_obj(obj):
-    name=str(type(obj).__name__)
+def load_json(name):#used to load game
     path='save/' + name + '.json'
-    load_data=read_json(path)
-    obj.from_json(load_data)
+    return read_json(path)
 
 def read_json(path):
     with open(path) as f:
@@ -129,37 +125,29 @@ class Sprites():
 
 #class containing sprites for players (pre,post,main charge)
 class Sprites_Player(Sprites):
-
     def __init__(self,path):
         super().__init__()
-        pre_dict = self.load_all_sprites(path+'pre/')
-        main_dict = self.load_all_sprites(path+'main/')
-        post_dict = self.load_all_sprites(path+'post/')
-        charge_dict = self.load_all_sprites(path+'charge/')
-        self.sprite_dict={'pre':pre_dict,'main':main_dict,'post':post_dict,'charge':charge_dict}
+        self.sprite_dict = self.load_all_sprites(path)
 
-    def get_image(self, input, timer, dir, phase):#phase pre, main, post, input=action,timer=frame
-        if dir[0] <= 0:
-            return self.sprite_dict[phase][input][timer]
-        elif dir[0] > 0:
-            return pygame.transform.flip(self.sprite_dict[phase][input][timer],True,False)
-
-    def get_frame_number(self, input,phase):
-        return len(self.sprite_dict[phase][input])
+    def get_image(self, input, timer, dir):#input = state,timer=frame, dir
+        if dir[0] > 0:
+            return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
+        elif dir[0] <= 0:#else
+            return self.sprite_dict[input][timer]
 
 class Sprites_wallslime(Sprites_Player):
     def __init__(self,path):
         super().__init__(path)
 
-    def get_image(self, input, timer, dir, phase):#phase pre, main, post, input=action,timer=frame
+    def get_image(self, input, timer, dir):#phase pre, main, post, input=action,timer=frame
         if dir[0] > 0:
-            return self.sprite_dict[phase][input][timer]
+            return self.sprite_dict[input][timer]
         elif dir[0] < 0:
-            return pygame.transform.rotate(self.sprite_dict[phase][input][timer],-180)
+            return pygame.transform.rotate(self.sprite_dict[input][timer],-180)
         elif dir[1] > 0:
-            return pygame.transform.rotate(self.sprite_dict[phase][input][timer],-270)
+            return pygame.transform.rotate(self.sprite_dict[input][timer],-270)
         elif dir[1] < 0:
-            return pygame.transform.rotate(self.sprite_dict[phase][input][timer],-90)
+            return pygame.transform.rotate(self.sprite_dict[input][timer],-90)
 
 class Sprite_sheet():#don't need it?
 
@@ -272,28 +260,40 @@ class Alphabet():
 
 class Controller():
     def __init__(self, controller_type = False):
+        self.controller_type = controller_type
         self.keydown=False
         self.keyup=False
         self.value=[0,0]
         self.key=False
         self.outputs=[self.keydown,self.keyup,self.value,self.key]
         self.map_keyboard()
-        self.methods=[self.keybord]#joystick may be appended
+        self.methods = [self.keybord]#joystick may be appended
 
         pygame.joystick.init()#initialise joystick module
         self.initiate_controls()#initialise joysticks and add to list
-        self.buttonmapping(controller_type)#read in controler configuration file
+        self.buttonmapping()#read in controler configuration file
 
     def initiate_controls(self):
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
 
-    def buttonmapping(self,controller_type):
+    def rumble(self):#doesn't rumble...
+        self.joysticks[0].rumble(0.4,0.9,1000)#low fre, high fre, duration
+
+    def buttonmapping(self):
+        if not self.controller_type: return
         #self.methods.append(self.joystick)
-        file = controller_type+'keys.json'
+        file = self.controller_type+'keys.json'
         with open(join(file),'r+') as file:
             mapping=json.load(file)
             self.buttons=mapping['buttons']
             self.analogs=mapping['analogs']
+
+    def get_controllertype(self):#called when a device is added
+        for joy in self.joysticks:
+            if 'xbox' in joy.get_name().lower():
+                self.controller_type = 'xbox'
+            elif 'playsation' in joy.get_name().lower():
+                self.controller_type = 'ps4'
 
     def map_keyboard(self):
         self.keyboard_map = {pygame.K_ESCAPE: 'start',
@@ -316,10 +316,9 @@ class Controller():
     def map_inputs(self,event):
         self.keyup=False
         self.keydown=False
-        try:
-            self.methods[-1](event)
-        except:
-            pass
+        for method in self.methods:
+            method(event)
+        #self.methods[-1](event)
 
     def keybord(self,event):
         if event.type == pygame.KEYDOWN:
@@ -358,10 +357,10 @@ class Controller():
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
             self.initiate_controls()
             self.methods.append(self.joystick)
+            self.get_controllertype()
+            self.buttonmapping()#read in controler configuration file
 
     def joystick(self,event):
-        print(event)
-        pass
         if event.type==pygame.JOYDEVICEREMOVED:#if a controller is removed wile playing
             self.initiate_controls()
             self.methods.pop()
@@ -375,7 +374,6 @@ class Controller():
             self.key=self.buttons[str(event.button)]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
-
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value[0]=event.value
                 if abs(event.value)<0.2:
