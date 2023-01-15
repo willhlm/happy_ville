@@ -63,15 +63,14 @@ class Collisions():
         elif interactable:
             interactable.interact()
 
-    #collision of player and enemy: setting the flags depedning on the collisoin directions
+    #collision of player, enemy and loot: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one
-
     def platform_collision(self,dynamic_Entities):
         for entity in dynamic_Entities.sprites():
             entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
 
             #move in x every dynamic sprite
-            entity.rect.center = [round(entity.rect.center[0] + entity.velocity[0]), entity.rect.center[1]]
+            entity.rect.centerx += round(entity.velocity[0])
             entity.update_hitbox()
 
             static_entity_x = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
@@ -79,7 +78,7 @@ class Collisions():
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
-            entity.rect.center = [entity.rect.center[0], round(entity.rect.center[1] + entity.velocity[1])]
+            entity.rect.centery += round(entity.velocity[1])
             entity.update_hitbox()#follow with hitbox
 
             static_entity_y = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)

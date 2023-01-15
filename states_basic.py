@@ -48,18 +48,6 @@ class Idle_once(Basic_states):
     def increase_phase(self):
         self.entity.kill()
 
-class Slash_1(Idle_once):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Slash_2(Idle_once):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Slash_3(Idle_once):
-    def __init__(self,entity):
-        super().__init__(entity)
-
 class Invisible(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -128,3 +116,29 @@ class Outline(Basic_states):
              self.enter_state('Idle')
         elif input == 'Once':
             self.enter_state('Once')
+
+#for slash
+class Slash_1(Idle_once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Slash_2(Idle_once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Slash_3(Idle_once):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+#for aila sword
+class Level_1(Idle):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Level_2(Idle):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Level_3(Idle):
+    def __init__(self,entity):
+        super().__init__(entity)

@@ -319,24 +319,6 @@
                  "width":16,
                  "x":896,
                  "y":528
-                }, 
-                {
-                 "gid":3,
-                 "height":16,
-                 "id":298,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"class",
-                         "type":"string",
-                         "value":"Kusa"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":1120,
-                 "y":512
                 }],
          "opacity":1,
          "type":"objectgroup",

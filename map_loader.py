@@ -8,17 +8,24 @@ class Level():
         self.TILE_SIZE = C.tile_size
         self.level_name = ''
         self.area_name = ''
+        self.area_change = True#a flag to chenge if we change area
 
     def load_map(self,map_name,spawn):
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. light effect
         self.level_name = map_name
         self.spawn = spawn
-        self.load_map_data()
+        self.check_pause_sound()#pause the sound if we change area
+        self.load_map_data()#load the map data
         self.init_state_file()#need to be before load statics
         self.load_statics()
         self.load_collision_layer()
         self.load_bgs()
         self.append_light_effet()#append any light effects
+
+    def check_pause_sound(self):
+        self.area_change = self.level_name[:self.level_name.rfind('_')] != self.area_name
+        if self.area_change:
+            self.game_objects.sound.pause_bg_sound()
 
     def init_state_file(self):
         try:
@@ -107,7 +114,7 @@ class Level():
                 self.game_objects.platforms.add(new_block)
             #spike collision blocks
             elif id == 8:
-                new_block = Entities.Spikes(object_position,object_size)
+                new_block = Entities.Collision_dmg(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #one way collision block (currently only top implemented)
             elif id == 11:
@@ -126,7 +133,7 @@ class Level():
                         type = property['value']
 
                 new_block = Entities.Collision_breakable(object_position,self.game_objects,type)
-                self.game_objects.enemies.add(new_block)
+                self.game_objects.interactables.add(new_block)
 
     def load_statics(self):
         chest_int = 1

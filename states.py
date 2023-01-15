@@ -1,6 +1,5 @@
 import pygame, sys
 import Read_files
-import Engine
 import Entities
 import cutscene
 import constants as C
@@ -93,6 +92,10 @@ class Title_Menu(Game_State):
             #load new game level
             self.game.game_objects.load_map('village_1','1')
 
+<<<<<<< HEAD
+            self.game.game_objects.load_map('light_forest_3','1')
+=======
+>>>>>>> 62a4189f485c07daecbbdd5ac670fa0bee73eccd
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -591,8 +594,8 @@ class Select_Menu(Gameplay):
         self.blit_sword()
 
     def blit_sword(self):
-        self.game.game_objects.player.sword.potrait_animation()
-        self.game.screen.blit(self.game.game_objects.player.sword.potrait_image,(105,0))#player position
+        self.game.game_objects.player.sword.potrait.animation.update()
+        self.game.screen.blit(self.game.game_objects.player.sword.potrait.image,(105,0))#player position
 
         for index, stone in enumerate(self.game.game_objects.player.sword.stones):
             self.game.game_objects.player.sword.stones[stone].animation.update()
@@ -844,14 +847,14 @@ class Facilities(Gameplay):
 class Smith(Facilities):
     def __init__(self, game, npc):
         super().__init__(game,npc)
-        self.actions=['upgrade','enhance','cancel']
+        self.actions = ['upgrade','enhance','cancel']
         self.init_canvas([64,22*len(self.actions)])#specific for each facility
 
     def select_frame2(self):
         if self.pointer_index[1] < len(self.actions)-1:#if we select upgrade
-            stone_str=self.actions[self.pointer_index[1]]
+            stone_str = self.actions[self.pointer_index[1]]
             self.game.game_objects.player.sword.set_stone(stone_str)
-            self.set_response('Now it is ' + self.game.game_objects.player.sword.equip)
+            self.set_response('Now it is ' + stone_str)
         else:#select cancel
             self.previouse_frame()
 
@@ -886,9 +889,9 @@ class Smith(Facilities):
             self.exit_state()
 
     def upgrade(self):
-        if self.game.game_objects.player.inventory['Tungsten']>=1:
-            self.game.game_objects.player.inventory['Tungsten'] -= 1
-            self.game.game_objects.player.sword.dmg+=5
+        if self.game.game_objects.player.inventory['Tungsten'] >= self.game.game_objects.player.sword.tungsten_cost:
+            self.game.game_objects.player.inventory['Tungsten'] -= self.game.game_objects.player.sword.tungsten_cost
+            self.game.game_objects.player.sword.level_up()
             self.set_response('Now it is better')
         else:#not enough tungsten
             self.set_response('You do not have enought heavy rocks')

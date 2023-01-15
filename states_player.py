@@ -237,6 +237,7 @@ class Fall_run_pre(Player_states):
         self.init()
 
     def init(self):
+        self.entity.velocity[1] = 0        
         self.entity.timer_jobs['ground'].activate()
 
     def update_state(self):
@@ -290,6 +291,7 @@ class Fall_stand_pre(Player_states):
         self.init()
 
     def init(self):
+        self.entity.velocity[1] = 0
         self.entity.timer_jobs['ground'].activate()
 
     def update_state(self):
@@ -339,6 +341,7 @@ class Wall_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.friction[1] = 0.4
+        self.entity.ground = True#so that we can jump
 
     def update_state(self):
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
@@ -602,6 +605,7 @@ class Spawn_main(Player_states):
         pass
 
     def increase_phase(self):
+        self.entity.health = max(self.entity.health,0)#if negative, set it to 0
         self.entity.heal(self.entity.max_health)
         self.enter_state('Idle_main')
 

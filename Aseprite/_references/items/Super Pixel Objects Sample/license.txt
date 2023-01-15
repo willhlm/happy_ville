@@ -1,0 +1,14 @@
+The license which applies to the material in this zip file is found at http://untiedgames.com/files/license.txt.
+Here's a brief summary:
+
+1. You may not publicly distribute the contents of this zip file in whole or in part, unless as part of a game or application product in accordance with the license document linked above.
+
+2. If you use the contents of this zip file in a game or application product, please give attribution to Will Tice in the credits.
+
+3. Commercial use and non-commercial use are both OK!
+
+4. Game making tools (programs which have the primary function of creating games or applications) are not granted a license by the license document.
+   Waivers to this restriction may be granted, see the license document linked above for details.
+
+5. That's it!
+   Feel free to give me a shoutout at @untiedgames if you want, or contact me at contact@untiedgames.com if you have any questions. Thanks!

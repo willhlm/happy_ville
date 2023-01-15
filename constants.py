@@ -5,9 +5,9 @@ player_center = [window_size[0]*0.5,window_size[1]*0.5]
 tile_size = 16
 
 #physics
-acceleration = [1,0.51]#y velocity needs to be large than 1/2
-friction = [1,0]
-friction_player = [0.24,0.01]
+acceleration = [1,0.5]
+friction = [0.5,0]#they need to be at least slightly larger than 0 to damp the veolocity
+friction_player = [0.24,0.01]#they need to be at least slightly larger than 0 to damp the veolocity
 max_vel = [30,7]
 jump_time_player = 3##how many frames from falling in which the player can jump when landing
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
