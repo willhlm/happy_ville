@@ -599,6 +599,24 @@
                  "width":16,
                  "x":356,
                  "y":461
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":64,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Larv"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":964,
+                 "y":454
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -810,7 +828,7 @@
          "y":0
         }],
  "nextlayerid":24,
- "nextobjectid":64,
+ "nextobjectid":65,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.6.0",
