@@ -148,7 +148,7 @@ class Level():
             if id == 0:
                 for property in obj['properties']:
                     if property['name'] == 'spawn':
-                        if type(self.spawn).__name__ != 'str':#if respawn
+                        if type(self.spawn).__name__ != 'str':#if respawn/fast tarvel
                             self.game_objects.player.set_pos(self.spawn)
                         else:#if notmal load
                             if property['value'] == self.spawn:
@@ -223,6 +223,13 @@ class Level():
                 for layer in layers:
                     self.particles[layer] = particle_type
 
+            elif id == 16:#bg_particles
+                for property in obj['properties']:
+                    if property['name'] == 'colour':
+                        colour = property['value']
+
+                self.fog_colour = pygame.Color(colour)
+
             elif id == 19:#trigger
                 values={}
                 object_size = (int(obj['width']),int(obj['height']))
@@ -251,7 +258,7 @@ class Level():
                 self.game_objects.reflections.add(reflection)
 
             elif id == 21:#re-spawpoint, save point
-                new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
+                new_int = Entities.Savepoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
             elif id == 22:#runestones, colectable
@@ -274,10 +281,6 @@ class Level():
                     new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interactables.add(new_interacable)
-
-            elif id == 26:#key items: soul_essence etc.
-                runestone = Entities.Uber_runestone(object_position,self.game_objects)
-                self.game_objects.interactables.add(runestone)
 
             elif id == 24:#event: e.g. bridge that is built when the reindeer dies
                 values={}
@@ -305,6 +308,14 @@ class Level():
                 new_sign = Entities.Sign(object_position,self.game_objects,values)
                 self.game_objects.interactables.add(new_sign)
 
+            elif id == 26:#uberstone
+                runestone = Entities.Uber_runestone(object_position,self.game_objects)
+                self.game_objects.interactables.add(runestone)
+
+            elif id == 27:#inorinoki
+                inorinoki = Entities.Inorinoki(object_position,self.game_objects)
+                self.game_objects.interactables.add(inorinoki)
+
             elif id == 28:#key items: soul_essence etc.
                 for property in obj['properties']:
                     if property['name'] == 'name':
@@ -319,6 +330,9 @@ class Level():
                         new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
                         self.game_objects.loot.add(new_keyitem)
 
+            elif id == 29:#key items: soul_essence etc.
+                fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
+                self.game_objects.interactables.add(fast_travel)
 
     def load_bgs(self):
         'tiled design notes: all sublayers in bg1_X (x specifies the sublayer) should have the same paralax and offset.'
@@ -413,9 +427,12 @@ class Level():
                 pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
                 self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
 
+            try:
                 #add fog to BG
                 if tile_layer != 'bg1':
-                    self.game_objects.weather.fog(self.game_objects.all_bgs,parallax[tile_layer])
+                    self.game_objects.weather.fog(self.game_objects.all_bgs,parallax[tile_layer],self.fog_colour)
+            except:
+                pass
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:
@@ -433,4 +450,6 @@ class Level():
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_bgs)
             except:
                 pass
+
         self.particles={}#reset particles
+        self.fog_colour = []#reset fog

@@ -68,7 +68,7 @@ class Trun_around(Pause):#when the player jumps over, should be a delays before 
         self.enter_AI('Chase')
 
 class Chase(AI):
-    def __init__(self,entity, turn_delay=50):
+    def __init__(self,entity, turn_delay = 50):
         super().__init__(entity)
         self.entity.currentstate.handle_input('Walk')
         self.timers = []

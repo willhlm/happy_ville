@@ -68,7 +68,7 @@ class Collision_block(Platform):
         entity.update_rect()
 
     def collide_y(self,entity):
-        if entity.velocity[1]>0:#going down
+        if entity.velocity[1] > 0:#going down
             entity.down_collision(self.hitbox.top)
             entity.running_particles = self.run_particles#save the particles to make
         else:#going up
@@ -317,11 +317,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
 
-    def update(self,scroll):
-        super().update(scroll)
-        self.update_vel()
-
-    def take_dmg(self,dmg):#collision dmg will call this
+    def take_dmg(self,dmg):#projectile collision dmg will call this
         pass
 
     def update_pos(self,pos):
@@ -329,10 +325,10 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.hitbox.bottom = self.rect.bottom
 
     def update_hitbox(self):
-        self.hitbox.midbottom = self.rect.midbottom#[self.rect.bottom + self.hitbox_offset[0], self.rect.bottom + self.hitbox_offset[1]]
+        self.hitbox.midbottom = self.rect.midbottom
 
     def update_rect(self):
-        self.rect.midbottom = self.hitbox.midbottom#[self.hitbox.bottom - self.hitbox_offset[0], self.hitbox.bottom - self.hitbox_offset[1]]
+        self.rect.midbottom = self.hitbox.midbottom
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -369,16 +365,41 @@ class Character(Platform_entity):#enemy, NPC,player
 
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
         self.running_particles = Dust_running_particles
+        self.true_pos = self.rect.center
+
+    def update_pos(self,pos):#scrollen
+        #self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        #self.rect.center = self.true_pos.copy()
+        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = self.rect.center
+        self.hitbox.bottom = self.rect.bottom
+
+    def update_hitbox(self):
+        self.hitbox.midbottom = self.rect.midbottom
+
+    def update_rect(self):
+        self.rect.midbottom = self.hitbox.midbottom
+        self.true_pos = [self.true_pos[0],self.rect.centery]
+
+    def set_pos(self, pos):
+        self.rect.center = (pos[0],pos[1])
+        self.true_pos = self.rect.center
+        self.hitbox.midbottom = self.rect.midbottom
 
     def update(self,pos):
-        super().update(pos)
+        self.update_pos(pos)
         self.update_timers()
+        self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
+        self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
+        self.animation.update()#need to be after currentstate since animation will animate the current state
 
     def update_vel(self):
-        self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
-        self.velocity[1]=min(self.velocity[1],self.max_vel[1])#set a y max speed
+        self.velocity[1] += self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[1] = min(self.velocity[1],self.max_vel[1])#set a y max speed#
 
-        self.velocity[0]+=self.dir[0]*self.acceleration[0]-self.friction[0]*self.velocity[0]
+        self.velocity[0] += self.dir[0]*self.acceleration[0]-self.friction[0]*self.velocity[0]#self.game_objects.game.dt*
+
+        self.true_pos = [self.true_pos[0] + self.velocity[0],self.true_pos[1] + self.velocity[1]]
 
     def take_dmg(self,dmg):
         if self.invincibile: return
@@ -422,7 +443,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 10
+        self.health = 2
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -435,8 +456,8 @@ class Player(Character):
         self.currentstate=states_player.Idle_main(self)
 
         self.spawn_point = [{'map':'light_forest_3', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
-        self.inventory = {'Amber_Droplet':23,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
-        self.omamoris = Omamoris(self)
+        self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
+        self.omamoris = Omamoris(self)#
 
         self.set_abs_dist()
 
@@ -506,6 +527,7 @@ class Enemy(Character):
         self.projectiles = game_objects.eprojectiles
         self.group = game_objects.enemies
         self.pause_group = game_objects.entity_pause
+        self.description = 'enemy'##used in journal
 
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.Peace(self)
@@ -562,7 +584,7 @@ class Mygga(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.currentstate = states_mygga.Idle(self)
-        self.health = 50
+        self.health = 2
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
@@ -1345,6 +1367,8 @@ class Aila_sword(Sword):
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
+        if self.level >=3: return
+        self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
         self.level += 1
         self.potrait.currentstate.enter_state('Level_'+str(self.level))
@@ -1530,12 +1554,25 @@ class Loot(Platform_entity):#
     def __init__(self,pos,game_objects):
         super().__init__(pos)
         self.game_objects = game_objects
+        self.description = ''
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.update_vel()
 
     def update_vel(self):
         pass
 
     def attract(self,pos):#the omamori calls on this in loot group
         pass
+
+class Empty_item(Loot):
+    sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heart_container/')
+
+    def __init__(self,pos,game_objects):
+        super().__init__(pos, game_objects)
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
 
 class Heart_container(Loot):
 
@@ -1648,8 +1685,11 @@ class Enemy_drop(Loot):#add gravity
             self.kill()
 
     def player_collision(self):#when the player collides with this object
-        obj=(self.__class__.__name__)#get the loot in question
-        self.game_objects.player.inventory[obj]+=1
+        obj=(self.__class__.__name__)#get the string in question
+        try:
+            self.game_objects.player.inventory[obj] += 1
+        except:
+            self.game_objects.player.inventory[obj] = 1
         self.kill()
 
     #plotfprm collisions
@@ -1777,7 +1817,7 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
         self.finish = True
         self.kill()
 
-class Slash(Animatedentity):
+class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
     sprites = Read_files.Sprites_Player('Sprites/GFX/slash/')
 
     def __init__(self,pos):
@@ -1790,7 +1830,7 @@ class Slash(Animatedentity):
     def reset_timer(self):
         self.kill()
 
-class Rune_symbol(Animatedentity):
+class Rune_symbol(Animatedentity):#the stuff that will be blitted on uberrunestone
     def __init__(self,pos,ID_key):
         super().__init__(pos)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/rune_symbol/' + ID_key)
@@ -1954,11 +1994,8 @@ class Runestones(Interactable):
             self.currentstate = states_basic.Interacted(self)
 
     def interact(self):
-        self.currentstate.handle_input('Transform')
+        self.currentstate.handle_input('Transform')#goes to interacted after transform
         self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
-
-    def reset_timer(self):#when animation is finished
-        self.currentstate.handle_input('Idle')
 
 class Uber_runestone(Interactable):
     def __init__(self, pos, game_objects):
@@ -2092,16 +2129,16 @@ class Collision_breakable(Interactable):#a breakable collision block: should it 
         for timer in self.timers:
             timer.update()
 
-class Spawnpoint(Interactable):#save point
+class Savepoint(Interactable):#save point
     def __init__(self,pos,game_objects,map):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/Spawnpoint/')
+        self.sprites=Read_files.Sprites_Player('Sprites/animations/savepoint/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox = self.rect.copy()
-        self.init_cor = pos
         self.map = map
+        self.init_cord = [pos[0],pos[1]-100]
 
     def player_collision(self):#player collision
         self.currentstate.handle_input('Outline')
@@ -2109,14 +2146,61 @@ class Spawnpoint(Interactable):#save point
     def interact(self):#when player press t/y
         if type(self.currentstate).__name__ == 'Outline':#single click
             self.game_objects.player.spawn_point[0]['map']=self.map
-            self.game_objects.player.spawn_point[0]['point']=self.init_cor
+            self.game_objects.player.spawn_point[0]['point']=self.init_cord
             self.currentstate.handle_input('Once')
         else:#odoulbe click
-            new_state = states.Soul_essence(self.game_objects.game)
-            new_state.enter_state()
+            pass
 
-    def reset_timer(self):
-        self.currentstate.handle_input('Idle')
+class Inorinoki(Interactable):#the place where you trade soul essence for spirit or heart contrainer
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/inorinoki/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = self.rect.copy()
+
+    def interact(self):#when player press t/y
+        new_state = states.Soul_essence(self.game_objects.game)
+        new_state.enter_state()
+
+class Fast_travel(Interactable):#save point
+    cost = 50
+
+    def __init__(self,pos,game_objects,map):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/fast_travel/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = self.rect.copy()
+        self.map = map
+        self.init_cord = [pos[0],pos[1]-100]
+
+        try:#if it has been unlocked
+            self.game_objects.world_state.travel_points[map]
+            self.locked = False
+        except:
+            self.locked = True#starts locked. After paying some ambers, it unlocks and fast travel is open
+
+    def unlock(self):#called from Fast_travel_unlock
+        if self.game_objects.player.inventory['Amber_Droplet'] > self.cost:
+            self.game_objects.player.inventory['Amber_Droplet'] -= self.cost
+            self.locked = False
+            Fast_travel.cost *= 5#increase by 5 for every unlock
+            self.game_objects.world_state.save_travelpoint(self.map,self.init_cord)#self.game_objects.player.abs_dist)
+            return True
+        else:
+            return False
+
+    def interact(self):#when player press t/y
+        if self.locked:
+            new_state = states.Fast_travel_unlock(self.game_objects.game,self)
+            new_state.enter_state()
+        else:
+            self.currentstate.handle_input('Once')
+            new_state = states.Fast_travel_menu(self.game_objects.game)
+            new_state.enter_state()
 
 class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginning
     def __init__(self,pos,game_objects):
@@ -2230,6 +2314,10 @@ class Infinity_stones():
         self.dir = [1,0]#animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
+        self.description = ''
+
+    def set_pos(self, pos):
+        self.rect.center = pos
 
     def reset_timer(self):
         pass
@@ -2242,6 +2330,14 @@ class Infinity_stones():
 
     def collision(self):#hit enemy
         pass
+
+class Empty_infinity_stone(Infinity_stones):#more dmg
+    sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/empty/')#for inventory
+
+    def __init__(self,sword):
+        super().__init__(sword)
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
 
 class Red_infinity_stone(Infinity_stones):#more dmg
 
@@ -2316,6 +2412,7 @@ class Omamoris():
         self.equipped_omamoris=[]#equiped omamoris
         self.omamori_list=[Double_jump(entity),Loot_magnet(entity),Dash_master(entity)]#omamoris in inventory.
         self.level = 0
+        self.number = 3#number of omamori we can equip
 
     def update(self):
         for omamori in self.equipped_omamoris:
@@ -2325,19 +2422,17 @@ class Omamoris():
         for omamori in self.equipped_omamoris:
             omamori.handle_input(input)
 
-    def equip_omamori(self,omamori_index):
-        new_omamori=self.omamori_list[omamori_index]
-        if new_omamori not in self.equipped_omamoris:#add the omamori
-            if len(self.equipped_omamoris)<3:#maximum number of omamoris to equip
-                self.equipped_omamoris.append(new_omamori)
-                new_omamori.attach()
-        else:#remove the omamori
-            old_omamori=self.omamori_list[omamori_index]
-            self.equipped_omamoris.remove(old_omamori)
-            old_omamori.detach()#call the detach function of omamori
-
     def level_up(self):
         self.level += 1
+
+    def equip_omamori(self,omamori):
+        if omamori not in self.equipped_omamoris:#if not equiped
+            if len(self.equipped_omamoris)<self.number:#maximum number of omamoris to equip
+                self.equipped_omamoris.append(omamori)
+                omamori.attach()
+        else:##if equiped -> remove
+            self.equipped_omamoris.remove(omamori)
+            omamori.detach()#call the detach function of omamori
 
 class Omamori():
     def __init__(self,entity):
@@ -2346,6 +2441,8 @@ class Omamori():
         self.animation = animation.Entity_animation(self)#it is called from inventory
         self.currentstate = states_basic.Idle(self)#
         self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.description = ''
 
     def update(self):
         pass
@@ -2362,12 +2459,22 @@ class Omamori():
     def reset_timer(self):
         pass
 
+    def set_pos(self,pos):#for inventory
+        self.rect.center = pos
+
+class Empty_omamori(Omamori):
+    sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/empty_omamori/')#for inventory
+
+    def __init__(self,entity):
+        super().__init__(entity)
+
 class Double_jump(Omamori):
     sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/double_jump/')#for inventory
 
     def __init__(self,entity):
         super().__init__(entity)
         self.counter = 0
+        self.description = 'Double jump'
 
     def update(self):
         if self.entity.collision_types['bottom'] or self.entity.collision_types['right'] or self.entity.collision_types['left']:
@@ -2387,6 +2494,7 @@ class Loot_magnet(Omamori):
 
     def __init__(self,entity):
         super().__init__(entity)
+        self.description = 'Attracts loot'
 
     def update(self):
         for loot in self.entity.game_objects.loot.sprites():
@@ -2397,6 +2505,7 @@ class Dash_master(Omamori):#makes dash free of charge
 
     def __init__(self,entity):
         super().__init__(entity)
+        self.description = 'Free dash'
 
     def detach(self):
         super().detach()

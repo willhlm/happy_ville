@@ -38,13 +38,24 @@ class Game():
                 self.game_objects.controller.map_inputs(event)
                 self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
+    def fps_independence(self):
+            pass
+#            try:
+    #            dt=60/self.clock.get_fps()
+        #        self.dt = min(dt,2)
+            #except:
+            #    self.dt=1
+            #dt = (time.time()-prev_time) * 60
+            #prev_time = time.time()
+            #self.dt = min(dt,2)
+
     def run(self):
-        prev_time = time.time()
+        #prev_time = time.time()
         while True:
-            self.dt = (time.time()-prev_time) * 60
-            prev_time = time.time()
+
             #tick clock
             self.clock.tick(self.fps)
+            self.fps_independence()
 
             #handle event
             self.event_loop()
@@ -66,7 +77,6 @@ class Game():
             scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
             scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
             self.scale = min(scale_w,scale_h)
-
 
 if __name__ == '__main__':
     #pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

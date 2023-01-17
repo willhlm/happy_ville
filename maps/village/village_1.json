@@ -599,6 +599,54 @@
                  "width":16,
                  "x":356,
                  "y":461
+                }, 
+                {
+                 "gid":2,
+                 "height":16,
+                 "id":65,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"MrSmith"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":464,
+                 "y":400
+                }, 
+                {
+                 "gid":22,
+                 "height":16,
+                 "id":71,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":2016,
+                 "y":480
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":72,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Larv_simple"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1024,
+                 "y":480
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -810,10 +858,10 @@
          "y":0
         }],
  "nextlayerid":24,
- "nextobjectid":64,
+ "nextobjectid":73,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.6.0",
+ "tiledversion":"1.8.2",
  "tileheight":16,
  "tilesets":[
         {
@@ -1079,9 +1127,22 @@
          "tilecount":3552,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "columns":51,
+         "firstgid":35357,
+         "image":"tilesets\/undervillage3.png",
+         "imageheight":304,
+         "imagewidth":816,
+         "margin":0,
+         "name":"entrance",
+         "spacing":0,
+         "tilecount":969,
+         "tileheight":16,
+         "tilewidth":16
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.6",
+ "version":"1.8",
  "width":300
 }

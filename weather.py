@@ -13,16 +13,16 @@ class Weather():
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
 
-    def fog(self,group,paralax):
-        group.add(Fog(self.game_objects,paralax))
+    def fog(self,group,paralax,colour):
+        group.add(Fog(self.game_objects,paralax,colour))
 
 class Fog(pygame.sprite.Sprite):
-    def __init__(self,game_objects,parallax):
+    def __init__(self,game_objects,parallax,colour):
         super().__init__()
         self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.topleft = (0,0)
-        self.colour = [255,255,255,7/parallax[0]]#higher alpha for lower parallax
+        self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
         pygame.draw.rect(self.image,self.colour,self.rect)
 
     def update(self,scroll):

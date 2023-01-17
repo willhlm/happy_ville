@@ -1,4 +1,4 @@
-import pygame
+import pygame,math
 
 class Collisions():
     def __init__(self,game_objects):
@@ -47,7 +47,7 @@ class Collisions():
             elif collision_plat:
                 projectile.collision_plat(collision_plat)
 
-    #take damage if collide with enemy
+    #check for player collision
     def player_collision(self,enteties):
         collision_enteties=pygame.sprite.spritecollideany(self.game_objects.player,enteties,Collisions.collided)#check collision
         if collision_enteties:
@@ -67,9 +67,10 @@ class Collisions():
     #collisions between entities-groups: a dynamic and a static one
     def platform_collision(self,dynamic_Entities):
         for entity in dynamic_Entities.sprites():
-            entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
+            entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
 
             #move in x every dynamic sprite
+            #entity.rect.centerx = round(entity.true_pos[0])
             entity.rect.centerx += round(entity.velocity[0])
             entity.update_hitbox()
 
@@ -78,6 +79,7 @@ class Collisions():
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
+            #entity.rect.centery = round(entity.true_pos[1])
             entity.rect.centery += round(entity.velocity[1])
             entity.update_hitbox()#follow with hitbox
 

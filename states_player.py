@@ -13,7 +13,6 @@ class Player_states(Entity_States):
 
     def update(self):
         self.update_state()
-    #    print(self.state_name,self.entity.velocity[1])
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -178,7 +177,7 @@ class Jump_run_pre(Player_states):
         super().__init__(entity)
 
     def update_state(self):
-        if self.entity.velocity[1] > 0.7:
+        if self.entity.velocity[1] > 0:
             self.enter_state('Fall_run_pre')
         elif self.entity.acceleration[0] == 0:
             self.enter_state('Jump_stand_main')
@@ -237,7 +236,6 @@ class Fall_run_pre(Player_states):
         self.init()
 
     def init(self):
-        self.entity.velocity[1] = 0        
         self.entity.timer_jobs['ground'].activate()
 
     def update_state(self):
@@ -291,7 +289,6 @@ class Fall_stand_pre(Player_states):
         self.init()
 
     def init(self):
-        self.entity.velocity[1] = 0
         self.entity.timer_jobs['ground'].activate()
 
     def update_state(self):
