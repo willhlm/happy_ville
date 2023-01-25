@@ -61,19 +61,19 @@ class Collision_block(Platform):
         self.run_particles = {'dust':Dust_running_particles,'water':Water_running_particles,'grass':Grass_running_particles}[run_particle]
 
     def collide_x(self,entity):
-        if entity.velocity[0]>0:#going to the right
+        if entity.velocity[0] > 0:#going to the right
             entity.right_collision(self.hitbox.left)
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
-        entity.update_rect()
+        entity.update_rect_x()
 
     def collide_y(self,entity):
-        if entity.velocity[1] > 0:#going down
+        if entity.velocity[1] >= 0:#going down
             entity.down_collision(self.hitbox.top)
             entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self.hitbox.bottom)
-        entity.update_rect()
+        entity.update_rect_y()
 
 class Collision_oneway_up(Platform):
     def __init__(self,pos,size,run_particle = 'dust'):
@@ -89,7 +89,7 @@ class Collision_oneway_up(Platform):
             if entity.hitbox.bottom <= self.hitbox.top+offset:
                 entity.down_collision(self.hitbox.top)
                 entity.running_particles = self.run_particles#save the particles to make
-                entity.update_rect()
+                entity.update_rect_y()
         else:#going up
             pass
 
@@ -187,7 +187,7 @@ class Collision_right_angle(Platform):
             entity.top_collision(target)
             entity.velocity[1] = 2 #need to have a value to avoid "dragin in air" while running
             entity.velocity[0] = 0 #need to have a value to avoid "dragin in air" while running
-            entity.update_rect()
+            entity.update_rect_y()
 
     def shift_up(self,rel_x,other_side,entity):
         target = -rel_x*self.ratio + self.hitbox.bottom
@@ -204,7 +204,7 @@ class Collision_right_angle(Platform):
         if not entity.go_through:
             if entity.hitbox.bottom > target:
                 entity.down_collision(target)
-                entity.update_rect()
+                entity.update_rect_y()
 
 class Collision_dmg(Platform):#should be an interactable
     def __init__(self,pos,size):
@@ -262,8 +262,9 @@ class BG_Block(Staticentity):
         self.rect.topleft = self.true_pos.copy()
 
 class BG_Animated(BG_Block):
-    def __init__(self,pos,sprite_folder_path,parallax=(1,1)):
+    def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
         super().__init__(pos,pygame.Surface((16,16)),parallax)
+        self.game_objects = game_objects#animation need it
         self.sprites = Read_files.load_sprites(sprite_folder_path)
         self.image = self.sprites[0]
         self.animation = animation.Simple_animation(self)
@@ -296,8 +297,9 @@ class Reflection(Staticentity):
         self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
-    def __init__(self,pos):
+    def __init__(self,pos,game_objects):
         super().__init__(pos)
+        self.game_objects = game_objects#animation need dt
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
@@ -311,28 +313,39 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
         pass
 
 class Platform_entity(Animatedentity):#Things to collide with platforms
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-
-    def take_dmg(self,dmg):#projectile collision dmg will call this
-        pass
+        self.true_pos = list(self.rect.center)
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.bottom = self.rect.bottom
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.center = self.true_pos.copy()
+        self.hitbox.midbottom = self.rect.midbottom
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
 
-    def update_rect(self):
+    def update_rect_y(self):
         self.rect.midbottom = self.hitbox.midbottom
+        self.true_pos[1] = self.rect.centery
+
+    def update_rect_x(self):
+        self.rect.midbottom = self.hitbox.midbottom
+        self.true_pos[0] = self.rect.centerx
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
+        self.true_pos = list(self.rect.center)
         self.hitbox.midbottom = self.rect.midbottom
+
+    def update_true_pos_x(self):#called from platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
+        self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
+
+    def update_true_pos_y(self):#called from platform collision
+        self.true_pos[1] += self.game_objects.game.dt*self.velocity[1]
 
     #pltform collisions.
     def right_collision(self,hitbox):
@@ -357,49 +370,27 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
-        super().__init__(pos)
-        self.game_objects = game_objects
+        super().__init__(pos,game_objects)
         self.acceleration = [0,C.acceleration[1]]
         self.friction = C.friction.copy()
         self.max_vel = C.max_vel.copy()
 
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
         self.running_particles = Dust_running_particles
-        self.true_pos = self.rect.center
-
-    def update_pos(self,pos):#scrollen
-        #self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
-        #self.rect.center = self.true_pos.copy()
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.true_pos = self.rect.center
-        self.hitbox.bottom = self.rect.bottom
-
-    def update_hitbox(self):
-        self.hitbox.midbottom = self.rect.midbottom
-
-    def update_rect(self):
-        self.rect.midbottom = self.hitbox.midbottom
-        self.true_pos = [self.true_pos[0],self.rect.centery]
-
-    def set_pos(self, pos):
-        self.rect.center = (pos[0],pos[1])
-        self.true_pos = self.rect.center
-        self.hitbox.midbottom = self.rect.midbottom
 
     def update(self,pos):
         self.update_pos(pos)
         self.update_timers()
         self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
+        #self.update_true_pos()
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
         self.animation.update()#need to be after currentstate since animation will animate the current state
 
     def update_vel(self):
-        self.velocity[1] += self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
+        self.velocity[1] += self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1],self.max_vel[1])#set a y max speed#
 
-        self.velocity[0] += self.dir[0]*self.acceleration[0]-self.friction[0]*self.velocity[0]#self.game_objects.game.dt*
-
-        self.true_pos = [self.true_pos[0] + self.velocity[0],self.true_pos[1] + self.velocity[1]]
+        self.velocity[0] += self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
     def take_dmg(self,dmg):
         if self.invincibile: return
@@ -420,9 +411,9 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0]*30
         self.velocity[1] = -dir[1]*30
 
-    def hurt_particles(self,distance=0,lifetime=20,vel=[1,10],type='circle',dir='isotropic',scale=1,colour=[255,255,255,255],number_particles=12):
+    def hurt_particles(self,distance=0,lifetime=40,vel=[7,15],type='circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
         for i in range(0,number_particles):
-            obj1=particles.General_particle(self.hitbox.center,distance,lifetime,vel,type,dir,scale,colour)
+            obj1=particles.General_particle(self.hitbox.center,self.game_objects,distance,lifetime,vel,type,dir,scale,colour)
             self.game_objects.cosmetics.add(obj1)
 
     def update_timers(self):
@@ -430,7 +421,6 @@ class Character(Platform_entity):#enemy, NPC,player
             timer.update()
 
 class Player(Character):
-
     sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
 
     def __init__(self,pos,game_objects):
@@ -443,7 +433,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 2
+        self.health = 5
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -465,6 +455,12 @@ class Player(Character):
         self.dash_cost = 1#cost of spirit to perform dash
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
 
+    def update_true_pos_x(self):#called from platform collision
+        self.true_pos[0] += round(self.game_objects.game.dt*self.velocity[0])
+
+    def update_true_pos_y(self):#called from platform collision
+        self.true_pos[1] += round(self.game_objects.game.dt*self.velocity[1])
+
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
         self.ground = True#used for jumping
@@ -479,7 +475,7 @@ class Player(Character):
             self.animation.handle_input('Invincibile')#blink a bit. need to be after hurt
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             self.hurt_particles(lifetime=40,vel=[3,8],colour=[0,0,0,255],scale=3,number_particles=60)
-            self.game_objects.cosmetics.add(Slash(self.hitbox.center))#make a slash animation
+            self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
         else:#if health < 0
             self.game_objects.game.state_stack[-1].handle_input('death')#depending on gameplay state, different death stuff should happen
@@ -584,7 +580,7 @@ class Mygga(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.currentstate = states_mygga.Idle(self)
-        self.health = 2
+        self.health = 3
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
@@ -611,8 +607,8 @@ class Wall_slime(Enemy):
         pass
 
     def update_vel(self):
-        self.velocity[1]=self.acceleration[1]-self.dir[1]
-        self.velocity[0]=self.acceleration[0]+self.dir[0]
+        self.velocity[1] = self.acceleration[1]-self.dir[1]
+        self.velocity[0] = self.acceleration[0]+self.dir[0]
 
 class Woopie(Enemy):
     def __init__(self,pos,game_objects):
@@ -742,7 +738,7 @@ class Svampis(Enemy):
         self.currentstate = states_kusa.Idle(self)
         self.attack_distance = 30
         self.health = 1
-        self.AI_stack = [AI_kusa.Peace(self)]
+        self.AI = AI_kusa.Peace(self)
         self.dmg = 2
 
     def suicide(self):
@@ -782,6 +778,7 @@ class Skeleton_warrior(Enemy):#change design
         self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
         self.attack_distance = 100
         self.attack = Sword
+        self.health = 3
 
     def knock_back(self,dir):
         pass
@@ -899,7 +896,7 @@ class NPC(Character):
         self.currentstate.handle_input('Walk')
 
     def AI(self):
-        self.counter += 1
+        self.counter += self.game_objects.game.dt
         if self.counter > 100:
             self.counter = 0
             rand=random.randint(0,1)
@@ -963,7 +960,7 @@ class Boss(Enemy):
 
     def dead(self):
         self.aggro = False
-        self.AI_stack[-1].set_AI('Nothing')
+        self.AI.enter_AI('Nothing')
         self.loots()
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
@@ -1165,13 +1162,13 @@ class Spawner(Staticentity):#an entity spawner
 
 class Abilities(Animatedentity):#projectiels
     def __init__(self,entity):
-        super().__init__(pos = [0,0])
+        super().__init__([0,0],entity.game_objects)
         self.entity = entity
         self.dir = entity.dir.copy()
 
     def update(self,pos):
         super().update(pos)
-        self.lifetime -= 1
+        self.lifetime -= self.game_objects.game.dt
         self.destroy()
 
     def destroy(self):
@@ -1181,10 +1178,10 @@ class Abilities(Animatedentity):#projectiels
     def update_hitbox(self):#make this a dictionary?
         if self.dir[1] > 0:#up
             self.hitbox.midbottom=self.entity.hitbox.midtop
-            self.dir[0] = 0#no knock back when hit from below or above
+            self.dir[0] = 0#no side knock back when hit from below or above
         elif self.dir[1] < 0:#down
             self.hitbox.midtop=self.entity.hitbox.midbottom
-            self.dir[0] = 0 #no knock back when hit from below or above
+            self.dir[0] = 0 #no side knock back when hit from below or above
         elif self.dir[0] > 0:#right
             self.hitbox.midleft=self.entity.hitbox.midright
         elif self.dir[0] < 0:#left
@@ -1194,13 +1191,13 @@ class Abilities(Animatedentity):#projectiels
     def collision_projectile(self,eprojectile):#projecticle proectile collision
         pass
 
-    def collision_enemy(self,collision_enemy):
-        if not collision_enemy.invincibile:
-            collision_enemy.take_dmg(self.dmg)
-            #self.kill()
+    def collision_enemy(self,collision_enemy):#projecticle enemy collision (inclusing player)
+        if collision_enemy.invincibile: return
+        collision_enemy.take_dmg(self.dmg)
+        #self.kill()
 
     def collision_plat(self,platform):#collision platform
-        platform.take_dmg()
+        pass
 
     def collision_inetractables(self,interactable):#collusion interactables
         pass
@@ -1217,7 +1214,7 @@ class Melee(Abilities):
         super().update(pos)
         self.update_hitbox()
 
-    def countered(self):#shielded
+    def countered(self):#called from Shield collision_projectile
         self.entity.countered()
         self.kill()
 
@@ -1253,8 +1250,8 @@ class Shield(Melee):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.entity.hitbox.copy()#pygame.Rect(self.entity.rect[0],self.entity.rect[1],20,40)
         self.hitbox = self.rect.copy()
-        self.dmg=0
-        self.lifetime=15
+        self.dmg = 0
+        self.lifetime = 25
 
     def update_hitbox(self):
         if self.dir[0] > 0:#right
@@ -1270,7 +1267,6 @@ class Shield(Melee):
     def collision_projectile(self,eprojectile):
         self.entity.projectiles.add(eprojectile)#add the projectilce to Ailas projectile group
         eprojectile.countered()
-        self.kill()
 
 class Thunder_aura(Melee):
     sprites = Read_files.Sprites_Player('Sprites/Attack/thunder_aura/')
@@ -1307,12 +1303,11 @@ class Sword(Melee):
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
-
         if collision_enemy.invincibile: return
         collision_enemy.take_dmg(self.dmg)
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir=self.dir[0])
-    #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
+        #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         if self.dir[0]>0:
             self.clash_particles(self.rect.midright)
         else:
@@ -1325,7 +1320,7 @@ class Sword(Melee):
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3)
+            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def collision_inetractables(self,interactable):#called when projectile hits interactables
@@ -1339,7 +1334,7 @@ class Aila_sword(Sword):
         self.dmg = 1
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
-        self.potrait = Sword_potrait()
+        self.potrait = Sword_potrait(self.game_objects)
         self.equip = []#stone pointer
         self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#,'purple':Red_infinity_stone(self)]#the ones aila has picked up
         self.colour = {'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
@@ -1363,7 +1358,7 @@ class Aila_sword(Sword):
         angle = random.randint(-180, 180)#the ejection anglex
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3,colour=color)
+            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=15,vel=[7,14],type='spark',dir=angle,scale=0.4,colour=color)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
@@ -1381,8 +1376,8 @@ class Darksaber(Aila_sword):
         self.lifetime=10#swrod hitbox duration
 
     def collision_enemy(self,collision_enemy):
-        if collision_enemy.spirit>=10:
-            collision_enemy.spirit-=10
+        if collision_enemy.spirit >= 10:
+            collision_enemy.spirit -= 10
             #spirits=Spiritorb([collision_enemy.rect.x,collision_enemy.rect.y])
             #collision_enemy.game_objects.loot.add(spirits)
         self.kill()
@@ -1393,7 +1388,7 @@ class Projectiles(Abilities):
         self.velocity = [0,0]
 
     def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + self.velocity[0]+scroll[0], self.rect.topleft[1] + self.velocity[1]+scroll[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.game_objects.game.dt*self.velocity[0]+scroll[0], self.rect.topleft[1] + self.game_objects.game.dt*self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
     def countered(self):
@@ -1461,7 +1456,7 @@ class Poisonblobb(Projectiles):
         self.update_vel()
 
     def update_vel(self):
-        self.velocity[1]+=0.1#graivity
+        self.velocity[1] += 0.1*self.game_objects.game.dt#graivity
 
     def collision_plat(self,platform):
         self.velocity = [0,0]
@@ -1552,8 +1547,7 @@ class Arrow(Projectiles):
 
 class Loot(Platform_entity):#
     def __init__(self,pos,game_objects):
-        super().__init__(pos)
-        self.game_objects = game_objects
+        super().__init__(pos,game_objects)
         self.description = ''
 
     def update(self,scroll):
@@ -1586,7 +1580,7 @@ class Heart_container(Loot):
         self.description = 'A heart container'
 
     def update_vel(self):
-        self.velocity[1]=3
+        self.velocity[1] = 3*self.game_objects.game.dt
 
     def player_collision(self):
         self.game_objects.player.max_health += 1
@@ -1605,7 +1599,7 @@ class Spirit_container(Loot):
         self.description = 'A spirit container'
 
     def update_vel(self):
-        self.velocity[1]=3
+        self.velocity[1]=3*self.game_objects.game.dt
 
     def player_collision(self):
         self.game_objects.player.max_spirit += 1
@@ -1631,7 +1625,7 @@ class Soul_essence(Loot):
 
     def update(self,scroll):
         super().update(scroll)
-        obj1 = particles.General_particle(self.rect.center,distance=100,lifetime=20,vel=[2,4],type='spark',dir='isotropic')
+        obj1 = particles.General_particle(self.rect.center,self.game_objects,distance=100,lifetime=20,vel=[2,4],type='spark',dir='isotropic')
         self.game_objects.cosmetics.add(obj1)
 
 class Tungsten(Loot):
@@ -1669,11 +1663,11 @@ class Enemy_drop(Loot):#add gravity
         self.lifetime = 500
 
     def update_vel(self):
-        self.velocity[1] += 0.5
+        self.velocity[1] += 0.5*self.game_objects.game.dt
 
     def update(self,pos):
         super().update(pos)
-        self.lifetime-=1
+        self.lifetime -= self.game_objects.game.dt
         self.destory()
 
     def attract(self,pos):#the omamori calls on this in loot group
@@ -1734,7 +1728,7 @@ class Bone(Enemy_drop):
 
     def use_item(self):
         if self.game_objects.player.inventory['Bone']>0:#if we have bones
-            self.game_objects.player.inventory['Bone']-=1
+            self.game_objects.player.inventory['Bone'] -= 1
             if len(self.game_objects.player.spawn_point)==2:#if there is already a bone
                 self.game_objects.player.spawn_point.pop()
             self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.player.abs_dist})
@@ -1743,8 +1737,8 @@ class Bone(Enemy_drop):
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     sprites=Read_files.Sprites_Player('Sprites/animations/running_particles/water/')
 
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
@@ -1755,8 +1749,8 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
 class Grass_running_particles(Animatedentity):#should make for grass, dust, water etc
     sprites=Read_files.Sprites_Player('Sprites/animations/running_particles/grass/')
 
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
@@ -1767,8 +1761,8 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
 class Dust_running_particles(Animatedentity):#should make for grass, dust, water etc
     sprites=Read_files.Sprites_Player('Sprites/animations/running_particles/dust/')
 
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
@@ -1779,8 +1773,8 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
 class Player_Soul(Animatedentity):#the thing that popps out when player dies
     sprites=Read_files.Sprites_Player('Sprites/Enteties/soul/')
 
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.currentstate = states_basic.Once(self)
         self.image = self.sprites.sprite_dict['once'][0]
         self.rect = self.image.get_rect()
@@ -1791,9 +1785,9 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def update(self,scroll):
         super().update(scroll)
 
-        self.timer +=1
-        if self.timer>100:#fly to sky
-            self.velocity[1]=-20
+        self.timer += self.game_objects.game.dt
+        if self.timer > 100:#fly to sky
+            self.velocity[1] = -20
         elif self.timer>200:
             self.kill()
 
@@ -1806,12 +1800,15 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
 class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
     sprites = Read_files.Sprites_Player('Sprites/GFX/respawn/')
 
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.finish = False
+
+    def update(self,pos):
+        super().update(pos)
 
     def reset_timer(self):
         self.finish = True
@@ -1820,8 +1817,8 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
 class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
     sprites = Read_files.Sprites_Player('Sprites/GFX/slash/')
 
-    def __init__(self,pos):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         state = str(random.randint(1, 3))
         self.currentstate.enter_state('Slash_' + state)
         self.image = self.sprites.sprite_dict['slash_' + state][0]
@@ -1831,8 +1828,8 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
         self.kill()
 
 class Rune_symbol(Animatedentity):#the stuff that will be blitted on uberrunestone
-    def __init__(self,pos,ID_key):
-        super().__init__(pos)
+    def __init__(self,pos,game_objects,ID_key):
+        super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/rune_symbol/' + ID_key)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
@@ -1843,8 +1840,7 @@ class Rune_symbol(Animatedentity):#the stuff that will be blitted on uberrunesto
 
 class Interactable(Animatedentity):#interactables
     def __init__(self,pos,game_objects):
-        super().__init__(pos)
-        self.game_objects = game_objects
+        super().__init__(pos,game_objects)
         self.group = game_objects.interactables
         self.pause_group = game_objects.entity_pause
 
@@ -1869,8 +1865,8 @@ class Interactable(Animatedentity):#interactables
         pass
 
 class Spikes(Interactable):#should be an interactable
-    def __init__(self,pos,size):
-        super().__init__(pos,size)
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/spikes')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
@@ -2055,7 +2051,7 @@ class Chest(Interactable):
         if self.invincibile:
             return
         projectile.clash_particles(self.hitbox.center)
-        self.health-=1
+        self.health -= 1
         self.timer_jobs['invincibility'].activate()
 
         if self.health > 0:
@@ -2271,7 +2267,8 @@ class Menu_Box():
 class Health():
     sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/health/')
 
-    def __init__(self):
+    def __init__(self,game_objects):
+        self.game_objects = game_objects#animation need it
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
@@ -2285,7 +2282,8 @@ class Health():
 class Spirit():
     sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/spirit/')
 
-    def __init__(self):
+    def __init__(self,game_objects):
+        self.game_objects = game_objects
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
@@ -2297,7 +2295,8 @@ class Spirit():
         self.animation.update()
 
 class Sword_potrait():
-    def __init__(self):
+    def __init__(self,game_objects):
+        self.game_objects = game_objects
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/Items/sword")#for inventory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
@@ -2311,6 +2310,7 @@ class Sword_potrait():
 class Infinity_stones():
     def __init__(self,sword):
         self.sword = sword
+        self.game_objects = sword.game_objects
         self.dir = [1,0]#animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
@@ -2437,6 +2437,7 @@ class Omamoris():
 class Omamori():
     def __init__(self,entity):
         self.entity = entity
+        self.game_objects = entity.game_objects
         self.dir = [1,0]
         self.animation = animation.Entity_animation(self)#it is called from inventory
         self.currentstate = states_basic.Idle(self)#
@@ -2484,7 +2485,7 @@ class Double_jump(Omamori):
         if input[-1]=='a' and self.counter<1:
             self.entity.currentstate.handle_press_input('double_jump')
             if type(self.entity.currentstate).__name__=='Double_jump':
-                self.counter+=1
+                self.counter += self.game_objects.game.dt
 
     def reset_counter(self):
         self.counter=0
@@ -2530,7 +2531,7 @@ class Timer():
         self.entity.timers.remove(self)
 
     def update(self):
-        self.lifetime -= 1
+        self.lifetime -= self.entity.game_objects.game.dt
         if self.lifetime < 0:
             self.deactivate()
 

@@ -91,7 +91,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('village_8','1')
+            self.game.game_objects.load_map('village_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -450,7 +450,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
 
     def update(self):
         self.game.game_objects.cosmetics.update([0,0])
-        self.duration -= 1
+        self.duration -= self.game.dt
         self.amp = int(0.8*self.amp)
         if self.duration < 0:
             self.exit_state()
@@ -476,7 +476,7 @@ class Ability_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
         self.abilities=list(self.game.game_objects.player.abilities.keys())
-        self.index=self.abilities.index(self.game.game_objects.player.equip)
+        self.index = self.abilities.index(self.game.game_objects.player.equip)
 
         symbol1=pygame.image.load("Sprites/Attack/Darksaber/symbol/darksaber.png").convert_alpha()
         symbol2=pygame.image.load("Sprites/Attack/Heal/symbol/heal.png").convert_alpha()
@@ -495,8 +495,9 @@ class Ability_menu(Gameplay):
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
 
     def update(self):
+        self.game.dt=0.2#slow motion
         super().update()
-        pygame.time.wait(100)#slow motion
+        #pygame.time.wait(100)#slow motion
 
     def render(self):
         super().render()
@@ -1041,8 +1042,7 @@ class Fading(Gameplay):#fades out and then in
     def __init__(self,game):
         super().__init__(game)
         self.page = 0
-        self.render_fade=[self.render_out,self.render_in]
-        self.game.game_objects.player.reset_movement()
+        self.render_fade = [self.render_out,self.render_in]
         self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
         self.fade_surface.fill((0,0,0))
         self.init_out()
@@ -1059,7 +1059,7 @@ class Fading(Gameplay):#fades out and then in
 
     def update(self):
         super().update()
-        self.count += 1
+        self.count += min(self.game.dt,2)#the framerate jump when loading map. This class is called when loading a map. Need to set maximum dt
         if self.count > self.fade_length:
             self.page += 1
             self.init_in()
@@ -1090,7 +1090,7 @@ class Conversation(Gameplay):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()
         self.npc = npc
-        self.print_frame_rate = 3
+        self.print_frame_rate = C.animation_framerate
         self.text_WINDOW_SIZE = (352, 96)
         self.blit_x = int((self.game.WINDOW_SIZE[0]-self.text_WINDOW_SIZE[0])/2)
         self.clean_slate()
@@ -1104,11 +1104,11 @@ class Conversation(Gameplay):
 
     def update(self):
         super().update()
-        self.letter_frame += 1
+        self.letter_frame += self.print_frame_rate*self.game.dt
 
     def render(self):
         super().render()
-        text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame//self.print_frame_rate))
+        text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
         self.text_window.blit(text,(64,8))
         self.game.screen.blit(self.text_window,(self.blit_x,60))
 
@@ -1118,7 +1118,7 @@ class Conversation(Gameplay):
                 self.exit_state()
 
             elif input[-1] == 'y':
-                if self.letter_frame//self.print_frame_rate < len(self.npc.get_conversation()):
+                if self.letter_frame < len(self.npc.get_conversation()):
                     self.letter_frame = 10000
                 else:
                     self.clean_slate()

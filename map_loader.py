@@ -392,7 +392,7 @@ class Level():
                             path = 'maps/%s/%s' % (level_name, Read_files.get_folder(tileset['image']))
                             parallax = bg_list[tile_layer]['parallax']
                             blit_pos = (x * self.TILE_SIZE - math.ceil(new_map_diff[0]*(1-parallax[0])) + bg_list[tile_layer]['offset'][0], y * self.TILE_SIZE - math.ceil((1-parallax[1])*new_map_diff[1])+bg_list[tile_layer]['offset'][1])
-                            new_animation = Entities.BG_Animated(blit_pos,path,parallax)
+                            new_animation = Entities.BG_Animated(self.game_objects,blit_pos,path,parallax)
                             animation_list[tile_layer].append(new_animation)
                 else:#if statics
                     blit_pos = (x * self.TILE_SIZE , y * self.TILE_SIZE)
@@ -444,7 +444,7 @@ class Level():
                 pass
 
             try:#add particles inbetween layers
-                if 'fg1' in tile_layer:
+                if 'fg' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_fgs)
                 elif 'bg' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_bgs)

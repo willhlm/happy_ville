@@ -4,7 +4,6 @@ import game_objects
 import Read_files
 import sys
 import constants as C
-import time
 
 class Game():
     def __init__(self):
@@ -38,25 +37,12 @@ class Game():
                 self.game_objects.controller.map_inputs(event)
                 self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
-    def fps_independence(self):
-            pass
-#            try:
-    #            dt=60/self.clock.get_fps()
-        #        self.dt = min(dt,2)
-            #except:
-            #    self.dt=1
-            #dt = (time.time()-prev_time) * 60
-            #prev_time = time.time()
-            #self.dt = min(dt,2)
-
     def run(self):
-        #prev_time = time.time()
         while True:
-
             #tick clock
-            self.clock.tick(self.fps)
-            self.fps_independence()
-
+            self.clock.tick(120)
+            self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            #self.dt = 1
             #handle event
             self.event_loop()
 

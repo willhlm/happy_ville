@@ -8,6 +8,7 @@ class Collisions():
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
             self.game_objects.player.go_through = True
+            self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
 
     def interactables_collision(self):#interactables
         for interactable in self.game_objects.interactables.sprites():
@@ -70,17 +71,18 @@ class Collisions():
             entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
 
             #move in x every dynamic sprite
-            #entity.rect.centerx = round(entity.true_pos[0])
-            entity.rect.centerx += round(entity.velocity[0])
+            entity.update_true_pos_x()
+            entity.rect.centerx = round(entity.true_pos[0])
+            #entity.rect.centerx += round(entity.velocity[0]*self.game_objects.game.dt)
             entity.update_hitbox()
-
             static_entity_x = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
             if static_entity_x:
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
-            #entity.rect.centery = round(entity.true_pos[1])
-            entity.rect.centery += round(entity.velocity[1])
+            entity.update_true_pos_y()
+            entity.rect.centery = round(entity.true_pos[1])
+            #entity.rect.centery += round(entity.velocity[1]*self.game_objects.game.dt)
             entity.update_hitbox()#follow with hitbox
 
             static_entity_y = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)

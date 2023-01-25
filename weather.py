@@ -54,8 +54,8 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
 
 class Bound_entity(Animatedentity):#entities bound to the scereen, should it be inheriting from animated entities (if we intendo to use animation) or static entity (if we intend to use pygame for particles)
     def __init__(self,game_objects, parallax):
-        super().__init__(pos = [0,0])
-        self.game_objects = game_objects
+        pos = [0,0]
+        super().__init__(pos,game_objects)
         self.parallax = parallax
         self.width = self.game_objects.game.WINDOW_SIZE[0] + 0.6*self.game_objects.game.WINDOW_SIZE[0]
         self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.6*self.game_objects.game.WINDOW_SIZE[1]

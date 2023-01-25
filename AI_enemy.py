@@ -18,7 +18,7 @@ class AI():
     def update_AI(self):
         pass
 
-    def finish_action(self):
+    def finish_action(self):#called when animation is finshed for a state
         pass
 
 class Peace(AI):
@@ -41,7 +41,7 @@ class Peace(AI):
         if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance*0.2:
             self.enter_AI('Chase')
 
-class Nothing(AI):#don't need it?
+class Nothing(AI):#for cutscenes
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -52,7 +52,7 @@ class Pause(AI):#the entity should just stay and do nothing for a while
         self.entity.currentstate.handle_input('Idle')
 
     def update_AI(self):
-        self.duration -= 1
+        self.duration -= self.entity.game_objects.game.dt
         if self.duration < 0:
             self.exit()
 
@@ -127,6 +127,6 @@ class Giveup_timer():
         self.AI.enter_AI('Peace')
 
     def update(self):
-        self.lifetime -= 1
+        self.lifetime -= self.AI.entity.game_objects.game.dt
         if self.lifetime < 0:
             self.deactivate()

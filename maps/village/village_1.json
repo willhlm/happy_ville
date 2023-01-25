@@ -639,14 +639,32 @@
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Larv_simple"
+                         "value":"Skeleton_warrior"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
                  "x":1024,
-                 "y":480
+                 "y":448
+                }, 
+                {
+                 "gid":3,
+                 "height":16,
+                 "id":75,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"class",
+                         "type":"string",
+                         "value":"Larv_simple"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1424,
+                 "y":416
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -858,7 +876,7 @@
          "y":0
         }],
  "nextlayerid":24,
- "nextobjectid":73,
+ "nextobjectid":76,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
