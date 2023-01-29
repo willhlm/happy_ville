@@ -72,7 +72,7 @@ class Aggro1(AI):
             self.entity.currentstate.handle_input('Idle')
 
         if abs(self.player_distance[0])>self.entity.aggro_distance:
-            self.exit_AI()
+            pass#self.exit_AI()
 
     def handle_input(self,input,duration=100):
         if input == 'Pause':

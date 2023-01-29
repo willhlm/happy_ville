@@ -7,6 +7,7 @@ class World_state():
         self.statistics = {'kill':{},'ambers':0}
         self.progress = 2#overall world progress meter. Increases everytime a boss is killed
         self.state = Read_files.read_json("map_state.json")
+        self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
 
     def increase_progress(self):#called when a boss dies
         self.progress += 1
@@ -19,6 +20,12 @@ class World_state():
 
     def update_money_statistcis(self):#called when amber is picked up
         self.statistics['ambers'] += 1#increaase total money
+
+    def save_travelpoint(self,map,cord):#called when inetracted with spawnpoint
+        try:#if already saved, do nothing
+            self.travel_points[map]
+        except:#if first time intercted with it
+            self.travel_points[map] = cord
 
     def init_state_file(self,level_name,map_data):#make a state file if it is the first time loading this map
         chest_int = 1

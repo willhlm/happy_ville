@@ -6,12 +6,13 @@ tile_size = 16
 
 #physics
 acceleration = [1,0.5]
-friction = [0.5,0]#they need to be at least slightly larger than 0 to damp the veolocity
-friction_player = [0.24,0.01]#they need to be at least slightly larger than 0 to damp the veolocity
+friction = [0.5,0]#need to be less than 1
+friction_player = [0.24,0.01]
 max_vel = [30,7]
 jump_time_player = 3##how many frames from falling in which the player can jump when landing
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
 ground_timer_player = 3#how many frames from falling in which the player can still jump
+animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
 
 #combat
 invincibility_time_player = 50

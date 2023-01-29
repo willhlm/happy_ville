@@ -61,6 +61,11 @@
    <property name="particle" value=""/>
   </properties>
  </tile>
+ <tile id="16">
+  <properties>
+   <property name="colour" type="color" value="#ffffffff"/>
+  </properties>
+ </tile>
  <tile id="19">
   <properties>
    <property name="event" value=""/>

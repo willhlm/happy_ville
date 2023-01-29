@@ -47,7 +47,7 @@ class Level():
         self.area_name = level_name
 
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
-        self.map_data = Read_files.format_tiled_json(self.map_data)
+        self.map_data = Read_files.format_tiled_json(self.map_data)        
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
@@ -148,7 +148,7 @@ class Level():
             if id == 0:
                 for property in obj['properties']:
                     if property['name'] == 'spawn':
-                        if type(self.spawn).__name__ != 'str':#if respawn
+                        if type(self.spawn).__name__ != 'str':#if respawn/fast tarvel
                             self.game_objects.player.set_pos(self.spawn)
                         else:#if notmal load
                             if property['value'] == self.spawn:
@@ -223,6 +223,13 @@ class Level():
                 for layer in layers:
                     self.particles[layer] = particle_type
 
+            elif id == 16:#bg_particles
+                for property in obj['properties']:
+                    if property['name'] == 'colour':
+                        colour = property['value']
+
+                self.fog_colour = pygame.Color(colour)
+
             elif id == 19:#trigger
                 values={}
                 object_size = (int(obj['width']),int(obj['height']))
@@ -251,7 +258,7 @@ class Level():
                 self.game_objects.reflections.add(reflection)
 
             elif id == 21:#re-spawpoint, save point
-                new_int = Entities.Spawnpoint(object_position,self.game_objects,self.level_name)
+                new_int = Entities.Savepoint(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(new_int)
 
             elif id == 22:#runestones, colectable
@@ -274,10 +281,6 @@ class Level():
                     new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interactables.add(new_interacable)
-
-            elif id == 26:#key items: soul_essence etc.
-                runestone = Entities.Uber_runestone(object_position,self.game_objects)
-                self.game_objects.interactables.add(runestone)
 
             elif id == 24:#event: e.g. bridge that is built when the reindeer dies
                 values={}
@@ -305,6 +308,14 @@ class Level():
                 new_sign = Entities.Sign(object_position,self.game_objects,values)
                 self.game_objects.interactables.add(new_sign)
 
+            elif id == 26:#uberstone
+                runestone = Entities.Uber_runestone(object_position,self.game_objects)
+                self.game_objects.interactables.add(runestone)
+
+            elif id == 27:#inorinoki
+                inorinoki = Entities.Inorinoki(object_position,self.game_objects)
+                self.game_objects.interactables.add(inorinoki)
+
             elif id == 28:#key items: soul_essence etc.
                 for property in obj['properties']:
                     if property['name'] == 'name':
@@ -319,6 +330,9 @@ class Level():
                         new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
                         self.game_objects.loot.add(new_keyitem)
 
+            elif id == 29:#key items: soul_essence etc.
+                fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
+                self.game_objects.interactables.add(fast_travel)
 
     def load_bgs(self):
         'tiled design notes: all sublayers in bg1_X (x specifies the sublayer) should have the same paralax and offset.'
@@ -378,7 +392,7 @@ class Level():
                             path = 'maps/%s/%s' % (level_name, Read_files.get_folder(tileset['image']))
                             parallax = bg_list[tile_layer]['parallax']
                             blit_pos = (x * self.TILE_SIZE - math.ceil(new_map_diff[0]*(1-parallax[0])) + bg_list[tile_layer]['offset'][0], y * self.TILE_SIZE - math.ceil((1-parallax[1])*new_map_diff[1])+bg_list[tile_layer]['offset'][1])
-                            new_animation = Entities.BG_Animated(blit_pos,path,parallax)
+                            new_animation = Entities.BG_Animated(self.game_objects,blit_pos,path,parallax)
                             animation_list[tile_layer].append(new_animation)
                 else:#if statics
                     blit_pos = (x * self.TILE_SIZE , y * self.TILE_SIZE)
@@ -413,9 +427,12 @@ class Level():
                 pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
                 self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
 
+            try:
                 #add fog to BG
                 if tile_layer != 'bg1':
-                    self.game_objects.weather.fog(self.game_objects.all_bgs,parallax[tile_layer])
+                    self.game_objects.weather.fog(self.game_objects.all_bgs,parallax[tile_layer],self.fog_colour)
+            except:
+                pass
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:
@@ -427,10 +444,12 @@ class Level():
                 pass
 
             try:#add particles inbetween layers
-                if 'fg1' in tile_layer:
+                if 'fg' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_fgs)
                 elif 'bg' in tile_layer:
                     self.game_objects.weather.create_particles(self.particles[tile_layer],parallax[tile_layer],self.game_objects.all_bgs)
             except:
                 pass
+
         self.particles={}#reset particles
+        self.fog_colour = []#reset fog

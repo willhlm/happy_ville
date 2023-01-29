@@ -4,7 +4,6 @@ import game_objects
 import Read_files
 import sys
 import constants as C
-import time
 
 class Game():
     def __init__(self):
@@ -39,13 +38,11 @@ class Game():
                 self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
     def run(self):
-        prev_time = time.time()
         while True:
-            self.dt = (time.time()-prev_time) * 60
-            prev_time = time.time()
             #tick clock
-            self.clock.tick(self.fps)
-
+            self.clock.tick(120)
+            self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            #self.dt = 1
             #handle event
             self.event_loop()
 
@@ -66,7 +63,6 @@ class Game():
             scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
             scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
             self.scale = min(scale_w,scale_h)
-
 
 if __name__ == '__main__':
     #pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

@@ -13,7 +13,6 @@ class Player_states(Entity_States):
 
     def update(self):
         self.update_state()
-    #    print(self.state_name,self.entity.velocity[1])
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -41,7 +40,7 @@ class Player_states(Entity_States):
     def handle_input(self,input):
         pass
 
-    def do_ability(self):
+    def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         if self.entity.equip=='Thunder' or self.entity.equip=='Darksaber':
             self.enter_state(self.entity.equip + '_pre')
         else:
@@ -53,7 +52,6 @@ class Idle_main(Player_states):
 
     def update_state(self):
         if not self.entity.collision_types['bottom']:
-            #self.entity.velocity[1]=0
             self.enter_state('Fall_stand_pre')
 
     def handle_press_input(self,input):
@@ -90,7 +88,7 @@ class Walk_main(Player_states):
         self.particle_timer = 0
 
     def update_state(self):
-        self.particle_timer -= 1
+        self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
 
@@ -98,7 +96,7 @@ class Walk_main(Player_states):
             self.enter_state('Fall_run_pre')
 
     def running_particles(self):
-        particle = self.entity.running_particles(self.entity.hitbox.midbottom)
+        particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
         self.entity.game_objects.cosmetics.add(particle)
         self.particle_timer = 10
 
@@ -178,7 +176,7 @@ class Jump_run_pre(Player_states):
         super().__init__(entity)
 
     def update_state(self):
-        if self.entity.velocity[1] > 0.7:
+        if self.entity.velocity[1] > 0:
             self.enter_state('Fall_run_pre')
         elif self.entity.acceleration[0] == 0:
             self.enter_state('Jump_stand_main')
@@ -237,8 +235,8 @@ class Fall_run_pre(Player_states):
         self.init()
 
     def init(self):
-        self.entity.velocity[1] = 0        
         self.entity.timer_jobs['ground'].activate()
+        self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
 
     def update_state(self):
         if self.entity.acceleration[0] == 0:
@@ -291,8 +289,8 @@ class Fall_stand_pre(Player_states):
         self.init()
 
     def init(self):
-        self.entity.velocity[1] = 0
         self.entity.timer_jobs['ground'].activate()
+        self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
 
     def update_state(self):
         if self.entity.acceleration[0] != 0:
@@ -407,7 +405,7 @@ class Dash_main(Dash_pre):
 
     def update_state(self):
         super().update_state()
-        self.counter -= 1
+        self.counter -= self.entity.game_objects.game.dt
 
     def handle_press_input(self,input):
         if input[-1]=='x' and self.counter > 0:#if pressed within three frames
@@ -478,7 +476,7 @@ class Counter_main(Player_states):
 class Death_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.cosmetics.add(Entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]]))
+        self.entity.game_objects.cosmetics.add(Entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
         self.entity.velocity[1]=-3
         if self.entity.velocity[0]<0:
             self.dir[0]=1
@@ -620,10 +618,10 @@ class Sword(Player_states):#main phases shold inheret this
 
     def slash_speed(self):#if we have green infinity stone
         if self.entity.sword.equip=='green':
-            self.entity.animation.framerate = 3
+            self.entity.animation.framerate = 0.33
 
     def enter_state(self,input):
-        self.entity.animation.framerate = 4
+        self.entity.animation.framerate = C.animation_framerate
         super().enter_state(input)
 
 class Sword_stand1_main(Sword):
@@ -669,9 +667,9 @@ class Air_sword1_main(Sword):
 
     def increase_phase(self):
         if self.entity.acceleration[0]==0:
-            self.enter_state('Fall_stand_pre')
+            self.enter_state('Fall_stand_main')
         else:
-            self.enter_state('Fall_run_pre')
+            self.enter_state('Fall_run_main')
 
 class Air_sword2_main(Air_sword1_main):
     def __init__(self,entity):

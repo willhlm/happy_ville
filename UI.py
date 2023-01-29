@@ -10,13 +10,13 @@ class Gameplay_UI():
     def init_hearts(self):
         self.hearts = []
         for i in range(0,self.game_objects.player.max_health):#make hearts
-            self.hearts.append(Entities.Health())
+            self.hearts.append(Entities.Health(self.game_objects))
         self.update_hearts()
 
     def init_spirits(self):
         self.spirits = []
         for i in range(0,self.game_objects.player.max_spirit):#make hearts
-            self.spirits.append(Entities.Spirit())
+            self.spirits.append(Entities.Spirit(self.game_objects))
         self.update_spirits()
 
     def update(self):

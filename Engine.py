@@ -8,6 +8,7 @@ class Collisions():
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
             self.game_objects.player.go_through = True
+            self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
 
     def interactables_collision(self):#interactables
         for interactable in self.game_objects.interactables.sprites():
@@ -47,7 +48,7 @@ class Collisions():
             elif collision_plat:
                 projectile.collision_plat(collision_plat)
 
-    #take damage if collide with enemy
+    #check for player collision
     def player_collision(self,enteties):
         collision_enteties=pygame.sprite.spritecollideany(self.game_objects.player,enteties,Collisions.collided)#check collision
         if collision_enteties:
@@ -67,18 +68,21 @@ class Collisions():
     #collisions between entities-groups: a dynamic and a static one
     def platform_collision(self,dynamic_Entities):
         for entity in dynamic_Entities.sprites():
-            entity.collision_types={'top':False,'bottom':False,'right':False,'left':False}
+            entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
 
             #move in x every dynamic sprite
+            entity.update_true_pos_x()
             entity.rect.centerx = round(entity.true_pos[0])
+            #entity.rect.centerx += round(entity.velocity[0]*self.game_objects.game.dt)
             entity.update_hitbox()
-
             static_entity_x = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
             if static_entity_x:
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
+            entity.update_true_pos_y()
             entity.rect.centery = round(entity.true_pos[1])
+            #entity.rect.centery += round(entity.velocity[1]*self.game_objects.game.dt)
             entity.update_hitbox()#follow with hitbox
 
             static_entity_y = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)

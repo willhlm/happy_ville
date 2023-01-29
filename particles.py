@@ -8,7 +8,7 @@ class Particles(pygame.sprite.Sprite):
         self.update_pos(scroll)
 
     def update_pos(self,scroll):
-        self.pos = [self.pos[0] + scroll[0]+self.velocity[0], self.pos[1] + scroll[1]+self.velocity[1]]
+        self.pos = [self.pos[0] + scroll[0]+self.velocity[0]*self.game_objects.game.dt, self.pos[1] + scroll[1]+self.velocity[1]*self.game_objects.game.dt]
         #self.rect.topleft = [self.rect.topleft[0] + scroll[0]+self.velocity[0], self.rect.topleft[1] + scroll[1]+self.velocity[1]]
         self.rect.center = self.pos
 
@@ -47,8 +47,10 @@ class Particles(pygame.sprite.Sprite):
         ]
 
 class General_particle(Particles):#a general one
-    def __init__(self,pos,distance=400,lifetime=60,vel=[7,13],type='spark',dir='isotropic',scale=1, colour=[255,255,255,255]):
+    def __init__(self,pos,game_objects,distance=400,lifetime=60,vel=[7,13],type='spark',dir='isotropic',scale=1, colour=[255,255,255,255]):
         super().__init__()
+        self.game_objects = game_objects
+
         if dir=='isotropic':
             angle=random.randint(-180, 180)#the ejection anglex
         elif dir == -1:#rigth hit
@@ -84,18 +86,18 @@ class General_particle(Particles):#a general one
 
     def update(self,scroll):
         super().update(scroll)
-        self.lifetime -= 1
+        self.lifetime -= self.game_objects.game.dt
         self.speed()
         self.fading()
         self.destroy()
         self.update_particle()
 
     def speed(self):
-        self.velocity[0] -= 0.01*self.velocity[0]#0.1*math.cos(self.angle)
-        self.velocity[1] -= 0.01*self.velocity[1]#0.1*math.sin(self.angle)
+        self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)
+        self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
 
     def fading(self):
-        self.fade-=3
+        self.fade -= 3*self.game_objects.game.dt
         self.image.set_alpha(self.fade)
 
     def destroy(self):

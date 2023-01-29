@@ -86,6 +86,7 @@ class Attack_main(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
+        self.entity.AI.finish_action()
 
 class Ambush_pre(Attack_pre):
     def __init__(self,entity):

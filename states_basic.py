@@ -99,9 +99,8 @@ class Transform(Once):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_input(self,input):
-        if input=='Idle':
-            self.enter_state('Interacted')
+    def increase_phase(self):
+        self.enter_state('Interacted')
 
 class Interacted(Basic_states):
     def __init__(self,entity):
@@ -116,6 +115,9 @@ class Outline(Basic_states):
              self.enter_state('Idle')
         elif input == 'Once':
             self.enter_state('Once')
+
+    def increase_phase(self):
+        self.enter_state('Idle')
 
 #for slash
 class Slash_1(Idle_once):

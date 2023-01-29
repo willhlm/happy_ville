@@ -10,6 +10,7 @@ import constants as C
 class Cutscene_file():#cutscneens that will run based on file. The name of the file should be the same as the class name
     def __init__(self,parent_class):
         self.parent_class = parent_class
+        self.game_objects = parent_class.game.game_objects
         self.animation=animation.Simple_animation(self)
         self.sprites = Read_files.load_sprites('cutscene/'+type(self).__name__.lower())
         self.image=self.sprites[0]
@@ -48,12 +49,12 @@ class Cutscene_engine():#cut scenens that is based on game engien
         self.cinematic()
 
     def cinematic(self):#black box stuff
-        self.pos[0]+=1#the upper balck box
-        rect1=(0, self.pos[0], self.parent_class.game.WINDOW_SIZE[0], self.parent_class.game.WINDOW_SIZE[1])
+        self.pos[0]+=self.parent_class.game.dt#the upper balck box
+        rect1=(0, int(self.pos[0]), self.parent_class.game.WINDOW_SIZE[0], self.parent_class.game.WINDOW_SIZE[1])
         pygame.draw.rect(self.parent_class.game.screen, (0, 0, 0), rect1)
 
-        self.pos[1]-=1#the lower balck box
-        rect2=(0, self.pos[1], self.parent_class.game.WINDOW_SIZE[0], self.parent_class.game.WINDOW_SIZE[1])
+        self.pos[1]-=self.parent_class.game.dt#the lower balck box
+        rect2=(0, int(self.pos[1]), self.parent_class.game.WINDOW_SIZE[0], self.parent_class.game.WINDOW_SIZE[1])
         pygame.draw.rect(self.parent_class.game.screen, (0, 0, 0), rect2)
 
         self.pos[0]=min(-self.parent_class.game.WINDOW_SIZE[1]*self.const,self.pos[0])
@@ -78,7 +79,7 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
         pass
 
     def update(self):
-        self.timer+=1
+        self.timer+=self.parent_class.game.dt
         if self.timer>500:
             self.exit_state()
 
@@ -96,7 +97,7 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
         self.press = False
 
     def update(self):
-        self.timer+=1
+        self.timer+=self.parent_class.game.dt
 
     def render(self):
         if self.stage == 0:#running slowly and blit title, Hjortron games etc.
@@ -163,12 +164,11 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
         self.entity=Entities.Reindeer(spawn_pos, self.parent_class.game.game_objects)
         self.parent_class.game.game_objects.enemies.add(self.entity)
         self.parent_class.game.game_objects.camera.set_camera('Deer_encounter')
+        self.parent_class.game.game_objects.player.currentstate.enter_state('Walk')#should only enter these states once
 
     def update(self):#write how you want the player/group to act
-        self.timer+=1
-        if self.timer==1:
-            self.parent_class.game.game_objects.player.currentstate.enter_state('Walk')#should only enter these states once
-        elif self.timer<50:
+        self.timer+=self.parent_class.game.dt
+        if self.timer<50:
             self.parent_class.game.game_objects.player.velocity[0]=4
         elif self.timer==50:
             self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
@@ -198,7 +198,7 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
 
     def update(self):#write how you want the player/group to act
         self.entity.velocity[1] = 0
-        self.timer+=1
+        self.timer+=self.parent_class.game.dt
         if self.stage == 0:
             self.parent_class.game.game_objects.player.velocity[0]=4
 
@@ -225,12 +225,11 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
         super().__init__(objects)
         self.step1 = False
         self.const = 0.5#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
+        self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
 
     def update(self):
-        self.timer+=1
-        if self.timer == 1:
-            self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
-        elif self.timer < 75:
+        self.timer+=self.parent_class.game.dt
+        if self.timer < 75:
             self.parent_class.game.game_objects.player.velocity[1] = -2
         elif self.timer > 75:
             self.parent_class.game.game_objects.player.velocity[1] = -1#compensates for gravity, levitates
@@ -244,7 +243,7 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
     def render(self):
         super().render()
         if self.step1:
-            particle = particles.General_particle(self.parent_class.game.game_objects.player.rect.center)
+            particle = particles.General_particle(self.parent_class.game.game_objects.player.rect.center,self.parent_class.game.game_objects)
             self.parent_class.game.game_objects.cosmetics.add(particle)
 
             self.parent_class.game.game_objects.cosmetics.draw(self.parent_class.game.game_objects.game.screen)
@@ -256,22 +255,24 @@ class Death(Cutscene_engine):#when aila dies
         self.stage = 0
 
     def update(self):
-        self.timer+=1
-        if self.stage==0:
+        self.timer += self.parent_class.game.dt
+        if self.stage == 0:
 
-            if self.timer>120:
+            if self.timer > 120:
                 self.state1()
 
-        elif self.stage==1:
-            if self.timer==1:
+        elif self.stage == 1:
+                #spawn effect
                 pos=(0,0)#
                 offset=100#depends on the effect animation
-                self.spawneffect=Entities.Spawneffect(pos)
+                self.spawneffect = Entities.Spawneffect(pos,self.parent_class.game.game_objects)
                 self.spawneffect.rect.midbottom=self.parent_class.game.game_objects.player.rect.midbottom
                 self.spawneffect.rect.bottom += offset
                 self.parent_class.game.game_objects.cosmetics.add(self.spawneffect)
+                self.stage = 2
 
-            elif self.spawneffect.finish:#when the cosmetic effetc finishes
+        elif self.stage == 2:
+            if self.spawneffect.finish:#when the cosmetic effetc finishes
                 self.parent_class.game.game_objects.player.currentstate.enter_state('Spawn_main')
                 self.exit_state()
 
@@ -299,36 +300,43 @@ class Cultist_encounter(Cutscene_engine):
         self.stage = 0
         self.entity1=Entities.Cultist_warrior(spawn_pos, self.parent_class.game.game_objects)
         self.parent_class.game.game_objects.camera.set_camera('Cultist_encounter')
-        self.entity1.AI_stack[-1].set_AI('Nothing')
+        self.entity1.AI.enter_AI('Nothing')
         self.parent_class.game.game_objects.enemies.add(self.entity1)
+        self.parent_class.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
 
     def update(self):
-        self.timer+=1
+        self.timer+=self.parent_class.game.dt
+
         if self.stage==0:#encounter Cultist_warrior
-            if self.timer==1:
-                self.parent_class.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
-            elif self.timer<50:
+            if self.timer<50:
                 self.parent_class.game.game_objects.player.velocity[0]=-4
-            elif self.timer==50:
+                self.parent_class.game.game_objects.player.acceleration[0]=1
+
+            elif self.timer > 50:
                 self.parent_class.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
                 self.parent_class.game.game_objects.player.velocity[0]=0
-            elif self.timer>200:
-                self.stage=1
-                self.timer=0
+                self.parent_class.game.game_objects.player.acceleration[0]=0
 
-        elif self.stage==1:#sapawn cultist_rogue
-            if self.timer==1:#enter once
+                self.stage = 1
+
+        elif self.stage == 1:
+            if self.timer>200:
                 spawn_pos = self.parent_class.game.game_objects.player.rect.topright
                 self.entity2=Entities.Cultist_rogue(spawn_pos, self.parent_class.game.game_objects)
                 self.entity2.dir[0]=-1
                 self.entity2.currentstate.enter_state('Ambush_pre')
-                self.entity2.AI_stack[-1].set_AI('Nothing')
+                self.entity2.AI.enter_AI('Nothing')
                 self.parent_class.game.game_objects.enemies.add(self.entity2)
-            elif self.timer>100:
+
+                self.stage=2
+                self.timer=0
+
+        elif self.stage==2:#sapawn cultist_rogue
+            if self.timer>100:
                 self.exit_state()
 
     def exit_state(self):
-        self.entity1.AI_stack[-1].exit_AI()
-        self.entity2.AI_stack[-1].exit_AI()
+        self.entity1.AI.enter_AI('Chase')
+        self.entity2.AI.enter_AI('Chase')
         self.parent_class.game.game_objects.camera.exit_state()
         super().exit_state()

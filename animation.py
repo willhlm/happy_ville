@@ -5,7 +5,7 @@ import math
 class Animation():
     def __init__(self,entity,frame):
         self.entity = entity
-        self.framerate = 4#depends on FPS
+        self.framerate = C.animation_framerate
         self.frame = frame
 
     def enter_state(self,next_animation):
@@ -22,11 +22,10 @@ class Entity_animation(Animation):#phase and state
         super().__init__(entity,frame)
 
     def update(self):
-        self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,self.frame//self.framerate,self.entity.currentstate.dir).copy()
-        self.frame += 1
-    #    if str(type(self.entity).__name__)=='Wall_slime':
+        self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,int(self.frame),self.entity.currentstate.dir).copy()
+        self.frame += self.framerate*self.entity.game_objects.game.dt
 
-        if self.frame == len(self.entity.sprites.sprite_dict[self.entity.currentstate.state_name])*self.framerate:
+        if self.frame >= len(self.entity.sprites.sprite_dict[self.entity.currentstate.state_name]):
             self.entity.currentstate.increase_phase()
             self.reset_timer()
 
@@ -75,9 +74,9 @@ class Simple_animation(Animation):#no state or phase
         super().__init__(entity,frame)
 
     def update(self):
-        self.entity.image = self.entity.sprites[self.frame//self.framerate].copy()
-        self.frame += 1
+        self.entity.image = self.entity.sprites[int(self.frame)].copy()
+        self.frame += self.framerate*self.entity.game_objects.game.dt
 
-        if self.frame == len(self.entity.sprites)*self.framerate:
+        if self.frame >= len(self.entity.sprites):
             self.reset_timer()
             self.entity.reset_timer()
