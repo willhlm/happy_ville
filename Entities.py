@@ -1,5 +1,6 @@
-import pygame, random, sys, Read_files, states, particles, animation, states_health, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_bluebird, AI_enemy, AI_reindeer, math, sound
+import pygame, random, sys, Read_files, states, particles, animation, states_health, states_basic, states_player, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer, math, sound
 import constants as C
+import math
 
 pygame.mixer.init()
 
@@ -65,7 +66,7 @@ class Collision_block(Platform):
             entity.right_collision(self.hitbox.left)
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
-        entity.update_rect()
+        entity.update_rect_x()
 
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
@@ -73,7 +74,7 @@ class Collision_block(Platform):
             entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self.hitbox.bottom)
-        entity.update_rect()
+        entity.update_rect_y()
 
 class Collision_oneway_up(Platform):
     def __init__(self,pos,size,run_particle = 'dust'):
@@ -316,6 +317,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
+        self.true_pos = list(self.rect.center)
 
     def update(self,scroll):
         super().update(scroll)
@@ -325,7 +327,9 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         pass
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.center = self.true_pos.copy()
+        #self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.bottom = self.rect.bottom
 
     def update_hitbox(self):
@@ -334,9 +338,21 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
     def update_rect(self):
         self.rect.midbottom = self.hitbox.midbottom#[self.hitbox.bottom - self.hitbox_offset[0], self.hitbox.bottom - self.hitbox_offset[1]]
 
+    def update_rect_y(self):
+        self.rect.midbottom = self.hitbox.midbottom
+        self.true_pos[1] = self.rect.centery
+
+    def update_rect_x(self):
+        self.rect.midbottom = self.hitbox.midbottom
+        self.true_pos[0] = self.rect.centerx
+
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
+        self.true_pos = list(self.rect.center)
         self.hitbox.midbottom = self.rect.midbottom
+
+    def update_true_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]
 
     #pltform collisions.
     def right_collision(self,hitbox):
@@ -371,8 +387,13 @@ class Character(Platform_entity):#enemy, NPC,player
         self.running_particles = Dust_running_particles
 
     def update(self,pos):
-        super().update(pos)
+        self.update_pos(pos)
         self.update_timers()
+        self.update_vel()
+        self.update_true_pos()
+        self.currentstate.update()
+        self.animation.update()
+
 
     def update_vel(self):
         self.velocity[1]+=self.acceleration[1]-self.velocity[1]*self.friction[1]#gravity
@@ -562,10 +583,27 @@ class Mygga(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.currentstate = states_mygga.Idle(self)
-        self.health = 50
+        self.health = 4
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
+
+class Exploding_Mygga(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/exploding_mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+        self.currentstate = states_mygga.Idle(self)
+        self.AI = AI_exploding_mygga.Peace(self)
+        self.health = 4
+        self.acceleration = [0,0]
+        self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
+        self.max_vel = [C.max_vel[0],C.max_vel[0]]
+        self.attack_distance = 20
+        self.aggro_distance = 50
+
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):

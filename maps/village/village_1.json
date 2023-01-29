@@ -282,8 +282,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":80,
-                 "y":432
+                 "x":212,
+                 "y":270
                 }, 
                 {
                  "gid":21,
@@ -603,20 +603,20 @@
                 {
                  "gid":3,
                  "height":16,
-                 "id":64,
+                 "id":66,
                  "name":"",
                  "properties":[
                         {
                          "name":"class",
                          "type":"string",
-                         "value":"Larv"
+                         "value":"Exploding_Mygga"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":964,
-                 "y":454
+                 "x":1226,
+                 "y":437
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -828,7 +828,7 @@
          "y":0
         }],
  "nextlayerid":24,
- "nextobjectid":65,
+ "nextobjectid":67,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.6.0",

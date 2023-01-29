@@ -100,6 +100,7 @@ class Game_Objects():
     def update(self):
         self.camera.update()
         scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
+        self.true_scroll = [-self.camera.true_scroll[0],-self.camera.true_scroll[1]]
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):
