@@ -72,6 +72,7 @@ class Collision_block(Platform):
         if entity.velocity[1] >= 0:#going down
             entity.down_collision(self.hitbox.top)
             entity.running_particles = self.run_particles#save the particles to make
+            entity.velocity[1] = 1
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()
