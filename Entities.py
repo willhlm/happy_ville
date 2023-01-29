@@ -84,8 +84,8 @@ class Collision_oneway_up(Platform):
         pass
 
     def collide_y(self,entity):
-        offset = entity.velocity[1]+1
         if entity.velocity[1] > 0:#going down
+            offset = entity.velocity[1]+1
             if entity.hitbox.bottom <= self.hitbox.top+offset:
                 entity.down_collision(self.hitbox.top)
                 entity.running_particles = self.run_particles#save the particles to make
@@ -206,7 +206,7 @@ class Collision_right_angle(Platform):
                 entity.down_collision(target)
                 entity.update_rect_y()
 
-class Collision_dmg(Platform):#should be an interactable
+class Collision_dmg(Platform):
     def __init__(self,pos,size):
         super().__init__(pos,size)
         self.dmg = 1
@@ -287,12 +287,11 @@ class Reflection(Staticentity):
         self.squeeze = 0.75
 
     def draw(self):
-        squeeze = self.squeeze
-        reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1]*squeeze - self.offset, self.size[0], self.size[1])
+        reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1]*self.squeeze - self.offset, self.size[0], self.size[1])
         reflect_rect.center = [reflect_rect.center[0],self.game_objects.game.screen.get_height() - reflect_rect.center[1]]
         reflect_surface = self.game_objects.game.screen.copy()
         reflect_surface.convert_alpha()#do we need this?
-        reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*squeeze))
+        reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*self.squeeze))
         #reflect_surface.set_alpha(100)
         self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
 
@@ -528,7 +527,7 @@ class Enemy(Character):
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.Peace(self)
 
-        self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}
+        self.inventory = {'Amber_Droplet':random.randint(0, 10),'Bone':2}#thigs to drop wgen killed
         self.spirit = 10
         self.health = 3
 
@@ -548,13 +547,15 @@ class Enemy(Character):
 
     def player_collision(self):#when player collides with enemy
         if not self.aggro: return
-        if not self.game_objects.player.invincibile and not self.game_objects.player.currentstate.state_name == 'death':
-            self.game_objects.player.take_dmg(1)
-            sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-            if sign>0:
-                self.game_objects.player.knock_back([1,0])
-            else:
-                self.game_objects.player.knock_back([-1,0])
+        if self.game_objects.player.invincibile: return
+        if self.game_objects.player.currentstate.state_name == 'death': return
+
+        self.game_objects.player.take_dmg(1)
+        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
+        if sign>0:
+            self.game_objects.player.knock_back([1,0])
+        else:
+            self.game_objects.player.knock_back([-1,0])
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -1087,14 +1088,12 @@ class Rhoutta_encounter(Boss):
         #new_game_state.enter_state()
 
 class Camera_Stop(Staticentity):
-
     def __init__(self,game_objects, size,pos,dir):
         super().__init__(pos,pygame.Surface(size))
         self.game_objects = game_objects
         self.flag = False#a flag such that the recentering only occures once
         self.hitbox = self.rect.inflate(0,0)
-        #self.dir = dir
-        self.stops = {'right':self.right,'left':self.left,'bottom':self.bottom,'top':self.top,'center':self.center}[dir]
+        self.stops = {'right':self.right,'left':self.left,'bottom':self.bottom,'top':self.top,'center':self.center}[dir]#called from camera.py
 
     #def update(self,scroll):
 #        super().update(scroll)
@@ -1147,10 +1146,10 @@ class Camera_Stop(Staticentity):
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
         super().__init__(pos)
-        self.game_objects=game_objects
+        self.game_objects = game_objects
         self.image = pygame.image.load("Sprites/invisible.png").convert_alpha()
-        self.entity=values['entity']
-        self.number=int(values['number'])
+        self.entity = values['entity']
+        self.number = int(values['number'])
         self.spawn_entities()
 
     def spawn_entities(self):
@@ -1160,7 +1159,7 @@ class Spawner(Staticentity):#an entity spawner
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
 
-class Abilities(Animatedentity):#projectiels
+class Abilities(Animatedentity):#projectiels: should it be platform enteties?
     def __init__(self,entity):
         super().__init__([0,0],entity.game_objects)
         self.entity = entity

@@ -47,7 +47,7 @@ class Level():
         self.area_name = level_name
 
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
-        self.map_data = Read_files.format_tiled_json(self.map_data)
+        self.map_data = Read_files.format_tiled_json(self.map_data)        
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():

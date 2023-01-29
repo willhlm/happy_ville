@@ -40,7 +40,7 @@ class Player_states(Entity_States):
     def handle_input(self,input):
         pass
 
-    def do_ability(self):
+    def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         if self.entity.equip=='Thunder' or self.entity.equip=='Darksaber':
             self.enter_state(self.entity.equip + '_pre')
         else:
@@ -52,7 +52,6 @@ class Idle_main(Player_states):
 
     def update_state(self):
         if not self.entity.collision_types['bottom']:
-            #self.entity.velocity[1]=0
             self.enter_state('Fall_stand_pre')
 
     def handle_press_input(self,input):
@@ -668,9 +667,9 @@ class Air_sword1_main(Sword):
 
     def increase_phase(self):
         if self.entity.acceleration[0]==0:
-            self.enter_state('Fall_stand_pre')
+            self.enter_state('Fall_stand_main')
         else:
-            self.enter_state('Fall_run_pre')
+            self.enter_state('Fall_run_main')
 
 class Air_sword2_main(Air_sword1_main):
     def __init__(self,entity):

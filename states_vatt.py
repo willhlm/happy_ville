@@ -112,8 +112,6 @@ class Run(Vatt_states):
             pass
         elif input == 'Transform':
             self.enter_state('Transform')
-        #if not self.entity.collision_types['bottom']:
-        #    self.enter_state('Fall_run')
 
 class Run_aggro(Vatt_states):
     def __init__(self,entity):
@@ -138,7 +136,6 @@ class Hurt(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
-        print('hurt')
 
     def increase_phase(self):
         self.enter_state('Transform')

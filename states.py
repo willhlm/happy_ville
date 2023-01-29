@@ -1,9 +1,8 @@
-import pygame, sys
+import pygame, sys, random
 import Read_files
 import Entities
 import cutscene
 import constants as C
-import random
 import state_inventory
 
 class Game_State():
@@ -530,6 +529,7 @@ class Inventory_menu(Gameplay):
         self.inventory_BG = pygame.image.load("Sprites/UI/menu/select/inventory.png").convert_alpha()
         self.letter_frame = 0#for description
         self.state = state_inventory.Items(self)
+        self.item_index = [0,0]#row, col
 
         #invenotory stuff: place holders
         self.use_items=[]#items that have the attribute "use" is stored here
@@ -546,19 +546,18 @@ class Inventory_menu(Gameplay):
                 self.key_items.append(item)
                 self.key_number.append(self.game.game_objects.player.inventory[key])
 
-        self.item_index = [0,0]#row, col
         self.define_blit_positions()
         self.define_pointer()
 
     def define_blit_positions(self):#set positions
-        keyitem_positions = [[],[]]
-        item_positions =  [[],[]]
+        keyitem_positions = [[],[]]#wll be two rows of items
+        item_positions =  [[],[]]#wll be two rows of items
+        stone_pos = [[[89,215],[154,215]],[[89,168],[154,168]],[[122,128]]]#infinity stone blit positions, the number of index matches the height of the blit positions
+
         for j in range(0,2):#two rows
             for i in range(0,6):#6 items horizontally
                 keyitem_positions[j].append([229+20*i,120+20*j])
                 item_positions[j].append([229+20*i,230+20*j])
-
-        stone_pos = [[[89,215],[154,215]],[[89,168],[154,168]],[[122,128]]]#infinity stone blit positions, the index matches the height of the blit
 
         items = [[],[]]
         index = 0
@@ -675,12 +674,8 @@ class Inventory_menu(Gameplay):
             self.letter_frame = 0
 
     def use_item(self):
-        item_index=self.item_index[0]
-        if self.item_index[1]==1:#if on the bottom row
-            item_index+=5
-        if item_index<len(self.use_items):
-            self.use_items[item_index].use_item()
-            self.exit_state()
+        self.items[self.state.state_name][self.item_index[0]][self.item_index[1]][0].use_item()
+        self.exit_state()
 
 class Omamori_menu(Gameplay):
     def __init__(self, game):
