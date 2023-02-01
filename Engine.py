@@ -1,4 +1,4 @@
-import pygame,math
+import pygame, math
 
 class Collisions():
     def __init__(self,game_objects):

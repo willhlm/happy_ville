@@ -1,4 +1,4 @@
-import random, sys
+import random, sys, math
 
 class Camera():
     def __init__(self,game_objects):
