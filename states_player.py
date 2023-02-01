@@ -28,7 +28,8 @@ class Player_states(Entity_States):
                 self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
     def handle_movement(self,input):#all states should inehrent this function
-        value = input[2]#the directions
+        #left stick and arrow keys
+        value = input[2]['l_stick']#the avlue of the press
         self.entity.acceleration[0] = abs(value[0])*C.acceleration[0]#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
 
@@ -217,17 +218,33 @@ class Jump_run_main(Jump_run_pre):
     def increase_phase(self):#called when an animation is finihed for that state
         pass
 
-class Double_jump(Player_states):
+class Double_jump_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.init()
+
+    def init(self):
         self.entity.velocity[1]=-10
 
     def update_state(self):
-        if self.entity.velocity[1]>0:#falling down
+        if self.entity.velocity[1] > 0:#falling down
             if self.entity.acceleration[0]==0:
-                self.enter_state('Fall_stand')
+                self.enter_state('Fall_stand_pre')
             else:
-                self.enter_state('Fall_run')
+                self.enter_state('Fall_run_pre')
+
+    def increase_phase(self):#called when an animation is finihed for that state
+        self.enter_state('Double_jump_main')
+
+class Double_jump_main(Double_jump_pre):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def init(self):
+        pass
+
+    def increase_phase(self):#called when an animation is finihed for that state
+        pass
 
 class Fall_run_pre(Player_states):
     def __init__(self,entity):
@@ -250,12 +267,12 @@ class Fall_run_pre(Player_states):
             self.enter_state('Dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
-        elif input=='double_jump':
-            self.enter_state('Double_jump_main')
+        elif input[-1]=='a':
+            self.enter_state('Double_jump_pre')
 
     def handle_input(self,input):
         if input == 'Wall':
-            self.enter_state('Wall_main')
+            self.enter_state('Wall_glide_main')
         elif input == 'Ground':
             self.enter_state('Walk_main')
 
@@ -304,8 +321,8 @@ class Fall_stand_pre(Player_states):
             self.swing_sword()
         elif input[-1]=='lb':
             self.enter_state('Dash_pre')
-        elif input=='double_jump':
-            self.enter_state('Double_jump_main')
+        elif input[-1]=='a':
+            self.enter_state('Double_jump_pre')
 
     def handle_input(self,input):
         if input == 'Ground':
@@ -335,7 +352,7 @@ class Fall_stand_main(Fall_stand_pre):
     def increase_phase(self):#called when an animation is finihed for that state
         pass
 
-class Wall_main(Player_states):
+class Wall_glide_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.friction[1] = 0.4
@@ -372,7 +389,6 @@ class Dash_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
-        self.entity.acceleration[1] = 0
 
     def update_state(self):
         self.entity.velocity[1] = 0
@@ -385,22 +401,18 @@ class Dash_pre(Player_states):
     def handle_input(self,input):#if hit wall
         if input == 'Wall':
             if self.entity.acceleration[0]!=0:
-                self.enter_state('Wall_main')
+                self.enter_state('Wall_glide_main')
             else:
                 self.enter_state('Idle_main')
 
     def increase_phase(self):
         self.enter_state('Dash_main')
 
-    def enter_state(self,input):
-        self.entity.acceleration[1] = C.acceleration[1]#set back the gravity
-        super().enter_state(input)
-
 class Dash_main(Dash_pre):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.velocity[0] = 20*self.dir[0]
-        self.entity.consume_spirit(self.entity.dash_cost)
+        self.entity.consume_spirit(self.entity.movement_abilities.abilities_dict['Dash'].dash_cost)
         self.counter = 4#within how many frames you can press x to enter attack
 
     def update_state(self):
@@ -450,7 +462,7 @@ class Dash_attack_post(Player_states):
 
     def increase_phase(self):
         if self.entity.acceleration[0]!=0:
-            self.enter_state('Wall_main')
+            self.enter_state('Wall_glide_main')
         else:
             self.enter_state('Idle_main')
 
@@ -776,8 +788,8 @@ class Thunder_charge(Thunder_pre):
         collision_ene = self.entity.game_objects.collisions.thunder_attack(self.entity.thunder_aura)
         if collision_ene:
             for enemy in collision_ene:
-                ability=self.entity.abilities['Thunder'](self.entity,enemy.rect)
-                self.entity.projectiles.add(ability)#add attack to group
+                self.entity.abilities['Thunder'].initiate(enemy.rect)
+                self.entity.projectiles.add(self.entity.abilities['Thunder'])#add attack to group
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -799,8 +811,8 @@ class Force_main(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
-        ability = self.entity.abilities['Force'](self.entity)
-        self.entity.projectiles.add(ability)#add sword to group
+        self.entity.abilities['Force'].initiate()
+        self.entity.projectiles.add(self.entity.abilities['Force'])#add force to group
         self.force_jump()
 
     def increase_phase(self):
@@ -847,8 +859,8 @@ class Darksaber_pre(Abillitites):
 class Darksaber_main(Darksaber_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        ability = self.entity.abilities['Darksaber'](self.entity)
-        self.entity.projectiles.add(ability)#add sword to group
+        self.entity.abilities['Darksaber'].initiate()
+        self.entity.projectiles.add(self.entity.abilities['Darksaber'])#add sword to group
 
     def increase_phase(self):
         self.enter_state('Idle_main')
@@ -857,8 +869,8 @@ class Arrow_main(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
-        ability = self.entity.abilities['Arrow'](self.entity)
-        self.entity.projectiles.add(ability)#add sword to group
+        self.entity.abilities['Arrow'].initiate()
+        self.entity.projectiles.add(self.entity.abilities['Arrow'])#add sword to group
 
     def increase_phase(self):
         self.enter_state('Idle_main')

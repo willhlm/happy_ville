@@ -327,11 +327,11 @@ class Alphabet():
 class Controller():
     def __init__(self, controller_type = False):
         self.controller_type = controller_type
-        self.keydown=False
-        self.keyup=False
-        self.value=[0,0]
-        self.key=False
-        self.outputs=[self.keydown,self.keyup,self.value,self.key]
+        self.keydown = False
+        self.keyup = False
+        self.value = {'l_stick':[0,0],'r_stick':[0,0],'d_pad':[0,0]}#movement (left analog, arrow keys), right analog, d_pad
+        self.key = False
+        self.outputs = [self.keydown,self.keyup,self.value,self.key]
         self.map_keyboard()
         self.methods = [self.keybord]#joystick may be appended
 
@@ -382,7 +382,7 @@ class Controller():
     def map_inputs(self,event):
         self.keyup=False
         self.keydown=False
-        for method in self.methods:
+        for method in self.methods:#check for keyboard and controller
             method(event)
         #self.methods[-1](event)
 
@@ -392,13 +392,13 @@ class Controller():
             self.key = self.keyboard_map.get(event.key, '')
 
             if self.key=='right':
-                self.value[0]=1
+                self.value['l_stick'][0]=1
             elif self.key=='left':
-                self.value[0]=-1
+                self.value['l_stick'][0]=-1
             elif self.key=='up':
-                self.value[1]=-1
+                self.value['l_stick'][1]=-1
             elif self.key=='down':
-                self.value[1]=1
+                self.value['l_stick'][1]=1
 
         elif event.type == pygame.KEYUP:#lift bottom
             self.keyup=True
@@ -407,18 +407,18 @@ class Controller():
             if self.key=='right':
                 keys_pressed=pygame.key.get_pressed()
                 if keys_pressed[pygame.K_LEFT]:
-                    self.value[0]=-1
+                    self.value['l_stick'][0]=-1
                 else:
-                    self.value[0]=0
+                    self.value['l_stick'][0]=0
             elif self.key=='left':
                 keys_pressed=pygame.key.get_pressed()
                 if keys_pressed[pygame.K_RIGHT]:
-                    self.value[0]=1
+                    self.value['l_stick'][0]=1
                 else:
-                    self.value[0]=0
+                    self.value['l_stick'][0]=0
 
             elif self.key=='up' or self.key=='down':
-                self.value[1]=0
+                self.value['l_stick'][1]=0
 
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
             self.initiate_controls()
@@ -440,18 +440,19 @@ class Controller():
             self.key=self.buttons[str(event.button)]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
+
             if event.axis==self.analogs['lh']:#left horizontal
-                self.value[0]=event.value
+                self.value['l_stick'][0] = event.value
                 if abs(event.value)<0.2:
-                    self.value[0] = 0
+                    self.value['l_stick'][0] = 0
 
             if event.axis==self.analogs['lv']:#left vertical
-                self.value[1]=event.value
+                self.value['l_stick'][1] = event.value
                 if abs(event.value)<0.2:
-                    self.value[1] = 0
+                    self.value['l_stick'][1] = 0
 
-        if event.type==pygame.JOYHATMOTION:
-            pass
+        if event.type == pygame.JOYHATMOTION:
+            self.value['d_pad'] = [event.value[0],event.value[1]]
 
     def output(self):
         return [self.keydown,self.keyup,self.value,self.key]
