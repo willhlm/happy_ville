@@ -7,7 +7,7 @@ class Collisions():
     def pass_through(self):#for ramps, called when pressing down
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
-            self.game_objects.player.go_through = True
+            self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through
             self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
 
     def interactables_collision(self):#interactables
@@ -50,9 +50,10 @@ class Collisions():
 
     #check for player collision
     def player_collision(self,enteties):
-        collision_enteties=pygame.sprite.spritecollideany(self.game_objects.player,enteties,Collisions.collided)#check collision
-        if collision_enteties:
-            collision_enteties.player_collision()
+        for player in self.game_objects.players:#aila and eventual double gangler
+            collision_enteties = pygame.sprite.spritecollideany(player,enteties,Collisions.collided)#check collision
+            if collision_enteties:
+                collision_enteties.player_collision()
 
     #npc player conversation, when pressing t
     def check_interaction_collision(self):

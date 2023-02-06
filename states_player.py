@@ -9,7 +9,7 @@ class Player_states(Entity_States):
     def enter_state(self,newstate):
         state = newstate[:newstate.rfind('_')]#get the name up to last _ (remove pre, main, post)
         if state in self.entity.states:
-            self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+             self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def update(self):
         self.update_state()
@@ -42,7 +42,7 @@ class Player_states(Entity_States):
         pass
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        if self.entity.equip=='Thunder' or self.entity.equip=='Darksaber':
+        if self.entity.equip=='Thunder' or self.entity.equip=='Darksaber' or self.entity.equip=='Migawari':
             self.enter_state(self.entity.equip + '_pre')
         else:
             self.enter_state(self.entity.equip + '_main')
@@ -394,10 +394,6 @@ class Dash_pre(Player_states):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
 
-    def handle_press_input(self,input):
-        if input[-1]=='x':
-            self.enter_state('Dash_attack_main')
-
     def handle_input(self,input):#if hit wall
         if input == 'Wall':
             if self.entity.acceleration[0]!=0:
@@ -406,14 +402,45 @@ class Dash_pre(Player_states):
                 self.enter_state('Idle_main')
 
     def increase_phase(self):
-        self.enter_state('Dash_main')
+        next_dash = 'Dash_' + str(self.entity.movement_abilities.abilities_dict['Dash'].level) + 'main'
+        self.enter_state(next_dash)
 
-class Dash_main(Dash_pre):
+class Dash_1main(Dash_pre):#level one dash: normal
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.velocity[0] = 20*self.dir[0]
-        self.entity.consume_spirit(self.entity.movement_abilities.abilities_dict['Dash'].dash_cost)
-        self.counter = 4#within how many frames you can press x to enter attack
+        self.entity.consume_spirit(1)
+
+    def increase_phase(self):
+        self.enter_state('Dash_post')
+
+class Dash_2main(Dash_pre):#level 2 dash: free dash
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.velocity[0] = 20*self.dir[0]
+
+    def increase_phase(self):
+        self.enter_state('Dash_post')
+
+class Dash_3main(Dash_pre):#level 3 dash: invinsible
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.velocity[0] = 20*self.dir[0]
+        self.entity.invincibile = True
+
+    def increase_phase(self):
+        self.enter_state('Dash_post')
+
+    def enter_state(self,state):
+        super().enter_state(state)
+        self.entity.invincibile = False
+
+class Dash_4main(Dash_pre):#level 4 dash: allow dash attack
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.velocity[0] = 20*self.dir[0]
+        self.entity.invincibile = True
+        self.counter = 6#within how many frames you can press x to enter attack
 
     def update_state(self):
         super().update_state()
@@ -422,9 +449,14 @@ class Dash_main(Dash_pre):
     def handle_press_input(self,input):
         if input[-1]=='x' and self.counter > 0:#if pressed within three frames
             self.enter_state('Dash_attack_main')
+            self.entity.timer_jobs['invincibility'].activate()
 
     def increase_phase(self):
         self.enter_state('Dash_post')
+
+    def enter_state(self,state):
+        super().enter_state(state)
+        self.entity.invincibile = False
 
 class Dash_post(Dash_pre):
     def __init__(self,entity):
@@ -754,7 +786,7 @@ class Thunder_pre(Abillitites):
         self.init()
 
     def init(self):
-        self.entity.thunder_aura = Entities.Thunder_aura(self.entity)
+        self.entity.thunder_aura = Entities.Thunder_aura(self.entity.rect.center,self.entity.game_objects)
         self.entity.game_objects.cosmetics.add(self.entity.thunder_aura)
 
     def handle_movement(self,input):
@@ -825,7 +857,7 @@ class Force_main(Abillitites):
         if self.dir[1]<0:
             self.entity.velocity[1] = -10
 
-class Heal_pre(Abillitites):
+class Migawari_pre(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -835,17 +867,17 @@ class Heal_pre(Abillitites):
             self.enter_state('Idle_main')
 
     def increase_phase(self):
-        self.enter_state('Heal_main')
+        self.enter_state('Migawari_main')
 
-class Heal_main(Heal_pre):
+class Migawari_main(Migawari_pre):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.abilities['Migawari'].spawn(self.entity.rect.center)
 
     def handle_release_input(self,input):
         pass
 
     def increase_phase(self):
-        self.entity.heal()
         self.entity.consume_spirit()
         self.enter_state('Idle_main')
 
