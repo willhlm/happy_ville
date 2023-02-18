@@ -76,9 +76,9 @@ class Idle_main(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if self.entity.dir[1]==0:
-                state='Sword_stand'+str(int(self.entity.sword_swing)+1)+'_main'
+                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
-                self.entity.sword_swing = not self.entity.sword_swing
+                self.entity.sword.swing = not self.entity.sword.swing
 
             elif self.entity.dir[1]>0:
                 self.enter_state('Sword_up_pre')
@@ -120,9 +120,9 @@ class Walk_main(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if abs(self.entity.dir[1])<0.8:
-                state='Sword_run'+str(int(self.entity.sword_swing)+1)+'_main'
+                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
-                self.entity.sword_swing = not self.entity.sword_swing
+                self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
                 self.enter_state('Sword_up_pre')
 
@@ -158,9 +158,9 @@ class Jump_stand_pre(Player_states):
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword_swing)+1)+'_main'
+                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
-                self.entity.sword_swing = not self.entity.sword_swing
+                self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
         self.enter_state('Jump_stand_main')
@@ -204,9 +204,9 @@ class Jump_run_pre(Player_states):
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword_swing)+1)+'_main'
+                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
-                self.entity.sword_swing = not self.entity.sword_swing
+                self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
         self.enter_state('Jump_run_main')
@@ -283,9 +283,9 @@ class Fall_run_pre(Player_states):
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword_swing)+1)+'_main'
+                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
-                self.entity.sword_swing = not self.entity.sword_swing
+                self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
         self.enter_state('Fall_run_main')
@@ -335,9 +335,9 @@ class Fall_stand_pre(Player_states):
             elif self.entity.dir[1]==-1:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword_swing)+1)+'_main'
+                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
-                self.entity.sword_swing = not self.entity.sword_swing
+                self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
         self.enter_state('Fall_stand_main')

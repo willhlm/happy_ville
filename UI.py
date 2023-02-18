@@ -23,7 +23,7 @@ class Gameplay_UI():
     def init_ability(self):
         self.ability_hud=[]#the hud
         for i in range(0,self.game_objects.player.movement_abilities.number):
-            self.ability_hud.append(Entities.Movement_hud(self.game_objects))#the ability object
+            self.ability_hud.append(Entities.Movement_hud(self.game_objects.player))#the ability object
 
         self.abilities = self.game_objects.player.movement_abilities.abilities[0:len(self.ability_hud)]#the abilities
 
@@ -57,15 +57,21 @@ class Gameplay_UI():
 
         self.game_objects.game.screen.blit(temp,(20, 10))
 
-    def remove_hearts(self,dmg):#dmg is an integer: 1 or 2 and set the rellavant to hurt
-        index = self.game_objects.player.health
-        index = max(index,0)#in principle not needed but make it fool proof
-        for i in range(index,index+dmg):
-            self.hearts[i].currentstate.handle_input('Hurt')#make heart go white
+    def remove_hearts(self,dmg):#dmg is 0.5, 1 or 2. Will set the rellavant to hurt
+        index = int(self.game_objects.player.health)-1
+        index = max(index,-1)
+        for i in range(index+int(dmg+0.5+self.game_objects.player.health-int(self.game_objects.player.health)),index,-1):
+            health = self.hearts[i].health
+            self.hearts[i].take_dmg(dmg)
+            dmg -= health#distribute the dmg
 
     def update_hearts(self):#set the rellavant onces to idle
-        for i in range(0,self.game_objects.player.health):#set them to idle for the number of health we have
-            self.hearts[i].currentstate.handle_input('Idle')
+        for i in range(0,int(self.game_objects.player.health)):#set them to idle for the number of health we have
+            if self.game_objects.player.health - i -1 == 0.5:
+                self.hearts[i].currentstate.enter_state('Idle')
+                self.hearts[i+1].currentstate.enter_state('Half')
+            else:
+                self.hearts[i].currentstate.handle_input('Idle')
 
     def remove_spirits(self,spirit):
         index = self.game_objects.player.spirit + spirit - 1

@@ -33,6 +33,40 @@ class Idle(Basic_states):
         elif input == 'Equip':
             self.enter_state('Equip')
 
+#ability UI
+class Idle_1(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Idle_2(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Idle_3(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Idle_4(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Active_1(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Active_2(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Active_3(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+class Active_4(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+#ability UI
+
 class Equip(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)

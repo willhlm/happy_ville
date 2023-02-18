@@ -44,7 +44,7 @@ class Game_Objects():
         self.cosmetics = pygame.sprite.Group()#things we just want to blit
         self.camera_blocks = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
-        self.reflections = Entities.RefelctionGroup()
+        self.reflections = Entities.Specialdraw_Group()
 
         #initiate player
         self.player = Entities.Player([0,0],self)

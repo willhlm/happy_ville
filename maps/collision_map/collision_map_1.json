@@ -158,6 +158,24 @@
                  "width":16,
                  "x":128,
                  "y":240
+                }, 
+                {
+                 "gid":112,
+                 "height":16,
+                 "id":143,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Light_crystal"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":352,
+                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -261,7 +279,7 @@
          "y":0
         }],
  "nextlayerid":22,
- "nextobjectid":143,
+ "nextobjectid":144,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

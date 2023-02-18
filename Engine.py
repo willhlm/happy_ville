@@ -53,7 +53,7 @@ class Collisions():
         for player in self.game_objects.players:#aila and eventual double gangler
             collision_enteties = pygame.sprite.spritecollideany(player,enteties,Collisions.collided)#check collision
             if collision_enteties:
-                collision_enteties.player_collision()
+                collision_enteties.player_collision(player)
 
     #npc player conversation, when pressing t
     def check_interaction_collision(self):

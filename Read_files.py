@@ -122,7 +122,7 @@ def generic_sheet_reader(self, path_to_sheet, w, h, r, c):
     for i in range(sprite_count[0]):
         for j in range(sprite_count[1]):
             rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
-            image = pygame.Surface(sprite_size,pygame.SRCALPHA,32)
+            image = pygame.Surface(sprite_size,pygame.SRCALPHA,32).convert_alpha()
             image.blit(sheet,(0,0),rect)
             sprite_dict[n] = image
             n+=1
@@ -183,7 +183,7 @@ class Sprites():
         for i in range(sprite_count[0]):
             for j in range(sprite_count[1]):
                 rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
-                image = pygame.Surface(sprite_size,pygame.SRCALPHA,32)
+                image = pygame.Surface(sprite_size,pygame.SRCALPHA,32).convert_alpha()
                 image.blit(sheet,(0,0),rect)
                 sprite_dict[n] = image
                 n+=1
