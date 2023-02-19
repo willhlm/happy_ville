@@ -44,7 +44,6 @@ class Hurt(Basic_states):
 class Half(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.health = 0.5
 
     def handle_input(self,input):
         if input=='Idle':

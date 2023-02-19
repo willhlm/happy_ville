@@ -42,10 +42,10 @@ class Player_states(Entity_States):
         pass
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        if self.entity.equip=='Thunder' or self.entity.equip=='Darksaber' or self.entity.equip=='Migawari':
-            self.enter_state(self.entity.equip + '_pre')
+        if self.entity.abilities.equip=='Thunder' or self.entity.abilities.equip=='Darksaber' or self.entity.abilities.equip=='Migawari':
+            self.enter_state(self.entity.abilities.equip + '_pre')
         else:
-            self.enter_state(self.entity.equip + '_main')
+            self.enter_state(self.entity.abilities.equip + '_main')
 
 class Idle_main(Player_states):
     def __init__(self,entity):
@@ -402,7 +402,7 @@ class Dash_pre(Player_states):
                 self.enter_state('Idle_main')
 
     def increase_phase(self):
-        next_dash = 'Dash_' + str(self.entity.movement_abilities.abilities_dict['Dash'].level) + 'main'
+        next_dash = 'Dash_' + str(self.entity.abilities.movement_dict['Dash'].level) + 'main'
         self.enter_state(next_dash)
 
 class Dash_1main(Dash_pre):#level one dash: normal
@@ -820,8 +820,8 @@ class Thunder_charge(Thunder_pre):
         collision_ene = self.entity.game_objects.collisions.thunder_attack(self.entity.thunder_aura)
         if collision_ene:
             for enemy in collision_ene:
-                self.entity.abilities['Thunder'].initiate(enemy.rect)
-                self.entity.projectiles.add(self.entity.abilities['Thunder'])#add attack to group
+                self.entity.abilities.spirit_abilities['Thunder'].initiate(enemy.rect)
+                self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Thunder'])#add attack to group
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -843,8 +843,8 @@ class Force_main(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
-        self.entity.abilities['Force'].initiate()
-        self.entity.projectiles.add(self.entity.abilities['Force'])#add force to group
+        self.entity.abilities.spirit_abilities['Force'].initiate()
+        self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Force'])#add force to group
         self.force_jump()
 
     def increase_phase(self):
@@ -872,7 +872,7 @@ class Migawari_pre(Abillitites):
 class Migawari_main(Migawari_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.abilities['Migawari'].spawn(self.entity.rect.center)
+        self.entity.abilities.spirit_abilities['Migawari'].spawn(self.entity.rect.center)
 
     def handle_release_input(self,input):
         pass
@@ -891,8 +891,8 @@ class Darksaber_pre(Abillitites):
 class Darksaber_main(Darksaber_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.abilities['Darksaber'].initiate()
-        self.entity.projectiles.add(self.entity.abilities['Darksaber'])#add sword to group
+        self.entity.abilities.spirit_abilities['Darksaber'].initiate()
+        self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Darksaber'])#add sword to group
 
     def increase_phase(self):
         self.enter_state('Idle_main')
@@ -901,8 +901,8 @@ class Arrow_main(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
-        self.entity.abilities['Arrow'].initiate()
-        self.entity.projectiles.add(self.entity.abilities['Arrow'])#add sword to group
+        self.entity.abilities.spirit_abilities['Arrow'].initiate()
+        self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Arrow'])#add sword to group
 
     def increase_phase(self):
         self.enter_state('Idle_main')

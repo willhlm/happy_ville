@@ -73,7 +73,6 @@ class Collision_block(Platform):
         if entity.velocity[1] >= 0:#going down
             entity.down_collision(self.hitbox.top)
             entity.running_particles = self.run_particles#save the particles to make
-            entity.velocity[1] = 3#the slow motion will not really work if this is too low
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()
@@ -448,10 +447,8 @@ class Player(Character):
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
-        self.abilities = {'Thunder':Thunder(self),'Force':Force(self),'Arrow':Arrow(self),'Migawari':Migawari(self),'Darksaber':Darksaber(self)}#the objects are referensed but created in states
-        self.equip = 'Thunder'#ability pointer
         self.sword = Aila_sword(self)
-        self.movement_abilities = Movement_abilities(self)#dash, double jump and wall glide
+        self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
         self.states = set(['Dash_attack','Dash','Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
         self.currentstate = states_player.Idle_main(self)
@@ -1213,8 +1210,106 @@ class Spawner(Staticentity):#an entity spawner
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
 
+#Player movement abilities, handles them
+class Player_abilities():
+    def __init__(self,entity):
+        self.entity = entity
+        self.spirit_abilities = {'Thunder':Thunder(entity),'Force':Force(entity),'Arrow':Arrow(entity),'Migawari':Migawari(entity),'Darksaber':Darksaber(entity)}#abilities aila has
+        self.equip = 'Thunder'#spirit ability pointer
+        self.movement_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
+        self.movement_abilities = list(self.movement_dict.values())#make it a list
+        self.number = 1#number of movement abilities one can have equiped, the equiped one will be appended to self.entity.states
+
+    def remove_ability(self):#movement stuff
+        abilities = self.movement_abilities[0:self.number]#the abilities currently equiped
+        for ability in abilities:#remove ability
+            string = ability.__class__.__name__
+            self.entity.states.remove(string)
+
+    def add_ability(self):#movement stuff
+        abilities = self.movement_abilities[0:self.number]#the abilities to be equiped
+        for ability in abilities:#at tthe ones we have equipped
+            string = ability.__class__.__name__
+            self.entity.states.add(string)
+
+    def increase_number(self):#movement stuff
+        self.number += 1
+        self.number = min(self.number,3)#limit the number of abilities one can equip at the same time
+
+    def handle_input(self,input):#movement stuff
+        value = input[2]['d_pad']
+        if sum(value) == 0: return#if d_pad wasn't pressed
+
+        if value[0] == 1:#pressed right
+            self.remove_ability()
+            self.movement_abilities = self.movement_abilities[-1:] + self.movement_abilities[:-1]#rotate the abilityes to the right
+            self.entity.game_objects.UI.init_ability()
+            self.add_ability()
+        elif value[0] == -1:#pressed left
+            self.remove_ability()
+            self.movement_abilities = self.movement_abilities[1:] + self.movement_abilities[:1]#rotate the abilityes to the left
+            self.entity.game_objects.UI.init_ability()
+            self.add_ability()
+        elif value[1] == 1:#pressed up
+            pass
+        elif value[1] == -1:#pressed down
+            pass
+
+class Movement_hud():
+    sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud')
+
+    def __init__(self,entity):
+        self.entity = entity
+        self.game_objects = entity.game_objects#animation need it
+        self.image = self.sprites.sprite_dict['idle_1'][0]
+        self.rect = self.image.get_rect()
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle_1(self)#
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+    def reset_timer(self):
+        pass
+
+    def upgrade_ability(self):
+        self.level += 1
+        self.level = min(self.level,len(self.description))
+
+    def activate(self,level):
+        self.currentstate.enter_state('Active_'+str(level))
+
+    def deactivate(self,level):
+        self.currentstate.enter_state('Idle_'+str(level))
+
+class Dash(Movement_hud):
+    sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/dash/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.description = ['dash','free dash','invinsible dash','dash attack']
+        self.level = 1
+
+class Wall_glide(Movement_hud):
+    sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/wall_glide/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.description = ['wall glide','free wall jumps','donno']
+        self.level = 1
+
+class Double_jump(Movement_hud):
+    sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/double_jump/')
+
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.description = ['doulbe jump','free double jump','donno']
+        self.level = 1
+
 #projectiles
-class Abilities(Animatedentity):#projectiels: should it be platform enteties?
+class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
     def __init__(self,entity):
         super().__init__([0,0],entity.game_objects)
         self.entity = entity
@@ -1269,7 +1364,7 @@ class Abilities(Animatedentity):#projectiels: should it be platform enteties?
         self.currentstate.enter_state('Idle_'+str(level))
         self.level = level
 
-class Melee(Abilities):
+class Melee(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -1432,7 +1527,7 @@ class Darksaber(Aila_sword):
             #collision_enemy.game_objects.loot.add(spirits)
         self.kill()
 
-class Projectiles(Abilities):
+class Ranged(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
         self.velocity = [0,0]
@@ -1445,7 +1540,7 @@ class Projectiles(Abilities):
         self.velocity[0]=-self.velocity[0]
         self.velocity[1]=-self.velocity[1]
 
-class Thunder(Projectiles):
+class Thunder(Ranged):
     sprites = Read_files.Sprites_Player('Sprites/Attack/Thunder/')
 
     def __init__(self,entity):
@@ -1472,7 +1567,7 @@ class Thunder(Projectiles):
         self.dmg = 1
         self.kill()
 
-class Poisoncloud(Projectiles):
+class Poisoncloud(Ranged):
     sprites = Read_files.Sprites_Player('Sprites/Attack/poisoncloud/')
 
     def __init__(self,entity):
@@ -1494,7 +1589,7 @@ class Poisoncloud(Projectiles):
     def countered(self):#shielded
         self.currentstate.handle_input('Death')
 
-class Poisonblobb(Projectiles):
+class Poisonblobb(Ranged):
     sprites = Read_files.Sprites_Player('Sprites/Attack/poisonblobb/')
 
     def __init__(self,entity):
@@ -1519,7 +1614,7 @@ class Poisonblobb(Projectiles):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-class Ground_shock(Projectiles):
+class Ground_shock(Ranged):
     sprites = Read_files.Sprites_Player('Sprites/Attack/ground_shock/')
 
     def __init__(self,entity):
@@ -1534,7 +1629,7 @@ class Ground_shock(Projectiles):
         self.lifetime = 100
         self.velocity=[entity.dir[0]*5,0]
 
-class Force(Projectiles):
+class Force(Ranged):
     sprites = Read_files.Sprites_Player('Sprites/Attack/force/')
 
     def __init__(self,entity):
@@ -1568,7 +1663,7 @@ class Force(Projectiles):
         collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
         collision_enemy.velocity[1]=-6
 
-class Arrow(Projectiles):
+class Arrow(Ranged):
     sprites = Read_files.Sprites_Player('Sprites/Attack/arrow/')
 
     def __init__(self,entity):
@@ -1780,7 +1875,7 @@ class Enemy_drop(Loot):#add gravity
         if self.lifetime < 0:#remove after a while
             self.kill()
 
-    def player_collision(self):#when the player collides with this object
+    def player_collision(self,player):#when the player collides with this object
         obj=(self.__class__.__name__)#get the string in question
         try:
             self.game_objects.player.inventory[obj] += 1
@@ -1813,8 +1908,8 @@ class Amber_Droplet(Enemy_drop):
         self.hitbox = self.rect.copy()
         self.description = 'moneyy'
 
-    def player_collision(self):#when the player collides with this object
-        super().player_collision()
+    def player_collision(self,player):#when the player collides with this object
+        super().player_collision(player)
         self.game_objects.world_state.update_money_statistcis()
 
 class Bone(Enemy_drop):
@@ -2381,7 +2476,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
 
-class Sign(Interactable):#save point
+class Sign(Interactable):
     def __init__(self,pos,game_objects,directions):
         super().__init__(pos,game_objects)
         self.directions = directions
@@ -2708,102 +2803,6 @@ class Dash_master(Omamori):#obsolete
     def attach(self):
         super().attach()
         self.entity.dash_cost = 0
-
-#Player movement abilities: will handle upgrades etc
-class Movement_abilities():
-    def __init__(self,entity):
-        self.entity = entity
-        self.abilities_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
-        self.abilities = list(self.abilities_dict.values())#make it a list
-        self.number = 1#number of movement abilities one can have equiped, the equiped one will be appended to self.entity.states
-
-    def remove_ability(self):
-        abilities = self.abilities[0:self.number]#the abilities currently equiped
-        for ability in abilities:#remove ability
-            string = ability.__class__.__name__
-            self.entity.states.remove(string)
-
-    def add_ability(self):
-        abilities = self.abilities[0:self.number]#the abilities to be equiped
-        for ability in abilities:#at tthe ones we have equipped
-            string = ability.__class__.__name__
-            self.entity.states.add(string)
-
-    def increase_number(self):
-        self.number += 1
-        self.number = min(self.number,3)#limit the number of abilities one can equip at the same time
-
-    def handle_input(self,input):
-        value = input[2]['d_pad']
-        if sum(value) == 0: return#if d_pad wasn't pressed
-
-        if value[0] == 1:#pressed right
-            self.remove_ability()
-            self.abilities = self.abilities[-1:] + self.abilities[:-1]#rotate the abilityes to the right
-            self.entity.game_objects.UI.init_ability()
-            self.add_ability()
-        elif value[0] == -1:#pressed left
-            self.remove_ability()
-            self.abilities = self.abilities[1:] + self.abilities[:1]#rotate the abilityes to the left
-            self.entity.game_objects.UI.init_ability()
-            self.add_ability()
-        elif value[1] == 1:#pressed up
-            pass
-        elif value[1] == -1:#pressed down
-            pass
-
-class Movement_hud():
-    sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud')
-
-    def __init__(self,entity):
-        self.entity = entity
-        self.game_objects = entity.game_objects#animation need it
-        self.image = self.sprites.sprite_dict['idle_1'][0]
-        self.rect = self.image.get_rect()
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Entity_animation(self)
-        self.currentstate = states_basic.Idle_1(self)#
-
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
-
-    def reset_timer(self):
-        pass
-
-    def upgrade_ability(self):
-        self.level += 1
-        self.level = min(self.level,len(self.description))
-
-    def activate(self,level):
-        self.currentstate.enter_state('Active_'+str(level))
-
-    def deactivate(self,level):
-        self.currentstate.enter_state('Idle_'+str(level))
-
-class Dash(Movement_hud):
-    sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/dash/')
-
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.description = ['dash','free dash','invinsible dash','dash attack']
-        self.level = 1
-
-class Wall_glide(Movement_hud):
-    sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/wall_glide/')
-
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.description = ['wall glide','free wall jumps','donno']
-        self.level = 1
-
-class Double_jump(Movement_hud):
-    sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/double_jump/')
-
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.description = ['doulbe jump','free double jump','donno']
-        self.level = 1
 
 #timer toools: activate with the attrubute activate, which will run until the specified duration is run out
 class Timer():

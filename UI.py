@@ -22,10 +22,10 @@ class Gameplay_UI():
 
     def init_ability(self):
         self.ability_hud=[]#the hud
-        for i in range(0,self.game_objects.player.movement_abilities.number):
+        for i in range(0,self.game_objects.player.abilities.number):
             self.ability_hud.append(Entities.Movement_hud(self.game_objects.player))#the ability object
 
-        self.abilities = self.game_objects.player.movement_abilities.abilities[0:len(self.ability_hud)]#the abilities
+        self.abilities = self.game_objects.player.abilities.movement_abilities[0:len(self.ability_hud)]#the abilities
 
     def update(self):
         for heart in self.hearts:
@@ -67,11 +67,10 @@ class Gameplay_UI():
 
     def update_hearts(self):#set the rellavant onces to idle
         for i in range(0,int(self.game_objects.player.health)):#set them to idle for the number of health we have
-            if self.game_objects.player.health - i -1 == 0.5:
-                self.hearts[i].currentstate.enter_state('Idle')
-                self.hearts[i+1].currentstate.enter_state('Half')
-            else:
-                self.hearts[i].currentstate.handle_input('Idle')
+            self.hearts[i].currentstate.handle_input('Idle')
+        if self.game_objects.player.health - i -1 == 0.5:
+            self.hearts[i+1].currentstate.enter_state('Idle')
+            self.hearts[i+1].take_dmg(0.5)
 
     def remove_spirits(self,spirit):
         index = self.game_objects.player.spirit + spirit - 1

@@ -373,7 +373,7 @@ class Gameplay(Game_State):
 
     def handle_events(self, input):
         self.game.game_objects.player.currentstate.handle_movement(input)#move around
-        self.game.game_objects.player.movement_abilities.handle_input(input)#to change movement ability
+        self.game.game_objects.player.abilities.handle_input(input)#to change movement ability
         if input[0]:#press
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
@@ -474,8 +474,8 @@ class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not re
 class Ability_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.abilities=list(self.game.game_objects.player.abilities.keys())
-        self.index = self.abilities.index(self.game.game_objects.player.equip)
+        self.abilities=list(self.game.game_objects.player.abilities.spirit_abilities.keys())
+        self.index = self.abilities.index(self.game.game_objects.player.abilities.equip)
 
         hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
         hud3=pygame.image.load("Sprites/Attack/HUD/abilityHUD3.png").convert_alpha()
@@ -496,7 +496,7 @@ class Ability_menu(Gameplay):
 
         hud=self.hud[self.index]
         for index,ability in enumerate(self.abilities):
-            hud.blit(self.game.game_objects.player.abilities[ability].sprites.sprite_dict['active_1'][0],self.coordinates[index])
+            hud.blit(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites.sprite_dict['active_1'][0],self.coordinates[index])
 
         self.game.screen.blit(hud,(250,100))
 
@@ -512,7 +512,7 @@ class Ability_menu(Gameplay):
                     self.index=len(self.abilities)-1
         elif input [1]:#release
             if input[-1]=='rb':
-                self.game.game_objects.player.equip=self.abilities[self.index]
+                self.game.game_objects.player.abilities.equip=self.abilities[self.index]
                 self.exit_state()
 
 class Inventory_menu(Gameplay):
@@ -1038,14 +1038,14 @@ class Ability_upgrades(Gameplay):#when double clicking the save point, open abil
 
     def define_abilities(self):
         self.abilities_UI = {}
-        for ability in self.game.game_objects.player.abilities.keys():
+        for ability in self.game.game_objects.player.abilities.spirit_abilities.keys():
             ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
             ability_copy.activate(1)
             self.abilities_UI[ability] = [ability_copy]
 
-            for level in range(1,len(self.game.game_objects.player.abilities[ability].description)):#the levels already aquired
+            for level in range(1,len(self.game.game_objects.player.abilities.spirit_abilities[ability].description)):#the levels already aquired
                 ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
-                if level < self.game.game_objects.player.abilities[ability].level:
+                if level < self.game.game_objects.player.abilities.spirit_abilities[ability].level:
                     ability_copy.activate(level+1)
                 else:
                     ability_copy.deactivate(level+1)
@@ -1054,7 +1054,7 @@ class Ability_upgrades(Gameplay):#when double clicking the save point, open abil
 
     def define_positions(self):
         self.blit_pos=[[],[],[],[],[]]
-        for j, ability in enumerate(list(self.game.game_objects.player.abilities.values())):#a list of dictionary values
+        for j, ability in enumerate(list(self.game.game_objects.player.abilities.spirit_abilities.values())):#a list of dictionary values
             for i in range(0,ability.level+1):#+1 so we can see one level above
                 if i == len(ability.description):#limit the maxiumu level, defined by the length of description
                     continue
@@ -1089,14 +1089,14 @@ class Ability_upgrades(Gameplay):#when double clicking the save point, open abil
     def blit_symbols(self):
         for index, ability in enumerate(self.abilities_UI.keys()):
 
-            for i in range(0,self.game.game_objects.player.abilities[ability].level):
+            for i in range(0,self.game.game_objects.player.abilities.spirit_abilities[ability].level):
                 self.abilities_UI[ability][i].animation.update()
                 self.game.screen.blit(self.abilities_UI[ability][i].image,self.blit_pos[index][i])
 
             #blit the one level above
-            if self.game.game_objects.player.abilities[ability].level == len(self.game.game_objects.player.abilities[ability].description): continue#one ability just above that is not upgraded
-            self.abilities_UI[ability][self.game.game_objects.player.abilities[ability].level].animation.update()
-            self.game.screen.blit(self.abilities_UI[ability][self.game.game_objects.player.abilities[ability].level].image,self.blit_pos[index][self.game.game_objects.player.abilities[ability].level])
+            if self.game.game_objects.player.abilities.spirit_abilities[ability].level == len(self.game.game_objects.player.abilities.spirit_abilities[ability].description): continue#one ability just above that is not upgraded
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.spirit_abilities[ability].level].animation.update()
+            self.game.screen.blit(self.abilities_UI[ability][self.game.game_objects.player.abilities.spirit_abilities[ability].level].image,self.blit_pos[index][self.game.game_objects.player.abilities.spirit_abilities[ability].level])
 
     def blit_BG(self):
         self.BG.set_alpha(230)
@@ -1105,7 +1105,7 @@ class Ability_upgrades(Gameplay):#when double clicking the save point, open abil
     def blit_description(self):
         ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
         level = self.index[1]#the columns we are on
-        conv = self.game.game_objects.player.abilities[ability].description[level]
+        conv = self.game.game_objects.player.abilities.spirit_abilities[ability].description[level]
         text = self.game.game_objects.font.render((152,80), conv, int(self.letter_frame//2))
         text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         self.game.screen.blit(text,(380,120))
@@ -1146,9 +1146,9 @@ class Ability_upgrades(Gameplay):#when double clicking the save point, open abil
     def choose_ability(self):
         ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
         level = self.index[1]#the columns we are on
-        if self.game.game_objects.player.abilities[ability].level == level:
-            self.game.game_objects.player.abilities[ability].upgrade_ability()
-            self.abilities_UI[ability][self.game.game_objects.player.abilities[ability].level-1].activate(level+1)
+        if self.game.game_objects.player.abilities.spirit_abilities[ability].level == level:
+            self.game.game_objects.player.abilities.spirit_abilities[ability].upgrade_ability()
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.spirit_abilities[ability].level-1].activate(level+1)
 
             self.define_positions()
             self.define_pointer()
@@ -1166,14 +1166,14 @@ class Ability_movement_upgrades(Gameplay):#when double clicking the save point, 
 
     def define_abilities(self):
         self.abilities_UI = {}
-        for ability in self.game.game_objects.player.movement_abilities.abilities_dict.keys():
+        for ability in self.game.game_objects.player.abilities.movement_dict.keys():
             ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
             ability_copy.activate(1)
             self.abilities_UI[ability] = [ability_copy]
 
-            for level in range(1,len(self.game.game_objects.player.movement_abilities.abilities_dict[ability].description)):#the levels already aquired
+            for level in range(1,len(self.game.game_objects.player.abilities.movement_dict[ability].description)):#the levels already aquired
                 ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
-                if level < self.game.game_objects.player.movement_abilities.abilities_dict[ability].level:
+                if level < self.game.game_objects.player.abilities.movement_dict[ability].level:
                     ability_copy.activate(level+1)
                 else:
                     ability_copy.deactivate(level+1)
@@ -1181,7 +1181,7 @@ class Ability_movement_upgrades(Gameplay):#when double clicking the save point, 
 
     def define_positions(self):
         self.blit_pos=[[],[],[]]
-        for j, ability in enumerate(self.game.game_objects.player.movement_abilities.abilities):#a list of dictionary values
+        for j, ability in enumerate(self.game.game_objects.player.abilities.movement_abilities):#a list of dictionary values
             for i in range(0,ability.level+1):#+1 so we can see one level above
                 if i == len(ability.description):#limit the maxiumu level, defined by the length of description
                     continue
@@ -1214,18 +1214,18 @@ class Ability_movement_upgrades(Gameplay):#when double clicking the save point, 
 
     def blit_symbols(self):
         for index, ability in enumerate(self.abilities_UI.keys()):
-            for i in range(0,self.game.game_objects.player.movement_abilities.abilities_dict[ability].level):
+            for i in range(0,self.game.game_objects.player.abilities.movement_dict[ability].level):
                 self.abilities_UI[ability][i].update()
                 self.game.screen.blit(self.abilities_UI[ability][i].image,self.blit_pos[index][i])
 
             #blit the one level above
-            if self.game.game_objects.player.movement_abilities.abilities_dict[ability].level == len(self.game.game_objects.player.movement_abilities.abilities_dict[ability].description): continue#one ability just above that is not upgraded
-            self.abilities_UI[ability][self.game.game_objects.player.movement_abilities.abilities_dict[ability].level].update()
-            self.game.screen.blit(self.abilities_UI[ability][self.game.game_objects.player.movement_abilities.abilities_dict[ability].level].image,self.blit_pos[index][self.game.game_objects.player.movement_abilities.abilities_dict[ability].level])
+            if self.game.game_objects.player.abilities.movement_dict[ability].level == len(self.game.game_objects.player.abilities.movement_dict[ability].description): continue#one ability just above that is not upgraded
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.movement_dict[ability].level].update()
+            self.game.screen.blit(self.abilities_UI[ability][self.game.game_objects.player.abilities.movement_dict[ability].level].image,self.blit_pos[index][self.game.game_objects.player.abilities.movement_dict[ability].level])
 
 
     def blit_symbols2(self):#works if we do not have animations
-        for index, ability in enumerate(self.game.game_objects.player.movement_abilities.abilities):#a list of dictionary values
+        for index, ability in enumerate(self.game.game_objects.player.abilities.movement_abilities):#a list of dictionary values
             for i in range(0,ability.level):#abilities that have been upgraded
                 self.game.screen.blit(ability.sprites.sprite_dict['active_'+str(ability.level)][0],self.blit_pos[index][i])
 
@@ -1239,7 +1239,7 @@ class Ability_movement_upgrades(Gameplay):#when double clicking the save point, 
     def blit_description(self):
         ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
         level = self.index[1]#the columns we are on
-        conv = self.game.game_objects.player.movement_abilities.abilities_dict[ability].description[level]
+        conv = self.game.game_objects.player.abilities.movement_dict[ability].description[level]
         text = self.game.game_objects.font.render((152,80), conv, int(self.letter_frame//2))
         text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         self.game.screen.blit(text,(380,120))
@@ -1280,9 +1280,9 @@ class Ability_movement_upgrades(Gameplay):#when double clicking the save point, 
     def choose_ability(self):
         ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
         level = self.index[1]#the columns we are on
-        if self.game.game_objects.player.movement_abilities.abilities_dict[ability].level == level:
-            self.game.game_objects.player.movement_abilities.abilities_dict[ability].upgrade_ability()
-            self.abilities_UI[ability][self.game.game_objects.player.movement_abilities.abilities_dict[ability].level-1].activate(level+1)
+        if self.game.game_objects.player.abilities.movement_dict[ability].level == level:
+            self.game.game_objects.player.abilities.movement_dict[ability].upgrade_ability()
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.movement_dict[ability].level-1].activate(level+1)
 
             self.define_positions()
             self.define_pointer()
