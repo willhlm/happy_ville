@@ -6,6 +6,7 @@ class Gameplay_UI():
         self.surface = pygame.Surface((500,100),pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
         self.init_hearts()
         self.init_spirits()
+        self.init_ability()
 
     def init_hearts(self):
         self.hearts = []
@@ -19,11 +20,22 @@ class Gameplay_UI():
             self.spirits.append(Entities.Spirit(self.game_objects))
         self.update_spirits()
 
+    def init_ability(self):
+        self.ability_hud=[]#the hud
+        for i in range(0,self.game_objects.player.abilities.number):
+            self.ability_hud.append(Entities.Movement_hud(self.game_objects.player))#the ability object
+
+        self.abilities = self.game_objects.player.abilities.movement_abilities[0:len(self.ability_hud)]#the abilities
+
     def update(self):
         for heart in self.hearts:
             heart.update()
         for spirit in self.spirits:
             spirit.update()
+        for ability_hud in self.ability_hud:
+            ability_hud.update()
+        for ability in self.abilities:
+            ability.update()
 
     def render(self):
         #draw health
@@ -34,17 +46,31 @@ class Gameplay_UI():
         #draw spirit
         for index, spirit in enumerate(self.spirits):
             temp.blit(spirit.image,(16*index,16))
+
+        #draw movement ability_hud
+        for index,ability_hud in enumerate(self.ability_hud):
+            temp.blit(ability_hud.image,(32*index,60))
+
+        #draw ability symbols
+        for index,ability in enumerate(self.abilities):
+            temp.blit(ability.image,(32*index,60))
+
         self.game_objects.game.screen.blit(temp,(20, 10))
 
-    def remove_hearts(self,dmg):#dmg is an integer: 1 or 2 and set the rellavant to hurt
-        index = self.game_objects.player.health
-        index = max(index,0)#in principle not needed but make it fool proof
-        for i in range(index,index+dmg):
-            self.hearts[i].currentstate.handle_input('Hurt')#make heart go white
+    def remove_hearts(self,dmg):#dmg is 0.5, 1 or 2. Will set the rellavant to hurt
+        index = int(self.game_objects.player.health)-1
+        index = max(index,-1)
+        for i in range(index+int(dmg+0.5+self.game_objects.player.health-int(self.game_objects.player.health)),index,-1):
+            health = self.hearts[i].health
+            self.hearts[i].take_dmg(dmg)
+            dmg -= health#distribute the dmg
 
     def update_hearts(self):#set the rellavant onces to idle
-        for i in range(0,self.game_objects.player.health):#set them to idle for the number of health we have
+        for i in range(0,int(self.game_objects.player.health)):#set them to idle for the number of health we have
             self.hearts[i].currentstate.handle_input('Idle')
+        if self.game_objects.player.health - i -1 == 0.5:
+            self.hearts[i+1].currentstate.enter_state('Idle')
+            self.hearts[i+1].take_dmg(0.5)
 
     def remove_spirits(self,spirit):
         index = self.game_objects.player.spirit + spirit - 1

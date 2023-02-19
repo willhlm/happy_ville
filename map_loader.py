@@ -47,7 +47,7 @@ class Level():
         self.area_name = level_name
 
         self.map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
-        self.map_data = Read_files.format_tiled_json(self.map_data)        
+        self.map_data = Read_files.format_tiled_json(self.map_data)
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
@@ -97,19 +97,23 @@ class Level():
 
             #check for polygon type first
             if 'polygon' in obj.keys():
-                new_block = Entities.Collision_right_angle(object_position, convert_points_to_list(obj['polygon']))
+                if 'properties' in obj.keys():
+                    new_block = Entities.Collision_right_angle(object_position, convert_points_to_list(obj['polygon']),False)
+                else:
+                    new_block = Entities.Collision_right_angle(object_position, convert_points_to_list(obj['polygon']))
+
                 self.game_objects.platforms_ramps.add(new_block)
                 continue
 
             id = obj['gid'] - self.map_data['statics_firstgid']
             #normal collision blocks
             if id == 7:
-                try:
+                if 'properties' in obj.keys():
                     for property in obj['properties']:
                         if property['name'] == 'particles':
                             type = property['value']
                     new_block = Entities.Collision_block(object_position,object_size,type)
-                except:
+                else:
                     new_block = Entities.Collision_block(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
             #spike collision blocks

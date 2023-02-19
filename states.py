@@ -90,7 +90,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('village_1','1')
+            self.game.game_objects.load_map('collision_map_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -372,8 +372,8 @@ class Gameplay(Game_State):
         self.game.screen.blit(self.game.game_objects.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
 
     def handle_events(self, input):
-        self.game.game_objects.player.currentstate.handle_movement(input)
-
+        self.game.game_objects.player.currentstate.handle_movement(input)#move around
+        self.game.game_objects.player.abilities.handle_input(input)#to change movement ability
         if input[0]:#press
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
@@ -419,13 +419,13 @@ class Gameplay(Game_State):
             effect()
 
     def blit_glow_effect(self):
-        pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
+        pos = [self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
         self.game.screen.blit(self.glow,pos,special_flags=pygame.BLEND_RGBA_ADD)
 
     def blit_dark_effect(self):
         self.dark.fill((80,80,80))#dark background
         pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
-        self.dark.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_ADD)
+        #self.dark.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_ADD)
         self.game.screen.blit(self.dark,(0,0),special_flags = pygame.BLEND_RGBA_MULT)
 
     def make_glow(self,const=1):#init
@@ -474,14 +474,8 @@ class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not re
 class Ability_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.abilities=list(self.game.game_objects.player.abilities.keys())
-        self.index = self.abilities.index(self.game.game_objects.player.equip)
-
-        symbol1=pygame.image.load("Sprites/Attack/Darksaber/symbol/darksaber.png").convert_alpha()
-        symbol2=pygame.image.load("Sprites/Attack/Heal/symbol/heal.png").convert_alpha()
-        symbol3=pygame.image.load("Sprites/Attack/Force/symbol/force.png").convert_alpha()
-        symbol4=pygame.image.load("Sprites/Attack/thunder/symbol/hammer.png").convert_alpha()
-        symbol5=pygame.image.load("Sprites/Attack/Arrow/symbol/arrow.png").convert_alpha()
+        self.abilities=list(self.game.game_objects.player.abilities.spirit_abilities.keys())
+        self.index = self.abilities.index(self.game.game_objects.player.abilities.equip)
 
         hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
         hud3=pygame.image.load("Sprites/Attack/HUD/abilityHUD3.png").convert_alpha()
@@ -489,14 +483,12 @@ class Ability_menu(Gameplay):
         hud5=pygame.image.load("Sprites/Attack/HUD/abilityHUD5.png").convert_alpha()
         hud6=pygame.image.load("Sprites/Attack/HUD/abilityHUD6.png").convert_alpha()
 
-        self.symbols={'Darksaber':symbol1,'Heal':symbol2,'Force':symbol3,'Thunder':symbol4,'Arrow':symbol5}
         self.hud=[hud2,hud3,hud4,hud5,hud6]
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
 
     def update(self):
-        self.game.dt=0.2#slow motion
+        self.game.dt = 0.2#slow motion
         super().update()
-        #pygame.time.wait(100)#slow motion
 
     def render(self):
         super().render()
@@ -504,7 +496,7 @@ class Ability_menu(Gameplay):
 
         hud=self.hud[self.index]
         for index,ability in enumerate(self.abilities):
-            hud.blit(self.symbols[ability],self.coordinates[index])
+            hud.blit(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites.sprite_dict['active_1'][0],self.coordinates[index])
 
         self.game.screen.blit(hud,(250,100))
 
@@ -520,7 +512,7 @@ class Ability_menu(Gameplay):
                     self.index=len(self.abilities)-1
         elif input [1]:#release
             if input[-1]=='rb':
-                self.game.game_objects.player.equip=self.abilities[self.index]
+                self.game.game_objects.player.abilities.equip=self.abilities[self.index]
                 self.exit_state()
 
 class Inventory_menu(Gameplay):
@@ -609,7 +601,7 @@ class Inventory_menu(Gameplay):
 
     def update(self):
         super().update()
-        self.letter_frame += 1
+        self.letter_frame += self.game.dt
 
     def render(self):
         super().render()
@@ -723,7 +715,7 @@ class Omamori_menu(Gameplay):
 
     def update(self):
         super().update()
-        self.letter_frame += 1
+        self.letter_frame += self.game.dt
 
     def render(self):
         super().render()
@@ -824,7 +816,7 @@ class Journal_menu(Gameplay):
 
     def update(self):
         super().update()
-        self.letter_frame += 1
+        self.letter_frame += self.game.dt
 
     def render(self):
         super().render()
@@ -1002,7 +994,7 @@ class Fast_travel_unlock(Gameplay):
 
     def update(self):
         super().update()
-        self.letter_frame += 1
+        self.letter_frame += self.game.dt
 
     def render(self):
         super().render()
@@ -1032,6 +1024,268 @@ class Fast_travel_unlock(Gameplay):
                         self.exit_state()
                     else:#not enout money
                         pass
+
+class Ability_upgrades(Gameplay):#when double clicking the save point, open ability upgrade screen
+    def __init__(self, game):
+        super().__init__(game)
+        self.BG = pygame.image.load("Sprites/UI/menu/fast_travel/fast_travel.png").convert_alpha()
+        self.define_abilities()
+        self.index = [0,0]
+        self.letter_frame = 0
+        self.define_positions()
+        self.define_pointer()
+        self.blit_titles()
+
+    def define_abilities(self):
+        self.abilities_UI = {}
+        for ability in self.game.game_objects.player.abilities.spirit_abilities.keys():
+            ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
+            ability_copy.activate(1)
+            self.abilities_UI[ability] = [ability_copy]
+
+            for level in range(1,len(self.game.game_objects.player.abilities.spirit_abilities[ability].description)):#the levels already aquired
+                ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
+                if level < self.game.game_objects.player.abilities.spirit_abilities[ability].level:
+                    ability_copy.activate(level+1)
+                else:
+                    ability_copy.deactivate(level+1)
+                self.abilities_UI[ability].append(ability_copy)
+
+
+    def define_positions(self):
+        self.blit_pos=[[],[],[],[],[]]
+        for j, ability in enumerate(list(self.game.game_objects.player.abilities.spirit_abilities.values())):#a list of dictionary values
+            for i in range(0,ability.level+1):#+1 so we can see one level above
+                if i == len(ability.description):#limit the maxiumu level, defined by the length of description
+                    continue
+                self.blit_pos[j].append([100+50*i,60+50*j])
+
+        self.pointer_pos = self.blit_pos
+
+    def define_pointer(self,size = [32,32]):#called everytime we move from one area to another
+        self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
+
+    def update(self):
+        super().update()
+        self.letter_frame += self.game.dt
+
+    def render(self):
+        super().render()
+        self.blit_BG()
+        self.blit_symbols()
+        self.blit_pointer()
+        self.blit_description()
+        self.blit_titles()
+
+    def blit_titles(self):
+        title = self.game.game_objects.font.render(text = 'absorbed abillities')
+        title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game.screen.blit(title,[250,50])
+
+    def blit_pointer(self):
+        self.game.screen.blit(self.pointer,self.pointer_pos[self.index[0]][self.index[1]])#pointer
+
+    def blit_symbols(self):
+        for index, ability in enumerate(self.abilities_UI.keys()):
+
+            for i in range(0,self.game.game_objects.player.abilities.spirit_abilities[ability].level):
+                self.abilities_UI[ability][i].animation.update()
+                self.game.screen.blit(self.abilities_UI[ability][i].image,self.blit_pos[index][i])
+
+            #blit the one level above
+            if self.game.game_objects.player.abilities.spirit_abilities[ability].level == len(self.game.game_objects.player.abilities.spirit_abilities[ability].description): continue#one ability just above that is not upgraded
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.spirit_abilities[ability].level].animation.update()
+            self.game.screen.blit(self.abilities_UI[ability][self.game.game_objects.player.abilities.spirit_abilities[ability].level].image,self.blit_pos[index][self.game.game_objects.player.abilities.spirit_abilities[ability].level])
+
+    def blit_BG(self):
+        self.BG.set_alpha(230)
+        self.game.screen.blit(self.BG,(0,0))#pointer
+
+    def blit_description(self):
+        ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
+        level = self.index[1]#the columns we are on
+        conv = self.game.game_objects.player.abilities.spirit_abilities[ability].description[level]
+        text = self.game.game_objects.font.render((152,80), conv, int(self.letter_frame//2))
+        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game.screen.blit(text,(380,120))
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'select':
+                self.exit_state()
+            elif input[-1] == 'rb' or input[-1] == 'lb':#nezt page
+                self.exit_state()
+                new_state = Ability_movement_upgrades(self.game)
+                new_state.enter_state()
+            elif input[-1]=='a' or input[-1]=='return':
+                self.choose_ability()
+
+            elif input[-1] =='right':
+                self.index[1] += 1
+                self.index[1] = min(self.index[1],len(self.blit_pos[self.index[0]])-1)
+                self.letter_frame = 0
+
+            elif input[-1] =='left':
+                self.index[1] -= 1
+                self.index[1] = max(0,self.index[1])
+                self.letter_frame = 0
+
+            elif input[-1] =='down':
+                self.index[0] += 1
+                self.index[0] = min(self.index[0],len(self.blit_pos)-1)
+                self.letter_frame = 0
+                self.index[1] = min(self.index[1],len(self.blit_pos[self.index[0]])-1)
+
+            elif input[-1] =='up':
+                self.index[0] -= 1
+                self.index[0] = max(0,self.index[0])
+                self.letter_frame = 0
+                self.index[1] = min(self.index[1],len(self.blit_pos[self.index[0]])-1)
+
+    def choose_ability(self):
+        ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
+        level = self.index[1]#the columns we are on
+        if self.game.game_objects.player.abilities.spirit_abilities[ability].level == level:
+            self.game.game_objects.player.abilities.spirit_abilities[ability].upgrade_ability()
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.spirit_abilities[ability].level-1].activate(level+1)
+
+            self.define_positions()
+            self.define_pointer()
+
+class Ability_movement_upgrades(Gameplay):#when double clicking the save point, open ability upgrade screen
+    def __init__(self, game):
+        super().__init__(game)
+        self.define_abilities()
+        self.BG = pygame.image.load("Sprites/UI/menu/fast_travel/fast_travel.png").convert_alpha()
+        self.index = [0,0]
+        self.letter_frame = 0
+        self.define_positions()
+        self.define_pointer()
+        self.blit_titles()
+
+    def define_abilities(self):
+        self.abilities_UI = {}
+        for ability in self.game.game_objects.player.abilities.movement_dict.keys():
+            ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
+            ability_copy.activate(1)
+            self.abilities_UI[ability] = [ability_copy]
+
+            for level in range(1,len(self.game.game_objects.player.abilities.movement_dict[ability].description)):#the levels already aquired
+                ability_copy = getattr(sys.modules[Entities.__name__], ability)(self.game.game_objects.player)#make the object based on the string
+                if level < self.game.game_objects.player.abilities.movement_dict[ability].level:
+                    ability_copy.activate(level+1)
+                else:
+                    ability_copy.deactivate(level+1)
+                self.abilities_UI[ability].append(ability_copy)
+
+    def define_positions(self):
+        self.blit_pos=[[],[],[]]
+        for j, ability in enumerate(self.game.game_objects.player.abilities.movement_abilities):#a list of dictionary values
+            for i in range(0,ability.level+1):#+1 so we can see one level above
+                if i == len(ability.description):#limit the maxiumu level, defined by the length of description
+                    continue
+                self.blit_pos[j].append([100+50*i,60+50*j])
+        self.pointer_pos = self.blit_pos
+
+    def define_pointer(self,size = [32,32]):
+        self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
+
+    def update(self):
+        super().update()
+        self.letter_frame += self.game.dt
+
+    def render(self):
+        super().render()
+        self.blit_BG()
+        self.blit_symbols()
+        self.blit_pointer()
+        self.blit_description()
+        self.blit_titles()
+
+    def blit_titles(self):
+        title = self.game.game_objects.font.render(text = 'infused abilities')
+        title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game.screen.blit(title,[250,50])
+
+    def blit_pointer(self):
+        self.game.screen.blit(self.pointer,self.pointer_pos[self.index[0]][self.index[1]])#pointer
+
+    def blit_symbols(self):
+        for index, ability in enumerate(self.abilities_UI.keys()):
+            for i in range(0,self.game.game_objects.player.abilities.movement_dict[ability].level):
+                self.abilities_UI[ability][i].update()
+                self.game.screen.blit(self.abilities_UI[ability][i].image,self.blit_pos[index][i])
+
+            #blit the one level above
+            if self.game.game_objects.player.abilities.movement_dict[ability].level == len(self.game.game_objects.player.abilities.movement_dict[ability].description): continue#one ability just above that is not upgraded
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.movement_dict[ability].level].update()
+            self.game.screen.blit(self.abilities_UI[ability][self.game.game_objects.player.abilities.movement_dict[ability].level].image,self.blit_pos[index][self.game.game_objects.player.abilities.movement_dict[ability].level])
+
+
+    def blit_symbols2(self):#works if we do not have animations
+        for index, ability in enumerate(self.game.game_objects.player.abilities.movement_abilities):#a list of dictionary values
+            for i in range(0,ability.level):#abilities that have been upgraded
+                self.game.screen.blit(ability.sprites.sprite_dict['active_'+str(ability.level)][0],self.blit_pos[index][i])
+
+            if ability.level == len(ability.description): continue#one ability just above that is not upgraded
+            self.game.screen.blit(ability.sprites.sprite_dict['idle_'+str(ability.level)][0],self.blit_pos[index][ability.level])
+
+    def blit_BG(self):
+        self.BG.set_alpha(230)
+        self.game.screen.blit(self.BG,(0,0))#pointer
+
+    def blit_description(self):
+        ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
+        level = self.index[1]#the columns we are on
+        conv = self.game.game_objects.player.abilities.movement_dict[ability].description[level]
+        text = self.game.game_objects.font.render((152,80), conv, int(self.letter_frame//2))
+        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game.screen.blit(text,(380,120))
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'select':
+                self.exit_state()
+            elif input[-1] == 'rb' or input[-1] == 'lb':#nezt page
+                self.exit_state()
+                new_state = Ability_upgrades(self.game)
+                new_state.enter_state()
+            elif input[-1]=='a' or input[-1]=='return':
+                self.choose_ability()
+
+            elif input[-1] =='right':
+                self.index[1] += 1
+                self.index[1] = min(self.index[1],len(self.blit_pos[self.index[0]])-1)
+                self.letter_frame = 0
+
+            elif input[-1] =='left':
+                self.index[1] -= 1
+                self.index[1] = max(0,self.index[1])
+                self.letter_frame = 0
+
+            elif input[-1] =='down':
+                self.index[0] += 1
+                self.index[0] = min(self.index[0],len(self.blit_pos)-1)
+                self.letter_frame = 0
+                self.index[1] = min(self.index[1],len(self.blit_pos[self.index[0]])-1)
+
+            elif input[-1] =='up':
+                self.index[0] -= 1
+                self.index[0] = max(0,self.index[0])
+                self.letter_frame = 0
+                self.index[1] = min(self.index[1],len(self.blit_pos[self.index[0]])-1)
+
+    def choose_ability(self):
+        ability = list(self.abilities_UI.keys())[self.index[0]]#the row we are on
+        level = self.index[1]#the columns we are on
+        if self.game.game_objects.player.abilities.movement_dict[ability].level == level:
+            self.game.game_objects.player.abilities.movement_dict[ability].upgrade_ability()
+            self.abilities_UI[ability][self.game.game_objects.player.abilities.movement_dict[ability].level-1].activate(level+1)
+
+            self.define_positions()
+            self.define_pointer()
 
 class Fading(Gameplay):#fades out and then in
     def __init__(self,game):
@@ -1385,8 +1639,8 @@ class Vendor(Facilities):
         self.game.screen.blit(self.amber.image,(190,50))
 
     def blit_description(self):
-        self.conv=self.items[self.item_index[1]].description
-        text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame//2))
+        conv=self.items[self.item_index[1]].description
+        text = self.game.game_objects.font.render((272,80), conv, int(self.letter_frame//2))
         self.game.screen.blit(text,(190,100))
 
     def blit_items(self):

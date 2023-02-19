@@ -15,6 +15,7 @@ class Basic_states(Entity_States):
 class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.health = 1#set it back
 
     def handle_input(self,input):
         if input=='Hurt':
@@ -27,7 +28,7 @@ class Idle(Basic_states):
 class Hurt(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        
+
     def handle_input(self,input):
         if input == 'Death':
             self.enter_state('Death')
@@ -35,9 +36,12 @@ class Hurt(Basic_states):
              self.enter_state('Idle')
 
     def increase_phase(self):
-        self.enter_state('Death')
+        if self.entity.health == 0.5:
+            self.enter_state('Half')
+        else:
+            self.enter_state('Death')
 
-class Death(Basic_states):
+class Half(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -46,3 +50,11 @@ class Death(Basic_states):
             self.enter_state('Idle')
         if input=='Hurt':
              self.enter_state('Hurt')
+
+class Death(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input=='Idle':
+            self.enter_state('Idle')
