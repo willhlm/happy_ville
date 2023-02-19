@@ -612,7 +612,6 @@ class Exploding_Mygga(Enemy):
         self.attack_distance = 20
         self.aggro_distance = 50
 
-
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)

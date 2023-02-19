@@ -34,15 +34,7 @@ class Peace(AI):
         self.init_time += 0.02
         idle_vel_x = math.sin(self.init_time)
         idle_vel_y = math.sin(self.init_time*5)*1.5
-        #print(idle_vel)
         self.entity.velocity = [idle_vel_x, idle_vel_y]
-
-        #rand=random.randint(0,1000)
-        #if rand>970:
-    #        self.entity.currentstate.handle_input('Idle')
-    #        self.entity.dir[0] = -self.entity.dir[0]
-    #    else:
-    #        self.entity.currentstate.handle_input('Walk')
 
     def check_sight(self):#if wihtin sight, enter the passed AI
         if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance*0.2:
