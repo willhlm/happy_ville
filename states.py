@@ -471,6 +471,39 @@ class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not re
             self.game.game_objects.player.reset_movement()
             self.game.game_objects.load_map('cultist_hideout_1','2')
 
+class Slow_motion_gameplay(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)
+        self.slow_rate = 0.5#determines the rate of slow motion, between 0 and 1
+        self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].init(self.slow_rate)
+        self.duration = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].duration
+
+        self.bar = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites.sprite_dict['bar'][0].copy()
+        self.meter = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites.sprite_dict['meter'][0].copy()
+        self.width = self.meter.get_width()
+
+        self.pos = [self.game.WINDOW_SIZE[0]*0.5 - self.width*0.5,3]
+        self.rate =self.meter.get_width()/self.duration
+
+    def update(self):
+        self.game.dt *= self.slow_rate#slow motion
+        super().update()
+        self.duration -= self.game.dt
+        self.exit()
+
+    def render(self):
+        super().render()
+        self.game.screen.fill((20,20,20), special_flags = pygame.BLEND_RGB_ADD)
+        self.width -= self.game.dt*self.rate
+        self.width = max(self.width,0)
+        self.game.screen.blit(pygame.transform.scale(self.meter,[self.width,self.meter.get_height()]),self.pos)
+        self.game.screen.blit(self.bar, self.pos)
+
+    def exit(self):
+        if self.duration < 0:
+            self.game.game_objects.player.slow_motion = 1
+            self.exit_state()
+
 class Ability_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
@@ -1110,6 +1143,10 @@ class Ability_upgrades(Gameplay):#when double clicking the save point, open abil
         text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         self.game.screen.blit(text,(380,120))
 
+    def exit_state(self):
+        super().exit_state()
+        self.game.game_objects.player.currentstate.handle_input('Pray_spe_post')
+
     def handle_events(self,input):
         if input[0]:#press
             if input[-1] == 'select':
@@ -1286,6 +1323,10 @@ class Ability_movement_upgrades(Gameplay):#when double clicking the save point, 
 
             self.define_positions()
             self.define_pointer()
+
+    def exit_state(self):
+        super().exit_state()
+        self.game.game_objects.player.currentstate.handle_input('Pray_spe_post')
 
 class Fading(Gameplay):#fades out and then in
     def __init__(self,game):

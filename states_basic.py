@@ -33,6 +33,9 @@ class Idle(Basic_states):
         elif input == 'Equip':
             self.enter_state('Equip')
 
+    def increase_phase(self):
+        pass
+
 #ability UI
 class Idle_1(Basic_states):
     def __init__(self,entity):
@@ -95,6 +98,7 @@ class Once(Basic_states):
         super().__init__(entity)
 
     def increase_phase(self):
+        self.entity.reset_timer()
         self.enter_state('Idle')
 
     def handle_input(self,input):
@@ -111,7 +115,7 @@ class Hurt(Basic_states):
         elif input=='Idle':
              self.enter_state('Idle')
 
-class Death(Once):
+class Death(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -134,11 +138,15 @@ class Transform(Once):
         super().__init__(entity)
 
     def increase_phase(self):
+        self.entity.reset_timer()
         self.enter_state('Interacted')
 
 class Interacted(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def increase_phase(self):
+        pass
 
 class Outline(Basic_states):
     def __init__(self,entity):

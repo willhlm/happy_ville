@@ -352,10 +352,10 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.hitbox.midbottom = self.rect.midbottom
 
     def update_true_pos_x(self):#called from platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
-        self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
+        self.true_pos[0] += self.slow_motion*self.game_objects.game.dt*self.velocity[0]
 
     def update_true_pos_y(self):#called from platform collision
-        self.true_pos[1] += self.game_objects.game.dt*self.velocity[1]
+        self.true_pos[1] += self.slow_motion*self.game_objects.game.dt*self.velocity[1]
 
     #pltform collisions.
     def right_collision(self,hitbox):
@@ -397,10 +397,10 @@ class Character(Platform_entity):#enemy, NPC,player
         self.animation.update()#need to be after currentstate since animation will animate the current state
 
     def update_vel(self):
-        self.velocity[1] += self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
+        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1],self.max_vel[1])#set a y max speed#
 
-        self.velocity[0] += self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
+        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
     def take_dmg(self,dmg):
         if self.invincibile: return
@@ -450,7 +450,7 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = set(['Dash_attack','Dash','Idle','Walk','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Darksaber','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
+        self.states = set(['Dash_attack','Dash','Idle','Walk','Pray','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Slow_motion','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
         self.currentstate = states_player.Idle_main(self)
 
         self.spawn_point = [{'map':'light_forest_3', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -461,10 +461,10 @@ class Player(Character):
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def update_true_pos_x(self):#called from platform collision
-        self.true_pos[0] += round(self.game_objects.game.dt*self.velocity[0])
+        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
 
     def update_true_pos_y(self):#called from platform collision
-        self.true_pos[1] += round(self.game_objects.game.dt*self.velocity[1])
+        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -542,12 +542,26 @@ class Migawari_entity(Character):#player double ganger
 
     def update(self,pos):
         super().update(pos)
-        self.lifetime -= self.game_objects.game.dt
+        self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
+
+    def take_dmg(self,dmg):
+        if self.invincibile: return
+        self.health -= dmg
+        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+
+        if self.health > 0:#check if dead¨
+            self.animation.handle_input('Hurt')#turn white
+            #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+        else:#if dead
+            if self.currentstate.state_name != 'death':#if not already dead
+                if self.game_objects.player.abilities.spirit_abilities['Migawari'].level == 3:
+                    self.game_objects.player.heal(1)
+                self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def destroy(self):
         if self.lifetime < 0:
-            #do death animation
+            self.currentstate.enter_state('Death')#overrite any state and go to deat
             self.kill()
 
 class Enemy(Character):
@@ -573,6 +587,7 @@ class Enemy(Character):
         #move these to AI classes?
         self.attack_distance = 0#when try to hit
         self.aggro_distance = 300#when ot become aggro
+        self.dir[1] = 1
 
     def update(self,pos):
         super().update(pos)
@@ -633,8 +648,12 @@ class Exploding_Mygga(Enemy):
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
-        self.attack_distance = 20
-        self.aggro_distance = 50
+        self.attack_distance = 50
+        self.aggro_distance = 100
+
+    def suicide(self):
+        self.projectiles.add(Explosion(self))
+        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -947,7 +966,7 @@ class NPC(Character):
         self.currentstate.handle_input('Walk')
 
     def AI(self):
-        self.counter += self.game_objects.game.dt
+        self.counter += self.game_objects.game.dt*self.slow_motion
         if self.counter > 100:
             self.counter = 0
             rand=random.randint(0,1)
@@ -1214,7 +1233,7 @@ class Spawner(Staticentity):#an entity spawner
 class Player_abilities():
     def __init__(self,entity):
         self.entity = entity
-        self.spirit_abilities = {'Thunder':Thunder(entity),'Force':Force(entity),'Arrow':Arrow(entity),'Migawari':Migawari(entity),'Darksaber':Darksaber(entity)}#abilities aila has
+        self.spirit_abilities = {'Thunder':Thunder(entity),'Force':Force(entity),'Arrow':Arrow(entity),'Migawari':Migawari(entity),'Slow_motion':Slow_motion(entity)}#abilities aila has
         self.equip = 'Thunder'#spirit ability pointer
         self.movement_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
         self.movement_abilities = list(self.movement_dict.values())#make it a list
@@ -1317,7 +1336,7 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
 
     def update(self,pos):
         super().update(pos)
-        self.lifetime -= self.game_objects.game.dt
+        self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
 
     def destroy(self):
@@ -1390,7 +1409,6 @@ class Explosion(Melee):
         self.rect.x = entity.rect.x
         self.rect.bottom = entity.rect.bottom
         self.hitbox = self.rect.copy()
-        self.aggro = False #to not take collision dmg
         self.lifetime = 100
         self.dmg = entity.dmg
 
@@ -1508,32 +1526,13 @@ class Aila_sword(Sword):
         self.potrait.currentstate.enter_state('Level_'+str(self.level))
         self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
-class Darksaber(Aila_sword):
-    sprites = Read_files.Sprites_Player('Sprites/Attack/darksaber/')
-
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.dmg = 0
-        self.description = ['shoot arrow','explosive arrows','nice arrows']
-        self.level = 1#upgrade pointer
-
-    def initiate(self):
-        self.lifetime = 10#swrod hitbox duration
-
-    def collision_enemy(self,collision_enemy):
-        if collision_enemy.spirit >= 10:
-            collision_enemy.spirit -= 10
-            #spirits=Spiritorb([collision_enemy.rect.x,collision_enemy.rect.y])
-            #collision_enemy.game_objects.loot.add(spirits)
-        self.kill()
-
 class Ranged(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
         self.velocity = [0,0]
 
     def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + self.game_objects.game.dt*self.velocity[0]+scroll[0], self.rect.topleft[1] + self.game_objects.game.dt*self.velocity[1]+scroll[1]]
+        self.rect.topleft = [self.rect.topleft[0] + self.slow_motion*self.game_objects.game.dt*self.velocity[0]+scroll[0], self.rect.topleft[1] + self.slow_motion*self.game_objects.game.dt*self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
     def countered(self):
@@ -1608,7 +1607,7 @@ class Poisonblobb(Ranged):
         self.update_vel()
 
     def update_vel(self):
-        self.velocity[1] += 0.1*self.game_objects.game.dt#graivity
+        self.velocity[1] += 0.1*self.game_objects.game.dt*self.slow_motion#graivity
 
     def collision_plat(self,platform):
         self.velocity = [0,0]
@@ -1673,7 +1672,7 @@ class Arrow(Ranged):
         self.hitbox = self.rect.copy()
         self.dmg = 1
 
-        self.description = ['shoot arrow','explosive arrows','nice arrows']
+        self.description = ['shoot arrow','charge arrows','charge for insta kill']
         self.level = 1#upgrade pointer
 
     def initiate(self):#called when using the attack
@@ -1708,14 +1707,13 @@ class Migawari():
     sprites = Read_files.Sprites_Player('Sprites/Attack/migawari/')
 
     def __init__(self,entity):
-        super().__init__()
         self.entity = entity
         self.game_objects = entity.game_objects#animation need dt
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
 
-        self.description = ['migawari','add extra health to migawari','heals aila when killed by aila']
+        self.description = ['migawari','add extra health to migawari','heals aila when killed']
         self.health = 1
         self.level = 1#upgrade pointer
 
@@ -1723,11 +1721,49 @@ class Migawari():
         spawn = Migawari_entity(pos,self.entity.game_objects)
         spawn.set_health(self.health)
         spawn.set_lifetime(1000)
-        self.entity.heal()
         self.entity.game_objects.players.add(spawn)
 
     def reset_timer(self):
         pass
+
+    def upgrade_ability(self):#called from upgrade menu
+        self.level += 1
+        self.level = min(self.level,len(self.description))
+        if self.level == 2:
+            self.health = 2
+
+    def activate(self,level):#for UI of Aila abilities
+        self.currentstate.enter_state('Active_'+str(level))
+        self.level = level
+
+    def deactivate(self,level):#for UI of Aila abilities
+        self.currentstate.enter_state('Idle_'+str(level))
+        self.level = level
+
+class Slow_motion():
+    sprites = Read_files.Sprites_Player('Sprites/Attack/slow_motion/')
+
+    def __init__(self,entity):
+        self.entity = entity
+        self.game_objects = entity.game_objects#animation need dt
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle(self)#
+
+        self.description = ['slow motion','longer slow motion','slow motion but aila']
+        self.level = 1#upgrade pointer
+        self.duration = 200#slow motion duration, in time [whatever units]
+
+    def init(self,rate):#called from slow motion state
+        if self.level == 3:#counteract slowmotion for aila
+            self.entity.slow_motion = 1/rate
+            self.duration = 400#slow motion duration, in time [whatever units]
+        if self.level == 2:
+            self.duration = 400#slow motion duration, in time [whatever units]
+
+    def spawn(self):#called when using the ability from player states
+        new_state = states.Slow_motion_gameplay(self.game_objects.game)
+        new_state.enter_state()
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
@@ -1740,6 +1776,9 @@ class Migawari():
     def deactivate(self,level):#for UI of Aila abilities
         self.currentstate.enter_state('Idle_'+str(level))
         self.level = level
+
+    def reset_timer(self):
+        pass
 
 #things player can pickup
 class Loot(Platform_entity):#
@@ -1777,7 +1816,7 @@ class Heart_container(Loot):
         self.description = 'A heart container'
 
     def update_vel(self):
-        self.velocity[1] = 3*self.game_objects.game.dt
+        self.velocity[1] = 3*self.game_objects.game.dt*self.slow_motion
 
     def player_collision(self):
         self.game_objects.player.max_health += 1
@@ -1796,7 +1835,7 @@ class Spirit_container(Loot):
         self.description = 'A spirit container'
 
     def update_vel(self):
-        self.velocity[1]=3*self.game_objects.game.dt
+        self.velocity[1]=3*self.game_objects.game.dt*self.slow_motion
 
     def player_collision(self):
         self.game_objects.player.max_spirit += 1
@@ -1856,15 +1895,15 @@ class Spiritorb(Loot):#the thing dark saber produces
 class Enemy_drop(Loot):#add gravity
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.velocity = [random.randint(-3, 3),-4]
+        self.velocity = [random.uniform(-3, 3),-4]
         self.lifetime = 500
 
     def update_vel(self):
-        self.velocity[1] += 0.5*self.game_objects.game.dt
+        self.velocity[1] += 0.5*self.game_objects.game.dt*self.slow_motion
 
     def update(self,pos):
         super().update(pos)
-        self.lifetime -= self.game_objects.game.dt
+        self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destory()
 
     def attract(self,pos):#the omamori calls on this in loot group
@@ -1881,7 +1920,7 @@ class Enemy_drop(Loot):#add gravity
             self.game_objects.player.inventory[obj] += 1
         except:
             self.game_objects.player.inventory[obj] = 1
-        self.kill()
+        self.currentstate.handle_input('Death')
 
     #plotfprm collisions
     def down_collision(self,hitbox):
@@ -1904,8 +1943,9 @@ class Amber_Droplet(Enemy_drop):
         super().__init__(pos,game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
-        self.hitbox = self.rect.copy()
+        #self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
+        self.hitbox = pygame.Rect(pos[0],pos[1],5,5)
+        self.hitbox.bottom = self.rect.bottom
         self.description = 'moneyy'
 
     def player_collision(self,player):#when the player collides with this object
@@ -1937,7 +1977,8 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.currentstate = states_basic.Death(self)
+        self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
 
@@ -1949,7 +1990,8 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.currentstate = states_basic.Death(self)
+        self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
 
@@ -1961,7 +2003,8 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.currentstate = states_basic.Death(self)
+        self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
 
@@ -1983,7 +2026,7 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def update(self,scroll):
         super().update(scroll)
 
-        self.timer += self.game_objects.game.dt
+        self.timer += self.game_objects.game.dt*self.slow_motion
         if self.timer > 100:#fly to sky
             self.velocity[1] = -20
         elif self.timer>200:
@@ -2063,6 +2106,22 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
     def reset_timer(self):#called when animation is finished
         self.currentstate.handle_input('Idle')
 
+class Pray_effect(Animatedentity):#the thing when aila pray
+    sprites = Read_files.Sprites_Player('Sprites/animations/pray_effect/')
+
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.currentstate = states_basic.Death(self)#
+        self.image = self.sprites.sprite_dict['death'][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+
+    def update_pos(self,scroll):
+        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+
+    def spawn(self):
+        pass
+
 class Glow(Animatedentity):
 
     def __init__(self,entity):
@@ -2082,7 +2141,7 @@ class Glow(Animatedentity):
 
     def diminish(self):#slowly reduce the light
         self.image.set_alpha(int(self.alpha))
-        self.alpha -= self.game_objects.game.dt
+        self.alpha -= self.game_objects.game.dt*self.slow_motion
 
     def make_glow(self):#init
         self.radius = 200
@@ -2247,8 +2306,13 @@ class Runestones(Interactable):
             self.currentstate = states_basic.Interacted(self)
 
     def interact(self):
+        if type(self.currentstate).__name__ == 'Interacted': return
+        self.game_objects.player.currentstate.enter_state('Pray_pre')
         self.currentstate.handle_input('Transform')#goes to interacted after transform
         self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
+
+    def reset_timer(self):#when animation finished
+        self.game_objects.player.currentstate.handle_input('Pray_post')
 
 class Uber_runestone(Interactable):
     def __init__(self, pos, game_objects):
@@ -2398,12 +2462,17 @@ class Savepoint(Interactable):#save point
 
     def interact(self):#when player press t/y
         if type(self.currentstate).__name__ == 'Outline':#single click
+            self.game_objects.player.currentstate.enter_state('Pray_pre')
             self.game_objects.player.spawn_point[0]['map']=self.map
             self.game_objects.player.spawn_point[0]['point']=self.init_cord
             self.currentstate.handle_input('Once')
         else:#odoulbe click
+            self.game_objects.player.currentstate.handle_input('special')
             new_state = states.Ability_upgrades(self.game_objects.game)
             new_state.enter_state()
+
+    def reset_timer(self):#when animation finished
+        self.game_objects.player.currentstate.handle_input('Pray_post')
 
 class Inorinoki(Interactable):#the place where you trade soul essence for spirit or heart contrainer
     def __init__(self,pos,game_objects):
@@ -2819,7 +2888,7 @@ class Timer():
         self.entity.timers.remove(self)
 
     def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt
+        self.lifetime -= self.entity.game_objects.game.dt*self.entity.slow_motion
         if self.lifetime < 0:
             self.deactivate()
 
