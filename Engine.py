@@ -49,11 +49,11 @@ class Collisions():
                 projectile.collision_plat(collision_plat)
 
     #check for player collision
-    def player_collision(self,enteties):
+    def player_collision(self,enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce
         for player in self.game_objects.players:#aila and eventual double gangler
-            collision_enteties = pygame.sprite.spritecollideany(player,enteties,Collisions.collided)#check collision
-            if collision_enteties:
-                collision_enteties.player_collision(player)
+            collision_enteties = pygame.sprite.spritecollide(player,enteties,dokill = False, collided = Collisions.collided)#check collision
+            for collision_entetiy in collision_enteties:
+                collision_entetiy.player_collision(player)
 
     #npc player conversation, when pressing t
     def check_interaction_collision(self):

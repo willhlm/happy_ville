@@ -42,7 +42,7 @@ class Player_states(Entity_States):
         pass
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        if self.entity.abilities.equip=='Thunder' or self.entity.abilities.equip=='Darksaber' or self.entity.abilities.equip=='Migawari':
+        if self.entity.abilities.equip=='Thunder' or self.entity.abilities.equip=='Slow_motion' or self.entity.abilities.equip=='Migawari':
             self.enter_state(self.entity.abilities.equip + '_pre')
         else:
             self.enter_state(self.entity.abilities.equip + '_main')
@@ -618,6 +618,70 @@ class Invisible_main(Player_states):
     def handle_movement(self,input):
         pass
 
+class Pray_pre(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.special = False#a flag to chekc when the animation should finish (after interaction with e.g. rune stone, or when ability upgrade screen is exited)
+        effect = Entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
+        effect.rect.bottom = self.entity.rect.bottom
+        self.entity.game_objects.cosmetics.add(effect)
+        
+    def handle_press_input(self,input):#all states should inehrent this function
+        pass
+
+    def handle_release_input(self,input):#all states should inehrent this function
+        pass
+
+    def handle_movement(self,input):
+        pass
+
+    def increase_phase(self):
+        self.enter_state('Pray_main')
+        self.entity.currentstate.special = self.special
+
+    def handle_input(self,input):
+        if input == 'special':
+            self.special = True
+
+class Pray_main(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.special = False
+
+    def handle_press_input(self,input):
+        pass
+
+    def handle_release_input(self,input):
+        pass
+
+    def handle_movement(self,input):
+        pass
+
+    def handle_input(self,input):#called from either when the ability scnreen is exited (special), or when the saving point/runestone animation is finshed
+        if input == 'Pray_post':
+            if not self.special:
+                self.enter_state('Pray_post')
+        elif input == 'Pray_spe_post':
+                self.enter_state('Pray_post')
+        elif input == 'special':
+            self.special = True
+
+class Pray_post(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_press_input(self,input):#all states should inehrent this function
+        pass
+
+    def handle_release_input(self,input):#all states should inehrent this function
+        pass
+
+    def handle_movement(self,input):
+        pass
+
+    def increase_phase(self):
+        self.enter_state('Idle_main')
+
 class Hurt_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -881,18 +945,17 @@ class Migawari_main(Migawari_pre):
         self.entity.consume_spirit()
         self.enter_state('Idle_main')
 
-class Darksaber_pre(Abillitites):
+class Slow_motion_pre(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
 
     def increase_phase(self):
-        self.enter_state('Darksaber_main')
+        self.enter_state('Slow_motion_main')
 
-class Darksaber_main(Darksaber_pre):
+class Slow_motion_main(Slow_motion_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.abilities.spirit_abilities['Darksaber'].initiate()
-        self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Darksaber'])#add sword to group
+        self.entity.abilities.spirit_abilities['Slow_motion'].spawn()
 
     def increase_phase(self):
         self.enter_state('Idle_main')

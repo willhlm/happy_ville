@@ -5,6 +5,7 @@ import math
 class Animation():
     def __init__(self,entity,frame):
         self.entity = entity
+        entity.slow_motion = 1#this value can be changed for player so that it counterasct teh slow motinos
         self.framerate = C.animation_framerate
         self.frame = frame
 
@@ -23,7 +24,7 @@ class Entity_animation(Animation):#phase and state
 
     def update(self):
         self.entity.image = self.entity.sprites.get_image(self.entity.currentstate.state_name,int(self.frame),self.entity.currentstate.dir).copy()
-        self.frame += self.framerate*self.entity.game_objects.game.dt
+        self.frame += self.framerate*self.entity.game_objects.game.dt*self.entity.slow_motion
 
         if self.frame >= len(self.entity.sprites.sprite_dict[self.entity.currentstate.state_name]):
             self.entity.currentstate.increase_phase()
