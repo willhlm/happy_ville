@@ -46,7 +46,7 @@ class Chase(AI):
             self.entity.dir[0] = -1
 
 class Nothing(AI):
-    def __init__(self,entity,duration):
+    def __init__(self,entity,duration=100000):
         super().__init__(entity)
         self.duration = duration
 

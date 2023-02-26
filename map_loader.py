@@ -9,9 +9,10 @@ class Level():
         self.level_name = ''
         self.area_name = ''
         self.area_change = True#a flag to chenge if we change area
+        self.screen = Entities.Transparent_screen()
 
     def load_map(self,map_name,spawn):
-        self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. light effect
+        self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
         self.level_name = map_name
         self.spawn = spawn
         self.check_pause_sound()#pause the sound if we change area
@@ -36,11 +37,13 @@ class Level():
     def append_light_effet(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
         if level_name == 'light_forest_cave':
-            self.game_objects.game.state_stack[-1].handle_input('dark')#make a dark effect gameplay state
+            self.screen = Entities.Dark_screen(self.game_objects)
+            self.game_objects.cosmetics.add(self.screen)
+            self.game_objects.cosmetics.add(Entities.Dark_glow(self.game_objects.player))
         elif level_name == 'village_cave':
-            self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
+            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#should be when interacted state is initialised
         elif level_name == 'dark_forest':
-            self.game_objects.game.state_stack[-1].handle_input('light')#make a light effect gameplay state
+            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#should be when interacted state is initialised
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
@@ -334,9 +337,18 @@ class Level():
                         new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
                         self.game_objects.loot.add(new_keyitem)
 
-            elif id == 29:#key items: soul_essence etc.
+            elif id == 29:#fas ttravel points
                 fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(fast_travel)
+
+            elif id == 30:#traps
+                for property in obj['properties']:
+                    if property['name'] == 'type':
+                        trap_type = property['value']
+
+                object_size = [int(obj['width']),int(obj['height'])]
+                new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
+                self.game_objects.interactables.add(new_trap)
 
     def load_bgs(self):
         'tiled design notes: all sublayers in bg1_X (x specifies the sublayer) should have the same paralax and offset.'

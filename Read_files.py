@@ -343,7 +343,8 @@ class Controller():
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]#save and initialise the controlers.
 
     def rumble(self):#doesn't rumble...
-        self.joysticks[0].rumble(0.4,0.9,1000)#low fre, high fre, duration
+        for joystick in self.joysticks:
+            joystick.rumble(0,0.7,1000)#low fre, high fre, duration
 
     def buttonmapping(self):
         if not self.controller_type: return
@@ -382,6 +383,7 @@ class Controller():
     def map_inputs(self,event):
         self.keyup=False
         self.keydown=False
+        self.key = None
         for method in self.methods:#check for keyboard and controller
             method(event)
         #self.methods[-1](event)
@@ -452,7 +454,8 @@ class Controller():
                     self.value['l_stick'][1] = 0
 
         if event.type == pygame.JOYHATMOTION:
+            self.keydown=True
             self.value['d_pad'] = [event.value[0],event.value[1]]
-
+            self.rumble()
     def output(self):
         return [self.keydown,self.keyup,self.value,self.key]

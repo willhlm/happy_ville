@@ -362,7 +362,7 @@ class Gameplay(Game_State):
     def render(self):
         self.game.screen.fill((17,22,22))
         self.game.game_objects.draw()
-        self.render_effect()#cave light effects
+        #self.render_effect()#cave light effects
         self.game.game_objects.UI.render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
@@ -373,7 +373,6 @@ class Gameplay(Game_State):
 
     def handle_events(self, input):
         self.game.game_objects.player.currentstate.handle_movement(input)#move around
-        self.game.game_objects.player.abilities.handle_input(input)#to change movement ability
         if input[0]:#press
             if input[-1]=='start':#escape button
                 new_state = Pause_Menu(self.game)
@@ -395,7 +394,8 @@ class Gameplay(Game_State):
 
             else:
                 self.game.game_objects.player.currentstate.handle_press_input(input)
-                self.game.game_objects.player.omamoris.handle_input(input)
+                self.game.game_objects.player.abilities.handle_input(input)#to change movement ability
+                #self.game.game_objects.player.omamoris.handle_input(input)
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
@@ -404,11 +404,11 @@ class Gameplay(Game_State):
             new_game_state = Pause_gameplay(self.game,duration=11)
             new_game_state.enter_state()
         elif input =='dark':#dark around aila
-            self.light_effects.append(self.blit_dark_effect)
-            self.make_glow(6)
+            pass#self.light_effects.append(self.blit_dark_effect)
+            #self.make_glow(6)
         elif input =='light':#light around aila
-            self.light_effects.append(self.blit_glow_effect)
-            self.make_glow(1)
+            pass#self.light_effects.append(self.blit_glow_effect)
+            #self.make_glow(1)
         elif input == 'death':#normal death
             self.game.game_objects.player.death()
         elif input == 'exit':#remove any effects
@@ -425,7 +425,7 @@ class Gameplay(Game_State):
     def blit_dark_effect(self):
         self.dark.fill((80,80,80))#dark background
         pos=[self.game.game_objects.player.rect.centerx-self.radius,self.game.game_objects.player.rect.centery-self.radius]
-        #self.dark.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_ADD)
+        self.dark.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_ADD)
         self.game.screen.blit(self.dark,(0,0),special_flags = pygame.BLEND_RGBA_MULT)
 
     def make_glow(self,const=1):#init
@@ -1848,7 +1848,7 @@ class New_ability(Gameplay):#when player obtaines a new ability
         self.page = 0
         self.render_fade=[self.render_in,self.render_out]
 
-        self.img = self.game.game_objects.player.sprites.sprite_dict[ability+'_main'][0].copy()
+        self.img = self.game.game_objects.player.sprites.sprite_dict[ability][0].copy()
         self.game.game_objects.player.reset_movement()
 
         self.surface = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])), pygame.SRCALPHA, 32).convert_alpha()

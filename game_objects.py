@@ -82,6 +82,7 @@ class Game_Objects():
         self.camera_blocks.empty()
         self.bg_interact.empty()
         self.reflections.empty()
+        self.cosmetics.empty()
 
     def collide_all(self):
         self.collisions.platform_collision(self.players)
