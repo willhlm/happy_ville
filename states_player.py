@@ -30,10 +30,10 @@ class Player_states(Entity_States):
     def handle_movement(self,input):#all states should inehrent this function
         #left stick and arrow keys
         value = input[2]['l_stick']#the avlue of the press
-        self.entity.acceleration[0] = abs(value[0])*C.acceleration[0]#always positive, add acceleration to entity
+        self.entity.acceleration[0] = C.acceleration[0]*abs(value[0])#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
 
-        if value[0] > 0.2:#x
+        if value[0] > 0.2:#x, even if value goes to 0, the direction is maintained
             self.entity.dir[0] = 1
         elif value[0] < -0.2:#x
             self.entity.dir[0] = -1
@@ -81,7 +81,7 @@ class Idle_main(Player_states):
                 self.entity.sword.swing = not self.entity.sword.swing
 
             elif self.entity.dir[1]>0:
-                self.enter_state('Sword_up_pre')
+                self.enter_state('Sword_up_main')
 
 class Walk_main(Player_states):
     def __init__(self,entity):
@@ -124,7 +124,7 @@ class Walk_main(Player_states):
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
-                self.enter_state('Sword_up_pre')
+                self.enter_state('Sword_up_main')
 
 class Jump_stand_pre(Player_states):
     def __init__(self,entity):
@@ -154,7 +154,7 @@ class Jump_stand_pre(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if self.entity.dir[1]>0:
-                self.enter_state('Sword_up_pre')
+                self.enter_state('Sword_up_main')
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
@@ -200,7 +200,7 @@ class Jump_run_pre(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if self.entity.dir[1]>0:
-                self.enter_state('Sword_up_pre')
+                self.enter_state('Sword_up_main')
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
@@ -279,7 +279,7 @@ class Fall_run_pre(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if self.entity.dir[1]>0:
-                self.enter_state('Sword_up_pre')
+                self.enter_state('Sword_up_main')
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
@@ -331,7 +331,7 @@ class Fall_stand_pre(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if self.entity.dir[1]==1:
-                self.enter_state('Sword_up_pre')
+                self.enter_state('Sword_up_main')
             elif self.entity.dir[1]==-1:
                 self.enter_state('Sword_down_main')
             else:#right or left
@@ -400,6 +400,8 @@ class Dash_pre(Player_states):
                 self.enter_state('Wall_glide_main')
             else:
                 self.enter_state('Idle_main')
+        elif input == 'interrupt':
+            self.enter_state('Idle_main')
 
     def increase_phase(self):
         next_dash = 'Dash_' + str(self.entity.abilities.movement_dict['Dash'].level) + 'main'
@@ -428,6 +430,13 @@ class Dash_3main(Dash_pre):#level 3 dash: invinsible
         self.entity.velocity[0] = 20*self.dir[0]
         self.entity.invincibile = True
 
+    def handle_input(self,input):#if hit wall
+        if input == 'Wall':
+            if self.entity.acceleration[0]!=0:
+                self.enter_state('Wall_glide_main')
+            else:
+                self.enter_state('Idle_main')
+
     def increase_phase(self):
         self.enter_state('Dash_post')
 
@@ -445,6 +454,13 @@ class Dash_4main(Dash_pre):#level 4 dash: allow dash attack
     def update_state(self):
         super().update_state()
         self.counter -= self.entity.game_objects.game.dt
+
+    def handle_input(self,input):#if hit wall
+        if input == 'Wall':
+            if self.entity.acceleration[0]!=0:
+                self.enter_state('Wall_glide_main')
+            else:
+                self.enter_state('Idle_main')
 
     def handle_press_input(self,input):
         if input[-1]=='x' and self.counter > 0:#if pressed within three frames
@@ -625,7 +641,7 @@ class Pray_pre(Player_states):
         effect = Entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        
+
     def handle_press_input(self,input):#all states should inehrent this function
         pass
 
@@ -722,11 +738,11 @@ class Sword(Player_states):#main phases shold inheret this
         self.dir = self.entity.dir.copy()#animation direction
         self.entity.sword.dir = self.dir.copy()#sword direction
         sound.Sound.play_sfx(self.entity.sfx_sword)
-        self.slash_speed()
+        self.slash()
 
-    def slash_speed(self):#if we have green infinity stone
-        if self.entity.sword.equip=='green':
-            self.entity.animation.framerate = 0.33
+    def slash(self):#if we have green infinity stone
+        for stone in self.entity.sword.equip:
+            self.entity.sword.stones[stone].slash()#call collision specific for stone
 
     def enter_state(self,input):
         self.entity.animation.framerate = C.animation_framerate
@@ -782,22 +798,6 @@ class Air_sword1_main(Sword):
 class Air_sword2_main(Air_sword1_main):
     def __init__(self,entity):
         super().__init__(entity)
-
-class Sword_up_pre(Player_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.dir = self.entity.dir.copy()#animation direction
-
-    def slash_speed(self):#if we have green infinity stone
-        if self.entity.sword.equip=='green':
-            self.entity.animation.framerate = 3
-
-    def enter_state(self,input):
-        self.entity.animation.framerate = 4
-        super().enter_state(input)
-
-    def increase_phase(self):
-        self.enter_state('Sword_up_main')
 
 class Sword_up_main(Sword):
     def __init__(self,entity):

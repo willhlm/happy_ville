@@ -105,4 +105,9 @@
    <property name="name" value=""/>
   </properties>
  </tile>
+ <tile id="30">
+  <properties>
+   <property name="type" value=""/>
+  </properties>
+ </tile>
 </tileset>

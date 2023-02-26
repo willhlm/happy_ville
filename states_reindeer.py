@@ -16,7 +16,6 @@ class Reindeer_states(Entity_States):
 
     def update(self):
         self.update_state()
-        print(self.state_name,type(self.entity.AI).__name__)
 
     def update_state(self):
         pass

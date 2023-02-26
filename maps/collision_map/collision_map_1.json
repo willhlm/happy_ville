@@ -194,6 +194,60 @@
                  "width":16,
                  "x":464,
                  "y":240
+                }, 
+                {
+                 "gid":119,
+                 "height":16,
+                 "id":145,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Spirit_spikes"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":400,
+                 "y":240
+                }, 
+                {
+                 "gid":119,
+                 "height":16,
+                 "id":146,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Lighitning_barrier"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":512,
+                 "y":240
+                }, 
+                {
+                 "gid":119,
+                 "height":16,
+                 "id":147,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"type",
+                         "type":"string",
+                         "value":"Lightning_spikes"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":240,
+                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -297,7 +351,7 @@
          "y":0
         }],
  "nextlayerid":22,
- "nextobjectid":145,
+ "nextobjectid":148,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
