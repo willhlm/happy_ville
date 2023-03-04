@@ -1,6 +1,6 @@
 import pygame, random, sys
 import Read_files, states, particles, animation, sound
-import states_health, states_basic, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
+import states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
 pygame.mixer.init()
@@ -450,7 +450,8 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = set(['Dash_attack','Dash','Idle','Walk','Pray','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Slow_motion','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
+        #make it a dictionary instead?
+        self.states = set(['Dash_attack','Dash','Wall_glide','Double_jump','Idle','Walk','Pray','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Slow_motion','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
         self.currentstate = states_player.Idle_main(self)
 
         self.spawn_point = [{'map':'light_forest_3', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -770,7 +771,7 @@ class Shroompoline(Enemy):
         self.aggro = False#player collision
         self.invincibile = True#taking dmg
 
-    def player_collision(self):
+    def player_collision(self,player):
         if self.game_objects.player.velocity[1]>0:#going down
             offset=self.game_objects.player.velocity[1]+1
             if self.game_objects.player.hitbox.bottom < self.jump_box.top+offset:
@@ -1171,53 +1172,54 @@ class Camera_Stop(Staticentity):
     def __init__(self,game_objects, size,pos,dir):
         super().__init__(pos,pygame.Surface(size))
         self.game_objects = game_objects
-        self.flag = False#a flag such that the recentering only occures once
         self.hitbox = self.rect.inflate(0,0)
         self.stops = {'right':self.right,'left':self.left,'bottom':self.bottom,'top':self.top,'center':self.center}[dir]#called from camera.py
+        self.dir = dir#the new one doesn't need it
+        self.size = size
 
-    #def update(self,scroll):
-#        super().update(scroll)
-#        self.methods()#this needs to be called before camera calculates the scroll.
+        self.currentstate = states_camerastop.Idle(self)
+        self.currentstate.enter_state('Idle_'+dir)
 
-    def right(self):
-        if (self.rect.bottom > 0) and (self.rect.top < self.game_objects.game.WINDOW_SIZE[1]):#just enters the screen vertically (the top and bottom)
-            if -self.game_objects.game.WINDOW_SIZE[0] < (self.rect.left - self.game_objects.player.hitbox.centerx) < self.game_objects.game.WINDOW_SIZE[0]*0.5:
-                self.game_objects.camera.center[0] = self.game_objects.game.WINDOW_SIZE[0] - (self.rect.left - self.game_objects.player.hitbox.centerx)
-                self.flag = True
+    def right(self):#should makes states
+        distance = [self.rect.left - self.game_objects.player.hitbox.centerx,self.rect.centery - self.game_objects.player.hitbox.centery]
+        if distance[0] < 0: return
+
+        if abs(distance[1]) < self.size[1]*0.5 and distance[0] < self.game_objects.game.WINDOW_SIZE[0]*0.5:#if on screen on y and coser than half screen on x
+            self.game_objects.camera.center[0] = self.game_objects.game.WINDOW_SIZE[0] - (self.rect.left - self.game_objects.player.hitbox.centerx)
         else:
-            if self.flag:
-                self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
-                self.flag = False
+            self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
 
     def left(self):
-        if (self.rect.bottom > 0) and (self.rect.top < self.game_objects.game.WINDOW_SIZE[1]):#just enters the screen vertically (the top and bottom)
-            if -self.game_objects.game.WINDOW_SIZE[0] < (self.game_objects.player.hitbox.centerx - self.rect.right) < self.game_objects.game.WINDOW_SIZE[0]*0.5:
-                self.game_objects.camera.center[0] =  self.game_objects.player.hitbox.centerx - self.rect.right
-                self.flag = True
+        distance = [self.rect.right - self.game_objects.player.hitbox.centerx,self.rect.centery - self.game_objects.player.hitbox.centery]
+        if distance[0] > 0: return
+
+        if abs(distance[1]) < self.size[1]*0.5 and abs(distance[0]) < self.game_objects.game.WINDOW_SIZE[0]*0.5:#if on screen on y and coser than half screen on x
+            self.game_objects.camera.center[0] =  self.game_objects.player.hitbox.centerx - self.rect.right
         else:
-            if self.flag:
-                self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
-                self.flag = False
+            self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
+
 
     def bottom(self):
-        if (self.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (self.rect.right > 0):
-            if -self.game_objects.game.WINDOW_SIZE[1] < (self.rect.top - self.game_objects.player.hitbox.centery) < self.game_objects.game.WINDOW_SIZE[1]*0.5:
-                self.game_objects.camera.center[1] = self.game_objects.game.WINDOW_SIZE[1] - (self.rect.top - self.game_objects.player.hitbox.centery)
-                self.flag = True
+        distance = [self.rect.centerx - self.game_objects.player.hitbox.centerx,self.rect.top - self.game_objects.player.hitbox.centery]
+        if distance[1] < 0:
+            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+            return
+
+        if abs(distance[0]) < self.size[0]*0.5 and abs(distance[1]) < self.game_objects.game.WINDOW_SIZE[1]*0.5:#if on screen on y and coser than half screen on x
+            self.game_objects.camera.center[1] = self.game_objects.game.WINDOW_SIZE[1] - (self.rect.top - self.game_objects.player.hitbox.centery)
         else:
-            if self.flag:
-                self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
-                self.flag = False
+            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
 
     def top(self):
-        if (self.rect.left <= self.game_objects.game.WINDOW_SIZE[0]) and (self.rect.right > 0):
-            if -self.game_objects.game.WINDOW_SIZE[1] < (self.game_objects.player.hitbox.centery - self.rect.bottom) < self.game_objects.game.WINDOW_SIZE[1]*0.5:
-                self.game_objects.camera.center[1] = self.game_objects.player.hitbox.centery - self.rect.bottom
-                self.flag = True
+        distance = [self.rect.centerx - self.game_objects.player.hitbox.centerx,self.rect.bottom - self.game_objects.player.hitbox.centery]
+        if distance[1] > 0:
+            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+            return
+
+        if abs(distance[0]) < self.size[0]*0.5 and abs(distance[1]) < self.game_objects.game.WINDOW_SIZE[1]*0.5:#if on screen on y and coser than half screen on x
+            self.game_objects.camera.center[1] = self.game_objects.player.hitbox.centery - self.rect.bottom
         else:
-            if self.flag:
-                self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
-                self.flag=False
+            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
 
     def center(self):
         self.game_objects.camera.center[0] = self.game_objects.player.hitbox.centerx - (self.rect.centerx - self.game_objects.game.WINDOW_SIZE[0]*0.5)
@@ -1311,7 +1313,7 @@ class Player_abilities():
         self.equip = 'Thunder'#spirit ability pointer
         self.movement_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
         self.movement_abilities = list(self.movement_dict.values())#make it a list
-        self.number = 1#number of movement abilities one can have equiped, the equiped one will be appended to self.entity.states
+        self.number = 3#number of movement abilities one can have equiped, the equiped one will be appended to self.entity.states
 
     def remove_ability(self):#movement stuff
         abilities = self.movement_abilities[0:self.number]#the abilities currently equiped

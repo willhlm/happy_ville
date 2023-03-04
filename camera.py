@@ -27,8 +27,8 @@ class Camera():
         self.center = self.original_center.copy()
 
     def check_camera_border_new(self):
-        for stop in self.game_objects.camera_blocks:
-            stop.stops()
+        for block in self.game_objects.camera_blocks:
+            block.currentstate.update()
 
     def check_camera_border_old(self):
         xflag = True
