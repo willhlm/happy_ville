@@ -13,6 +13,8 @@ import world_state
 import UI
 import save_load
 
+from time import perf_counter
+
 class Game_Objects():
 
     def __init__(self, game):
@@ -51,11 +53,14 @@ class Game_Objects():
         self.players = pygame.sprite.Group(self.player)
 
     def load_map(self, map_name, spawn = '1',fade = True):
+        t1_start = perf_counter()
         self.player.enter_idle()
         self.player.reset_movement()
         self.clean_groups()
         self.map.load_map(map_name,spawn)
         self.camera.reset_player_center()
+        t1_stop = perf_counter()
+        print(t1_stop-t1_start)
 
         if fade:
             new_game_state = states.Fading(self.game)
