@@ -1,14 +1,14 @@
-import sys, random
+import sys, random, math
 
 class AI():
     def __init__(self,entity):
         self.entity = entity
-        self.player_distance = [0,0]
+        self.player_distance = [entity.game_objects.player.rect.centerx-entity.rect.centerx,entity.game_objects.player.rect.centery-entity.rect.centery]#check plater distance
 
     def enter_AI(self,newAI):
         self.entity.AI = getattr(sys.modules[__name__], newAI)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def handle_input(self,input,duration=100):
+    def handle_input(self,input):
         pass
 
     def update(self):
@@ -18,96 +18,158 @@ class AI():
     def update_AI(self):
         pass
 
-    def finish_action(self):#called when animation is finshed for a state
-        pass
+##peace states
+class Nothing(AI):#can be used in cutscene etc
+    def __init__(self,entity):
+        super().__init__(entity)
 
 class Peace(AI):
     def __init__(self,entity):
         super().__init__(entity)
+        self.children = {'Walk':Walk,'Wait':Wait,'Turn_around':Turn_around}
+        self.set_child('Wait')
+
+    def set_child(self,child):#the init will run the same frame but its update in the next
+        self.child = self.children[child](self)
+
+    def update_AI(self):#the init will run the same frame but its update in the next
+        self.child.update_AI()
+
+    def set_parent(self,parent):
+        self.enter_AI(parent)
+
+class Walk():
+    def __init__(self,parent):
+        self.parent = parent
+        self.parent.entity.currentstate.handle_input('Walk')
+        self.init_time = 0
 
     def update_AI(self):
-        self.idle_momvement()
+        self.init_time += 0.02*self.parent.entity.game_objects.game.dt
+        self.parent.entity.velocity[0] += 0.01*self.parent.entity.dir[0]
         self.check_sight()
+        self.exit()
 
-    def idle_momvement(self):
-        rand=random.randint(0,1000)
-        if rand>970:
-            self.entity.currentstate.handle_input('Idle')
-            self.entity.dir[0] = -self.entity.dir[0]
-        else:
-            self.entity.currentstate.handle_input('Walk')
+    def check_sight(self):
+        if abs(self.parent.player_distance[0])<self.parent.entity.aggro_distance and abs(self.parent.player_distance[1])<self.parent.entity.aggro_distance*0.2:
+            self.parent.set_parent('Aggro')
 
-    def check_sight(self):#if wihtin sight, enter the passed AI
-        if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance*0.2:
-            self.enter_AI('Chase')
+    def exit(self):
+        if self.init_time > math.pi:
+            child = random.choice(list(self.parent.children.keys()))
+            self.parent.set_child(child)
 
-class Nothing(AI):#for cutscenes
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Pause(AI):#the entity should just stay and do nothing for a while
-    def __init__(self,entity,duration):
-        super().__init__(entity)
+class Wait():#the entity should just stay and do nothing for a while
+    def __init__(self,parent,duration=100):
+        self.parent = parent
         self.duration = duration
-        self.entity.currentstate.handle_input('Idle')
+        self.parent.entity.currentstate.enter_state('Idle')
+        self.parent.entity.velocity = [0,0]
 
     def update_AI(self):
-        self.duration -= self.entity.game_objects.game.dt
+        self.duration -= 1
         if self.duration < 0:
             self.exit()
 
-    def exit(self):
-        self.entity.AI = Chase(self.entity,0)#send in the turnaround duration för the next fram. So that pause and turn_around do run in sequence.
+    def exit(self):#check sight
+        self.parent.set_child('Turn_around')
 
-class Trun_around(Pause):#when the player jumps over, should be a delays before the entity turns around
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-
-    def exit(self):
-        self.entity.dir[0] = -self.entity.dir[0]
-        self.enter_AI('Chase')
-
-class Chase(AI):
-    def __init__(self,entity, turn_delay = 50):
-        super().__init__(entity)
-        self.entity.currentstate.handle_input('Walk')
-        self.timers = []
-        self.timer_jobs = Giveup_timer(self,100)#if player is out of sight for more than duration, go to peace, else, remain
-        self.turn_delay = turn_delay
+class Turn_around():#when the player jumps over, should be a delays before the entity turns around
+    def __init__(self,parent):
+        self.parent = parent
+        self.parent.entity.dir[0] = -self.parent.entity.dir[0]
 
     def update_AI(self):
-        if self.look_player(): return#make the direction along the player. a delay can be added
-        self.check_sight()#are we within aggro distance?
-        self.attack()#are we withtin attack distance?
+        self.parent.set_child('Walk')
+
+class Aggro(AI):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.children = {'Chase':Chase,'Wait_aggro':Wait_aggro,'Turn_around_aggro':Turn_around_aggro,'Attack':Attack}
+        self.set_child('Chase')
+        self.timers = []
+        self.timer_jobs = Giveup_timer(self,300)#if player is out of sight for more than duration, go to peace, else, remain
+
+    def set_child(self,child):#the init will run the same frame but its update in the next
+        self.child = self.children[child](self)
+
+    def update_AI(self):
+        self.check_sight()
+        self.child.update_AI()
         self.update_timers()
-        self.turn_delay = 50
 
-    def attack(self):
-        if abs(self.player_distance[0])<self.entity.attack_distance and abs(self.player_distance[1])<self.entity.attack_distance*0.2:
-            self.enter_AI('Attack')
+    def set_parent(self,parent):#the init will run the same frame but its update in the next
+        self.enter_AI(parent)
 
-    def check_sight(self):#if wihtin sight, enter the passed AI
-        if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance*0.2:
+    def check_sight(self):#if wihtin sight, stay in chase
+        if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance*0.3:
             self.timer_jobs.restore()
         else:#out of sight
             self.timer_jobs.activate()
-
-    def look_player(self):#look at the player
-        if self.player_distance[0] > 0 and self.entity.dir[0] == -1 or self.player_distance[0] < 0 and self.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
-            self.entity.AI = Trun_around(self.entity,self.turn_delay)
-            return True#do not go to attack if you just turned around
 
     def update_timers(self):
         for timer in self.timers:
             timer.update()
 
-class Attack(AI):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.currentstate.handle_input('Attack')
+class Chase():
+    def __init__(self,parent):
+        self.parent = parent
+        self.parent.entity.currentstate.handle_input('Walk')
 
-    def finish_action(self):#called when animation is finished
-        self.entity.AI = Pause(self.entity,50)
+    def update_AI(self):
+        self.look_player()#make the direction along the player. a delay can be added
+        self.chase_momvement()
+        self.attack()#are we withtin attack distance?
+
+    def look_player(self):#look at the player
+        if self.parent.player_distance[0] > 0 and self.parent.entity.dir[0] == -1 or self.parent.player_distance[0] < 0 and self.parent.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
+            self.parent.set_child('Wait_aggro')
+
+    def chase_momvement(self):
+        self.parent.entity.velocity[0] += self.parent.entity.dir[0]*0.02#*abs(math.sin(self.init_time))
+
+    def attack(self):
+        if abs(self.parent.player_distance[0])<self.parent.entity.attack_distance and abs(self.parent.player_distance[1])<self.parent.entity.attack_distance:
+            self.parent.set_child('Attack')
+
+class Turn_around_aggro():#when the player jumps over, should be a delays before the entity turns around
+    def __init__(self,parent):
+        self.parent = parent
+        self.parent.entity.dir[0] = -self.parent.entity.dir[0]
+
+    def update_AI(self):
+        self.parent.set_child('Chase')
+
+class Wait_aggro():#the entity should just stay and do nothing for a while
+    def __init__(self,parent,duration=50):
+        self.parent = parent
+        self.duration = duration
+        self.parent.entity.currentstate.enter_state('Idle')
+        self.velocity = [0,0]
+
+    def update_AI(self):
+        self.duration -= 1
+        if self.duration < 0:
+            self.exit()
+
+    def exit(self):
+        if self.parent.player_distance[0] > 0 and self.parent.entity.dir[0] == -1 or self.parent.player_distance[0] < 0 and self.parent.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
+            self.parent.set_child('Turn_around_aggro')
+        else:
+            self.parent.set_child('Chase')
+
+class Attack():
+    def __init__(self,parent):
+        self.parent = parent
+        self.parent.entity.currentstate.handle_input('Attack')
+        self.parent.entity.velocity = [0,0]
+
+    def update_AI(self):
+        pass
+
+    def handle_input(self,input):
+        if input == 'Finish_attack':
+            self.enter_AI('Wait_aggro')
 
 class Giveup_timer():
     def __init__(self,AI,duration = 100):
@@ -124,9 +186,9 @@ class Giveup_timer():
 
     def deactivate(self):
         self.AI.timers.remove(self)
-        self.AI.enter_AI('Peace')
+        self.AI.set_parent('Peace')
 
     def update(self):
-        self.lifetime -= self.AI.entity.game_objects.game.dt
+        self.lifetime -= 1
         if self.lifetime < 0:
             self.deactivate()

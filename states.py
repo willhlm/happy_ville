@@ -90,7 +90,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('light_forest_1','1')
+            self.game.game_objects.load_map('village_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -520,7 +520,7 @@ class Ability_menu(Gameplay):
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
 
     def update(self):
-        self.game.dt = 0.2#slow motion
+        self.game.dt *= 0.5#slow motion
         super().update()
 
     def render(self):
@@ -1779,7 +1779,7 @@ class Vendor(Facilities):
 class Cutscenes(Gameplay):#basically, this class is not needed but would be nice to have the cutscene classes in a seperate file
     def __init__(self, game,scene):
         super().__init__(game)
-        self.game.game_objects.player.reset_movement()
+        #self.game.game_objects.player.reset_movement()
         self.current_scene = getattr(cutscene, scene)(self)#make an object based on string
         if scene != 'Death':
             self.game.game_objects.world_state.cutscenes_complete.append(scene)#scenes will not run if the scnene is in this list

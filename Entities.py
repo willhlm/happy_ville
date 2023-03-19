@@ -1,6 +1,6 @@
 import pygame, random, sys
 import Read_files, states, particles, animation, sound
-import states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
+import behaviour_tree, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
 pygame.mixer.init()
@@ -72,6 +72,7 @@ class Collision_block(Platform):
     def collide_y(self,entity):
         if entity.velocity[1] >= 0:#going down
             entity.down_collision(self.hitbox.top)
+            entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self.hitbox.bottom)
@@ -90,6 +91,7 @@ class Collision_oneway_up(Platform):
             offset = entity.velocity[1]+1
             if entity.hitbox.bottom <= self.hitbox.top+offset:
                 entity.down_collision(self.hitbox.top)
+                entity.limit_y()
                 entity.running_particles = self.run_particles#save the particles to make
                 entity.update_rect_y()
         else:#going up
@@ -378,6 +380,9 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
+    def limit_y(self):#limits the velocity on ground. But not on ramps
+        self.velocity[1] = 1/self.game_objects.game.dt
+
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -392,7 +397,6 @@ class Character(Platform_entity):#enemy, NPC,player
         self.update_pos(pos)
         self.update_timers()
         self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
-        #self.update_true_pos()
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
         self.animation.update()#need to be after currentstate since animation will animate the current state
 
@@ -421,7 +425,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0]*30
         self.velocity[1] = -dir[1]*30
 
-    def hurt_particles(self,distance=0,lifetime=40,vel=[7,15],type='circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
+    def hurt_particles(self,distance=0,lifetime=40,vel=[7,15],type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
         for i in range(0,number_particles):
             obj1=particles.General_particle(self.hitbox.center,self.game_objects,distance,lifetime,vel,type,dir,scale,colour)
             self.game_objects.cosmetics.add(obj1)
@@ -644,18 +648,24 @@ class Exploding_Mygga(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+        self.original_pos = pos
         self.currentstate = states_mygga.Idle(self)
-        self.AI = AI_exploding_mygga.Peace(self)
+        behaviour_tree.build_tree(self)#AI_exploding_mygga.Peace(self)#
         self.health = 4
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
         self.attack_distance = 50
-        self.aggro_distance = 100
+        self.aggro_distance = 150
         self.dir[1] = 1
+        self.size = [64,64]#hurtbox size
+
+    def update_pos(self,pos):
+        super().update_pos(pos)
+        self.original_pos = [self.original_pos[0] + pos[0], self.original_pos[1] + pos[1]]
 
     def suicide(self):
-        self.projectiles.add(Explosion(self))
+        self.projectiles.add(Hurt_box(self,lifetime = 50))
         self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
 
 class Slime(Enemy):
@@ -930,7 +940,7 @@ class NPC(Character):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
-        self.portrait=pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()  #temp
+        self.portrait = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()  #temp
         self.load_conversation()
         self.counter = 0
         self.state = 'state_1'#a flag to decide what do say. Should we have a world state instead?
@@ -1029,11 +1039,12 @@ class MrBanks(NPC):#bank
 class Boss(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.health = 1
+        self.health = 10
         self.health_bar = Health_bar(self)
 
     def dead(self):
         self.aggro = False
+        self.invincibile = True
         self.AI.enter_AI('Nothing')
         self.loots()
         self.give_abillity()
@@ -1044,7 +1055,6 @@ class Boss(Enemy):
         new_game_state.enter_state()
 
     def init_fight(self):#called when cutscene finishes and fight with aila starts
-        #print(self.game_objects.player.omamoris.handle_input('hp'))
         for omamori in self.game_objects.player.omamoris.equipped_omamoris:#not very an elegant solution
             if type(omamori).__name__ == 'Boss_HP':
                 self.health_bar.max_health = self.health
@@ -1061,13 +1071,14 @@ class Reindeer(Boss):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
+
         self.currentstate = states_reindeer.Idle(self)
+        self.AI = AI_reindeer.Nothing(self)
+
         self.abillity = 'dash_1main'#the stae of image that will be blitted to show which ability that was gained
-        self.spirit = 1
         self.attack = Sword
         self.special_attack = Ground_shock
         self.attack_distance = 300
-        self.AI = AI_reindeer.Peace(self)
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states.add('Dash')#append dash abillity to available states
@@ -1478,14 +1489,14 @@ class Melee(Projectiles):
 class Hurt_box(Melee):#a hitbox that spawns
     sprites = Read_files.Sprites_Player('Sprites/Attack/hurt_box/')#invisible
 
-    def __init__(self,entity):
+    def __init__(self,entity, lifetime = 100):
         super().__init__(entity)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = entity.rect.center
         self.rect.bottom = entity.rect.bottom
         self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,entity.size[0],entity.size[1])
-        self.lifetime = 100
+        self.lifetime = lifetime
         self.dmg = entity.dmg
 
     def update_hitbox(self):
@@ -1568,7 +1579,7 @@ class Sword(Melee):
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=10,vel=[7,14],type='spark',dir=angle,scale=0.3)
+            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=20,vel=[7,14],type='Spark',dir=angle,scale=0.5)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def collision_inetractables(self,interactable):#called when projectile hits interactables
@@ -1611,7 +1622,7 @@ class Aila_sword(Sword):
         angle = random.randint(-180, 180)#the ejection anglex
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=15,vel=[7,14],type='spark',dir=angle,scale=0.4,colour=color)
+            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=15,vel=[7,14],type='Spark',dir=angle,scale=0.4,colour=color)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
@@ -2033,6 +2044,9 @@ class Enemy_drop(Loot):#add gravity
         super().left_collision(hitbox)
         self.velocity[0] = -self.velocity[0]
 
+    def limit_y(self):
+        pass
+
 class Amber_Droplet(Enemy_drop):
     sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/amber_droplet/')
 
@@ -2343,7 +2357,7 @@ class Cutscene_trigger(Interactable):
 
     def update(self,scroll):
         self.update_pos(scroll)
-        self.group_distance()
+        #self.group_distance()
 
     def player_collision(self):
         if self.event not in self.game_objects.world_state.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
@@ -2513,7 +2527,7 @@ class Collision_breakable(Interactable):#a breakable collision block: should it 
             self.game_objects.player.hitbox.left = self.hitbox.right
         else:#plyer on left
             self.game_objects.player.hitbox.right = self.hitbox.left
-        self.game_objects.player.update_rect()
+        self.game_objects.player.update_rect_x()
 
     def update(self,scroll):
         super().update(scroll)

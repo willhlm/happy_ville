@@ -109,10 +109,10 @@ class Circles(Bound_entity):
         self.set_image()
 
     def set_image(self):
-        self.image = self.images[self.frame]
-        self.frame += 1
+        self.image = self.images[int(self.frame)]
+        self.frame += self.game_objects.game.dt
 
-        if self.frame == len(self.images):
+        if self.frame >= len(self.images):
             self.frame = 0
             #set new positions
             self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position

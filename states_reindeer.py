@@ -32,7 +32,6 @@ class Idle(Reindeer_states):
 class Walk(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.walk()
 
     def handle_input(self,input):
         if input=='Idle':
@@ -52,19 +51,13 @@ class Dead(Reindeer_states):
         self.stay_still()
         self.entity.dead()
 
-    def update_state(self):
-        pass
-
-    def increase_phase(self):
-        pass
-
 class Transform(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
 
     def increase_phase(self):
-        self.entity.attack_distance=60
+        self.entity.attack_distance = 60
         self.enter_state('Transform_idle')
 
 class Transform_idle(Reindeer_states):
@@ -84,7 +77,7 @@ class Transform_idle(Reindeer_states):
         elif input =='Jump':
              self.enter_state('Jump_pre')
 
-class Rest(Reindeer_states):#enters here after attakes to "rest"
+class Rest(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
@@ -98,6 +91,7 @@ class Transform_walk(Reindeer_states):
         self.walk()
 
     def handle_input(self,input):
+
         if input=='Idle':
              self.enter_state('Transform_idle')
         elif input =='Attack':
@@ -144,10 +138,11 @@ class Fall_pre(Reindeer_states):
 class Fall_main(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.dir=self.entity.dir.copy()#animation direction
+        self.dir = self.entity.dir.copy()#animation direction
 
     def handle_input(self,input):
         if input == 'Ground':
+            self.entity.game_objects.camera.camera_shake(amp=2,duration=10)
             self.enter_state('Fall_post')
 
 class Fall_post(Reindeer_states):
@@ -157,7 +152,7 @@ class Fall_post(Reindeer_states):
 
     def increase_phase(self):
          self.enter_state('Transform_walk')
-         self.entity.AI.finish_action()
+         self.entity.AI.child.handle_input('Landed')
 
 class Stun(Reindeer_states):
     def __init__(self,entity,duration):
@@ -188,8 +183,8 @@ class Attack_main(Reindeer_states):
         self.entity.projectiles.add(attack)#add to group but in main phase
 
     def increase_phase(self):
+        self.entity.AI.child.handle_input('Attack')
         self.enter_state('Transform_idle')
-        self.entity.AI.finish_action()
 
 class Dash_pre(Reindeer_states):
     def __init__(self,entity):

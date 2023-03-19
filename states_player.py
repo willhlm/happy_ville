@@ -307,7 +307,7 @@ class Fall_stand_pre(Player_states):
 
     def init(self):
         self.entity.timer_jobs['ground'].activate()
-        self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
+        #self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
 
     def update_state(self):
         if self.entity.acceleration[0] != 0:
