@@ -1087,7 +1087,7 @@ class Reindeer(Boss):
         super().take_dmg(dmg)
         self.health_bar.resize()
 
-    def knock_back(self):
+    def knock_back(self,dir):
         pass
 
 class Idun(Boss):
