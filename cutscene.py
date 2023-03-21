@@ -193,13 +193,14 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         self.parent_class.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
         self.parent_class.game.game_objects.camera.set_camera('Deer_encounter')
+        self.entity.AI.deactivate()
         self.stage = 0
         self.parent_class.game.game_objects.player.currentstate.enter_state('Walk_main')
 
     def update(self):#write how you want the player/group to act
         self.timer+=self.parent_class.game.dt
         if self.stage == 0:
-            self.parent_class.game.game_objects.player.velocity[0]=4
+            self.parent_class.game.game_objects.player.velocity[0]  = 4
 
             if self.timer >120:
                 self.stage=1
@@ -209,14 +210,14 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         elif self.stage==1:
             if self.timer>200:
                 self.entity.currentstate.enter_state('Transform')
-                self.parent_class.game.game_objects.player.velocity[0]=-20
+                self.parent_class.game.game_objects.player.velocity[0] = -20
                 self.parent_class.game.game_objects.camera.camera_shake(amp=3,duration=100)#amplitude, duration
                 self.stage=2
 
         elif self.stage==2:
             if self.timer > 400:
                 self.parent_class.game.game_objects.camera.exit_state()#exsiting deer encounter camera
-                self.entity.AI.enter_AI('Aggro_1')
+                self.entity.AI.activate()
                 self.entity.init_fight()
                 self.exit_state()
 

@@ -1,6 +1,6 @@
 import pygame, random, sys
 import Read_files, states, particles, animation, sound
-import behaviour_tree, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
+import states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
 pygame.mixer.init()
@@ -650,7 +650,7 @@ class Exploding_Mygga(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.original_pos = pos
         self.currentstate = states_mygga.Idle(self)
-        behaviour_tree.build_tree(self)#AI_exploding_mygga.Peace(self)#
+        AI_exploding_mygga.build_tree(self)#AI_exploding_mygga.Peace(self)#
         self.health = 4
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
@@ -1045,7 +1045,7 @@ class Boss(Enemy):
     def dead(self):
         self.aggro = False
         self.invincibile = True
-        self.AI.enter_AI('Nothing')
+        self.AI.deactivate()
         self.loots()
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
@@ -1073,7 +1073,7 @@ class Reindeer(Boss):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
 
         self.currentstate = states_reindeer.Idle(self)
-        self.AI = AI_reindeer.Nothing(self)
+        AI_reindeer.build_tree(self)
 
         self.abillity = 'dash_1main'#the stae of image that will be blitted to show which ability that was gained
         self.attack = Sword
@@ -1086,11 +1086,9 @@ class Reindeer(Boss):
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
         self.health_bar.resize()
-        #self.AI_stack[-1].handle_input('jumping')#enter stage 3
-        #if self.health < 100:
-    #        self.AI_stack[-1].handle_input('stage3')#enter stage 3
-    #    elif self.health < 200:
-    #        self.AI_stack[-1].handle_input('stage2')#enter stage 2
+
+    def knock_back(self):
+        pass
 
 class Idun(Boss):
     def __init__(self,pos,game_objects):
@@ -1213,7 +1211,7 @@ class Camera_Stop(Staticentity):
     def bottom(self):
         distance = [self.rect.centerx - self.game_objects.player.hitbox.centerx,self.rect.top - self.game_objects.player.hitbox.centery]
         if distance[1] < 0:
-            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+            #self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]#is it needed
             return
 
         if abs(distance[0]) < self.size[0]*0.5 and abs(distance[1]) < self.game_objects.game.WINDOW_SIZE[1]*0.5:#if on screen on y and coser than half screen on x
@@ -1224,7 +1222,7 @@ class Camera_Stop(Staticentity):
     def top(self):
         distance = [self.rect.centerx - self.game_objects.player.hitbox.centerx,self.rect.bottom - self.game_objects.player.hitbox.centery]
         if distance[1] > 0:
-            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
+            #self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]#is it needed?
             return
 
         if abs(distance[0]) < self.size[0]*0.5 and abs(distance[1]) < self.game_objects.game.WINDOW_SIZE[1]*0.5:#if on screen on y and coser than half screen on x
@@ -1252,7 +1250,7 @@ class Spawner(Staticentity):#an entity spawner
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
 
-class Dark_screen(Staticentity):#used in e.g. caves.
+class Dark_screen(Staticentity):#used in e.g. caves. loaded in maploader
     def __init__(self,game_objects,colour = (10,10,10,200)):
         super().__init__(pos = [0,0])
         blank_surface  = pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))).convert_alpha()#ONLY USED FOR DARK MODE
@@ -1265,15 +1263,16 @@ class Dark_screen(Staticentity):#used in e.g. caves.
     def update(self,pos):
         self.image = self.dark.copy()
 
-class Transparent_screen(Staticentity):#a placeholder for normal stages
+class Transparent_screen(Staticentity):#a placeholder for normal stages. initialised in maploader
     def __init__(self):
         super().__init__(pos = [0,0])
 
-class Light_glow(Staticentity):#a light glow anounf an entity
+class Light_glow(Staticentity):#a light glow anounf an entity. loaded in maploader
     def __init__(self,entity):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
+        self.radius = 200
         self.make_glow()
         self.image = self.glow
         self.rect = self.image.get_rect()
@@ -1285,7 +1284,6 @@ class Light_glow(Staticentity):#a light glow anounf an entity
         self.alpha -= self.game_objects.game.dt*self.slow_motion
 
     def make_glow(self):#init
-        self.radius = 200
         self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
 
         layers = 40
@@ -1294,20 +1292,20 @@ class Light_glow(Staticentity):#a light glow anounf an entity
             pygame.draw.circle(self.temp,(80,80,80,1),self.temp.get_rect().center,i*5+1)
             self.glow.blit(self.temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
-class Dark_glow(Staticentity):#the glow to use in dark area, removes the dark image in caves
+class Dark_glow(Staticentity):#the glow to use in dark area, removes the dark image in caves. Loaded in maploader
     def __init__(self,entity):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
+        self.radius = 200
         self.make_glow()
 
-    def update(self,pos):#the self.dark should be in gameobjects, so that all lights can blit on it
+    def update(self,pos):
         pos=[self.entity.rect.centerx-self.radius,self.entity.rect.centery-self.radius]
         self.game_objects.map.screen.image.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_SUB)
         self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), None, special_flags = pygame.BLEND_RGB_SUB)#inverting
 
     def make_glow(self,const=6):#init
-        self.radius = 200
         self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
 
         layers = 40
@@ -2509,7 +2507,7 @@ class Door(Interactable):
         except:
             pass
 
-class Collision_breakable(Interactable):#a breakable collision block: should it be inetractable instead?
+class Collision_breakable(Interactable):#a breakable collision block
     def __init__(self, pos,game_objects,type = 'type1'):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/'+type+'/')
@@ -2695,7 +2693,7 @@ class Light_crystal(Interactable):
         projectile.clash_particles(self.hitbox.center)
         self.timer_jobs['invincibility'].activate()
         self.currentstate.handle_input('Transform')
-        self.game_objects.cosmetics.add(self.dark_glow(self))#should be when interacted state is initialised
+        self.game_objects.cosmetics.add(self.dark_glow(self))#should be when interacted state is initialised and not on taking dmg
         self.game_objects.cosmetics.add(self.light_glow(self))#should be when interacted state is initialised
 
     def update_timers(self):
