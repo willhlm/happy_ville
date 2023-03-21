@@ -245,24 +245,6 @@
                  "y":224
                 }, 
                 {
-                 "gid":3415,
-                 "height":16,
-                 "id":17,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"string",
-                         "value":"center"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":280,
-                 "y":161
-                }, 
-                {
                  "gid":3402,
                  "height":16,
                  "id":18,
@@ -290,7 +272,7 @@
  "nextobjectid":19,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.8.2",
+ "tiledversion":"1.6.0",
  "tileheight":16,
  "tilesets":[
         {
@@ -325,6 +307,6 @@
         }],
  "tilewidth":16,
  "type":"map",
- "version":"1.8",
+ "version":"1.6",
  "width":40
 }
