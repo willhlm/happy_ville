@@ -85,7 +85,6 @@ class Collisions():
             entity.rect.centery = round(entity.true_pos[1])
             #entity.rect.centery += round(entity.velocity[1]*self.game_objects.game.dt)
             entity.update_hitbox()#follow with hitbox
-
             static_entity_y = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
             if static_entity_y:
                 static_entity_y.collide_y(entity)

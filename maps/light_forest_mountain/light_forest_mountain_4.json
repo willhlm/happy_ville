@@ -76,7 +76,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"light_forest_8"
+                         "value":"light_forest_mountain_8"
                         }, 
                         {
                          "name":"spawn",
@@ -107,6 +107,42 @@
                  "width":16,
                  "x":2288,
                  "y":944
+                }, 
+                {
+                 "gid":15,
+                 "height":144,
+                 "id":295,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"string",
+                         "value":"left"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1712,
+                 "y":576
+                }, 
+                {
+                 "gid":15,
+                 "height":144,
+                 "id":296,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"string",
+                         "value":"left"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":2208,
+                 "y":1024
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -584,7 +620,7 @@
                         {
                          "name":"path_to",
                          "type":"string",
-                         "value":"light_forest_5"
+                         "value":"light_forest_mountain_5"
                         }, 
                         {
                          "name":"spawn",
@@ -641,7 +677,7 @@
          "y":0
         }],
  "nextlayerid":45,
- "nextobjectid":295,
+ "nextobjectid":297,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

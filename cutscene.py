@@ -188,36 +188,36 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
-        pos=(900,100)
-        self.entity=Entities.Reindeer(pos, self.parent_class.game.game_objects)#make the boss
+        pos = (900,100)
+        self.entity = Entities.Reindeer(pos, self.parent_class.game.game_objects)#make the boss
         self.parent_class.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
         self.parent_class.game.game_objects.camera.set_camera('Deer_encounter')
+        self.entity.AI.deactivate()
         self.stage = 0
-        self.parent_class.game.game_objects.player.currentstate.handle_input('Walk_main')#should only enter these states once
+        self.parent_class.game.game_objects.player.currentstate.enter_state('Walk_main')
 
     def update(self):#write how you want the player/group to act
-        self.entity.velocity[1] = 0
         self.timer+=self.parent_class.game.dt
         if self.stage == 0:
-            self.parent_class.game.game_objects.player.velocity[0]=4
+            self.parent_class.game.game_objects.player.velocity[0]  = 4
 
-            if self.timer >160:
+            if self.timer >120:
                 self.stage=1
                 self.parent_class.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                self.parent_class.game.game_objects.player.velocity[0]=0
+                self.parent_class.game.game_objects.player.acceleration[0]=0
 
         elif self.stage==1:
             if self.timer>200:
                 self.entity.currentstate.enter_state('Transform')
-                self.parent_class.game.game_objects.player.velocity[0]=-20
+                self.parent_class.game.game_objects.player.velocity[0] = -20
                 self.parent_class.game.game_objects.camera.camera_shake(amp=3,duration=100)#amplitude, duration
                 self.stage=2
 
         elif self.stage==2:
             if self.timer > 400:
                 self.parent_class.game.game_objects.camera.exit_state()#exsiting deer encounter camera
-                self.entity.AI.enter_AI('Chase')
+                self.entity.AI.activate()
                 self.entity.init_fight()
                 self.exit_state()
 

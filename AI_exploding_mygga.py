@@ -1,163 +1,178 @@
-import sys, random, time, math
+import math, random
+import behaviour_tree
 
-class AI():
-    def __init__(self,entity,init_time = 0):
-        self.entity = entity
-        self.player_distance = [0,0]
-        self.init_time = init_time
-
-    def enter_AI(self,newAI):
-        self.entity.AI = getattr(sys.modules[__name__], newAI)(self.entity,self.init_time)#make a class based on the name of the newstate: need to import sys
-
-    def handle_input(self,input,duration=100):
-        pass
+#peace
+class Target_position(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.angle = random.randint(0,180)
+        self.amp = 60
+        self.update()
 
     def update(self):
-        self.player_distance = [self.entity.game_objects.player.rect.centerx-self.entity.rect.centerx,self.entity.game_objects.player.rect.centery-self.entity.rect.centery]#check plater distance
-        self.init_time += 0.02
-        self.update_AI()
+        self.amp = random.randint(self.amp-20,self.amp+20)
+        self.amp = min(self.amp,80)#cap the amp
 
-    def update_AI(self):
-        pass
+        offset = [-20-10*self.entity.dir[0],20-10*self.entity.dir[0]]
+        self.angle = random.randint(self.angle+offset[0],self.angle+offset[1])
 
-    def finish_action(self):
-        pass
+        self.entity.AI.black_board['target_position'] = [self.amp*math.cos(math.pi*self.angle/180),self.amp*math.sin(math.pi*self.angle/180)]
+        return 'SUCCESS'
 
-class Peace(AI):
-    def __init__(self,entity,init_time=0):
-        super().__init__(entity,init_time)
+class Patrol(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
 
-    def update_AI(self):
-        self.idle_momvement()
-        self.check_sight()
+    def update(self):
+        target_position = [self.entity.original_pos[0] + self.entity.AI.black_board['target_position'][0],self.entity.original_pos[1] + self.entity.AI.black_board['target_position'][1]]
 
-    def idle_momvement(self):
-        self.entity.velocity[0] += 0.6*math.sin(self.init_time)
-        self.entity.velocity[1] += 0.6*math.sin(self.init_time*5)
+        self.entity.velocity[0] += 0.001*(target_position[0]-self.entity.rect.centerx)+0.02*self.entity.dir[0]
+        self.entity.velocity[0] = math.copysign(1,self.entity.velocity[0])*min(abs(self.entity.velocity[0]),1)#limit the max abs velocity to 1
+        self.entity.velocity[1] += 0.001*(target_position[1]-self.entity.rect.centery)
 
-        if self.entity.velocity[0]>0:
-            self.entity.dir[0] = 1
+        if abs(target_position[0]-self.entity.rect.centerx) < 10 and abs(target_position[1]-self.entity.rect.centery) < 10:#5*self.init_time > 2*math.pi
+            return 'SUCCESS'
+        elif self.entity.collision_types['left'] or self.entity.collision_types['right'] or self.entity.collision_types['bottom'] or self.entity.collision_types['top']:
+            return 'FAILURE'
         else:
-            self.entity.dir[0] = -1
+            return 'RUNNING'#no new posiion
 
-    def check_sight(self):#if wihtin sight, enter the passed AI
-        if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance*0.2:
-            self.enter_AI('Chase')
+class Look_target(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
 
-class Nothing(AI):#can be used in cutscene etc
-    def __init__(self,entity,init_time):
-        super().__init__(entity,init_time)
+    def update(self):
+        target_position = [self.entity.original_pos[0] + self.entity.AI.black_board['target_position'][0],self.entity.original_pos[1] + self.entity.AI.black_board['target_position'][1]]
 
-class Pause(AI):#the entity should just stay and do nothing for a while
-    def __init__(self,entity,init_time,duration):
-        super().__init__(entity,init_time)
-        self.duration = duration
-        self.entity.currentstate.handle_input('Idle')
+        if target_position[0] - self.entity.rect.centerx > 10 and self.entity.dir[0] == -1 or target_position[0] - self.entity.rect.centerx < -10 and self.entity.dir[0] == 1:#e.g. player jumpt over entity
+            self.entity.dir[0] = -self.entity.dir[0]
+            return 'FAILURE'
+        elif target_position[1] - self.entity.rect.centery > 10 and self.entity.dir[1] == 1 or target_position[1] - self.entity.rect.centery < -10 and self.entity.dir[0] == -1:#e.g. player jumpt over entity
+            self.entity.dir[1] = -self.entity.dir[1]
+            return 'FAILURE'
+        return 'SUCCESS'
 
-    def update_AI(self):
+#aggro
+class Select_target(behaviour_tree.Leaf):#selects the one that is the closest in players group (so aila or migawari)
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        min_disatnce = 1000000
+        target = None
+        for player in self.entity.game_objects.players:
+            distance = abs(self.entity.rect.centerx - player.rect.centerx)
+            if distance < min_disatnce:
+                min_distance = distance
+                target = player
+        self.entity.AI.black_board['target'] = target
+        return 'SUCCESS'
+
+class Check_sight(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.timer = 0#give up timer
+
+    def update(self):
+        self.timer -= self.entity.game_objects.game.dt
+        self.entity.AI.black_board['player_distance'] = [self.entity.AI.black_board['target'].rect.centerx-self.entity.rect.centerx,self.entity.AI.black_board['target'].rect.centery-self.entity.rect.centery]#check plater distance
+        if abs(self.entity.AI.black_board['player_distance'][0])<self.entity.aggro_distance and abs(self.entity.AI.black_board['player_distance'][1])<self.entity.aggro_distance*0.5:#within aggro distance
+            self.timer = 300#reset
+            return 'SUCCESS'
+        elif self.timer < 0:#no player around
+            self.timer = 0
+            return 'FAILURE'
+
+class Chase(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.init_time = 0
+
+    def update(self):
+        self.init_time += 0.02*self.entity.game_objects.game.dt
+
+        self.entity.velocity[0] += self.entity.dir[0]*0.3#*abs(math.sin(self.init_time))
+        self.entity.velocity[1] += -self.entity.dir[1]*0.3*math.sin(self.init_time*5) + self.entity.AI.black_board['player_distance'][1]*0.001
+
+        if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance and abs(self.entity.AI.black_board['player_distance'][1]) < self.entity.attack_distance:
+            return 'SUCCESS'
+        else:
+            return 'RUNNING'
+
+class Attack(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.state = 'RUNNING'
+
+    def update(self):
+        state = self.state
+        if self.state != 'RUNNING':
+            self.state = 'RUNNING'#reset
+        else:
+            self.entity.currentstate.handle_input('explode')
+        return state
+
+    def handle_input(self,input):
+        if input == 'De_explode':
+            self.state = 'FAILURE'
+        elif input == 'Attack':
+            self.state = 'SUCCESS'
+
+class Look_player(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        if self.entity.AI.black_board['player_distance'][0] > 0 and self.entity.dir[0] == -1 or self.entity.AI.black_board['player_distance'][0] < 0 and self.entity.dir[0] == 1:#e.g. player jumpt over entity
+            self.entity.dir[0] = -self.entity.dir[0]
+            return 'FAILURE'
+        return 'SUCCESS'
+
+class Wait(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.duration = 100
+
+    def update(self):
         self.duration -= 1
         if self.duration < 0:
-            self.exit()
+            self.duration = 100#reset
+            return 'SUCCESS'
+        else:
+            return 'RUNNING'
 
-    def exit(self):
-        self.entity.AI = Chase(self.entity,0)#send in the turnaround duration för the next fram. So that pause and turn_around do run in sequence.
+def build_tree(entity):
+    entity.AI = behaviour_tree.Treenode()
 
-class Trun_around(Pause):#when the player jumps over, should be a delays before the entity turns around
-    def __init__(self,entity,init_time,duration):
-        super().__init__(entity,init_time,duration)
+    peace = behaviour_tree.Sequence()
+    succeeder = behaviour_tree.Fail2Success()
+    run2success = behaviour_tree.Run2Success()#patrol
+    succeeder.add_child(Look_target(entity))
+    peace.add_child(succeeder)
+    selector = behaviour_tree.Selector()
+    success2fail = behaviour_tree.Success2Fail()
+    success2fail.add_child(Patrol(entity))
+    selector.add_child(run2success)
+    selector.add_child(Target_position(entity))
+    run2success.add_child(success2fail)
+    peace.add_child(selector)
 
-    def update_AI(self):
-        self.entity.velocity[0] += self.entity.dir[0]*0.6*abs(math.sin(self.init_time))
-        self.entity.velocity[1] += -self.entity.dir[1]*0.6*math.sin(self.init_time*5)
-        self.exit()
+    aggro = behaviour_tree.Sequence()
+    aggro.add_child(Select_target(entity))
+    aggro1 = behaviour_tree.Running_sequence()
+    aggro.add_child(aggro1)
+    aggro2 = behaviour_tree.Selector()
+    aggro1.add_child(Check_sight(entity))
+    aggro1.add_child(aggro2)
+    aggro2.add_child(Look_player(entity))
+    aggro2.add_child(Wait(entity))
+    aggro1.add_child(Chase(entity))
+    aggro4 = behaviour_tree.Fail2Success()
+    aggro.add_child(aggro4)
+    aggro4.add_child(Attack(entity))
+    aggro.add_child(Wait(entity))
 
-    def exit(self):
-        if abs(self.entity.velocity[0]) < 0.1:
-            self.entity.dir[0] = -self.entity.dir[0]
-            self.enter_AI('Chase')
+    entity.AI.add_child(aggro)
+    entity.AI.add_child(peace)
 
-class Trun_around_up(Trun_around):#when the player jumps over, should be a delays before the entity turns around
-    def __init__(self,entity,init_time,duration):
-        super().__init__(entity,init_time,duration)
-
-    def exit(self):
-        if abs(self.entity.velocity[1]) < 0.1:
-            if self.player_distance[1] > 0:
-                self.entity.dir[1] = -1
-            else:
-                self.entity.dir[1] = 1
-
-            self.enter_AI('Chase')
-
-class Chase(AI):
-    def __init__(self,entity, init_time):
-        super().__init__(entity,init_time)
-        self.entity.currentstate.handle_input('Walk')
-        self.timers = []
-        self.timer_jobs = Giveup_timer(self,100)#if player is out of sight for more than duration, go to peace, else, remain
-        self.turn_delay = 40
-
-    def update_AI(self):
-        if self.look_player(): return#make the direction along the player. a delay can be added
-        self.check_sight()#are we within aggro distance?
-        self.chase_momvement()
-        self.attack()#are we withtin attack distance?
-        self.update_timers()
-
-    def chase_momvement(self):
-        self.entity.velocity[0] += self.entity.dir[0]*0.6*abs(math.sin(self.init_time))
-        self.entity.velocity[1] += -self.entity.dir[1]*0.6*math.sin(self.init_time*5)+self.player_distance[1]*0.001
-
-    def attack(self):
-        if abs(self.player_distance[0])<self.entity.attack_distance and abs(self.player_distance[1])<self.entity.attack_distance:
-            self.enter_AI('Attack')
-
-    def check_sight(self):#if wihtin sight, stay in chase
-        if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance:
-            self.timer_jobs.restore()
-        else:#out of sight
-            self.timer_jobs.activate()
-
-    def look_player(self):#look at the player
-        if self.player_distance[1] > 0 and self.entity.dir[1] == 1 or self.player_distance[1] < 0 and self.entity.dir[1] == -1:
-            self.entity.AI = Trun_around_up(self.entity,self.init_time,self.turn_delay)
-        elif self.player_distance[0] > 0 and self.entity.dir[0] == -1 or self.player_distance[0] < 0 and self.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
-            self.entity.AI = Trun_around(self.entity,self.init_time,self.turn_delay)
-            return True#do not go to attack if you just turned around
-
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
-
-class Attack(AI):
-    def __init__(self,entity,init_time):
-        super().__init__(entity,init_time)
-        self.entity.currentstate.handle_input('explode')
-        self.entity.velocity=[0,0]
-
-    def update_AI(self):
-        pass
-
-class Giveup_timer():
-    def __init__(self,AI,duration = 100):
-        self.AI = AI
-        self.duration = duration
-
-    def restore(self):
-        self.lifetime = self.duration
-
-    def activate(self):#add timer to the entity timer list
-        if self in self.AI.timers: return#do not append if the timer is already inside
-        self.restore()
-        self.AI.timers.append(self)
-
-    def deactivate(self):
-        self.AI.timers.remove(self)
-        self.AI.enter_AI('Peace')
-
-    def update(self):
-        self.lifetime -= 1
-        if self.lifetime < 0:
-            if abs(self.AI.entity.velocity[0]) < 0.1:
-                self.deactivate()
+    #entity.AI.print_tree()
