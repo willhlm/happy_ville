@@ -455,6 +455,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
             self.exit_state()
 
     def render(self):
+        self.game.game_objects.cosmetics.draw(self.game.screen)
         self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
 
 class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not respawned but transffered to cultist hideout

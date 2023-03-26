@@ -117,7 +117,7 @@ class Hurt(Basic_states):
 
 class Death(Basic_states):
     def __init__(self,entity):
-        super().__init__(entity)
+        super().__init__(entity)        
 
     def handle_input(self,input):
         pass

@@ -1,9 +1,8 @@
 import pygame, random, sys
 import Read_files, states, particles, animation, sound
-import states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
+import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist
+import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
-
-pygame.mixer.init()
 
 class Specialdraw_Group(pygame.sprite.Group):#a group for the reflection object which need a special draw method
     def __init__(self):
@@ -353,10 +352,10 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.true_pos = list(self.rect.center)
         self.hitbox.midbottom = self.rect.midbottom
 
-    def update_true_pos_x(self):#called from platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
+    def update_true_pos_x(self):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
         self.true_pos[0] += self.slow_motion*self.game_objects.game.dt*self.velocity[0]
 
-    def update_true_pos_y(self):#called from platform collision
+    def update_true_pos_y(self):#called from Engine.platform collision
         self.true_pos[1] += self.slow_motion*self.game_objects.game.dt*self.velocity[1]
 
     #pltform collisions.
@@ -427,7 +426,7 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def hurt_particles(self,distance=0,lifetime=40,vel=[7,15],type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
         for i in range(0,number_particles):
-            obj1=particles.General_particle(self.hitbox.center,self.game_objects,distance,lifetime,vel,type,dir,scale,colour)
+            obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance,lifetime,vel,dir,scale,colour)
             self.game_objects.cosmetics.add(obj1)
 
     def update_timers(self):
@@ -435,10 +434,9 @@ class Character(Platform_entity):#enemy, NPC,player
             timer.update()
 
 class Player(Character):
-    sfx_sword = pygame.mixer.Sound("Audio/SFX/utils/sword_3.ogg")
-
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = Read_files.Sounds('Audio/SFX/enteties/aila/')
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/aila/')
         self.image = self.sprites.sprite_dict['idle_main'][0]
         self.rect = self.image.get_rect(center=pos)
@@ -454,8 +452,8 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        #make it a dictionary instead?
-        self.states = set(['Dash_attack','Dash','Wall_glide','Double_jump','Idle','Walk','Pray','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Slow_motion','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
+        #self.states = set(['Dash_attack','Dash','Wall_glide','Double_jump','Idle','Walk','Pray','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Slow_motion','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
+        self.states = {'Idle':True,'Walk':True,'Pray':True,'Jump_run':True,'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':False,'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
 
         self.spawn_point = [{'map':'light_forest_3', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -465,10 +463,10 @@ class Player(Character):
         self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-    def update_true_pos_x(self):#called from platform collision
+    def update_true_pos_x(self):#called from Engine.platform collision
         self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
 
-    def update_true_pos_y(self):#called from platform collision
+    def update_true_pos_y(self):#called from Engine.platform collision
         self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
 
     def down_collision(self,hitbox):#when colliding with platform beneth
@@ -592,7 +590,7 @@ class Enemy(Character):
 
         #move these to AI classes?
         self.attack_distance = 0#when try to hit
-        self.aggro_distance = 300#when ot become aggro
+        self.aggro_distance = 300#when to become aggro
 
     def update(self,pos):
         super().update(pos)
@@ -602,11 +600,10 @@ class Enemy(Character):
     def player_collision(self,player):#when player collides with enemy
         if not self.aggro: return
         if player.invincibile: return
-        if player.currentstate.state_name == 'death': return
-
+        #if player.currentstate.state_name == 'death': return
         player.take_dmg(1)
         sign=(player.hitbox.center[0]-self.hitbox.center[0])
-        if sign>0:
+        if sign > 0:
             player.knock_back([1,0])
         else:
             player.knock_back([-1,0])
@@ -1061,7 +1058,7 @@ class Boss(Enemy):
                 self.game_objects.cosmetics.add(self.health_bar)
 
     def give_abillity(self):
-        self.game_objects.player.abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
+        self.game_objects.player.abilities.Player_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
 
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
@@ -1077,11 +1074,11 @@ class Reindeer(Boss):
 
         self.abillity = 'dash_1main'#the stae of image that will be blitted to show which ability that was gained
         self.attack = Sword
-        self.special_attack = Ground_shock
+        self.special_attack = Horn_vines
         self.attack_distance = 300
 
     def give_abillity(self):#called when reindeer dies
-        self.game_objects.player.states.add('Dash')#append dash abillity to available states
+        self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
@@ -1268,11 +1265,11 @@ class Transparent_screen(Staticentity):#a placeholder for normal stages. initial
         super().__init__(pos = [0,0])
 
 class Light_glow(Staticentity):#a light glow anounf an entity. loaded in maploader
-    def __init__(self,entity):
+    def __init__(self,entity,radius=200):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
-        self.radius = 200
+        self.radius = radius
         self.make_glow()
         self.image = self.glow
         self.rect = self.image.get_rect()
@@ -1288,20 +1285,20 @@ class Light_glow(Staticentity):#a light glow anounf an entity. loaded in mapload
 
         layers = 40
         for i in range(layers):
-            self.temp = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-            pygame.draw.circle(self.temp,(80,80,80,1),self.temp.get_rect().center,i*5+1)
-            self.glow.blit(self.temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
+            temp = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
+            pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*5+1)
+            self.glow.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
 class Dark_glow(Staticentity):#the glow to use in dark area, removes the dark image in caves. Loaded in maploader
-    def __init__(self,entity):
+    def __init__(self,entity,radius=200):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
-        self.radius = 200
+        self.radius = radius
         self.make_glow()
 
     def update(self,pos):
-        pos=[self.entity.rect.centerx-self.radius,self.entity.rect.centery-self.radius]
+        pos = [self.entity.rect.centerx-self.radius,self.entity.rect.centery-self.radius]
         self.game_objects.map.screen.image.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_SUB)
         self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), None, special_flags = pygame.BLEND_RGB_SUB)#inverting
 
@@ -1313,6 +1310,24 @@ class Dark_glow(Staticentity):#the glow to use in dark area, removes the dark im
             k = i*const
             k = min(k,255)
             pygame.draw.circle(self.glow,(k,k,k,k),self.glow.get_rect().center,self.radius-i*5)
+
+class Dash_effect(Staticentity):
+    def __init__(self, entity, alpha = 255):
+        super().__init__(entity.rect.center)
+        self.image = entity.image.copy()
+        self.rect = self.image.get_rect()
+        self.rect.center = entity.rect.center
+        self.alpha = alpha
+
+    def update(self,scroll):
+        self.update_pos(scroll)
+        self.alpha *= 0.9
+        self.image.set_alpha(self.alpha)
+        self.destroy()
+
+    def destroy(self):
+        if self.alpha < 5:
+            self.kill()
 
 #Player movement abilities, handles them
 class Player_abilities():
@@ -1577,7 +1592,7 @@ class Sword(Melee):
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=20,vel=[7,14],type='Spark',dir=angle,scale=0.5)
+            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=20,vel=[7,14],dir=angle,scale=0.5,colour = [255,255,255,255])
             self.entity.game_objects.cosmetics.add(obj1)
 
     def collision_inetractables(self,interactable):#called when projectile hits interactables
@@ -1620,7 +1635,7 @@ class Aila_sword(Sword):
         angle = random.randint(-180, 180)#the ejection anglex
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1=particles.General_particle(pos,self.game_objects,distance=0,lifetime=15,vel=[7,14],type='Spark',dir=angle,scale=0.4,colour=color)
+            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel=[7,14],dir=angle,scale=0.4,colour=color)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
@@ -1718,20 +1733,24 @@ class Poisonblobb(Ranged):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-class Ground_shock(Ranged):
-    sprites = Read_files.Sprites_Player('Sprites/Attack/ground_shock/')
+class Horn_vines(Ranged):
+    sprites = Read_files.Sprites_Player('Sprites/Attack/horn_vines/')
 
-    def __init__(self,entity):
+    def __init__(self,entity,pos):
         super().__init__(entity)
-        self.image = self.sprites.sprite_dict['once'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = self.image.get_rect()
+        self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center = pos)
         self.rect.bottom = self.entity.rect.bottom
-        self.hitbox=pygame.Rect(self.rect.x,self.rect.y,64,32)
-        self.update_hitbox()
-
+        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(pos[0],pos[1],0,0)#
+        self.currentstate = states_horn_vines.Idle(self)#
         self.dmg = entity.dmg
-        self.lifetime = 100
-        self.velocity=[entity.dir[0]*5,0]
+        self.lifetime = 500
+
+    def destroy(self):
+        if self.lifetime < 0:
+            self.entity.currentstate.handle_input('Horn_vines')
+            self.kill()
 
 class Force(Ranged):
     sprites = Read_files.Sprites_Player('Sprites/Attack/force/')
@@ -1966,7 +1985,7 @@ class Soul_essence(Loot):
 
     def update(self,scroll):
         super().update(scroll)
-        obj1 = particles.General_particle(self.rect.center,self.game_objects,distance=100,lifetime=20,vel=[2,4],type='spark',dir='isotropic')
+        obj1 = getattr(particles, 'Spark')(self.rect.center,self.game_objects,distance = 100,lifetime=20,vel=[2,4],dir='isotropic',scale = 1, colour = [255,255,255,255])
         self.game_objects.cosmetics.add(obj1)
 
 class Tungsten(Loot):
@@ -2021,6 +2040,7 @@ class Enemy_drop(Loot):#add gravity
 
     def player_collision(self,player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return
+        self.game_objects.sound.play_sfx(self.sounds.SFX['death'])#should be in states
         obj = (self.__class__.__name__)#get the string in question
         try:
             self.game_objects.player.inventory[obj] += 1
@@ -2047,6 +2067,7 @@ class Enemy_drop(Loot):#add gravity
 
 class Amber_Droplet(Enemy_drop):
     sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/amber_droplet/')
+    sounds = Read_files.Sounds('Audio/SFX/enteties/items/amber_droplet/')
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -2063,6 +2084,7 @@ class Amber_Droplet(Enemy_drop):
 
 class Bone(Enemy_drop):
     sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/bone/')
+    sounds = Read_files.Sounds('Audio/SFX/enteties/items/bone/')
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -2082,6 +2104,7 @@ class Bone(Enemy_drop):
 
 class Heal_item(Enemy_drop):
     sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heal_item/')
+    sounds = Read_files.Sounds('Audio/SFX/enteties/items/heal_item/')
 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)

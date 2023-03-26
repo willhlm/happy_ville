@@ -1,10 +1,7 @@
-import pygame, math, random, sys
-
-def General_particle(pos,game_objects,distance=400,lifetime=60,vel=[7,13],type='Circle',dir='isotropic',scale=1, colour=[255,255,255,255]):
-    return getattr(sys.modules[__name__], type)(pos,game_objects,distance,lifetime,vel,dir,scale, colour)
+import pygame, math, random
 
 class Particles(pygame.sprite.Sprite):
-    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour):
+    def __init__(self,pos, game_objects, distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255]):
         super().__init__()
         self.game_objects = game_objects
         angle = self.define_angle(dir)
@@ -41,7 +38,7 @@ class Particles(pygame.sprite.Sprite):
         if self.lifetime < 0:
             self.kill()
 
-    def define_angle(self,dir):
+    def define_angle(self,dir):#is there a better way?
         if dir=='isotropic':
             angle=random.randint(-180, 180)#the ejection anglex
         elif dir == -1:#rigth hit
@@ -59,7 +56,7 @@ class Particles(pygame.sprite.Sprite):
 
 class Circle(Particles):#a general one
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour):
-        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale, colour)
+        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.radius = random.randint(max(self.scale-1,1), self.scale+1)
         self.fade_scale = 3
         self.make_circle()
@@ -83,7 +80,7 @@ class Circle(Particles):#a general one
 
 class Spark(Particles):#a general one
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale,colour):
-        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale, colour)
+        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.make_sparks()
         self.fade_scale = 10
 

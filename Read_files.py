@@ -138,6 +138,30 @@ def load_sprites(path_to_folder):
     list_of_sprites.sort()
     return [pygame.image.load(file) for file in list_of_sprites]
 
+class Sounds():#read in SFX sounds, dorsn't have to be a class
+    def __init__(self,path):
+        super().__init__()
+        self.SFX = self.load_all(path)
+
+    @staticmethod
+    def load_all(base_path):
+        #loads all sprites in all sub directories in base_path, stores list of sprites with keys corresponding to folder name
+        sprite_dict = {}
+        for subdir in [d[0] for d in walk(base_path)]:
+            if subdir == base_path:
+                pass
+            sprite_dict[subdir.split("/")[-1]] = Sounds.load_sounds(subdir)
+        return sprite_dict
+
+    @staticmethod
+    def load_sounds(path_to_folder):
+        #use this to load multiple sprites in a path_to_folder
+        for f in listdir(path_to_folder):
+            if not isfile(join(path_to_folder, f)): continue#skip the folders
+            if '.DS_Store' in join(path_to_folder, f): continue#skip this file
+            if '.gitkeep' in join(path_to_folder, f): continue#skip this file
+            return pygame.mixer.Sound(join(path_to_folder, f))
+
 #sprires and fonts
 class Sprites():
     #use for animation sprites

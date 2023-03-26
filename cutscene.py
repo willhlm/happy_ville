@@ -226,7 +226,7 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
         super().__init__(objects)
         self.step1 = False
         self.const = 0.5#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
-        self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
+        self.parent_class.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
 
     def update(self):
         self.timer+=self.parent_class.game.dt
@@ -244,7 +244,7 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
     def render(self):
         super().render()
         if self.step1:
-            particle = particles.General_particle(self.parent_class.game.game_objects.player.rect.center,self.parent_class.game.game_objects)
+            particle = getattr(particles, 'Spark')(self.parent_class.game.game_objects.player.rect.center,self.parent_class.game.game_objects,distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255])
             self.parent_class.game.game_objects.cosmetics.add(particle)
 
             self.parent_class.game.game_objects.cosmetics.draw(self.parent_class.game.game_objects.game.screen)

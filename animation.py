@@ -45,9 +45,9 @@ class Hurt_animation(Entity_animation):#become white
     def update(self):
         super().update()
         self.entity.image.fill((250,250,250),special_flags=pygame.BLEND_ADD)
-        self.duration -= 1
+        self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
 
-        if self.duration<0:
+        if self.duration < 0:
             self.enter_state(self.next_animation)
 
     def handle_input(self,input):
@@ -64,10 +64,10 @@ class Invincibile_animation(Entity_animation):
         super().update()
         colour=[int(0.5*255*math.sin(self.time)+255*0.5),int(0.5*255*math.sin(self.time)+255*0.5),int(0.5*255*math.sin(self.time)+255*0.5)]
         self.entity.image.fill(colour,special_flags=pygame.BLEND_ADD)
-        self.duration -= 1
-        self.time += 0.5
+        self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
+        self.time += 0.5*self.entity.game_objects.game.dt*self.entity.slow_motion
 
-        if self.duration<0:
+        if self.duration < 0:
             self.enter_state('Entity_animation')
 
 class Simple_animation(Animation):#no state or phase

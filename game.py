@@ -16,7 +16,7 @@ class Game():
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
 
         #initiate game related values and mixer
-        pygame.mixer.init()
+        #pygame.mixer.init()
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
         self.fps = C.fps
@@ -65,7 +65,7 @@ class Game():
             self.scale = min(scale_w,scale_h)
 
 if __name__ == '__main__':
-    #pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
-    pygame.init()#initilise
+    pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
+    pygame.init()#initilise    
     g = Game()
     g.run()

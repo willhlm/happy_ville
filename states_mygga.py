@@ -42,7 +42,7 @@ class Walk(Enemy_states):
 
     def update_state(self):
         self.init_time += 0.02*self.entity.game_objects.game.dt
-        amp = min(abs(self.entity.velocity[0]),0.1)
+        amp = min(abs(self.entity.velocity[0]),0.3)
         self.entity.velocity[1] += amp*math.sin(5*self.init_time)# - self.entity.dir[1]*0.1
 
         if abs(self.entity.velocity[0]) < 0.01:

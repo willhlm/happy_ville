@@ -1,7 +1,7 @@
 import pygame
+pygame.mixer.init()
 
 class Sound():
-
     #class for organising sound and music playback
     #channels 0 - 4 is dedicated to
     def __init__(self):

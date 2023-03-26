@@ -1,4 +1,4 @@
-import sys, math
+import sys, math, Entities
 from states_entity import Entity_States
 
 class Reindeer_states(Entity_States):
@@ -233,6 +233,7 @@ class Dash_main(Reindeer_states):
     def update_state(self):
         self.entity.velocity[1]=0
         self.entity.velocity[0]=self.dir[0]*max(20,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity))
 
     def increase_phase(self):
          self.enter_state('Dash_post')
@@ -259,8 +260,22 @@ class Special_attack_main(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()#animation direction
-        attack=self.entity.special_attack(self.entity)#make the object
-        self.entity.projectiles.add(attack)#add to group but in main phase
+        self.make_attacks()
+
+    def make_attacks(self):
+        for i in range(0,5):
+            pos = [100 + 100*i, 300]
+            attack = self.entity.special_attack(self.entity,pos)#make the object
+            self.entity.projectiles.add(attack)#add to group but in main phase
+
+    def handle_input(self,input):
+        if input == 'Horn_vines':#called when horn vines dissapear
+            self.enter_state('Special_attack_post')
+
+class Special_attack_post(Reindeer_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir=self.entity.dir.copy()#animation direction
 
     def increase_phase(self):
         self.entity.AI.handle_input('Attack')

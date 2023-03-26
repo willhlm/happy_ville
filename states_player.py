@@ -8,7 +8,7 @@ class Player_states(Entity_States):
 
     def enter_state(self,newstate):
         state = newstate[:newstate.rfind('_')]#get the name up to last _ (remove pre, main, post)
-        if state in self.entity.states:
+        if self.entity.states[state]:
              self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
     def update(self):
@@ -92,6 +92,7 @@ class Walk_main(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
+            self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
@@ -149,7 +150,7 @@ class Jump_stand_pre(Player_states):
         super().handle_release_input(input)
         if input[-1]=='a':
             if self.entity.acceleration[0]==0:
-                self.enter_state('Fall_stand')
+                self.enter_state('Fall_stand_pre')
 
     def swing_sword(self):
         if not self.entity.sword_swinging:
@@ -195,7 +196,7 @@ class Jump_run_pre(Player_states):
         super().handle_release_input(input)
         if input[-1]=='a':
             if self.entity.acceleration[0]!=0:
-                self.enter_state('Fall_run')
+                self.enter_state('Fall_run_pre')
 
     def swing_sword(self):
         if not self.entity.sword_swinging:
@@ -393,6 +394,7 @@ class Dash_pre(Player_states):
     def update_state(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity,100))
 
     def handle_input(self,input):#if hit wall
         if input == 'Wall':
@@ -412,6 +414,7 @@ class Dash_1main(Dash_pre):#level one dash: normal
         super().__init__(entity)
         self.entity.velocity[0] = 20*self.dir[0]
         self.entity.consume_spirit(1)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['dash'])
 
     def increase_phase(self):
         self.enter_state('Dash_post')
@@ -641,6 +644,7 @@ class Pray_pre(Player_states):
         effect = Entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['pray'])
 
     def handle_press_input(self,input):#all states should inehrent this function
         pass
@@ -737,7 +741,7 @@ class Sword(Player_states):#main phases shold inheret this
         self.entity.timer_jobs['sword'].activate()
         self.dir = self.entity.dir.copy()#animation direction
         self.entity.sword.dir = self.dir.copy()#sword direction
-        sound.Sound.play_sfx(self.entity.sfx_sword)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['sword'])
         self.slash()
 
     def slash(self):#if we have green infinity stone
@@ -868,6 +872,7 @@ class Thunder_pre(Abillitites):
 class Thunder_charge(Thunder_pre):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['thunder'])
 
     def init(self):
         self.entity.consume_spirit()

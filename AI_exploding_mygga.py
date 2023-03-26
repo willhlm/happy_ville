@@ -92,7 +92,7 @@ class Chase(behaviour_tree.Leaf):
         self.init_time += 0.02*self.entity.game_objects.game.dt
 
         self.entity.velocity[0] += self.entity.dir[0]*0.3#*abs(math.sin(self.init_time))
-        self.entity.velocity[1] += -self.entity.dir[1]*0.3*math.sin(self.init_time*5) + self.entity.AI.black_board['player_distance'][1]*0.001
+        self.entity.velocity[1] += (self.entity.AI.black_board['player_distance'][1] - 30)*0.002
 
         if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance and abs(self.entity.AI.black_board['player_distance'][1]) < self.entity.attack_distance:
             return 'SUCCESS'
