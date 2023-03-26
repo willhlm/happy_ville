@@ -1,5 +1,5 @@
 #game settings
-fps = 120
+fps = 60
 window_size = [576,324]
 player_center = [window_size[0]*0.5,window_size[1]*0.5]
 tile_size = 16
