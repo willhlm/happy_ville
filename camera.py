@@ -7,7 +7,8 @@ class Camera():
         self.scroll = [0,0]
         self.center = list(game_objects.map.PLAYER_CENTER)
         self.original_center = self.center.copy()
-
+        self.test = []
+        
     def update(self):
         self.check_camera_border_new()#this need to be checked before the camera calculates the scroll
         self.true_scroll[0] += (self.game_objects.player.rect.centerx - 8*self.true_scroll[0] - self.center[0])/15
