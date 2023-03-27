@@ -261,9 +261,8 @@ class BG_Block(Staticentity):
         self.parallax = parallax
 
     def update_pos(self,pos):
-        #self.rect.topleft = [self.rect.topleft[0] + self.parallax[0]*pos[0], self.rect.topleft[1] + self.parallax[1]*pos[1]]#do you need this?
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
-        self.rect.topleft = self.true_pos.copy()
+        self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -453,7 +452,7 @@ class Player(Character):
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
         #self.states = set(['Dash_attack','Dash','Wall_glide','Double_jump','Idle','Walk','Pray','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Slow_motion','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
-        self.states = {'Idle':True,'Walk':True,'Pray':True,'Jump_run':True,'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':False,'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,'Arrow':True,'Counter':True}
+        self.states = {'Idle':True,'Walk':True,'Pray':True,'Jump_run':True,'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':True,'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
 
         self.spawn_point = [{'map':'light_forest_3', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
