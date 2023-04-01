@@ -15,8 +15,7 @@ class Game():
         flags = pygame.SCALED# | pygame.FULLSCREEN
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
 
-        #initiate game related values and mixer
-        #pygame.mixer.init()
+        #initiate game related values
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
         self.fps = C.fps
@@ -43,6 +42,7 @@ class Game():
             self.clock.tick(self.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
             #self.dt = 1
+            
             #handle event
             self.event_loop()
 

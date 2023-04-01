@@ -30,6 +30,7 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = UI.Gameplay_UI(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
+        self.scroll = [0,0]
 
     def create_groups(self):#define all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -106,7 +107,7 @@ class Game_Objects():
     def update(self):
         self.camera.update()
         scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
-        self.true_scroll = [-self.camera.true_scroll[0],-self.camera.true_scroll[1]]
+        true_scroll = [-self.camera.true_scroll[0],-self.camera.true_scroll[1]]
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):
