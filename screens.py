@@ -12,7 +12,7 @@ class Screen():
         self.surface = self.blank_surface.copy()
         fracx, whole = math.modf(self.layer.parallax[0]*self.game_objects.camera.true_scroll[0])
         fracy, whole = math.modf(self.layer.parallax[1]*self.game_objects.camera.true_scroll[1])
-        self.offset = [fracx, fracy]#the fractional coordinate
+        self.offset = [0, 0]#the fractional coordinate
 
 class Player_screen():
     def __init__(self,layer):

@@ -272,7 +272,7 @@ class BG_Block(Staticentity):
 
     def update_pos(self,pos):
         self.screen.update_pos(pos)
-        self.true_pos = [self.true_pos[0] + int((self.parallax[0]*pos[0])), self.true_pos[1] +int(self.parallax[1]*pos[1])]
+        self.true_pos = [self.true_pos[0] + (self.parallax[0]*pos[0]), self.true_pos[1] +(self.parallax[1]*pos[1])]
         #self.rect.topleft = [self.rect.topleft[0] + int(self.parallax[0]*pos[0]), self.rect.topleft[1] + int(self.parallax[1]*pos[1])]
         self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
         #print(pos[0],self.true_pos[0],self.rect.topleft[0],self.screen.offset[0],self.screen.true_offset[0],self.game_objects.camera.true_scroll[0])
