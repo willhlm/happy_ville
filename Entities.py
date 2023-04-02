@@ -1,5 +1,5 @@
 import pygame, random, sys
-import Read_files, states, particles, animation, sound
+import Read_files, states, particles, animation, sound, screens
 import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
@@ -11,6 +11,14 @@ class Specialdraw_Group(pygame.sprite.Group):#a group for the reflection object 
     def draw(self):
         for s in self.sprites():
             s.draw()
+
+class PPdraw_Group(pygame.sprite.LayeredUpdates):#all bg and fg
+    def __init__(self):
+        super().__init__()
+
+    def draw(self,screen):
+        for spr in self.sprites():
+            spr.screen.surface.blit(spr.image, spr.rect)
 
 class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries
     def __init__(self):
@@ -255,14 +263,19 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
             self.add(self.pause_group)#add to pause
 
 class BG_Block(Staticentity):
-    def __init__(self,pos,img,parallax = 1):
+    def __init__(self,game_objects,pos,img,parallax):
         super().__init__(pos,img)
+        self.game_objects = game_objects
         self.true_pos = self.rect.bottomleft
         self.parallax = parallax
+        self.screen = screens.Screen(self)
 
     def update_pos(self,pos):
-        self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
+        self.screen.update_pos(pos)
+        self.true_pos = [self.true_pos[0] + int((self.parallax[0]*pos[0])), self.true_pos[1] +int(self.parallax[1]*pos[1])]
+        #self.rect.topleft = [self.rect.topleft[0] + int(self.parallax[0]*pos[0]), self.rect.topleft[1] + int(self.parallax[1]*pos[1])]
         self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
+        #print(pos[0],self.true_pos[0],self.rect.topleft[0],self.screen.offset[0],self.screen.true_offset[0],self.game_objects.camera.true_scroll[0])
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -462,11 +475,14 @@ class Player(Character):
         self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-    def update_true_pos_x(self):#called from Engine.platform collision
-        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
+    def init_screen(self):
+        self.screen = screens.Player_screen(self)
 
-    def update_true_pos_y(self):#called from Engine.platform collision
-        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
+    #def update_true_pos_x(self):#called from Engine.platform collision
+    #    self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
+
+    #def update_true_pos_y(self):#called from Engine.platform collision
+        #self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -524,6 +540,7 @@ class Player(Character):
         super().update(pos)
         self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
         self.omamoris.update()
+        self.screen.update_pos()
 
 class Migawari_entity(Character):#player double ganger
     sprites = Read_files.Sprites_Player('Sprites/Attack/migawari/')

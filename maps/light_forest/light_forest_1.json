@@ -407,29 +407,6 @@
                  "y":768
                 }, 
                 {
-                 "gid":16,
-                 "height":16,
-                 "id":238,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"layers",
-                         "type":"string",
-                         "value":"fg1,bg4"
-                        }, 
-                        {
-                         "name":"particle",
-                         "type":"string",
-                         "value":"Circles"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":3584,
-                 "y":896
-                }, 
-                {
                  "gid":10,
                  "height":48,
                  "id":240,
@@ -569,24 +546,6 @@
                  "width":2336,
                  "x":2512,
                  "y":1024
-                }, 
-                {
-                 "gid":17,
-                 "height":16,
-                 "id":268,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"colour",
-                         "type":"color",
-                         "value":"#ffffffff"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":3568,
-                 "y":896
                 }, 
                 {
                  "gid":15,

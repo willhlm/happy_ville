@@ -432,16 +432,17 @@ class Level():
 
         #add the bg, fg and animations to the group
         for tile_layer in blit_compress_surfaces.keys():
+            #self.game_objects.game.new_screen()#make a new screen for each layer
 
             if 'fg' in tile_layer:
                 pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
-                self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+                self.game_objects.all_fgs.add(Entities.BG_Block(self.game_objects,pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables
                 pos=(-math.ceil((1 - parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
-                self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+                self.game_objects.bg_interact.add(Entities.BG_Block(self.game_objects,pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
             elif 'bg' in tile_layer:#bg
                 pos=(-math.ceil((1-parallax[tile_layer][0])*new_map_diff[0]) + offset[tile_layer][0],-math.ceil((1-parallax[tile_layer][1])*new_map_diff[1])+ offset[tile_layer][1])
-                self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+                self.game_objects.all_bgs.add(Entities.BG_Block(self.game_objects,pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
 
             try:
                 #add fog to BG
@@ -469,3 +470,4 @@ class Level():
 
         self.particles={}#reset particles
         self.fog_colour = []#reset fog
+        self.game_objects.player.init_screen()

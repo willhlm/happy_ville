@@ -37,8 +37,8 @@ class Game_Objects():
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.platforms_ramps = pygame.sprite.Group()
-        self.all_bgs = pygame.sprite.LayeredUpdates()
-        self.all_fgs = pygame.sprite.LayeredUpdates()
+        self.all_bgs = Entities.PPdraw_Group()
+        self.all_fgs = Entities.PPdraw_Group()
         self.bg_interact = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
         self.eprojectiles = pygame.sprite.Group()#arrows and sword for enemies
         self.fprojectiles = pygame.sprite.Group()#arrows and sword for aila
@@ -116,6 +116,7 @@ class Game_Objects():
         self.all_bgs.update(scroll)
         self.bg_interact.update(scroll)
         self.all_fgs.update(scroll)
+        player = [-self.camera.player[0],-self.camera.player[1]]
         self.players.update(scroll)
         self.entity_pause.update(scroll)#should be before enemies, npcs and interactable groups
         self.enemies.update(scroll)
@@ -130,17 +131,18 @@ class Game_Objects():
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
-        self.interactables.draw(self.game.screen)#should be before bg_interact
-        self.bg_interact.draw(self.game.screen)
+        int = 7
+        self.interactables.draw(self.game.screens[int].surface)#should be before bg_interact
+        self.bg_interact.draw(self.game.screens[int].surface)
 
-        self.enemies.draw(self.game.screen)
-        self.npcs.draw(self.game.screen)
-        self.players.draw(self.game.screen)
-        self.fprojectiles.draw(self.game.screen)
-        self.eprojectiles.draw(self.game.screen)
-        self.loot.draw(self.game.screen)
-        self.entity_pause.draw(self.game.screen)
-        self.cosmetics.draw(self.game.screen)
+        self.enemies.draw(self.game.screens[int].surface)
+        self.npcs.draw(self.game.screens[int].surface)
+        self.players.draw(self.player.screen.surface)
+        self.fprojectiles.draw(self.game.screens[int].surface)
+        self.eprojectiles.draw(self.game.screens[int].surface)
+        self.loot.draw(self.game.screens[int].surface)
+        self.entity_pause.draw(self.game.screens[int].surface)
+        self.cosmetics.draw(self.game.screens[int].surface)
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw(self.game.screen)
 
