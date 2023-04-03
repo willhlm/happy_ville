@@ -13,9 +13,6 @@ class Weather():
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
 
-    def fog(self,group,paralax,colour):
-        group.add(Fog(self.game_objects,paralax,colour))
-
 class Fog(pygame.sprite.Sprite):
     def __init__(self,game_objects,parallax,colour):
         super().__init__()

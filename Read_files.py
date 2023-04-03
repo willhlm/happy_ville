@@ -25,69 +25,28 @@ def write_json():
     pass
 
 #if we want static stamps with parallax
-def format_tiled_json2(map_data):
+def format_tiled_json_group(map_data):
     formatted_map_data = {}
-    formatted_map_data['tile_layers'] = {}
+    formatted_map_data['groups'] = {}
     formatted_map_data['tilesets'] = map_data['tilesets']
-    #formatted_map_data['group'] = {}
 
-    for layer in map_data['layers']:#it will take from lowest position in tiled
-        if layer['name'] == 'statics' or layer['name'] =='collision':#object not in group: static stamps
-            formatted_map_data[layer['name']] = layer['objects']
-            continue
+    for gruop in map_data['layers']:#it will take from lowest position in tiled
+    #    if gruop['name'] == 'statics' or gruop['name'] =='collision':#object not in group: static stamps and collision layer
+    #        formatted_map_data[gruop['name']] = gruop['objects']
+    #        continue
+        formatted_map_data['groups'][gruop['name']] = {}
+        formatted_map_data['groups'][gruop['name']]['layers'] = {}
+        formatted_map_data['groups'][gruop['name']]['objects'] = {}
+        for layer in gruop['layers']:#inside group stuff
+            formatted_map_data['groups'][gruop['name']]['parallaxx'] = gruop.get('parallaxx',1)#get value, if not present, pass 1
+            formatted_map_data['groups'][gruop['name']]['parallaxy'] = gruop.get('parallaxy',1)#get value, if not present, pass 1
+            formatted_map_data['groups'][gruop['name']]['offsetx'] = gruop.get('offsetx',0)
+            formatted_map_data['groups'][gruop['name']]['offsety'] = gruop.get('offsety',0)
 
-        elif 'objects' in layer.keys():#object not in gropu but not static stamps
-            formatted_map_data['tile_layers'][layer['name']] = {}
-            formatted_map_data['tile_layers'][layer['name']]['objects'] = layer['objects']
-
-            if 'parallaxx' in layer.keys():
-                formatted_map_data['tile_layers'][layer['name']]['paralaxx'] = layer['parallaxx']
-            else:
-                formatted_map_data['tile_layers'][layer['name']]['paralaxx'] = 1
-
-            if 'parallaxy' in layer.keys():
-                formatted_map_data['tile_layers'][layer['name']]['paralaxy'] = layer['parallaxy']
-            else:
-                formatted_map_data['tile_layers'][layer['name']]['paralaxy'] = 1
-
-            if 'offsetx' in layer.keys():
-                formatted_map_data['tile_layers'][layer['name']]['offsetx'] = layer['offsetx']
-            else:
-                formatted_map_data['tile_layers'][layer['name']]['offsetx'] = 0
-
-            if 'offsety' in layer.keys():
-                formatted_map_data['tile_layers'][layer['name']]['offsety'] = layer['offsety']
-            else:
-                formatted_map_data['tile_layers'][layer['name']]['offsety'] = 0
-            continue
-
-        for sub_group in layer['layers']:#inside group stuff, should contain only tile layers
-            if layer['name'] in formatted_map_data['tile_layers'].keys():#check if the group has been opeed before
-                pass
-            else:#first time loading that group
-                formatted_map_data['tile_layers'][layer['name']] = {}
-                formatted_map_data['tile_layers'][layer['name']]['layers'] = {}
-                if 'parallaxx' in layer.keys():
-                    formatted_map_data['tile_layers'][layer['name']]['paralaxx'] = layer['parallaxx']
-                else:
-                    formatted_map_data['tile_layers'][layer['name']]['paralaxx'] = 1
-
-                if 'parallaxy' in layer.keys():
-                    formatted_map_data['tile_layers'][layer['name']]['paralaxy'] = layer['parallaxy']
-                else:
-                    formatted_map_data['tile_layers'][layer['name']]['paralaxy'] = 1
-
-                if 'offsetx' in layer.keys():
-                    formatted_map_data['tile_layers'][layer['name']]['offsetx'] = layer['offsetx']
-                else:
-                    formatted_map_data['tile_layers'][layer['name']]['offsetx'] = 0
-
-                if 'offsety' in layer.keys():
-                    formatted_map_data['tile_layers'][layer['name']]['offsety'] = layer['offsety']
-                else:
-                    formatted_map_data['tile_layers'][layer['name']]['offsety'] = 0
-
-            formatted_map_data['tile_layers'][layer['name']]['layers'][sub_group['name']] = sub_group
+            if 'objects' in layer.keys():#objects in group
+                formatted_map_data['groups'][gruop['name']]['objects'][layer['name']] = layer
+            else:#tile layer in gorup
+                formatted_map_data['groups'][gruop['name']]['layers'][layer['name']] = layer
 
     return formatted_map_data
 

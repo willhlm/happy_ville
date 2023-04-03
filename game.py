@@ -1,6 +1,7 @@
-import pygame, sys
+import pygame
 import states
 import game_objects
+import sys
 import constants as C
 
 class Game():

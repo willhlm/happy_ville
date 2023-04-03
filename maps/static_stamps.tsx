@@ -57,7 +57,6 @@
  </tile>
  <tile id="15">
   <properties>
-   <property name="layers" value=""/>
    <property name="particle" value=""/>
   </properties>
  </tile>
