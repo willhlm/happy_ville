@@ -1,8 +1,6 @@
-import pygame
+import pygame, sys
 import states
 import game_objects
-import Read_files
-import sys
 import constants as C
 
 class Game():
@@ -42,7 +40,7 @@ class Game():
             self.clock.tick(self.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
             #self.dt = 1
-            
+
             #handle event
             self.event_loop()
 
