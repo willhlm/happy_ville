@@ -10,11 +10,13 @@ class Weather():
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
 
+    def create_leaves(self,position,parallax,group,number_particles = 20):
+        for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead
+            obj = Leaves(self.game_objects,parallax,position)
+            group.add(obj)
+
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
-
-    def fog(self,group,paralax,colour):
-        group.add(Fog(self.game_objects,paralax,colour))
 
 class Fog(pygame.sprite.Sprite):
     def __init__(self,game_objects,parallax,colour):
@@ -189,7 +191,7 @@ class Weather_particles(Bound_entity):
         self.speed()
 
     def speed(self):
-        self.velocity=[math.sin(self.time*0.1+self.phase)+self.wind,self.velocity[1]]
+        self.velocity[0] = math.sin(self.time*0.1+self.phase)+self.wind
 
     def set_color(self,new_colour):
         replace_color=(255,0,0)
@@ -264,3 +266,44 @@ class Rain(Weather_particles):
 
     def speed(self):
         pass
+
+class Leaves(Weather_particles):
+    def __init__(self,game_objects,parallax,position):
+        super().__init__(game_objects,parallax)
+        self.init_pos = position[0]
+        self.spawn_size = position[1]
+        self.true_pos = self.init_pos
+
+        rand=random.randint(1,1)
+        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = self.true_pos
+        self.fade = 255
+        self.velocity[1] = random.uniform(0.5,1)
+
+        colours=[[178,34,34],[139,69,19],[128,128,0],[255,228,181]]
+        colour = colours[random.randint(0, len(colours)-1)]
+        self.set_color(colour)
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.fade -= self.game_objects.game.dt
+        self.image.set_alpha(self.fade)
+
+    def boundary(self):
+        if self.rect.centery > self.game_objects.game.WINDOW_SIZE[1]+10:
+            self.reset()
+
+    def update_pos(self,scroll):
+        self.true_pos = [self.true_pos[0] + (scroll[0] + self.velocity[0])*self.parallax[0], self.true_pos[1] + (scroll[1] + self.velocity[1])*self.parallax[1]]
+        self.init_pos = [self.init_pos[0] +scroll[0]*self.parallax[0],self.init_pos[1]+scroll[1]*self.parallax[0]]#update inital position
+        self.rect.topleft = self.true_pos.copy()
+
+    def reset(self):
+        self.fade = 255
+        self.velocity[1] = random.uniform(0.5,1)
+        self.time = 0
+        self.image.set_alpha(self.fade)
+        self.true_pos = [self.init_pos[0]+random.randint(-self.spawn_size[0]*0.5,self.spawn_size[0]*0.5),self.init_pos[1]+random.randint(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]
+        self.rect.center = self.true_pos.copy()

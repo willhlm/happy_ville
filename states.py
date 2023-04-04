@@ -90,7 +90,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('light_forest_1','1')
+            self.game.game_objects.load_map('collision_map_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -1333,7 +1333,6 @@ class Fading(Gameplay):#fades out and then in
     def render_in(self):
         super().render()
         self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
-        self.game.state_stack[-2].render_effect()#render light or dark effects, if exist
 
     def render_out(self):
         self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
