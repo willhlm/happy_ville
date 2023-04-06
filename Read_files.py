@@ -29,7 +29,6 @@ def format_tiled_json_group(map_data):
     formatted_map_data = {}
     formatted_map_data['groups'] = {}
     formatted_map_data['tilesets'] = map_data['tilesets']
-    #print(map_data['tilesets'])
 
     for gruop in map_data['layers']:#it will take from lowest position in tiled
     #    if gruop['name'] == 'statics' or gruop['name'] =='collision':#object not in group: static stamps and collision layer
@@ -41,8 +40,8 @@ def format_tiled_json_group(map_data):
         for layer in gruop['layers']:#inside group stuff
             formatted_map_data['groups'][gruop['name']]['parallaxx'] = gruop.get('parallaxx',1)#get value, if not present, pass 1
             formatted_map_data['groups'][gruop['name']]['parallaxy'] = gruop.get('parallaxy',1)#get value, if not present, pass 1
-            formatted_map_data['groups'][gruop['name']]['offsetx'] = gruop.get('offsetx',0)
-            formatted_map_data['groups'][gruop['name']]['offsety'] = gruop.get('offsety',0)
+            formatted_map_data['groups'][gruop['name']]['offsetx'] = gruop.get('offsetx',0)#get value, if not present, pass 0
+            formatted_map_data['groups'][gruop['name']]['offsety'] = gruop.get('offsety',0)#get value, if not present, pass 0
 
             if 'objects' in layer.keys():#objects in group
                 formatted_map_data['groups'][gruop['name']]['objects'][layer['name']] = layer
