@@ -24,6 +24,33 @@ def read_json(path):
 def write_json():
     pass
 
+#if we want static stamps with parallax
+def format_tiled_json_group(map_data):
+    formatted_map_data = {}
+    formatted_map_data['groups'] = {}
+    formatted_map_data['tilesets'] = map_data['tilesets']
+    #print(map_data['tilesets'])
+
+    for gruop in map_data['layers']:#it will take from lowest position in tiled
+    #    if gruop['name'] == 'statics' or gruop['name'] =='collision':#object not in group: static stamps and collision layer
+    #        formatted_map_data[gruop['name']] = gruop['objects']
+    #        continue
+        formatted_map_data['groups'][gruop['name']] = {}
+        formatted_map_data['groups'][gruop['name']]['layers'] = {}
+        formatted_map_data['groups'][gruop['name']]['objects'] = {}
+        for layer in gruop['layers']:#inside group stuff
+            formatted_map_data['groups'][gruop['name']]['parallaxx'] = gruop.get('parallaxx',1)#get value, if not present, pass 1
+            formatted_map_data['groups'][gruop['name']]['parallaxy'] = gruop.get('parallaxy',1)#get value, if not present, pass 1
+            formatted_map_data['groups'][gruop['name']]['offsetx'] = gruop.get('offsetx',0)
+            formatted_map_data['groups'][gruop['name']]['offsety'] = gruop.get('offsety',0)
+
+            if 'objects' in layer.keys():#objects in group
+                formatted_map_data['groups'][gruop['name']]['objects'][layer['name']] = layer
+            else:#tile layer in gorup
+                formatted_map_data['groups'][gruop['name']]['layers'][layer['name']] = layer
+
+    return formatted_map_data
+
 def format_tiled_json(map_data):
     formatted_map_data = {}
     formatted_map_data['tile_layers'] = {}

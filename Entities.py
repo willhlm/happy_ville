@@ -57,7 +57,7 @@ class Invisible_block(Platform):
             entity.dir[0] = -entity.dir[0]#turn around
 
 class Collision_block(Platform):
-    def __init__(self,pos,size, run_particle = 'dust'):
+    def __init__(self,pos,size, run_particle):
         super().__init__(pos,size)
         self.run_particles = {'dust':Dust_running_particles,'water':Water_running_particles,'grass':Grass_running_particles}[run_particle]
 
