@@ -16,6 +16,64 @@
                  "width":500,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":77,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":299,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":672,
+                         "y":480
+                        }, 
+                        {
+                         "gid":17,
+                         "height":16,
+                         "id":307,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffffff"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":752,
+                         "y":480
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":78,
+                 "name":"interactables",
+                 "objects":[],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg9",
          "offsetx":-400,
@@ -64,6 +122,53 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":500,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":76,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":294,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1232,
+                         "y":448
+                        }, 
+                        {
+                         "gid":17,
+                         "height":16,
+                         "id":306,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffffff"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1248,
+                         "y":448
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
                  "x":0,
                  "y":0
                 }],
@@ -116,6 +221,47 @@
                  "width":500,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":75,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":18,
+                         "height":33.8612250671948,
+                         "id":315,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":37.3857688499079,
+                         "x":1632,
+                         "y":384
+                        }, 
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":320,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1648,
+                         "y":512
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg5",
          "offsetx":-100,
@@ -166,6 +312,53 @@
                  "width":500,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":74,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":285,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2416,
+                         "y":608
+                        }, 
+                        {
+                         "gid":17,
+                         "height":16,
+                         "id":304,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffffff"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2448,
+                         "y":608
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg4",
          "opacity":1,
@@ -214,6 +407,53 @@
                  "width":500,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":73,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":282,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2784,
+                         "y":720
+                        }, 
+                        {
+                         "gid":17,
+                         "height":16,
+                         "id":303,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffffff"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2800,
+                         "y":720
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg3",
          "opacity":1,
@@ -233,8 +473,6 @@
                  "id":51,
                  "name":"bg2_3",
                  "opacity":1,
-                 "parallaxx":0.9,
-                 "parallaxy":0.9,
                  "type":"tilelayer",
                  "visible":true,
                  "width":500,
@@ -262,6 +500,65 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":500,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":72,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":281,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3168,
+                         "y":800
+                        }, 
+                        {
+                         "gid":17,
+                         "height":16,
+                         "id":302,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffffff"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3184,
+                         "y":800
+                        }, 
+                        {
+                         "gid":18,
+                         "height":70.686942990522,
+                         "id":313,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":57.4333003253641,
+                         "x":2896,
+                         "y":736
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
                  "x":0,
                  "y":0
                 }],
@@ -432,29 +729,6 @@
                          "y":768
                         }, 
                         {
-                         "gid":16,
-                         "height":16,
-                         "id":238,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"layers",
-                                 "type":"string",
-                                 "value":"fg1,bg4"
-                                }, 
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Circles"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3584,
-                         "y":896
-                        }, 
-                        {
                          "gid":10,
                          "height":48,
                          "id":240,
@@ -596,24 +870,6 @@
                          "y":1024
                         }, 
                         {
-                         "gid":17,
-                         "height":16,
-                         "id":268,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3568,
-                         "y":896
-                        }, 
-                        {
                          "gid":15,
                          "height":16,
                          "id":270,
@@ -684,6 +940,54 @@
                          "width":2304,
                          "x":5040,
                          "y":960
+                        }, 
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":278,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3584,
+                         "y":896
+                        }, 
+                        {
+                         "gid":17,
+                         "height":16,
+                         "id":309,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffffff"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3616,
+                         "y":896
+                        }, 
+                        {
+                         "gid":18,
+                         "height":96,
+                         "id":310,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":3536,
+                         "y":816
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1271,8 +1575,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":72,
- "nextobjectid":278,
+ "nextlayerid":79,
+ "nextobjectid":321,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1372,6 +1676,10 @@
          "tilecount":4096,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":27605,
+         "source":"..\/_interactables\/interactables.tsx"
         }],
  "tilewidth":16,
  "type":"map",

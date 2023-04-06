@@ -29,6 +29,7 @@ def format_tiled_json_group(map_data):
     formatted_map_data = {}
     formatted_map_data['groups'] = {}
     formatted_map_data['tilesets'] = map_data['tilesets']
+    #print(map_data['tilesets'])
 
     for gruop in map_data['layers']:#it will take from lowest position in tiled
     #    if gruop['name'] == 'statics' or gruop['name'] =='collision':#object not in group: static stamps and collision layer

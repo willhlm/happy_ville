@@ -59,7 +59,6 @@ class Level():
 
     def read_all_spritesheets(self):
         sprites = {}
-
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():#objexts have source in dict
                 continue
@@ -79,10 +78,12 @@ class Level():
                     image.blit(sheet,(0,0),rect)
                     sprites[n] = image
                     n += 1
-
         return sprites
 
     def load_groups(self):
+        self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
+        self.load_object = {'statics':self.load_statics,'interactables':self.load_interactables,'collision':self.load_statics}#the keys are the naes of the object in tiled
+
         for group in self.map_data['groups']:
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
             offset = [self.map_data['groups'][group]['offsetx'], self.map_data['groups'][group]['offsety']]
@@ -91,252 +92,265 @@ class Level():
             elif 'bg' in group: self.layer = 'bg'
             elif 'interact' in group: self.layer = 'interact'
 
-            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
+            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)#load this first so objects are blitted on top
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset)
 
     def load_objects(self,data,parallax,offset):
+        for object in data.keys():#load each object in group
+            self.load_object[object](data[object],parallax,offset)
+
+    def load_statics(self,data,parallax,offset):#load statics and collision
         chest_int = 1
         soul_essence_int = 1
 
-        for object in data:#nane of the object
-            for obj in data[object]['objects']:
-                object_position = (int(obj['x']),int(obj['y']))
+        for obj in data['objects']:
+            object_position = [int(obj['x']),int(obj['y'])]
+            object_size = [int(obj['width']),int(obj['height'])]
+            properties = obj.get('properties',[])
+
+            if 'polygon' in obj.keys():#check for polygon type first
+                points_list = []
+                for point in obj['polygon']:
+                    points_list.append((point['x'],point['y']))
+
+                fall_through = obj.get('properties',True)
+                new_block = Entities.Collision_right_angle(object_position, points_list,fall_through)
+                self.game_objects.platforms_ramps.add(new_block)
+                continue
+
+            id = obj['gid'] - self.map_data['statics_firstgid']
+            if id == 0:#player
+                for property in properties:
+                    if property['name'] == 'spawn':
+                        if type(self.spawn).__name__ != 'str':#if respawn/fast tarvel
+                            self.game_objects.player.set_pos(self.spawn)
+                        else:#if notmal load
+                            if property['value'] == self.spawn:
+                                self.game_objects.player.set_pos(object_position)
+
+            elif id == 1:#npcs
+                for property in properties:
+                    if property['name'] == 'class':
+                        npc_name = property['value']
+                new_npc = getattr(Entities, npc_name)
+                self.game_objects.npcs.add(new_npc(object_position,self.game_objects))
+
+
+            elif id == 2:#enemies
+                for property in properties:
+                    if property['name'] == 'class':
+                        enemy_name = property['value']
+                new_enemy = getattr(Entities, enemy_name)
+                self.game_objects.enemies.add(new_enemy(object_position, self.game_objects))
+
+            elif id == 4:#Spawner: spawn enemies
+                values={}
+                for property in properties:
+                    if property['name'] == 'entity':
+                        values['entity'] = property['value']
+                    elif property['name'] == 'number':
+                        values['number']=property['value']
+                new_spawn = Entities.Spawner(object_position,self.game_objects,values)
+                self.game_objects.cosmetics.add(new_spawn)
+
+            elif id == 7:#normal collision blocks
+                types = 'dust'
+                for property in properties:
+                    if property['name'] == 'particles':
+                        types = property['value']
+                new_block = Entities.Collision_block(object_position,object_size,types)
+                self.game_objects.platforms.add(new_block)
+
+            elif id == 8:#spike collision blocks
+                new_block = Entities.Collision_dmg(object_position,object_size)
+                self.game_objects.platforms.add(new_block)
+
+            elif id == 9:
+                for property in properties:
+                    if property['name'] == 'path_to':
+                        destination = property['value']
+                    if property['name'] == 'spawn':
+                        spawn = property['value']
+                    if property['name'] == 'image':
+                        image = property['value']
+                new_path = Entities.Path_inter(object_position,self.game_objects,object_size,destination,spawn,image)
+                self.game_objects.interactables.add(new_path)
+
+            elif id == 10:
+                for property in properties:
+                    if property['name'] == 'path_to':
+                        destination = property['value']
+                    if property['name'] == 'spawn':
+                        spawn = property['value']
+                new_path = Entities.Path_col(object_position,self.game_objects,object_size,destination,spawn)
+                self.game_objects.interactables.add(new_path)
+
+            elif id == 11:#one way collision block (currently only top implemented)
+                for property in properties:
+                    if property['name'] == 'particles':
+                        types = property['value']
+                new_block = Entities.Collision_oneway_up(object_position,object_size,types)
+                self.game_objects.platforms.add(new_block)
+
+            elif id == 13:#breakable collision block
+                for property in properties:
+                    if property['name'] == 'sprite':
+                        types = property['value']
+                new_block = Entities.Collision_breakable(object_position,self.game_objects,types)
+                self.game_objects.interactables.add(new_block)
+
+            elif id == 14:#camera stop
+                for property in properties:
+                    if property['name'] == 'direction':
+                        values = property['value']
+                new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values)
+                self.game_objects.camera_blocks.add(new_camera_stop)
+
+            elif id == 15:#bg_particles
+                for property in properties:
+                    if property['name'] == 'particle':
+                        particle_type = property['value']
+                if self.layer == 'fg':
+                    self.game_objects.weather.create_particles(particle_type,parallax,self.game_objects.all_fgs)
+                else:
+                    self.game_objects.weather.create_particles(particle_type,parallax,self.game_objects.all_bgs)
+
+            elif id == 16:#fog
+                for property in properties:
+                    if property['name'] == 'colour':
+                        colour = property['value']
+
+                new_fog = getattr(weather, 'Fog')(self.game_objects,parallax,pygame.Color(colour))
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_fog)
+                else:
+                    self.game_objects.all_bgs.add(new_fog)
+
+            elif id == 17:#leaves
+                information = [object_position,object_size]
+                if self.layer == 'fg':
+                    self.game_objects.weather.create_leaves(information,parallax,self.game_objects.all_fgs)
+                else:
+                    self.game_objects.weather.create_leaves(information,parallax,self.game_objects.all_bgs)
+
+            elif id == 19:#trigger
+                values={}
+                for property in properties:
+                    if property['name'] == 'event':
+                        values['event'] = property['value']
+                    elif property['name'] == 'event_type':
+                        values['event_type']=property['value']
+
+                if values['event_type'] == 'cutscene':
+                    new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
+                    self.game_objects.interactables.add(new_trigger)
+
+            #reflection object
+            elif id == 20:
+                for property in properties:
+                    if property['name'] == 'direction':
+                        dir = property['value']
+                dir = 'up'
+                reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
+                self.game_objects.reflections.add(reflection)
+
+            elif id == 21:#re-spawpoint, save point
+                new_int = Entities.Savepoint(object_position,self.game_objects,self.level_name)
+                self.game_objects.interactables.add(new_int)
+
+            elif id == 22:#runestones, colectable
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID = property['value']
+                new_rune = Entities.Runestones(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['runestone'][ID],ID)
+                self.game_objects.interactables.add(new_rune)
+
+            elif id == 23:#bushes, chests etc
+                for property in properties:
+                    if property['name'] == 'type':
+                        interactable_type = property['value']
+
+                if interactable_type == 'Chest':
+                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['chest'][str(chest_int)],str(chest_int))
+                    chest_int += 1
+                else:
+                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
+                #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
+                self.game_objects.interactables.add(new_interacable)
+
+            elif id == 24:#event: e.g. bridge that is built when the reindeer dies
+                values={}
+                for property in properties:
+                    if property['name'] == 'name':
+                        interactable = property['value']
+
+                    #write specefic conditions if thse should spawn
+                    if interactable == 'Bridge':
+                        if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
+                            new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
+                            self.game_objects.interactables.add(new_interactable)
+
+            elif id == 25:#roadsign
+                values={}
+                for property in properties:
+                    if property['name'] == 'left':
+                        values['left'] = property['value']
+                    elif property['name'] == 'up':
+                        values['up']=property['value']
+                    elif property['name'] == 'right':
+                        values['right']=property['value']
+                    elif property['name'] == 'down':
+                        values['down']=property['value']
+                new_sign = Entities.Sign(object_position,self.game_objects,values)
+                self.game_objects.interactables.add(new_sign)
+
+            elif id == 26:#uberstone
+                runestone = Entities.Uber_runestone(object_position,self.game_objects)
+                self.game_objects.interactables.add(runestone)
+
+            elif id == 27:#inorinoki
+                inorinoki = Entities.Inorinoki(object_position,self.game_objects)
+                self.game_objects.interactables.add(inorinoki)
+
+            elif id == 28:#key items: soul_essence etc.
+                for property in properties:
+                    if property['name'] == 'name':
+                        keyitem = property['value']
+
+                if keyitem == 'Soul_essence':
+                    if self.game_objects.world_state.state[self.level_name][str(keyitem).lower()][str(soul_essence_int)] == 'idle':#if player hasn't picked it up
+                        new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects,str(soul_essence_int))
+                        self.game_objects.loot.add(new_keyitem)
+                        soul_essence_int += 1
+                elif keyitem == 'Spiritorb':
+                        new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
+                        self.game_objects.loot.add(new_keyitem)
+
+            elif id == 29:#fas ttravel points
+                fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
+                self.game_objects.interactables.add(fast_travel)
+
+            elif id == 30:#traps
+                for property in properties:
+                    if property['name'] == 'type':
+                        trap_type = property['value']
+
                 object_size = [int(obj['width']),int(obj['height'])]
-                properties = obj.get('properties',[])
+                new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
+                self.game_objects.interactables.add(new_trap)
 
-                if 'polygon' in obj.keys():#check for polygon type first
-                    points_list = []
-                    for point in obj['polygon']:
-                        points_list.append((point['x'],point['y']))
-
-                    fall_through = obj.get('properties',True)
-                    new_block = Entities.Collision_right_angle(object_position, points_list,fall_through)
-                    self.game_objects.platforms_ramps.add(new_block)
-                    continue
-
-
-                id = obj['gid'] - self.map_data['statics_firstgid']
-                if id == 0:#player
-                    for property in properties:
-                        if property['name'] == 'spawn':
-                            if type(self.spawn).__name__ != 'str':#if respawn/fast tarvel
-                                self.game_objects.player.set_pos(self.spawn)
-                            else:#if notmal load
-                                if property['value'] == self.spawn:
-                                    self.game_objects.player.set_pos(object_position)
-
-                elif id == 1:#npcs
-                    for property in properties:
-                        if property['name'] == 'class':
-                            npc_name = property['value']
-                    new_npc = getattr(Entities, npc_name)
-                    self.game_objects.npcs.add(new_npc(object_position,self.game_objects))
-
-
-                elif id == 2:#enemies
-                    for property in properties:
-                        if property['name'] == 'class':
-                            enemy_name = property['value']
-                    new_enemy = getattr(Entities, enemy_name)
-                    self.game_objects.enemies.add(new_enemy(object_position, self.game_objects))
-
-                elif id == 4:#Spawner: spawn enemies
-                    values={}
-                    for property in properties:
-                        if property['name'] == 'entity':
-                            values['entity'] = property['value']
-                        elif property['name'] == 'number':
-                            values['number']=property['value']
-                    new_spawn = Entities.Spawner(object_position,self.game_objects,values)
-                    self.game_objects.cosmetics.add(new_spawn)
-
-                elif id == 7:#normal collision blocks
-                    types = 'dust'
-                    for property in properties:
-                        if property['name'] == 'particles':
-                            types = property['value']
-                    new_block = Entities.Collision_block(object_position,object_size,types)
-                    self.game_objects.platforms.add(new_block)
-
-                elif id == 8:#spike collision blocks
-                    new_block = Entities.Collision_dmg(object_position,object_size)
-                    self.game_objects.platforms.add(new_block)
-
-                elif id == 9:
-                    for property in properties:
-                        if property['name'] == 'path_to':
-                            destination = property['value']
-                        if property['name'] == 'spawn':
-                            spawn = property['value']
-                        if property['name'] == 'image':
-                            image = property['value']
-                    new_path = Entities.Path_inter(object_position,self.game_objects,object_size,destination,spawn,image)
-                    self.game_objects.interactables.add(new_path)
-
-                elif id == 10:
-                    for property in properties:
-                        if property['name'] == 'path_to':
-                            destination = property['value']
-                        if property['name'] == 'spawn':
-                            spawn = property['value']
-                    new_path = Entities.Path_col(object_position,self.game_objects,object_size,destination,spawn)
-                    self.game_objects.interactables.add(new_path)
-
-                elif id == 11:#one way collision block (currently only top implemented)
-                    for property in properties:
-                        if property['name'] == 'particles':
-                            types = property['value']
-                    new_block = Entities.Collision_oneway_up(object_position,object_size,types)
-                    self.game_objects.platforms.add(new_block)
-
-                elif id == 13:#breakable collision block
-                    for property in properties:
-                        if property['name'] == 'sprite':
-                            types = property['value']
-                    new_block = Entities.Collision_breakable(object_position,self.game_objects,types)
-                    self.game_objects.interactables.add(new_block)
-
-                elif id == 14:#camera stop
-                    for property in properties:
-                        if property['name'] == 'direction':
-                            values = property['value']
-                    new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values)
-                    self.game_objects.camera_blocks.add(new_camera_stop)
-
-                elif id == 15:#bg_particles
-                    for property in properties:
-                        if property['name'] == 'particle':
-                            particle_type = property['value']
-                    if self.layer == 'fg':
-                        self.game_objects.weather.create_particles(particle_type,parallax,self.game_objects.all_fgs)
-                    else:
-                        self.game_objects.weather.create_particles(particle_type,parallax,self.game_objects.all_bgs)
-
-                elif id == 16:#fog
-                    for property in properties:
-                        if property['name'] == 'colour':
-                            colour = property['value']
-                    new_fog = getattr(weather, 'Fog')(self.game_objects,parallax,pygame.Color(colour))
-                    if self.layer == 'fg':
-                        self.game_objects.all_fgs.add(new_fog)
-                    else:
-                        self.game_objects.all_bgs.add(new_fog)
-
-                elif id == 19:#trigger
-                    values={}
-                    for property in properties:
-                        if property['name'] == 'event':
-                            values['event'] = property['value']
-                        elif property['name'] == 'event_type':
-                            values['event_type']=property['value']
-
-                    if values['event_type'] == 'cutscene':
-                        new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
-                        self.game_objects.interactables.add(new_trigger)
-
-                #reflection object
-                elif id == 20:
-                    for property in properties:
-                        if property['name'] == 'direction':
-                            dir = property['value']
-                    dir = 'up'
-                    reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
-                    self.game_objects.reflections.add(reflection)
-
-                elif id == 21:#re-spawpoint, save point
-                    new_int = Entities.Savepoint(object_position,self.game_objects,self.level_name)
-                    self.game_objects.interactables.add(new_int)
-
-                elif id == 22:#runestones, colectable
-                    for property in properties:
-                        if property['name'] == 'ID':
-                            ID = property['value']
-                    new_rune = Entities.Runestones(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['runestone'][ID],ID)
-                    self.game_objects.interactables.add(new_rune)
-
-                elif id == 23:#bushes, chests etc
-                    for property in properties:
-                        if property['name'] == 'type':
-                            interactable_type = property['value']
-
-                    if interactable_type == 'Chest':
-                        new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['chest'][str(chest_int)],str(chest_int))
-                        chest_int += 1
-                    else:
-                        new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
-                    #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
-                    self.game_objects.interactables.add(new_interacable)
-
-                elif id == 24:#event: e.g. bridge that is built when the reindeer dies
-                    values={}
-                    for property in properties:
-                        if property['name'] == 'name':
-                            interactable = property['value']
-
-                        #write specefic conditions if thse should spawn
-                        if interactable == 'Bridge':
-                            if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
-                                new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
-                                self.game_objects.interactables.add(new_interactable)
-
-                elif id == 25:#roadsign
-                    values={}
-                    for property in properties:
-                        if property['name'] == 'left':
-                            values['left'] = property['value']
-                        elif property['name'] == 'up':
-                            values['up']=property['value']
-                        elif property['name'] == 'right':
-                            values['right']=property['value']
-                        elif property['name'] == 'down':
-                            values['down']=property['value']
-                    new_sign = Entities.Sign(object_position,self.game_objects,values)
-                    self.game_objects.interactables.add(new_sign)
-
-                elif id == 26:#uberstone
-                    runestone = Entities.Uber_runestone(object_position,self.game_objects)
-                    self.game_objects.interactables.add(runestone)
-
-                elif id == 27:#inorinoki
-                    inorinoki = Entities.Inorinoki(object_position,self.game_objects)
-                    self.game_objects.interactables.add(inorinoki)
-
-                elif id == 28:#key items: soul_essence etc.
-                    for property in properties:
-                        if property['name'] == 'name':
-                            keyitem = property['value']
-
-                    if keyitem == 'Soul_essence':
-                        if self.game_objects.world_state.state[self.level_name][str(keyitem).lower()][str(soul_essence_int)] == 'idle':#if player hasn't picked it up
-                            new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects,str(soul_essence_int))
-                            self.game_objects.loot.add(new_keyitem)
-                            soul_essence_int += 1
-                    elif keyitem == 'Spiritorb':
-                            new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
-                            self.game_objects.loot.add(new_keyitem)
-
-                elif id == 29:#fas ttravel points
-                    fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
-                    self.game_objects.interactables.add(fast_travel)
-
-                elif id == 30:#traps
-                    for property in properties:
-                        if property['name'] == 'type':
-                            trap_type = property['value']
-
-                    object_size = [int(obj['width']),int(obj['height'])]
-                    new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
-                    self.game_objects.interactables.add(new_trap)
+    def load_interactables(self,data,parallax,offset):#load interactables
+        pass
 
     def load_layers(self,data,parallax,offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and collision).'
         'The offset and parallax should be specified for group and not in the layers or objects'
         'Each group needs at least one tile layer (but can be emppty).'
         'The groups should contain "fg", "bg" or "interact" in their name. The group containing statics needs to be called bg1'
-        'The tile layer and objects in groups can be called whatever. But statics needs to be called statics'
+        'The tile layer in groups can be called whatever. But the objects need to be called statics, objects or interactables.'
 
         animation_list = {}#a place holder for animation objects
-        for tile_layer in data.keys():
+        for tile_layer in data.keys():#name of each tile layer
             animation_list[tile_layer] = []
 
         #make empty surfaces
@@ -352,7 +366,6 @@ class Level():
             blit_compress_surfaces[tile_layer[0:tile_layer.find('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
 
         #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
-        spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
         for tile_layer in data.keys():
             for index, tile_number in enumerate(data[tile_layer]['data']):
@@ -372,7 +385,7 @@ class Level():
                             animation_list[tile_layer].append(new_animation)
                 else:#if statics
                     blit_pos = (x * self.TILE_SIZE , y * self.TILE_SIZE)
-                    blit_surfaces[tile_layer].blit(spritesheet_dict[tile_number], blit_pos)
+                    blit_surfaces[tile_layer].blit(self.spritesheet_dict[tile_number], blit_pos)
 
         #blit all static sublayers onto one single parallax layer in order as drawn in Tiled. And sort the animations into the key grouops
         animation_entities = {}
