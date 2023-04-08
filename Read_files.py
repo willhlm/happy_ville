@@ -37,12 +37,11 @@ def format_tiled_json_group(map_data):
         formatted_map_data['groups'][gruop['name']] = {}
         formatted_map_data['groups'][gruop['name']]['layers'] = {}
         formatted_map_data['groups'][gruop['name']]['objects'] = {}
+        formatted_map_data['groups'][gruop['name']]['parallaxx'] = gruop.get('parallaxx',1)#get value, if not present, pass 1
+        formatted_map_data['groups'][gruop['name']]['parallaxy'] = gruop.get('parallaxy',1)#get value, if not present, pass 1
+        formatted_map_data['groups'][gruop['name']]['offsetx'] = gruop.get('offsetx',0)#get value, if not present, pass 0
+        formatted_map_data['groups'][gruop['name']]['offsety'] = gruop.get('offsety',0)#get value, if not present, pass 0
         for layer in gruop['layers']:#inside group stuff
-            formatted_map_data['groups'][gruop['name']]['parallaxx'] = gruop.get('parallaxx',1)#get value, if not present, pass 1
-            formatted_map_data['groups'][gruop['name']]['parallaxy'] = gruop.get('parallaxy',1)#get value, if not present, pass 1
-            formatted_map_data['groups'][gruop['name']]['offsetx'] = gruop.get('offsetx',0)#get value, if not present, pass 0
-            formatted_map_data['groups'][gruop['name']]['offsety'] = gruop.get('offsety',0)#get value, if not present, pass 0
-
             if 'objects' in layer.keys():#objects in group
                 formatted_map_data['groups'][gruop['name']]['objects'][layer['name']] = layer
             else:#tile layer in gorup

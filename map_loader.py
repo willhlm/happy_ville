@@ -1,4 +1,5 @@
-import pygame, csv, Entities, math, Read_files, weather
+import pygame, csv, math
+import Entities, Read_files, weather, tiled_objects
 import constants as C
 
 class Level():
@@ -82,7 +83,7 @@ class Level():
 
     def load_groups(self):
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
-        self.load_object = {'statics':self.load_statics,'interactables':self.load_interactables,'collision':self.load_statics}#the keys are the naes of the object in tiled
+        self.load_object_layer = {'statics':self.load_statics,'interactables':self.load_interactables,'collision':self.load_statics}#the keys are the naes of the object in tiled
 
         for group in self.map_data['groups']:
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
@@ -97,14 +98,15 @@ class Level():
 
     def load_objects(self,data,parallax,offset):
         for object in data.keys():#load each object in group
-            self.load_object[object](data[object],parallax,offset)
+            self.load_object_layer[object](data[object],parallax,offset)
 
     def load_statics(self,data,parallax,offset):#load statics and collision
         chest_int = 1
         soul_essence_int = 1
 
         for obj in data['objects']:
-            object_position = [int(obj['x']),int(obj['y'])]
+            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]]
             object_size = [int(obj['width']),int(obj['height'])]
             properties = obj.get('properties',[])
 
@@ -308,7 +310,7 @@ class Level():
                 runestone = Entities.Uber_runestone(object_position,self.game_objects)
                 self.game_objects.interactables.add(runestone)
 
-            elif id == 27:#inorinoki
+            elif id == 27:#inorinoki            
                 inorinoki = Entities.Inorinoki(object_position,self.game_objects)
                 self.game_objects.interactables.add(inorinoki)
 
@@ -340,7 +342,22 @@ class Level():
                 self.game_objects.interactables.add(new_trap)
 
     def load_interactables(self,data,parallax,offset):#load interactables
-        pass
+        chest_int = 1
+        soul_essence_int = 1
+
+        for obj in data['objects']:
+            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['interactables_firstgid']
+
+            if id == 2:#tree
+                new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.game_objects.all_bgs.add(new_tree)
 
     def load_layers(self,data,parallax,offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and collision).'

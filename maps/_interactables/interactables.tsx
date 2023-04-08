@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="160" tileheight="128" tilecount="2" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="208" tileheight="288" tilecount="1" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
- <tile id="0">
-  <image width="160" height="128" source="chest2.png"/>
- </tile>
- <tile id="1">
-  <image width="144" height="96" source="site2.png"/>
+ <tile id="2">
+  <image width="208" height="288" source="../../Sprites/animations/tiled_objects/Light_forest_tree1/idle/trees_ani1.png"/>
  </tile>
 </tileset>

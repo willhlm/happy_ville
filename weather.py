@@ -4,8 +4,9 @@ from Entities import Animatedentity
 class Weather():
     def __init__(self,game_objects):
         self.game_objects = game_objects
+        self.wind = Wind(self)
 
-    def create_particles(self,type,parallax,group,number_particles = 20):
+    def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
         for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
@@ -15,8 +16,43 @@ class Weather():
             obj = Leaves(self.game_objects,parallax,information)
             group.add(obj)
 
+    def update(self):
+        if random.randint(0,1000) == 0:
+            self.blow()
+
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
+
+    def blow(self,dir = [-1,0]):
+        self.wind.blow(dir)
+        self.game_objects.cosmetics.add(self.wind)
+
+class Wind(pygame.sprite.Sprite):
+    def __init__(self,weather):
+        super().__init__()
+        self.weather = weather
+        self.image = pygame.Surface([weather.game_objects.game.WINDOW_SIZE[0],weather.game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [0,0]
+        self.velocity = [0,0]
+        self.lifetime = 300
+
+    def blow(self,dir):#called when weather is initiated
+        self.velocity = dir
+
+    def update(self,scroll):
+        self.lifetime -= self.weather.game_objects.game.dt
+        if self.lifetime < 0:
+            self.finish()
+
+    def finish(self):
+        self.kill()
+        self.velocity = [0,0]
+        self.lifetime = 300
+
+    def update_pos(self,scroll):#not used
+        self.true_pos = [self.true_pos[0] + (scroll[0]+self.velocity[0]), self.true_pos[1] + (scroll[1]+self.velocity[1])]
+        self.rect.topleft = self.true_pos
 
 class Fog(pygame.sprite.Sprite):
     def __init__(self,game_objects,parallax,colour):
@@ -33,7 +69,7 @@ class Fog(pygame.sprite.Sprite):
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
         super().__init__()
-        self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0]*2,game_objects.game.WINDOW_SIZE[1]*2], pygame.SRCALPHA, 32).convert_alpha()
+        self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.image.fill((255,255,255,255))
         self.rect = self.image.get_rect()
         self.rect.center = [game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]]
@@ -42,7 +78,7 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
         self.image.set_alpha(int(255/self.fade_length))
 
     def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
+        self.rect.topleft = (0,0)
 
     def update(self,scroll):
         self.update_pos(scroll)
@@ -56,8 +92,7 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
 
 class Bound_entity(Animatedentity):#entities bound to the scereen, should it be inheriting from animated entities (if we intendo to use animation) or static entity (if we intend to use pygame for particles)
     def __init__(self,game_objects, parallax):
-        pos = [0,0]
-        super().__init__(pos,game_objects)
+        super().__init__([0,0],game_objects)
         self.parallax = parallax
         self.width = self.game_objects.game.WINDOW_SIZE[0] + 0.6*self.game_objects.game.WINDOW_SIZE[0]
         self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.6*self.game_objects.game.WINDOW_SIZE[1]
@@ -72,14 +107,14 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
         self.rect.topleft = self.true_pos
 
     def boundary(self):#continiouse falling
-        if self.rect.centery > self.height:#if on the lower side of screen.
-            self.true_pos[1] -= self.height
-        elif self.rect.centery < -100:#if on the higher side of screen.
-            self.true_pos[1] += self.height
-        elif self.rect.centerx < -100:
+        if self.rect.centerx < -100:
             self.true_pos[0] += self.width
         elif self.rect.centerx > self.width:
             self.true_pos[0] -= self.width
+        elif self.rect.centery > self.height:#if on the lower side of screen.
+            self.true_pos[1] -= self.height
+        elif self.rect.centery < -100:#if on the higher side of screen.
+            self.true_pos[1] += self.height
 
 class Circles(Bound_entity):
     animations = {}
@@ -178,29 +213,37 @@ class Weather_particles(Bound_entity):
         self.pos = [random.randint(0, int(self.width)),random.randint(-700, -50)]#starting position
         self.true_pos = self.pos.copy()
 
-        self.wind = -2
         self.velocity[1] = random.randint(1, 3)
         self.time = 0
         self.phase = random.randint(0, 100)#for velocity
 
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
+        self.friction = [0.5,0]
 
     def update(self,scroll):
         super().update(scroll)
-        self.time+=1
-        self.speed()
+        self.time += self.game_objects.game.dt
+        self.update_vel()
+
+    def update_vel(self):
+        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[0] - self.friction[0]*self.velocity[0] + self.speed())
+        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[1] - self.friction[1]*self.velocity[1])
 
     def speed(self):
-        self.velocity[0] = math.sin(self.time*0.1+self.phase)+self.wind
+        return math.sin(self.time*0.1+self.phase)
 
     def set_color(self,new_colour):
         replace_color=(255,0,0)
+        size = [self.image.get_size()[0]*self.parallax[0],self.image.get_size()[1]*self.parallax[1]]
         for state in self.sprites.sprite_dict.keys():
-            for image in self.sprites.sprite_dict[state]:
-                img_copy=pygame.Surface(self.image.get_size())
-                img_copy.fill(new_colour)
-                image.set_colorkey(replace_color)#the color key will not be drawn
-                image.blit(img_copy,(0,0),special_flags=pygame.BLEND_RGB_ADD)
+            for frame,image in enumerate(self.sprites.sprite_dict[state]):
+                img_copy = pygame.transform.scale(image,size)
+                #mask = img_copy.copy()
+                #mask.fill(new_colour)
+                #img_copy.set_colorkey(replace_color)
+                #img_copy.blit(img_copy,(0,0),special_flags = pygame.BLEND_RGB_SUB)#remove original
+                #img_copy.blit(mask,(0,0),special_flags = pygame.BLEND_RGBA_ADD)#add first
+                self.sprites.sprite_dict[state][frame] = img_copy
 
 class Sakura(Weather_particles):
     def __init__(self,game_objects,parallax):
@@ -270,23 +313,22 @@ class Rain(Weather_particles):
 class Leaves(Weather_particles):#leaves from trees
     def __init__(self,game_objects,parallax,information):
         super().__init__(game_objects,parallax)
-        self.init_pos = information[0]
+        self.init_pos = [information[0][0]+information[1][0]*0.5,information[0][1]-information[1][1]*0.5]#center
         self.spawn_size = information[1]
-
-        rand=random.randint(1,1)#randomly choose a leaf type
+        rand = random.randint(1,1)#randomly choose a leaf type
         self.sprites = Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.reset()
 
-        colours=[[178,34,34],[139,69,19],[128,128,0],[255,228,181]]
+        colours=[[60,179,113],[154,205,50],[34,139,34],[46,139,87]]
         colour = colours[random.randint(0, len(colours)-1)]
         self.set_color(colour)
 
     def update(self,scroll):
         super().update(scroll)
-        self.alpha -= self.game_objects.game.dt
-        self.image.set_alpha(self.alpha)
+        #self.alpha -= self.game_objects.game.dt*0.5
+        #self.image.set_alpha(self.alpha)
 
     def update_pos(self,scroll):
         self.true_pos = [self.true_pos[0] + (scroll[0] + self.velocity[0])*self.parallax[0], self.true_pos[1] + (scroll[1] + self.velocity[1])*self.parallax[1]]
@@ -298,11 +340,11 @@ class Leaves(Weather_particles):#leaves from trees
             self.reset()
 
     def speed(self):
-        self.velocity[0] = (math.sin(self.time*0.1+self.phase)+self.wind)*self.parallax[0]
+        return (math.sin(self.time*0.1+self.phase))*self.parallax[0]*0.3
 
     def reset(self):
         self.alpha = random.uniform(255*self.parallax[0],255)
-        self.velocity[1] = random.uniform(0.5,1)*self.parallax[1]
+        self.velocity[1] = random.uniform(0.2,0.5)
         self.time = 0
         self.image.set_alpha(self.alpha)
         self.true_pos = [self.init_pos[0]+random.uniform(-self.spawn_size[0]*0.5,self.spawn_size[0]*0.5),self.init_pos[1]+random.uniform(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]

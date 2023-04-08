@@ -6,7 +6,6 @@ import map_loader
 import sound
 import states
 import camera
-import json
 import weather
 import constants as C
 import world_state
@@ -30,7 +29,6 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = UI.Gameplay_UI(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.scroll = [0,0]
 
     def create_groups(self):#define all sprite groups
         self.enemies = pygame.sprite.Group()
@@ -107,7 +105,6 @@ class Game_Objects():
     def update(self):
         self.camera.update()
         scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
-        true_scroll = [-self.camera.true_scroll[0],-self.camera.true_scroll[1]]
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):
@@ -143,7 +140,6 @@ class Game_Objects():
         self.cosmetics.draw(self.game.screen)
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw(self.game.screen)
-
         #self.camera_blocks.draw(self.game.screen)
 
         #temporaries draws. Shuold be removed
