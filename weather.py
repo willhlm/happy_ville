@@ -235,15 +235,16 @@ class Weather_particles(Bound_entity):
     def set_color(self,new_colour):
         replace_color=(255,0,0)
         size = [self.image.get_size()[0]*self.parallax[0],self.image.get_size()[1]*self.parallax[1]]
+        surface = pygame.Surface((size),pygame.SRCALPHA,32).convert_alpha()
         for state in self.sprites.sprite_dict.keys():
             for frame,image in enumerate(self.sprites.sprite_dict[state]):
                 img_copy = pygame.transform.scale(image,size)
-                #mask = img_copy.copy()
-                #mask.fill(new_colour)
-                #img_copy.set_colorkey(replace_color)
-                #img_copy.blit(img_copy,(0,0),special_flags = pygame.BLEND_RGB_SUB)#remove original
-                #img_copy.blit(mask,(0,0),special_flags = pygame.BLEND_RGBA_ADD)#add first
-                self.sprites.sprite_dict[state][frame] = img_copy
+                img_copy.set_colorkey(replace_color)
+                mask = surface.copy()
+                mask.fill(new_colour)
+                mask.blit(img_copy,(0,0))
+                mask.set_colorkey(mask.get_at((0,0)))#should be (0,0,0) but first frame has different colour for some reason
+                self.sprites.sprite_dict[state][frame] = mask
 
 class Sakura(Weather_particles):
     def __init__(self,game_objects,parallax):

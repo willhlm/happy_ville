@@ -87,7 +87,7 @@ class Collision_oneway_up(Platform):
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down
-            offset = entity.velocity[1]+1
+            offset = entity.velocity[1] + 1
             if entity.hitbox.bottom <= self.hitbox.top+offset:
                 entity.down_collision(self.hitbox.top)
                 entity.limit_y()
@@ -1439,7 +1439,7 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         self.destroy()
 
     def destroy(self):
-        if self.lifetime<0:
+        if self.lifetime < 0:
             self.kill()
 
     def update_hitbox(self):#make this a dictionary?

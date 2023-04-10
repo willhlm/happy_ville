@@ -2,6 +2,8 @@ import pygame, csv, math
 import Entities, Read_files, weather, tiled_objects
 import constants as C
 
+from PIL import Image, ImageFilter#for blurring
+
 class Level():
     def __init__(self, game_objects):
         self.game_objects = game_objects
@@ -55,8 +57,10 @@ class Level():
             if 'source' in tileset.keys():
                 if 'static' in tileset['source']:
                     self.map_data['statics_firstgid'] =  tileset['firstgid']
-                elif 'interactables' in tileset['source']:
-                    self.map_data['interactables_firstgid'] = tileset['firstgid']
+                elif 'front' in tileset['source']:
+                    self.map_data['front_firstgid'] = tileset['firstgid']
+                elif 'back' in tileset['source']:
+                    self.map_data['back_firstgid'] = tileset['firstgid']
 
     def read_all_spritesheets(self):
         sprites = {}
@@ -83,7 +87,8 @@ class Level():
 
     def load_groups(self):
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
-        self.load_object_layer = {'statics':self.load_statics,'interactables':self.load_interactables,'collision':self.load_statics}#the keys are the naes of the object in tiled
+        load_front_objects = {'front':self.load_front_objects,'statics':self.load_statics,'collision':self.load_statics}#the keys are the naes of the object in tiled
+        load_back_objects = {'back':self.load_back_objects}#the keys are the naes of the object in tiled
 
         for group in self.map_data['groups']:
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
@@ -93,12 +98,14 @@ class Level():
             elif 'bg' in group: self.layer = 'bg'
             elif 'interact' in group: self.layer = 'interact'
 
-            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)#load this first so objects are blitted on top
-            self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset)
+            self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_back_objects)#objects behind layers
+            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
+            self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_front_objects)#object infron of layers
 
-    def load_objects(self,data,parallax,offset):
-        for object in data.keys():#load each object in group
-            self.load_object_layer[object](data[object],parallax,offset)
+    def load_objects(self,data,parallax,offset,method):
+        for object in method.keys():#load each object in group
+            if data.get(object,False):
+                method[object](data[object],parallax,offset)
 
     def load_statics(self,data,parallax,offset):#load statics and collision
         chest_int = 1
@@ -310,7 +317,7 @@ class Level():
                 runestone = Entities.Uber_runestone(object_position,self.game_objects)
                 self.game_objects.interactables.add(runestone)
 
-            elif id == 27:#inorinoki            
+            elif id == 27:#inorinoki
                 inorinoki = Entities.Inorinoki(object_position,self.game_objects)
                 self.game_objects.interactables.add(inorinoki)
 
@@ -341,16 +348,16 @@ class Level():
                 new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
                 self.game_objects.interactables.add(new_trap)
 
-    def load_interactables(self,data,parallax,offset):#load interactables
-        chest_int = 1
-        soul_essence_int = 1
+    def load_front_objects(self,data,parallax,offset):#load object infront of layers
+        pass
 
+    def load_back_objects(self,data,parallax,offset):#load objects back of layers
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]]
             object_size = [int(obj['width']),int(obj['height'])]
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['interactables_firstgid']
+            id = obj['gid'] - self.map_data['back_firstgid']
 
             if id == 2:#tree
                 new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
@@ -415,6 +422,28 @@ class Level():
                     animation_entities[bg] = [animation_list[layer]]
             else:#statics
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
+
+        #blurring
+    #    strFormat = 'RGBA'
+    #    for layer in blit_compress_surfaces.keys():
+    #        if parallax[0] == 1: continue
+    #        blur_value = 0.5/parallax[0]
+
+            #surface to pil
+    #        surface = blit_compress_surfaces[layer]
+    #        raw_str = pygame.image.tobytes(surface, strFormat)
+    #        image = Image.frombytes(strFormat, surface.get_size(), raw_str)
+
+            #blurImage = image.filter(ImageFilter.BoxBlur(blur_value))
+    #        blurImage = image.filter(ImageFilter.GaussianBlur(blur_value))
+
+            #pil to surface
+    #        blit_compress_surfaces[layer] = pygame.image.fromstring(blurImage.tobytes(), blurImage.size, blurImage.mode)
+
+        for layer in blit_compress_surfaces.keys():
+            if parallax[0] == 1: continue
+            blur_value = round(1/parallax[0])
+            blit_compress_surfaces[layer] = pygame.transform.gaussian_blur(blit_compress_surfaces[layer], blur_value,repeat_edge_pixels=True)#box_blur
 
         #add the bg, fg, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():
