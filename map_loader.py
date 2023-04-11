@@ -361,10 +361,16 @@ class Level():
 
             if id == 2:#tree
                 new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                if parallax[0] != 1:
+                    new_tree.blur(self.blur_value(parallax))
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
+
+    @staticmethod
+    def blur_value(parallax):#called from load_laters and load_back/front_objects
+        return round(1/parallax[0])
 
     def load_layers(self,data,parallax,offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and collision).'
@@ -440,9 +446,9 @@ class Level():
             #pil to surface
     #        blit_compress_surfaces[layer] = pygame.image.fromstring(blurImage.tobytes(), blurImage.size, blurImage.mode)
 
+        blur_value = self.blur_value(parallax)
         for layer in blit_compress_surfaces.keys():
-            if parallax[0] == 1: continue
-            blur_value = round(1/parallax[0])
+            if parallax[0] == 1: break
             blit_compress_surfaces[layer] = pygame.transform.gaussian_blur(blit_compress_surfaces[layer], blur_value,repeat_edge_pixels=True)#box_blur
 
         #add the bg, fg, animations and objects to the group

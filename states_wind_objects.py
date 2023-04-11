@@ -25,8 +25,12 @@ class Idle(Basic_states):
 class Wind(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.blowing()
+        self.timer = random.randint(40,60)
 
     def update_state(self):
+        self.timer -= self.entity.game_objects.game.dt
+        if self.timer < 0:
+            self.entity.blowing()
+            self.timer = random.randint(40,60)
         if self.entity.game_objects.weather.wind.velocity[0] == 0:
             self.enter_state('Idle')
