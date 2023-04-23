@@ -104,6 +104,7 @@ class Game_Objects():
 
     def update(self):
         self.camera.update()
+        self.weather.update()
         scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
         self.update_groups(scroll)
 

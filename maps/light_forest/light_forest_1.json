@@ -27,17 +27,6 @@
                  "visible":true,
                  "x":0,
                  "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":78,
-                 "name":"interactables",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
                 }],
          "name":"bg9",
          "offsetx":-400,
@@ -68,43 +57,19 @@
                 {
                  "draworder":"topdown",
                  "id":80,
-                 "name":"interactables",
+                 "name":"back",
                  "objects":[
                         {
-                         "gid":27607,
+                         "gid":27610,
                          "height":288,
-                         "id":551,
+                         "id":557,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":208,
-                         "x":768,
-                         "y":528
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":552,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1120,
-                         "y":528
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":553,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1408,
-                         "y":528
+                         "x":1168,
+                         "y":544
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -188,56 +153,8 @@
                 {
                  "draworder":"topdown",
                  "id":85,
-                 "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":547,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1184,
-                         "y":592
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":548,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1440,
-                         "y":592
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":549,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1776,
-                         "y":592
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":550,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2048,
-                         "y":592
-                        }],
+                 "name":"back",
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -296,44 +213,8 @@
                 {
                  "draworder":"topdown",
                  "id":82,
-                 "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":544,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":1808,
-                         "y":656
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":545,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2144,
-                         "y":672
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":546,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2560,
-                         "y":672
-                        }],
+                 "name":"back",
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -432,44 +313,8 @@
                 {
                  "draworder":"topdown",
                  "id":84,
-                 "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":541,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2320,
-                         "y":752
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":542,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2528,
-                         "y":768
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":543,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2944,
-                         "y":752
-                        }],
+                 "name":"back",
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -556,56 +401,8 @@
                 {
                  "draworder":"topdown",
                  "id":83,
-                 "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":534,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2528,
-                         "y":864
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":535,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2800,
-                         "y":848
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":536,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":2944,
-                         "y":864
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":537,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":3168,
-                         "y":848
-                        }],
+                 "name":"back",
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -692,43 +489,19 @@
                 {
                  "draworder":"topdown",
                  "id":79,
-                 "name":"interactables",
+                 "name":"back",
                  "objects":[
                         {
-                         "gid":27607,
+                         "gid":27610,
                          "height":288,
-                         "id":538,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":3088,
-                         "y":928
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":539,
+                         "id":563,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":208,
                          "x":3488,
-                         "y":944
-                        }, 
-                        {
-                         "gid":27607,
-                         "height":288,
-                         "id":540,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":3744,
-                         "y":944
+                         "y":928
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1672,7 +1445,7 @@
          "y":0
         }],
  "nextlayerid":86,
- "nextobjectid":554,
+ "nextobjectid":564,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1775,7 +1548,11 @@
         }, 
         {
          "firstgid":27605,
-         "source":"..\/_interactables\/interactables.tsx"
+         "source":"..\/_objects\/trees.tsx"
+        }, 
+        {
+         "firstgid":27608,
+         "source":"..\/_objects\/back.tsx"
         }],
  "tilewidth":16,
  "type":"map",
