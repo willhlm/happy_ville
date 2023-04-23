@@ -366,7 +366,7 @@ class Level():
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
-                    self.game_objects.all_bgs.add(new_tree)
+                    self.game_objects.all_bgs.add(new_tree)            
 
     @staticmethod
     def blur_value(parallax):#called from load_laters and load_back/front_objects

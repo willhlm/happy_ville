@@ -21,6 +21,13 @@ class Light_forest_tree1(Animatedentity):
         self.spawn_box = [position,size]
         self.create_leaves()
 
+        self.convert_alpha()#a temporary solution
+
+    def convert_alpha(self):#a temporary solution
+        for state in self.sprites.sprite_dict.keys():
+            for frame,image in enumerate(self.sprites.sprite_dict[state]):
+                self.sprites.sprite_dict[state][frame] = image.convert_alpha()
+
     def blur(self,blur_value):#called from maploader
         for state in self.sprites.sprite_dict.keys():
             for frame, image in enumerate(self.sprites.sprite_dict[state]):
@@ -36,12 +43,13 @@ class Light_forest_tree1(Animatedentity):
             self.game_objects.all_bgs.add(obj)
 
     def blowing(self):#called when in wind state
+        return
         sprites = self.game_objects.all_bgs.sprites()
-        index = sprites.index(self)
+        self.index = sprites.index(self)
 
         obj = Leaves(self.game_objects,self.parallax,[self.rect.center,[64,64]],kill = True)
         #manuall add to a specific layer
         self.game_objects.all_bgs.spritedict[obj] = self.game_objects.all_bgs._init_rect#in add internal
         self.game_objects.all_bgs._spritelayers[obj] = 0
-        self.game_objects.all_bgs._spritelist.insert(index,obj)
+        self.game_objects.all_bgs._spritelist.insert(self.index,obj)
         obj.add_internal(self.game_objects.all_bgs)

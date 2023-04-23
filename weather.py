@@ -120,10 +120,9 @@ class Circles(Bound_entity):
     animations = {}
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.colour = [255,255,255,160]#center ball colour
+        self.set_color()
         self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
 
-        self.glow_colour = [255,255,255,2]#colour of each glow
         self.layers = 40#number of layers in the glow
         self.glow_spacing_factor = 0.1#a factor to determine the spacing between the glows
         self.glow_radius = self.layers*self.radius*self.glow_spacing_factor#determines the canvas size needed (the size of the largest glow)
@@ -139,6 +138,10 @@ class Circles(Bound_entity):
             Circles.animations[str(self.parallax[0])] = self.images
 
         self.frame = random.randint(0, len(self.images)-1)#randomise the starting frame
+
+    def set_color(self):
+        self.colour = [255,255,255,160]#center ball colour
+        self.glow_colour = [255,255,255,2]#colour of each glow
 
     def update(self,scroll):
         self.update_pos(scroll)
@@ -188,6 +191,23 @@ class Circles(Bound_entity):
         for i in range(self.layers):
             pygame.draw.circle(temp,self.glow_colour,self.surface.get_rect().center,i*radius*self.glow_spacing_factor)
             self.image.blit(temp,(0,0))#need to blit in order to "stack" the alpha
+
+class Vertical_circles(Circles):
+    animations = {}
+    def __init__(self,game_objects, parallax):
+        super().__init__(game_objects, parallax)
+        self.phase = random.randint(0, 360)#randomise the starting phase
+
+    def set_color(self):
+        self.colour = [255,255,255,100]#center ball colour
+        self.glow_colour = [255,255,255,2]#colour of each glow
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.update_vel()
+
+    def update_vel(self):
+        self.velocity  = [0.5*math.sin(self.frame*0.1+self.phase),-1]
 
 class Blink(Bound_entity):
     def __init__(self,game_objects, parallax):
@@ -325,6 +345,7 @@ class Leaves(Weather_particles):#leaves from trees
 
         colours=[[60,179,113],[154,205,50],[34,139,34],[46,139,87]]
         colour = colours[random.randint(0, len(colours)-1)]
+
         self.set_color(colour)
         #self.blur()
 
