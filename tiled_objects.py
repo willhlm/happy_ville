@@ -20,13 +20,8 @@ class Light_forest_tree1(Animatedentity):
         size = [64,64]
         self.spawn_box = [position,size]
         self.create_leaves()
-
-        self.convert_alpha()#a temporary solution
-
-    def convert_alpha(self):#a temporary solution
-        for state in self.sprites.sprite_dict.keys():
-            for frame,image in enumerate(self.sprites.sprite_dict[state]):
-                self.sprites.sprite_dict[state][frame] = image.convert_alpha()
+        self.pause_group = game_objects.layer_pause
+        self.group = game_objects.all_bgs
 
     def blur(self,blur_value):#called from maploader
         for state in self.sprites.sprite_dict.keys():
@@ -36,6 +31,10 @@ class Light_forest_tree1(Animatedentity):
     def update_pos(self,scroll):
         self.true_pos = [self.true_pos[0] + self.parallax[0]*scroll[0], self.true_pos[1] + self.parallax[1]*scroll[1]]
         self.rect.bottomleft = self.true_pos.copy()
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.group_distance()   
 
     def create_leaves(self,number_particles = 3):
         for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead?

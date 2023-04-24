@@ -366,7 +366,10 @@ class Level():
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
-                    self.game_objects.all_bgs.add(new_tree)            
+                    self.game_objects.all_bgs.add(new_tree)
+
+                sprites = self.game_objects.all_bgs.sprites()
+                new_tree.index = sprites.index(new_tree)
 
     @staticmethod
     def blur_value(parallax):#called from load_laters and load_back/front_objects
@@ -459,7 +462,9 @@ class Level():
             elif self.layer == 'interact':#the stuff that blits in front of interactables
                 self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
             elif self.layer == 'bg':#bg
-                self.game_objects.all_bgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
+                bg = Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
+                self.game_objects.all_bgs.add(bg)
+                self.game_objects.all_bgs.reference[str(parallax[0])]= bg
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:

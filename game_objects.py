@@ -36,6 +36,7 @@ class Game_Objects():
         self.platforms = pygame.sprite.Group()
         self.platforms_ramps = pygame.sprite.Group()
         self.all_bgs = pygame.sprite.LayeredUpdates()
+        self.all_bgs.reference = {}#to store the reference positions of each static bg layer
         self.all_fgs = pygame.sprite.LayeredUpdates()
         self.bg_interact = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
         self.eprojectiles = pygame.sprite.Group()#arrows and sword for enemies
@@ -46,6 +47,7 @@ class Game_Objects():
         self.camera_blocks = pygame.sprite.Group()
         self.interactables = pygame.sprite.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
         self.reflections = Entities.Specialdraw_Group()
+        self.layer_pause = Entities.PauseLayer()
 
         #initiate player
         self.player = Entities.Player([0,0],self)
@@ -111,6 +113,7 @@ class Game_Objects():
     def update_groups(self, scroll = (0,0)):
         self.platforms.update(scroll)
         self.platforms_ramps.update(scroll)
+        self.layer_pause.update(scroll)#should be before all_bgs and all-fgs
         self.all_bgs.update(scroll)
         self.bg_interact.update(scroll)
         self.all_fgs.update(scroll)

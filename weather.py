@@ -253,18 +253,15 @@ class Weather_particles(Bound_entity):
         return math.sin(self.time*0.1+self.phase)
 
     def set_color(self,new_colour):
-        replace_color=(255,0,0)
+        replace_color = (255,0,0)
         size = [self.image.get_size()[0]*self.parallax[0],self.image.get_size()[1]*self.parallax[1]]
-        surface = pygame.Surface((size),pygame.SRCALPHA,32).convert_alpha()
         for state in self.sprites.sprite_dict.keys():
             for frame,image in enumerate(self.sprites.sprite_dict[state]):
                 img_copy = pygame.transform.scale(image,size)
-                img_copy.set_colorkey(replace_color)
-                mask = surface.copy()
-                mask.fill(new_colour)
-                mask.blit(img_copy,(0,0))
-                mask.set_colorkey(mask.get_at((0,0)))#should be (0,0,0) but first frame has different colour for some reason
-                self.sprites.sprite_dict[state][frame] = mask
+                arr = pygame.PixelArray(img_copy)#make it an pixel arrat since it has a replace color function
+                arr.replace(replace_color,new_colour)
+                self.sprites.sprite_dict[state][frame] =arr.make_surface()
+                arr.close()
 
 class Sakura(Weather_particles):
     def __init__(self,game_objects,parallax):
@@ -343,7 +340,7 @@ class Leaves(Weather_particles):#leaves from trees
         self.reset()
         self.resetting = {False:self.reset,True:self.kill}[kill]
 
-        colours=[[60,179,113],[154,205,50],[34,139,34],[46,139,87]]
+        colours=[(60,179,113),(154,205,50),(34,139,34),(46,139,87)]
         colour = colours[random.randint(0, len(colours)-1)]
 
         self.set_color(colour)

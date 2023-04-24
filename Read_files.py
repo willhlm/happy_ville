@@ -95,7 +95,7 @@ def load_sprites(path_to_folder):
     if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
         list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
     list_of_sprites.sort()
-    return [pygame.image.load(file) for file in list_of_sprites]
+    return [pygame.image.load(file).convert_alpha() for file in list_of_sprites]
 
 class Sounds():#read in SFX sounds, dorsn't have to be a class
     def __init__(self,path):
@@ -145,11 +145,11 @@ class Sprites():
         if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
             list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
         list_of_sprites.sort()
-        return [pygame.image.load(file) for file in list_of_sprites]
+        return [pygame.image.load(file).convert_alpha() for file in list_of_sprites]
 
     def load_single_sprite(self,path_to_sprite):
         #use to load single sprite, full path must be provided
-        return pygame.image.load(path_to_sprite)
+        return pygame.image.load(path_to_sprite).convert_alpha()
 
 
     #TO DO: put this method outside of class!
@@ -202,7 +202,7 @@ class Sprite_sheet():#don't need it?
 
     def __init__(self, filename):
         try:
-            self.sheet =  pygame.image.load(filename).convert()
+            self.sheet =  pygame.image.load(filename).convert_alpha()
         except:
             #print(f"Unable to load spritesheet image: {filename}")
             raise SystemExit(e)
@@ -211,7 +211,7 @@ class Sprite_sheet():#don't need it?
         #Loads image from x, y, x+tilesize, y+tilesize.
 
         rect = pygame.Rect(rectangle)
-        image = pygame.Surface(rect.size).convert()
+        image = pygame.Surface(rect.size).convert_alpha()
         image.blit(self.sheet, (0, 0), rect)
         if colorkey is not None:
             if colorkey is -1:
@@ -246,7 +246,7 @@ class Alphabet():
     def render(self, surface_size = False, text = "", limit = 1000, inverse_color = False):
         if not surface_size:
             surface_size = (4*len(text),5)
-        text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
+        text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
         x, y = 0, 0
         x_max = int(surface_size[0]/self.char_size[0])
         y_max = int(surface_size[1]/self.char_size[1])
@@ -280,7 +280,7 @@ class Alphabet():
     def fill_text_bg(self, surface_size):
         col = int(surface_size[0]/16)
         row = int(surface_size[1]/16)
-        surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32)
+        surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
 
         for r in range(0,row):
             for c in range(0,col):
