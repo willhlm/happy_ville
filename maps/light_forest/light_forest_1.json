@@ -1289,6 +1289,24 @@
                          "width":16,
                          "x":3616,
                          "y":896
+                        }, 
+                        {
+                         "gid":24,
+                         "height":16,
+                         "id":631,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"type",
+                                 "type":"string",
+                                 "value":"Fireplace"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3760,
+                         "y":928
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1877,7 +1895,7 @@
          "y":0
         }],
  "nextlayerid":86,
- "nextobjectid":597,
+ "nextobjectid":632,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -4,6 +4,13 @@ import states_horn_vines, states_health, states_basic, states_camerastop, states
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
+def empty_copy(obj):
+    class Empty(obj.__class__):
+        def __init__(self): pass
+    newcopy = Empty()
+    newcopy.__class__ = obj.__class__
+    return newcopy
+
 class Specialdraw_Group(pygame.sprite.Group):#a group for the reflection object which need a special draw method
     def __init__(self):
         super().__init__()
@@ -27,12 +34,12 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
         else:
             #manuall add to a specific layer
             sprites = s.game_objects.all_bgs.sprites()
-            bg = s.game_objects.all_bgs.reference[str(s.parallax[0])]
-            index = sprites.index(bg)
+            bg = s.game_objects.all_bgs.reference[tuple(s.parallax)]
+            index = sprites.index(bg)#fine the index in which the static layer is located
 
             s.game_objects.all_bgs.spritedict[s] = s.game_objects.all_bgs._init_rect#in add internal
             s.game_objects.all_bgs._spritelayers[s] = 0
-            s.game_objects.all_bgs._spritelist.insert(index,s)
+            s.game_objects.all_bgs._spritelist.insert(index,s)#it goes behind the static layer of reference
             s.add_internal(s.game_objects.all_bgs)
             s.remove(s.pause_group)#remove from pause
 
@@ -550,7 +557,6 @@ class Player(Character):
         self.omamoris.update()
 
 class Migawari_entity(Character):#player double ganger
-
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/migawari/')
@@ -2497,6 +2503,7 @@ class Chest(Interactable):
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
+                #obj = self.game_objects.object_pool.spawn(key)
                 obj = getattr(sys.modules[__name__], key)([self.hitbox.x,self.hitbox.y],self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
@@ -2505,8 +2512,7 @@ class Chest(Interactable):
         self.currentstate.handle_input('Idle')
 
     def take_dmg(self,projectile):
-        if self.invincibile:
-            return
+        if self.invincibile: return
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
         self.timer_jobs['invincibility'].activate()
@@ -2730,6 +2736,19 @@ class Light_crystal(Interactable):
         for timer in self.timers:
             timer.update()
 
+class Fireplace(Interactable):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/fireplace/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = pos
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+
+    def interact(self):#when player press t/y
+        self.currentstate.handle_input('Interact')#goes to interacted after transform
+
+#traps
 class Lighitning_barrier(Interactable):
     def __init__(self,pos,game_objects,size):
         super().__init__(pos,game_objects)

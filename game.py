@@ -10,7 +10,7 @@ class Game():
         self.WINDOW_SIZE = C.window_size.copy()
         self.scale_size()#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
-        self.screen = pygame.Surface(self.WINDOW_SIZE)#do not add .convert_alpha()
+        self.screen = pygame.Surface(self.WINDOW_SIZE)#do not add .convert_alpha(), should be initiad before display, for some reason
         flags = pygame.SCALED# | pygame.FULLSCREEN
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
 

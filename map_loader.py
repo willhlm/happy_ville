@@ -89,13 +89,14 @@ class Level():
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
         load_front_objects = {'front':self.load_front_objects,'statics':self.load_statics,'collision':self.load_statics}#the keys are the naes of the object in tiled
         load_back_objects = {'back':self.load_back_objects}#the keys are the naes of the object in tiled
+        self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer
 
         for group in self.map_data['groups']:
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
             offset = [self.map_data['groups'][group]['offsetx'], self.map_data['groups'][group]['offsety']]
 
-            if 'fg' in group: self.layer = 'fg'
-            elif 'bg' in group: self.layer = 'bg'
+            if 'bg' in group: self.layer = 'bg'
+            elif 'fg' in group: self.layer = 'fg'
             elif 'interact' in group: self.layer = 'interact'
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_back_objects)#objects behind layers
@@ -359,7 +360,7 @@ class Level():
             properties = obj.get('properties',[])
             id = obj['gid'] - self.map_data['back_firstgid']
 
-            if id == 2:#tree
+            if id == 2:#light forest tree tree
                 new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
                 if parallax[0] != 1:
                     new_tree.blur(self.blur_value(parallax))
@@ -367,9 +368,6 @@ class Level():
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
-
-                sprites = self.game_objects.all_bgs.sprites()
-                new_tree.index = sprites.index(new_tree)
 
     @staticmethod
     def blur_value(parallax):#called from load_laters and load_back/front_objects
@@ -395,8 +393,8 @@ class Level():
         blit_compress_surfaces = {}#the ones with the same paralax are merged
         for tile_layer in data.keys():#make a blank surface
             if 'animated' in tile_layer: continue
-            blit_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
-            blit_compress_surfaces[tile_layer[0:tile_layer.find('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32).convert_alpha()
+            blit_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
+            blit_compress_surfaces[tile_layer[0:tile_layer.find('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
 
         #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
@@ -464,7 +462,7 @@ class Level():
             elif self.layer == 'bg':#bg
                 bg = Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
                 self.game_objects.all_bgs.add(bg)
-                self.game_objects.all_bgs.reference[str(parallax[0])]= bg
+                self.game_objects.all_bgs.reference[tuple(parallax)]= bg
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:

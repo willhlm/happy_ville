@@ -11,6 +11,7 @@ import constants as C
 import world_state
 import UI
 import save_load
+import object_pool
 
 from time import perf_counter
 
@@ -29,14 +30,14 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = UI.Gameplay_UI(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-
+        self.object_pool = object_pool.Object_pool(self)
+        
     def create_groups(self):#define all sprite groups
         self.enemies = pygame.sprite.Group()
         self.npcs = pygame.sprite.Group()
         self.platforms = pygame.sprite.Group()
         self.platforms_ramps = pygame.sprite.Group()
         self.all_bgs = pygame.sprite.LayeredUpdates()
-        self.all_bgs.reference = {}#to store the reference positions of each static bg layer
         self.all_fgs = pygame.sprite.LayeredUpdates()
         self.bg_interact = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
         self.eprojectiles = pygame.sprite.Group()#arrows and sword for enemies
@@ -89,6 +90,7 @@ class Game_Objects():
         self.bg_interact.empty()
         self.reflections.empty()
         self.cosmetics.empty()
+        self.layer_pause.empty()
 
     def collide_all(self):
         self.collisions.platform_collision(self.players)
@@ -113,7 +115,7 @@ class Game_Objects():
     def update_groups(self, scroll = (0,0)):
         self.platforms.update(scroll)
         self.platforms_ramps.update(scroll)
-        self.layer_pause.update(scroll)#should be before all_bgs and all-fgs
+        self.layer_pause.update(scroll)#should be before all_bgs and all_fgs
         self.all_bgs.update(scroll)
         self.bg_interact.update(scroll)
         self.all_fgs.update(scroll)

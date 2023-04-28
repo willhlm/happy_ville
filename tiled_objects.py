@@ -34,7 +34,7 @@ class Light_forest_tree1(Animatedentity):
 
     def update(self,scroll):
         super().update(scroll)
-        self.group_distance()   
+        self.group_distance()
 
     def create_leaves(self,number_particles = 3):
         for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead?
