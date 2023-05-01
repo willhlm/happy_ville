@@ -1,4 +1,4 @@
-import pygame, math, random, sys, Read_files, states_weather
+import pygame, math, random, sys, Read_files, states_weather, shader_entities
 from Entities import Animatedentity
 
 class Weather():
@@ -36,7 +36,8 @@ class Wind(pygame.sprite.Sprite):
         self.rect.topleft = [0,0]
         self.velocity = [0,0]
         self.lifetime = 300
-
+        self.shader = shader_entities.Shader_entities(self)
+        
     def blow(self,dir):#called when weather is initiated
         self.velocity = dir
 
@@ -62,6 +63,7 @@ class Fog(pygame.sprite.Sprite):
         self.rect.topleft = (0,0)
         self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
         pygame.draw.rect(self.image,self.colour,self.rect)
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self,scroll):
         self.rect.topleft = (0,0)
@@ -339,6 +341,7 @@ class Leaves(Weather_particles):#leaves from trees
         self.rect = self.image.get_rect()
         self.reset()
         self.resetting = {False:self.reset,True:self.kill}[kill]
+        #self.shader = shader_entities.Shader_entities(self)
 
         colours=[(60,179,113),(154,205,50),(34,139,34),(46,139,87)]
         colour = colours[random.randint(0, len(colours)-1)]

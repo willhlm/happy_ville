@@ -3,6 +3,7 @@ import states
 import game_objects
 import sys
 import constants as C
+import shaders
 
 class Game():
     def __init__(self):
@@ -10,13 +11,21 @@ class Game():
         self.WINDOW_SIZE = C.window_size.copy()
         self.scale_size()#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
+        flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF#pygame.SCALED | pygame.FULLSCREEN
+
+        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)#has to be before set_mode
+        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
+        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK,pygame.GL_CONTEXT_PROFILE_CORE)
+
         self.screen = pygame.Surface(self.WINDOW_SIZE)#do not add .convert_alpha(), should be initiad before display, for some reason
-        flags = pygame.SCALED# | pygame.FULLSCREEN
-        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled,flags,vsync = 1)
+        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, flags, vsync = 1)
+        #need to be after display
+        self.screen_shader = shaders.Shader(self.WINDOW_SIZE_scaled, self.WINDOW_SIZE_scaled, (0, 0), "shaders/vertex.txt", "shaders/default_frag.txt", self.screen)
 
         #initiate game related values
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
+
         self.fps = C.fps
         self.state_stack = [states.Title_Menu(self)]
 
@@ -37,10 +46,11 @@ class Game():
 
     def run(self):
         while True:
+            shaders.clear((0, 0, 0))
+
             #tick clock
             self.clock.tick(self.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-            #self.dt = 1
 
             #handle event
             self.event_loop()
@@ -49,11 +59,11 @@ class Game():
             self.state_stack[-1].update()
 
             #render
-            self.state_stack[-1].render()
+            self.state_stack[-1].render()#render as usual with blit onto self.screeen
+            self.screen_shader.render(self.screen)#this rener method takes care of rendering to the display
 
             #update display
-            self.display.blit(pygame.transform.scale(self.screen,self.WINDOW_SIZE_scaled),(0,0))
-            pygame.display.update()
+            pygame.display.flip()
 
     def scale_size(self, scale = None):
         if scale:

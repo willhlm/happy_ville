@@ -1,4 +1,4 @@
-import pygame, math, random
+import pygame, math, random, shader_entities
 
 class Particles(pygame.sprite.Sprite):
     def __init__(self,pos, game_objects, distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255]):
@@ -16,6 +16,7 @@ class Particles(pygame.sprite.Sprite):
 
     def update(self,scroll):
         self.update_pos(scroll)
+        self.shader.update_pos()        
         self.lifetime -= self.game_objects.game.dt
         self.speed()
         self.fading()
@@ -60,6 +61,7 @@ class Circle(Particles):#a general one
         self.radius = random.randint(max(self.scale-1,1), self.scale+1)
         self.fade_scale = 3
         self.make_circle()
+        self.shader = shader_entities.Shader_entities(self)
 
     def make_circle(self):
         self.surface =pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
@@ -83,6 +85,7 @@ class Spark(Particles):#a general one
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.make_sparks()
         self.fade_scale = 10
+        self.shader = shader_entities.Shader_entities(self)
 
     def update(self,scroll):
         self.update_spark()

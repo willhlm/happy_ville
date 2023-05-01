@@ -11,12 +11,11 @@ import constants as C
 import world_state
 import UI
 import save_load
-import object_pool
+import groups
 
 from time import perf_counter
 
 class Game_Objects():
-
     def __init__(self, game):
         self.game = game
         self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
@@ -30,29 +29,30 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = UI.Gameplay_UI(self)
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.object_pool = object_pool.Object_pool(self)
-        
+        #self.object_pool = object_pool.Object_pool(self)
+
     def create_groups(self):#define all sprite groups
-        self.enemies = pygame.sprite.Group()
-        self.npcs = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()#groups.Shader_group()
+        self.npcs = pygame.sprite.Group()#groups.Shader_group()
         self.platforms = pygame.sprite.Group()
         self.platforms_ramps = pygame.sprite.Group()
-        self.all_bgs = pygame.sprite.LayeredUpdates()
-        self.all_fgs = pygame.sprite.LayeredUpdates()
+        self.all_bgs = pygame.sprite.LayeredUpdates()#groups.Shader_layered_group()#
+        self.all_fgs = pygame.sprite.LayeredUpdates()#groups.Shader_layered_group()#
         self.bg_interact = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
-        self.eprojectiles = pygame.sprite.Group()#arrows and sword for enemies
-        self.fprojectiles = pygame.sprite.Group()#arrows and sword for aila
-        self.loot = pygame.sprite.Group()#coins and stuff the player can collide can pickup
-        self.entity_pause = Entities.PauseGroup() #all Entities that are far away
-        self.cosmetics = pygame.sprite.Group()#things we just want to blit
+        self.eprojectiles = pygame.sprite.Group()#groups.Shader_group()
+        self.fprojectiles = pygame.sprite.Group()#groups.Shader_group()
+        self.loot = pygame.sprite.Group()#groups.Shader_group()
+        self.entity_pause = groups.PauseGroup() #all Entities that are far away
+        self.cosmetics = pygame.sprite.Group()#groups.Shader_group()#things we just want to blit
         self.camera_blocks = pygame.sprite.Group()
-        self.interactables = pygame.sprite.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
-        self.reflections = Entities.Specialdraw_Group()
-        self.layer_pause = Entities.PauseLayer()
+        self.interactables = pygame.sprite.Group()#groups.Shader_group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
+        self.reflections = groups.Specialdraw_Group()
+        self.layer_pause = groups.PauseLayer()
 
         #initiate player
         self.player = Entities.Player([0,0],self)
-        self.players = pygame.sprite.Group(self.player)
+        self.players = pygame.sprite.Group()#groups.Shader_group()
+        self.players.add(self.player)
 
     def load_map(self, map_name, spawn = '1',fade = True):
         t1_start = perf_counter()

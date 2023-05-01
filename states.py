@@ -4,6 +4,7 @@ import Entities
 import cutscene
 import constants as C
 import state_inventory
+import shader_entities
 
 class Game_State():
     def __init__(self,game):
@@ -90,7 +91,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('light_forest_1','1')
+            self.game.game_objects.load_map('village_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -411,6 +412,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
         self.amp = amplitude
         self.game.state_stack[-1].render()#make sure that everything is plotted before making a screen copy
         self.temp_surface = self.game.screen.copy()
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self):
         self.game.game_objects.cosmetics.update([0,0])
@@ -420,6 +422,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
             self.exit_state()
 
     def render(self):
+        #super().render()
         self.game.game_objects.cosmetics.draw(self.game.screen)
         self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
 

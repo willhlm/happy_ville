@@ -2,7 +2,7 @@ import pygame, csv, math
 import Entities, Read_files, weather, tiled_objects
 import constants as C
 
-from PIL import Image, ImageFilter#for blurring
+#from PIL import Image, ImageFilter#for blurring
 
 class Level():
     def __init__(self, game_objects):

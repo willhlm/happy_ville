@@ -11,54 +11,6 @@ def empty_copy(obj):
     newcopy.__class__ = obj.__class__
     return newcopy
 
-class Specialdraw_Group(pygame.sprite.Group):#a group for the reflection object which need a special draw method
-    def __init__(self):
-        super().__init__()
-
-    def draw(self):
-        for s in self.sprites():
-            s.draw()
-
-class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries: almst works with LayeredUpdates group (when they come back, it is in fron of grass, so the posoition is not 100 % preserved)
-    def __init__(self):
-        super().__init__()
-
-    def update(self, pos):
-        for s in self.sprites():
-            self.group_distance(s,pos)
-
-    @staticmethod
-    def group_distance(s,pos):
-        if s.rect[0]<s.bounds[0] or s.rect[0]>s.bounds[1] or s.rect[1]<s.bounds[2] or s.rect[1]>s.bounds[3]:#this means it is outside of screen
-            s.update_pos(pos)
-        else:
-            #manuall add to a specific layer
-            sprites = s.game_objects.all_bgs.sprites()
-            bg = s.game_objects.all_bgs.reference[tuple(s.parallax)]
-            index = sprites.index(bg)#fine the index in which the static layer is located
-
-            s.game_objects.all_bgs.spritedict[s] = s.game_objects.all_bgs._init_rect#in add internal
-            s.game_objects.all_bgs._spritelayers[s] = 0
-            s.game_objects.all_bgs._spritelist.insert(index,s)#it goes behind the static layer of reference
-            s.add_internal(s.game_objects.all_bgs)
-            s.remove(s.pause_group)#remove from pause
-
-class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries
-    def __init__(self):
-        super().__init__()
-
-    def update(self, pos):
-        for s in self.sprites():
-            self.group_distance(s,pos)
-
-    @staticmethod
-    def group_distance(s,pos):
-        if s.rect[0]<s.bounds[0] or s.rect[0]>s.bounds[1] or s.rect[1]<s.bounds[2] or s.rect[1]>s.bounds[3]:#this means it is outside of screen
-            s.update_pos(pos)
-        else:
-            s.add(s.group)#add to group
-            s.remove(s.pause_group)#remove from pause
-
 class Platform(pygame.sprite.Sprite):#has hitbox
     def __init__(self,pos,size = (16,16)):
         super().__init__()
@@ -290,6 +242,8 @@ class BG_Block(Staticentity):
         super().__init__(pos,img)
         self.true_pos = self.rect.bottomleft
         self.parallax = parallax
+        #surface = pygame.Surface([640,360], pygame.SRCALPHA, 32)
+        #self.shader = shader_entities.Shader_BG(self,surface)
 
     def update_pos(self,pos):
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
@@ -302,6 +256,8 @@ class BG_Animated(BG_Block):
         self.sprites = Read_files.load_sprites(sprite_folder_path)
         self.image = self.sprites[0]
         self.animation = animation.Simple_animation(self)
+        #surface = pygame.Surface([640,360], pygame.SRCALPHA, 32)
+        #self.shader = shader_entities.Shader_BG(self,surface)
 
     def update(self, pos):
         self.update_pos(pos)
@@ -339,6 +295,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
 
     def update(self,scroll):
         super().update(scroll)#update_pos
+        #self.shader.update_pos()#should be after update_pos
         self.currentstate.update()
         self.animation.update()
 
@@ -360,14 +317,6 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
-
-    def update_rect_y(self):
-        self.rect.midbottom = self.hitbox.midbottom
-        self.true_pos[1] = self.rect.centery
-
-    def update_rect_x(self):
-        self.rect.midbottom = self.hitbox.midbottom
-        self.true_pos[0] = self.rect.centerx
 
     def update_rect_y(self):
         self.rect.midbottom = self.hitbox.midbottom
@@ -423,6 +372,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.running_particles = Dust_running_particles
 
     def update(self,pos):
+        #self.shader.update_pos()#should be before update_pos? for aila but maybe not for enemies
         self.update_pos(pos)
         self.update_timers()
         self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
@@ -489,6 +439,8 @@ class Player(Character):
         self.spawn_point = [{'map':'light_forest_3', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
+
+        #self.shader = shader_entities.Shader_entities(self)
 
         self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
@@ -685,6 +637,7 @@ class Exploding_Mygga(Enemy):
         self.aggro_distance = 150
         self.dir[1] = 1
         self.size = [64,64]#hurtbox size
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update_pos(self,pos):
         super().update_pos(pos)
@@ -1347,9 +1300,12 @@ class Dash_effect(Staticentity):
         self.rect = self.image.get_rect()
         self.rect.center = entity.rect.center
         self.alpha = alpha
+        self.image.set_alpha(self.alpha)
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self,scroll):
         self.update_pos(scroll)
+        #self.shader.update_pos()
         self.alpha *= 0.9
         self.image.set_alpha(self.alpha)
         self.destroy()
@@ -1530,7 +1486,6 @@ class Melee(Projectiles):
         self.kill()
 
 class Hurt_box(Melee):#a hitbox that spawns
-
     def __init__(self,entity, lifetime = 100):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/hurt_box/')#invisible
@@ -1541,12 +1496,12 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,entity.size[0],entity.size[1])
         self.lifetime = lifetime
         self.dmg = entity.dmg
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update_hitbox(self):
         pass
 
 class Explosion(Melee):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/explosion/')
@@ -1557,6 +1512,7 @@ class Explosion(Melee):
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.dmg = entity.dmg
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update_hitbox(self):
         pass
@@ -1591,7 +1547,6 @@ class Shield(Melee):
         eprojectile.countered()
 
 class Sword(Melee):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Sword/')
@@ -1599,6 +1554,7 @@ class Sword(Melee):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,35)
         self.hitbox = self.rect.copy()
+        #self.shader = shader_entities.Shader_entities(self)
 
     def init(self):
         self.dmg = self.entity.dmg
@@ -2101,6 +2057,7 @@ class Amber_Droplet(Enemy_drop):
         self.hitbox = pygame.Rect(pos[0],pos[1],5,5)
         self.hitbox.bottom = self.rect.bottom
         self.description = 'moneyy'
+        #self.shader = shader_entities.Shader_entities(self)
 
     def player_collision(self,player):#when the player collides with this object
         super().player_collision(player)
@@ -2116,6 +2073,7 @@ class Bone(Enemy_drop):
         self.rect.center = pos
         self.hitbox = self.rect.copy()
         self.description = 'Ribs from my daugther. You can respawn and stuff'
+        #self.shader = shader_entities.Shader_entities(self)
 
     def use_item(self):
         if self.game_objects.player.inventory['Bone'] < 0: return#if we don't have bones
@@ -2135,6 +2093,7 @@ class Heal_item(Enemy_drop):
         self.rect.center = pos
         self.hitbox = self.rect.copy()
         self.description = 'Use it to heal'
+        #self.shader = shader_entities.Shader_entities(self)
 
     def use_item(self):
         if self.game_objects.player.inventory['Heal_item'] < 0: return
@@ -2150,6 +2109,7 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
@@ -2162,6 +2122,7 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
@@ -2174,6 +2135,7 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
@@ -2188,6 +2150,7 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
         self.rect.topleft = pos
         self.timer=0
         self.velocity=[0,0]
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self,scroll):
         super().update(scroll)
@@ -2213,6 +2176,7 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.finish = False
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self,pos):
         super().update(pos)
@@ -2229,6 +2193,7 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
         self.currentstate.enter_state('Slash_' + state)
         self.image = self.sprites.sprite_dict['slash_' + state][0]
         self.rect = self.image.get_rect(center=pos)
+        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
@@ -2343,7 +2308,6 @@ class Bridge(Interactable):
         self.game_objects.platforms.add(platform)
 
 class Path_col(Interactable):
-
     def __init__(self, pos, game_objects,size, destination, spawn):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
@@ -2353,6 +2317,7 @@ class Path_col(Interactable):
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
         self.image.set_alpha(0)#make them transparent
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self,scroll):
         self.update_pos(scroll)
@@ -2362,7 +2327,6 @@ class Path_col(Interactable):
         self.game_objects.load_map(self.destination, self.spawn)
 
 class Path_inter(Interactable):
-
     def __init__(self, pos, game_objects, size, destination, spawn, image):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos,size)
@@ -2372,6 +2336,7 @@ class Path_inter(Interactable):
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
         self.image.set_alpha(0)#make them transparent
+        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self,scroll):
         self.update_pos(scroll)
@@ -2641,6 +2606,7 @@ class Fast_travel(Interactable):#save point
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
+        #self.shader = shader_entities.Shader_entities(self)
 
         try:#if it has been unlocked
             self.game_objects.world_state.travel_points[map]
@@ -2696,6 +2662,7 @@ class Sign(Interactable):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox=self.rect.copy()
+        #self.shader = shader_entities.Shader_entities(self)
 
     def player_collision(self):#player collision
         self.currentstate.handle_input('Outline')
