@@ -556,9 +556,11 @@ class Enemy(Character):
         self.group = game_objects.enemies
         self.pause_group = game_objects.entity_pause
         self.description = 'enemy'##used in journal
+        self.original_pos = pos
 
         self.currentstate = states_enemy.Idle(self)
-        self.AI = AI_enemy.Peace(self)
+        #self.AI = AI_enemy.Peace(self)
+        AI_enemy.build_tree_peace(self)#AI_exploding_mygga.Peace(self)#
 
         self.inventory = {'Amber_Droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -605,6 +607,10 @@ class Enemy(Character):
         self.velocity[0] = -30*self.dir[0]
         self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
 
+    def update_pos(self,pos):
+        super().update_pos(pos)
+        self.original_pos = [self.original_pos[0] + pos[0], self.original_pos[1] + pos[1]]
+
 class Mygga(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -638,10 +644,6 @@ class Exploding_Mygga(Enemy):
         self.dir[1] = 1
         self.size = [64,64]#hurtbox size
         #self.shader = shader_entities.Shader_entities(self)
-
-    def update_pos(self,pos):
-        super().update_pos(pos)
-        self.original_pos = [self.original_pos[0] + pos[0], self.original_pos[1] + pos[1]]
 
     def suicide(self):
         self.projectiles.add(Hurt_box(self,lifetime = 50))
@@ -1057,7 +1059,7 @@ class Reindeer(Boss):
         self.abillity = 'dash_1main'#the stae of image that will be blitted to show which ability that was gained
         self.attack = Sword
         self.special_attack = Horn_vines
-        self.attack_distance = 300
+        self.attack_distance = 50
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
@@ -1217,7 +1219,6 @@ class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
         super().__init__(pos)
         self.game_objects = game_objects
-        self.image = pygame.image.load("Sprites/invisible.png").convert_alpha()
         self.entity = values['entity']
         self.number = int(values['number'])
         self.spawn_entities()
@@ -1229,7 +1230,7 @@ class Spawner(Staticentity):#an entity spawner
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
 
-class Dark_screen(Staticentity):#used in e.g. caves. loaded in maploader
+class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. caves. loaded in maploader
     def __init__(self,game_objects,colour = (10,10,10,200)):
         super().__init__(pos = [0,0])
         blank_surface  = pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))).convert_alpha()#ONLY USED FOR DARK MODE
@@ -1246,12 +1247,13 @@ class Transparent_screen(Staticentity):#a placeholder for normal stages. initial
     def __init__(self):
         super().__init__(pos = [0,0])
 
-class Light_glow(Staticentity):#a light glow anounf an entity. loaded in maploader
-    def __init__(self,entity,radius=200):
+class Light_glow(Staticentity):#a light glow anounf an entity.
+    def __init__(self,entity,radius = 200,layers = 40):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
         self.radius = radius
+        self.layers = layers
         self.make_glow()
         self.image = self.glow
         self.rect = self.image.get_rect()
@@ -1265,18 +1267,18 @@ class Light_glow(Staticentity):#a light glow anounf an entity. loaded in mapload
     def make_glow(self):#init
         self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
 
-        layers = 40
-        for i in range(layers):
+        for i in range(self.layers):
             temp = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
             pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*5+1)
             self.glow.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
-class Dark_glow(Staticentity):#the glow to use in dark area, removes the dark image in caves. Loaded in maploader
-    def __init__(self,entity,radius=200):
+class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark screen/layer in e.g. caves. It can be combined with light_glow
+    def __init__(self,entity,radius = 200, layers = 40):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
         self.radius = radius
+        self.layers = layers
         self.make_glow()
 
     def update(self,pos):
@@ -1284,11 +1286,10 @@ class Dark_glow(Staticentity):#the glow to use in dark area, removes the dark im
         self.game_objects.map.screen.image.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_SUB)
         self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), None, special_flags = pygame.BLEND_RGB_SUB)#inverting
 
-    def make_glow(self,const=6):#init
+    def make_glow(self,const = 6):#init
         self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
 
-        layers = 40
-        for i in range(layers):
+        for i in range(self.layers):
             k = i*const
             k = min(k,255)
             pygame.draw.circle(self.glow,(k,k,k,k),self.glow.get_rect().center,self.radius-i*5)
@@ -1314,7 +1315,7 @@ class Dash_effect(Staticentity):
         if self.alpha < 5:
             self.kill()
 
-#Player movement abilities, handles them
+#Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
     def __init__(self,entity):
         self.entity = entity
@@ -1360,7 +1361,6 @@ class Player_abilities():
             pass
 
 class Movement_hud():
-
     def __init__(self,entity):
         self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud')
         self.entity = entity
@@ -2774,10 +2774,10 @@ class Lightning_spikes(Interactable):
 
 #UI
 class Menu_Arrow():
-
     def __init__(self):
         self.img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
         self.rect = self.img.get_rect()
+        self.img.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
 
     #note: sets pos to input, doesn't update with an increment of pos like other entities
     def update(self,pos):

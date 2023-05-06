@@ -1,4 +1,4 @@
-import pygame, math, random, sys, Read_files, states_weather, shader_entities
+import pygame, math, random, sys, Read_files, states_weather
 from Entities import Animatedentity
 
 class Weather():
@@ -7,12 +7,12 @@ class Weather():
         self.wind = Wind(self)
 
     def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
-        for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead
+        for i in range(0,number_particles):
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
 
     def create_leaves(self,information,parallax,group,number_particles = 10):
-        for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead
+        for i in range(0,number_particles):
             obj = Leaves(self.game_objects,parallax,information)
             group.add(obj)
 
@@ -36,8 +36,8 @@ class Wind(pygame.sprite.Sprite):
         self.rect.topleft = [0,0]
         self.velocity = [0,0]
         self.lifetime = 300
-        self.shader = shader_entities.Shader_entities(self)
-        
+        #self.shader = shader_entities.Shader_entities(self)
+
     def blow(self,dir):#called when weather is initiated
         self.velocity = dir
 
@@ -122,9 +122,7 @@ class Circles(Bound_entity):
     animations = {}
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.set_color()
-        self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
-
+        self.set_parameters()
         self.layers = 40#number of layers in the glow
         self.glow_spacing_factor = 0.1#a factor to determine the spacing between the glows
         self.glow_radius = self.layers*self.radius*self.glow_spacing_factor#determines the canvas size needed (the size of the largest glow)
@@ -134,16 +132,18 @@ class Circles(Bound_entity):
 
         self.frequency = 0.003#the frequncy of grow and shrinking
         try:#the images are stored in an class variable such that the animations are only made once. This way, many particles can be made with very small performance.
-            self.images = Circles.animations[str(self.parallax[0])]
+            self.images = Circles.animations[tuple(self.parallax)]
         except:#if it is the first time making that circle size (depends on parallax)
             self.prepare_animation()#make the circles once and store each frame in a list: takes performance to make many
-            Circles.animations[str(self.parallax[0])] = self.images
+            Circles.animations[tuple(self.parallax)] = self.images
 
         self.frame = random.randint(0, len(self.images)-1)#randomise the starting frame
+        self.animation_speed = 1
 
-    def set_color(self):
+    def set_parameters(self):
         self.colour = [255,255,255,160]#center ball colour
         self.glow_colour = [255,255,255,2]#colour of each glow
+        self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
 
     def update(self,scroll):
         self.update_pos(scroll)
@@ -152,7 +152,7 @@ class Circles(Bound_entity):
 
     def set_image(self):
         self.image = self.images[int(self.frame)]
-        self.frame += self.game_objects.game.dt
+        self.frame += self.game_objects.game.dt*self.animation_speed
 
         if self.frame >= len(self.images):
             self.frame = 0
@@ -200,9 +200,10 @@ class Vertical_circles(Circles):
         super().__init__(game_objects, parallax)
         self.phase = random.randint(0, 360)#randomise the starting phase
 
-    def set_color(self):
+    def set_parameters(self):
         self.colour = [255,255,255,100]#center ball colour
         self.glow_colour = [255,255,255,2]#colour of each glow
+        self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
 
     def update(self,scroll):
         super().update(scroll)
@@ -210,6 +211,26 @@ class Vertical_circles(Circles):
 
     def update_vel(self):
         self.velocity  = [0.5*math.sin(self.frame*0.1+self.phase),-1]
+
+
+class Fireflies(Circles):
+    animations = {}
+    def __init__(self,game_objects, parallax):
+        super().__init__(game_objects, parallax)
+        self.phase = random.randint(0, 360)#randomise the starting phase
+        self.animation_speed = 0.8
+
+    def set_parameters(self):
+        self.colour = [153,153,0,150]#center ball colour
+        self.glow_colour = [255,215,0,2]#colour of each glow
+        self.radius = 3*self.parallax[0]#particle radius, depends on parallax
+
+    def update(self,scroll):
+        super().update(scroll)
+        self.update_vel()
+
+    def update_vel(self):
+        self.velocity  = [math.cos(self.frame*0.01+self.phase),math.sin(self.frame*0.01+self.phase)]
 
 class Blink(Bound_entity):
     def __init__(self,game_objects, parallax):

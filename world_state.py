@@ -31,26 +31,21 @@ class World_state():
         chest_int = 1
         soul_essence_int = 1
 
-        map_statics = map_data['groups']['bg1']['objects']['statics']
+        map_statics = map_data['groups']['bg1']['objects']['front']
         self.state[level_name] = {'chest':{},'soul_essence':{},'runestone':{}}#a place holder for things that should depend on map state
 
         for obj in map_statics['objects']:
-            id = obj['gid'] - map_data['statics_firstgid']
+            id = obj['gid'] - map_data['front_firstgid']
 
-            if id == 22:#runestone
+            if id == 3:#runestone
                 for property in obj['properties']:
                     if property['name'] == 'ID':
                         ID = property['value']
                 self.state[level_name]['runestone'][ID] = 'idle'
 
-            elif id == 23:#bushes, chests etc
-                for property in obj['properties']:
-                    if property['name'] == 'type':
-                        interactable_type = property['value']
-
-                if interactable_type == 'Chest':
-                    self.state[level_name]['chest'][str(chest_int)] = 'idle'
-                    chest_int += 1
+            elif id == 4:#chests
+                self.state[level_name]['chest'][str(chest_int)] = 'idle'
+                chest_int += 1
 
             elif id == 28:#key items: Soul_essence etc.
                 for property in obj['properties']:
