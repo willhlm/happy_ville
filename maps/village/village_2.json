@@ -227,8 +227,6 @@
                  "id":76,
                  "name":"bg2_2",
                  "opacity":1,
-                 "parallaxx":0.8,
-                 "parallaxy":0.8,
                  "type":"tilelayer",
                  "visible":true,
                  "width":140,
@@ -292,6 +290,29 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":140,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":93,
+                 "name":"front",
+                 "objects":[
+                        {
+                         "gid":28896,
+                         "height":80,
+                         "id":272,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":416,
+                         "y":416
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
                  "x":0,
                  "y":0
                 }, 
@@ -368,34 +389,6 @@
                          "width":16,
                          "x":832,
                          "y":352
-                        }, 
-                        {
-                         "gid":26,
-                         "height":16,
-                         "id":241,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"left",
-                                 "type":"string",
-                                 "value":"Village"
-                                }, 
-                                {
-                                 "name":"right",
-                                 "type":"string",
-                                 "value":"Dead forest"
-                                }, 
-                                {
-                                 "name":"up",
-                                 "type":"string",
-                                 "value":"Light Forest"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":544,
-                         "y":416
                         }, 
                         {
                          "gid":11,
@@ -549,18 +542,6 @@
                          "width":16,
                          "x":144,
                          "y":416
-                        }, 
-                        {
-                         "gid":30,
-                         "height":16,
-                         "id":271,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":464,
-                         "y":416
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -609,8 +590,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":92,
- "nextobjectid":272,
+ "nextlayerid":94,
+ "nextobjectid":273,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -788,6 +769,10 @@
          "tilecount":1813,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":28889,
+         "source":"..\/_objects\/front.tsx"
         }],
  "tilewidth":16,
  "type":"map",

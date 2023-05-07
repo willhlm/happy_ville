@@ -145,12 +145,12 @@ class Sprites():
         if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
             list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
         list_of_sprites.sort()
-        return [pygame.image.load(file).convert_alpha() for file in list_of_sprites]
+        return [self.load_sprite(file) for file in list_of_sprites]
 
-    def load_single_sprite(self,path_to_sprite):
+    @staticmethod
+    def load_sprite(path_to_sprite):
         #use to load single sprite, full path must be provided
         return pygame.image.load(path_to_sprite).convert_alpha()
-
 
     #TO DO: put this method outside of class!
     def generic_sheet_reader(self, path_to_sheet, w, h, r, c):
@@ -158,7 +158,7 @@ class Sprites():
     #loads all sprites from a sheet,
     #this method requires all sprites to have the same dimension in the sheet
         sprite_dict = {}
-        sheet = pygame.image.load(path_to_sheet).convert_alpha()
+        sheet = self.load_sprite(path_to_sheet)
         sprite_size = (w,h) #[width, height] of sprite in sheet
         sprite_count = [r,c] # nomber of sprites per [row,column]
         n = 0
@@ -172,7 +172,7 @@ class Sprites():
                 n+=1
         return sprite_dict
 
-#class containing sprites for players (pre,post,main charge)
+#class containing sprites for players
 class Sprites_Player(Sprites):
     def __init__(self,path):
         super().__init__()

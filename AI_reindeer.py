@@ -67,31 +67,27 @@ class Wait(behaviour_tree.Leaf):
         else:
             return 'RUNNING'
 
-class Init_attack_animation(behaviour_tree.Leaf):#run once
+class Init_attack(behaviour_tree.Leaf):#run once
     def __init__(self,entity):
         super().__init__(entity)
 
     def update(self):
         self.entity.currentstate.enter_state('Attack_pre')
+        self.entity.AI.black_board['attack'] = 'RUNNING'
         return 'SUCCESS'
 
 class Attack(behaviour_tree.Leaf):
     def __init__(self,entity):
         super().__init__(entity)
-        self.state = 'RUNNING'
 
     def update(self):
-        if self.state != 'RUNNING':
-            state = self.state
-            self.state = 'RUNNING'#reset
-            return state
-        return 'RUNNING'
+        return self.entity.AI.black_board['attack']
 
     def handle_input(self,input):
         if input == 'Attack':
-            self.state = 'SUCCESS'
+            self.entity.AI.black_board['attack'] = 'SUCCESS'
 
-class Init_jump_animation(behaviour_tree.Leaf):#run once
+class Init_jump(behaviour_tree.Leaf):#run once
     def __init__(self,entity,sign = 1):
         super().__init__(entity)
         self.sign = sign
@@ -99,21 +95,16 @@ class Init_jump_animation(behaviour_tree.Leaf):#run once
     def update(self):
         self.entity.AI.black_board['jump_direction'] = self.sign
         self.entity.currentstate.enter_state('Jump_pre')
+        self.entity.AI.black_board['jump'] = 'RUNNING'
         return 'SUCCESS'
 
 class Jumping(behaviour_tree.Leaf):
     def __init__(self,entity):
         super().__init__(entity)
-        self.state = 'RUNNING'
         self.counter = 1
 
     def update(self):
-        if self.state != 'RUNNING':
-            state = self.state
-            self.state = 'RUNNING'#reset
-            self.entity.AI.black_board['jump_direction'] = 1#reset
-            return state
-        return 'RUNNING'
+        return self.entity.AI.black_board['jump']
 
     def handle_input(self,input):#when it finished attack, called when attack animation finished
         if input == 'Landed':#jump animation finsihed
@@ -123,55 +114,48 @@ class Jumping(behaviour_tree.Leaf):
                 self.entity.currentstate.enter_state('Jump_pre')
             else:
                 self.counter = 1
-                self.state = 'SUCCESS'
+                self.entity.AI.black_board['jump_direction'] = 1#reset
+                self.entity.AI.black_board['jump'] = 'SUCCESS'
 
-class Init_rangeattack_animation(behaviour_tree.Leaf):#run once
+class Init_rangeattack(behaviour_tree.Leaf):#run once
     def __init__(self,entity):
         super().__init__(entity)
 
     def update(self):
         self.entity.currentstate.enter_state('Special_attack_pre')
+        self.entity.AI.black_board['range'] = 'RUNNING'
         return 'SUCCESS'
 
 class Range_attack(behaviour_tree.Leaf):
     def __init__(self,entity):
         super().__init__(entity)
-        self.state = 'RUNNING'
 
     def update(self):
-        if self.state != 'RUNNING':
-            state = self.state
-            self.state = 'RUNNING'#reset
-            return state
-        return 'RUNNING'
+        return self.entity.AI.black_board['range']
 
     def handle_input(self,input):#when it finished attack, called when attack animation finished
         if input == 'Attack':#attack animation finished
-            self.state = 'SUCCESS'
+            self.entity.AI.black_board['range'] = 'SUCCESS'
 
-class Init_dash_animation(behaviour_tree.Leaf):#run once
+class Init_dash(behaviour_tree.Leaf):#run once
     def __init__(self,entity):
         super().__init__(entity)
 
     def update(self):
         self.entity.currentstate.enter_state('Dash_pre')
+        self.entity.AI.black_board['range'] = 'RUNNING'
         return 'SUCCESS'
 
 class Dash_attack(behaviour_tree.Leaf):
     def __init__(self,entity):
         super().__init__(entity)
-        self.state = 'RUNNING'
 
     def update(self):
-        if self.state != 'RUNNING':
-            state = self.state
-            self.state = 'RUNNING'#reset
-            return state
-        return 'RUNNING'
+        return self.entity.AI.black_board['range']
 
     def handle_input(self,input):#when it finished attack, called when attack animation finished
         if input == 'Dash':#attack animation finished
-            self.state = 'SUCCESS'
+            self.entity.AI.black_board['range'] = 'SUCCESS'
 
 def build_tree(entity):
     entity.AI = behaviour_tree.Treenode()
@@ -190,19 +174,19 @@ def build_tree(entity):
     Random_selector = behaviour_tree.Random_selector()
 
     sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_jump_animation(entity))
+    sequence.add_child(Init_jump(entity))
     sequence.add_child(Jumping(entity))
     sequence.add_child(Wait(entity))
     Random_selector.add_child(sequence)
 
     sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_dash_animation(entity))
+    sequence.add_child(Init_dash(entity))
     sequence.add_child(Dash_attack(entity))
     sequence.add_child(Wait(entity))
     Random_selector.add_child(sequence)
 
     sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_rangeattack_animation(entity))
+    sequence.add_child(Init_rangeattack(entity))
     sequence.add_child(Range_attack(entity))
     sequence.add_child(Wait(entity))
     Random_selector.add_child(sequence)
@@ -214,13 +198,13 @@ def build_tree(entity):
     random_selector = behaviour_tree.Random_selector()
 
     sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_attack_animation(entity))
+    sequence.add_child(Init_attack(entity))
     sequence.add_child(Attack(entity))
     sequence.add_child(Wait(entity))
     random_selector.add_child(sequence)
 
     sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_jump_animation(entity,-1))#reverse jumping
+    sequence.add_child(Init_jump(entity,-1))#reverse jumping
     sequence.add_child(Jumping(entity))
     sequence.add_child(Wait(entity))
     random_selector.add_child(sequence)

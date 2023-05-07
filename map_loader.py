@@ -38,13 +38,13 @@ class Level():
     def append_light_effet(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
         if level_name == 'light_forest_cave':
-            self.screen = Entities.Dark_screen(self.game_objects)
+            self.screen = Entities.Dark_screen(self.game_objects)#makes the screen dark
             self.game_objects.cosmetics.add(self.screen)#need to be added before Dark glow on player
             self.game_objects.cosmetics.add(Entities.Dark_glow(self.game_objects.player))
         elif level_name == 'village_cave':
-            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#should be when interacted state is initialised
+            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#add a light glow around the player
         elif level_name == 'dark_forest':
-            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#should be when interacted state is initialised
+            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#add a light glow around the player
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
@@ -264,26 +264,12 @@ class Level():
                 reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
                 self.game_objects.reflections.add(reflection)
 
-            elif id == 21:#re-spawpoint, save point
-                new_int = Entities.Savepoint(object_position,self.game_objects,self.level_name)
-                self.game_objects.interactables.add(new_int)
-
-            elif id == 22:#runestones, colectable
-                for property in properties:
-                    if property['name'] == 'ID':
-                        ID = property['value']
-                new_rune = Entities.Runestones(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['runestone'][ID],ID)
-                self.game_objects.interactables.add(new_rune)
-
-            elif id == 23:#bushes, chests etc
+            #move to front objects
+            elif id == 23:#bushes, etc
                 for property in properties:
                     if property['name'] == 'type':
                         interactable_type = property['value']
 
-                if interactable_type == 'Chest':
-                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['chest'][str(chest_int)],str(chest_int))
-                    chest_int += 1
-                else:
                     new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
                 #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
                 self.game_objects.interactables.add(new_interacable)
@@ -299,20 +285,6 @@ class Level():
                         if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
                             new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
                             self.game_objects.interactables.add(new_interactable)
-
-            elif id == 25:#roadsign
-                values={}
-                for property in properties:
-                    if property['name'] == 'left':
-                        values['left'] = property['value']
-                    elif property['name'] == 'up':
-                        values['up']=property['value']
-                    elif property['name'] == 'right':
-                        values['right']=property['value']
-                    elif property['name'] == 'down':
-                        values['down']=property['value']
-                new_sign = Entities.Sign(object_position,self.game_objects,values)
-                self.game_objects.interactables.add(new_sign)
 
             elif id == 26:#uberstone
                 runestone = Entities.Uber_runestone(object_position,self.game_objects)
@@ -336,10 +308,6 @@ class Level():
                         new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
                         self.game_objects.loot.add(new_keyitem)
 
-            elif id == 29:#fas ttravel points
-                fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
-                self.game_objects.interactables.add(fast_travel)
-
             elif id == 30:#traps
                 for property in properties:
                     if property['name'] == 'type':
@@ -350,7 +318,51 @@ class Level():
                 self.game_objects.interactables.add(new_trap)
 
     def load_front_objects(self,data,parallax,offset):#load object infront of layers
-        pass
+        chest_int = 1
+        for obj in data['objects']:
+            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['front_firstgid']
+
+            if id == 2:#save point
+                new_int = Entities.Savepoint(object_position,self.game_objects,self.level_name)
+                self.game_objects.interactables.add(new_int)
+
+            elif id == 3:#runestones, colectable
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID = property['value']
+                new_rune = Entities.Runestones(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['runestone'][ID],ID)
+                self.game_objects.interactables.add(new_rune)
+
+            elif id == 4:#chests
+                new_interacable = Entities.Chest(object_position,self.game_objects,self.game_objects.world_state.state[self.level_name]['chest'][str(chest_int)],str(chest_int))
+                self.game_objects.interactables.add(new_interacable)
+                chest_int += 1
+
+            elif id == 5:#fireplace
+                new_interacable = Entities.Fireplace(object_position,self.game_objects)
+                self.game_objects.interactables.add(new_interacable)
+
+            elif id == 6:#roadsign
+                values={}
+                for property in properties:
+                    if property['name'] == 'left':
+                        values['left'] = property['value']
+                    elif property['name'] == 'up':
+                        values['up']=property['value']
+                    elif property['name'] == 'right':
+                        values['right']=property['value']
+                    elif property['name'] == 'down':
+                        values['down']=property['value']
+                new_sign = Entities.Sign(object_position,self.game_objects,values)
+                self.game_objects.interactables.add(new_sign)
+
+            elif id == 7:#roadsign
+                fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
+                self.game_objects.interactables.add(fast_travel)
 
     def load_back_objects(self,data,parallax,offset):#load objects back of layers
         for obj in data['objects']:
@@ -377,12 +389,8 @@ class Level():
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and collision).'
         'The offset and parallax should be specified for group and not in the layers or objects'
         'Each group needs at least one tile layer (but can be emppty).'
-        'The groups should contain "fg", "bg" or "interact" in their name. The group containing statics needs to be called bg1'
-        'The tile layer in groups can be called whatever. But the objects need to be called statics, objects or interactables.'
-
-        animation_list = {}#a place holder for animation objects
-        for tile_layer in data.keys():#name of each tile layer
-            animation_list[tile_layer] = []
+        'The groups should contain "fg", "bg" or "interact" in their name.'
+        'The tile layer in groups can be called whatever. But the objects need to be called statics, front or back.'
 
         #make empty surfaces
         key = list(data.keys())[0]
@@ -391,10 +399,12 @@ class Level():
 
         blit_surfaces = {}#every layer from tiled
         blit_compress_surfaces = {}#the ones with the same paralax are merged
+        animation_list = {}#a place holder for animation objects
         for tile_layer in data.keys():#make a blank surface
+            animation_list[tile_layer] = []
             if 'animated' in tile_layer: continue
             blit_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
-            blit_compress_surfaces[tile_layer[0:tile_layer.find('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
+            blit_compress_surfaces[tile_layer[0:tile_layer.rfind('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
 
         #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
@@ -421,7 +431,7 @@ class Level():
         #blit all static sublayers onto one single parallax layer in order as drawn in Tiled. And sort the animations into the key grouops
         animation_entities = {}
         for layer in data.keys():
-            bg = layer[0:layer.find('_')]#bg2_2 -> bg2
+            bg = layer[0:layer.rfind('_')]#bg2_2 -> bg2
             if 'animated' in layer:#animations
                 try:#make a dictionary of list
                     animation_entities[bg].append(animation_list[layer])
@@ -457,8 +467,8 @@ class Level():
             pos=(-math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0],-math.ceil((1-parallax[1])*new_map_diff[1])+ offset[1])
             if self.layer == 'fg':
                 self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
-            elif self.layer == 'interact':#the stuff that blits in front of interactables
-                self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax[tile_layer]))#pos,img,parallax
+            elif 'interact' in tile_layer:#the stuff that blits in front of interactables
+                self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
             elif self.layer == 'bg':#bg
                 bg = Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
                 self.game_objects.all_bgs.add(bg)

@@ -1,194 +1,216 @@
-import sys, random, math
+import math, random
+import behaviour_tree
 
-class AI():
+#peace
+class Target_position(behaviour_tree.Leaf):#calculate where to go
     def __init__(self,entity):
-        self.entity = entity
-        self.player_distance = [entity.game_objects.player.rect.centerx-entity.rect.centerx,entity.game_objects.player.rect.centery-entity.rect.centery]#check plater distance
-
-    def enter_AI(self,newAI):
-        self.entity.AI = getattr(sys.modules[__name__], newAI)(self.entity)#make a class based on the name of the newstate: need to import sys
-
-    def handle_input(self,input):
-        pass
+        super().__init__(entity)
+        self.update()
 
     def update(self):
-        self.player_distance = [self.entity.game_objects.player.rect.centerx-self.entity.rect.centerx,self.entity.game_objects.player.rect.centery-self.entity.rect.centery]#check plater distance
-        self.update_AI()
+        self.distance = random.choice([-1,1])*random.randint(100,200) + self.entity.game_objects.game.WINDOW_SIZE[0]*0.5
+        self.entity.AI.black_board['target_position'] = [self.entity.original_pos[0]+self.distance,self.entity.original_pos[1] + 0]
+        return 'SUCCESS'
 
-    def update_AI(self):
-        pass
-
-##peace states
-class Nothing(AI):#can be used in cutscene etc
+class Patrol(behaviour_tree.Leaf):#try to go to target
     def __init__(self,entity):
         super().__init__(entity)
 
-class Peace(AI):
+    def update(self):
+        self.entity.AI.black_board['target_position'] = [self.entity.AI.black_board['target_position'][0] - self.entity.game_objects.camera.scroll[0],self.entity.AI.black_board['target_position'][1] - self.entity.game_objects.camera.scroll[1]]
+
+        self.entity.velocity[0] += self.entity.dir[0]*0.5
+        if abs(self.entity.AI.black_board['target_position'][0]-self.entity.rect.centerx) < 20:#5*self.init_time > 2*math.pi
+            return 'SUCCESS'
+        elif self.entity.collision_types['left'] or self.entity.collision_types['right'] or self.entity.collision_types['top']:
+            return 'FAILURE'
+        else:
+            return 'RUNNING'#no new posiion
+
+class Look_target(behaviour_tree.Leaf):#look at target
     def __init__(self,entity):
         super().__init__(entity)
-        self.children = {'Walk':Walk,'Wait':Wait,'Turn_around':Turn_around}
-        self.set_child('Wait')
 
-    def set_child(self,child):#the init will run the same frame but its update in the next
-        self.child = self.children[child](self)
+    def update(self):
+        target_position = self.entity.AI.black_board['target_position']
 
-    def update_AI(self):#the init will run the same frame but its update in the next
-        self.child.update_AI()
+        if target_position[0] - self.entity.rect.centerx > 10 and self.entity.dir[0] == -1 or target_position[0] - self.entity.rect.centerx < -10 and self.entity.dir[0] == 1:#e.g. player jumpt over entity
+            self.entity.dir[0] = -self.entity.dir[0]
+            return 'FAILURE'
+        elif target_position[1] - self.entity.rect.centery > 10 and self.entity.dir[1] == 1 or target_position[1] - self.entity.rect.centery < -10 and self.entity.dir[0] == -1:#e.g. player jumpt over entity
+            self.entity.dir[1] = -self.entity.dir[1]
+            return 'FAILURE'
+        return 'SUCCESS'
 
-    def set_parent(self,parent):
-        self.enter_AI(parent)
+class Check_ground(behaviour_tree.Leaf):#check if there is ground in fron of entity
+    def __init__(self,entity):
+        super().__init__(entity)
 
-class Walk():
-    def __init__(self,parent):
-        self.parent = parent
-        self.parent.entity.currentstate.handle_input('Walk')
+    def update(self):
+        point = [self.entity.hitbox.midbottom[0] + self.entity.dir[0]*self.entity.hitbox[3],self.entity.hitbox.midbottom[1] + 8]
+        collide = self.entity.game_objects.collisions.check_ground(point)
+        if collide:#if collide
+            return 'SUCCESS'
+        else:#there is no ground in front
+            return 'FAILURE'
+
+class Turn_around(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        self.entity.dir[0] = -self.entity.dir[0]
+        return 'SUCCESS'
+
+#aggro
+class Select_target(behaviour_tree.Leaf):#selects the one that is the closest in players group (so aila or migawari)
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        min_disatnce = 1000000
+        target = None
+        for player in self.entity.game_objects.players:
+            distance = abs(self.entity.rect.centerx - player.rect.centerx)
+            if distance < min_disatnce:
+                min_distance = distance
+                target = player
+        self.entity.AI.black_board['target'] = target
+        return 'SUCCESS'
+
+class Check_sight(behaviour_tree.Leaf):#check if target is within sight
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.timer = 0#give up timer
+
+    def update(self):
+        self.timer -= self.entity.game_objects.game.dt
+        self.entity.AI.black_board['player_distance'] = [self.entity.AI.black_board['target'].rect.centerx-self.entity.rect.centerx,self.entity.AI.black_board['target'].rect.centery-self.entity.rect.centery]#check plater distance
+        if abs(self.entity.AI.black_board['player_distance'][0])<self.entity.aggro_distance and abs(self.entity.AI.black_board['player_distance'][1])<self.entity.aggro_distance*0.5:#within aggro distance
+            self.timer = 300#reset
+        elif self.timer < 0:#no player around
+            self.timer = 0
+            return 'FAILURE'
+        return 'SUCCESS'
+
+class Chase(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
         self.init_time = 0
 
-    def update_AI(self):
-        self.init_time += 0.02*self.parent.entity.game_objects.game.dt
-        self.parent.entity.velocity[0] += 0.01*self.parent.entity.dir[0]
-        self.check_sight()
-        self.exit()
+    def update(self):
+        self.entity.velocity[0] += self.entity.dir[0]*0.3#*abs(math.sin(self.init_time))
 
-    def check_sight(self):
-        if abs(self.parent.player_distance[0])<self.parent.entity.aggro_distance and abs(self.parent.player_distance[1])<self.parent.entity.aggro_distance*0.2:
-            self.parent.set_parent('Aggro')
+        if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance and abs(self.entity.AI.black_board['player_distance'][1]) < self.entity.attack_distance:
+            return 'SUCCESS'
+        else:
+            return 'RUNNING'
 
-    def exit(self):
-        if self.init_time > math.pi:
-            child = random.choice(list(self.parent.children.keys()))
-            self.parent.set_child(child)
-
-class Wait():#the entity should just stay and do nothing for a while
-    def __init__(self,parent,duration=100):
-        self.parent = parent
-        self.duration = duration
-        self.parent.entity.currentstate.enter_state('Idle')
-        self.parent.entity.velocity = [0,0]
-
-    def update_AI(self):
-        self.duration -= 1
-        if self.duration < 0:
-            self.exit()
-
-    def exit(self):#check sight
-        self.parent.set_child('Turn_around')
-
-class Turn_around():#when the player jumps over, should be a delays before the entity turns around
-    def __init__(self,parent):
-        self.parent = parent
-        self.parent.entity.dir[0] = -self.parent.entity.dir[0]
-
-    def update_AI(self):
-        self.parent.set_child('Walk')
-
-class Aggro(AI):
+class Attack(behaviour_tree.Leaf):
     def __init__(self,entity):
         super().__init__(entity)
-        self.children = {'Chase':Chase,'Wait_aggro':Wait_aggro,'Turn_around_aggro':Turn_around_aggro,'Attack':Attack}
-        self.set_child('Chase')
-        self.timers = []
-        self.timer_jobs = Giveup_timer(self,300)#if player is out of sight for more than duration, go to peace, else, remain
-
-    def set_child(self,child):#the init will run the same frame but its update in the next
-        self.child = self.children[child](self)
-
-    def update_AI(self):
-        self.check_sight()
-        self.child.update_AI()
-        self.update_timers()
-
-    def set_parent(self,parent):#the init will run the same frame but its update in the next
-        self.enter_AI(parent)
-
-    def check_sight(self):#if wihtin sight, stay in chase
-        if abs(self.player_distance[0])<self.entity.aggro_distance and abs(self.player_distance[1])<self.entity.aggro_distance*0.3:
-            self.timer_jobs.restore()
-        else:#out of sight
-            self.timer_jobs.activate()
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
-
-class Chase():
-    def __init__(self,parent):
-        self.parent = parent
-        self.parent.entity.currentstate.handle_input('Walk')
-
-    def update_AI(self):
-        self.look_player()#make the direction along the player. a delay can be added
-        self.chase_momvement()
-        self.attack()#are we withtin attack distance?
-
-    def look_player(self):#look at the player
-        if self.parent.player_distance[0] > 0 and self.parent.entity.dir[0] == -1 or self.parent.player_distance[0] < 0 and self.parent.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
-            self.parent.set_child('Wait_aggro')
-
-    def chase_momvement(self):
-        self.parent.entity.velocity[0] += self.parent.entity.dir[0]*0.02#*abs(math.sin(self.init_time))
-
-    def attack(self):
-        if abs(self.parent.player_distance[0])<self.parent.entity.attack_distance and abs(self.parent.player_distance[1])<self.parent.entity.attack_distance:
-            self.parent.set_child('Attack')
-
-class Turn_around_aggro():#when the player jumps over, should be a delays before the entity turns around
-    def __init__(self,parent):
-        self.parent = parent
-        self.parent.entity.dir[0] = -self.parent.entity.dir[0]
-
-    def update_AI(self):
-        self.parent.set_child('Chase')
-
-class Wait_aggro():#the entity should just stay and do nothing for a while
-    def __init__(self,parent,duration=50):
-        self.parent = parent
-        self.duration = duration
-        self.parent.entity.currentstate.enter_state('Idle')
-        self.velocity = [0,0]
-
-    def update_AI(self):
-        self.duration -= 1
-        if self.duration < 0:
-            self.exit()
-
-    def exit(self):
-        if self.parent.player_distance[0] > 0 and self.parent.entity.dir[0] == -1 or self.parent.player_distance[0] < 0 and self.parent.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
-            self.parent.set_child('Turn_around_aggro')
-        else:
-            self.parent.set_child('Chase')
-
-class Attack():
-    def __init__(self,parent):
-        self.parent = parent
-        self.parent.entity.currentstate.handle_input('Attack')
-        self.parent.entity.velocity = [0,0]
-
-    def update_AI(self):
-        pass
-
-    def handle_input(self,input):
-        if input == 'Finish_attack':
-            self.enter_AI('Wait_aggro')
-
-class Giveup_timer():
-    def __init__(self,AI,duration = 100):
-        self.AI = AI
-        self.duration = duration
-
-    def restore(self):
-        self.lifetime = self.duration
-
-    def activate(self):#add timer to the entity timer list
-        if self in self.AI.timers: return#do not append if the timer is already inside
-        self.restore()
-        self.AI.timers.append(self)
-
-    def deactivate(self):
-        self.AI.timers.remove(self)
-        self.AI.set_parent('Peace')
+        self.state = 'RUNNING'
 
     def update(self):
-        self.lifetime -= 1
-        if self.lifetime < 0:
-            self.deactivate()
+        state = self.state
+        if self.state != 'RUNNING':
+            self.state = 'RUNNING'#reset
+        else:
+            self.entity.currentstate.handle_input('explode')
+        return state
+
+    def handle_input(self,input):
+        if input == 'De_explode':
+            self.state = 'FAILURE'
+        elif input == 'Attack':
+            self.state = 'SUCCESS'
+
+class Look_player(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        if self.entity.AI.black_board['player_distance'][0] > 0 and self.entity.dir[0] == -1 or self.entity.AI.black_board['player_distance'][0] < 0 and self.entity.dir[0] == 1:#e.g. player jumpt over entity
+            self.entity.dir[0] = -self.entity.dir[0]
+            return 'FAILURE'
+        return 'SUCCESS'
+
+class Wait(behaviour_tree.Leaf):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.duration = 100
+
+    def update(self):
+        self.duration -= 1
+        if self.duration < 0:
+            self.duration = 100#reset
+            return 'SUCCESS'
+        else:
+            return 'RUNNING'
+
+def build_tree(entity):#peace and aggro
+    entity.AI = behaviour_tree.Treenode()
+
+    peace = behaviour_tree.Sequence()
+    succeeder = behaviour_tree.Fail2Success()
+    run2success = behaviour_tree.Run2Success()#patrol
+    succeeder.add_child(Look_target(entity))
+    peace.add_child(succeeder)
+    selector = behaviour_tree.Selector()
+    success2fail = behaviour_tree.Success2Fail()
+    success2fail.add_child(Patrol(entity))
+    selector.add_child(run2success)
+    selector.add_child(Target_position(entity))
+    run2success.add_child(success2fail)
+    peace.add_child(selector)
+
+    aggro = behaviour_tree.Sequence()
+    aggro.add_child(Select_target(entity))
+    aggro1 = behaviour_tree.Running_sequence()
+    aggro.add_child(aggro1)
+    aggro2 = behaviour_tree.Selector()
+    aggro1.add_child(Check_sight(entity))
+    aggro1.add_child(aggro2)
+    aggro2.add_child(Look_player(entity))
+    aggro2.add_child(Wait(entity))
+    aggro1.add_child(Chase(entity))
+    aggro4 = behaviour_tree.Fail2Success()
+    aggro.add_child(aggro4)
+    aggro4.add_child(Attack(entity))
+    aggro.add_child(Wait(entity))
+
+    entity.AI.add_child(aggro)
+    entity.AI.add_child(peace)
+
+    entity.AI.print_tree()
+
+def build_tree_peace(entity):#no aggro, just roam around
+    entity.AI = behaviour_tree.Treenode()
+
+    peace = behaviour_tree.Sequence()
+
+    succeeder = behaviour_tree.Fail2Success()
+    run2success = behaviour_tree.Run2Success()#patrol
+    succeeder.add_child(Look_target(entity))
+
+    peace.add_child(Target_position(entity))
+    peace.add_child(Wait(entity))
+    peace.add_child(succeeder)
+
+    running_sequence = behaviour_tree.Running_sequence()
+
+    selector = behaviour_tree.Selector()
+    selector.add_child(Check_ground(entity))
+    sequence = behaviour_tree.Sequence()
+    sequence.add_child(Wait(entity))
+    sequence.add_child(Turn_around(entity))
+    sequence.add_child(Wait(entity))
+    selector.add_child(sequence)
+    running_sequence.add_child(selector)
+    running_sequence.add_child(Patrol(entity))
+
+    peace.add_child(running_sequence)
+
+    entity.AI.add_child(peace)
+
+    entity.AI.print_tree()

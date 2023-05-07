@@ -4,6 +4,12 @@ class Collisions():
     def __init__(self,game_objects):
         self.game_objects = game_objects
 
+    def check_ground(self,point):#called from AI
+        for platform in self.game_objects.platforms:
+            if platform.hitbox.collidepoint(point):
+                return True
+        return False
+
     def pass_through(self):#for ramps, called when pressing down
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
