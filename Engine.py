@@ -36,7 +36,6 @@ class Collisions():
 
     def projectile_collision(self,projectiles,enemies):
         for projectile in projectiles.sprites():#go through the group
-
             #projectile collision?
             collision_plat = pygame.sprite.spritecollideany(projectile,self.game_objects.platforms,Collisions.collided)
             collision_enemy = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
@@ -51,7 +50,7 @@ class Collisions():
                 projectile.collision_enemy(collision_enemy)
 
             #hit platform
-            elif collision_plat:
+            if collision_plat:
                 projectile.collision_plat(collision_plat)
 
     #check for player collision

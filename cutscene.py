@@ -218,7 +218,6 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
             if self.timer > 400:
                 self.parent_class.game.game_objects.camera.exit_state()#exsiting deer encounter camera
                 self.entity.AI.activate()
-                self.entity.init_fight()
                 self.exit_state()
 
 class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies

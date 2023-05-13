@@ -26,6 +26,7 @@ class Treenode():
                 return
             elif response == 'FAILURE':
                 pass#next child
+        self.curr_child = 0
 
     def get_level(self):
         level = 0
@@ -124,7 +125,7 @@ class Random_selector(Treenode):#returns SUCCESS or RUNNING prematurly
         self.curr_child = None
         return 'FAILURE'#reset failed
 
-#decorators
+#decorators, can have only one child
 class Fail2Success(Treenode):#a decorator, returns sucess even if it failed
     def __init__(self):
         super().__init__()
@@ -165,6 +166,16 @@ class Run2Success(Treenode):#a decorator, running is turnde to sucess
         response = self.children[0].update()
         if response == 'RUNNING':
             return 'SUCCESS'
+        return response
+
+class Success2Run(Treenode):#a decorator, running is turnde to sucess
+    def __init__(self):
+        super().__init__()
+
+    def update(self):
+        response = self.children[0].update()
+        if response == 'SUCCESS':
+            return 'RUNNING'
         return response
 
 class FPS_limiter(Treenode):
