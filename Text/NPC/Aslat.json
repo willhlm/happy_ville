@@ -1,10 +1,16 @@
 {
+
+  "reindeer" : {
+      "0" : "Mr pinky transformed?! Hmm, ominous",
+      "1" : "Must be does damed cultists."
+  },
+
   "state_1" : {
       "0" : "You been having those dreams again? Hmm, ominous",
-      "1" : "You were always suceptibile to spirits."
+      "1" : "You were always susceptible to spirits."
   },
     "state_2" : {
-        "0" : "Shakar's deer transformed? hmm, this is indeed trouble some. Probably it is those dammed cultists. You better protect your self. Here, takes these shoes.",
+        "0" : "yolo.",
         "1" : "Be careful out there, don't fall off a cliff"
     }
 }

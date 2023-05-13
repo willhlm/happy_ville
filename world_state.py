@@ -7,11 +7,17 @@ class World_state():
         self.statistics = {'kill':{},'ambers':0}#collects stuff aila has done
         self.state = Read_files.read_json("map_state.json")
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
-        self.state_tree = build_tree()
-        self.state_ID = 1#world state progress ID.
+        self.define_events()
+        self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
 
-    def set_progress(self,path):#called when e.g. a boss dies
-        self.state_ID = self.state_tree.set_path(path)
+    def define_events(self):#all events that should have a flag
+        self.events = {'reindeer':False,'aslat':False,'ape':False}
+
+    def update_event(self,event):#called when an event has happened and set it to True
+        self.events[event] = True
+
+    def increase_progress(self,path):#called when e.g. a boss dies. It is the happinies degree of the world
+        self.progress += 1
 
     def update_kill_statistics(self,enemy):#called when an enemy is killed
         try:#have killed it before

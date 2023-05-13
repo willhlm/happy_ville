@@ -381,6 +381,15 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
+            elif id == 3:#light forest tree tree
+                new_tree = tiled_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
+                if parallax[0] != 1:
+                    new_tree.blur(self.blur_value(parallax))
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.game_objects.all_bgs.add(new_tree)
+
     @staticmethod
     def blur_value(parallax):#called from load_laters and load_back/front_objects
         return round(1/parallax[0])

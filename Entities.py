@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import Read_files, states, particles, animation, sound
+import Read_files, states, particles, animation, sound, dialogue
 import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
@@ -953,41 +953,19 @@ class NPC(Character):
         self.name = str(type(self).__name__)#the name of the class
 
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('idle', 0, self.dir)
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
-        self.portrait = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()  #temp
+        self.portrait = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
 
         self.currentstate = states_NPC.Idle(self)
-
-        self.conv_index = 0
-        self.load_conversation()
-        self.state = 'state_1'#a flag to decide what do say. Should we have a world state instead?
+        self.dialogue = dialogue.Dialogue(self)#handles dialoage and what to say
         self.define_conversations()
 
-    def define_conversations(self):
-        self.priority = ['reindeer','ape']
-        self.event = ['Aslat']
-
-
-    def load_conversation(self):
-        self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
-
-    def get_conversation(self):#returns the conversation depending on the NPC state and conversation index
-        #self.dialogue.get_dialogue()
-        try:
-            state = 'state_' + str(1)
-            return self.conversation[state][str(self.conv_index)]
-        except:
-            self.conv_index -= 1
-            return None
-
-    def reset_conv_index(self):
-        self.conv_index = 0
-
-    def increase_conv_index(self):
-        self.conv_index += 1
+    def define_conversations(self):#should depend on NPC
+        self.priority = ['reindeer','ape']#priority events to say
+        self.event = ['aslat']#normal events to say
 
     def update(self,pos):
         super().update(pos)
@@ -1011,11 +989,11 @@ class Aslat(NPC):
         super().__init__(pos,game_objects)
 
     def buisness(self):#enters after conversation
-        if self.game_objects.world_state.progress == 2:#if player has deafated the reindeer
-            if 'Wall' not in self.game_objects.player.states:#if player doesn't have wall yet
-                new_game_state = states.New_ability(self.game_objects.game,'wall')
+        if 'reindeer' not in self.priority:#if player has deafated the reindeer
+            if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet
+                new_game_state = states.New_ability(self.game_objects.game,'Wall_glide')
                 new_game_state.enter_state()
-                self.game_objects.player.states.add('Wall')#append wall abillity to available states
+                self.game_objects.player.states['Wall_glide'] = True
 
 class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):

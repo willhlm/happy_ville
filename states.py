@@ -1413,10 +1413,10 @@ class Conversation(Gameplay):
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
         self.text_WINDOW_SIZE = (352, 96)
-        self.blit_x = int((self.game.WINDOW_SIZE[0]-self.text_WINDOW_SIZE[0])/2)
+        self.blit_pos = [int((self.game.WINDOW_SIZE[0]-self.text_WINDOW_SIZE[0])*0.5),60]
         self.clean_slate()
 
-        self.conv = self.npc.get_conversation()
+        self.conv = self.npc.dialogue.get_conversation()
 
     def clean_slate(self):
         self.letter_frame = 0
@@ -1431,7 +1431,7 @@ class Conversation(Gameplay):
         super().render()
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
         self.text_window.blit(text,(64,8))
-        self.game.screen.blit(self.text_window,(self.blit_x,60))
+        self.game.screen.blit(self.text_window,self.blit_pos)
 
     def handle_events(self, input):
         if input[0]:
@@ -1439,12 +1439,12 @@ class Conversation(Gameplay):
                 self.exit_state()
 
             elif input[-1] == 'y':
-                if self.letter_frame < len(self.npc.get_conversation()):
+                if self.letter_frame < len(self.conv):
                     self.letter_frame = 10000
-                else:
+                else:#check if we have a series of conversations or not                    
                     self.clean_slate()
-                    self.npc.increase_conv_index()
-                    self.conv = self.npc.get_conversation()
+                    self.npc.dialogue.increase_conv_index()
+                    self.conv = self.npc.dialogue.get_conversation()
                     if not self.conv:
                         self.exit_state()
 
@@ -1826,7 +1826,7 @@ class Cutscenes(Gameplay):#basically, this class is not needed but would be nice
     def handle_events(self, input):
         self.current_scene.handle_events(input)
 
-class Signpost(Gameplay):
+class Signpost(Gameplay):#shuold this be a new state? probably not?
     def __init__(self, game,sign_post):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()
