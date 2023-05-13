@@ -1,0 +1,34 @@
+{
+    "activeFile": "maps/map/world_map_labels.json",
+    "expandedProjectPaths": [
+        "maps",
+        "maps/map",
+        "."
+    ],
+    "fileStates": {
+        "maps/map/world_map_labels.json": {
+            "scale": 1.0906,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 573.5375022923162,
+                "y": 460.75554740509807
+            }
+        },
+        "maps/map/world_map_labels.json#480x270Border": {
+            "scaleInDock": 1
+        },
+        "maps/map/world_map_labels.json#map_base": {
+            "scaleInDock": 1
+        },
+        "maps/static_stamps.tsx": {
+            "scaleInDock": 1
+        }
+    },
+    "openFiles": [
+        "maps/map/world_map_labels.json"
+    ],
+    "project": "happy_ville.tiled-project",
+    "recentFiles": [
+        "maps/map/world_map_labels.json"
+    ]
+}

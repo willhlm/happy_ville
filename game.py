@@ -11,7 +11,7 @@ class Game():
         self.WINDOW_SIZE = C.window_size.copy()
         self.scale_size()#get the scale according to your display size
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
-        flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF#pygame.SCALED | pygame.FULLSCREEN
+        flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF | pygame.FULLSCREEN#pygame.SCALED | pygame.FULLSCREEN
 
         pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)#has to be before set_mode
         pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
