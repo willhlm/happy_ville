@@ -90,4 +90,4 @@ class Attack_main(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
-        self.entity.AI.handle_input('Finish_attack')
+        self.entity.AI.handle_input('Attack')

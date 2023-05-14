@@ -17,7 +17,7 @@ class Weather():
             group.add(obj)
 
     def update(self):
-        if random.randint(0,100) == 0:
+        if random.randint(0,1000) == 0:
             self.blow()
 
     def lightning(self):

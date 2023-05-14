@@ -25,11 +25,7 @@ class Patrol(behaviour_tree.Leaf):
 
     def update(self):
         target_position = [self.entity.original_pos[0] + self.entity.AI.black_board['target_position'][0],self.entity.original_pos[1] + self.entity.AI.black_board['target_position'][1]]
-
-        self.entity.velocity[0] += 0.001*(target_position[0]-self.entity.rect.centerx)+0.02*self.entity.dir[0]
-        self.entity.velocity[0] = math.copysign(1,self.entity.velocity[0])*min(abs(self.entity.velocity[0]),1)#limit the max abs velocity to 1
-        self.entity.velocity[1] += 0.001*(target_position[1]-self.entity.rect.centery)
-
+        self.entity.patrol(target_position)
         if abs(target_position[0]-self.entity.rect.centerx) < 10 and abs(target_position[1]-self.entity.rect.centery) < 10:#5*self.init_time > 2*math.pi
             return 'SUCCESS'
         elif self.entity.collision_types['left'] or self.entity.collision_types['right'] or self.entity.collision_types['bottom'] or self.entity.collision_types['top']:
@@ -76,7 +72,7 @@ class Check_sight(behaviour_tree.Leaf):
     def update(self):
         self.timer -= self.entity.game_objects.game.dt
         self.entity.AI.black_board['player_distance'] = [self.entity.AI.black_board['target'].rect.centerx-self.entity.rect.centerx,self.entity.AI.black_board['target'].rect.centery-self.entity.rect.centery]#check plater distance
-        if abs(self.entity.AI.black_board['player_distance'][0])<self.entity.aggro_distance and abs(self.entity.AI.black_board['player_distance'][1])<self.entity.aggro_distance*0.5:#within aggro distance
+        if abs(self.entity.AI.black_board['player_distance'][0])<self.entity.aggro_distance[0] and abs(self.entity.AI.black_board['player_distance'][1])<self.entity.aggro_distance[1]:#within aggro distance
             self.timer = 300#reset
             return 'SUCCESS'
         elif self.timer < 0:#no player around
@@ -86,15 +82,11 @@ class Check_sight(behaviour_tree.Leaf):
 class Chase(behaviour_tree.Leaf):
     def __init__(self,entity):
         super().__init__(entity)
-        self.init_time = 0
 
     def update(self):
-        self.init_time += 0.02*self.entity.game_objects.game.dt
+        self.entity.chase()
 
-        self.entity.velocity[0] += self.entity.dir[0]*0.3#*abs(math.sin(self.init_time))
-        self.entity.velocity[1] += (self.entity.AI.black_board['player_distance'][1] - 30)*0.002
-
-        if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance and abs(self.entity.AI.black_board['player_distance'][1]) < self.entity.attack_distance:
+        if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance[0] and abs(self.entity.AI.black_board['player_distance'][1]) < self.entity.attack_distance[1]:
             return 'SUCCESS'
         else:
             return 'RUNNING'

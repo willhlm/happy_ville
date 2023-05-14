@@ -22,7 +22,7 @@ class Peace(AI):
 
     def update(self):
         super().update()
-        if abs(self.player_distance[0])<100:
+        if abs(self.player_distance[0])<self.aggro_distance[0]:
             self.entity.currentstate.handle_input('Fly')
         else:
             rand=random.randint(0,100)

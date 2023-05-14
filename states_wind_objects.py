@@ -19,6 +19,9 @@ class Idle(Basic_states):
         super().__init__(entity)
 
     def update_state(self):
+        pass
+
+    def increase_phase(self):#enter wind state when animation is finished to make a smooth transition
         if abs(self.entity.game_objects.weather.wind.velocity[0]) > 0:
             self.enter_state('Wind')
 
@@ -32,5 +35,8 @@ class Wind(Basic_states):
         if self.timer < 0:
             self.entity.blowing()
             self.timer = random.randint(40,60)
+
+
+    def increase_phase(self):#enter wind state when animation is finished to make a smooth transition
         if self.entity.game_objects.weather.wind.velocity[0] == 0:
             self.enter_state('Idle')

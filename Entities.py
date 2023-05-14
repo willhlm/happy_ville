@@ -1,6 +1,6 @@
-import pygame, random, sys
-import Read_files, states, particles, animation, sound
-import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist
+import pygame, random, sys, math
+import Read_files, states, particles, animation, sound, dialogue
+import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -27,17 +27,6 @@ class Platform(pygame.sprite.Sprite):#has hitbox
 
     def take_dmg(self):
         pass
-
-class Invisible_block(Platform):
-    def __init__(self,pos,size):
-        super().__init__(pos,size)
-
-    def collide_y(self,entity):
-        pass
-
-    def collide_x(self,entity):
-        if type(entity).__name__ != "Player":#only apply to enemies and NPC
-            entity.dir[0] = -entity.dir[0]#turn around
 
 class Collision_block(Platform):
     def __init__(self,pos,size, run_particle):
@@ -295,7 +284,6 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
 
     def update(self,scroll):
         super().update(scroll)#update_pos
-        #self.shader.update_pos()#should be after update_pos
         self.currentstate.update()
         self.animation.update()
 
@@ -372,7 +360,6 @@ class Character(Platform_entity):#enemy, NPC,player
         self.running_particles = Dust_running_particles
 
     def update(self,pos):
-        #self.shader.update_pos()#should be before update_pos? for aila but maybe not for enemies
         self.update_pos(pos)
         self.update_timers()
         self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
@@ -432,15 +419,12 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        #self.states = set(['Dash_attack','Dash','Wall_glide','Double_jump','Idle','Walk','Pray','Jump_run','Jump_stand','Fall_run','Fall_stand','Death','Invisible','Hurt','Spawn','Sword_run1','Sword_run2','Sword_stand1','Sword_stand2','Air_sword2','Air_sword1','Sword_up','Sword_down','Plant_bone','Thunder','Force','Migawari','Slow_motion','Arrow','Counter'])#all states that are available to Aila, convert to set to make lookup faster,#'Double_jump','Wall_glide',
         self.states = {'Idle':True,'Walk':True,'Pray':True,'Jump_run':True,'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':True,'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
 
-        self.spawn_point = [{'map':'light_forest_3', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
+        self.spawn_point = [{'map':'light_forest_1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
-
-        #self.shader = shader_entities.Shader_entities(self)
 
         self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
@@ -560,7 +544,7 @@ class Enemy(Character):
 
         self.currentstate = states_enemy.Idle(self)
         #self.AI = AI_enemy.Peace(self)
-        AI_enemy.build_tree_peace(self)#AI_exploding_mygga.Peace(self)#
+        AI_enemy.build_tree(self)#AI_exploding_mygga.Peace(self)#
 
         self.inventory = {'Amber_Droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -571,9 +555,8 @@ class Enemy(Character):
 
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
 
-        #move these to AI classes?
-        self.attack_distance = 0#when try to hit
-        self.aggro_distance = 300#when to become aggro
+        self.attack_distance = [0,0]#at which distance to the player to attack
+        self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
     def update(self,pos):
         super().update(pos)
@@ -585,11 +568,8 @@ class Enemy(Character):
         if player.invincibile: return
         #if player.currentstate.state_name == 'death': return
         player.take_dmg(1)
-        sign=(player.hitbox.center[0]-self.hitbox.center[0])
-        if sign > 0:
-            player.knock_back([1,0])
-        else:
-            player.knock_back([-1,0])
+        sign = math.copysign(1,(player.hitbox.center[0]-self.hitbox.center[0]))
+        player.knock_back([sign,0])
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -610,6 +590,49 @@ class Enemy(Character):
     def update_pos(self,pos):
         super().update_pos(pos)
         self.original_pos = [self.original_pos[0] + pos[0], self.original_pos[1] + pos[1]]
+
+    def health_bar(self):#called from omamori Boss_HP
+        pass
+
+    def chase(self):#called from AI: when chaising
+        self.velocity[0] += self.dir[0]*0.5#*abs(math.sin(self.init_time))
+
+    def patrol(self,position):#called from AI: when patroling
+        self.velocity[0] += self.dir[0]*0.3#self.entity.walk()
+
+class Packun(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/packun/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.health = 3
+        self.dmg = 1
+        self.attack = Projectile_1
+        self.attack_distance = [250,50]
+
+    def chase(self):#called from AI
+        pass
+
+    def patrol(self,position):
+        pass
+
+class Sandrew(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/sandrew/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.currentstate = states_sandrew.Idle(self)
+        self.health = 3
+        self.attack_distance = [250,50]
+        self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+
+    def update(self,pos):
+        super().update(pos)
+        #self.AI.print_leaf()
 
 class Mygga(Enemy):
     def __init__(self,pos,game_objects):
@@ -639,8 +662,8 @@ class Exploding_Mygga(Enemy):
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
-        self.attack_distance = 50
-        self.aggro_distance = 150
+        self.attack_distance = [50,50]
+        self.aggro_distance = [150,100]
         self.dir[1] = 1
         self.size = [64,64]#hurtbox size
         #self.shader = shader_entities.Shader_entities(self)
@@ -649,6 +672,15 @@ class Exploding_Mygga(Enemy):
         self.projectiles.add(Hurt_box(self,lifetime = 50))
         self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
 
+    def chase(self):#called from AI: when chaising
+        self.velocity[0] += self.dir[0]*0.3#*abs(math.sin(self.init_time))
+        self.velocity[1] += (self.AI.black_board['player_distance'][1] - 30)*0.002
+
+    def patrol(self,position):#called from AI: when patroling
+        self.velocity[0] += 0.001*(position[0]-self.rect.centerx)+0.02*self.dir[0]
+        self.velocity[0] = math.copysign(1,self.velocity[0])*min(abs(self.velocity[0]),1)#limit the max abs velocity to 1
+        self.velocity[1] += 0.001*(position[1]-self.rect.centery)
+
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -656,6 +688,28 @@ class Slime(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro
+
+class Slime_giant(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/slime_giant/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],48,48)
+        self.number = random.randint(1, 6)
+
+    def dead(self):
+        self.game_objects.world_state.update_kill_statistics(type(self).__name__.lower())
+        self.spawn_minions()
+        self.kill()
+
+    def spawn_minions(self):
+        pos = [self.hitbox.centerx,self.hitbox.centery-10]
+        for i in range(0,self.number):
+            obj = Slime(pos,self.game_objects)
+            obj.velocity=[random.randint(-10, 10),random.randint(-10, -5)]
+            self.game_objects.enemies.add(obj)
 
 class Wall_slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -683,10 +737,8 @@ class Woopie(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.health = 1
         self.spirit=100
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
 
 class Vatt(Enemy):
-
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/vatt/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -745,7 +797,8 @@ class Blue_bird(Enemy):
         self.currentstate = states_bluebird.Idle(self)
         self.aggro=False
         self.health=1
-        self.AI = AI_bluebird.Peace(self)
+        self.AI = AI_bluebird.Peace(self)#should we make it into a tree as well?
+        self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
     def knock_back(self,dir):
         pass
@@ -827,9 +880,9 @@ class Egg(Enemy):#change design
         self.kill()
 
     def spawn_minions(self):
+        pos = [self.hitbox.centerx,self.hitbox.centery-10]
         for i in range(0,self.number):
-            pos=[self.hitbox.centerx,self.hitbox.centery-10]
-            obj=Slime(pos,self.game_objects)
+            obj = Slime(pos,self.game_objects)
             obj.velocity=[random.randint(-100, 100),random.randint(-10, -5)]
             self.game_objects.enemies.add(obj)
 
@@ -913,40 +966,24 @@ class NPC(Character):
         self.group = game_objects.npcs
         self.pause_group = game_objects.entity_pause
         self.name = str(type(self).__name__)#the name of the class
-        self.conv_index = 0
-        self.currentstate = states_NPC.Idle(self)
 
         self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
-        self.image = self.sprites.get_image('idle', 0, self.dir)
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
-        self.portrait = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()  #temp
-        self.load_conversation()
-        self.counter = 0
-        self.state = 'state_1'#a flag to decide what do say. Should we have a world state instead?
+        self.portrait = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
 
-    def load_conversation(self):
-        self.conversation = Read_files.read_json("Text/NPC/" + self.name + ".json")
+        self.currentstate = states_NPC.Idle(self)
+        self.dialogue = dialogue.Dialogue(self)#handles dialoage and what to say
+        self.define_conversations()
 
-    def get_conversation(self):#returns the conversation depending on the NPC state and conversation index
-        try:
-            state = 'state_' + str(self.game_objects.world_state.progress)
-            conv = self.conversation[state][str(self.conv_index)]
-        except:
-            self.conv_index -= 1
-            return None
-        return conv
-
-    def reset_conv_index(self):
-        self.conv_index = 0
-
-    def increase_conv_index(self):
-        self.conv_index += 1
+    def define_conversations(self):#should depend on NPC
+        self.priority = ['reindeer','ape']#priority events to say
+        self.event = ['aslat']#normal events to say
 
     def update(self,pos):
         super().update(pos)
-        self.AI()
         self.group_distance()
 
     def interact(self):#when plater press t
@@ -959,16 +996,6 @@ class NPC(Character):
     def walk(self):
         self.currentstate.handle_input('Walk')
 
-    def AI(self):
-        self.counter += self.game_objects.game.dt*self.slow_motion
-        if self.counter > 100:
-            self.counter = 0
-            rand=random.randint(0,1)
-            if rand == 0:
-                self.idle()
-            else:
-                self.walk()
-
     def buisness(self):#enters after conversation
         pass
 
@@ -977,11 +1004,11 @@ class Aslat(NPC):
         super().__init__(pos,game_objects)
 
     def buisness(self):#enters after conversation
-        if self.game_objects.world_state.progress == 2:#if player has deafated the reindeer
-            if 'Wall' not in self.game_objects.player.states:#if player doesn't have wall yet
-                new_game_state = states.New_ability(self.game_objects.game,'wall')
+        if 'reindeer' not in self.priority:#if player has deafated the reindeer
+            if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet
+                new_game_state = states.New_ability(self.game_objects.game,'Wall_glide')
                 new_game_state.enter_state()
-                self.game_objects.player.states.add('Wall')#append wall abillity to available states
+                self.game_objects.player.states['Wall_glide'] = True
 
 class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
@@ -1035,11 +1062,9 @@ class Boss(Enemy):
         new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
         new_game_state.enter_state()
 
-    def init_fight(self):#called when cutscene finishes and fight with aila starts
-        for omamori in self.game_objects.player.omamoris.equipped_omamoris:#not very an elegant solution
-            if type(omamori).__name__ == 'Boss_HP':
-                self.health_bar.max_health = self.health
-                self.game_objects.cosmetics.add(self.health_bar)
+    def health_bar(self):#called from omamori Boss_HP
+        self.health_bar.max_health = self.health
+        self.game_objects.cosmetics.add(self.health_bar)
 
     def give_abillity(self):
         self.game_objects.player.abilities.Player_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
@@ -1302,11 +1327,9 @@ class Dash_effect(Staticentity):
         self.rect.center = entity.rect.center
         self.alpha = alpha
         self.image.set_alpha(self.alpha)
-        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self,scroll):
         self.update_pos(scroll)
-        #self.shader.update_pos()
         self.alpha *= 0.9
         self.image.set_alpha(self.alpha)
         self.destroy()
@@ -1419,15 +1442,22 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         super().__init__([0,0],entity.game_objects)
         self.entity = entity
         self.dir = entity.dir.copy()
+        self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
 
     def update(self,pos):
         super().update(pos)
+        self.update_timers()
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
 
     def destroy(self):
         if self.lifetime < 0:
             self.kill()
+
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
 
     def update_hitbox(self):#make this a dictionary?
         if self.dir[1] > 0:#up
@@ -1481,7 +1511,7 @@ class Melee(Projectiles):
         super().update(pos)
         self.update_hitbox()
 
-    def countered(self):#called from Shield collision_projectile, purple initinty stone
+    def countered(self):#called from sword collision_projectile, purple initinty stone
         self.entity.countered()
         self.kill()
 
@@ -1492,11 +1522,9 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = entity.rect.center
-        self.rect.bottom = entity.rect.bottom
         self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,entity.size[0],entity.size[1])
         self.lifetime = lifetime
         self.dmg = entity.dmg
-        #self.shader = shader_entities.Shader_entities(self)
 
     def update_hitbox(self):
         pass
@@ -1512,7 +1540,6 @@ class Explosion(Melee):
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.dmg = entity.dmg
-        #self.shader = shader_entities.Shader_entities(self)
 
     def update_hitbox(self):
         pass
@@ -1521,7 +1548,6 @@ class Explosion(Melee):
         self.kill()
 
 class Shield(Melee):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/invisible/')
@@ -1554,7 +1580,6 @@ class Sword(Melee):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y,40,35)
         self.hitbox = self.rect.copy()
-        #self.shader = shader_entities.Shader_entities(self)
 
     def init(self):
         self.dmg = self.entity.dmg
@@ -1587,16 +1612,16 @@ class Sword(Melee):
 class Aila_sword(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-
-    def init(self):
-        self.dmg = 1
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
         self.potrait = Sword_potrait(self.game_objects)
-        self.equip = []#stone pointers
-        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#,'purple':Red_infinity_stone(self)]#the ones aila has picked up
+        self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
+        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self),'purple':Red_infinity_stone(self)}#the ones aila has picked up
         self.colour = {'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
         self.swing = 0#a flag to check which swing we are at (0 or 1)
+
+    def init(self):
+        self.dmg = 1
 
     def set_stone(self,stone_str):#called from smith
         if len(self.equip) < self.level:
@@ -1609,8 +1634,16 @@ class Aila_sword(Sword):
         #    self.stones[self.equip].detach()
 
     def collision_projectile(self,eprojectile):#projecticle proectile collision
-        for stone in self.equip:
-            self.stones[stone].collision(eprojectile)#call collision specific for stone
+        if eprojectile.invincibile: return
+        eprojectile.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+
+        if 'purple' in self.equip:#if the purpuple stone is equped
+            eprojectile.countered(self.dir,self.rect.center)
+            self.sword_jump()
+        else:
+            eprojectile.velocity = [0,0]
+            eprojectile.dmg = 0
+            eprojectile.currentstate.handle_input('Death')
 
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
@@ -1641,12 +1674,10 @@ class Ranged(Projectiles):
         self.rect.topleft = [self.rect.topleft[0] + self.slow_motion*self.game_objects.game.dt*self.velocity[0]+scroll[0], self.rect.topleft[1] + self.slow_motion*self.game_objects.game.dt*self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
-    def countered(self):#called from sword collsion with purple infinity stone
-        self.velocity[0]=-self.velocity[0]
-        self.velocity[1]=-self.velocity[1]
+    def countered(self,dir):#called from sword collsion with purple infinity stone
+        pass
 
 class Thunder(Ranged):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Thunder/')
@@ -1673,7 +1704,6 @@ class Thunder(Ranged):
         self.kill()
 
 class Poisoncloud(Ranged):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/poisoncloud/')
@@ -1695,7 +1725,6 @@ class Poisoncloud(Ranged):
         self.currentstate.handle_input('Death')
 
 class Poisonblobb(Ranged):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/poisonblobb/')
@@ -1719,8 +1748,31 @@ class Poisonblobb(Ranged):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-class Horn_vines(Ranged):
+class Projectile_1(Ranged):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/projectile_1/')
+        self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.hitbox = self.rect.copy()
+        self.update_hitbox()
 
+        self.dmg = entity.dmg
+        self.lifetime = 400
+        self.velocity=[entity.dir[0]*5,0]
+
+    def collision_plat(self,platform):
+        self.velocity = [0,0]
+        self.currentstate.handle_input('Death')
+
+    def countered(self,dir,pos):#called from sword collsion with purple infinity stone
+        dy = self.rect.centery - pos[1]
+        dx = self.rect.centerx - pos[0]
+
+        self.velocity[0] = dir[0]*(10-abs(dx)*0.2) - dir[1]*self.velocity[0]*dx*0.05
+        self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy)
+
+class Horn_vines(Ranged):
     def __init__(self,entity,pos):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/horn_vines/')
@@ -1739,7 +1791,6 @@ class Horn_vines(Ranged):
             self.kill()
 
 class Force(Ranged):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/force/')
@@ -1773,7 +1824,6 @@ class Force(Ranged):
         collision_enemy.velocity[1]=-6
 
 class Arrow(Ranged):
-
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/arrow/')
@@ -1814,7 +1864,6 @@ class Arrow(Ranged):
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
 class Migawari():
-
     def __init__(self,entity):
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/migawari/')
         self.entity = entity
@@ -1851,7 +1900,6 @@ class Migawari():
         self.level = level
 
 class Slow_motion():
-
     def __init__(self,entity):
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/slow_motion/')
         self.entity = entity
@@ -1907,7 +1955,6 @@ class Loot(Platform_entity):#
         pass
 
 class Empty_item(Loot):
-
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heart_container/')
@@ -1915,7 +1962,6 @@ class Empty_item(Loot):
         self.rect = self.image.get_rect(center=pos)
 
 class Heart_container(Loot):
-
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heart_container/')
@@ -1933,7 +1979,6 @@ class Heart_container(Loot):
         self.kill()
 
 class Spirit_container(Loot):
-
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/spirit_container/')
@@ -2053,11 +2098,9 @@ class Amber_Droplet(Enemy_drop):
         self.sounds = Read_files.Sounds('Audio/SFX/enteties/items/amber_droplet/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        #self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
         self.hitbox = pygame.Rect(pos[0],pos[1],5,5)
         self.hitbox.bottom = self.rect.bottom
         self.description = 'moneyy'
-        #self.shader = shader_entities.Shader_entities(self)
 
     def player_collision(self,player):#when the player collides with this object
         super().player_collision(player)
@@ -2596,7 +2639,6 @@ class Inorinoki(Interactable):#the place where you trade soul essence for spirit
 
 class Fast_travel(Interactable):#save point
     cost = 50
-
     def __init__(self,pos,game_objects,map):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/fast_travel/')
@@ -2870,9 +2912,6 @@ class Infinity_stones():
     def collision(self):#hit enemy
         pass
 
-    def collision_projectile(self,eprojectile):#collision with enemy projectile
-        eprojectile.currentstate.enter_state('Death')
-
     def slash(self):#called when swingin sword
         pass
 
@@ -2943,7 +2982,6 @@ class Orange_infinity_stone(Infinity_stones):#bigger hitbox
         self.sword.hitbox = self.sword.rect.copy()
 
 class Purple_infinity_stone(Infinity_stones):#reflect projectile
-
     def __init__(self,sword):
         super().__init__(sword)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/purple/')#for inventory
@@ -2958,14 +2996,10 @@ class Purple_infinity_stone(Infinity_stones):#reflect projectile
     def detach(self):
         pass
 
-    def collision_projectile(self,eprojectile):
-        eprojectile.countered()
-
 class Omamoris():
     def __init__(self,entity):
         self.equipped_omamoris = []#equiped omamoris
         self.omamori_list = [Half_dmg(entity),Loot_magnet(entity),Boss_HP(entity)]#omamoris in inventory.
-        self.level = 0
         self.number = 3#number of omamori we can equip
         entity.dmg_scale = 1
 
@@ -2976,9 +3010,6 @@ class Omamoris():
     def handle_input(self,input):
         for omamori in self.equipped_omamoris:
             omamori.handle_input(input)
-
-    def level_up(self):
-        self.level += 1
 
     def equip_omamori(self,omamori):
         if omamori not in self.equipped_omamoris:#if not equiped
@@ -2998,7 +3029,7 @@ class Omamori():
         self.currentstate = states_basic.Idle(self)#
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.description = ''
+        self.description = ''#for inventory
 
     def update(self):
         pass
@@ -3047,15 +3078,16 @@ class Loot_magnet(Omamori):
         for loot in self.entity.game_objects.loot.sprites():
             loot.attract(self.entity.rect.center)
 
-class Boss_HP(Omamori):#obsolete
+class Boss_HP(Omamori):
     def __init__(self,entity):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/boss_HP/')#for inventory
         super().__init__(entity)
         self.description = 'Visible boss HP'
 
-    def handle_input(self,input):
-        if input == 'hp':
-            pass
+    def attach(self):
+        super().attach()
+        for enemy in self.entity.game_objects.enemies.sprites():
+            enemy.health_bar()#attached a healthbar on boss
 
 #timer toools: activate with the attrubute activate, which will run until the specified duration is run out
 class Timer():

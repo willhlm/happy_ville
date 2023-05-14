@@ -156,7 +156,7 @@ class Level():
             elif id == 4:#Spawner: spawn enemies
                 values={}
                 for property in properties:
-                    if property['name'] == 'entity':
+                    if property['name'] == 'class':
                         values['entity'] = property['value']
                     elif property['name'] == 'number':
                         values['number']=property['value']
@@ -374,6 +374,15 @@ class Level():
 
             if id == 2:#light forest tree tree
                 new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                if parallax[0] != 1:
+                    new_tree.blur(self.blur_value(parallax))
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.game_objects.all_bgs.add(new_tree)
+
+            elif id == 3:#light forest tree tree
+                new_tree = tiled_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
                 if parallax[0] != 1:
                     new_tree.blur(self.blur_value(parallax))
                 if self.layer == 'fg':
