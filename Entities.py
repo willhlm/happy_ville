@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, states, particles, animation, sound, dialogue
-import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist
+import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -556,7 +556,7 @@ class Enemy(Character):
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
 
         self.attack_distance = [0,0]#at which distance to the player to attack
-        self.aggro_distance = [300,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
     def update(self,pos):
         super().update(pos)
@@ -570,7 +570,6 @@ class Enemy(Character):
         player.take_dmg(1)
         sign = math.copysign(1,(player.hitbox.center[0]-self.hitbox.center[0]))
         player.knock_back([sign,0])
-
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -618,6 +617,22 @@ class Packun(Enemy):
 
     def patrol(self,position):
         pass
+
+class Sandrew(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/sandrew/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.currentstate = states_sandrew.Idle(self)
+        self.health = 3
+        self.attack_distance = [250,50]
+        self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+
+    def update(self,pos):
+        super().update(pos)
+        #self.AI.print_leaf()
 
 class Mygga(Enemy):
     def __init__(self,pos,game_objects):
@@ -722,7 +737,6 @@ class Woopie(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.health = 1
         self.spirit=100
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/woopie/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
 
 class Vatt(Enemy):
     def __init__(self,pos,game_objects):
@@ -783,7 +797,8 @@ class Blue_bird(Enemy):
         self.currentstate = states_bluebird.Idle(self)
         self.aggro=False
         self.health=1
-        self.AI = AI_bluebird.Peace(self)
+        self.AI = AI_bluebird.Peace(self)#should we make it into a tree as well?
+        self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
     def knock_back(self,dir):
         pass
@@ -2083,11 +2098,9 @@ class Amber_Droplet(Enemy_drop):
         self.sounds = Read_files.Sounds('Audio/SFX/enteties/items/amber_droplet/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        #self.rect = pygame.Rect(pos[0],pos[1],5,5)#resize the rect
         self.hitbox = pygame.Rect(pos[0],pos[1],5,5)
         self.hitbox.bottom = self.rect.bottom
         self.description = 'moneyy'
-        #self.shader = shader_entities.Shader_entities(self)
 
     def player_collision(self,player):#when the player collides with this object
         super().player_collision(player)

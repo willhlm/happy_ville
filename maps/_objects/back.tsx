@@ -6,6 +6,6 @@
   <image width="202" height="286" source="../../Sprites/animations/tiled_objects/light_forest_tree1/idle/tree01.png"/>
  </tile>
  <tile id="3">
-  <image width="168" height="246" source="../../Sprites/animations/tiled_objects/light_forest_tree2/idle/tree_02.png"/>
+  <image width="168" height="246" source="../../Sprites/animations/tiled_objects/light_forest_tree2/idle/tree01.png"/>
  </tile>
 </tileset>

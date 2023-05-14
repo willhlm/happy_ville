@@ -30,14 +30,19 @@ class Target_position(behaviour_tree.Leaf):#calculate where to go
 class Patrol(behaviour_tree.Leaf):#try to go to target
     def __init__(self,entity):
         super().__init__(entity)
+        self.time = 400 #a time out timer
 
     def update(self):
+        self.time -= self.entity.game_objects.game.dt
         target_position = [self.entity.original_pos[0] + self.entity.AI.black_board['target_position'][0],self.entity.original_pos[1] + self.entity.AI.black_board['target_position'][1]]
         self.entity.patrol(target_position)
 
         if abs(target_position[0]-self.entity.rect.centerx) < 10 and abs(target_position[1]-self.entity.rect.centery) < 10:#5*self.init_time > 2*math.pi
             return 'SUCCESS'
         elif self.entity.collision_types['left'] or self.entity.collision_types['right'] or self.entity.collision_types['top']:
+            return 'FAILURE'
+        elif self.time < 0:
+            self.time = 400
             return 'FAILURE'
         else:
             return 'RUNNING'#no new posiion
@@ -228,7 +233,7 @@ def build_tree(entity):#peace and aggro: the peace will patrol around the spawn 
     sequence.add_child(Wait(entity))
     aggro2.add_child(sequence)
     aggro1.add_child(Chase(entity))
-    aggro4 = behaviour_tree.Fail2Success()
+    aggro4 = behaviour_tree.Sequence()
     aggro.add_child(aggro4)
     aggro4.add_child(Attack_init(entity))
     aggro4.add_child(Attack(entity))

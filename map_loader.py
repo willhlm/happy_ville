@@ -156,7 +156,7 @@ class Level():
             elif id == 4:#Spawner: spawn enemies
                 values={}
                 for property in properties:
-                    if property['name'] == 'entity':
+                    if property['name'] == 'class':
                         values['entity'] = property['value']
                     elif property['name'] == 'number':
                         values['number']=property['value']
