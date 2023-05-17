@@ -27,7 +27,7 @@ class Game_Objects():
         self.map = map_loader.Level(self)
         self.camera = camera.Camera(self)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
-        self.UI = UI.Gameplay_UI(self)
+        self.UI = {'gameplay':UI.Gameplay_UI(self),'map':UI.UI_loader(self,'map')}
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         #self.object_pool = object_pool.Object_pool(self)
 

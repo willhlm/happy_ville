@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, states, particles, animation, sound, dialogue
-import states_horn_vines, states_health, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -457,15 +457,15 @@ class Player(Character):
 
     def heal(self, health = 1):
         self.health += health
-        self.game_objects.UI.update_hearts()#update UI
+        self.game_objects.UI['gameplay'].update_hearts()#update UI
 
     def consume_spirit(self, spirit = 1):
         self.spirit -= spirit
-        self.game_objects.UI.remove_spirits(spirit)#update UI
+        self.game_objects.UI['gameplay'].remove_spirits(spirit)#update UI
 
     def add_spirit(self, spirit = 1):
         self.spirit += spirit
-        self.game_objects.UI.update_spirits()#update UI
+        self.game_objects.UI['gameplay'].update_spirits()#update UI
 
     def death(self):#"normal" gameplay states calls this
         self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
@@ -1338,6 +1338,49 @@ class Dash_effect(Staticentity):
         if self.alpha < 5:
             self.kill()
 
+class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the appropriate directions
+    def __init__(self,entity):
+        super().__init__(entity.rect.center)
+        self.game_objects = entity.game_objects
+        self.image = pygame.Surface((400,400), pygame.SRCALPHA, 32).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.center = [entity.game_objects.game.WINDOW_SIZE[0]*0.5,entity.game_objects.game.WINDOW_SIZE[0]*0.5-100]
+        self.image.fill((0,0,0))
+
+        dir = {'left':[self.image.get_width()*0.25,150],'up':[self.image.get_width()*0.5,50],'right':[self.image.get_width()*0.75,150],'down':[self.image.get_width()*0.5,300]}
+        for key in entity.directions.keys():
+            text = entity.game_objects.font.render(text = entity.directions[key])
+            text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.image.blit(text,dir[key])
+
+        self.render_fade=[self.render_in,self.render_out]
+        self.init()
+
+    def init(self):
+        self.fade = 0
+        self.image.set_alpha(self.fade)
+        self.page = 0
+
+    def update(self,scroll):
+        self.render_fade[self.page]()
+
+    def render_in(self):
+        self.fade += self.game_objects.game.dt
+        self.fade = min(self.fade,200)
+        self.image.set_alpha(int(self.fade))
+
+    def render_out(self):
+        self.fade -= self.game_objects.game.dt
+        self.fade = max(self.fade,0)
+        self.image.set_alpha(int(self.fade))
+
+        if self.fade < 10:
+            self.init()
+            self.kill()
+
+    def finish(self):#called when fading out should start
+        self.page = 1
+
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
     def __init__(self,entity):
@@ -1383,13 +1426,10 @@ class Player_abilities():
         elif value[1] == -1:#pressed down
             pass
 
-class Movement_hud():
+class Movement_abilities():#ailas movement abilities. Contains the potrais and logic to handle the level ups from save point
     def __init__(self,entity):
-        self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud')
         self.entity = entity
         self.game_objects = entity.game_objects#animation need it
-        self.image = self.sprites.sprite_dict['idle_1'][0]
-        self.rect = self.image.get_rect()
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle_1(self)#
@@ -1411,28 +1451,30 @@ class Movement_hud():
     def deactivate(self,level):
         self.currentstate.enter_state('Idle_'+str(level))
 
-class Dash(Movement_hud):
-
+class Dash(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/dash/')
+        self.image = self.sprites.sprite_dict['idle_1'][0]
+        self.rect = self.image.get_rect()
         self.description = ['dash','free dash','invinsible dash','dash attack']
         self.level = 1
 
-class Wall_glide(Movement_hud):
-
+class Wall_glide(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/wall_glide/')
+        self.image = self.sprites.sprite_dict['idle_1'][0]
+        self.rect = self.image.get_rect()
         self.description = ['wall glide','free wall jumps','donno']
         self.level = 1
 
-class Double_jump(Movement_hud):
-
-
+class Double_jump(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/double_jump/')
+        self.image = self.sprites.sprite_dict['idle_1'][0]
+        self.rect = self.image.get_rect()
         self.description = ['doulbe jump','free double jump','donno']
         self.level = 1
 
@@ -2704,17 +2746,21 @@ class Sign(Interactable):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox=self.rect.copy()
-        #self.shader = shader_entities.Shader_entities(self)
+        self.symbols = Sign_symbols(self)
 
     def player_collision(self):#player collision
         self.currentstate.handle_input('Outline')
 
     def player_noncollision(self):#when player doesn't collide
+        self.symbols.finish()
         self.currentstate.handle_input('Idle')
 
     def interact(self):#when player press t/y
-        new_state = states.Signpost(self.game_objects.game,self)
-        new_state.enter_state()
+        if self.symbols in self.game_objects.cosmetics:
+            self.symbols.finish()
+        else:
+            self.symbols.init()
+            self.game_objects.cosmetics.add(self.symbols)
 
 class Light_crystal(Interactable):
     def __init__(self,pos,game_objects):
@@ -2839,41 +2885,6 @@ class Menu_Box():
     def draw(self,screen):
         pass
         #screen.blit(self.img, self.rect.topleft)
-
-class Health():
-    def __init__(self,game_objects):
-        self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/health/')
-        self.game_objects = game_objects#animation need it
-        self.image = self.sprites.sprite_dict['death'][0]
-        self.rect = self.image.get_rect()
-        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Entity_animation(self)
-        self.currentstate = states_health.Death(self)
-        self.health = 0
-
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
-
-    def take_dmg(self,dmg):
-        self.health -= dmg
-        self.health = max(0,self.health)#so that it doesn't go negative, inprinciple not needed
-        self.currentstate.handle_input('Hurt')#make heart go white
-
-class Spirit():
-    def __init__(self,game_objects):
-        self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/spirit/')
-        self.game_objects = game_objects
-        self.image = self.sprites.sprite_dict['death'][0]
-        self.rect = self.image.get_rect()
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Entity_animation(self)
-        self.currentstate = states_health.Death(self)
-        self.health = 0
-
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
 
 class Sword_potrait():
     def __init__(self,game_objects):

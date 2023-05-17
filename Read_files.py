@@ -52,14 +52,13 @@ def format_tiled_json_group(map_data):
 def format_tiled_json(map_data):
     formatted_map_data = {}
     formatted_map_data['tile_layers'] = {}
-    formatted_map_data['objects'] = {}
     formatted_map_data['tilesets'] = map_data['tilesets']
 
     for layer in map_data['layers']:
         if 'data' in layer.keys():#tile layers
             formatted_map_data['tile_layers'][layer['name']] = layer
         elif 'objects' in layer.keys():#object: static stamps, collision
-            formatted_map_data['objects'][layer['name']] = layer['objects']
+            formatted_map_data[layer['name']] = layer['objects']
 
     return formatted_map_data
 
@@ -428,17 +427,27 @@ class Controller():
 
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value['l_stick'][0] = event.value
-                if abs(event.value)<0.2:
+                if abs(event.value) < 0.2:
                     self.value['l_stick'][0] = 0
 
             if event.axis==self.analogs['lv']:#left vertical
                 self.value['l_stick'][1] = event.value
-                if abs(event.value)<0.2:
+                if abs(event.value) < 0.2:
                     self.value['l_stick'][1] = 0
 
+            if event.axis==self.analogs['rh']:#right horizontal
+                self.value['r_stick'][0] = event.value
+                if abs(event.value) < 0.2:
+                    self.value['r_stick'][0] = 0
+
+            if event.axis==self.analogs['rv']:#right vertical
+                self.value['r_stick'][1] = event.value
+                if abs(event.value) < 0.2:
+                    self.value['r_stick'][1] = 0
+
         if event.type == pygame.JOYHATMOTION:
-            self.keydown=True
+            self.keydown = True
             self.value['d_pad'] = [event.value[0],event.value[1]]
-            self.rumble()
+
     def output(self):
         return [self.keydown,self.keyup,self.value,self.key]
