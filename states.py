@@ -109,7 +109,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('light_forest_1','1')
+            self.game.game_objects.load_map('village_2','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -341,12 +341,12 @@ class Gameplay(Game_State):
     def update(self):
         self.game.game_objects.update()
         self.game.game_objects.collide_all()
-        self.game.game_objects.UI.update()
+        self.game.game_objects.UI['gameplay'].update()
 
     def render(self):
         self.game.screen.fill((17,22,22))
         self.game.game_objects.draw()
-        self.game.game_objects.UI.render()
+        self.game.game_objects.UI['gameplay'].render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
 
@@ -953,7 +953,79 @@ class Journal_menu(Gameplay):
 class Map_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        pass
+        self.map_UI = self.game.game_objects.UI['map']
+
+        self.scroll = [0,0]
+        self.index = 0
+        self.pos = [-0.5*(self.map_UI.BG.get_width() - self.game.WINDOW_SIZE[0]),-0.5*(self.map_UI.BG.get_height() - self.game.WINDOW_SIZE[1])]#start offset position
+
+        for object in self.map_UI.objects:
+            object.update(self.pos)
+
+    def update(self):
+        super().update()
+        self.update_pos(self.scroll)
+        self.limit_pos()
+        for object in self.map_UI.objects:
+            object.update(self.scroll)
+
+        self.map_UI.objects[self.index].currentstate.handle_input('Equip')
+
+    def update_pos(self,scroll):
+        self.pos = [self.pos[0]+scroll[0],self.pos[1]+scroll[1]]
+
+    def limit_pos(self):
+        #self.pos[0] = min(0,self.pos[0])
+        #self.pos[0] = max(self.game.WINDOW_SIZE[0] - self.map_UI.BG.get_width(),self.pos[0])
+        #self.pos[1] = min(0,self.pos[1])
+        #self.pos[1] = max(self.game.WINDOW_SIZE[1] - self.map_UI.BG.get_height(),self.pos[1])
+        if self.pos[0] > 0:
+            self.pos[0] = 0
+            self.scroll[0] = 0
+        elif self.pos[0] < self.game.WINDOW_SIZE[0] - self.map_UI.BG.get_width():
+            self.pos[0] = self.game.WINDOW_SIZE[0] - self.map_UI.BG.get_width()
+            self.scroll[0] = 0
+        if self.pos[1] > 0:
+            self.pos[1] = 0
+            self.scroll[1] = 0
+        elif self.pos[1] < self.game.WINDOW_SIZE[1] - self.map_UI.BG.get_height():
+            self.pos[1] = self.game.WINDOW_SIZE[1] - self.map_UI.BG.get_height()
+            self.scroll[1] = 0
+
+    def render(self):
+        super().render()
+        self.game.screen.blit(self.map_UI.BG,self.pos)
+        for object in self.map_UI.objects:
+            self.game.screen.blit(object.image,object.rect.topleft)
+
+    def calculate_position(self):
+        scroll = [-self.map_UI.objects[self.index].rect.center[0]+self.game.WINDOW_SIZE[0]*0.5,-self.map_UI.objects[self.index].rect.center[1]+self.game.WINDOW_SIZE[1]*0.5]
+        for object in self.map_UI.objects:
+            object.update(scroll)
+        self.update_pos(scroll)
+
+    def handle_events(self,input):
+        self.scroll = [-2*input[2]['r_stick'][0],-2*input[2]['r_stick'][1]]#right analog stick
+
+        if input[0]:#press
+            if input[-1] == 'select':
+                self.exit_state()
+            elif input[-1] == 'rb':#nezt page
+                self.exit_state()
+                new_state = Inventory_menu(self.game)
+                new_state.enter_state()
+            elif input[-1] == 'right':#should it be left analogue stick?
+                self.map_UI.objects[self.index].currentstate.handle_input('Idle')
+                self.index += 1
+                self.index = min(self.index,len(self.map_UI.objects)-1)
+                self.calculate_position()
+            elif input[-1] == 'left':#should it be left analogue stick?
+                self.map_UI.objects[self.index].currentstate.handle_input('Idle')
+                self.index -= 1
+                self.index = max(0,self.index)
+                self.calculate_position()
+            elif input[-1] == 'a':#when pressing a
+                self.map_UI.objects[self.index].activate()#open the local map. I guess it should be a new state
 
 class Fast_travel_menu(Gameplay):
     def __init__(self, game):
@@ -1441,7 +1513,7 @@ class Conversation(Gameplay):
             elif input[-1] == 'y':
                 if self.letter_frame < len(self.conv):
                     self.letter_frame = 10000
-                else:#check if we have a series of conversations or not                    
+                else:#check if we have a series of conversations or not
                     self.clean_slate()
                     self.npc.dialogue.increase_conv_index()
                     self.conv = self.npc.dialogue.get_conversation()
@@ -1634,7 +1706,7 @@ class Bank(Facilities):
             elif input[-1]=='a' or input[-1]=='return':
                 self.select()
 
-class Soul_essence(Facilities):
+class Soul_essence(Facilities):#called from inorinoki
     def __init__(self, game):
         super().__init__(game)
         self.actions=['health','spirit','cancel']
@@ -1825,53 +1897,6 @@ class Cutscenes(Gameplay):#basically, this class is not needed but would be nice
 
     def handle_events(self, input):
         self.current_scene.handle_events(input)
-
-class Signpost(Gameplay):#shuold this be a new state? probably not?
-    def __init__(self, game,sign_post):
-        super().__init__(game)
-        self.game.game_objects.player.reset_movement()
-
-        self.page = 0
-        self.render_fade=[self.render_in,self.render_out]
-
-        self.sign_post = sign_post
-        self.img = sign_post.sprites.sprite_dict['bg'][0]#maybe the img should not be in signpost but somewhere more accesable
-        self.dir_pos = {'left':[0,150],'up':[100,50],'right':[200,150],'down':[100,300]}
-
-        self.surface = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])), pygame.SRCALPHA, 32).convert_alpha()
-        self.surface.fill((0,0,0))
-
-        self.fade = 0
-        self.surface.set_alpha(self.fade)
-
-    def render(self):
-        super().render()
-        self.surface.set_alpha(int(self.fade))
-        self.render_fade[self.page]()
-        self.game.screen.blit(self.surface,(0, 0))
-        self.game.screen.blit(self.img,(0, 0))#blit directly on screen to avoid alpha change on this
-        for dir in self.sign_post.directions.keys():
-            self.game.screen.blit(self.game.game_objects.font.render(text = self.sign_post.directions[dir]),self.dir_pos[dir])
-
-    def render_in(self):
-        self.fade += 1
-        self.fade = min(self.fade,150)
-        self.img.set_alpha((255-150)+int(self.fade))
-
-    def render_out(self):
-        self.fade -= 1
-        self.fade = max(self.fade,0)
-        self.img.set_alpha(int(self.fade))
-
-        if self.fade == 0:
-            self.exit_state()
-
-    def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'start':
-                self.page = 1
-            elif input[-1] == 'a':
-                self.page = 1
 
 class New_ability(Gameplay):#when player obtaines a new ability
     def __init__(self, game,ability):
