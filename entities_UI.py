@@ -7,7 +7,8 @@ class Banner():#for map UI
         self.sprites = Read_files.Sprites_Player('UI/map/objects/banner/banner_' + type + '/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
+        self.original_pos = pos
 
         self.dir = [-1,0]
         self.animation = animation.Entity_animation(self)
@@ -29,11 +30,28 @@ class Banner():#for map UI
     def update_pos(self,scroll):
         self.rect.center = [self.rect.center[0] + scroll[0], self.rect.center[1] + scroll[1]]
 
+    def revert(self):#called when quitting map state
+        self.rect.topleft = self.original_pos
+        self.currentstate.handle_input('Idle')
+
     def reset_timer(self):
         pass
 
     def activate(self):#called from map when selecting the pecific banner
         pass#open the local map
+
+class Empty_omamori():#this will save the positions needed to the UI
+    def __init__(self,pos,game_objects):
+        self.game_objects = game_objects
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/empty_omamori/')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.dir = [1,0]
+
+        self.animation = animation.Entity_animation(self)#it is called from inventory
+        self.currentstate = states_basic.Idle(self)#
+        self.description = ''
 
 class Health():#gameplay UI
     def __init__(self,game_objects):

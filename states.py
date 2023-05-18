@@ -737,44 +737,29 @@ class Inventory_menu(Gameplay):
 class Omamori_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.omamori_BG = pygame.image.load("Sprites/UI/menu/select/omamori.png").convert_alpha()
+        self.omamori_UI = self.game.game_objects.UI['omamori']
+
         self.letter_frame = 0#for description
-        self.define_pointer()
         self.define_blit_positions()
-        self.omamori_index = [0,0]
+        self.define_pointer()
+        self.omamori_index = 0
 
     def define_blit_positions(self):
-        inventory_pos = [[],[],[],[]]#positions of the ones in the inventory
-        equip_pos = []#the positions of the equipped ones
-        for j in range(0,4):#four rows
-            for i in range(0,6):#6 items horizontally
-                inventory_pos[j].append([60+20*i,150+20*j])
+        for index, key in enumerate(self.game.game_objects.player.omamoris.equipped):#the equiped ones
+            pos = self.omamori_UI.equipped[index].rect.center
+            self.game.game_objects.player.omamoris.equipped[key].set_pos(pos)
 
-        for j in range(0,self.game.game_objects.player.omamoris.number):
-            equip_pos.append([90+20*j,110])
+        for index, key in enumerate(self.game.game_objects.player.omamoris.inventory):#the ones in inventory
+            pos = self.omamori_UI.inventory[index].rect.center
+            self.game.game_objects.player.omamoris.inventory[key].set_pos(pos)
 
-        omamori_equipped=[]
-        for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):
-            omamori.set_pos(equip_pos[index])
-            omamori_equipped.append(omamori)
-
-        omamori_inventory =  [[],[],[],[]]
-        index = 0
-        for row,posi in enumerate(inventory_pos):
-            for pos in posi:
-                if index < len(self.game.game_objects.player.omamoris.omamori_list):
-                    item = self.game.game_objects.player.omamoris.omamori_list[index]
-                    item.set_pos(pos)
-                else:
-                    item = getattr(sys.modules[Entities.__name__], 'Empty_omamori')(self.game.game_objects.player)#make the object based on the string
-                omamori_inventory[row].append([item])
-                index += 1
-
-        self.pointer_pos = {'equip':equip_pos,'inventory':inventory_pos}#positions of the pointer
-        self.omamoris = {'equip':omamori_equipped,'inventory':omamori_inventory}#organised items: used to select the item
+        #need to make a list that also contains "empty omamori", so that the pointer can roam around the whole grid. if not, then these empty is not needed
+        self.omamori_list = list(self.game.game_objects.player.omamoris.inventory.values())
+        for index in range(len(self.game.game_objects.player.omamoris.inventory),15):
+            self.omamori_list.append(self.omamori_UI.inventory[index])
 
     def define_pointer(self,size = [16,16]):#called everytime we move from one area to another
-        size = self.game.game_objects.player.omamoris.omamori_list[0].rect.size
+        size = self.omamori_list[0].rect.size
         self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
         pygame.draw.rect(self.pointer,[200,50,50,255],(size[0]*0.5-8,size[1]*0.5+8,16,16),width=1,border_radius=5)
 
@@ -785,41 +770,42 @@ class Omamori_menu(Gameplay):
     def render(self):
         super().render()
         self.blit_omamori_BG()
-        self.omamori_menu()
+        self.blit_omamori_menu()
         self.blit_pointer()
         self.blit_description()
 
     def blit_omamori_BG(self):
-        self.omamori_BG.set_alpha(230)
-        self.game.screen.blit(self.omamori_BG,(0,0))
+        self.omamori_UI.BG.set_alpha(230)
+        self.game.screen.blit(self.omamori_UI.BG,(0,0))
 
-    def omamori_menu(self):
-        for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped_omamoris):#equipped ones
+    def blit_omamori_menu(self):
+        for omamori in self.game.game_objects.player.omamoris.equipped.values():#equipped ones
             omamori.animation.update()
-            self.game.screen.blit(omamori.image,self.pointer_pos['equip'][index])
+            self.game.screen.blit(omamori.image,omamori.rect.topleft)
 
-        for row in self.omamoris['inventory']:
-            for omamori in row:
-                omamori[0].animation.update()
-                self.game.screen.blit(omamori[0].image,omamori[0].rect.center)
+        for omamori in self.omamori_list:
+            omamori.animation.update()
+            self.game.screen.blit(omamori.image,omamori.rect.topleft)
 
     def blit_description(self):
-        self.conv = self.omamoris['inventory'][self.omamori_index[0]][self.omamori_index[1]][0].description
+        self.conv = self.omamori_list[self.omamori_index].description
         text = self.game.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
         text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         self.game.screen.blit(text,(380,120))
 
     def blit_pointer(self):
-        self.game.screen.blit(self.pointer,self.pointer_pos['inventory'][self.omamori_index[0]][self.omamori_index[1]])#pointer
+        pos = self.omamori_UI.inventory[self.omamori_index].rect.topleft
+        self.game.screen.blit(self.pointer,pos)#pointer
 
     def handle_events(self,input):
         if input[0]:#press
             if input[-1] == 'select':
                 self.exit_state()
             elif input[-1] == 'rb':#nezt page
-                self.exit_state()
-                new_state = Journal_menu(self.game)
-                new_state.enter_state()
+                if self.game.game_objects.world_state.statistics['kill']:#if we have killed something
+                    self.exit_state()
+                    new_state = Journal_menu(self.game)
+                    new_state.enter_state()
             elif input[-1] == 'lb':#previouse page
                 self.exit_state()
                 new_state = Inventory_menu(self.game)
@@ -829,37 +815,42 @@ class Omamori_menu(Gameplay):
 
             elif input[-1] =='right':
                 self.letter_frame = 0
-                self.omamori_index[1] += 1
-                self.omamori_index[1] = min(self.omamori_index[1],len(self.pointer_pos['inventory'][self.omamori_index[0]])-1)
+                self.omamori_index += 1
+                self.omamori_index = min(self.omamori_index,len(self.omamori_UI.inventory)-1)
 
             elif input[-1] =='left':
                 self.letter_frame = 0
-                self.omamori_index[1] -= 1
-                self.omamori_index[1] = max(0,self.omamori_index[1])
+                self.omamori_index -= 1
+                self.omamori_index = max(0,self.omamori_index)
 
             elif input[-1] =='down':
                 self.letter_frame = 0
-                self.omamori_index[0] += 1
-                self.omamori_index[0] = min(self.omamori_index[0],len(self.pointer_pos['inventory'])-1)
+                self.omamori_index += 5
+                self.omamori_index = min(self.omamori_index,len(self.omamori_UI.inventory)-1)
 
             elif input[-1] =='up':
                 self.letter_frame = 0
-                self.omamori_index[0] -= 1
-                self.omamori_index[0] = max(0,self.omamori_index[0])
+                self.omamori_index -= 5
+                self.omamori_index = max(0,self.omamori_index)
 
     def choose_omamori(self):
-        self.game.game_objects.player.omamoris.equip_omamori(self.omamoris['inventory'][self.omamori_index[0]][self.omamori_index[1]][0])
+        name = type(self.omamori_list[self.omamori_index]).__name__#name of omamori
+        if name == 'Empty_omamori': return
+        self.game.game_objects.player.omamoris.equip_omamori(name)
+
+        for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped.values()):#update the positions of the equiped ones
+            pos = self.omamori_UI.equipped[index].rect.center
+            omamori.set_pos(pos)
 
 class Journal_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.journal_BG = pygame.image.load("Sprites/UI/menu/select/journal.png").convert_alpha()
+        self.journal_UI =  self.game.game_objects.UI['journal']
         self.letter_frame = 0
         self.journal_index = [0,0]
         self.enemies = []
         self.enemy_index = self.journal_index.copy()
         self.number = 8 #number of enemies per page
-        self.enemy_pos = [270,150]
 
         for enemy in self.game.game_objects.world_state.statistics['kill']:
             self.enemies.append(getattr(sys.modules[Entities.__name__], enemy.capitalize())([0,0],self.game.game_objects))#make the object based on the string
@@ -869,10 +860,6 @@ class Journal_menu(Gameplay):
 
     def select_enemies(self):
         self.selected_enemies = self.enemies[self.enemy_index[0]:self.enemy_index[0]+self.number:1]
-
-        self.text_pos = []
-        for i in range(0,self.number):#5 enemies at once
-            self.text_pos.append([80,120 + i*20])
 
     def define_pointer(self):#called everytime we move from one area to another
         size = [48,16]
@@ -892,34 +879,31 @@ class Journal_menu(Gameplay):
         self.blit_description()
 
     def blit_journal_BG(self):
-        self.journal_BG.set_alpha(230)
-        self.game.screen.blit(self.journal_BG,(0,0))
+        self.journal_UI.BG.set_alpha(230)
+        self.game.screen.blit(self.journal_UI.BG,(0,0))
 
     def blit_names(self):
         for index, enemy in enumerate(self.selected_enemies):
             name = enemy.__class__.__name__
             text = self.game.game_objects.font.render((152,80), name, 100)
             text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.game.screen.blit(text,self.text_pos[index])
+            self.game.screen.blit(text,self.journal_UI.name_pos[index])
 
     def blit_pointer(self):
-        if self.selected_enemies:
-            pos = [self.text_pos[self.journal_index[0]][0],self.text_pos[self.journal_index[0]][1]-5]#add a offset
-            self.game.screen.blit(self.pointer,pos)#pointer
+        pos = [self.journal_UI.name_pos[self.journal_index[0]][0],self.journal_UI.name_pos[self.journal_index[0]][1]-5]#add a offset
+        self.game.screen.blit(self.pointer,pos)#pointer
 
     def blit_enemy(self):
-        if self.selected_enemies:#if we have killed enemies
-            enemy = self.selected_enemies[self.journal_index[0]]
-            enemy.rect.midbottom=self.enemy_pos#allign based on bottom
-            enemy.animation.update()
-            self.game.screen.blit(enemy.image,[enemy.rect.center[0]-enemy.rect.width*0.5,enemy.rect.center[1]-enemy.rect.height*0.5])#it blits the top left courner so need to correct based on the rectanle size
+        enemy = self.selected_enemies[self.journal_index[0]]
+        enemy.rect.midbottom = self.journal_UI.image_pos#allign based on bottom
+        enemy.animation.update()
+        self.game.screen.blit(enemy.image,[enemy.rect.center[0]-enemy.rect.width*0.5,enemy.rect.center[1]-enemy.rect.height*0.5])#it blits the top left courner so need to correct based on the rectanle size
 
     def blit_description(self):
-        if self.selected_enemies:#if we have killed enemies
-            self.conv = self.selected_enemies[self.journal_index[0]].description
-            text = self.game.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
-            text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.game.screen.blit(text,(380,120))
+        self.conv = self.selected_enemies[self.journal_index[0]].description
+        text = self.game.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
+        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game.screen.blit(text,(380,120))
 
     def handle_events(self,input):
         if input[0]:#press
@@ -1027,24 +1011,23 @@ class Map_menu(Gameplay):
             elif input[-1] == 'a':#when pressing a
                 self.map_UI.objects[self.index].activate()#open the local map. I guess it should be a new state
 
+    def exit_state(self):
+        super().exit_state()
+        for object in self.map_UI.objects:
+            object.revert()
+
 class Fast_travel_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.travel_BG = pygame.image.load("Sprites/UI/menu/fast_travel/fast_travel.png").convert_alpha()
+        self.travel_UI = self.game.game_objects.UI['fast_travel']
         self.index = [0,0]
         self.define_destination()
         self.define_pointer()
-        self.define_positions()
 
     def define_destination(self):
         self.destinations = []
         for level in self.game.game_objects.world_state.travel_points.keys():
             self.destinations.append(level)
-
-    def define_positions(self):
-        self.blit_pos = []
-        for i in range(0,len(self.game.game_objects.world_state.travel_points)):
-            self.blit_pos.append([100,100 + 20*i])
 
     def define_pointer(self):#called everytime we move from one area to another
         size = [48,16]
@@ -1052,16 +1035,16 @@ class Fast_travel_menu(Gameplay):
         pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
 
     def blit_BG(self):
-        self.game.screen.blit(self.travel_BG,(0,0))#pointer
+        self.game.screen.blit(self.travel_UI.BG,(0,0))#pointer
 
     def blit_destinations(self):
         for index, name in enumerate(self.game.game_objects.world_state.travel_points.keys()):
             text = self.game.game_objects.font.render((152,80), name, 100)
             text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.game.screen.blit(text,self.blit_pos[index])#pointer
+            self.game.screen.blit(text,self.travel_UI.name_pos[index])#pointer
 
     def blit_pointer(self):
-        pos = self.blit_pos[self.index[0]]
+        pos = self.travel_UI.name_pos[self.index[0]]
         self.game.screen.blit(self.pointer,pos)#pointer
 
     def render(self):
@@ -1077,7 +1060,7 @@ class Fast_travel_menu(Gameplay):
 
             elif input[-1] =='down':
                 self.index[0] += 1
-                self.index[0] = min(self.index[0],len(self.blit_pos)-1)
+                self.index[0] = min(self.index[0],len(self.destinations)-1)
 
             elif input[-1] =='up':
                 self.index[0] -= 1

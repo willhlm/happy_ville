@@ -5,9 +5,9 @@ class UI_loader():#for map
     def __init__(self,game_objects,type):
         self.game_objects = game_objects
         self.BG = pygame.image.load('UI/' + type + '/BG.png').convert_alpha()
-        self.source = {'map':'map_UI','inventory':'inventory_map'}[type]#the name of the tmx file with the objects
+        self.source = {'map':'map_UI','omamori':'omamori_UI','journal':'journal_UI','fast_travel':'fast_travel_UI'}[type]#the name of the tmx file with the objects
         self.load_UI_data(type)
-        self.load_data()
+        self.load_data = {'map':self.load_map_data,'omamori':self.load_omamori_data,'journal':self.load_journal_data,'fast_travel':self.load_fast_travel_data}[type]()
 
     def load_UI_data(self,type):
         map_data = Read_files.read_json("UI/%s/%s.json" % (type,type))
@@ -17,25 +17,63 @@ class UI_loader():#for map
                 if self.source in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
 
-    def load_data(self):
+    def load_map_data(self):
         self.objects = []
-        map_statics = self.map_data['elements']
-        for obj in map_statics:
-            object_position = [int(obj['x']), int(obj['y'])]
+        for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
             properties = obj.get('properties',[])
             id = obj['gid'] - self.map_data['UI_firstgid']
 
-            #this part probably depends on the tmx file with the objects
             if id == 0:
-                new_banner = entities_UI.Banner(object_position,self.game_objects,str(1),properties[0]['value'])
+                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(1),properties[0]['value'])
                 self.objects.append(new_banner)
             elif id == 1:
-                new_banner = entities_UI.Banner(object_position,self.game_objects,str(2),properties[0]['value'])
+                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(2),properties[0]['value'])
                 self.objects.append(new_banner)
             elif id == 2:
-                new_banner = entities_UI.Banner(object_position,self.game_objects,str(3),properties[0]['value'])
+                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(3),properties[0]['value'])
                 self.objects.append(new_banner)
+
+    def load_omamori_data(self):
+        self.equipped = []
+        self.inventory = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:
+                new_omamori = entities_UI.Empty_omamori(topleft_object_position,self.game_objects)
+                self.inventory.append(new_omamori)
+            elif id == 1:
+                new_omamori = entities_UI.Empty_omamori(topleft_object_position,self.game_objects)
+                self.equipped.append(new_omamori)
+
+    def load_journal_data(self):
+        self.name_pos = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#image
+                self.image_pos = topleft_object_position
+            elif id == 1:#name
+                self.name_pos.append(topleft_object_position)
+
+    def load_fast_travel_data(self):
+        self.name_pos = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#name
+                self.name_pos.append(topleft_object_position)
 
 class Gameplay_UI():
     def __init__(self,game_objects):

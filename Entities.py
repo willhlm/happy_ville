@@ -443,7 +443,7 @@ class Player(Character):
         if self.invincibile: return
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
         self.health -= dmg*self.dmg_scale#a omamori can set the dmg_scale to 0.5
-        self.game_objects.UI.remove_hearts(dmg*self.dmg_scale)#update UI
+        self.game_objects.UI['gameplay'].remove_hearts(dmg*self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
             self.animation.handle_input('Hurt')#turn white
@@ -3009,27 +3009,31 @@ class Purple_infinity_stone(Infinity_stones):#reflect projectile
 
 class Omamoris():
     def __init__(self,entity):
-        self.equipped_omamoris = []#equiped omamoris
-        self.omamori_list = [Half_dmg(entity),Loot_magnet(entity),Boss_HP(entity)]#omamoris in inventory.
+        self.entity = entity
+        self.equipped = {}#equiped omamoris
+        self.inventory = {'Half_dmg':Half_dmg(entity),'Loot_magnet':Loot_magnet(entity),'Boss_HP':Boss_HP(entity)}#omamoris in inventory.
         self.number = 3#number of omamori we can equip
         entity.dmg_scale = 1
 
     def update(self):
-        for omamori in self.equipped_omamoris:
+        for omamori in self.equipped.values():
             omamori.update()
 
     def handle_input(self,input):
-        for omamori in self.equipped_omamoris:
+        for omamori in self.equipped.values():
             omamori.handle_input(input)
 
-    def equip_omamori(self,omamori):
-        if omamori not in self.equipped_omamoris:#if not equiped
-            if len(self.equipped_omamoris)<self.number:#maximum number of omamoris to equip
-                self.equipped_omamoris.append(omamori)
-                omamori.attach()
+    def equip_omamori(self,omamori_string):
+        if not self.equipped.get(omamori_string,False):#if it is not equipped
+            if len(self.equipped) < self.number:#maximum number of omamoris to equip
+                new_omamori = getattr(sys.modules[__name__], omamori_string)(self.entity)#make a class based on the name of the newstate: need to import sys
+                self.equipped[omamori_string] = new_omamori
+                self.inventory[omamori_string].currentstate.handle_input('Equip')
+                new_omamori.attach()
         else:##if equiped -> remove
-            self.equipped_omamoris.remove(omamori)
-            omamori.detach()#call the detach function of omamori
+            self.inventory[omamori_string].currentstate.handle_input('Idle')
+            self.equipped[omamori_string].detach()#call the detach function of omamori
+            del self.equipped[omamori_string]
 
 class Omamori():
     def __init__(self,entity):
@@ -3059,11 +3063,6 @@ class Omamori():
 
     def set_pos(self,pos):#for inventory
         self.rect.center = pos
-
-class Empty_omamori(Omamori):
-    def __init__(self,entity):
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/empty_omamori/')#for inventory
-        super().__init__(entity)
 
 class Half_dmg(Omamori):
     def __init__(self,entity):
