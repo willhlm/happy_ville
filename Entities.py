@@ -1414,69 +1414,37 @@ class Player_abilities():
         if value[0] == 1:#pressed right
             self.remove_ability()
             self.movement_abilities = self.movement_abilities[-1:] + self.movement_abilities[:-1]#rotate the abilityes to the right
-            self.entity.game_objects.UI.init_ability()
+            self.entity.game_objects.UI['gameplay'].init_ability()
             self.add_ability()
         elif value[0] == -1:#pressed left
             self.remove_ability()
             self.movement_abilities = self.movement_abilities[1:] + self.movement_abilities[:1]#rotate the abilityes to the left
-            self.entity.game_objects.UI.init_ability()
+            self.entity.game_objects.UI['gameplay'].init_ability()
             self.add_ability()
         elif value[1] == 1:#pressed up
             pass
         elif value[1] == -1:#pressed down
             pass
 
-class Movement_abilities():#ailas movement abilities. Contains the potrais and logic to handle the level ups from save point
+class Movement_abilities():#ailas movement abilities. Contains logic to handle the level ups from save point. Should it do something when used?
     def __init__(self,entity):
         self.entity = entity
-        self.game_objects = entity.game_objects#animation need it
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Entity_animation(self)
-        self.currentstate = states_basic.Idle_1(self)#
-
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
-
-    def reset_timer(self):
-        pass
+        self.level = 1
 
     def upgrade_ability(self):
         self.level += 1
-        self.level = min(self.level,len(self.description))
-
-    def activate(self,level):
-        self.currentstate.enter_state('Active_'+str(level))
-
-    def deactivate(self,level):
-        self.currentstate.enter_state('Idle_'+str(level))
 
 class Dash(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
-        self.sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/dash/')
-        self.image = self.sprites.sprite_dict['idle_1'][0]
-        self.rect = self.image.get_rect()
-        self.description = ['dash','free dash','invinsible dash','dash attack']
-        self.level = 1
 
 class Wall_glide(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
-        self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/wall_glide/')
-        self.image = self.sprites.sprite_dict['idle_1'][0]
-        self.rect = self.image.get_rect()
-        self.description = ['wall glide','free wall jumps','donno']
-        self.level = 1
 
 class Double_jump(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
-        self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/movement/double_jump/')
-        self.image = self.sprites.sprite_dict['idle_1'][0]
-        self.rect = self.image.get_rect()
-        self.description = ['doulbe jump','free double jump','donno']
-        self.level = 1
 
 #projectiles
 class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
@@ -1531,15 +1499,6 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
     #called from upgrade menu
     def upgrade_ability(self):
         self.level += 1
-        self.level = min(self.level,len(self.description))
-
-    def activate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Active_'+str(level))
-        self.level = level
-
-    def deactivate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Idle_'+str(level))
-        self.level = level
 
 class Melee(Projectiles):
     def __init__(self,entity):
@@ -1729,7 +1688,6 @@ class Thunder(Ranged):
         self.hitbox = self.rect.copy()
         self.dmg = 1
         self.level = 1#upgrade pointer
-        self.description = ['thunder','hits one additional target','one additional damage']
 
     def initiate(self,enemy_rect):
         self.rect.midbottom = enemy_rect.midbottom
@@ -1840,7 +1798,6 @@ class Force(Ranged):
         self.rect = self.image.get_rect()
         self.hitbox = self.rect.copy()
         self.dmg = 0
-        self.description = ['shoot arrow','explosive arrows','nice arrows']
         self.level = 1#upgrade pointer
 
     def initiate(self):
@@ -1873,8 +1830,6 @@ class Arrow(Ranged):
         self.rect = self.image.get_rect()
         self.hitbox = self.rect.copy()
         self.dmg = 1
-
-        self.description = ['shoot arrow','charge arrows','charge for insta kill']
         self.level = 1#upgrade pointer
 
     def initiate(self):#called when using the attack
@@ -1914,7 +1869,6 @@ class Migawari():
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
 
-        self.description = ['migawari','add extra health to migawari','heals aila when killed']
         self.health = 1
         self.level = 1#upgrade pointer
 
@@ -1929,17 +1883,8 @@ class Migawari():
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
-        self.level = min(self.level,len(self.description))
         if self.level == 2:
             self.health = 2
-
-    def activate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Active_'+str(level))
-        self.level = level
-
-    def deactivate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Idle_'+str(level))
-        self.level = level
 
 class Slow_motion():
     def __init__(self,entity):
@@ -1950,7 +1895,6 @@ class Slow_motion():
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
 
-        self.description = ['slow motion','longer slow motion','slow motion but aila']
         self.level = 1#upgrade pointer
         self.duration = 200#slow motion duration, in time [whatever units]
 
@@ -1967,15 +1911,6 @@ class Slow_motion():
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
-        self.level = min(self.level,len(self.description))
-
-    def activate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Active_'+str(level))
-        self.level = level
-
-    def deactivate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Idle_'+str(level))
-        self.level = level
 
     def reset_timer(self):
         pass
@@ -1996,7 +1931,7 @@ class Loot(Platform_entity):#
     def attract(self,pos):#the omamori calls on this in loot group
         pass
 
-class Empty_item(Loot):
+class Empty_item(Loot):#for invenotry
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heart_container/')
@@ -2914,7 +2849,7 @@ class Infinity_stones():
     def reset_timer(self):
         pass
 
-    def attach(self):#called when balcksmith attached the stone
+    def attach(self):#called from sword when balcksmith attached the stone
         pass
 
     def detach(self):
@@ -2926,7 +2861,7 @@ class Infinity_stones():
     def slash(self):#called when swingin sword
         pass
 
-class Empty_infinity_stone(Infinity_stones):#more dmg
+class Empty_infinity_stone(Infinity_stones):
     def __init__(self,sword):
         super().__init__(sword)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/empty/')#for inventory
@@ -2940,7 +2875,7 @@ class Red_infinity_stone(Infinity_stones):#more dmg
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.colour = 'red'
-        self.description = '10% more damage'
+        self.description = '10 procent more damage'
 
     def attach(self):
         self.sword.dmg*=1.1
@@ -2949,7 +2884,6 @@ class Red_infinity_stone(Infinity_stones):#more dmg
         self.sword.dmg*=(1/1.1)
 
 class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
-
     def __init__(self,sword):
         super().__init__(sword)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/green/')#for inventory
@@ -2962,7 +2896,6 @@ class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
         self.sword.entity.animation.framerate = 0.33
 
 class Blue_infinity_stone(Infinity_stones):#get spirit at collision
-
     def __init__(self,sword):
         super().__init__(sword)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/blue/')#for inventory
@@ -2975,7 +2908,6 @@ class Blue_infinity_stone(Infinity_stones):#get spirit at collision
         self.sword.entity.add_spirit()
 
 class Orange_infinity_stone(Infinity_stones):#bigger hitbox
-
     def __init__(self,sword):
         super().__init__(sword)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/orange/')#for inventory

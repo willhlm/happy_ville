@@ -1,7 +1,8 @@
 import pygame
 import Read_files, animation, states_health, states_basic
 
-class Banner():#for map UI
+#for map UI
+class Banner():
     def __init__(self,pos,game_objects,type,text):
         self.game_objects = game_objects
         self.sprites = Read_files.Sprites_Player('UI/map/objects/banner/banner_' + type + '/')
@@ -40,6 +41,9 @@ class Banner():#for map UI
     def activate(self):#called from map when selecting the pecific banner
         pass#open the local map
 
+#inventory
+
+#momamori inventory
 class Empty_omamori():#this will save the positions needed to the UI
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
@@ -53,6 +57,98 @@ class Empty_omamori():#this will save the positions needed to the UI
         self.currentstate = states_basic.Idle(self)#
         self.description = ''
 
+#ability spirit upgrade UI
+class Abilities_spirit():
+    def __init__(self,pos,game_objects):
+        self.game_objects = game_objects
+        name = type(self).__name__
+        self.sprites = Read_files.Sprites_Player('UI/ability_spirit_upgrade/objects/' + name + '/')
+        self.image = self.sprites.sprite_dict['idle_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.dir = [1,0]
+
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle(self)#
+
+    def activate(self,level):#for UI of Aila abilities
+        self.currentstate.enter_state('Active_'+str(level))
+        self.level = level
+
+    def deactivate(self,level):#for UI of Aila abilities
+        self.currentstate.enter_state('Idle_'+str(level))
+        self.level = level
+
+    def reset_timer(self):
+        pass
+
+class Arrow(Abilities_spirit):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
+
+class Force(Abilities_spirit):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
+
+class Migawari(Abilities_spirit):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['migawari','add extra health to migawari','heals aila when killed','imba']
+
+class Slow_motion(Abilities_spirit):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
+
+class Thunder(Abilities_spirit):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['thunder','hits one additional target','one additional damage','imba']
+
+class Abilities_movement():
+    def __init__(self,pos,game_objects):
+        self.game_objects = game_objects
+        name = type(self).__name__
+        self.sprites = Read_files.Sprites_Player('UI/ability_movement_upgrade/objects/' + name + '/')
+        self.image = self.sprites.sprite_dict['idle_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center=pos)
+        self.dir = [1,0]
+
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle_1(self)#
+
+    def update(self):#called from gameplayHUD
+        self.animation.update()
+        self.currentstate.update()
+
+    def activate(self,level):#for UI of Aila abilities
+        self.currentstate.enter_state('Active_'+str(level))
+        self.level = level
+
+    def deactivate(self,level):#for UI of Aila abilities
+        self.currentstate.enter_state('Idle_'+str(level))
+        self.level = level
+
+    def reset_timer(self):
+        pass
+
+class Dash(Abilities_movement):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['dash','free dash','invinsible dash','dash attack']
+
+class Wall_glide(Abilities_movement):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['wall glide','free wall jumps','donno','donno']
+
+class Double_jump(Abilities_movement):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['doulbe jump','free double jump','donno','donno']
+
+#gameplay HUD
 class Health():#gameplay UI
     def __init__(self,game_objects):
         self.sprites=Read_files.Sprites_Player('Sprites/UI/gameplay/health/')

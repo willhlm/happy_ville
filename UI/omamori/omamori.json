@@ -24,6 +24,12 @@
                  "height":48,
                  "id":1,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"1"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -36,6 +42,12 @@
                  "height":48,
                  "id":2,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Loot_magnet"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -48,6 +60,12 @@
                  "height":48,
                  "id":4,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"3"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -60,6 +78,12 @@
                  "height":48,
                  "id":5,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"4"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -72,6 +96,12 @@
                  "height":48,
                  "id":6,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"5"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -144,6 +174,12 @@
                  "height":48,
                  "id":21,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Boss_HP"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -156,6 +192,12 @@
                  "height":48,
                  "id":22,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"6"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -168,6 +210,12 @@
                  "height":48,
                  "id":23,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"7"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -180,6 +228,12 @@
                  "height":48,
                  "id":24,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"8"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -192,6 +246,12 @@
                  "height":48,
                  "id":25,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"9"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -204,6 +264,12 @@
                  "height":48,
                  "id":26,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"11"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -216,6 +282,12 @@
                  "height":48,
                  "id":27,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"12"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -228,6 +300,12 @@
                  "height":48,
                  "id":28,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"Half_dmg"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -240,6 +318,12 @@
                  "height":48,
                  "id":29,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"13"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -252,6 +336,12 @@
                  "height":48,
                  "id":30,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"name",
+                         "type":"string",
+                         "value":"14"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
