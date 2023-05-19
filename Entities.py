@@ -2861,13 +2861,6 @@ class Infinity_stones():
     def slash(self):#called when swingin sword
         pass
 
-class Empty_infinity_stone(Infinity_stones):
-    def __init__(self,sword):
-        super().__init__(sword)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/empty/')#for inventory
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-
 class Red_infinity_stone(Infinity_stones):#more dmg
     def __init__(self,sword):
         super().__init__(sword)

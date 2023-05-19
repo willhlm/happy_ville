@@ -583,7 +583,114 @@ class Ability_menu(Gameplay):#when pressing tab
 class Inventory_menu(Gameplay):
     def __init__(self, game):
         super().__init__(game)
-        self.inventory_BG = pygame.image.load("Sprites/UI/menu/select/inventory.png").convert_alpha()
+        self.iventory_UI = self.game.game_objects.UI['inventory']
+        self.letter_frame = 0#for description
+        self.state = state_inventory.Items(self)
+        self.item_index = [0,0]#row, col
+
+        self.define_blit_positions()
+        self.define_pointer()
+
+    def define_blit_positions(self):#set positions
+        items = self.iventory_UI.items.copy()#a list if empty items
+        key_items = self.iventory_UI.key_items#a dict of empty key items
+        index = 0
+        for key in self.game.game_objects.player.inventory.keys():#crease the object in inventory and sepeerate between useable items and key items
+            item = getattr(sys.modules[Entities.__name__], key)([0,0],self.game.game_objects)#make the object based on the string
+            if hasattr(item, 'use_item'):
+                item.rect.topleft = items[index].rect.topleft
+                item.number = self.game.game_objects.player.inventory[key]#number of items euirepped
+                items[index] = item
+                index += 1
+            else:
+                item.rect.topleft = key_items[key].rect.topleft
+                item.number = self.game.game_objects.player.inventory[key]#number of items euirepped
+                key_items[key] = item
+
+        stones = self.iventory_UI.stones#a dict of emppty stones
+        for key in self.game.game_objects.player.sword.stones.keys():
+            self.game.game_objects.player.sword.stones[key].rect.topleft = stones[key].rect.topleft
+            stones[key] = self.game.game_objects.player.sword.stones[key]
+
+        self.items = {'sword':list(stones.values()),'key_items':list(key_items.values()),'items':items}#organised items: used to select the item
+
+    def define_pointer(self,size = [16,16]):#called everytime we move from one area to another
+        self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
+
+    def update(self):
+        super().update()
+        self.letter_frame += self.game.dt
+
+    def render(self):
+        super().render()
+        self.blit_inventory_BG()
+        self.blit_inventory()
+        self.blit_sword()
+        self.blit_pointer()
+        self.blit_description()
+
+    def blit_inventory_BG(self):
+        self.iventory_UI.BG.set_alpha(230)
+        self.game.screen.blit(self.iventory_UI.BG,(0,0))
+
+    def blit_inventory(self):
+        for index, item in enumerate(self.items['items']):#items we can use
+            item.animation.update()
+            self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),item.rect.topleft)
+            number = self.game.game_objects.font.render(text = str(item.number))
+            number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.game.screen.blit(number,item.rect.center)
+
+        for index, item in enumerate(self.items['key_items']):
+            item.animation.update()
+            self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),item.rect.topleft)
+            number = self.game.game_objects.font.render(text = str(item.number))
+            number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.game.screen.blit(number,item.rect.center)
+
+    def blit_sword(self):
+        self.iventory_UI.sword.animation.update()
+        self.game.screen.blit(self.iventory_UI.sword.image,self.iventory_UI.sword.rect.topleft)
+
+        for stone in self.items['sword']:
+            stone.animation.update()
+            self.game.screen.blit(stone.image,stone.rect.topleft)
+
+    def blit_pointer(self):
+        self.game.screen.blit(self.pointer,self.items[self.state.state_name][self.item_index[0]].rect.topleft)#pointer
+
+    def blit_description(self):
+        self.conv = self.items[self.state.state_name][self.item_index[0]].description
+        text = self.game.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
+        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game.screen.blit(text,(380,120))
+
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'select':
+                self.exit_state()
+            elif input[-1] == 'rb':#nezt page
+                self.exit_state()
+                new_state = Omamori_menu(self.game)
+                new_state.enter_state()
+            elif input[-1] == 'lb':#previouse page
+                self.exit_state()
+                new_state = Map_menu(self.game)
+                new_state.enter_state()
+            elif input[-1]=='a' or input[-1]=='return':
+                self.use_item()
+            self.state.handle_input(input)
+            self.letter_frame = 0
+
+    def use_item(self):
+        self.items[self.state.state_name][self.item_index[0]].use_item()
+        self.exit_state()
+
+class Inventory_menu2(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)
+        self.iventory_UI = self.game.game_objects.UI['inventory']
         self.letter_frame = 0#for description
         self.state = state_inventory.Items(self)
         self.item_index = [0,0]#row, col
@@ -677,8 +784,8 @@ class Inventory_menu(Gameplay):
         self.blit_description()
 
     def blit_inventory_BG(self):
-        self.inventory_BG.set_alpha(230)
-        self.game.screen.blit(self.inventory_BG,(0,0))
+        self.iventory_UI.BG.set_alpha(230)
+        self.game.screen.blit(self.iventory_UI.BG,(0,0))
 
     def inventory_menu(self):
         for index, item in enumerate(self.use_items):#items we can use

@@ -42,6 +42,42 @@ class Banner():
         pass#open the local map
 
 #inventory
+class Item():#for invenotry
+    def __init__(self,pos,game_objects):
+        self.game_objects = game_objects
+        self.sprites = Read_files.Sprites_Player('UI/inventory/objects/item/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.rect.topleft = pos
+
+        self.dir = [1,0]
+        self.animation = animation.Entity_animation(self)#it is called from inventory
+        self.currentstate = states_basic.Idle(self)#
+        self.description = ''
+        self.number = ''#to bilt the number of items player has. THis class is an empty object so no number
+
+class Sword():
+    def __init__(self,pos,game_objects):
+        self.game_objects = game_objects
+        self.sprites = Read_files.Sprites_Player('UI/inventory/objects/sword/')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.rect.topleft = pos
+        self.dir = [1,0]#animation and state need this
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle(self)#
+
+class Infinity_stone():
+    def __init__(self,pos,game_objects):
+        self.game_objects = game_objects
+        self.sprites = Read_files.Sprites_Player('UI/inventory/objects/infinity_stone/empty')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.rect.topleft = pos
+        self.dir = [1,0]#animation and state need this
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle(self)#
+        self.description = ''
 
 #momamori inventory
 class Empty_omamori():#this will save the positions needed to the UI

@@ -5,9 +5,9 @@ class UI_loader():#for map, omamori, ability, journal etc
     def __init__(self,game_objects,type):
         self.game_objects = game_objects
         self.BG = pygame.image.load('UI/' + type + '/BG.png').convert_alpha()
-        self.source = {'map':'map_UI','omamori':'omamori_UI','journal':'journal_UI','fast_travel':'fast_travel_UI','ability_spirit_upgrade':'ability_spirit_upgrade_UI','ability_movement_upgrade':'ability_movement_upgrade_UI'}[type]#the name of the tmx file with the objects
+        self.source = {'map':'map_UI','omamori':'omamori_UI','journal':'journal_UI','fast_travel':'fast_travel_UI','ability_spirit_upgrade':'ability_spirit_upgrade_UI','ability_movement_upgrade':'ability_movement_upgrade_UI','inventory':'inventory_UI'}[type]#the name of the tmx file with the objects
         self.load_UI_data(type)
-        self.load_data = {'map':self.load_map_data,'omamori':self.load_omamori_data,'journal':self.load_journal_data,'fast_travel':self.load_fast_travel_data,'ability_spirit_upgrade':self.load_ability_spirit_upgrade_data,'ability_movement_upgrade':self.load_ability_movement_upgrade_data}[type]()
+        self.load_data = {'map':self.load_map_data,'omamori':self.load_omamori_data,'journal':self.load_journal_data,'fast_travel':self.load_fast_travel_data,'ability_spirit_upgrade':self.load_ability_spirit_upgrade_data,'ability_movement_upgrade':self.load_ability_movement_upgrade_data,'inventory':self.load_inventory_data}[type]()
 
     def load_UI_data(self,type):
         map_data = Read_files.read_json("UI/%s/%s.json" % (type,type))
@@ -127,6 +127,32 @@ class UI_loader():#for map, omamori, ability, journal etc
                 new_ability = entities_UI.Wall_glide(topleft_object_position,self.game_objects)
                 self.abilities[2].append(new_ability)
                 self.rows['Wall_glide'] = 2
+
+    def load_inventory_data(self):
+        self.key_items = {}
+        self.items = []
+        self.stones = {}
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#sword
+                new_item = entities_UI.Sword(topleft_object_position,self.game_objects)
+                self.sword = new_item
+            elif id == 1:#infinity stone
+                name = properties[0]['value']#the name of stone
+                new_item = entities_UI.Infinity_stone(topleft_object_position,self.game_objects)#make an object based on stringgetattr(entities_UI, name)
+                self.stones[name] = new_item
+            elif id == 2:#item
+                name = properties[0]['value']#the name of item
+                new_item = entities_UI.Item(topleft_object_position,self.game_objects)
+                self.items.append(new_item)
+            elif id == 3:#key_item
+                name = properties[0]['value']#the name of keyitem
+                new_item = entities_UI.Item(topleft_object_position,self.game_objects)
+                self.key_items[name] = new_item
 
 class Gameplay_UI():
     def __init__(self,game_objects):
