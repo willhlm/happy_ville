@@ -42,7 +42,7 @@ class Banner():
         pass#open the local map
 
 #inventory
-class Item():#for invenotry
+class Item():#for invenotry, an empty item
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
         self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/item/empty/')
