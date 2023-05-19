@@ -5,7 +5,7 @@ import Read_files, animation, states_health, states_basic
 class Banner():
     def __init__(self,pos,game_objects,type,text):
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('UI/map/objects/banner/banner_' + type + '/')
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/map/banner/banner_' + type + '/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -45,10 +45,9 @@ class Banner():
 class Item():#for invenotry
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('UI/inventory/objects/item/')
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/item/empty/')
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
-        self.rect.topleft = pos
+        self.rect = self.image.get_rect(topleft=pos)
 
         self.dir = [1,0]
         self.animation = animation.Entity_animation(self)#it is called from inventory
@@ -59,34 +58,34 @@ class Item():#for invenotry
 class Sword():
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('UI/inventory/objects/sword/')#for inventory
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/sword/')#for inventory
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
-        self.rect.topleft = pos
+        self.rect = self.image.get_rect(topleft = pos)
         self.dir = [1,0]#animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
 
+    def set_level(self,level):
+        self.currentstate.enter_state('Level_'+str(level))
+
 class Infinity_stone():
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('UI/inventory/objects/infinity_stone/empty')#for inventory
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/infinity_stone/empty')#for inventory
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
-        self.rect.topleft = pos
+        self.rect = self.image.get_rect(topleft=pos)
         self.dir = [1,0]#animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
         self.description = ''
 
 #momamori inventory
-class Empty_omamori():#this will save the positions needed to the UI
+class Omamori():#this will save the positions needed to the UI
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/empty_omamori/')#for inventory
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/omamori/empty/')#for inventory
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect = self.image.get_rect(topleft=pos)
         self.dir = [1,0]
 
         self.animation = animation.Entity_animation(self)#it is called from inventory
@@ -94,70 +93,18 @@ class Empty_omamori():#this will save the positions needed to the UI
         self.description = ''
 
 #ability spirit upgrade UI
-class Abilities_spirit():
+class Abilities():
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
         name = type(self).__name__
-        self.sprites = Read_files.Sprites_Player('UI/ability_spirit_upgrade/objects/' + name + '/')
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/abilities/' + name + '/')
         self.image = self.sprites.sprite_dict['idle_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
-        self.dir = [1,0]
-
-        self.animation = animation.Entity_animation(self)
-        self.currentstate = states_basic.Idle(self)#
-
-    def activate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Active_'+str(level))
-        self.level = level
-
-    def deactivate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Idle_'+str(level))
-        self.level = level
-
-    def reset_timer(self):
-        pass
-
-class Arrow(Abilities_spirit):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
-
-class Force(Abilities_spirit):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
-
-class Migawari(Abilities_spirit):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.description = ['migawari','add extra health to migawari','heals aila when killed','imba']
-
-class Slow_motion(Abilities_spirit):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
-
-class Thunder(Abilities_spirit):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.description = ['thunder','hits one additional target','one additional damage','imba']
-
-class Abilities_movement():
-    def __init__(self,pos,game_objects):
-        self.game_objects = game_objects
-        name = type(self).__name__
-        self.sprites = Read_files.Sprites_Player('UI/ability_movement_upgrade/objects/' + name + '/')
-        self.image = self.sprites.sprite_dict['idle_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = self.image.get_rect(center=pos)
+        self.rect = self.image.get_rect(topleft=pos)
         self.dir = [1,0]
 
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle_1(self)#
 
-    def update(self):#called from gameplayHUD
-        self.animation.update()
-        self.currentstate.update()
-
     def activate(self,level):#for UI of Aila abilities
         self.currentstate.enter_state('Active_'+str(level))
         self.level = level
@@ -169,20 +116,57 @@ class Abilities_movement():
     def reset_timer(self):
         pass
 
-class Dash(Abilities_movement):
+class Arrow(Abilities):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
+
+class Force(Abilities):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
+
+class Migawari(Abilities):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['migawari','add extra health to migawari','heals aila when killed','imba']
+
+class Slow_motion(Abilities):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
+
+class Thunder(Abilities):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.description = ['thunder','hits one additional target','one additional damage','imba']
+
+class Dash(Abilities):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.description = ['dash','free dash','invinsible dash','dash attack']
 
-class Wall_glide(Abilities_movement):
+    def update(self):#called from gameplayHUD
+        self.animation.update()
+        self.currentstate.update()
+
+class Wall_glide(Abilities):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.description = ['wall glide','free wall jumps','donno','donno']
 
-class Double_jump(Abilities_movement):
+    def update(self):#called from gameplayHUD
+        self.animation.update()
+        self.currentstate.update()
+
+class Double_jump(Abilities):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.description = ['doulbe jump','free double jump','donno','donno']
+
+    def update(self):#called from gameplayHUD
+        self.animation.update()
+        self.currentstate.update()
 
 #gameplay HUD
 class Health():#gameplay UI
@@ -231,3 +215,29 @@ class Movement_hud():#gameplay UI
 
     def update(self):
         pass
+
+#utilities
+class Menu_Arrow():
+    def __init__(self):
+        self.img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
+        self.rect = self.img.get_rect()
+        self.img.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+
+    #note: sets pos to input, doesn't update with an increment of pos like other entities
+    def update(self,pos):
+        self.rect.topleft = pos
+
+    def draw(self,screen):
+        screen.blit(self.img, self.rect.topleft)
+
+class Menu_Box():
+    def __init__(self):
+        self.img = pygame.image.load("Sprites/utils/box.png").convert_alpha()#select box
+        self.rect = self.img.get_rect()
+
+    def update(self,pos):
+        pass
+
+    def draw(self,screen):
+        pass
+        #screen.blit(self.img, self.rect.topleft)

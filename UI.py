@@ -46,10 +46,10 @@ class UI_loader():#for map, omamori, ability, journal etc
 
             if id == 0:#inventory
                 name = properties[0]['value']#the name of omamori
-                new_omamori = entities_UI.Empty_omamori(topleft_object_position,self.game_objects)
+                new_omamori = entities_UI.Omamori(topleft_object_position,self.game_objects)
                 self.inventory[name] = new_omamori
             elif id == 1:#equipeed
-                new_omamori = entities_UI.Empty_omamori(topleft_object_position,self.game_objects)
+                new_omamori = entities_UI.Omamori(topleft_object_position,self.game_objects)
                 self.equipped.append(new_omamori)
 
     def load_journal_data(self):

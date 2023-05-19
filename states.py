@@ -1,6 +1,6 @@
 import pygame, sys, random
 import Read_files
-import Entities
+import Entities, entities_UI
 import cutscene
 import constants as C
 import state_inventory
@@ -29,7 +29,7 @@ class Title_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.arrow = Entities.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow()
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE') #temporary
         self.sprites = Read_files.load_sprites('Sprites/UI/load_screen/new_game')
         self.image = self.sprites[0]
@@ -127,7 +127,7 @@ class Load_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.arrow = Entities.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow()
         self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
         self.sprites = Read_files.load_sprites('Sprites/UI/load_screen/new_game')
         self.image = self.sprites[0]
@@ -205,7 +205,7 @@ class Start_Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.arrow = Entities.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow()
         self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
         self.sprites = Read_files.load_sprites('Sprites/UI/load_screen/new_game')
         self.image = self.sprites[0]
@@ -274,7 +274,7 @@ class Start_Option_Menu(Game_State):
 class Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = Entities.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow()
         self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
 
         #create buttons
@@ -392,7 +392,7 @@ class Gameplay(Game_State):
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = Entities.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow()
         self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
         self.title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         #create buttons
@@ -684,161 +684,9 @@ class Inventory_menu(Gameplay):
             self.letter_frame = 0
 
     def use_item(self):
+        if not hasattr(self.items[self.state.state_name][self.item_index[0]], 'use_item'): return#if it is a item
+        if self.items[self.state.state_name][self.item_index[0]].number <= 0: return#if we have more than 0 item
         self.items[self.state.state_name][self.item_index[0]].use_item()
-        self.exit_state()
-
-class Inventory_menu2(Gameplay):
-    def __init__(self, game):
-        super().__init__(game)
-        self.iventory_UI = self.game.game_objects.UI['inventory']
-        self.letter_frame = 0#for description
-        self.state = state_inventory.Items(self)
-        self.item_index = [0,0]#row, col
-
-        #invenotory stuff: place holders
-        self.use_items=[]#items that have the attribute "use" is stored here
-        self.key_items=[]#items that doen't have the attribute "use" is stored here
-        self.key_number=[]#number of key items
-        self.use_number=[]#number of itmes
-        #crease the object in inventory and sepeerate between useable items and key items
-        for key in self.game.game_objects.player.inventory.keys():
-            item = getattr(sys.modules[Entities.__name__], key)([0,0],self.game.game_objects)#make the object based on the string
-            if hasattr(item, 'use_item'):
-                self.use_items.append(item)
-                self.use_number.append(self.game.game_objects.player.inventory[key])
-            else:
-                self.key_items.append(item)
-                self.key_number.append(self.game.game_objects.player.inventory[key])
-
-        self.define_blit_positions()
-        self.define_pointer()
-
-    def define_blit_positions(self):#set positions
-        keyitem_positions = [[],[]]#wll be two rows of items
-        item_positions =  [[],[]]#wll be two rows of items
-        stone_pos = [[[89,215],[154,215]],[[89,168],[154,168]],[[122,128]]]#infinity stone blit positions, the number of index matches the height of the blit positions
-
-        for j in range(0,2):#two rows
-            for i in range(0,6):#6 items horizontally
-                keyitem_positions[j].append([229+20*i,120+20*j])
-                item_positions[j].append([229+20*i,230+20*j])
-
-        items = [[],[]]
-        index = 0
-        for row, positions in enumerate(item_positions):
-            for pos in positions:
-                if index < len(self.use_items):
-                    item = self.use_items[index]
-                    item.set_pos(pos)
-                else:#if we don't have items, fill with ampty objects
-                    item = getattr(sys.modules[Entities.__name__], 'Empty_item')([0,0],self.game.game_objects)#make the object based on the string
-                index += 1
-                items[row].append([item])
-
-        key_items = [[],[]]
-        index = 0
-        for row, positions in enumerate(keyitem_positions):
-            for pos in positions:
-                if index < len(self.key_items):
-                    item = self.key_items[index]
-                    item.set_pos(pos)
-                else:
-                    item = getattr(sys.modules[Entities.__name__], 'Empty_item')([0,0],self.game.game_objects)#make the object based on the string
-                index += 1
-                key_items[row].append([item])
-
-        stones = [[],[],[]]
-        colours = []
-        index = 0
-        for keys in self.game.game_objects.player.sword.stones.keys():
-            colours.append(keys)
-
-        for row, positions in enumerate(stone_pos):
-            for pos in positions:
-                if index < len(colours):
-                    item = self.game.game_objects.player.sword.stones[colours[index]]
-                    item.set_pos(pos)
-                else:
-                    item = getattr(sys.modules[Entities.__name__], 'Empty_infinity_stone')(self.game.game_objects.player.sword)#make the object based on the string
-                    item.set_pos(pos)
-                index += 1
-                stones[row].append([item])
-
-        self.pointer_pos = {'sword':stone_pos,'key_items':keyitem_positions,'items':item_positions}#positions of the pointer
-        self.items = {'sword':stones,'key_items':key_items,'items':items}#organised items: used to select the item
-
-    def define_pointer(self,size = [16,16]):#called everytime we move from one area to another
-        self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
-
-    def update(self):
-        super().update()
-        self.letter_frame += self.game.dt
-
-    def render(self):
-        super().render()
-        self.blit_inventory_BG()
-        self.inventory_menu()
-        self.blit_sword()
-        self.blit_pointer()
-        self.blit_description()
-
-    def blit_inventory_BG(self):
-        self.iventory_UI.BG.set_alpha(230)
-        self.game.screen.blit(self.iventory_UI.BG,(0,0))
-
-    def inventory_menu(self):
-        for index, item in enumerate(self.use_items):#items we can use
-            item.animation.update()
-            self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),item.rect.center)
-            number = self.game.game_objects.font.render(text = str(self.use_number[index]))
-            number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.game.screen.blit(number,item.rect.center)
-
-        for index, item in enumerate(self.key_items):
-            item.animation.update()
-            self.game.screen.blit(pygame.transform.scale(item.image,(16,16)),item.rect.center)
-            number = self.game.game_objects.font.render(text = str(self.key_number[index]))
-            number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.game.screen.blit(number,item.rect.center)
-
-    def blit_sword(self):
-        self.game.game_objects.player.sword.potrait.animation.update()
-        self.game.screen.blit(self.game.game_objects.player.sword.potrait.image,(90,125))#player position
-
-        for row in self.items['sword']:
-            for stone in row:
-                stone[0].animation.update()
-                self.game.screen.blit(stone[0].image,stone[0].rect.center)#player position
-
-    def blit_pointer(self):
-        self.game.screen.blit(self.pointer,self.pointer_pos[self.state.state_name][self.item_index[0]][self.item_index[1]])#pointer
-
-    def blit_description(self):
-        self.conv = self.items[self.state.state_name][self.item_index[0]][self.item_index[1]][0].description
-        text = self.game.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
-        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game.screen.blit(text,(380,120))
-
-    def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'select':
-                self.exit_state()
-            elif input[-1] == 'rb':#nezt page
-                self.exit_state()
-                new_state = Omamori_menu(self.game)
-                new_state.enter_state()
-            elif input[-1] == 'lb':#previouse page
-                self.exit_state()
-                new_state = Map_menu(self.game)
-                new_state.enter_state()
-            elif input[-1]=='a' or input[-1]=='return':
-                self.use_item()
-            self.state.handle_input(input)
-            self.letter_frame = 0
-
-    def use_item(self):
-        self.items[self.state.state_name][self.item_index[0]][self.item_index[1]][0].use_item()
         self.exit_state()
 
 class Omamori_menu(Gameplay):
@@ -940,7 +788,7 @@ class Omamori_menu(Gameplay):
 
     def choose_omamori(self):
         name = type(self.omamori_list[self.omamori_index]).__name__#name of omamori
-        if name == 'Empty_omamori': return
+        if name == 'Omamori': return#if it is an empyu omamori. return
         self.game.game_objects.player.omamoris.equip_omamori(name)
 
         for index, omamori in enumerate(self.game.game_objects.player.omamoris.equipped.values()):#update the positions of the equiped ones
@@ -1374,6 +1222,39 @@ class Ability_movement_upgrades(Ability_upgrades):#when double clicking the save
         title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         self.game.screen.blit(title,[250,50])
 
+    def handle_events(self,input):
+        if input[0]:#press
+            if input[-1] == 'select':
+                self.exit_state()
+            elif input[-1] == 'rb' or input[-1] == 'lb':#nezt page
+                self.exit_state()
+                new_state = Ability_upgrades(self.game)
+                new_state.enter_state()
+            elif input[-1]=='a' or input[-1]=='return':
+                self.choose_ability()
+
+            elif input[-1] =='right':
+                self.index[1] += 1
+                self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
+                self.letter_frame = 0
+
+            elif input[-1] =='left':
+                self.index[1] -= 1
+                self.index[1] = max(0,self.index[1])
+                self.letter_frame = 0
+
+            elif input[-1] =='down':
+                self.index[0] += 1
+                self.index[0] = min(self.index[0],len(self.abillity_UI.abilities)-1)
+                self.letter_frame = 0
+                self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
+
+            elif input[-1] =='up':
+                self.index[0] -= 1
+                self.index[0] = max(0,self.index[0])
+                self.letter_frame = 0
+                self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
+
 class Fading(Gameplay):#fades out and then in
     def __init__(self,game):
         super().__init__(game)
@@ -1471,7 +1352,7 @@ class Facilities(Gameplay):
         super().__init__(game)
         self.npc = npc
         self.pointer_index = [0,0]#position of box
-        self.pointer = Entities.Menu_Arrow()
+        self.pointer = entities_UI.Menu_Arrow()
         self.set_response('welcome')
         self.render_list=[self.blit_frame1]
         self.handle_list=[self.handle_frame1]
@@ -1659,13 +1540,13 @@ class Soul_essence(Facilities):#called from inorinoki
         if self.pointer_index[1] == 0:#if we select health
             if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
                 pos = [self.game.game_objects.player.rect[0],-100]
-                heart=Entities.Heart_container(pos,self.game.game_objects)
+                heart = Entities.Heart_container(pos,self.game.game_objects)
                 self.game.game_objects.loot.add(heart)
                 self.game.game_objects.player.inventory['Soul_essence']-=self.cost
         elif self.pointer_index[1] == 1:#if we select spirit
             if self.game.game_objects.player.inventory['Soul_essence'] >= self.cost:
                 pos = [self.game.game_objects.player.rect[0],-100]
-                spirit=Entities.Spirit_container(pos,self.game.game_objects)
+                spirit = Entities.Spirit_container(pos,self.game.game_objects)
                 self.game.game_objects.loot.add(spirit)
                 self.game.game_objects.player.inventory['Soul_essence']-=self.cost
         else:#select cancel
@@ -1676,7 +1557,7 @@ class Vendor(Facilities):
         super().__init__(game, npc)
         self.letter_frame = 0
         self.init_canvas()
-        self.pointer = Entities.Menu_Box()
+        self.pointer = entities_UI.Menu_Box()
         self.item_index = [0,0]#pointer of item
 
     def init_canvas(self):
@@ -1755,7 +1636,7 @@ class Vendor(Facilities):
         self.next_frame()
         self.bg2 = self.game.game_objects.font.fill_text_bg([64,32])
         self.item = type(self.items[self.item_index[1]]).__name__
-        self.pointer = Entities.Menu_Arrow()
+        self.pointer = entities_UI.Menu_Arrow()
 
     def select_frame2(self):
         if self.pointer_index[1] == 0:#if we select buy
@@ -1763,7 +1644,7 @@ class Vendor(Facilities):
         else:
             self.set_response('What do you want?')
         self.previouse_frame()
-        self.pointer = Entities.Menu_Box()
+        self.pointer = entities_UI.Menu_Box()
 
     def buy(self):
         if self.game.game_objects.player.inventory['Amber_Droplet']>=self.npc.inventory[self.item]:

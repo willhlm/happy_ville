@@ -1615,7 +1615,6 @@ class Aila_sword(Sword):
         super().__init__(entity)
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
-        self.potrait = Sword_potrait(self.game_objects)
         self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
         self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self),'purple':Red_infinity_stone(self)}#the ones aila has picked up
         self.colour = {'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
@@ -1663,7 +1662,6 @@ class Aila_sword(Sword):
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
         self.level += 1
-        self.potrait.currentstate.enter_state('Level_'+str(self.level))
         self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
 class Ranged(Projectiles):
@@ -1930,13 +1928,6 @@ class Loot(Platform_entity):#
 
     def attract(self,pos):#the omamori calls on this in loot group
         pass
-
-class Empty_item(Loot):#for invenotry
-    def __init__(self,pos,game_objects):
-        super().__init__(pos, game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heart_container/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
 
 class Heart_container(Loot):
     def __init__(self,pos,game_objects):
@@ -2738,8 +2729,7 @@ class Fireplace(Interactable):
     def interact(self):#when player press t/y
         self.currentstate.handle_input('Interact')#goes to interacted after transform
 
-#traps
-class Lighitning_barrier(Interactable):
+class Lighitning_barrier(Interactable):#traps
     def __init__(self,pos,game_objects,size):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/lighitning_barrier/')
@@ -2763,7 +2753,7 @@ class Lighitning_barrier(Interactable):
         for index,spirte in enumerate(self.sprites.sprite_dict['idle']):
             self.sprites.sprite_dict['idle'][index] = pygame.transform.scale(spirte,size)
 
-class Spirit_spikes(Interactable):
+class Spirit_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):
         super().__init__(pos,game_objects)
         self.currentstate = states_traps.Idle(self)#
@@ -2779,7 +2769,7 @@ class Spirit_spikes(Interactable):
     def player_collision(self):#player collision
         self.currentstate.handle_input('Death')
 
-class Lightning_spikes(Interactable):
+class Lightning_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):
         super().__init__(pos,game_objects)
         self.currentstate = states_traps.Idle(self)#
@@ -2795,45 +2785,7 @@ class Lightning_spikes(Interactable):
     def player_collision(self):#player collision
         self.currentstate.handle_input('Once')
 
-#UI
-class Menu_Arrow():
-    def __init__(self):
-        self.img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
-        self.rect = self.img.get_rect()
-        self.img.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-
-    #note: sets pos to input, doesn't update with an increment of pos like other entities
-    def update(self,pos):
-        self.rect.topleft = pos
-
-    def draw(self,screen):
-        screen.blit(self.img, self.rect.topleft)
-
-class Menu_Box():
-    def __init__(self):
-        self.img = pygame.image.load("Sprites/utils/box.png").convert_alpha()#select box
-        self.rect = self.img.get_rect()
-
-    def update(self,pos):
-        pass
-
-    def draw(self,screen):
-        pass
-        #screen.blit(self.img, self.rect.topleft)
-
-class Sword_potrait():
-    def __init__(self,game_objects):
-        self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/Items/sword")#for inventory
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.dir = [1,0]#animation and state need this
-        self.animation = animation.Entity_animation(self)
-        self.currentstate = states_basic.Idle(self)#
-
-    def reset_timer(self):
-        pass
-
+#equipable items
 class Infinity_stones():
     def __init__(self,sword):
         self.sword = sword
@@ -2932,7 +2884,7 @@ class Purple_infinity_stone(Infinity_stones):#reflect projectile
     def detach(self):
         pass
 
-class Omamoris():
+class Omamoris():#omamori handler
     def __init__(self,entity):
         self.entity = entity
         self.equipped = {}#equiped omamoris
