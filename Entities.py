@@ -1024,7 +1024,7 @@ class Astrid(NPC):#vendor
         self.inventory={'Bone':10,'Amber_Droplet':1}#itam+price
 
     def buisness(self):#enters after conversation
-        new_state = states.Vendor(self.game_objects.game, self)
+        new_state = states.Facilities(self.game_objects.game,'Vendor',self)
         new_state.enter_state()
 
 class MrSmith(NPC):#balck smith
@@ -1032,7 +1032,7 @@ class MrSmith(NPC):#balck smith
         super().__init__(pos,game_objects)
 
     def buisness(self):#enters after conversation
-        new_state = states.Smith(self.game_objects.game, self)
+        new_state = states.Facilities(self.game_objects.game,'Smith',self)
         new_state.enter_state()
 
 class MrBanks(NPC):#bank
@@ -1041,7 +1041,7 @@ class MrBanks(NPC):#bank
         self.ammount = 0
 
     def buisness(self):#enters after conversation
-        new_state = states.Bank(self.game_objects.game, self)
+        new_state = states.Facilities(self.game_objects.game,'Bank',self)
         new_state.enter_state()
 
 class Boss(Enemy):
@@ -2586,7 +2586,7 @@ class Savepoint(Interactable):#save point
             self.currentstate.handle_input('Once')
         else:#odoulbe click
             self.game_objects.player.currentstate.handle_input('special')
-            new_state = states.Ability_upgrades(self.game_objects.game)
+            new_state = states.Facilities(self.game_objects.game,'Spirit_upgrade_menu')
             new_state.enter_state()
 
     def reset_timer(self):#when animation finished
@@ -2636,12 +2636,13 @@ class Fast_travel(Interactable):#save point
 
     def interact(self):#when player press t/y
         if self.locked:
-            new_state = states.Fast_travel_unlock(self.game_objects.game,self)
-            new_state.enter_state()
+            type = 'Fast_travel_unlock'
+            new_state = states.Facilities(self.game_objects.game,type,self)
         else:
+            type = 'Fast_travel_menu'
             self.currentstate.handle_input('Once')
-            new_state = states.Fast_travel_menu(self.game_objects.game)
-            new_state.enter_state()
+            new_state = states.Facilities(self.game_objects.game,type)
+        new_state.enter_state()
 
 class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginning
     def __init__(self,pos,game_objects):
