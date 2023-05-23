@@ -1188,57 +1188,10 @@ class Camera_Stop(Staticentity):
         super().__init__(pos,pygame.Surface(size))
         self.game_objects = game_objects
         self.hitbox = self.rect.inflate(0,0)
-        self.stops = {'right':self.right,'left':self.left,'bottom':self.bottom,'top':self.top,'center':self.center}[dir]#called from camera.py
-        self.dir = dir#the new one doesn't need it
         self.size = size
 
         self.currentstate = states_camerastop.Idle(self)
         self.currentstate.enter_state('Idle_'+dir)
-
-    def right(self):#should makes states
-        distance = [self.rect.left - self.game_objects.player.hitbox.centerx,self.rect.centery - self.game_objects.player.hitbox.centery]
-        if distance[0] < 0: return
-
-        if abs(distance[1]) < self.size[1]*0.5 and distance[0] < self.game_objects.game.WINDOW_SIZE[0]*0.5:#if on screen on y and coser than half screen on x
-            self.game_objects.camera.center[0] = self.game_objects.game.WINDOW_SIZE[0] - (self.rect.left - self.game_objects.player.hitbox.centerx)
-        else:
-            self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
-
-    def left(self):
-        distance = [self.rect.right - self.game_objects.player.hitbox.centerx,self.rect.centery - self.game_objects.player.hitbox.centery]
-        if distance[0] > 0: return
-
-        if abs(distance[1]) < self.size[1]*0.5 and abs(distance[0]) < self.game_objects.game.WINDOW_SIZE[0]*0.5:#if on screen on y and coser than half screen on x
-            self.game_objects.camera.center[0] =  self.game_objects.player.hitbox.centerx - self.rect.right
-        else:
-            self.game_objects.camera.center[0] = list(self.game_objects.map.PLAYER_CENTER)[0]
-
-
-    def bottom(self):
-        distance = [self.rect.centerx - self.game_objects.player.hitbox.centerx,self.rect.top - self.game_objects.player.hitbox.centery]
-        if distance[1] < 0:
-            #self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]#is it needed
-            return
-
-        if abs(distance[0]) < self.size[0]*0.5 and abs(distance[1]) < self.game_objects.game.WINDOW_SIZE[1]*0.5:#if on screen on y and coser than half screen on x
-            self.game_objects.camera.center[1] = self.game_objects.game.WINDOW_SIZE[1] - (self.rect.top - self.game_objects.player.hitbox.centery)
-        else:
-            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
-
-    def top(self):
-        distance = [self.rect.centerx - self.game_objects.player.hitbox.centerx,self.rect.bottom - self.game_objects.player.hitbox.centery]
-        if distance[1] > 0:
-            #self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]#is it needed?
-            return
-
-        if abs(distance[0]) < self.size[0]*0.5 and abs(distance[1]) < self.game_objects.game.WINDOW_SIZE[1]*0.5:#if on screen on y and coser than half screen on x
-            self.game_objects.camera.center[1] = self.game_objects.player.hitbox.centery - self.rect.bottom
-        else:
-            self.game_objects.camera.center[1] = list(self.game_objects.map.PLAYER_CENTER)[1]
-
-    def center(self):
-        self.game_objects.camera.center[0] = self.game_objects.player.hitbox.centerx - (self.rect.centerx - self.game_objects.game.WINDOW_SIZE[0]*0.5)
-        self.game_objects.camera.center[1] = self.game_objects.player.hitbox.centery - (self.rect.centery - self.game_objects.game.WINDOW_SIZE[1]*0.5)
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
