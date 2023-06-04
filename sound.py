@@ -1,14 +1,12 @@
 import pygame
-pygame.mixer.init()
+pygame.mixer.init()#this one is needed to avoid a delay when playing the sounds
 
-class Sound():
-    #class for organising sound and music playback
-    #channels 0 - 4 is dedicated to
-    def __init__(self):
+class Sound():#class for organising sound and music playback
+    def __init__(self):#channels 0 - 4 is dedicated to
         self.reserved_channels = 4
         self.initiate_channels(8)
 
-    def initiate_channels(self, quantity):
+    def initiate_channels(self, quantity):#note channel 0 should be used for level bg music
         self.channels = []
         for i in range(quantity):
             self.channels.append(pygame.mixer.Channel(i))
@@ -25,10 +23,8 @@ class Sound():
     def load_bg_sound(self, name):
         self.bg = pygame.mixer.Sound("Audio/maps/" + name + "/default.wav")
 
-    #finds an available channel and playts SFX sounds
-    #takes mixer.Sound objects
     @staticmethod
-    def play_sfx(sfx):
+    def play_sfx(sfx):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
         channel = pygame.mixer.find_channel()
         try:
             channel.set_volume(0.2)
@@ -36,8 +32,7 @@ class Sound():
         except:
             print("No available channels")
 
-    #note channel 0 should be used for level bg music
-    def play_sound(self, channel):
+    def play_sound(self, sfx):
         pass
 
     def pause_sound(self, channel):
@@ -45,5 +40,5 @@ class Sound():
 
     def load_sound(self, name):
         pass
-
+        
     #list general sounds that  can always be loaded and played

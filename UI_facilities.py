@@ -22,6 +22,7 @@ class Facility_states():
     def exit_state(self):
         self.game_state.exit_state()
 
+#fast travel
 class Fast_travel_unlock(Facility_states):
     def __init__(self, game_state,fast_travel):
         super().__init__(game_state)

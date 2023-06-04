@@ -4,16 +4,12 @@ import Read_files, states_wind_objects
 from weather import Leaves
 
 class Tree(Animatedentity):
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects)
         self.currentstate = states_wind_objects.Idle(self)#
         self.pause_group = game_objects.layer_pause
         self.group = game_objects.all_bgs
-
-    def blur(self,blur_value):#called from maploader
-        for state in self.sprites.sprite_dict.keys():
-            for frame, image in enumerate(self.sprites.sprite_dict[state]):
-                self.sprites.sprite_dict[state][frame] = pygame.transform.gaussian_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
+        self.parallax = parallax
 
     def create_leaves(self,number_particles = 3):#should we have colour as an argument?
         for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead?
@@ -40,16 +36,30 @@ class Tree(Animatedentity):
         self.game_objects.all_bgs._spritelist.insert(self.index,obj)
         obj.add_internal(self.game_objects.all_bgs)
 
+    def init_sprites(self):#Only blur if it is the first time loading the object. Otherwise, copy from memory
+        try:#if it is not the first one
+            self.sprites.sprite_dict =  type(self).animations[tuple(self.parallax)]
+        except:#if it is the first tree loading, blur it:
+            if self.parallax[0] != 1:#don't blur if oarallax = 1
+                self.blur(self.game_objects.map.blur_value(self.parallax))
+            type(self).animations[tuple(self.parallax)] = self.sprites.sprite_dict#save to memery for later use
+
+    def blur(self,blur_value):#
+        for state in self.sprites.sprite_dict.keys():
+            for frame, image in enumerate(self.sprites.sprite_dict[state]):
+                self.sprites.sprite_dict[state][frame] = pygame.transform.gaussian_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
+
 class Light_forest_tree1(Tree):
+    animations = {}
     def __init__(self,pos,game_objects,parallax):
-        super().__init__(pos,game_objects)
+        super().__init__(pos,game_objects,parallax)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/tiled_objects/light_forest_tree1')
+        self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox = self.rect.copy()
         self.true_pos = self.rect.bottomleft
-        self.parallax = parallax
 
         #for leaves
         position = self.rect.center
@@ -58,15 +68,16 @@ class Light_forest_tree1(Tree):
         self.create_leaves()
 
 class Light_forest_tree2(Tree):
+    animations = {}
     def __init__(self,pos,game_objects,parallax):
-        super().__init__(pos,game_objects)
+        super().__init__(pos,game_objects,parallax)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/tiled_objects/light_forest_tree2')
+        self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox = self.rect.copy()
         self.true_pos = self.rect.bottomleft
-        self.parallax = parallax
 
         #for leaves
         position = self.rect.center

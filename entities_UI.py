@@ -71,7 +71,7 @@ class Sword():
 class Infinity_stone():
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/infinity_stone/empty')#for inventory
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/infinity_stone/empty/')#for inventory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(topleft=pos)
         self.dir = [1,0]#animation and state need this
@@ -206,7 +206,7 @@ class Spirit():#gameplay UI
 
 class Movement_hud():#gameplay UI
     def __init__(self,entity):
-        self.sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud')
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud/')
         self.entity = entity
         self.game_objects = entity.game_objects#animation need it
         self.image = self.sprites.sprite_dict['idle_1'][0]

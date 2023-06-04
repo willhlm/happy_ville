@@ -1,0 +1,52 @@
+-Alarm
+-Alien Weapon
+-Animal
+-Beep
+-Bird
+-Bone
+-Bow
+-Bubble
+-Chain
+-Chest
+-Click
+-Switch
+-Clock
+-Cloth
+-Coin
+-Door
+-Drinking
+-Equipment
+-Fire
+-Foot step
+-Ghost
+-Glass
+-Grass
+-Leaf
+-Gun shot
+-Gun sound
+-Hammer
+-Heart beat
+-Hit
+-Impact
+-Human(Female/Grunt/Effort/Hurt)
+-Human(Male/Grunt/Effort/Hurt)
+-Ice
+-Insect
+-Key
+-Lock
+-Machine
+-Menu
+-Monster
+-Pop
+-Punch
+-Rock
+-Shock
+-Slash
+-Sonar
+-Spell
+-Squishy
+-Sword
+-Thunder
+-Water
+-Whip
+-Wing flap

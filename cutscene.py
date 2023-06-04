@@ -3,7 +3,7 @@ import Entities
 import pygame
 import particles
 import animation
-import states
+import states#maybe can code it so that we don't import states
 import random
 import constants as C
 
@@ -34,7 +34,7 @@ class Rhoutta_encounter(Cutscene_file):#play the first cutscene encountering rho
 
     def reset_timer(self):#called when cutscene is finshed
         self.parent_class.exit_state()
-        new_state=states.Cutscenes(self.parent_class.game,'Title_screen')
+        new_state = states.Cutscenes(self.parent_class.game,'Title_screen')
         new_state.enter_state()
 
 class Cutscene_engine():#cut scenens that is based on game engien
@@ -281,11 +281,6 @@ class Death(Cutscene_engine):#when aila dies
         self.parent_class.game.game_objects.player.currentstate.enter_state('Invisible_main')
         self.stage = 1
         self.timer = 0
-
-    def exit_state(self):
-        if len(self.parent_class.game.game_objects.player.spawn_point) == 2:#if the respawn was a bone
-            self.parent_class.game.game_objects.player.spawn_point.pop()
-        super().exit_state()
 
     def handle_events(self,input):
         pass

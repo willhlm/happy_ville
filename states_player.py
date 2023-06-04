@@ -110,7 +110,7 @@ class Walk_main(Player_states):
             self.enter_state('Dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
-        elif input[-1]=='b':#depends on if the abillities have pre or main animation
+        elif input[-1]=='b':#depends on if the abillities have pre or main animation. Should all have pre?
             self.do_ability()
 
     def handle_movement(self,input):
@@ -645,6 +645,7 @@ class Pray_pre(Player_states):
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['pray'])
+        self.entity.acceleration[0] = 0
 
     def handle_press_input(self,input):#all states should inehrent this function
         pass
@@ -657,7 +658,7 @@ class Pray_pre(Player_states):
 
     def increase_phase(self):
         self.enter_state('Pray_main')
-        self.entity.currentstate.special = self.special
+        self.entity.currentstate.special = self.special#set the Pray_main flag
 
     def handle_input(self,input):
         if input == 'special':
@@ -716,7 +717,7 @@ class Hurt_main(Player_states):
         else:
             self.next_state ='Walk_main'
 
-class Spawn_main(Player_states):
+class Spawn_main(Player_states):#enters when aila respawn after death
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.invincibile = False
@@ -730,9 +731,12 @@ class Spawn_main(Player_states):
     def handle_movement(self,input):
         pass
 
-    def increase_phase(self):
+    def increase_phase(self):#when animation finishes
         self.entity.health = max(self.entity.health,0)#if negative, set it to 0
         self.entity.heal(self.entity.max_health)
+        if len(self.entity.spawn_point) == 2:#if the respawn was a bone
+            self.entity.spawn_point.pop()
+
         self.enter_state('Idle_main')
 
 class Sword(Player_states):#main phases shold inheret this

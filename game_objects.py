@@ -12,6 +12,7 @@ import world_state
 import UI
 import save_load
 import groups
+import object_pool
 
 from time import perf_counter
 
@@ -29,7 +30,7 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = {'gameplay':UI.Gameplay_UI(self)}
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        #self.object_pool = object_pool.Object_pool(self)
+        self.object_pool = object_pool.Object_pool(self)
 
     def create_groups(self):#define all sprite groups
         self.enemies = pygame.sprite.Group()#groups.Shader_group()

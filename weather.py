@@ -1,29 +1,30 @@
-import pygame, math, random, sys, Read_files, states_weather
+import pygame, math, random, sys
+import Read_files, states_weather_particles, states_weather
 from Entities import Animatedentity
 
 class Weather():
     def __init__(self,game_objects):
         self.game_objects = game_objects
         self.wind = Wind(self)
+        self.currentstate = states_weather.Idle(self)
 
     def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
         for i in range(0,number_particles):
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
 
-    def create_leaves(self,information,parallax,group,number_particles = 10):
+    def create_leaves(self,information,parallax,group,number_particles = 10):#there is a static stamp
         for i in range(0,number_particles):
             obj = Leaves(self.game_objects,parallax,information)
             group.add(obj)
 
     def update(self):
-        if random.randint(0,1000) == 0:
-            self.blow()
+        self.currentstate.update()
 
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
 
-    def blow(self,dir = [-1,0]):
+    def blow(self,dir = [-1,0]):#called from currentstate
         self.wind.blow(dir)
         self.game_objects.cosmetics.add(self.wind)
 
@@ -36,7 +37,6 @@ class Wind(pygame.sprite.Sprite):
         self.rect.topleft = [0,0]
         self.velocity = [0,0]
         self.lifetime = 300
-        #self.shader = shader_entities.Shader_entities(self)
 
     def blow(self,dir):#called when weather is initiated
         self.velocity = dir
@@ -47,6 +47,7 @@ class Wind(pygame.sprite.Sprite):
             self.finish()
 
     def finish(self):
+        self.weather.currentstate.handle_input('Finish')
         self.kill()
         self.velocity = [0,0]
         self.lifetime = 300
@@ -92,6 +93,7 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def update_img(self):
         self.image.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
 
+#particles
 class Bound_entity(Animatedentity):#entities bound to the scereen, should it be inheriting from animated entities (if we intendo to use animation) or static entity (if we intend to use pygame for particles)
     def __init__(self,game_objects, parallax):
         super().__init__([0,0],game_objects)
@@ -212,7 +214,6 @@ class Vertical_circles(Circles):
     def update_vel(self):
         self.velocity  = [0.5*math.sin(self.frame*0.1+self.phase),-1]
 
-
 class Fireflies(Circles):
     animations = {}
     def __init__(self,game_objects, parallax):
@@ -252,7 +253,7 @@ class Blink(Bound_entity):
 class Weather_particles(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.currentstate = states_weather.Idle(self)
+        self.currentstate = states_weather_particles.Idle(self)
         self.pos = [random.randint(0, int(self.width)),random.randint(-700, -50)]#starting position
         self.true_pos = self.pos.copy()
 
