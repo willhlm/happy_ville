@@ -24,8 +24,11 @@ class Player_states(Entity_States):
 
     def handle_release_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
+            self.entity.max_health += 1
+            self.entity.timer_jobs['air'].deactivate()
+            self.entity.timer_jobs['jump'].deactivate()
+            print('released' + str(self.entity.max_health))
             if self.entity.velocity[1] < 0:#if going up
-                self.entity.timer_jobs['air'].deactivate()
                 self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
     def handle_movement(self,input):#all states should inehrent this function
