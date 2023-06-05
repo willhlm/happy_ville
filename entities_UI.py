@@ -1,5 +1,6 @@
 import pygame
 import Read_files, animation, states_health, states_basic
+from sys import platform
 
 #for map UI
 class Banner():
@@ -206,7 +207,7 @@ class Spirit():#gameplay UI
 
 class Movement_hud():#gameplay UI
     def __init__(self,entity):
-        self.sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud')
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/gameplay/movement/hud/')
         self.entity = entity
         self.game_objects = entity.game_objects#animation need it
         self.image = self.sprites.sprite_dict['idle_1'][0]

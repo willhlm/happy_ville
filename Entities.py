@@ -419,7 +419,14 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = {'Idle':True,'Walk':True,'Pray':True,'Jump_run':True,'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':True,'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,'Arrow':True,'Counter':True}
+        self.states={'Idle':True,'Walk':True,'Run':True,'Pray':True,'Jump_run':True,
+                     'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,
+                     'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
+                     'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
+                     'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
+                     'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':False,
+                     'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
+                     'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
 
         self.spawn_point = [{'map':'light_forest_1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -2978,11 +2985,13 @@ class Sword_timer(Timer):
 class Jump_timer(Timer):#can be combined with shroomjump?
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
+        #self.jump_timer_air = duration_air #timer how long one can move while not releasing the button
+        #self.air_active = False
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
-            self.entity.velocity[1] = -10
             self.entity.ground = False
+            self.entity.velocity[1] = C.jump_vel_player
         super().update()#need to be after
 
 class Ground_timer(Timer):#a timer to check how long time one has not been on ground

@@ -1,6 +1,7 @@
 import pygame, json
 from os import listdir, walk
 from os.path import isfile, join
+from sys import platform
 
 def default(dict):
     if hasattr(dict, 'to_json'):
@@ -129,6 +130,9 @@ class Sprites():
 
     def load_all_sprites(self,base_path):
         #loads all sprites in all sub directories in base_path, stores list of sprites with keys corresponding to folder name
+        #if 'win' in platform:   #quick fix for fixing path in windows, should probably be more robust...
+        #    base_path = base_path[:-1]
+
         sprite_dict = {}
         for subdir in [d[0] for d in walk(base_path)]:
             if subdir == base_path:
