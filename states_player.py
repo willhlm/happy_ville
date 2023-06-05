@@ -26,6 +26,7 @@ class Player_states(Entity_States):
         if input[-1] == 'a':
             if self.entity.velocity[1] < 0:#if going up
                 self.entity.timer_jobs['air'].deactivate()
+                self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
     def handle_movement(self,input):#all states should inehrent this function
         #left stick and arrow keys
