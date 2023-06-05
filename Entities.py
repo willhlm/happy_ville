@@ -258,7 +258,6 @@ class BG_Animated(BG_Block):
 class Reflection(Staticentity):
     def __init__(self,pos,size,dir,game_objects, offset = 12):
         super().__init__(pos,pygame.Surface(size, pygame.SRCALPHA, 32))
-        self.pos = list(pos)
         self.size = size
         self.dir = dir
         self.game_objects = game_objects
@@ -272,7 +271,7 @@ class Reflection(Staticentity):
         reflect_surface.convert_alpha()#do we need this?
         reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*self.squeeze))
         #reflect_surface.set_alpha(100)
-        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), (self.rect.topleft[0],self.rect.topleft[1]), reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
+        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), self.rect.topleft, reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -434,7 +433,7 @@ class Player(Character):
         self.omamoris = Omamoris(self)#
 
         self.set_abs_dist()
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def update_true_pos_x(self):#called from Engine.platform collision
         self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
@@ -810,7 +809,7 @@ class Blue_bird(Enemy):
     def knock_back(self,dir):
         pass
 
-class Shroompoline(Enemy):
+class Shroompoline(Enemy):#an enemy or interactable?
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/shroompolin/')
@@ -818,7 +817,6 @@ class Shroompoline(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
         self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
-        self.AI = AI_enemy.Nothing(self)
         self.aggro = False#player collision
         self.invincibile = True#taking dmg
 
@@ -834,6 +832,12 @@ class Shroompoline(Enemy):
     def update_hitbox(self):
         super().update_hitbox()
         self.jump_box.midtop = self.rect.midtop
+
+    def chase(self):#called from AI: when chaising
+        pass
+
+    def patrol(self,position):#called from AI: when patroling
+        pass
 
 class Kusa(Enemy):
     def __init__(self,pos,game_objects):
@@ -1460,6 +1464,9 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
     def upgrade_ability(self):
         self.level += 1
 
+    def countered(self,dir, pos):#called from sword collsion with purple infinity stone
+        pass
+
 class Melee(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
@@ -1472,7 +1479,8 @@ class Melee(Projectiles):
         super().update(pos)
         self.update_hitbox()
 
-    def countered(self):#called from sword collision_projectile, purple initinty stone
+    def countered(self,dir,pos):#called from sword collision_projectile, purple initinty stone
+        return
         self.entity.countered()
         self.kill()
 
@@ -1530,8 +1538,9 @@ class Shield(Melee):
         self.kill()
 
     def collision_projectile(self,eprojectile):
+        return
         self.entity.projectiles.add(eprojectile)#add the projectilce to Ailas projectile group
-        eprojectile.countered()
+        eprojectile.countered(self.dir,self.rect.center)
 
 class Sword(Melee):
     def __init__(self,entity):
@@ -1633,9 +1642,6 @@ class Ranged(Projectiles):
         self.rect.topleft = [self.rect.topleft[0] + self.slow_motion*self.game_objects.game.dt*self.velocity[0]+scroll[0], self.rect.topleft[1] + self.slow_motion*self.game_objects.game.dt*self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
-    def countered(self,dir):#called from sword collsion with purple infinity stone
-        pass
-
 class Thunder(Ranged):
     def __init__(self,entity):
         super().__init__(entity)
@@ -1679,7 +1685,7 @@ class Poisoncloud(Ranged):
         if self.lifetime<0:
             self.currentstate.handle_input('Death')
 
-    def countered(self):#shielded
+    def countered(self,dir,pos):#shielded
         self.currentstate.handle_input('Death')
 
 class Poisonblobb(Ranged):
@@ -2022,8 +2028,8 @@ class Enemy_drop(Loot):#add gravity
 class Amber_Droplet(Enemy_drop):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/amber_droplet/')
-        self.sounds = Read_files.Sounds('Audio/SFX/enteties/items/amber_droplet/')
+        self.sprites = game_objects.object_pool.objects['Amber_Droplet'].sprites
+        self.sounds = game_objects.object_pool.objects['Amber_Droplet'].sounds
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.hitbox = pygame.Rect(pos[0],pos[1],5,5)
@@ -2034,17 +2040,23 @@ class Amber_Droplet(Enemy_drop):
         super().player_collision(player)
         self.game_objects.world_state.update_money_statistcis()
 
+    @classmethod#called from object pool
+    def pool(cls):#all things that should be saved in object pool
+        obj = cls.__new__(cls)#creatate without runing initmethod
+        obj.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/amber_droplet/')
+        obj.sounds = Read_files.Sounds('Audio/SFX/enteties/items/amber_droplet/')
+        return obj
+
 class Bone(Enemy_drop):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/bone/')
-        self.sounds = Read_files.Sounds('Audio/SFX/enteties/items/bone/')
+        self.sprites = game_objects.object_pool.objects['Bone'].sprites
+        self.sounds = game_objects.object_pool.objects['Bone'].sounds
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.hitbox = self.rect.copy()
         self.description = 'Ribs from my daugther. You can respawn and stuff'
-        #self.shader = shader_entities.Shader_entities(self)
 
     def use_item(self):
         if self.game_objects.player.inventory['Bone'] < 0: return#if we don't have bones
@@ -2054,62 +2066,90 @@ class Bone(Enemy_drop):
         self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.player.abs_dist})
         self.game_objects.player.currentstate.enter_state('Plant_bone_main')
 
+    @classmethod#called from object pool
+    def pool(cls):#all things that should be saved in object pool
+        obj = cls.__new__(cls)#creatate without runing initmethod
+        obj.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/bone/')
+        obj.sounds = Read_files.Sounds('Audio/SFX/enteties/items/bone/')
+        return obj
+
 class Heal_item(Enemy_drop):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heal_item/')
-        self.sounds = Read_files.Sounds('Audio/SFX/enteties/items/heal_item/')
+        self.sprites = game_objects.object_pool.objects['Heal_item'].sprites
+        self.sounds = game_objects.object_pool.objects['Heal_item'].sounds
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.hitbox = self.rect.copy()
         self.description = 'Use it to heal'
-        #self.shader = shader_entities.Shader_entities(self)
 
     def use_item(self):
         if self.game_objects.player.inventory['Heal_item'] < 0: return
         self.game_objects.player.inventory['Heal_item'] -= 1
         self.game_objects.player.heal(1)
 
+    @classmethod#called from object pool
+    def pool(cls):#all things that should be saved in object pool
+        obj = cls.__new__(cls)#creatate without runing initmethod
+        obj.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heal_item/')
+        obj.sounds = Read_files.Sounds('Audio/SFX/enteties/items/heal_item/')
+        return obj
+
 #cosmetics
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/running_particles/water/')
+        self.sprites = game_objects.object_pool.objects['Water_running_particles'].sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
+
+    @classmethod#called from object pool
+    def pool(cls):#all things that should be saved in object pool
+        obj = cls.__new__(cls)#creatate without runing initmethod
+        obj.sprites = Read_files.Sprites_Player('Sprites/animations/running_particles/water/')
+        return obj
 
 class Grass_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/running_particles/grass/')
+        self.sprites = game_objects.object_pool.objects['Grass_running_particles'].sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
+
+    @classmethod#called from object pool
+    def pool(cls):#all things that should be saved in object pool
+        obj = cls.__new__(cls)#creatate without runing initmethod
+        obj.sprites = Read_files.Sprites_Player('Sprites/animations/running_particles/grass/')
+        return obj
 
 class Dust_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/running_particles/dust/')
+        self.sprites = game_objects.object_pool.objects['Dust_running_particles'].sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
+
+    @classmethod#called from object pool
+    def pool(cls):#all things that should be saved in object pool
+        obj = cls.__new__(cls)#creatate without runing initmethod
+        obj.sprites = Read_files.Sprites_Player('Sprites/animations/running_particles/dust/')
+        return obj
 
 class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def __init__(self,pos,game_objects):
@@ -2949,6 +2989,7 @@ class Timer():
         self.entity.timers.append(self)
 
     def deactivate(self):
+        if self not in self.entity.timers: return#do not remove if the timer is not inside
         self.entity.timers.remove(self)
 
     def update(self):
@@ -2990,9 +3031,22 @@ class Jump_timer(Timer):#can be combined with shroomjump?
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
+            #self.entity.velocity[1] = -10
             self.entity.ground = False
-            self.entity.velocity[1] = C.jump_vel_player
+            self.entity.timer_jobs['air'].activate()
         super().update()#need to be after
+
+class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def update(self):#called everyframe after activation (activated after jumping)
+        self.entity.velocity[1] = -6
+        super().update()#need to be after
+
+    def deactivate(self):
+        super().deactivate()
+        self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
 class Ground_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity,duration):

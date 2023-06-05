@@ -72,7 +72,7 @@ class Sword():
 class Infinity_stone():
     def __init__(self,pos,game_objects):
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/infinity_stone/empty')#for inventory
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/inventory/infinity_stone/empty/')#for inventory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(topleft=pos)
         self.dir = [1,0]#animation and state need this

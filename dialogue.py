@@ -31,7 +31,7 @@ class Dialogue():#handles dialoage and what to say
                 if self.finish(event):
                     self.entity.event.remove(event)
                     return None
-                return self.conversation[event]
+                return self.conversation[event][str(self.conv_index)] 
 
         #if no priority events have happened, return normal conversation
         event = 'state_' + str(self.entity.game_objects.world_state.progress)

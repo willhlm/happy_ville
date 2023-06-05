@@ -374,8 +374,6 @@ class Level():
 
             if id == 2:#light forest tree tree
                 new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
-                if parallax[0] != 1:
-                    new_tree.blur(self.blur_value(parallax))
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
@@ -383,8 +381,6 @@ class Level():
 
             elif id == 3:#light forest tree tree
                 new_tree = tiled_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
-                if parallax[0] != 1:
-                    new_tree.blur(self.blur_value(parallax))
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:

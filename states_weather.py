@@ -1,30 +1,33 @@
 import sys, math, random
 from states_entity import Entity_States
 
-class Weather_States(Entity_States):
+class Weather_States():
     def __init__(self,entity):
-        super().__init__(entity)
+        self.entity = entity
+
+    def update(self):
+        pass
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
+    def handle_input(self,input):
+        pass
+
 class Idle(Weather_States):
     def __init__(self,entity):
         super().__init__(entity)
-        self.time=0
 
-    def update_state(self):
-        self.time+=1
+    def update(self):
+        rand=random.randint(0, 1000)
+        if rand==0:
+            self.enter_state('Wind')
 
-        rand=random.randint(0, self.entity.trans_prob)
-        if rand==1:
-            self.enter_state('Flip')
-
-class Flip(Weather_States):
+class Wind(Weather_States):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.entity.velocity[1]=self.entity.velocity[1]*0.8#slow down
-        #self.entity.velocity[0]=self.entity.velocity[0]*0.8
+        self.entity.blow()
 
-    def increase_phase(self):
-        self.enter_state('Idle')
+    def handle_input(self,input):
+        if input == 'Finish':
+            self.enter_state('Idle')

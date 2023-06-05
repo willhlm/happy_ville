@@ -29,7 +29,7 @@ class Inventory(Select_menu):
         self.iventory_UI = UI_loader.UI_loader(self.game_objects,'inventory')
         self.letter_frame = 0#for description
         self.state = state_inventory.Items(self)
-        self.item_index = [0,0]#row, col
+        self.item_index = [0,0]
 
         self.define_blit_positions()
         self.define_pointer()
