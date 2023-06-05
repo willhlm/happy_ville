@@ -3041,12 +3041,11 @@ class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velo
         super().__init__(entity,duration)
 
     def update(self):#called everyframe after activation (activated after jumping)
-        self.entity.velocity[1] = -6
+        self.entity.velocity[1] = C.jump_vel_player
         super().update()#need to be after
 
     def deactivate(self):
         super().deactivate()
-        self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
 class Ground_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity,duration):

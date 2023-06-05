@@ -26,6 +26,7 @@ class Player_states(Entity_States):
         if input[-1] == 'a':
             if self.entity.velocity[1] < 0:#if going up
                 self.entity.timer_jobs['air'].deactivate()
+                self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
     def handle_movement(self,input):#all states should inehrent this function
         #left stick and arrow keys
@@ -92,7 +93,7 @@ class Walk_main(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
@@ -136,7 +137,7 @@ class Run_main(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
