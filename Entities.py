@@ -418,7 +418,7 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = {'Idle':True,'Walk':True,'Pray':True,'Jump_run':True,'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':True,'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,'Arrow':True,'Counter':True}
+        self.states = {'Idle':True,'Walk':True,'Pray':True,'Jump_run':True,'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':False,'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
 
         self.spawn_point = [{'map':'light_forest_1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -426,7 +426,7 @@ class Player(Character):
         self.omamoris = Omamoris(self)#
 
         self.set_abs_dist()
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def update_true_pos_x(self):#called from Engine.platform collision
         self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
@@ -802,7 +802,7 @@ class Blue_bird(Enemy):
     def knock_back(self,dir):
         pass
 
-class Shroompoline(Enemy):
+class Shroompoline(Enemy):#an enemy or interactable?
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/shroompolin/')
@@ -810,7 +810,6 @@ class Shroompoline(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
         self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
-        self.AI = AI_enemy.Nothing(self)
         self.aggro = False#player collision
         self.invincibile = True#taking dmg
 
@@ -826,6 +825,12 @@ class Shroompoline(Enemy):
     def update_hitbox(self):
         super().update_hitbox()
         self.jump_box.midtop = self.rect.midtop
+
+    def chase(self):#called from AI: when chaising
+        pass
+
+    def patrol(self,position):#called from AI: when patroling
+        pass
 
 class Kusa(Enemy):
     def __init__(self,pos,game_objects):
@@ -2977,6 +2982,7 @@ class Timer():
         self.entity.timers.append(self)
 
     def deactivate(self):
+        if self not in self.entity.timers: return#do not remove if the timer is not inside
         self.entity.timers.remove(self)
 
     def update(self):
@@ -3016,9 +3022,22 @@ class Jump_timer(Timer):#can be combined with shroomjump?
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
-            self.entity.velocity[1] = -10
+            #self.entity.velocity[1] = -10
             self.entity.ground = False
+            self.entity.timer_jobs['air'].activate()
         super().update()#need to be after
+
+class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def update(self):#called everyframe after activation (activated after jumping)
+        self.entity.velocity[1] = -6
+        super().update()#need to be after
+
+    def deactivate(self):
+        super().deactivate()
+        self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
 class Ground_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity,duration):

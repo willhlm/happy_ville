@@ -53,7 +53,7 @@ class Light_forest_tree1(Tree):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/tiled_objects/light_forest_tree1')
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/tiled_objects/light_forest_tree1/')
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
@@ -71,7 +71,7 @@ class Light_forest_tree2(Tree):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/tiled_objects/light_forest_tree2')
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/tiled_objects/light_forest_tree2/')
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()

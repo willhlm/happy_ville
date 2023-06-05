@@ -636,6 +636,24 @@
                          "width":16,
                          "x":384,
                          "y":336
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":286,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Shroompoline"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":576,
+                         "y":368
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -685,7 +703,7 @@
          "y":0
         }],
  "nextlayerid":94,
- "nextobjectid":286,
+ "nextobjectid":287,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
