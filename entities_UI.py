@@ -1,5 +1,6 @@
 import pygame
 import Read_files, animation, states_health, states_basic
+from sys import platform
 
 #for map UI
 class Banner():

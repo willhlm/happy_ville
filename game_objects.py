@@ -20,7 +20,8 @@ class Game_Objects():
     def __init__(self, game):
         self.game = game
         self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
-        self.controller = Read_files.Controller()
+        #self.controller = Read_files.Controller()
+        self.controller = Read_files.Controller('ps4')
         self.sound = sound.Sound()
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather

@@ -72,7 +72,7 @@ class Idle_main(Player_states):
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0] != 0:
-            self.enter_state('Walk_main')
+            self.enter_state('Run_main')
 
     def swing_sword(self):
         if not self.entity.sword_swinging:
@@ -93,7 +93,7 @@ class Walk_main(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
@@ -112,6 +112,50 @@ class Walk_main(Player_states):
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation. Should all have pre?
+            self.do_ability()
+
+    def handle_movement(self,input):
+        super().handle_movement(input)
+        if self.entity.acceleration[0]==0:
+            self.enter_state('Idle_main')
+
+    def swing_sword(self):
+        if not self.entity.sword_swinging:
+            if abs(self.entity.dir[1])<0.8:
+                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
+                self.enter_state(state)
+                self.entity.sword.swing = not self.entity.sword.swing
+            elif self.entity.dir[1]>0.8:
+                self.enter_state('Sword_up_main')
+
+class Run_main(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.particle_timer = 0
+
+    def update_state(self):
+        self.particle_timer -= self.entity.game_objects.game.dt
+        if self.particle_timer < 0:
+            self.running_particles()
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+
+        if not self.entity.collision_types['bottom']:#disable this one while on ramp
+            self.enter_state('Fall_run_pre')
+
+    def running_particles(self):
+        particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
+        self.entity.game_objects.cosmetics.add(particle)
+        self.particle_timer = 10
+
+    def handle_press_input(self,input):
+        super().handle_press_input(input)
+        if input[-1]=='a':
+            self.enter_state('Jump_run_pre')
+        elif input[-1]=='lb':
+            self.enter_state('Dash_pre')
+        elif input[-1]=='x':
+            self.swing_sword()
+        elif input[-1]=='b':#depends on if the abillities have pre or main animation
             self.do_ability()
 
     def handle_movement(self,input):
@@ -226,7 +270,7 @@ class Double_jump_pre(Player_states):
         self.init()
 
     def init(self):
-        self.entity.velocity[1]=-10
+        self.entity.velocity[1] = C.jump_vel_player
 
     def update_state(self):
         if self.entity.velocity[1] > 0:#falling down
@@ -276,7 +320,7 @@ class Fall_run_pre(Player_states):
         if input == 'Wall':
             self.enter_state('Wall_glide_main')
         elif input == 'Ground':
-            self.enter_state('Walk_main')
+            self.enter_state('Run_main')
 
     def swing_sword(self):
         if not self.entity.sword_swinging:
@@ -381,7 +425,7 @@ class Wall_glide_main(Player_states):
 
     def handle_input(self,input):#when hit the ground
         if input == 'Ground':
-            self.enter_state('Walk_main')
+            self.enter_state('Run_main')
 
     def enter_state(self,input):#reset friction before exiting this state
         self.entity.friction[1] = C.friction_player[1]
@@ -489,7 +533,7 @@ class Dash_post(Dash_pre):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
         else:
-            self.enter_state('Walk_main')
+            self.enter_state('Run_main')
 
 class Dash_attack_main(Player_states):#enters from pre dash
     def __init__(self,entity):
@@ -716,7 +760,7 @@ class Hurt_main(Player_states):
         if self.entity.acceleration[0] == 0:
             self.next_state = 'Idle_main'
         else:
-            self.next_state ='Walk_main'
+            self.next_state ='Run_main'
 
 class Spawn_main(Player_states):#enters when aila respawn after death
     def __init__(self,entity):
@@ -768,7 +812,7 @@ class Sword_stand1_main(Sword):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
         else:
-            self.enter_state('Walk_main')
+            self.enter_state('Run_main')
 
 class Sword_stand2_main(Sword_stand1_main):
     def __init__(self,entity):
@@ -785,7 +829,7 @@ class Sword_run1_main(Sword):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
         else:
-            self.enter_state('Walk_main')
+            self.enter_state('Run_main')
 
 class Sword_run2_main(Sword_run1_main):
     def __init__(self,entity):
@@ -925,7 +969,7 @@ class Force_main(Abillitites):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
         else:
-            self.enter_state('Walk_main')
+            self.enter_state('Run_main')
 
     def force_jump(self):
         if self.dir[1]<0:
