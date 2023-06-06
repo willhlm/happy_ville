@@ -1,7 +1,7 @@
 import pygame, sys
 import UI_loader
 import Entities#to load the inventory -> entities_UI?
-import state_inventory
+import states_inventory
 
 class Select_menu():
     def __init__(self, game_state):
@@ -28,7 +28,7 @@ class Inventory(Select_menu):
         super().__init__(game_state)
         self.iventory_UI = UI_loader.UI_loader(self.game_objects,'inventory')
         self.letter_frame = 0#for description
-        self.state = state_inventory.Items(self)
+        self.state = states_inventory.Items(self)
         self.item_index = [0,0]
 
         self.define_blit_positions()

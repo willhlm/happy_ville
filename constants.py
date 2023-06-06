@@ -16,6 +16,10 @@ shroomjump_timer_player = 3#how many frames the player can press jump, after lan
 ground_timer_player = 3#how many frames from falling in which the player can still jump
 animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
 air_timer = 7#for how long one can press A and keep jumping
+<<<<<<< HEAD
+=======
+dash_length = 3#how long  Aila dashes
+>>>>>>> a22462e566ba9f0afef12cb98ab2cad900cee6a5
 
 #combat
 invincibility_time_player = 50
