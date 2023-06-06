@@ -24,8 +24,10 @@ class Player_states(Entity_States):
 
     def handle_release_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
+            self.entity.timer_jobs['air'].deactivate()
+            self.entity.timer_jobs['jump'].deactivate()
+
             if self.entity.velocity[1] < 0:#if going up
-                self.entity.timer_jobs['air'].deactivate()
                 self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
     def handle_movement(self,input):#all states should inehrent this function
@@ -435,11 +437,18 @@ class Dash_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
+        self.dash_length = C.dash_length
 
     def update_state(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity,100))
+        self.dash_length -= self.entity.game_objects.game.dt
+        self.exit()
+
+    def exit(self):
+        if self.dash_length < 0:
+            self.increase_phase()
 
     def handle_input(self,input):#if hit wall
         if input == 'Wall':
@@ -525,6 +534,9 @@ class Dash_4main(Dash_pre):#level 4 dash: allow dash attack
 class Dash_post(Dash_pre):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def update_state(self):
+        pass
 
     def handle_press_input(self,input):
         pass

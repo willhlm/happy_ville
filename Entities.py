@@ -3026,13 +3026,11 @@ class Sword_timer(Timer):
 class Jump_timer(Timer):#can be combined with shroomjump?
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
-        #self.jump_timer_air = duration_air #timer how long one can move while not releasing the button
-        #self.air_active = False
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
-            #self.entity.velocity[1] = -10
             self.entity.ground = False
+            self.deactivate()
             self.entity.timer_jobs['air'].activate()
         super().update()#need to be after
 
@@ -3043,9 +3041,6 @@ class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velo
     def update(self):#called everyframe after activation (activated after jumping)
         self.entity.velocity[1] = C.jump_vel_player
         super().update()#need to be after
-
-    def deactivate(self):
-        super().deactivate()
 
 class Ground_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity,duration):
