@@ -465,7 +465,7 @@ class Dash_pre(Player_states):
 class Dash_1main(Dash_pre):#level one dash: normal
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.velocity[0] = 20*self.dir[0]
+        self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['dash'])
 
