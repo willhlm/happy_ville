@@ -3032,16 +3032,27 @@ class Jump_timer(Timer):#can be combined with shroomjump?
             self.entity.ground = False
             self.deactivate()
             self.entity.timer_jobs['air'].activate()
+            self.deactivate()
         super().update()#need to be after
 
 class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
+        self.i = 0
 
     def update(self):#called everyframe after activation (activated after jumping)
         self.entity.velocity[1] = C.jump_vel_player
+        self.i += 1
+        print(self.i)
         super().update()#need to be after
 
+<<<<<<< HEAD
+=======
+    def deactivate(self):
+        self.i = 0
+        super().deactivate()
+
+>>>>>>> f62db03aa6cf3a2e83f4c4f456c6c4a258f647ba
 class Ground_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
