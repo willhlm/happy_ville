@@ -1,6 +1,7 @@
 #game settings
 fps = 70#this is the screeen resfresh rate
 window_size = [640,360]
+#window_size = [560,320]
 player_center = [window_size[0]*0.5,window_size[1]*0.5]
 tile_size = 16
 
@@ -14,7 +15,7 @@ jump_time_player = 4##how many frames from falling in which the player can jump 
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
 ground_timer_player = 3#how many frames from falling in which the player can still jump
 animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
-air_timer = 8#for how long one can press A and keep jumping
+air_timer = 7#for how long one can press A and keep jumping
 
 #combat
 invincibility_time_player = 50
