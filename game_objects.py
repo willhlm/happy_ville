@@ -115,6 +115,7 @@ class Game_Objects():
         self.update_groups(scroll)
 
     def update_groups(self, scroll = (0,0)):
+        print(self.player.velocity)
         self.platforms.update(scroll)
         self.platforms_ramps.update(scroll)
         self.layer_pause.update(scroll)#should be before all_bgs and all_fgs
