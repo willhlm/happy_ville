@@ -80,7 +80,6 @@ class Collisions():
             #move in x every dynamic sprite
             entity.update_true_pos_x()
             entity.rect.centerx = round(entity.true_pos[0])
-            #entity.rect.centerx += round(entity.velocity[0]*self.game_objects.game.dt)
             entity.update_hitbox()
             static_entity_x = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
             if static_entity_x:
@@ -89,7 +88,6 @@ class Collisions():
             #move in y every dynamic sprite
             entity.update_true_pos_y()
             entity.rect.centery = round(entity.true_pos[1])
-            #entity.rect.centery += round(entity.velocity[1]*self.game_objects.game.dt)
             entity.update_hitbox()#follow with hitbox
             static_entity_y = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
             if static_entity_y:

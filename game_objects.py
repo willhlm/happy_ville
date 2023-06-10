@@ -121,7 +121,7 @@ class Game_Objects():
         self.all_bgs.update(scroll)
         self.bg_interact.update(scroll)
         self.all_fgs.update(scroll)
-        self.players.update(scroll)
+        self.players.update([-self.camera.true_scroll[0],-self.camera.true_scroll[1]])
         self.entity_pause.update(scroll)#should be before enemies, npcs and interactable groups
         self.enemies.update(scroll)
         self.npcs.update(scroll)

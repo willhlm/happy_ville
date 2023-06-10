@@ -423,7 +423,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':True,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
@@ -435,11 +435,11 @@ class Player(Character):
         self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-    def update_true_pos_x(self):#called from Engine.platform collision
-        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
+#    def update_true_pos_x(self):#called from Engine.platform collision
+#        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
 
-    def update_true_pos_y(self):#called from Engine.platform collision
-        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
+#    def update_true_pos_y(self):#called from Engine.platform collision
+#        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
