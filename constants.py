@@ -8,7 +8,7 @@ tile_size = 16
 #physics
 acceleration = [1,0.38]
 friction = [0.5,0]#need to be less than 1
-friction_player = [0.29,0.01]
+friction_player = [0.24,0.01]
 jump_vel_player = -6
 max_vel = [30,6]#[30,6]
 jump_time_player = 4##how many frames from falling in which the player can jump when landing
