@@ -98,7 +98,6 @@ class Title_Menu(Game_State):
             self.button_rects[b] = pygame.Rect((100,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
-
     def change_state(self):
         if self.current_button == 0:#new game
             new_state = Gameplay(self.game)
@@ -109,7 +108,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('light_forest_1','1')
+            self.game.game_objects.load_map('village_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
