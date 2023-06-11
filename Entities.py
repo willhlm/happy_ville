@@ -17,12 +17,14 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect = pygame.Rect(pos,size)
         self.rect.bottomleft = pos
         self.hitbox = self.rect.inflate(0,0)
+        self.true_pos = self.rect.topleft
 
     def update(self,pos):
         self.update_pos(pos)
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
         self.hitbox.center = self.rect.center
 
     def take_dmg(self):
@@ -214,12 +216,14 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.bounds = [-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.true_pos = self.rect.bottomleft
 
     def update(self,pos):
         self.update_pos(pos)
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.topleft = self.true_pos.copy()
 
     def group_distance(self):#instead of bound, could calculate distance from center. But maybe cost
         if self.rect[0]<self.bounds[0] or self.rect[0]>self.bounds[1] or self.rect[1]<self.bounds[2] or self.rect[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
@@ -230,7 +234,6 @@ class BG_Block(Staticentity):
     def __init__(self,pos,img,parallax = 1):
         super().__init__(pos,img)
         self.parallax = parallax
-        self.true_pos = self.rect.bottomleft
 
     def update_pos(self,pos):
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
@@ -259,6 +262,7 @@ class Reflection(Staticentity):
         self.game_objects = game_objects
         self.offset = offset
         self.squeeze = 0.75
+        self.true_pos = self.rect.topleft
 
     def draw(self):
         reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1]*self.squeeze - self.offset, self.size[0], self.size[1])
@@ -291,7 +295,6 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        self.true_pos = list(self.rect.center)
 
     def update_pos(self,pos):
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
@@ -431,11 +434,11 @@ class Player(Character):
         self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
 
-    def update_true_pos_x(self):#called from Engine.platform collision
-        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
+#    def update_true_pos_x(self):#called from Engine.platform collision
+#        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
 
-    def update_true_pos_y(self):#called from Engine.platform collision
-        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
+#    def update_true_pos_y(self):#called from Engine.platform collision
+#        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -1199,6 +1202,7 @@ class Camera_Stop(Staticentity):
 
         self.currentstate = states_camerastop.Idle(self)
         self.currentstate.enter_state('Idle_'+dir)
+        self.true_pos = self.rect.topleft
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
@@ -2288,7 +2292,8 @@ class Interactable(Animatedentity):#interactables
         self.group_distance()
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.bottomleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
         self.hitbox.midbottom = self.rect.midbottom
 
     def interact(self):#when player press T
