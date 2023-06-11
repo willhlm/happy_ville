@@ -16,13 +16,17 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         super().__init__()
         self.rect = pygame.Rect(pos,size)
         self.rect.bottomleft = pos
+        self.true_pos = self.rect.topleft
         self.hitbox = self.rect.inflate(0,0)
 
     def update(self,pos):
         self.update_pos(pos)
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
+
+        #self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
         self.hitbox.center = self.rect.center
 
     def take_dmg(self):
@@ -214,12 +218,14 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.bounds = [-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.true_pos = self.rect.bottomleft
 
     def update(self,pos):
         self.update_pos(pos)
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
 
     def group_distance(self):#instead of bound, could calculate distance from center. But maybe cost
         if self.rect[0]<self.bounds[0] or self.rect[0]>self.bounds[1] or self.rect[1]<self.bounds[2] or self.rect[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
@@ -229,10 +235,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
 class BG_Block(Staticentity):
     def __init__(self,pos,img,parallax = 1):
         super().__init__(pos,img)
-        self.true_pos = self.rect.bottomleft
         self.parallax = parallax
-        #surface = pygame.Surface([640,360], pygame.SRCALPHA, 32)
-        #self.shader = shader_entities.Shader_BG(self,surface)
 
     def update_pos(self,pos):
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
@@ -295,7 +298,6 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        self.true_pos = list(self.rect.center)
 
     def update_pos(self,pos):
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
@@ -2292,7 +2294,8 @@ class Interactable(Animatedentity):#interactables
         self.group_distance()
 
     def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
+        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
+        self.rect.bottomleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
         self.hitbox.midbottom = self.rect.midbottom
 
     def interact(self):#when player press T
