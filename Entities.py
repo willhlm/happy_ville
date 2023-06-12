@@ -16,8 +16,8 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         super().__init__()
         self.rect = pygame.Rect(pos,size)
         self.rect.bottomleft = pos
+        self.true_pos = self.rect.bottomleft
         self.hitbox = self.rect.inflate(0,0)
-        self.true_pos = self.rect.topleft
 
     def update(self,pos):
         self.update_pos(pos)
@@ -298,7 +298,6 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        #self.true_pos = list(self.rect.center)
 
     def update_pos(self,pos):
         return

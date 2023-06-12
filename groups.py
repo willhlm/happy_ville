@@ -36,7 +36,7 @@ class Group(pygame.sprite.Group):#a group for the reflection object which need a
 
     def draw(self,surface):
         for spr in self.sprites():
-            self.spritedict[spr] = surface.blit(spr.image, (int(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]),int(spr.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
+            self.spritedict[spr] = surface.blit(spr.image, (round(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]-spr.rect[2]*0.5),round(spr.true_pos[1]-self.game_objects.camera.true_scroll[1]-spr.rect[3]*0.5)))#round seem nicer than int
 
 class LayeredUpdates(pygame.sprite.LayeredUpdates):#a group for the reflection object which need a special draw method
     def __init__(self,game_objects):

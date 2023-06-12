@@ -164,11 +164,11 @@ class Game_Objects():
             for cos in self.interactables.sprites():#go through the group
                 pygame.draw.rect(self.game.screen, (0,0,255), cos.hitbox,2)#draw hitbox
 
-            pygame.draw.rect(self.game.screen, (0,0,255), self.player.hitbox,2)#draw hitbox
-            pygame.draw.rect(self.game.screen, (255,0,255), self.player.rect,2)#draw hitbox
+            pygame.draw.rect(self.game.screen, (0,0,255), (round(self.player.hitbox[0]-self.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
+            pygame.draw.rect(self.game.screen, (255,0,255), (round(self.player.rect[0]-self.camera.true_scroll[0]),round(self.player.rect[1]-self.camera.true_scroll[1]),self.player.rect[2],self.player.rect[3]),2)#draw hitbox
 
             for platform in self.platforms:#go through the group
-                pygame.draw.rect(self.game.screen, (255,0,0), platform.hitbox,1)#draw hitbox
+                pygame.draw.rect(self.game.screen, (255,0,0), (round(platform.hitbox[0]-self.camera.true_scroll[0]),round(platform.hitbox[1]-self.camera.true_scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,1)#draw hitbox
             for int in self.interactables:
