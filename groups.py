@@ -29,6 +29,24 @@ class Specialdraw_Group(pygame.sprite.Group):#a group for the reflection object 
         for s in self.sprites():
             s.draw()
 
+class Group(pygame.sprite.Group):#a group for the reflection object which need a special draw method
+    def __init__(self,game_objects):
+        super().__init__()
+        self.game_objects = game_objects
+
+    def draw(self,surface):
+        for spr in self.sprites():
+            self.spritedict[spr] = surface.blit(spr.image, (int(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]),int(spr.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
+
+class LayeredUpdates(pygame.sprite.LayeredUpdates):#a group for the reflection object which need a special draw method
+    def __init__(self,game_objects):
+        super().__init__()
+        self.game_objects = game_objects
+
+    def draw(self,surface):
+        for spr in self.sprites():
+            newrect = surface.blit(spr.image, (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1])))#round seem nicer than int
+
 class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries: almst works with LayeredUpdates group (when they come back, it is in fron of grass, so the posoition is not 100 % preserved)
     def __init__(self):
         super().__init__()

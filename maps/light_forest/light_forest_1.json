@@ -1201,7 +1201,7 @@
                         }, 
                         {
                          "gid":15,
-                         "height":112,
+                         "height":272,
                          "id":261,
                          "name":"",
                          "properties":[
@@ -1214,8 +1214,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":7360,
-                         "y":800
+                         "x":7488,
+                         "y":928
                         }, 
                         {
                          "gid":15,
@@ -1342,42 +1342,6 @@
                          "width":16,
                          "x":3616,
                          "y":896
-                        }, 
-                        {
-                         "gid":2,
-                         "height":16,
-                         "id":657,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Aslat"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3344,
-                         "y":864
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":668,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Sandrew"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4640,
-                         "y":816
                         }],
                  "opacity":1,
                  "type":"objectgroup",

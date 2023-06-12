@@ -65,9 +65,11 @@ class Fog(pygame.sprite.Sprite):
         self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
         pygame.draw.rect(self.image,self.colour,self.rect)
         #self.shader = shader_entities.Shader_entities(self)
-
+        self.true_pos = [0,0]
+        self.parallax = [1,1]
+        
     def update(self,scroll):
-        self.rect.topleft = (0,0)
+        self.true_pos = (0,0)
 
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):

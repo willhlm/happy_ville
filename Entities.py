@@ -23,6 +23,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.update_pos(pos)
 
     def update_pos(self,pos):
+        return
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
         self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
         self.hitbox.center = self.rect.center
@@ -222,6 +223,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.update_pos(pos)
 
     def update_pos(self,pos):
+        return
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
         self.rect.topleft = self.true_pos.copy()
 
@@ -236,6 +238,7 @@ class BG_Block(Staticentity):
         self.parallax = parallax
 
     def update_pos(self,pos):
+        return
         self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
         self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
 
@@ -295,8 +298,10 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
+        #self.true_pos = list(self.rect.center)
 
     def update_pos(self,pos):
+        return
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
         self.rect.center = self.true_pos.copy()
         self.hitbox.midbottom = self.rect.midbottom
@@ -2141,6 +2146,7 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.true_pos = self.rect.topleft
 
     def reset_timer(self):
         self.kill()

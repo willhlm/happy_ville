@@ -20,7 +20,6 @@ class Game_Objects():
     def __init__(self, game):
         self.game = game
         self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
-        #self.controller = Read_files.Controller()
         self.controller = Read_files.Controller('ps4')
         self.sound = sound.Sound()
         self.create_groups()
@@ -34,26 +33,26 @@ class Game_Objects():
         self.object_pool = object_pool.Object_pool(self)
 
     def create_groups(self):#define all sprite groups
-        self.enemies = pygame.sprite.Group()#groups.Shader_group()
-        self.npcs = pygame.sprite.Group()#groups.Shader_group()
-        self.platforms = pygame.sprite.Group()
-        self.platforms_ramps = pygame.sprite.Group()
-        self.all_bgs = pygame.sprite.LayeredUpdates()#groups.Shader_layered_group()#
-        self.all_fgs = pygame.sprite.LayeredUpdates()#groups.Shader_layered_group()#
-        self.bg_interact = pygame.sprite.Group()#small grass stuff so that interactables blends with BG
-        self.eprojectiles = pygame.sprite.Group()#groups.Shader_group()
-        self.fprojectiles = pygame.sprite.Group()#groups.Shader_group()
-        self.loot = pygame.sprite.Group()#groups.Shader_group()
+        self.enemies = groups.Group(self)#groups.Shader_group()
+        self.npcs = groups.Group(self)#groups.Shader_group()
+        self.platforms = groups.Group(self)
+        self.platforms_ramps = groups.Group(self)
+        self.all_bgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
+        self.all_fgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
+        self.bg_interact = groups.Group(self)#small grass stuff so that interactables blends with BG
+        self.eprojectiles = groups.Group(self)#groups.Shader_group()
+        self.fprojectiles = groups.Group(self)#groups.Shader_group()
+        self.loot = groups.Group(self)#groups.Shader_group()
         self.entity_pause = groups.PauseGroup() #all Entities that are far away
-        self.cosmetics = pygame.sprite.Group()#groups.Shader_group()#things we just want to blit
-        self.camera_blocks = pygame.sprite.Group()
-        self.interactables = pygame.sprite.Group()#groups.Shader_group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
+        self.cosmetics = groups.Group(self)#groups.Shader_group()#things we just want to blit
+        self.camera_blocks = groups.Group(self)#pygame.sprite.Group()
+        self.interactables = groups.Group(self)#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
         self.reflections = groups.Specialdraw_Group()
         self.layer_pause = groups.PauseLayer()
 
         #initiate player
         self.player = Entities.Player([0,0],self)
-        self.players = pygame.sprite.Group()#groups.Shader_group()
+        self.players = groups.Group(self)
         self.players.add(self.player)
 
     def load_map(self, map_name, spawn = '1',fade = True):
@@ -145,7 +144,7 @@ class Game_Objects():
         self.eprojectiles.draw(self.game.screen)
         self.loot.draw(self.game.screen)
         self.entity_pause.draw(self.game.screen)
-        self.cosmetics.draw(self.game.screen)
+        #self.cosmetics.draw(self.game.screen)
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
