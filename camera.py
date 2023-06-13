@@ -5,20 +5,17 @@ class Camera():
         self.game_objects = game_objects
         self.true_scroll = [0,0]
         self.scroll = [0,0]
-        self.center = list(game_objects.map.PLAYER_CENTER)
+        self.center = [game_objects.map.PLAYER_CENTER[0]-game_objects.player.rect[2]*0.5,game_objects.map.PLAYER_CENTER[1]-game_objects.player.rect[3]*0.5]
         self.original_center = self.center.copy()
 
     def update(self):
         self.check_camera_border_new()#this need to be checked before the camera calculates the scroll
-        self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
-        self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
+        self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.15
+        self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.15
         self.scroll = self.true_scroll.copy()
 
         self.scroll[0] = int(self.scroll[0])
         self.scroll[1] = int(self.scroll[1])
-
-        #hfhfhf
-        s = 3
 
     def set_camera(self, camera):
         new_camera = getattr(sys.modules[__name__], camera)(self.game_objects)

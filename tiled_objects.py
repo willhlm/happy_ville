@@ -17,6 +17,7 @@ class Tree(Animatedentity):
             self.game_objects.all_bgs.add(obj)
 
     def update_pos(self,scroll):
+        return
         self.true_pos = [self.true_pos[0] + self.parallax[0]*scroll[0], self.true_pos[1] + self.parallax[1]*scroll[1]]
         self.rect.bottomleft = self.true_pos.copy()
 
@@ -59,7 +60,7 @@ class Light_forest_tree1(Tree):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox = self.rect.copy()
-        self.true_pos = self.rect.bottomleft
+        self.true_pos = self.rect.topleft
 
         #for leaves
         position = self.rect.center
@@ -77,7 +78,7 @@ class Light_forest_tree2(Tree):
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.hitbox = self.rect.copy()
-        self.true_pos = self.rect.bottomleft
+        self.true_pos = self.rect.topleft
 
         #for leaves
         position = self.rect.center

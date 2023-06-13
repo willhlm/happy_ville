@@ -29,6 +29,15 @@ class Specialdraw_Group(pygame.sprite.Group):#a group for the reflection object 
         for s in self.sprites():
             s.draw()
 
+class Group_player(pygame.sprite.Group):#a group for the reflection object which need a special draw method
+    def __init__(self,game_objects):
+        super().__init__()
+        self.game_objects = game_objects
+
+    def draw(self,surface):
+        for spr in self.sprites():
+            self.spritedict[spr] = surface.blit(spr.image, (round(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(spr.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
+
 class Group(pygame.sprite.Group):#a group for the reflection object which need a special draw method
     def __init__(self,game_objects):
         super().__init__()
@@ -36,7 +45,7 @@ class Group(pygame.sprite.Group):#a group for the reflection object which need a
 
     def draw(self,surface):
         for spr in self.sprites():
-            self.spritedict[spr] = surface.blit(spr.image, (round(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]-spr.rect[2]*0.5),round(spr.true_pos[1]-self.game_objects.camera.true_scroll[1]-spr.rect[3]*0.5)))#round seem nicer than int
+            self.spritedict[spr] = surface.blit(spr.image, (int(spr.rect[0]-self.game_objects.camera.scroll[0]),int(spr.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
 
 class LayeredUpdates(pygame.sprite.LayeredUpdates):#a group for the reflection object which need a special draw method
     def __init__(self,game_objects):
@@ -45,7 +54,7 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):#a group for the reflection o
 
     def draw(self,surface):
         for spr in self.sprites():
-            newrect = surface.blit(spr.image, (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1])))#round seem nicer than int
+            newrect = surface.blit(spr.image, (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1])))#int seem nicer than round
 
 class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries: almst works with LayeredUpdates group (when they come back, it is in fron of grass, so the posoition is not 100 % preserved)
     def __init__(self):
@@ -57,8 +66,8 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
 
     @staticmethod
     def group_distance(s,pos):
-        if s.rect[0]<s.bounds[0] or s.rect[0]>s.bounds[1] or s.rect[1]<s.bounds[2] or s.rect[1]>s.bounds[3]:#this means it is outside of screen
-            s.update_pos(pos)
+        if s.true_pos[0]<s.bounds[0] or s.true_pos[0]>s.bounds[1] or s.true_pos[1]<s.bounds[2] or s.true_pos[1]>s.bounds[3]:#this means it is outside of screen
+            pass#s.update_pos(pos)
         else:
             #manuall add to a specific layer
             sprites = s.game_objects.all_bgs.sprites()
@@ -81,8 +90,8 @@ class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside
 
     @staticmethod
     def group_distance(s,pos):
-        if s.rect[0]<s.bounds[0] or s.rect[0]>s.bounds[1] or s.rect[1]<s.bounds[2] or s.rect[1]>s.bounds[3]:#this means it is outside of screen
-            s.update_pos(pos)
+        if s.true_pos[0]<s.bounds[0] or s.true_pos[0]>s.bounds[1] or s.true_pos[1]<s.bounds[2] or s.true_pos[1]>s.bounds[3]:#this means it is outside of screen
+            pass#s.update_pos(pos)
         else:
             s.add(s.group)#add to group
             s.remove(s.pause_group)#remove from pause

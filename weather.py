@@ -37,6 +37,7 @@ class Wind(pygame.sprite.Sprite):
         self.rect.topleft = [0,0]
         self.velocity = [0,0]
         self.lifetime = 300
+        self.true_pos = [0,0]
 
     def blow(self,dir):#called when weather is initiated
         self.velocity = dir
@@ -67,7 +68,7 @@ class Fog(pygame.sprite.Sprite):
         #self.shader = shader_entities.Shader_entities(self)
         self.true_pos = [0,0]
         self.parallax = [1,1]
-        
+
     def update(self,scroll):
         self.true_pos = (0,0)
 
@@ -109,10 +110,12 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
         self.boundary()
 
     def update_pos(self,scroll):
+        scroll = [0,0]
         self.true_pos = [self.true_pos[0] + (scroll[0]+self.velocity[0])*self.parallax[0], self.true_pos[1] + (scroll[1]+self.velocity[1])*self.parallax[1]]
         self.rect.topleft = self.true_pos
 
     def boundary(self):#continiouse falling
+        return
         if self.rect.centerx < -100:
             self.true_pos[0] += self.width
         elif self.rect.centerx > self.width:
@@ -131,8 +134,7 @@ class Circles(Bound_entity):
         self.glow_spacing_factor = 0.1#a factor to determine the spacing between the glows
         self.glow_radius = self.layers*self.radius*self.glow_spacing_factor#determines the canvas size needed (the size of the largest glow)
 
-        self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
-        self.true_pos = self.pos.copy()
+        self.true_pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
 
         self.frequency = 0.003#the frequncy of grow and shrinking
         try:#the images are stored in an class variable such that the animations are only made once. This way, many particles can be made with very small performance.
@@ -161,8 +163,7 @@ class Circles(Bound_entity):
         if self.frame >= len(self.images):
             self.frame = 0
             #set new positions
-            self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
-            self.true_pos = self.pos.copy()
+            self.true_pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
 
     def prepare_animation(self):
         self.prepare_canvas()
@@ -176,7 +177,7 @@ class Circles(Bound_entity):
         self.surface = pygame.Surface((self.glow_radius * 2, self.glow_radius * 2),pygame.SRCALPHA,32).convert_alpha()
         self.image = self.surface.copy()
         self.rect = self.image.get_rect()
-        self.rect.center = self.pos
+        self.rect.topleft = self.true_pos
 
     def prepare_images(self):
         phase = 3*math.pi*0.5

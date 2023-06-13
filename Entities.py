@@ -217,7 +217,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.rect = self.image.get_rect()
         self.rect.bottomleft = pos
         self.bounds = [-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
-        self.true_pos = self.rect.bottomleft
+        self.true_pos = list(self.rect.bottomleft)
 
     def update(self,pos):
         self.update_pos(pos)
@@ -227,8 +227,8 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
         self.rect.topleft = self.true_pos.copy()
 
-    def group_distance(self):#instead of bound, could calculate distance from center. But maybe cost
-        if self.rect[0]<self.bounds[0] or self.rect[0]>self.bounds[1] or self.rect[1]<self.bounds[2] or self.rect[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+    def group_distance(self):#instead of bound, could calculate distance from center.
+        if self.true_pos[0]<self.bounds[0] or self.true_pos[0]>self.bounds[1] or self.true_pos[1]<self.bounds[2] or self.true_pos[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             self.remove(self.group)#remove from group
             self.add(self.pause_group)#add to pause
 
@@ -310,11 +310,11 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
 
     def update_rect_y(self):
         self.rect.midbottom = self.hitbox.midbottom
-        self.true_pos[1] = self.rect.centery
+        self.true_pos[1] = self.rect.top
 
     def update_rect_x(self):
         self.rect.midbottom = self.hitbox.midbottom
-        self.true_pos[0] = self.rect.centerx
+        self.true_pos[0] = self.rect.left
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -323,9 +323,13 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
 
     def update_true_pos_x(self):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
         self.true_pos[0] += self.slow_motion*self.game_objects.game.dt*self.velocity[0]
+        self.rect.left = int(self.true_pos[0])#should be int
+        self.update_hitbox()
 
     def update_true_pos_y(self):#called from Engine.platform collision
         self.true_pos[1] += self.slow_motion*self.game_objects.game.dt*self.velocity[1]
+        self.rect.top = int(self.true_pos[1])#should be int
+        self.update_hitbox()
 
     #pltform collisions.
     def right_collision(self,hitbox):
@@ -382,7 +386,7 @@ class Character(Platform_entity):#enemy, NPC,player
         if self.health > 0:#check if dead¨
             self.animation.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.game_objects.camera.camera_shake(3,10)
+            #self.game_objects.camera.camera_shake(3,10)
         else:#if dead
             if self.currentstate.state_name != 'death':#if not already dead
                 self.aggro = False
@@ -437,12 +441,6 @@ class Player(Character):
 
         self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
-
-#    def update_true_pos_x(self):#called from Engine.platform collision
-#        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
-
-#    def update_true_pos_y(self):#called from Engine.platform collision
-#        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -570,7 +568,7 @@ class Enemy(Character):
     def update(self,pos):
         super().update(pos)
         self.AI.update()#tell what the entity should do
-        self.group_distance()
+        #self.group_distance()
 
     def player_collision(self,player):#when player collides with enemy
         if not self.aggro: return
@@ -998,7 +996,7 @@ class NPC(Character):
 
     def update(self,pos):
         super().update(pos)
-        self.group_distance()
+        #self.group_distance()
 
     def interact(self):#when plater press t
         new_state = states.Conversation(self.game_objects.game, self)
@@ -1016,6 +1014,7 @@ class NPC(Character):
 class Aslat(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
+    #    self.true_pos = self.rect.topleft
 
     def buisness(self):#enters after conversation
         if 'reindeer' not in self.priority:#if player has deafated the reindeer
@@ -1295,6 +1294,7 @@ class Dash_effect(Staticentity):
         self.rect.center = entity.rect.center
         self.alpha = alpha
         self.image.set_alpha(self.alpha)
+        self.true_pos = self.rect.topleft
 
     def update(self,scroll):
         self.update_pos(scroll)
@@ -1643,6 +1643,7 @@ class Ranged(Projectiles):
         self.velocity = [0,0]
 
     def update_pos(self,scroll):
+        scroll = [0,0]
         self.rect.topleft = [self.rect.topleft[0] + self.slow_motion*self.game_objects.game.dt*self.velocity[0]+scroll[0], self.rect.topleft[1] + self.slow_motion*self.game_objects.game.dt*self.velocity[1]+scroll[1]]
         self.hitbox.center = self.rect.center
 
@@ -2036,9 +2037,11 @@ class Amber_Droplet(Enemy_drop):
         self.sounds = game_objects.object_pool.objects['Amber_Droplet'].sounds
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.hitbox = pygame.Rect(pos[0],pos[1],5,5)
-        self.hitbox.bottom = self.rect.bottom
+        self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
+        self.hitbox = self.rect.copy()
         self.description = 'moneyy'
+        self.true_pos = list(self.rect.topleft)
 
     def player_collision(self,player):#when the player collides with this object
         super().player_collision(player)
@@ -2059,6 +2062,7 @@ class Bone(Enemy_drop):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
@@ -2085,6 +2089,7 @@ class Heal_item(Enemy_drop):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
         self.description = 'Use it to heal'
 
@@ -2294,12 +2299,10 @@ class Interactable(Animatedentity):#interactables
 
     def update(self,scroll):
         super().update(scroll)
-        self.group_distance()
+        #self.group_distance()
 
     def update_pos(self,pos):
-        self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
-        self.rect.bottomleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
-        self.hitbox.midbottom = self.rect.midbottom
+        return
 
     def interact(self):#when player press T
         pass
@@ -2425,6 +2428,8 @@ class Runestones(Interactable):
         self.rect.bottomleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
+        self.true_pos = self.rect.topleft
+        self.hitbox.midbottom = self.rect.midbottom
 
         if state != "idle":
             self.currentstate = states_basic.Interacted(self)
@@ -2474,6 +2479,8 @@ class Chest(Interactable):
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.true_pos = self.rect.topleft
+        self.hitbox.midbottom = self.rect.midbottom
 
         if state != "idle":
             self.currentstate = states_basic.Interacted(self)
@@ -2580,6 +2587,7 @@ class Savepoint(Interactable):#save point
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
+        self.true_pos = self.rect.topleft
 
     def player_collision(self):#player collision
         self.currentstate.handle_input('Outline')
@@ -2622,7 +2630,7 @@ class Fast_travel(Interactable):#save point
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
-        #self.shader = shader_entities.Shader_entities(self)
+        self.true_pos = self.rect.topleft
 
         try:#if it has been unlocked
             self.game_objects.world_state.travel_points[map]
