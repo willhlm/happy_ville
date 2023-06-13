@@ -291,7 +291,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        self.true_pos = list(self.rect.center)
+        self.true_pos = self.rect.center
 
     def update_pos(self,pos):
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
