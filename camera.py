@@ -17,6 +17,9 @@ class Camera():
         self.scroll[0] = int(self.scroll[0])
         self.scroll[1] = int(self.scroll[1])
 
+        #hfhfhf
+        s = 3
+
     def set_camera(self, camera):
         new_camera = getattr(sys.modules[__name__], camera)(self.game_objects)
         self.game_objects.camera = new_camera
