@@ -110,27 +110,27 @@ class Game_Objects():
     def update(self):
         self.camera.update()
         self.weather.update()
-        scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
-        self.update_groups(scroll)
+        scroll = [self.camera.scroll[0],self.camera.scroll[1]]
+        self.update_groups()
 
-    def update_groups(self, scroll = (0,0)):
-        self.platforms.update(scroll)
-        self.platforms_ramps.update(scroll)
-        self.layer_pause.update(scroll)#should be before all_bgs and all_fgs
-        self.all_bgs.update(scroll)
-        self.bg_interact.update(scroll)
-        self.all_fgs.update(scroll)
-        self.players.update(scroll)
-        self.entity_pause.update(scroll)#should be before enemies, npcs and interactable groups
-        self.enemies.update(scroll)
-        self.npcs.update(scroll)
-        self.fprojectiles.update(scroll)
-        self.eprojectiles.update(scroll)
-        self.loot.update(scroll)
-        self.cosmetics.update(scroll)
-        self.camera_blocks.update(scroll)
-        self.interactables.update(scroll)
-        self.reflections.update(scroll)
+    def update_groups(self):
+        self.platforms.update()
+        self.platforms_ramps.update()
+        self.layer_pause.update()#should be before all_bgs and all_fgs
+        self.all_bgs.update()
+        self.bg_interact.update()
+        self.all_fgs.update()
+        self.players.update()
+        self.entity_pause.update()#should be before enemies, npcs and interactable groups
+        self.enemies.update()
+        self.npcs.update()
+        self.fprojectiles.update()
+        self.eprojectiles.update()
+        self.loot.update()
+        self.cosmetics.update()
+        self.camera_blocks.update()
+        self.interactables.update()
+        self.reflections.update()
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)

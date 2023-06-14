@@ -42,7 +42,7 @@ class Wind(pygame.sprite.Sprite):
     def blow(self,dir):#called when weather is initiated
         self.velocity = dir
 
-    def update(self,scroll):
+    def update(self):
         self.lifetime -= self.weather.game_objects.game.dt
         if self.lifetime < 0:
             self.finish()
@@ -53,24 +53,24 @@ class Wind(pygame.sprite.Sprite):
         self.velocity = [0,0]
         self.lifetime = 300
 
-    def update_pos(self,scroll):#not used
-        self.true_pos = [self.true_pos[0] + (scroll[0]+self.velocity[0]), self.true_pos[1] + (scroll[1]+self.velocity[1])]
+    def update_pos(self):#not used
+        self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]
         self.rect.topleft = self.true_pos
 
 class Fog(pygame.sprite.Sprite):
     def __init__(self,game_objects,parallax,colour):
         super().__init__()
+        self.game_objects = game_objects
         self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.topleft = (0,0)
+        self.rect.topleft = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]#this is [0,0]
         self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
         pygame.draw.rect(self.image,self.colour,self.rect)
-        #self.shader = shader_entities.Shader_entities(self)
-        self.true_pos = [0,0]
+        self.true_pos = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]
         self.parallax = [1,1]
 
-    def update(self,scroll):
-        self.true_pos = (0,0)
+    def update(self):
+        self.true_pos = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]#this is [0,0]
 
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
@@ -82,12 +82,9 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
         self.count = 0
         self.fade_length = 20
         self.image.set_alpha(int(255/self.fade_length))
+        self.true_pos = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]
 
-    def update_pos(self,scroll):
-        self.rect.topleft = (0,0)
-
-    def update(self,scroll):
-        self.update_pos(scroll)
+    def update(self):
         self.update_img()
         self.count += 1
         if self.count > self.fade_length:
@@ -105,13 +102,13 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
         self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.6*self.game_objects.game.WINDOW_SIZE[1]
         self.velocity = [0,0]
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
+        self.update_pos()
         self.boundary()
 
-    def update_pos(self,scroll):
-        scroll = [0,0]
-        self.true_pos = [self.true_pos[0] + (scroll[0]+self.velocity[0])*self.parallax[0], self.true_pos[1] + (scroll[1]+self.velocity[1])*self.parallax[1]]
+    def update_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.parallax[0], self.true_pos[1] + self.velocity[1]*self.parallax[1]]
         self.rect.topleft = self.true_pos
 
     def boundary(self):#continiouse falling
@@ -134,7 +131,7 @@ class Circles(Bound_entity):
         self.glow_spacing_factor = 0.1#a factor to determine the spacing between the glows
         self.glow_radius = self.layers*self.radius*self.glow_spacing_factor#determines the canvas size needed (the size of the largest glow)
 
-        self.true_pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
+        self.true_pos = [random.randint(0, int(self.width))+self.parallax[0]*self.game_objects.camera.scroll[0],random.randint(0, int(self.height))+self.parallax[1]*self.game_objects.camera.scroll[1]]#starting position
 
         self.frequency = 0.003#the frequncy of grow and shrinking
         try:#the images are stored in an class variable such that the animations are only made once. This way, many particles can be made with very small performance.
@@ -151,8 +148,8 @@ class Circles(Bound_entity):
         self.glow_colour = [255,255,255,2]#colour of each glow
         self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
 
-    def update(self,scroll):
-        self.update_pos(scroll)
+    def update(self):
+        self.update_pos()
         self.boundary()
         self.set_image()
 
@@ -163,7 +160,7 @@ class Circles(Bound_entity):
         if self.frame >= len(self.images):
             self.frame = 0
             #set new positions
-            self.true_pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
+            self.true_pos = [random.randint(0, int(self.width))+self.parallax[0]*self.game_objects.camera.scroll[0],random.randint(0, int(self.height))+self.parallax[1]*self.game_objects.camera.scroll[1]]#starting position
 
     def prepare_animation(self):
         self.prepare_canvas()
@@ -210,8 +207,8 @@ class Vertical_circles(Circles):
         self.glow_colour = [255,255,255,2]#colour of each glow
         self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.update_vel()
 
     def update_vel(self):
@@ -229,8 +226,8 @@ class Fireflies(Circles):
         self.glow_colour = [255,215,0,2]#colour of each glow
         self.radius = 3*self.parallax[0]#particle radius, depends on parallax
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.update_vel()
 
     def update_vel(self):
@@ -267,8 +264,8 @@ class Weather_particles(Bound_entity):
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
         self.friction = [0.5,0]
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.time += self.game_objects.game.dt
         self.update_vel()
 
@@ -358,7 +355,7 @@ class Rain(Weather_particles):
 class Leaves(Weather_particles):#leaves from trees
     def __init__(self,game_objects,parallax,information,kill = False):
         super().__init__(game_objects,parallax)
-        self.init_pos = [information[0][0]+information[1][0]*0.5,information[0][1]-information[1][1]*0.5]#center
+        self.init_pos = [information[0][0]+information[1][0]*0.5+self.parallax[0]*self.game_objects.camera.scroll[0],information[0][1]-information[1][1]*0.5+self.parallax[1]*self.game_objects.camera.scroll[1]]#center
         self.spawn_size = information[1]
         rand = random.randint(1,1)#randomly choose a leaf type
         self.sprites = Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
@@ -366,7 +363,6 @@ class Leaves(Weather_particles):#leaves from trees
         self.rect = self.image.get_rect()
         self.reset()
         self.resetting = {False:self.reset,True:self.kill}[kill]
-        #self.shader = shader_entities.Shader_entities(self)
 
         colours=[(60,179,113),(154,205,50),(34,139,34),(46,139,87)]
         colour = colours[random.randint(0, len(colours)-1)]
@@ -381,18 +377,13 @@ class Leaves(Weather_particles):#leaves from trees
             for frame, image in enumerate(self.sprites.sprite_dict[state]):
                 self.sprites.sprite_dict[state][frame] = pygame.transform.box_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.alpha -= self.game_objects.game.dt*0.2
         self.image.set_alpha(self.alpha)
 
-    def update_pos(self,scroll):
-        self.true_pos = [self.true_pos[0] + (scroll[0] + self.velocity[0])*self.parallax[0], self.true_pos[1] + (scroll[1] + self.velocity[1])*self.parallax[1]]
-        self.init_pos = [self.init_pos[0] +scroll[0]*self.parallax[0],self.init_pos[1]+scroll[1]*self.parallax[0]]#update inital position with scroll
-        self.rect.center = self.true_pos.copy()
-
     def boundary(self):
-        if self.rect.centery > self.game_objects.game.WINDOW_SIZE[1]+50 or self.alpha < 5:
+        if self.alpha < 5:#self.rect.centery > self.game_objects.game.WINDOW_SIZE[1]+50 or
             self.resetting()
 
     def speed(self):
@@ -404,4 +395,4 @@ class Leaves(Weather_particles):#leaves from trees
         self.time = 0
         self.image.set_alpha(self.alpha)
         self.true_pos = [self.init_pos[0]+random.uniform(-self.spawn_size[0]*0.5,self.spawn_size[0]*0.5),self.init_pos[1]+random.uniform(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]
-        self.rect.center = self.true_pos.copy()
+        self.rect.topleft = self.true_pos.copy()

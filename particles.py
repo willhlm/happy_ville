@@ -14,18 +14,15 @@ class Particles(pygame.sprite.Sprite):
         self.colour = colour
         self.scale = scale
 
-    def update(self,scroll):
-        self.update_pos(scroll)
-        self.shader.update_pos()
+    def update(self):
+        self.update_pos()
         self.lifetime -= self.game_objects.game.dt
         self.speed()
         self.fading()
         self.destroy()
 
-    def update_pos(self,scroll):
-        scroll = [0,0]
-        self.true_pos = [self.true_pos[0] + scroll[0]+self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + scroll[1]+self.velocity[1]*self.game_objects.game.dt]
-        #self.rect.topleft = [self.rect.topleft[0] + scroll[0]+self.velocity[0], self.rect.topleft[1] + scroll[1]+self.velocity[1]]
+    def update_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
         self.rect.topleft = self.true_pos
 
     def speed(self):
@@ -62,7 +59,6 @@ class Circle(Particles):#a general one
         self.radius = random.randint(max(self.scale-1,1), self.scale+1)
         self.fade_scale = 3
         self.make_circle()
-        self.shader = shader_entities.Shader_entities(self)
         #self.true_pos = self.rect.topleft
 
     def make_circle(self):
@@ -87,12 +83,11 @@ class Spark(Particles):#a general one
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.make_sparks()
         self.fade_scale = 10
-        self.shader = shader_entities.Shader_entities(self)
         #self.true_pos = self.rect.topleft
 
-    def update(self,scroll):
+    def update(self):
         self.update_spark()
-        super().update(scroll)
+        super().update()
 
     def update_spark(self):
         self.image = self.surface.copy()

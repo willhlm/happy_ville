@@ -477,7 +477,7 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
         #self.shader = shader_entities.Shader_entities(self)
 
     def update(self):
-        self.game.game_objects.cosmetics.update([0,0])
+        self.game.game_objects.cosmetics.update()
         self.duration -= self.game.dt
         self.amp = int(0.8*self.amp)
         if self.duration < 0:
