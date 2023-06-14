@@ -52,7 +52,7 @@ class Game_Objects():
 
         #initiate player
         self.player = Entities.Player([0,0],self)
-        self.players = groups.Group(self)
+        self.players = groups.Group_player(self)#blits on float positions
         self.players.add(self.player)
 
     def load_map(self, map_name, spawn = '1',fade = True):
@@ -110,27 +110,27 @@ class Game_Objects():
     def update(self):
         self.camera.update()
         self.weather.update()
-        scroll = [-self.camera.scroll[0],-self.camera.scroll[1]]
-        self.update_groups(scroll)
+        scroll = [self.camera.scroll[0],self.camera.scroll[1]]
+        self.update_groups()
 
-    def update_groups(self, scroll = (0,0)):
-        self.platforms.update(scroll)
-        self.platforms_ramps.update(scroll)
-        self.layer_pause.update(scroll)#should be before all_bgs and all_fgs
-        self.all_bgs.update(scroll)
-        self.bg_interact.update(scroll)
-        self.all_fgs.update(scroll)
-        self.players.update(scroll)
-        self.entity_pause.update(scroll)#should be before enemies, npcs and interactable groups
-        self.enemies.update(scroll)
-        self.npcs.update(scroll)
-        self.fprojectiles.update(scroll)
-        self.eprojectiles.update(scroll)
-        self.loot.update(scroll)
-        self.cosmetics.update(scroll)
-        self.camera_blocks.update(scroll)
-        self.interactables.update(scroll)
-        self.reflections.update(scroll)
+    def update_groups(self):
+        self.platforms.update()
+        self.platforms_ramps.update()
+        self.layer_pause.update()#should be before all_bgs and all_fgs
+        self.all_bgs.update()
+        self.bg_interact.update()
+        self.all_fgs.update()
+        self.players.update()
+        self.entity_pause.update()#should be before enemies, npcs and interactable groups
+        self.enemies.update()
+        self.npcs.update()
+        self.fprojectiles.update()
+        self.eprojectiles.update()
+        self.loot.update()
+        self.cosmetics.update()
+        self.camera_blocks.update()
+        self.interactables.update()
+        self.reflections.update()
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
@@ -144,7 +144,7 @@ class Game_Objects():
         self.eprojectiles.draw(self.game.screen)
         self.loot.draw(self.game.screen)
         self.entity_pause.draw(self.game.screen)
-        #self.cosmetics.draw(self.game.screen)
+        self.cosmetics.draw(self.game.screen)
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw(self.game.screen)
         #self.camera_blocks.draw(self.game.screen)
@@ -152,7 +152,7 @@ class Game_Objects():
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
             for projectile in self.fprojectiles.sprites():#go through the group
-                pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
+                pygame.draw.rect(self.game.screen, (0,0,255), (int(projectile.hitbox[0]-self.camera.scroll[0]),int(projectile.hitbox[1]-self.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
             for projectile in self.eprojectiles.sprites():#go through the group
                 pygame.draw.rect(self.game.screen, (0,0,255), projectile.hitbox,2)#draw hitbox
             for enemy in self.enemies.sprites():#go through the group
@@ -162,14 +162,12 @@ class Game_Objects():
             #    pygame.draw.rect(self.game.screen, (0,0,255), loot.hitbox,2)#draw hitbox
             #    pygame.draw.rect(self.game.screen, (255,0,255), loot.rect,2)#draw hitbox
             for cos in self.interactables.sprites():#go through the group
-                pygame.draw.rect(self.game.screen, (0,0,255), cos.hitbox,2)#draw hitbox
+                pygame.draw.rect(self.game.screen, (0,0,255), (int(cos.hitbox[0]-self.camera.scroll[0]),int(cos.hitbox[1]-self.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
 
             pygame.draw.rect(self.game.screen, (0,0,255), (round(self.player.hitbox[0]-self.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
             pygame.draw.rect(self.game.screen, (255,0,255), (round(self.player.rect[0]-self.camera.true_scroll[0]),round(self.player.rect[1]-self.camera.true_scroll[1]),self.player.rect[2],self.player.rect[3]),2)#draw hitbox
 
             for platform in self.platforms:#go through the group
-                pygame.draw.rect(self.game.screen, (255,0,0), (round(platform.hitbox[0]-self.camera.true_scroll[0]),round(platform.hitbox[1]-self.camera.true_scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(self.game.screen, (255,0,0), (int(platform.hitbox[0]-self.camera.scroll[0]),int(platform.hitbox[1]-self.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), ramp.hitbox,1)#draw hitbox
-            for int in self.interactables:
-                pygame.draw.rect(self.game.screen, (255,100,100), int.hitbox,1)#draw hitbox
