@@ -238,21 +238,21 @@ class BG_Animated(BG_Block):
 class Reflection(Staticentity):
     def __init__(self,pos,size,dir,game_objects, offset = 12):
         super().__init__(pos,pygame.Surface(size, pygame.SRCALPHA, 32))
+        self.game_objects = game_objects
         self.size = size
         self.dir = dir
-        self.game_objects = game_objects
         self.offset = offset
         self.squeeze = 0.75
-        self.true_pos = self.rect.topleft
+        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, self.size[0], self.size[1])
 
     def draw(self):
-        reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1]*self.squeeze - self.offset, self.size[0], self.size[1])
-        reflect_rect.center = [reflect_rect.center[0],self.game_objects.game.screen.get_height() - reflect_rect.center[1]]
+        self.reflect_rect.center = [self.rect.center[0]- self.game_objects.camera.scroll[0],self.game_objects.game.screen.get_height() - self.rect.center[1]+ self.size[1]*self.squeeze + self.offset + self.game_objects.camera.scroll[1]]
         reflect_surface = self.game_objects.game.screen.copy()
         reflect_surface.convert_alpha()#do we need this?
         reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*self.squeeze))
         #reflect_surface.set_alpha(100)
-        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), self.rect.topleft, reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
+        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0],self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
+        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), blit_pos, self.reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
