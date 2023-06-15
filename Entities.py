@@ -229,8 +229,7 @@ class BG_Animated(BG_Block):
         self.image = self.sprites[0]
         self.animation = animation.Simple_animation(self)
 
-    def update(self, pos):
-        self.update_pos(pos)
+    def update(self):
         self.animation.update()
 
     def reset_timer(self):

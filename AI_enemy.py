@@ -139,7 +139,7 @@ class Attack_init(behaviour_tree.Leaf):#run once
         super().__init__(entity)
 
     def update(self):
-        self.entity.currentstate.handle_input('Attack_pre')
+        self.entity.currentstate.enter_state('Attack_pre')#shoul it be handle_input?
         self.entity.AI.black_board['attack'] = 'RUNNING'
         return 'SUCCESS'
 
