@@ -65,7 +65,7 @@ class Collision_oneway_up(Platform):
 class Collision_right_angle(Platform):
     def __init__(self,pos,points,go_through=True):
         self.define_values(pos, points)
-        super().__init__(self.new_pos,self.size)
+        super().__init__([self.new_pos[0],self.new_pos[1]-self.size[1]],self.size)
         self.ratio = self.size[1]/self.size[0]
         self.go_through = go_through
     #function calculates size, real bottomleft position and orientation of right angle triangle
@@ -189,7 +189,7 @@ class Collision_dmg(Platform):
             entity.left_collision(self.hitbox.right)
             entity.velocity[0] = 10#knock back
         entity.take_dmg(self.dmg)
-        entity.update_rect()
+        entity.update_rect_x()
 
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
@@ -199,7 +199,7 @@ class Collision_dmg(Platform):
             entity.top_collision(self.hitbox.bottom)
             entity.velocity[1] = 10#knock back
         entity.take_dmg(self.dmg)
-        entity.update_rect()
+        entity.update_rect_y()
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def __init__(self,pos,img = pygame.Surface((16,16),pygame.SRCALPHA,32)):
@@ -409,7 +409,6 @@ class Player(Character):
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
 
-        self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def down_collision(self,hitbox):#when colliding with platform beneth
@@ -451,10 +450,6 @@ class Player(Character):
     def dead(self):#called when death animation is finished
         new_game_state = states.Cutscenes(self.game_objects.game,'Death')
         new_game_state.enter_state()
-        self.set_abs_dist()
-
-    def set_abs_dist(self):#the absolute distance, i.e. the total scroll
-        self.abs_dist = C.player_center.copy()#the coordinate for buring the bone
 
     def enter_idle(self):
         self.currentstate = states_player.Idle_main(self)
@@ -466,7 +461,6 @@ class Player(Character):
 
     def update(self):
         super().update()
-        self.abs_dist = self.game_objects.camera.scroll
         self.omamoris.update()
 
 class Migawari_entity(Character):#player double ganger
@@ -1951,7 +1945,7 @@ class Enemy_drop(Loot):#add gravity
         self.lifetime = 500
 
     def update_vel(self):
-        self.velocity[1] += 0.5*self.game_objects.game.dt*self.slow_motion
+        self.velocity[1] += 0.3*self.game_objects.game.dt*self.slow_motion
 
     def update(self):
         super().update()
@@ -1980,7 +1974,7 @@ class Enemy_drop(Loot):#add gravity
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
         self.velocity[0] = 0.5*self.velocity[0]
-        self.velocity[1] = -0.6*self.velocity[1]
+        self.velocity[1] = -0.3*self.velocity[1]
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
