@@ -16,12 +16,8 @@ class Tree(Animatedentity):
             obj = Leaves(self.game_objects,self.parallax,self.spawn_box)
             self.game_objects.all_bgs.add(obj)
 
-    def update_pos(self,scroll):
-        self.true_pos = [self.true_pos[0] + self.parallax[0]*scroll[0], self.true_pos[1] + self.parallax[1]*scroll[1]]
-        self.rect.bottomleft = self.true_pos.copy()
-
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.group_distance()
 
     def blowing(self):#called when in wind state
@@ -57,10 +53,9 @@ class Light_forest_tree1(Tree):
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
-        self.hitbox = self.rect.copy()
-        self.true_pos = self.rect.bottomleft
-
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+        
         #for leaves
         position = self.rect.center
         size = [64,64]
@@ -75,9 +70,8 @@ class Light_forest_tree2(Tree):
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
-        self.hitbox = self.rect.copy()
-        self.true_pos = self.rect.bottomleft
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
 
         #for leaves
         position = self.rect.center

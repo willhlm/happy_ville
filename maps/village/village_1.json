@@ -541,8 +541,8 @@
                          "type":"",
                          "visible":true,
                          "width":4713,
-                         "x":115,
-                         "y":588
+                         "x":48,
+                         "y":592
                         }, 
                         {
                          "gid":15,
@@ -689,6 +689,24 @@
                          "width":16,
                          "x":3728,
                          "y":383
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":68,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Exploding_Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1232,
+                         "y":432
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -929,7 +947,7 @@
          "y":0
         }],
  "nextlayerid":34,
- "nextobjectid":68,
+ "nextobjectid":69,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

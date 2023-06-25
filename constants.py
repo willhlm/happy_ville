@@ -6,7 +6,7 @@ player_center = [window_size[0]*0.5,window_size[1]*0.5]
 tile_size = 16
 
 #physics
-acceleration = [1,0.38]
+acceleration = [0.8,0.38]
 friction = [0.5,0]#need to be less than 1
 friction_player = [0.24,0.01]
 jump_vel_player = -6

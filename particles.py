@@ -7,25 +7,23 @@ class Particles(pygame.sprite.Sprite):
         angle = self.define_angle(dir)
         self.angle = -(2*math.pi*angle)/360
         self.lifetime = lifetime
-        self.pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
+        self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
         amp = random.randint(vel[0], vel[1])
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.fade = colour[-1]
         self.colour = colour
         self.scale = scale
 
-    def update(self,scroll):
-        self.update_pos(scroll)
-        self.shader.update_pos()        
+    def update(self):
+        self.update_pos()
         self.lifetime -= self.game_objects.game.dt
         self.speed()
         self.fading()
         self.destroy()
 
-    def update_pos(self,scroll):
-        self.pos = [self.pos[0] + scroll[0]+self.velocity[0]*self.game_objects.game.dt, self.pos[1] + scroll[1]+self.velocity[1]*self.game_objects.game.dt]
-        #self.rect.topleft = [self.rect.topleft[0] + scroll[0]+self.velocity[0], self.rect.topleft[1] + scroll[1]+self.velocity[1]]
-        self.rect.center = self.pos
+    def update_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
+        self.rect.topleft = self.true_pos
 
     def speed(self):
         self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)
@@ -61,7 +59,7 @@ class Circle(Particles):#a general one
         self.radius = random.randint(max(self.scale-1,1), self.scale+1)
         self.fade_scale = 3
         self.make_circle()
-        self.shader = shader_entities.Shader_entities(self)
+        #self.true_pos = self.rect.topleft
 
     def make_circle(self):
         self.surface =pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
@@ -69,7 +67,7 @@ class Circle(Particles):#a general one
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
         #self.prepare_glow()
         self.rect = self.image.get_rect()
-        self.rect.center = self.pos
+        self.rect.topleft = self.true_pos
 
     def prepare_glow(self):
         glow_colour = [255,255,255,20]#colour of each glow
@@ -85,11 +83,11 @@ class Spark(Particles):#a general one
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.make_sparks()
         self.fade_scale = 10
-        self.shader = shader_entities.Shader_entities(self)
+        #self.true_pos = self.rect.topleft
 
-    def update(self,scroll):
+    def update(self):
         self.update_spark()
-        super().update(scroll)
+        super().update()
 
     def update_spark(self):
         self.image = self.surface.copy()
@@ -113,4 +111,4 @@ class Spark(Particles):#a general one
         self.spark_shape()#define the shape of spark
         pygame.draw.polygon(self.image,self.colour,self.points)
         self.rect = self.image.get_rect()
-        self.rect.center = self.pos
+        self.rect.topleft = self.true_pos

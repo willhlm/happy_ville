@@ -15,15 +15,9 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def __init__(self,pos,size = (16,16)):
         super().__init__()
         self.rect = pygame.Rect(pos,size)
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
         self.hitbox = self.rect.inflate(0,0)
-
-    def update(self,pos):
-        self.update_pos(pos)
-
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.center = self.rect.center
 
     def take_dmg(self):
         pass
@@ -71,7 +65,7 @@ class Collision_oneway_up(Platform):
 class Collision_right_angle(Platform):
     def __init__(self,pos,points,go_through=True):
         self.define_values(pos, points)
-        super().__init__(self.new_pos,self.size)
+        super().__init__([self.new_pos[0],self.new_pos[1]-self.size[1]],self.size)
         self.ratio = self.size[1]/self.size[0]
         self.go_through = go_through
     #function calculates size, real bottomleft position and orientation of right angle triangle
@@ -195,7 +189,7 @@ class Collision_dmg(Platform):
             entity.left_collision(self.hitbox.right)
             entity.velocity[0] = 10#knock back
         entity.take_dmg(self.dmg)
-        entity.update_rect()
+        entity.update_rect_x()
 
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
@@ -205,24 +199,20 @@ class Collision_dmg(Platform):
             entity.top_collision(self.hitbox.bottom)
             entity.velocity[1] = 10#knock back
         entity.take_dmg(self.dmg)
-        entity.update_rect()
+        entity.update_rect_y()
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def __init__(self,pos,img = pygame.Surface((16,16),pygame.SRCALPHA,32)):
         super().__init__()
         self.image = img.convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.bounds = [-200,800,-100,350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.true_pos = list(self.rect.topleft)
+        self.parallax = [1,1]
 
-    def update(self,pos):
-        self.update_pos(pos)
-
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-
-    def group_distance(self):#instead of bound, could calculate distance from center. But maybe cost
-        if self.rect[0]<self.bounds[0] or self.rect[0]>self.bounds[1] or self.rect[1]<self.bounds[2] or self.rect[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
+    def group_distance(self):#instead of bound, could calculate distance from center.
+        if self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0] < self.bounds[0] or self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0] > self.bounds[1] or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1]<self.bounds[2] or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1]>self.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             self.remove(self.group)#remove from group
             self.add(self.pause_group)#add to pause
 
@@ -230,11 +220,6 @@ class BG_Block(Staticentity):
     def __init__(self,pos,img,parallax = 1):
         super().__init__(pos,img)
         self.parallax = parallax
-        self.true_pos = self.rect.bottomleft
-
-    def update_pos(self,pos):
-        self.true_pos = [self.true_pos[0] + self.parallax[0]*pos[0], self.true_pos[1] + self.parallax[1]*pos[1]]
-        self.rect.topleft = self.true_pos.copy()#[round(self.true_pos[0]),round(self.true_pos[1])]
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -244,8 +229,7 @@ class BG_Animated(BG_Block):
         self.image = self.sprites[0]
         self.animation = animation.Simple_animation(self)
 
-    def update(self, pos):
-        self.update_pos(pos)
+    def update(self):
         self.animation.update()
 
     def reset_timer(self):
@@ -254,20 +238,21 @@ class BG_Animated(BG_Block):
 class Reflection(Staticentity):
     def __init__(self,pos,size,dir,game_objects, offset = 12):
         super().__init__(pos,pygame.Surface(size, pygame.SRCALPHA, 32))
+        self.game_objects = game_objects
         self.size = size
         self.dir = dir
-        self.game_objects = game_objects
         self.offset = offset
         self.squeeze = 0.75
+        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, self.size[0], self.size[1])
 
     def draw(self):
-        reflect_rect = pygame.Rect(self.rect.left, self.rect.top - self.size[1]*self.squeeze - self.offset, self.size[0], self.size[1])
-        reflect_rect.center = [reflect_rect.center[0],self.game_objects.game.screen.get_height() - reflect_rect.center[1]]
+        self.reflect_rect.center = [self.rect.center[0]- self.game_objects.camera.scroll[0],self.game_objects.game.screen.get_height() - self.rect.center[1]+ self.size[1]*self.squeeze + self.offset + self.game_objects.camera.scroll[1]]
         reflect_surface = self.game_objects.game.screen.copy()
         reflect_surface.convert_alpha()#do we need this?
         reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*self.squeeze))
         #reflect_surface.set_alpha(100)
-        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), self.rect.topleft, reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
+        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0],self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
+        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), blit_pos, self.reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -277,8 +262,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
 
-    def update(self,scroll):
-        super().update(scroll)#update_pos
+    def update(self):
         self.currentstate.update()
         self.animation.update()
 
@@ -291,23 +275,26 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
+<<<<<<< HEAD
         self.true_pos = self.rect.center
 
     def update_pos(self,pos):
         self.true_pos = [self.true_pos[0] + pos[0], self.true_pos[1] + pos[1]]
         self.rect.center = self.true_pos.copy()
         self.hitbox.midbottom = self.rect.midbottom
+=======
+>>>>>>> dev/floatVel
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
 
     def update_rect_y(self):
         self.rect.midbottom = self.hitbox.midbottom
-        self.true_pos[1] = self.rect.centery
+        self.true_pos[1] = self.rect.top
 
     def update_rect_x(self):
         self.rect.midbottom = self.hitbox.midbottom
-        self.true_pos[0] = self.rect.centerx
+        self.true_pos[0] = self.rect.left
 
     def set_pos(self, pos):
         self.rect.center = (pos[0],pos[1])
@@ -316,9 +303,13 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
 
     def update_true_pos_x(self):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
         self.true_pos[0] += self.slow_motion*self.game_objects.game.dt*self.velocity[0]
+        self.rect.left = int(self.true_pos[0])#should be int
+        self.update_hitbox()
 
     def update_true_pos_y(self):#called from Engine.platform collision
         self.true_pos[1] += self.slow_motion*self.game_objects.game.dt*self.velocity[1]
+        self.rect.top = int(self.true_pos[1])#should be int
+        self.update_hitbox()
 
     #pltform collisions.
     def right_collision(self,hitbox):
@@ -354,8 +345,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
         self.running_particles = Dust_running_particles
 
-    def update(self,pos):
-        self.update_pos(pos)
+    def update(self):
         self.update_timers()
         self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
@@ -370,17 +360,17 @@ class Character(Platform_entity):#enemy, NPC,player
     def take_dmg(self,dmg):
         if self.invincibile: return
         self.health -= dmg
-        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
 
         if self.health > 0:#check if dead¨
+            self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
             self.animation.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.game_objects.camera.camera_shake(3,10)
+            #self.game_objects.camera.camera_shake(3,10)
         else:#if dead
-            if self.currentstate.state_name != 'death':#if not already dead
-                self.aggro = False
-                self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
-                self.currentstate.enter_state('Death')#overrite any state and go to deat
+            self.aggro = False
+            self.invincibile = True
+            self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+            self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
         self.velocity[0] = dir[0]*30
@@ -428,14 +418,7 @@ class Player(Character):
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
 
-        self.set_abs_dist()
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
-
-    def update_true_pos_x(self):#called from Engine.platform collision
-        self.true_pos[0] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[0])
-
-    def update_true_pos_y(self):#called from Engine.platform collision
-        self.true_pos[1] += round(self.slow_motion*self.game_objects.game.dt*self.velocity[1])
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -476,10 +459,6 @@ class Player(Character):
     def dead(self):#called when death animation is finished
         new_game_state = states.Cutscenes(self.game_objects.game,'Death')
         new_game_state.enter_state()
-        self.set_abs_dist()
-
-    def set_abs_dist(self):#the absolute distance, i.e. the total scroll
-        self.abs_dist = C.player_center.copy()#the coordinate for buring the bone
 
     def enter_idle(self):
         self.currentstate = states_player.Idle_main(self)
@@ -489,9 +468,8 @@ class Player(Character):
         self.acceleration =  [0,C.acceleration[1]]
         self.friction = C.friction_player.copy()
 
-    def update(self,pos):
-        super().update(pos)
-        self.abs_dist = [self.abs_dist[0] - pos[0], self.abs_dist[1] - pos[1]]
+    def update(self):
+        super().update()
         self.omamoris.update()
 
 class Migawari_entity(Character):#player double ganger
@@ -511,8 +489,8 @@ class Migawari_entity(Character):#player double ganger
     def set_lifetime(self,lifetime):#should be called when making this object
         self.lifetime = lifetime
 
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
 
@@ -560,8 +538,8 @@ class Enemy(Character):
         self.attack_distance = [0,0]#at which distance to the player to attack
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
         self.AI.update()#tell what the entity should do
         self.group_distance()
 
@@ -588,10 +566,6 @@ class Enemy(Character):
     def countered(self):#player shield
         self.velocity[0] = -30*self.dir[0]
         self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
-
-    def update_pos(self,pos):
-        super().update_pos(pos)
-        self.original_pos = [self.original_pos[0] + pos[0], self.original_pos[1] + pos[1]]
 
     def health_bar(self):#called from omamori Boss_HP
         pass
@@ -632,8 +606,8 @@ class Sandrew(Enemy):
         self.attack_distance = [250,50]
         self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
         #self.AI.print_leaf()
 
 class Mygga(Enemy):
@@ -989,9 +963,9 @@ class NPC(Character):
         self.priority = ['reindeer','ape']#priority events to say
         self.event = ['aslat']#normal events to say
 
-    def update(self,pos):
-        super().update(pos)
-        self.group_distance()
+    def update(self):
+        super().update()
+        #self.group_distance()
 
     def interact(self):#when plater press t
         new_state = states.Conversation(self.game_objects.game, self)
@@ -1009,6 +983,7 @@ class NPC(Character):
 class Aslat(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
+    #    self.true_pos = self.rect.topleft
 
     def buisness(self):#enters after conversation
         if 'reindeer' not in self.priority:#if player has deafated the reindeer
@@ -1225,7 +1200,7 @@ class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. cav
         self.rect = self.image.get_rect()
         self.rect.topleft = (0,0)
 
-    def update(self,pos):
+    def update(self):
         self.image = self.dark.copy()
 
 class Transparent_screen(Staticentity):#a placeholder for normal stages. initialised in maploader
@@ -1266,7 +1241,7 @@ class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark
         self.layers = layers
         self.make_glow()
 
-    def update(self,pos):
+    def update(self):
         pos = [self.entity.rect.centerx-self.radius,self.entity.rect.centery-self.radius]
         self.game_objects.map.screen.image.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_SUB)
         self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), None, special_flags = pygame.BLEND_RGB_SUB)#inverting
@@ -1287,9 +1262,9 @@ class Dash_effect(Staticentity):
         self.rect.center = entity.rect.center
         self.alpha = alpha
         self.image.set_alpha(self.alpha)
+        self.true_pos = self.rect.topleft
 
-    def update(self,scroll):
-        self.update_pos(scroll)
+    def update(self):
         self.alpha *= 0.9
         self.image.set_alpha(self.alpha)
         self.destroy()
@@ -1321,7 +1296,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
         self.image.set_alpha(self.fade)
         self.page = 0
 
-    def update(self,scroll):
+    def update(self):
         self.render_fade[self.page]()
 
     def render_in(self):
@@ -1415,8 +1390,8 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
 
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
         self.update_timers()
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
@@ -1467,12 +1442,8 @@ class Melee(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
-        self.hitbox.center = self.rect.center
-
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
         self.update_hitbox()
 
     def countered(self,dir,pos):#called from sword collision_projectile, purple initinty stone
@@ -1634,8 +1605,12 @@ class Ranged(Projectiles):
         super().__init__(entity)
         self.velocity = [0,0]
 
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + self.slow_motion*self.game_objects.game.dt*self.velocity[0]+scroll[0], self.rect.topleft[1] + self.slow_motion*self.game_objects.game.dt*self.velocity[1]+scroll[1]]
+    def update(self):
+        super().update()
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.topleft = [self.rect.topleft[0] + self.slow_motion*self.game_objects.game.dt*self.velocity[0], self.rect.topleft[1] + self.slow_motion*self.game_objects.game.dt*self.velocity[1]]
         self.hitbox.center = self.rect.center
 
 class Thunder(Ranged):
@@ -1697,8 +1672,8 @@ class Poisonblobb(Ranged):
         self.lifetime = 100
         self.velocity=[entity.dir[0]*5,-1]
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.update_vel()
 
     def update_vel(self):
@@ -1881,8 +1856,8 @@ class Loot(Platform_entity):#
         super().__init__(pos,game_objects)
         self.description = ''
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.update_vel()
 
     def update_vel(self):
@@ -1941,8 +1916,8 @@ class Soul_essence(Loot):
         #make a cutscene?
         self.kill()
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         obj1 = getattr(particles, 'Spark')(self.rect.center,self.game_objects,distance = 100,lifetime=20,vel=[2,4],dir='isotropic',scale = 1, colour = [255,255,255,255])
         self.game_objects.cosmetics.add(obj1)
 
@@ -1979,10 +1954,10 @@ class Enemy_drop(Loot):#add gravity
         self.lifetime = 500
 
     def update_vel(self):
-        self.velocity[1] += 0.5*self.game_objects.game.dt*self.slow_motion
+        self.velocity[1] += 0.3*self.game_objects.game.dt*self.slow_motion
 
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destory()
 
@@ -2008,7 +1983,7 @@ class Enemy_drop(Loot):#add gravity
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
         self.velocity[0] = 0.5*self.velocity[0]
-        self.velocity[1] = -0.6*self.velocity[1]
+        self.velocity[1] = -0.3*self.velocity[1]
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
@@ -2028,8 +2003,9 @@ class Amber_Droplet(Enemy_drop):
         self.sounds = game_objects.object_pool.objects['Amber_Droplet'].sounds
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.hitbox = pygame.Rect(pos[0],pos[1],5,5)
-        self.hitbox.bottom = self.rect.bottom
+        self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
+        self.hitbox = self.rect.copy()
         self.description = 'moneyy'
 
     def player_collision(self,player):#when the player collides with this object
@@ -2051,6 +2027,7 @@ class Bone(Enemy_drop):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
@@ -2077,6 +2054,7 @@ class Heal_item(Enemy_drop):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
         self.description = 'Use it to heal'
 
@@ -2137,6 +2115,7 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
         self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.rect.center = pos
+        self.true_pos = self.rect.topleft
 
     def reset_timer(self):
         self.kill()
@@ -2157,19 +2136,18 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
         self.rect.topleft = pos
         self.timer=0
         self.velocity=[0,0]
-        #self.shader = shader_entities.Shader_entities(self)
 
-    def update(self,scroll):
-        super().update(scroll)
-
+    def update(self):
+        super().update()
+        self.update_pos()
         self.timer += self.game_objects.game.dt*self.slow_motion
         if self.timer > 100:#fly to sky
             self.velocity[1] = -20
         elif self.timer>200:
             self.kill()
 
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0]+self.velocity[0], self.rect.topleft[1] + pos[1]+self.velocity[1]]
+    def update_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')
@@ -2185,8 +2163,8 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
         self.finish = False
         #self.shader = shader_entities.Shader_entities(self)
 
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
 
     def reset_timer(self):
         self.finish = True
@@ -2200,7 +2178,6 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
         self.currentstate.enter_state('Slash_' + state)
         self.image = self.sprites.sprite_dict['slash_' + state][0]
         self.rect = self.image.get_rect(center=pos)
-        #self.shader = shader_entities.Shader_entities(self)
 
     def reset_timer(self):
         self.kill()
@@ -2226,12 +2203,8 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
         self.rect.center = pos
         self.hitbox = self.rect.copy()#pygame.Rect(self.entity.rect.x,self.entity.rect.y,50,50)
 
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
-        self.hitbox.center = self.rect.center
-
-    def update(self,pos):
-        super().update(pos)
+    def update(self):
+        super().update()
         self.update_hitbox()
 
     def update_hitbox(self):
@@ -2251,9 +2224,6 @@ class Pray_effect(Animatedentity):#the thing when aila pray
         self.rect = self.image.get_rect()
         self.rect.center = pos
 
-    def update_pos(self,scroll):
-        self.rect.topleft = [self.rect.topleft[0] + scroll[0], self.rect.topleft[1] + scroll[1]]
-
     def spawn(self):
         pass
 
@@ -2268,9 +2238,6 @@ class Health_bar(Animatedentity):
         self.width = self.rect[2]
         self.rect.topleft = [self.game_objects.game.WINDOW_SIZE[0]*0.5 - self.width*0.5,3]
 
-    def update_pos(self,pos):
-        pass
-
     def resize(self):#in principle, should just be called when boss take dmg
         width = max(self.width * (self.entity.health/self.max_health),0)
         for index, sprite in  enumerate(self.sprites.sprite_dict['idle']):
@@ -2282,14 +2249,11 @@ class Interactable(Animatedentity):#interactables
         super().__init__(pos,game_objects)
         self.group = game_objects.interactables
         self.pause_group = game_objects.entity_pause
+        self.true_pos = self.rect.topleft
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.group_distance()
-
-    def update_pos(self,pos):
-        self.rect.topleft = [self.rect.topleft[0] + pos[0], self.rect.topleft[1] + pos[1]]
-        self.hitbox.midbottom = self.rect.midbottom
 
     def interact(self):#when player press T
         pass
@@ -2309,7 +2273,7 @@ class Bridge(Interactable):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/bridge/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = (pos[0],pos[1])
+        self.rect.topleft = (pos[0],pos[1])
         self.hitbox = self.rect.copy()
         platform = Collision_block(pos,(self.image.get_width(),32))
         self.game_objects.platforms.add(platform)
@@ -2318,7 +2282,7 @@ class Path_col(Interactable):
     def __init__(self, pos, game_objects,size, destination, spawn):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
@@ -2326,8 +2290,7 @@ class Path_col(Interactable):
         self.image.set_alpha(0)#make them transparent
         #self.shader = shader_entities.Shader_entities(self)
 
-    def update(self,scroll):
-        self.update_pos(scroll)
+    def update(self):
         self.group_distance()
 
     def player_collision(self):
@@ -2337,7 +2300,7 @@ class Path_inter(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn, image):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos,size)
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
@@ -2345,8 +2308,7 @@ class Path_inter(Interactable):
         self.image.set_alpha(0)#make them transparent
         #self.shader = shader_entities.Shader_entities(self)
 
-    def update(self,scroll):
-        self.update_pos(scroll)
+    def update(self):
         self.group_distance()
 
     def interact(self):
@@ -2356,13 +2318,13 @@ class Cutscene_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.event = event
         self.image.set_alpha(0)#make them transparent
 
-    def update(self,scroll):
-        self.update_pos(scroll)
+    def update(self):
+        pass
         #self.group_distance()
 
     def player_collision(self):
@@ -2403,7 +2365,7 @@ class Cave_grass(Interactable_bushes):
         self.sprites=Read_files.Sprites_Player('Sprites/animations/cave_grass/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
 
 class Runestones(Interactable):
@@ -2412,9 +2374,11 @@ class Runestones(Interactable):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/runestones/' + ID_key)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
+        self.true_pos = self.rect.topleft
+        self.hitbox.midbottom = self.rect.midbottom
 
         if state != "idle":
             self.currentstate = states_basic.Interacted(self)
@@ -2434,7 +2398,7 @@ class Uber_runestone(Interactable):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/uber_runestone/')
         self.image = self.sprites['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.runestone_number = 0#a counter of number of activated runestrones
         self.count_runestones()
@@ -2457,19 +2421,20 @@ class Chest(Interactable):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/Chest/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.health=3
         self.inventory = {'Amber_Droplet':3}
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.hitbox.midbottom = self.rect.midbottom
 
         if state != "idle":
             self.currentstate = states_basic.Interacted(self)
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.update_timers()#invincibililty
 
     def loots(self):#this is called when the opening animation is finished
@@ -2505,7 +2470,7 @@ class Door(Interactable):
         self.sprites=Read_files.Sprites_Player('Sprites/animations/Door/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
 
     def interact(self):
@@ -2521,7 +2486,7 @@ class Collision_breakable(Interactable):#a breakable collision block
         self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/'+type+'/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
@@ -2535,8 +2500,8 @@ class Collision_breakable(Interactable):#a breakable collision block
             self.game_objects.player.hitbox.right = self.hitbox.left
         self.game_objects.player.update_rect_x()
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.update_timers()#invincibililty
 
     def dead(self):#called when death animatin finishes
@@ -2566,7 +2531,7 @@ class Savepoint(Interactable):#save point
         self.sprites=Read_files.Sprites_Player('Sprites/animations/savepoint/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
@@ -2594,7 +2559,7 @@ class Inorinoki(Interactable):#the place where you trade soul essence for spirit
         self.sprites = Read_files.Sprites_Player('Sprites/animations/inorinoki/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = self.rect.copy()
 
     def interact(self):#when player press t/y
@@ -2608,11 +2573,10 @@ class Fast_travel(Interactable):#save point
         self.sprites = Read_files.Sprites_Player('Sprites/animations/fast_travel/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
-        #self.shader = shader_entities.Shader_entities(self)
 
         try:#if it has been unlocked
             self.game_objects.world_state.travel_points[map]
@@ -2646,7 +2610,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
         self.sprites = Read_files.Sprites_Player('Sprites/animations/rhoutta_altar/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox=self.rect.copy()
 
     def player_collision(self):#player collision
@@ -2667,7 +2631,7 @@ class Sign(Interactable):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/sign/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox=self.rect.copy()
         self.symbols = Sign_symbols(self)
 
@@ -2691,15 +2655,15 @@ class Light_crystal(Interactable):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/light_crystals/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
         self.dark_glow = Dark_glow
         self.light_glow = Light_glow
 
-    def update(self,scroll):
-        super().update(scroll)
+    def update(self):
+        super().update()
         self.update_timers()#invincibililty
 
     def take_dmg(self,projectile):
@@ -2720,8 +2684,9 @@ class Fireplace(Interactable):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/fireplace/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.hitbox.midbottom = self.rect.midbottom
 
     def interact(self):#when player press t/y
         self.currentstate.handle_input('Interact')#goes to interacted after transform
@@ -2734,7 +2699,7 @@ class Lighitning_barrier(Interactable):#traps
             self.scale(size)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = pos
+        self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],16,self.rect[3])
 
     def player_collision(self):#player collision
@@ -2757,7 +2722,7 @@ class Spirit_spikes(Interactable):#traps
         self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/spirit_spikes')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = (pos[0],pos[1])
+        self.rect.topleft = (pos[0],pos[1])
         self.hitbox = pygame.Rect(pos[0],pos[1],self.rect[2],16)
         self.size = [32,32]#hurtbox size
         self.hurt_box = Hurt_box
@@ -2773,7 +2738,7 @@ class Lightning_spikes(Interactable):#traps
         self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/lightning_spikes')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.bottomleft = (pos[0],pos[1])
+        self.rect.topleft = (pos[0],pos[1])
         self.hitbox = pygame.Rect(pos[0],pos[1],26,16)
         self.size = [64,64]#hurtbox size
         self.hurt_box = Hurt_box
