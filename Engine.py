@@ -79,22 +79,12 @@ class Collisions():
 
             #move in x every dynamic sprite
             entity.update_true_pos_x()
-<<<<<<< HEAD
-            entity.rect.centerx = int(entity.true_pos[0])#should be int
-            entity.update_hitbox()
-=======
->>>>>>> dev/floatVel
             static_entity_x = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
             if static_entity_x:
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
             entity.update_true_pos_y()
-<<<<<<< HEAD
-            entity.rect.centery = int(entity.true_pos[1])#should be int
-            entity.update_hitbox()#follow with hitbox
-=======
->>>>>>> dev/floatVel
             static_entity_y = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
             if static_entity_y:
                 static_entity_y.collide_y(entity)
