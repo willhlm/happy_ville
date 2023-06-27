@@ -4,13 +4,6 @@ import states_horn_vines, states_basic, states_camerastop, states_player, states
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
-def empty_copy(obj):
-    class Empty(obj.__class__):
-        def __init__(self): pass
-    newcopy = Empty()
-    newcopy.__class__ = obj.__class__
-    return newcopy
-
 class Platform(pygame.sprite.Sprite):#has hitbox
     def __init__(self,pos,size = (16,16)):
         super().__init__()
@@ -18,9 +11,6 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
         self.hitbox = self.rect.inflate(0,0)
-
-    def take_dmg(self):
-        pass
 
 class Collision_block(Platform):
     def __init__(self,pos,size, run_particle):
@@ -274,7 +264,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         super().__init__(pos,game_objects)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = False#a flag for entities to go through ramps from side or top
-        self.velocity = [0,0]        
+        self.velocity = [0,0]
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -324,7 +314,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground. But not on ramps
-        self.velocity[1] = 1/self.game_objects.game.dt
+        self.velocity[1] = 3/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -356,7 +346,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
             self.animation.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            #self.game_objects.camera.camera_shake(3,10)
+            self.game_objects.camera.camera_shake(3,10)
         else:#if dead
             self.aggro = False
             self.invincibile = True
@@ -1994,9 +1984,7 @@ class Amber_Droplet(Enemy_drop):
         self.sounds = game_objects.object_pool.objects['Amber_Droplet'].sounds
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-        self.rect.center = pos
-        self.true_pos = list(self.rect.topleft)
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(pos[0],pos[1],8,8)
         self.description = 'moneyy'
 
     def player_collision(self,player):#when the player collides with this object
@@ -2432,7 +2420,7 @@ class Chest(Interactable):
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
                 #obj = self.game_objects.object_pool.spawn(key)
-                obj = getattr(sys.modules[__name__], key)([self.hitbox.x,self.hitbox.y],self.game_objects)#make a class based on the name of the key: need to import sys
+                obj = getattr(sys.modules[__name__], key)(self.hitbox.center, self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
 

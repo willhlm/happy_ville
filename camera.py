@@ -10,8 +10,8 @@ class Camera():
 
     def update(self):
         self.check_camera_border_new()#this need to be checked before the camera calculates the scroll
-        self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.15
-        self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.15
+        self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
+        self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
         self.scroll = self.true_scroll.copy()
 
         self.scroll[0] = int(self.scroll[0])

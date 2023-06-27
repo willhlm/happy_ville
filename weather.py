@@ -254,8 +254,7 @@ class Weather_particles(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
         self.currentstate = states_weather_particles.Idle(self)
-        self.pos = [random.randint(0, int(self.width)),random.randint(-700, -50)]#starting position
-        self.true_pos = self.pos.copy()
+        self.true_pos = [random.randint(0, int(self.width)),random.randint(-700, -50)]#starting position
 
         self.velocity[1] = random.randint(1, 3)
         self.time = 0

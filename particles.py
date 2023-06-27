@@ -1,7 +1,7 @@
 import pygame, math, random, shader_entities
 
 class Particles(pygame.sprite.Sprite):
-    def __init__(self,pos, game_objects, distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255]):
+    def __init__(self, pos, game_objects, distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255]):
         super().__init__()
         self.game_objects = game_objects
         angle = self.define_angle(dir)
@@ -23,7 +23,7 @@ class Particles(pygame.sprite.Sprite):
 
     def update_pos(self):
         self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
-        self.rect.topleft = self.true_pos
+        self.rect.center = self.true_pos
 
     def speed(self):
         self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)
@@ -59,7 +59,6 @@ class Circle(Particles):#a general one
         self.radius = random.randint(max(self.scale-1,1), self.scale+1)
         self.fade_scale = 3
         self.make_circle()
-        #self.true_pos = self.rect.topleft
 
     def make_circle(self):
         self.surface =pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
@@ -67,7 +66,7 @@ class Circle(Particles):#a general one
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
         #self.prepare_glow()
         self.rect = self.image.get_rect()
-        self.rect.topleft = self.true_pos
+        self.rect.center = self.true_pos
 
     def prepare_glow(self):
         glow_colour = [255,255,255,20]#colour of each glow
@@ -83,7 +82,6 @@ class Spark(Particles):#a general one
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.make_sparks()
         self.fade_scale = 10
-        #self.true_pos = self.rect.topleft
 
     def update(self):
         self.update_spark()
@@ -95,7 +93,7 @@ class Spark(Particles):#a general one
         pygame.draw.polygon(self.image,self.colour,self.points)
 
     def spark_shape(self):
-        vel=math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
+        vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
 
         self.points = [
         [self.canvas_size*0.5+math.cos(self.angle)*vel*self.scale,self.canvas_size*0.5+math.sin(self.angle)*vel*self.scale],
@@ -111,4 +109,4 @@ class Spark(Particles):#a general one
         self.spark_shape()#define the shape of spark
         pygame.draw.polygon(self.image,self.colour,self.points)
         self.rect = self.image.get_rect()
-        self.rect.topleft = self.true_pos
+        self.rect.center = self.true_pos

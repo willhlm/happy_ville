@@ -998,7 +998,7 @@
                          "visible":true,
                          "width":160,
                          "x":3648,
-                         "y":928
+                         "y":864
                         }, 
                         {
                          "gid":27614,
@@ -1050,8 +1050,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3536,
-                         "y":847
+                         "x":3520,
+                         "y":704
                         }, 
                         {
                          "gid":11,
@@ -1231,9 +1231,9 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":2336,
+                         "width":2528,
                          "x":2512,
-                         "y":1008
+                         "y":1024
                         }, 
                         {
                          "gid":15,
@@ -1274,24 +1274,6 @@
                         {
                          "gid":15,
                          "height":16,
-                         "id":272,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"bottom"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":192,
-                         "x":4848,
-                         "y":992
-                        }, 
-                        {
-                         "gid":15,
-                         "height":16,
                          "id":273,
                          "name":"",
                          "properties":[
@@ -1305,7 +1287,7 @@
                          "visible":true,
                          "width":2304,
                          "x":5040,
-                         "y":960
+                         "y":976
                         }, 
                         {
                          "gid":16,
@@ -1370,14 +1352,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Sandrew"
+                                 "value":"Larv_simple"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":4608,
-                         "y":832
+                         "x":4688,
+                         "y":800
                         }],
                  "opacity":1,
                  "type":"objectgroup",

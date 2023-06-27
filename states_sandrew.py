@@ -47,6 +47,7 @@ class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
+        self.entity.AI.deactivate()
 
     def increase_phase(self):
         self.entity.dead()

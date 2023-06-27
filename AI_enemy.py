@@ -148,7 +148,6 @@ class Attack(behaviour_tree.Leaf):
         super().__init__(entity)
 
     def update(self):
-        print('fe')
         return self.entity.AI.black_board['attack']
 
     def handle_input(self,input):
@@ -242,7 +241,6 @@ def build_tree(entity):#peace and aggro: the peace will patrol around the spawn 
 
     entity.AI.add_child(aggro)
     entity.AI.add_child(peace2)
-
     entity.AI.print_tree()
 
 def build_tree_peace(entity):#no aggro, just roam around

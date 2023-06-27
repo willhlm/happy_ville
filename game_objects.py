@@ -108,12 +108,8 @@ class Game_Objects():
         self.collisions.projectile_collision(self.eprojectiles,self.players)
 
     def update(self):
-        self.camera.update()
+        self.camera.update()#should be first
         self.weather.update()
-        scroll = [self.camera.scroll[0],self.camera.scroll[1]]
-        self.update_groups()
-
-    def update_groups(self):
         self.platforms.update()
         self.platforms_ramps.update()
         self.layer_pause.update()#should be before all_bgs and all_fgs
@@ -163,6 +159,9 @@ class Game_Objects():
             #    pygame.draw.rect(self.game.screen, (255,0,255), loot.rect,2)#draw hitbox
             for cos in self.interactables.sprites():#go through the group
                 pygame.draw.rect(self.game.screen, (0,0,255), (int(cos.hitbox[0]-self.camera.scroll[0]),int(cos.hitbox[1]-self.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
+            for cos in self.loot.sprites():#go through the group
+                pygame.draw.rect(self.game.screen, (0,0,255), (int(cos.hitbox[0]-self.camera.scroll[0]),int(cos.hitbox[1]-self.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(self.game.screen, (0,0,255), (int(cos.rect[0]-self.camera.scroll[0]),int(cos.rect[1]-self.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
 
             pygame.draw.rect(self.game.screen, (0,0,255), (round(self.player.hitbox[0]-self.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
             pygame.draw.rect(self.game.screen, (255,0,255), (round(self.player.rect[0]-self.camera.true_scroll[0]),round(self.player.rect[1]-self.camera.true_scroll[1]),self.player.rect[2],self.player.rect[3]),2)#draw hitbox
