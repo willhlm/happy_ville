@@ -466,6 +466,7 @@ class Player(Character):
 
     def update(self):
         super().update()
+        print(self.velocity)
         self.abs_dist = self.game_objects.camera.scroll
         self.omamoris.update()
 
