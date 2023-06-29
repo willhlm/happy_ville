@@ -355,7 +355,7 @@ class Rain(Weather_particles):
 class Leaves(Weather_particles):#leaves from trees
     def __init__(self,game_objects,parallax,information,kill = False):
         super().__init__(game_objects,parallax)
-        self.init_pos = [information[0][0]+information[1][0]*0.5+self.parallax[0]*self.game_objects.camera.scroll[0],information[0][1]-information[1][1]*0.5+self.parallax[1]*self.game_objects.camera.scroll[1]]#center
+        self.init_pos = [information[0][0]+information[1][0]*0.5+parallax[0]*game_objects.camera.scroll[0],information[0][1]-information[1][1]*0.5+parallax[1]*game_objects.camera.scroll[1]]#center
         self.spawn_size = information[1]
         rand = random.randint(1,1)#randomly choose a leaf type
         self.sprites = Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
@@ -383,7 +383,7 @@ class Leaves(Weather_particles):#leaves from trees
         self.image.set_alpha(self.alpha)
 
     def boundary(self):
-        if self.alpha < 5:#self.rect.centery > self.game_objects.game.WINDOW_SIZE[1]+50 or
+        if self.alpha < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1] > self.game_objects.game.WINDOW_SIZE[1]+50:
             self.resetting()
 
     def speed(self):

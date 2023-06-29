@@ -53,7 +53,9 @@ class Light_forest_tree1(Tree):
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
-
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+        
         #for leaves
         position = self.rect.center
         size = [64,64]
@@ -68,6 +70,8 @@ class Light_forest_tree2(Tree):
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
 
         #for leaves
         position = self.rect.center
