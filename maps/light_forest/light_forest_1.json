@@ -998,7 +998,7 @@
                          "visible":true,
                          "width":160,
                          "x":3648,
-                         "y":864
+                         "y":928
                         }, 
                         {
                          "gid":27614,
@@ -1352,14 +1352,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv_simple"
+                                 "value":"Packun"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":4688,
-                         "y":800
+                         "x":5584,
+                         "y":688
                         }],
                  "opacity":1,
                  "type":"objectgroup",

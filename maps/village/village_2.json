@@ -487,7 +487,7 @@
                          "visible":true,
                          "width":16,
                          "x":1616,
-                         "y":384
+                         "y":368
                         }, 
                         {
                          "gid":10,
@@ -549,7 +549,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1616,
+                         "width":1744,
                          "x":32,
                          "y":528
                         }, 

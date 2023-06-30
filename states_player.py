@@ -178,9 +178,7 @@ class Jump_stand_pre(Player_states):
         super().__init__(entity)
 
     def update_state(self):
-        if self.entity.velocity[1] > 0.7:#when you start falling
-            self.enter_state('Fall_stand_pre')
-        elif self.entity.acceleration[0] != 0:#if you start moving
+        if self.entity.acceleration[0] != 0:#if you start moving
             self.enter_state('Jump_run_main')
 
     def handle_press_input(self,input):
@@ -216,6 +214,12 @@ class Jump_stand_main(Jump_stand_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
+    def update_state(self):
+        if self.entity.velocity[1] > 0.7:#when you start falling
+            self.enter_state('Fall_stand_pre')
+        elif self.entity.acceleration[0] != 0:#if you start moving
+            self.enter_state('Jump_run_main')
+
     def increase_phase(self):#called when an animation is finihed for that state
         pass
 
@@ -224,9 +228,7 @@ class Jump_run_pre(Player_states):
         super().__init__(entity)
 
     def update_state(self):
-        if self.entity.velocity[1] > 0:
-            self.enter_state('Fall_run_pre')
-        elif self.entity.acceleration[0] == 0:
+        if self.entity.acceleration[0] == 0:
             self.enter_state('Jump_stand_main')
 
     def handle_press_input(self,input):
@@ -261,6 +263,12 @@ class Jump_run_pre(Player_states):
 class Jump_run_main(Jump_run_pre):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def update_state(self):
+        if self.entity.velocity[1] > 0:
+            self.enter_state('Fall_run_pre')
+        elif self.entity.acceleration[0] == 0:
+            self.enter_state('Jump_stand_main')
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -410,9 +418,10 @@ class Wall_glide_main(Player_states):
             self.enter_state('Fall_stand_pre')
 
     def handle_press_input(self,input):
-        super().handle_press_input(input)
+        #super().handle_press_input(input)
         if input[-1] == 'a':
             self.entity.velocity[0] = -self.dir[0]*10
+            self.entity.velocity[1] = -7#to get a vertical velocity
             self.enter_state('Jump_run_main')
         elif input[-1] == 'right' or input[-1] == 'left':
             self.entity.velocity[0] = self.entity.dir[0]*2

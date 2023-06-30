@@ -1102,7 +1102,7 @@
                         }, 
                         {
                          "gid":11,
-                         "height":16,
+                         "height":64,
                          "id":221,
                          "name":"",
                          "properties":[
@@ -1121,7 +1121,7 @@
                          "visible":true,
                          "width":192,
                          "x":2720,
-                         "y":1120
+                         "y":1184
                         }, 
                         {
                          "gid":1,
@@ -1207,7 +1207,7 @@
                         }, 
                         {
                          "gid":11,
-                         "height":16,
+                         "height":112,
                          "id":405,
                          "name":"",
                          "properties":[
@@ -1357,7 +1357,7 @@
                          "visible":true,
                          "width":192,
                          "x":2720,
-                         "y":1136
+                         "y":1168
                         }, 
                         {
                          "gid":15,

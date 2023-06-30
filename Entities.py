@@ -314,7 +314,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground. But not on ramps
-        self.velocity[1] = 3/self.game_objects.game.dt
+        self.velocity[1] = 1/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -385,7 +385,7 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states={'Idle':True,'Walk':True,'Run':True,'Pray':True,'Jump_run':True,
+        self.states = {'Idle':True,'Walk':True,'Run':True,'Pray':True,'Jump_run':True,
                      'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
@@ -540,7 +540,7 @@ class Enemy(Character):
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(sys.modules[__name__], key)([self.rect.x,self.rect.y],self.game_objects)#make a class based on the name of the key: need to import sys
+                obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
 
@@ -1598,8 +1598,8 @@ class Thunder(Ranged):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/Thunder/')
-        self.currentstate = states_basic.Once(self)#
-        self.image = self.sprites.sprite_dict['once'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.currentstate = states_basic.Death(self)#
+        self.image = self.sprites.sprite_dict['death'][0]
         self.rect = self.image.get_rect()
         self.hitbox = self.rect.copy()
         self.dmg = 1
@@ -1928,13 +1928,13 @@ class Spiritorb(Loot):#the thing that gives spirit
         self.game_objects.player.add_spirit(1)
         self.kill()
 
-class Enemy_drop(Loot):#add gravity
+class Enemy_drop(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.velocity = [random.uniform(-3, 3),-4]
         self.lifetime = 500
 
-    def update_vel(self):
+    def update_vel(self):#add gravity
         self.velocity[1] += 0.3*self.game_objects.game.dt*self.slow_motion
 
     def update(self):
@@ -1984,6 +1984,8 @@ class Amber_Droplet(Enemy_drop):
         self.sounds = game_objects.object_pool.objects['Amber_Droplet'].sounds
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.true_pos = list(self.rect.topleft)
         self.hitbox = pygame.Rect(pos[0],pos[1],8,8)
         self.description = 'moneyy'
 
@@ -2007,7 +2009,7 @@ class Bone(Enemy_drop):
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.true_pos = list(self.rect.topleft)
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
     def use_item(self):
@@ -2034,7 +2036,7 @@ class Heal_item(Enemy_drop):
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.true_pos = list(self.rect.topleft)
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.description = 'Use it to heal'
 
     def use_item(self):
@@ -2266,8 +2268,6 @@ class Path_col(Interactable):
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
-        self.image.set_alpha(0)#make them transparent
-        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self):
         self.group_distance()
@@ -2284,8 +2284,6 @@ class Path_inter(Interactable):
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
-        self.image.set_alpha(0)#make them transparent
-        #self.shader = shader_entities.Shader_entities(self)
 
     def update(self):
         self.group_distance()
@@ -2300,7 +2298,6 @@ class Cutscene_trigger(Interactable):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.event = event
-        self.image.set_alpha(0)#make them transparent
 
     def update(self):
         pass
@@ -2420,7 +2417,7 @@ class Chest(Interactable):
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
                 #obj = self.game_objects.object_pool.spawn(key)
-                obj = getattr(sys.modules[__name__], key)(self.hitbox.center, self.game_objects)#make a class based on the name of the key: need to import sys
+                obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop, self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
 
@@ -2970,7 +2967,6 @@ class Jump_timer(Timer):#can be combined with shroomjump?
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
             self.entity.ground = False
-            self.deactivate()
             self.entity.timer_jobs['air'].activate()
             self.deactivate()
         super().update()#need to be after
