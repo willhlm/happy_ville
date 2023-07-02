@@ -481,9 +481,11 @@ class Level():
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:
+                    print(tile_layer)
                     if 'fg' in tile_layer:
                         self.game_objects.all_fgs.add(bg_animation)
                     elif 'bg' in tile_layer:
+                        print('fe')
                         self.game_objects.all_bgs.add(bg_animation)
             except:
                 pass

@@ -241,7 +241,7 @@ def build_tree(entity):#peace and aggro: the peace will patrol around the spawn 
 
     entity.AI.add_child(aggro)
     entity.AI.add_child(peace2)
-    entity.AI.print_tree()
+    #entity.AI.print_tree()
 
 def build_tree_peace(entity):#no aggro, just roam around
     entity.AI = behaviour_tree.Treenode()

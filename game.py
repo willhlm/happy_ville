@@ -49,11 +49,10 @@ class Game():
         while True:
             shaders.clear((0, 0, 0))
 
-
             #tick clock
             self.clock.tick(self.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-            
+
             #print(self.clock.tick(self.fps))
             #i+=1
             #if self.clock.get_fps() < 50:

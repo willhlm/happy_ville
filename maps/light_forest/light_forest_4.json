@@ -278,42 +278,6 @@
                          "y":608
                         }, 
                         {
-                         "gid":15,
-                         "height":16,
-                         "id":281,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"top"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":272,
-                         "x":5264,
-                         "y":400
-                        }, 
-                        {
-                         "gid":15,
-                         "height":16,
-                         "id":282,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"bottom"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":272,
-                         "x":5248,
-                         "y":688
-                        }, 
-                        {
                          "gid":22,
                          "height":16,
                          "id":283,
@@ -416,13 +380,13 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1040,
+                         "width":1136,
                          "x":0,
                          "y":624
                         }, 
                         {
                          "gid":8,
-                         "height":16,
+                         "height":48,
                          "id":201,
                          "name":"",
                          "rotation":0,
@@ -430,7 +394,7 @@
                          "visible":true,
                          "width":1424,
                          "x":1136,
-                         "y":576
+                         "y":608
                         }, 
                         {
                          "gid":8,
@@ -560,7 +524,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":224,
+                         "width":288,
                          "x":1776,
                          "y":432
                         }, 
