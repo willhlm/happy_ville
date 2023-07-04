@@ -114,6 +114,7 @@ class Game_Objects():
         self.update_groups()
 
     def update_groups(self):
+        print(self.player.velocity)
         self.platforms.update()
         self.platforms_ramps.update()
         self.layer_pause.update()#should be before all_bgs and all_fgs
