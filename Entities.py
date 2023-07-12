@@ -2166,7 +2166,7 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
 class Rune_symbol(Animatedentity):#the stuff that will be blitted on uberrunestone
     def __init__(self,pos,game_objects,ID_key):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/rune_symbol/' + ID_key)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/rune_symbol/' + ID_key + '/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.rect.center = pos
@@ -2347,7 +2347,7 @@ class Cave_grass(Interactable_bushes):
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/runestones/' + ID_key)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/runestones/' + ID_key + '/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
