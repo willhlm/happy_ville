@@ -72,7 +72,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
             #manuall add to a specific layer
             sprites = s.game_objects.all_bgs.sprites()
             bg = s.game_objects.all_bgs.reference[tuple(s.parallax)]
-            index = sprites.index(bg)#fine the index in which the static layer is located
+            index = sprites.index(bg)#find the index in which the static layer is located
 
             s.game_objects.all_bgs.spritedict[s] = s.game_objects.all_bgs._init_rect#in add internal
             s.game_objects.all_bgs._spritelayers[s] = 0

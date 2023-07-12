@@ -1,8 +1,9 @@
 import pygame, csv, math
 import Entities, Read_files, weather, tiled_objects
 import constants as C
+import numpy as np
 
-#from PIL import Image, ImageFilter#for blurring
+from PIL import Image, ImageFilter#for blurring
 
 class Level():
     def __init__(self, game_objects):
@@ -390,7 +391,7 @@ class Level():
     def blur_value(parallax):#called from load_laters and load_back/front_objects
         return round(1/parallax[0])
 
-    def load_layers(self,data,parallax,offset):
+    def load_layers(self,data, parallax, offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and collision).'
         'The offset and parallax should be specified for group and not in the layers or objects'
         'Each group needs at least one tile layer (but can be emppty).'
@@ -446,21 +447,27 @@ class Level():
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
 
         #blurring
-    #    strFormat = 'RGBA'
-    #    for layer in blit_compress_surfaces.keys():
-    #        if parallax[0] == 1: continue
-    #        blur_value = 0.5/parallax[0]
-
-            #surface to pil
-    #        surface = blit_compress_surfaces[layer]
-    #        raw_str = pygame.image.tobytes(surface, strFormat)
-    #        image = Image.frombytes(strFormat, surface.get_size(), raw_str)
-
-            #blurImage = image.filter(ImageFilter.BoxBlur(blur_value))
-    #        blurImage = image.filter(ImageFilter.GaussianBlur(blur_value))
-
-            #pil to surface
-    #        blit_compress_surfaces[layer] = pygame.image.fromstring(blurImage.tobytes(), blurImage.size, blurImage.mode)
+        # strFormat = 'RGBA'
+        # for layer in blit_compress_surfaces.keys():
+        #     if parallax[0] == 1: continue
+        #     blur_value = self.blur_value(parallax)
+        #
+        #     #surface to pil
+        #     surface = blit_compress_surfaces[layer]
+        #     raw_str = pygame.image.tobytes(surface, strFormat)
+        #     image = Image.frombytes(strFormat, surface.get_size(), raw_str)
+        #
+        #     #blurImage = image.filter(ImageFilter.BoxBlur(blur_value))
+        #     blurImage = image.filter(ImageFilter.GaussianBlur(blur_value))
+        #
+        #     #remove black border
+        #     blurImage = np.array(blurImage)
+        #     for i in range(3):
+        #         blurImage[:,:,i] = np.divide(blurImage[:,:,i],blurImage[:,:,3].astype('int16')+1)*256
+        #     blurImage =  Image.fromarray(blurImage.astype('uint8'), 'RGBA')
+        #
+        #     #pil to surface
+        #     blit_compress_surfaces[layer] = pygame.image.fromstring(blurImage.tobytes(), blurImage.size, blurImage.mode)
 
         blur_value = self.blur_value(parallax)
         for layer in blit_compress_surfaces.keys():
@@ -469,7 +476,7 @@ class Level():
 
         #add the bg, fg, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():
-            pos=(-math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0],-math.ceil((1-parallax[1])*new_map_diff[1])+ offset[1])
+            pos = (-math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0],-math.ceil((1-parallax[1])*new_map_diff[1])+ offset[1])
             if self.layer == 'fg':
                 self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables
@@ -477,15 +484,13 @@ class Level():
             elif self.layer == 'bg':#bg
                 bg = Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
                 self.game_objects.all_bgs.add(bg)
-                self.game_objects.all_bgs.reference[tuple(parallax)]= bg
+                self.game_objects.all_bgs.reference[tuple(parallax)] = bg
 
             try:#add animations to group
                 for bg_animation in animation_entities[tile_layer]:
-                    print(tile_layer)
                     if 'fg' in tile_layer:
                         self.game_objects.all_fgs.add(bg_animation)
                     elif 'bg' in tile_layer:
-                        print('fe')
                         self.game_objects.all_bgs.add(bg_animation)
             except:
                 pass
