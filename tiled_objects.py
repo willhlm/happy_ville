@@ -55,7 +55,7 @@ class Light_forest_tree1(Tree):
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
-        
+
         #for leaves
         position = self.rect.center
         size = [64,64]
