@@ -47,6 +47,7 @@ def format_tiled_json_group(map_data):
                 formatted_map_data['groups'][gruop['name']]['objects'][layer['name']] = layer
             else:#tile layer in gorup
                 formatted_map_data['groups'][gruop['name']]['layers'][layer['name']] = layer
+                
 
     return formatted_map_data
 

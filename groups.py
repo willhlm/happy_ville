@@ -56,7 +56,7 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):#a group for the reflection o
         for spr in self.sprites():
             newrect = surface.blit(spr.image, (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1])))#int seem nicer than round
 
-class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries: almst works with LayeredUpdates group (when they come back, it is in fron of grass, so the posoition is not 100 % preserved)
+class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries
     def __init__(self):
         super().__init__()
 
@@ -68,8 +68,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
     def group_distance(s):
         if s.true_pos[0]-s.parallax[0]*s.game_objects.camera.scroll[0] < s.bounds[0] or s.true_pos[0]-s.parallax[0]*s.game_objects.camera.scroll[0] > s.bounds[1] or s.true_pos[1]-s.parallax[1]*s.game_objects.camera.scroll[1]<s.bounds[2] or s.true_pos[1]-s.parallax[1]*s.game_objects.camera.scroll[1]>s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             pass#s.update_pos(pos)
-        else:
-            #manuall add to a specific layer
+        else:#manually add to a specific layer            
             sprites = s.game_objects.all_bgs.sprites()
             bg = s.game_objects.all_bgs.reference[tuple(s.parallax)]
             index = sprites.index(bg)#find the index in which the static layer is located
