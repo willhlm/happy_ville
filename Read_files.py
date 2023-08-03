@@ -44,10 +44,14 @@ def format_tiled_json_group(map_data):
         formatted_map_data['groups'][gruop['name']]['offsety'] = gruop.get('offsety',0)#get value, if not present, pass 0
         for layer in gruop['layers']:#inside group stuff
             if 'objects' in layer.keys():#objects in group
+                layer['offsetx'] = layer.get('offsetx',0)
+                layer['offsety'] = layer.get('offsety',0)
                 formatted_map_data['groups'][gruop['name']]['objects'][layer['name']] = layer
             else:#tile layer in gorup
+                layer['offsetx'] = layer.get('offsetx',0)
+                layer['offsety'] = layer.get('offsety',0)
                 formatted_map_data['groups'][gruop['name']]['layers'][layer['name']] = layer
-                
+
 
     return formatted_map_data
 

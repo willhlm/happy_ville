@@ -427,11 +427,11 @@ class Level():
                             level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
 
                             path = 'maps/%s/%s' % (level_name, Read_files.get_folder(tileset['image']))
-                            blit_pos = (x * self.TILE_SIZE - math.ceil(new_map_diff[0]*(1-parallax[0])) + offset[0], y * self.TILE_SIZE - math.ceil((1-parallax[1])*new_map_diff[1])+offset[1])
+                            blit_pos = (x * self.TILE_SIZE - math.ceil(new_map_diff[0]*(1-parallax[0])) + offset[0] + data[tile_layer]['offsetx'], y * self.TILE_SIZE - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1] + data[tile_layer]['offsety'])
                             new_animation = Entities.BG_Animated(self.game_objects,blit_pos,path,parallax)
                             animation_list[tile_layer].append(new_animation)
                 else:#if statics
-                    blit_pos = (x * self.TILE_SIZE , y * self.TILE_SIZE)
+                    blit_pos = (x * self.TILE_SIZE + data[tile_layer]['offsetx'], y * self.TILE_SIZE + data[tile_layer]['offsety'])
                     blit_surfaces[tile_layer].blit(self.spritesheet_dict[tile_number], blit_pos)
 
         #blit all static sublayers onto one single parallax layer in order as drawn in Tiled. And sort the animations into the key grouops
