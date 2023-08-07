@@ -1174,14 +1174,16 @@ class Spawner(Staticentity):#an entity spawner
 class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. caves. loaded in maploader
     def __init__(self,game_objects,colour = (10,10,10,200)):
         super().__init__(pos = [0,0])
+        self.game_objects = game_objects
         blank_surface  = pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))).convert_alpha()#ONLY USED FOR DARK MODE
         blank_surface.fill(colour)#dark background
         self.dark = blank_surface.copy()
         self.image = self.dark.copy()
         self.rect = self.image.get_rect()
-        self.rect.topleft = (0,0)
+        self.rect.topleft  = [game_objects.camera.scroll[0],game_objects.camera.scroll[1]]
 
     def update(self):
+        self.rect.topleft  = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]#this is [0,0]
         self.image = self.dark.copy()
 
 class Transparent_screen(Staticentity):#a placeholder for normal stages. initialised in maploader
@@ -1223,7 +1225,7 @@ class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark
         self.make_glow()
 
     def update(self):
-        pos = [self.entity.rect.centerx-self.radius,self.entity.rect.centery-self.radius]
+        pos = [self.entity.rect.centerx-self.radius-self.game_objects.camera.scroll[0],self.entity.rect.centery-self.radius-self.game_objects.camera.scroll[1]]
         self.game_objects.map.screen.image.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_SUB)
         self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), None, special_flags = pygame.BLEND_RGB_SUB)#inverting
 

@@ -38,7 +38,7 @@ class Group_player(pygame.sprite.Group):#a group for the reflection object which
         for spr in self.sprites():
             self.spritedict[spr] = surface.blit(spr.image, (round(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(spr.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
 
-class Group(pygame.sprite.Group):#a group for the reflection object which need a special draw method
+class Group(pygame.sprite.Group):
     def __init__(self,game_objects):
         super().__init__()
         self.game_objects = game_objects
@@ -68,7 +68,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
     def group_distance(s):
         if s.true_pos[0]-s.parallax[0]*s.game_objects.camera.scroll[0] < s.bounds[0] or s.true_pos[0]-s.parallax[0]*s.game_objects.camera.scroll[0] > s.bounds[1] or s.true_pos[1]-s.parallax[1]*s.game_objects.camera.scroll[1]<s.bounds[2] or s.true_pos[1]-s.parallax[1]*s.game_objects.camera.scroll[1]>s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             pass#s.update_pos(pos)
-        else:#manually add to a specific layer            
+        else:#manually add to a specific layer
             sprites = s.game_objects.all_bgs.sprites()
             bg = s.game_objects.all_bgs.reference[tuple(s.parallax)]
             index = sprites.index(bg)#find the index in which the static layer is located

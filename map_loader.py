@@ -43,9 +43,9 @@ class Level():
             self.game_objects.cosmetics.add(self.screen)#need to be added before Dark glow on player
             self.game_objects.cosmetics.add(Entities.Dark_glow(self.game_objects.player))
         elif level_name == 'village_cave':
-            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#add a light glow around the player
+            self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
         elif level_name == 'dark_forest':
-            self.game_objects.cosmetics.add(Entities.light_glow(self.game_objects.player))#add a light glow around the player
+            self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
