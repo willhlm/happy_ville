@@ -1227,9 +1227,9 @@ class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark
     def update(self):
         pos = [self.entity.rect.centerx-self.radius-self.game_objects.camera.scroll[0],self.entity.rect.centery-self.radius-self.game_objects.camera.scroll[1]]
         self.game_objects.map.screen.image.blit(self.glow,pos,special_flags = pygame.BLEND_RGBA_SUB)
-        self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), None, special_flags = pygame.BLEND_RGB_SUB)#inverting
+        #self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), None, special_flags = pygame.BLEND_RGB_SUB)#inverting
 
-    def make_glow(self,const = 6):#init
+    def make_glow(self,const = 4):#init
         self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
 
         for i in range(self.layers):
