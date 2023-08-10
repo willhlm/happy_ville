@@ -1188,7 +1188,7 @@ class Transparent_screen(Staticentity):#a placeholder for normal stages. initial
         super().__init__(pos = [0,0])
 
 class Light_glow(Staticentity):#a light glow anounf an entity.
-    def __init__(self,entity,radius = 200,layers = 40):
+    def __init__(self, entity, radius = 200,layers = 40):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
