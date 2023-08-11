@@ -35,10 +35,12 @@ class World_state():
             self.travel_points[map] = cord
 
     def init_state_file(self,level_name,map_data):#make a state file if it is the first time loading this map
+        map_statics = map_data['groups']['bg1']['objects'].get('interactables',False)
+        if not map_statics: return#if there are no interactables in this stage
+
         chest_int = 1
         soul_essence_int = 1
-
-        map_statics = map_data['groups']['bg1']['objects']['interactables']
+        
         self.state[level_name] = {'chest':{},'soul_essence':{},'runestone':{}}#a place holder for things that should depend on map state
 
         for obj in map_statics['objects']:

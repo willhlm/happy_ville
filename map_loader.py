@@ -1,9 +1,9 @@
 import pygame, csv, math
 import Entities, Read_files, weather, tiled_objects
 import constants as C
-import numpy as np
 
 from PIL import Image, ImageFilter#for blurring
+import numpy as np
 
 class Level():
     def __init__(self, game_objects):
@@ -31,9 +31,7 @@ class Level():
             self.game_objects.sound.pause_bg_sound()
 
     def init_state_file(self):
-        try:
-            self.game_objects.world_state.state[self.level_name]
-        except:#make a state file if it is the first time loading this map
+        if not self.game_objects.world_state.state.get(self.level_name, False):#if it is the first time loading the map
             self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
 
     def append_light_effet(self):
@@ -407,11 +405,13 @@ class Level():
         return round(1/parallax[0])
 
     def load_layers(self,data, parallax, offset):
-        'Tiled design notes: all tile layers and objects need to be in a group (including statics and collision).'
-        'The offset and parallax should be specified for group and not in the layers or objects'
+        'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
+        'The offset and parallax should be specified for group, which affects all in that group. Individual tile layers can be specified as well.'
         'Each group needs at least one tile layer (but can be emppty).'
         'The groups should contain "fg", "bg" or "interact" in their name.'
-        'The tile layer in groups can be called whatever. But the objects need to be called statics, front or back.'
+        'The main layer needs to be called "bg1"'#world state file reads it
+        'The tile layer in groups can be called whatever. But the objects need to be called statics, interactables, front or back.'
+        'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
 
         #make empty surfaces
         key = list(data.keys())[0]

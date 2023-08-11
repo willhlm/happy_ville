@@ -258,52 +258,7 @@
                          "width":16,
                          "x":480,
                          "y":240
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":27,
-                 "name":"back",
-                 "objects":[
-                        {
-                         "gid":382,
-                         "height":286,
-                         "id":166,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":202,
-                         "x":176,
-                         "y":288
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":29,
-                 "name":"front",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":2,
-                 "name":"collision",
-                 "objects":[
+                        }, 
                         {
                          "gid":96,
                          "height":624,
@@ -410,25 +365,7 @@
                  "draworder":"topdown",
                  "id":25,
                  "name":"fg1",
-                 "objects":[
-                        {
-                         "gid":104,
-                         "height":16,
-                         "id":164,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Circles"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":160,
-                         "y":224
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -494,7 +431,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":380,
+         "firstgid":383,
          "source":"..\/_objects\/back.tsx"
         }],
  "tilewidth":16,

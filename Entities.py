@@ -357,7 +357,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0]*30
         self.velocity[1] = -dir[1]*30
 
-    def hurt_particles(self,distance=0,lifetime=40,vel=[7,15],type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
+    def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
         for i in range(0,number_particles):
             obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance,lifetime,vel,dir,scale,colour)
             self.game_objects.cosmetics.add(obj1)
@@ -605,6 +605,9 @@ class Mygga(Enemy):
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
         self.dir[1] = 1
 
+    def update_hitbox(self):
+        self.hitbox.center = self.rect.center
+
 class Exploding_Mygga(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -624,6 +627,9 @@ class Exploding_Mygga(Enemy):
         self.dir[1] = 1
         self.size = [64,64]#hurtbox size
         #self.shader = shader_entities.Shader_entities(self)
+
+    def update_hitbox(self):
+        self.hitbox.center = self.rect.center
 
     def suicide(self):
         self.projectiles.add(Hurt_box(self,lifetime = 50))
@@ -1520,7 +1526,7 @@ class Sword(Melee):
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=20,vel=[7,14],dir=angle,scale=0.5,colour = [255,255,255,255])
+            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=20,vel={'linear':[7,14]},dir=angle,scale=0.5,colour = [255,255,255,255])
             self.entity.game_objects.cosmetics.add(obj1)
 
     def collision_inetractables(self,interactable):#called when projectile hits interactables
@@ -1570,7 +1576,7 @@ class Aila_sword(Sword):
         angle = random.randint(-180, 180)#the ejection anglex
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel=[7,14],dir=angle,scale=0.4,colour=color)
+            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel={'linear':[7,14]},dir=angle,scale=0.4,colour=color)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
@@ -1898,7 +1904,7 @@ class Soul_essence(Loot):
 
     def update(self):
         super().update()
-        obj1 = getattr(particles, 'Spark')(self.rect.center,self.game_objects,distance = 100,lifetime=20,vel=[2,4],dir='isotropic',scale = 1, colour = [255,255,255,255])
+        obj1 = getattr(particles, 'Spark')(self.rect.center,self.game_objects,distance = 100,lifetime=20,vel={'linear':[2,4]},dir='isotropic',scale = 1, colour = [255,255,255,255])
         self.game_objects.cosmetics.add(obj1)
 
 class Tungsten(Loot):
@@ -2321,9 +2327,9 @@ class Interactable_bushes(Interactable):
         self.interacted = False
 
     def player_collision(self):#player collision
-        if not self.interacted:
-            self.currentstate.handle_input('Hurt')
-            self.interacted = True#sets to false when player gos away
+        if self.interacted: return
+        self.currentstate.handle_input('Hurt')
+        self.interacted = True#sets to false when player gos away
 
     def take_dmg(self,projectile):
         self.currentstate.handle_input('Death')
@@ -2342,9 +2348,23 @@ class Cave_grass(Interactable_bushes):
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.hitbox.midbottom = self.rect.midbottom
 
-    def release_particles(self):#should release particles when hurt and death
-        pass
+    def player_collision(self):
+        if self.interacted: return
+        self.currentstate.handle_input('Hurt')
+        self.interacted = True#sets to false when player gos away
+        self.release_particles()
+
+    def take_dmg(self,projectile):
+        super().take_dmg(projectile)
+        self.release_particles(30)
+
+    def release_particles(self,number_particles=12):#should release particles when hurt and death
+        color = [255,255,255,255]
+        for i in range(0,number_particles):
+            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=30,lifetime=300,vel={'wave':[7,14]},dir='isotropic',scale=2,colour=color)
+            self.game_objects.cosmetics.add(obj1)
 
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
