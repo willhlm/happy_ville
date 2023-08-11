@@ -34,7 +34,6 @@ class Wind(pygame.sprite.Sprite):
         self.weather = weather
         self.image = pygame.Surface([weather.game_objects.game.WINDOW_SIZE[0],weather.game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.topleft = [0,0]
         self.velocity = [0,0]
         self.lifetime = 300
         self.true_pos = [0,0]
@@ -49,9 +48,9 @@ class Wind(pygame.sprite.Sprite):
 
     def finish(self):
         self.weather.currentstate.handle_input('Finish')
-        self.kill()
         self.velocity = [0,0]
         self.lifetime = 300
+        self.kill()
 
     def update_pos(self):#not used
         self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]

@@ -1,4 +1,4 @@
-import pygame, math, random, shader_entities
+import pygame, math, random
 
 class Particles(pygame.sprite.Sprite):
     def __init__(self, pos, game_objects, distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255]):

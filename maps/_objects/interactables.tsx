@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="front" tilewidth="160" tileheight="137" tilecount="6" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="160" tileheight="137" tilecount="6" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">

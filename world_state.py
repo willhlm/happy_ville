@@ -38,11 +38,11 @@ class World_state():
         chest_int = 1
         soul_essence_int = 1
 
-        map_statics = map_data['groups']['bg1']['objects']['front']
+        map_statics = map_data['groups']['bg1']['objects']['interactables']
         self.state[level_name] = {'chest':{},'soul_essence':{},'runestone':{}}#a place holder for things that should depend on map state
 
         for obj in map_statics['objects']:
-            id = obj['gid'] - map_data['front_firstgid']
+            id = obj['gid'] - map_data['interactables_firstgid']
 
             if id == 3:#runestone
                 for property in obj['properties']:

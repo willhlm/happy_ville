@@ -575,7 +575,7 @@
                 {
                  "draworder":"topdown",
                  "id":61,
-                 "name":"front",
+                 "name":"interactables",
                  "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
@@ -909,18 +909,7 @@
                          "width":1200,
                          "x":5392,
                          "y":720
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":5,
-                 "name":"collision",
-                 "objects":[
+                        }, 
                         {
                          "height":0,
                          "id":83,

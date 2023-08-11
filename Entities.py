@@ -1213,7 +1213,7 @@ class Light_glow(Staticentity):#a light glow anounf an entity.
             self.glow.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
 class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark screen/layer in e.g. caves. It can be combined with light_glow
-    def __init__(self,entity,radius = 200, layers = 40):
+    def __init__(self, entity, radius = 200, layers = 40):
         super().__init__(entity.rect.center)
         self.entity = entity
         self.game_objects = entity.game_objects
@@ -1222,7 +1222,7 @@ class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark
         self.make_glow()
 
     def update(self):
-        pos = [self.entity.rect.centerx-self.radius-self.game_objects.camera.scroll[0],self.entity.rect.centery-self.radius-self.game_objects.camera.scroll[1]]
+        pos = [self.entity.rect.centerx - self.radius - self.game_objects.camera.scroll[0], self.entity.rect.centery - self.radius - self.game_objects.camera.scroll[1]]
         self.game_objects.map.screen.image.blit(self.glow, pos, special_flags = pygame.BLEND_RGBA_SUB)
         #self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), special_flags = pygame.BLEND_RGB_SUB)#inverting
 
@@ -2337,11 +2337,14 @@ class Interactable_bushes(Interactable):
 class Cave_grass(Interactable_bushes):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/cave_grass/')
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/bushes/cave_grass/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+
+    def release_particles(self):#should release particles when hurt and death
+        pass
 
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):

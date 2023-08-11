@@ -32,9 +32,6 @@ def format_tiled_json_group(map_data):
     formatted_map_data['tilesets'] = map_data['tilesets']
 
     for gruop in map_data['layers']:#it will take from lowest position in tiled
-    #    if gruop['name'] == 'statics' or gruop['name'] =='collision':#object not in group: static stamps and collision layer
-    #        formatted_map_data[gruop['name']] = gruop['objects']
-    #        continue
         formatted_map_data['groups'][gruop['name']] = {}
         formatted_map_data['groups'][gruop['name']]['layers'] = {}
         formatted_map_data['groups'][gruop['name']]['objects'] = {}
@@ -51,7 +48,6 @@ def format_tiled_json_group(map_data):
                 layer['offsetx'] = layer.get('offsetx',0)
                 layer['offsety'] = layer.get('offsety',0)
                 formatted_map_data['groups'][gruop['name']]['layers'][layer['name']] = layer
-
 
     return formatted_map_data
 
