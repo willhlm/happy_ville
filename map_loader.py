@@ -1,9 +1,9 @@
 import pygame, csv, math
 import Entities, Read_files, weather, tiled_objects
 import constants as C
-import numpy as np
 
 from PIL import Image, ImageFilter#for blurring
+import numpy as np
 
 class Level():
     def __init__(self, game_objects):
@@ -31,9 +31,7 @@ class Level():
             self.game_objects.sound.pause_bg_sound()
 
     def init_state_file(self):
-        try:
-            self.game_objects.world_state.state[self.level_name]
-        except:#make a state file if it is the first time loading this map
+        if not self.game_objects.world_state.state.get(self.level_name, False):#if it is the first time loading the map
             self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
 
     def append_light_effet(self):
@@ -56,12 +54,12 @@ class Level():
 
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
-                if 'static' in tileset['source']:
+                if 'static' in tileset['source']:#name of the tsx file
                     self.map_data['statics_firstgid'] =  tileset['firstgid']
-                elif 'front' in tileset['source']:
-                    self.map_data['front_firstgid'] = tileset['firstgid']
-                elif 'back' in tileset['source']:
-                    self.map_data['back_firstgid'] = tileset['firstgid']
+                elif 'interactables' in tileset['source']:#name of the tsx file
+                    self.map_data['interactables_firstgid'] = tileset['firstgid']
+                elif 'objects' in tileset['source']:#name of the tsx file
+                    self.map_data['objects_firstgid'] = tileset['firstgid']
 
     def read_all_spritesheets(self):
         sprites = {}
@@ -88,8 +86,8 @@ class Level():
 
     def load_groups(self):
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
-        load_front_objects = {'front':self.load_front_objects,'statics':self.load_statics,'collision':self.load_statics}#the keys are the naes of the object in tiled
-        load_back_objects = {'back':self.load_back_objects}#the keys are the naes of the object in tiled
+        load_front_objects = {'light_forest_front':self.load_light_forest_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
+        load_back_objects = {'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
         self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer
 
         for group in self.map_data['groups']:
@@ -106,8 +104,8 @@ class Level():
 
     def load_objects(self,data,parallax,offset,method):
         for object in method.keys():#load each object in group
-            if data.get(object,False):
-                method[object](data[object],parallax,offset)
+            if data.get(object[object.rfind('_')+1:],False):
+                method[object](data[object[object.rfind('_')+1:]],parallax,offset)
 
     def load_statics(self,data,parallax,offset):#load statics and collision
         chest_int = 1
@@ -318,14 +316,14 @@ class Level():
                 new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
                 self.game_objects.interactables.add(new_trap)
 
-    def load_front_objects(self,data,parallax,offset):#load object infront of layers
+    def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
             object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['front_firstgid']
+            id = obj['gid'] - self.map_data['interactables_firstgid']
 
             if id == 2:#save point
                 new_int = Entities.Savepoint(object_position,self.game_objects,self.level_name)
@@ -365,13 +363,13 @@ class Level():
                 fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(fast_travel)
 
-    def load_back_objects(self,data,parallax,offset):#load objects back of layers
+    def load_light_forest_objects(self,data,parallax,offset):#load objects back of layers
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
             object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['back_firstgid']
+            id = obj['gid'] - self.map_data['objects_firstgid']
 
             if id == 2:#light forest tree tree
                 new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
@@ -387,16 +385,33 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
+    def load_light_forest_cave_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['objects_firstgid']
+
+            if id == 0:#cave grass
+                new_grass = Entities.Cave_grass(object_position,self.game_objects)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_grass)
+                else:
+                    self.game_objects.all_bgs.add(new_grass)
+
     @staticmethod
     def blur_value(parallax):#called from load_laters and load_back/front_objects
         return round(1/parallax[0])
 
     def load_layers(self,data, parallax, offset):
-        'Tiled design notes: all tile layers and objects need to be in a group (including statics and collision).'
-        'The offset and parallax should be specified for group and not in the layers or objects'
+        'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
+        'The offset and parallax should be specified for group, which affects all in that group. Individual tile layers can be specified as well.'
         'Each group needs at least one tile layer (but can be emppty).'
         'The groups should contain "fg", "bg" or "interact" in their name.'
-        'The tile layer in groups can be called whatever. But the objects need to be called statics, front or back.'
+        'The main layer needs to be called "bg1"'#world state file reads it
+        'The tile layer in groups can be called whatever. But the objects need to be called statics, interactables, front or back.'
+        'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
 
         #make empty surfaces
         key = list(data.keys())[0]
@@ -486,11 +501,9 @@ class Level():
                 self.game_objects.all_bgs.add(bg)
                 self.game_objects.all_bgs.reference[tuple(parallax)] = bg
 
-            try:#add animations to group
+            if animation_entities.get(tile_layer,False):#add animations
                 for bg_animation in animation_entities[tile_layer]:
                     if 'fg' in tile_layer:
                         self.game_objects.all_fgs.add(bg_animation)
                     elif 'bg' in tile_layer:
                         self.game_objects.all_bgs.add(bg_animation)
-            except:
-                pass

@@ -1,14 +1,17 @@
-import pygame, math, random, shader_entities
+import pygame, math, random
 
 class Particles(pygame.sprite.Sprite):
-    def __init__(self, pos, game_objects, distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255]):
+    def __init__(self, pos, game_objects, distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255]):
         super().__init__()
         self.game_objects = game_objects
         angle = self.define_angle(dir)
         self.angle = -(2*math.pi*angle)/360
         self.lifetime = lifetime
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
-        amp = random.randint(vel[0], vel[1])
+
+        motion = list(vel.keys())[0]#linear moetion or wave motion
+        self.update_velocity = {'linear':self.linear,'wave':self.wave}[motion]
+        amp = random.randint(vel[motion][0], vel[motion][1])
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.fade = colour[-1]
         self.colour = colour
@@ -17,7 +20,7 @@ class Particles(pygame.sprite.Sprite):
     def update(self):
         self.update_pos()
         self.lifetime -= self.game_objects.game.dt
-        self.speed()
+        self.update_velocity()
         self.fading()
         self.destroy()
 
@@ -25,7 +28,10 @@ class Particles(pygame.sprite.Sprite):
         self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
         self.rect.center = self.true_pos
 
-    def speed(self):
+    def wave(self):
+        self.velocity  = [0.5*math.sin(self.lifetime*0.1+self.angle),-1]
+
+    def linear(self):
         self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)
         self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
 
@@ -47,7 +53,6 @@ class Particles(pygame.sprite.Sprite):
             spawn_angle = 30
             angle=random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex
         else:#integer
-            sign=random.randint(0,1)
             dir += 180*random.randint(0,1)
             spawn_angle = 10
             angle=random.randint(dir-spawn_angle, dir+spawn_angle)#the ejection anglex
@@ -56,7 +61,7 @@ class Particles(pygame.sprite.Sprite):
 class Circle(Particles):#a general one
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour):
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
-        self.radius = random.randint(max(self.scale-1,1), self.scale+1)
+        self.radius = random.randint(max(self.scale-1,1), round(self.scale+1))
         self.fade_scale = 3
         self.make_circle()
 
@@ -64,18 +69,8 @@ class Circle(Particles):#a general one
         self.surface =pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
         self.image = self.surface.copy()
         pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
-        #self.prepare_glow()
         self.rect = self.image.get_rect()
         self.rect.center = self.true_pos
-
-    def prepare_glow(self):
-        glow_colour = [255,255,255,20]#colour of each glow
-        layers = 40
-        radius = self.radius/layers
-        temp = self.surface.copy()
-        for i in range(layers):
-            pygame.draw.circle(temp,glow_colour,(self.radius,self.radius),i*radius)
-            self.image.blit(temp,(0,0))#need to blit in order to "stack" the alpha
 
 class Spark(Particles):#a general one
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale,colour):

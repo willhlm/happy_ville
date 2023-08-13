@@ -54,7 +54,7 @@ class Hurt_animation(Entity_animation):#become white
         if input == 'Invincibile':
             self.next_animation = 'Invincibile_animation'
 
-class Invincibile_animation(Entity_animation):
+class Invincibile_animation(Entity_animation):#blink white
     def __init__(self,entity,frame):
         super().__init__(entity,frame)
         self.duration = C.invincibility_time_player-(C.hurt_animation_length+1)#a duration which considers the player invinsibility
