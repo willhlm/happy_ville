@@ -13,7 +13,7 @@ class Level():
         self.level_name = ''
         self.area_name = ''
         self.area_change = True#a flag to chenge if we change area
-        self.screen = Entities.Transparent_screen()
+        self.references = {'shade':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order
 
     def load_map(self,map_name,spawn):
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
@@ -24,6 +24,7 @@ class Level():
         self.init_state_file()#need to be before load groups
         self.load_groups()
         self.append_light_effet()#append any light effects depending on map
+        self.orginise_references()
 
     def check_pause_sound(self):
         self.area_change = self.level_name[:self.level_name.rfind('_')] != self.area_name
@@ -44,6 +45,11 @@ class Level():
             self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
         elif level_name == 'dark_forest':
             self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
+
+    def orginise_references(self):
+        for key in self.references.keys():
+            if key == 'shade_trigger':
+                self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
@@ -88,7 +94,7 @@ class Level():
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
         load_front_objects = {'light_forest_front':self.load_light_forest_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
         load_back_objects = {'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
-        self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer
+        self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer or other information
 
         for group in self.map_data['groups']:
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
@@ -224,16 +230,17 @@ class Level():
                 else:
                     self.game_objects.weather.create_particles(particle_type,parallax,self.game_objects.all_bgs)
 
-            elif id == 16:#fog
+            elif id == 16:#scren shade
                 for property in properties:
                     if property['name'] == 'colour':
                         colour = property['value']
 
-                new_fog = getattr(weather, 'Fog')(self.game_objects,parallax,pygame.Color(colour))
+                new_shade = Entities.Shade_Screen(self.game_objects,parallax,pygame.Color(colour))
+                self.references['shade'].append(new_shade)
                 if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(new_fog)
+                    self.game_objects.all_fgs.add(new_shade)
                 else:
-                    self.game_objects.all_bgs.add(new_fog)
+                    self.game_objects.all_bgs.add(new_shade)
 
             elif id == 17:#leaves
                 information = [object_position,object_size]
@@ -263,16 +270,16 @@ class Level():
                 reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
                 self.game_objects.reflections.add(reflection)
 
-            #move to front objects
-            elif id == 23:#bushes, etc
+            elif id == 23:#shade trigger
                 for property in properties:
-                    if property['name'] == 'type':
-                        interactable_type = property['value']
+                    if property['name'] == 'colour':
+                        colour = property['value']
 
-                    new_interacable = getattr(Entities, interactable_type)(object_position,self.game_objects)
-                #new_bush = Entities.Interactable_bushes(object_position,self.game_objects,bush_type)
+                new_interacable = Entities.Shade_trigger(object_position,self.game_objects,object_size,pygame.Color(colour))
+                self.references['shade_trigger'] = new_interacable
                 self.game_objects.interactables.add(new_interacable)
 
+            #move to front objects
             elif id == 24:#event: e.g. bridge that is built when the reindeer dies
                 values={}
                 for property in properties:

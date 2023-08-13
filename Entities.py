@@ -128,11 +128,13 @@ class Collision_right_angle(Platform):
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
-            self.shift_up(rel_x,other_side,entity)
+            benethe = entity.hitbox.bottom - self.hitbox.bottom
+            self.shift_up(rel_x,other_side,entity,benethe)
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
-            self.shift_up(rel_x,other_side,entity)
+            benethe = entity.hitbox.bottom - self.hitbox.bottom
+            self.shift_up(rel_x,other_side,entity,benethe)
         elif self.orientation == 2:
             rel_x = self.hitbox.right - entity.hitbox.left
             self.shift_down(rel_x,entity)
@@ -149,10 +151,10 @@ class Collision_right_angle(Platform):
             entity.velocity[0] = 0 #need to have a value to avoid "dragin in air" while running
             entity.update_rect_y()
 
-    def shift_up(self,rel_x,other_side,entity):
+    def shift_up(self,rel_x,other_side,entity,benethe):
         target = -rel_x*self.ratio + self.hitbox.bottom
 
-        if other_side > 0:
+        if other_side > 0 or benethe > 0:
             if entity.hitbox.bottom > target:
                 entity.go_through = True
             else:
@@ -1179,19 +1181,13 @@ class Spawner(Staticentity):#an entity spawner
 
 class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. caves. loaded in maploader
     def __init__(self, game_objects, colour = (10,10,10,200)):
-        super().__init__(pos = [0,0])
+        super().__init__([0,0], pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))))
         self.game_objects = game_objects
         self.colour = colour
-        self.image = pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))).convert_alpha()#ONLY USED FOR DARK MODE
-        self.rect = self.image.get_rect()
 
     def update(self):
-        self.rect.topleft  = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]#this is [0,0]
+        self.rect.topleft  = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
         self.image.fill(self.colour)#make it dark again
-
-class Transparent_screen(Staticentity):#a placeholder for normal stages. initialised in maploader
-    def __init__(self):
-        super().__init__(pos = [0,0])
 
 class Light_glow(Staticentity):#a light glow anounf an entity.
     def __init__(self, entity, radius = 200,layers = 40):
@@ -1301,6 +1297,19 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 
     def finish(self):#called when fading out should start
         self.page = 1
+
+class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
+    def __init__(self, game_objects, parallax, colour):
+        super().__init__([0,0], pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32))
+        self.game_objects = game_objects
+        self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
+        self.image.fill(self.colour)#make it dark again
+
+    def update(self):
+        self.true_pos = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
+
+    def set_colour(self,new_colour):#called from shade trigger
+        self.image.fill(new_colour)
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -2296,6 +2305,31 @@ class Path_inter(Interactable):
     def interact(self):
         self.game_objects.load_map(self.destination, self.spawn)
 
+class Shade_trigger(Interactable):
+    def __init__(self,pos,game_objects,size,colour):
+        super().__init__(pos,game_objects)
+        self.new_colour = [colour.g,colour.b,colour.a]#higher alpha for lower parallax
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/shade_trigger/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = pygame.Rect(pos,size)
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+
+    def update(self):
+        pass
+
+    def player_collision(self):#player collision
+        for layer in self.layers:
+            colour = self.new_colour + [layer.colour[-1]]
+            layer.set_colour(colour)
+
+    def player_noncollision(self):#when player doesn't collide: for grass
+        for layer in self.layers:
+            layer.set_colour(layer.colour)
+
+    def add_shade_layers(self, layers):#called from map loader
+        self.layers = layers#a list of shahde layers
+
 class Cutscene_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):
         super().__init__(pos,game_objects)
@@ -2363,7 +2397,7 @@ class Cave_grass(Interactable_bushes):
     def release_particles(self,number_particles=12):#should release particles when hurt and death
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=30,lifetime=300,vel={'wave':[7,14]},dir='isotropic',scale=2,colour=color)
+            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=30,lifetime=300,vel={'wave':[3,14]},dir='isotropic',scale=2,colour=color)
             self.game_objects.cosmetics.add(obj1)
 
 class Runestones(Interactable):

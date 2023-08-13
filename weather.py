@@ -57,19 +57,9 @@ class Wind(pygame.sprite.Sprite):
         self.rect.topleft = self.true_pos
 
 class Fog(pygame.sprite.Sprite):
-    def __init__(self,game_objects,parallax,colour):
+    def __init__(self):
         super().__init__()
-        self.game_objects = game_objects
-        self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.topleft = [0,0]
-        self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
-        pygame.draw.rect(self.image,self.colour,self.rect)
-        self.true_pos = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]
-        self.parallax = [1,1]
-
-    def update(self):
-        self.true_pos = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]#this is [0,0]
+        pass
 
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):

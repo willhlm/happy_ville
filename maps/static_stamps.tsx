@@ -89,7 +89,7 @@
  </tile>
  <tile id="23">
   <properties>
-   <property name="type" value=""/>
+   <property name="colour" type="color" value=""/>
   </properties>
  </tile>
  <tile id="24">

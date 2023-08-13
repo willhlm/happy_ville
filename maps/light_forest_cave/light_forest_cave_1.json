@@ -864,7 +864,7 @@
                         }, 
                         {
                          "gid":4104,
-                         "height":48,
+                         "height":64,
                          "id":1676,
                          "name":"",
                          "rotation":0,
@@ -872,7 +872,7 @@
                          "visible":true,
                          "width":336,
                          "x":2416,
-                         "y":1440
+                         "y":1456
                         }, 
                         {
                          "gid":4104,
@@ -1392,7 +1392,7 @@
          "y":0
         }],
  "nextlayerid":47,
- "nextobjectid":1844,
+ "nextobjectid":1845,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
