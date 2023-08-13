@@ -2751,7 +2751,7 @@ class Spirit_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):
         super().__init__(pos,game_objects)
         self.currentstate = states_traps.Idle(self)#
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/spirit_spikes')
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/spirit_spikes/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1])
@@ -2767,7 +2767,7 @@ class Lightning_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):
         super().__init__(pos,game_objects)
         self.currentstate = states_traps.Idle(self)#
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/lightning_spikes')
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/traps/lightning_spikes/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1])
