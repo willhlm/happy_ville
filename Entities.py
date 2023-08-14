@@ -1305,10 +1305,10 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
         self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
         self.original_colour = self.colour.copy()
         self.image.fill(self.colour)#make it dark again
-        self.currentstate = state_shade_screen.Idle(self)
+        self.currentstate = state_shade_screen.Idle(self,self.original_colour)
 
     def update(self):
-        #self.currentstate.update()
+        self.currentstate.update()
         self.true_pos = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
 
 #Player movement abilities, handles them. Contains also spirit abilities
@@ -2314,24 +2314,26 @@ class Shade_trigger(Interactable):
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        self.layers_two = []
 
     def update(self):
         pass
 
     def player_collision(self):#player collision
-        for layer in self.layers:
-            layer.currentstate.handle_input('Turn')
+        for layer in self.layers_one:
             colour = self.new_colour + [layer.colour[-1]]
-            layer.currentstate.set_colour(colour)
+            layer.currentstate.enter_state('Turn',colour)
+            self.layers_two.append(layer)
+            self.layers_one.remove(layer)
 
     def player_noncollision(self):#when player doesn't collide: for grass
-        for layer in self.layers:
-            layer.currentstate.handle_input('Idle')
-            layer.currentstate.set_colour(layer.original_colour)
+        for layer in self.layers_two:
+            layer.currentstate.enter_state('Turn',layer.original_colour)
+            self.layers_one.append(layer)
+            self.layers_two.remove(layer)
 
     def add_shade_layers(self, layers):#called from map loader
-        self.layers = layers#a list of shahde layers
+        self.layers_one = layers#a list of shahde layers
+        self.layers_two = []#similar to self.layer, keeps the layers of the shade screen
 
 class Cutscene_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):
