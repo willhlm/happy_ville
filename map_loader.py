@@ -13,9 +13,9 @@ class Level():
         self.level_name = ''
         self.area_name = ''
         self.area_change = True#a flag to chenge if we change area
-        self.references = {'shade':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order
 
     def load_map(self,map_name,spawn):
+        self.references = {'shade':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading        
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
         self.level_name = map_name
         self.spawn = spawn

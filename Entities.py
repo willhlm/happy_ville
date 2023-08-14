@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, states, particles, animation, sound, dialogue
-import states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -1303,13 +1303,13 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
         super().__init__([0,0], pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32))
         self.game_objects = game_objects
         self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
+        self.original_colour = self.colour.copy()
         self.image.fill(self.colour)#make it dark again
+        self.currentstate = state_shade_screen.Idle(self)
 
     def update(self):
+        #self.currentstate.update()
         self.true_pos = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
-
-    def set_colour(self,new_colour):#called from shade trigger
-        self.image.fill(new_colour)
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -2308,24 +2308,27 @@ class Path_inter(Interactable):
 class Shade_trigger(Interactable):
     def __init__(self,pos,game_objects,size,colour):
         super().__init__(pos,game_objects)
-        self.new_colour = [colour.g,colour.b,colour.a]#higher alpha for lower parallax
+        self.new_colour = [colour.g,colour.b,colour.a]
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/shade_trigger/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
+        self.layers_two = []
 
     def update(self):
         pass
 
     def player_collision(self):#player collision
         for layer in self.layers:
+            layer.currentstate.handle_input('Turn')
             colour = self.new_colour + [layer.colour[-1]]
-            layer.set_colour(colour)
+            layer.currentstate.set_colour(colour)
 
     def player_noncollision(self):#when player doesn't collide: for grass
         for layer in self.layers:
-            layer.set_colour(layer.colour)
+            layer.currentstate.handle_input('Idle')
+            layer.currentstate.set_colour(layer.original_colour)
 
     def add_shade_layers(self, layers):#called from map loader
         self.layers = layers#a list of shahde layers
