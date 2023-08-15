@@ -55,9 +55,55 @@
                 }, 
                 {
                  "draworder":"topdown",
-                 "id":5,
-                 "name":"collision",
+                 "id":6,
+                 "name":"statics",
                  "objects":[
+                        {
+                         "gid":6962,
+                         "height":48,
+                         "id":6,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"image",
+                                 "type":"string",
+                                 "value":"None"
+                                }, 
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"village_1"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"7"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":29,
+                         "x":353,
+                         "y":302
+                        }, 
+                        {
+                         "gid":6953,
+                         "height":16,
+                         "id":7,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":382,
+                         "y":270
+                        }, 
                         {
                          "gid":6960,
                          "height":16,
@@ -141,63 +187,24 @@
                          "width":0,
                          "x":512,
                          "y":256
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":false,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":6,
-                 "name":"statics",
-                 "objects":[
-                        {
-                         "gid":6962,
-                         "height":48,
-                         "id":6,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"image",
-                                 "type":"string",
-                                 "value":"None"
-                                }, 
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"village_1"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"7"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":29,
-                         "x":353,
-                         "y":302
                         }, 
                         {
-                         "gid":6953,
+                         "gid":6967,
                          "height":16,
-                         "id":7,
+                         "id":9,
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"spawn",
+                                 "name":"direction",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"center"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":382,
-                         "y":270
+                         "x":400,
+                         "y":272
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -213,7 +220,7 @@
          "y":0
         }],
  "nextlayerid":10,
- "nextobjectid":9,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

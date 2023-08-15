@@ -3,34 +3,16 @@ from Entities import Animatedentity
 import Read_files, states_wind_objects
 from weather import Leaves
 
-class Tree(Animatedentity):
+class Layered_objects(Animatedentity):#objects in tiled that goes to different layers
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects)
-        self.currentstate = states_wind_objects.Idle(self)#
         self.pause_group = game_objects.layer_pause
         self.group = game_objects.all_bgs
         self.parallax = parallax
 
-    def create_leaves(self,number_particles = 3):#should we have colour as an argument?
-        for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead?
-            obj = Leaves(self.game_objects,self.parallax,self.spawn_box)
-            self.game_objects.all_bgs.add(obj)
-
     def update(self):
         super().update()
         self.group_distance()
-
-    def blowing(self):#called when in wind state
-        return
-        sprites = self.game_objects.all_bgs.sprites()
-        self.index = sprites.index(self)
-
-        obj = Leaves(self.game_objects,self.parallax,[self.rect.center,[64,64]],kill = True)
-        #manuall add to a specific layer
-        self.game_objects.all_bgs.spritedict[obj] = self.game_objects.all_bgs._init_rect#in add internal
-        self.game_objects.all_bgs._spritelayers[obj] = 0
-        self.game_objects.all_bgs._spritelist.insert(self.index,obj)
-        obj.add_internal(self.game_objects.all_bgs)
 
     def init_sprites(self):#Only blur if it is the first time loading the object. Otherwise, copy from memory
         try:#if it is not the first one
@@ -45,7 +27,29 @@ class Tree(Animatedentity):
             for frame, image in enumerate(self.sprites.sprite_dict[state]):
                 self.sprites.sprite_dict[state][frame] = pygame.transform.gaussian_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
 
-class Light_forest_tree1(Tree):
+class Trees(Layered_objects):
+    def __init__(self,pos,game_objects,parallax):
+        super().__init__(pos,game_objects,parallax)
+        self.currentstate = states_wind_objects.Idle(self)#
+
+    def create_leaves(self,number_particles = 3):#should we have colour as an argument?
+        for i in range(0,number_particles):#slightly faster if we make the object once and copy it instead?
+            obj = Leaves(self.game_objects,self.parallax,self.spawn_box)
+            self.game_objects.all_bgs.add(obj)
+
+    def blowing(self):#called when in wind state
+        return
+        sprites = self.game_objects.all_bgs.sprites()
+        self.index = sprites.index(self)
+
+        obj = Leaves(self.game_objects,self.parallax,[self.rect.center,[64,64]],kill = True)
+        #manuall add to a specific layer
+        self.game_objects.all_bgs.spritedict[obj] = self.game_objects.all_bgs._init_rect#in add internal
+        self.game_objects.all_bgs._spritelayers[obj] = 0
+        self.game_objects.all_bgs._spritelist.insert(self.index,obj)
+        obj.add_internal(self.game_objects.all_bgs)
+
+class Light_forest_tree1(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
@@ -62,7 +66,7 @@ class Light_forest_tree1(Tree):
         self.spawn_box = [position,size]
         self.create_leaves()
 
-class Light_forest_tree2(Tree):
+class Light_forest_tree2(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
@@ -78,3 +82,16 @@ class Light_forest_tree2(Tree):
         size = [64,64]
         self.spawn_box = [position,size]
         self.create_leaves()
+
+class Ljusmaskar(Layered_objects):
+    animations = {}
+    def __init__(self,pos,game_objects,parallax):
+        super().__init__(pos,game_objects,parallax)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/ljusmaskar/')
+        self.init_sprites()#blur or lead from memory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+
+    def group_distance(self):
+        pass

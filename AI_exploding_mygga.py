@@ -91,24 +91,27 @@ class Chase(behaviour_tree.Leaf):
         else:
             return 'RUNNING'
 
+class Init_attack(behaviour_tree.Leaf):#run once before the attack
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update(self):
+        self.entity.currentstate.enter_state('Pre_explode')
+        self.entity.AI.black_board['attack'] = 'RUNNING'
+        return 'SUCCESS'
+
 class Attack(behaviour_tree.Leaf):
     def __init__(self,entity):
         super().__init__(entity)
-        self.state = 'RUNNING'
 
     def update(self):
-        state = self.state
-        if self.state != 'RUNNING':
-            self.state = 'RUNNING'#reset
-        else:
-            self.entity.currentstate.handle_input('explode')
-        return state
+        return self.entity.AI.black_board['attack']
 
     def handle_input(self,input):
         if input == 'De_explode':
-            self.state = 'FAILURE'
+            self.entity.AI.black_board['attack'] = 'FAILURE'
         elif input == 'Attack':
-            self.state = 'SUCCESS'
+            self.entity.AI.black_board['attack'] = 'SUCCESS'
 
 class Look_player(behaviour_tree.Leaf):
     def __init__(self,entity):
@@ -161,7 +164,11 @@ def build_tree(entity):
     aggro1.add_child(Chase(entity))
     aggro4 = behaviour_tree.Fail2Success()
     aggro.add_child(aggro4)
-    aggro4.add_child(Attack(entity))
+    sequence = behaviour_tree.Sequence()
+    sequence.add_child(Init_attack(entity))
+    sequence.add_child(Attack(entity))
+
+    aggro4.add_child(sequence)
     aggro.add_child(Wait(entity))
 
     entity.AI.add_child(aggro)

@@ -45,22 +45,12 @@ class Game():
                 self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
     def run(self):
-        #i = 0
         while True:
             shaders.clear((0, 0, 0))
 
             #tick clock
             self.clock.tick(self.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-            #dt =1
-            #print(self.clock.get_fps())
-            #print(self.clock.tick(self.fps))
-            #i+=1
-            #if self.clock.get_fps() < 50:
-            #    print(i)
-        #        print(self.clock.get_fps())
-        #        print(self.fps)
-        #        i = 0
 
             #handle event
             self.event_loop()

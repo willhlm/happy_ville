@@ -157,53 +157,6 @@
                 }, 
                 {
                  "draworder":"topdown",
-                 "id":5,
-                 "name":"collision",
-                 "objects":[
-                        {
-                         "gid":8,
-                         "height":16,
-                         "id":1,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":1360,
-                         "x":192,
-                         "y":368
-                        }, 
-                        {
-                         "gid":8,
-                         "height":352,
-                         "id":14,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1552,
-                         "y":352
-                        }, 
-                        {
-                         "gid":8,
-                         "height":352,
-                         "id":15,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":176,
-                         "y":352
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
                  "id":6,
                  "name":"statics",
                  "objects":[
@@ -365,6 +318,42 @@
                          "visible":true,
                          "width":16,
                          "x":208,
+                         "y":352
+                        }, 
+                        {
+                         "gid":8,
+                         "height":16,
+                         "id":1,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":1360,
+                         "x":192,
+                         "y":368
+                        }, 
+                        {
+                         "gid":8,
+                         "height":352,
+                         "id":14,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1552,
+                         "y":352
+                        }, 
+                        {
+                         "gid":8,
+                         "height":352,
+                         "id":15,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":176,
                          "y":352
                         }],
                  "opacity":1,

@@ -152,11 +152,7 @@
                  "height":40,
                  "id":6,
                  "name":"bg3_1",
-                 "offsetx":-144,
-                 "offsety":-26,
                  "opacity":1,
-                 "parallaxx":0.92,
-                 "parallaxy":0.92,
                  "type":"tilelayer",
                  "visible":true,
                  "width":300,
@@ -320,17 +316,6 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":300,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":33,
-                 "name":"front",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
                  "x":0,
                  "y":0
                 }, 
@@ -707,18 +692,7 @@
                          "width":16,
                          "x":1232,
                          "y":432
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":3,
-                 "name":"collision",
-                 "objects":[
+                        }, 
                         {
                          "gid":8,
                          "height":16,

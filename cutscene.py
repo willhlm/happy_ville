@@ -188,7 +188,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
-        pos = (900,100)
+        pos = (self.parent_class.game.game_objects.camera.scroll[0] + 900,self.parent_class.game.game_objects.camera.scroll[1] + 100)
         self.entity = Entities.Reindeer(pos, self.parent_class.game.game_objects)#make the boss
         self.parent_class.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
@@ -196,16 +196,17 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         self.entity.AI.deactivate()
         self.stage = 0
         self.parent_class.game.game_objects.player.currentstate.enter_state('Walk_main')
+        self.parent_class.game.game_objects.player.currentstate.walk()#to force tha walk animation
 
     def update(self):#write how you want the player/group to act
-        self.timer+=self.parent_class.game.dt
+        self.timer += self.parent_class.game.dt
         if self.stage == 0:
             self.parent_class.game.game_objects.player.velocity[0]  = 4
 
             if self.timer >120:
                 self.stage=1
                 self.parent_class.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                self.parent_class.game.game_objects.player.acceleration[0]=0
+                self.parent_class.game.game_objects.player.acceleration[0] = 0
 
         elif self.stage==1:
             if self.timer>200:
@@ -243,7 +244,7 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
     def render(self):
         super().render()
         if self.step1:
-            particle = getattr(particles, 'Spark')(self.parent_class.game.game_objects.player.rect.center,self.parent_class.game.game_objects,distance = 400, lifetime = 60, vel = [7,13], dir = 'isotropic', scale = 1, colour = [255,255,255,255])
+            particle = getattr(particles, 'Spark')(self.parent_class.game.game_objects.player.rect.center,self.parent_class.game.game_objects,distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255])
             self.parent_class.game.game_objects.cosmetics.add(particle)
 
             self.parent_class.game.game_objects.cosmetics.draw(self.parent_class.game.game_objects.game.screen)
@@ -291,13 +292,14 @@ class Death(Cutscene_engine):#when aila dies
 class Cultist_encounter(Cutscene_engine):
     def __init__(self,objects):
         super().__init__(objects)
-        spawn_pos = (-150,100)
+        spawn_pos = (self.parent_class.game.game_objects.camera.scroll[0] - 150,self.parent_class.game.game_objects.camera.scroll[1] + 100)
         self.stage = 0
         self.entity1=Entities.Cultist_warrior(spawn_pos, self.parent_class.game.game_objects)
         self.parent_class.game.game_objects.camera.set_camera('Cultist_encounter')
-        self.entity1.AI.enter_AI('Nothing')
+        self.entity1.AI.deactivate()
         self.parent_class.game.game_objects.enemies.add(self.entity1)
         self.parent_class.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
+        self.parent_class.game.game_objects.player.currentstate.walk()#to force tha walk animation
 
     def update(self):
         self.timer+=self.parent_class.game.dt
@@ -309,7 +311,7 @@ class Cultist_encounter(Cutscene_engine):
 
             elif self.timer > 50:
                 self.parent_class.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                self.parent_class.game.game_objects.player.velocity[0]=0
+                #self.parent_class.game.game_objects.player.velocity[0]=0
                 self.parent_class.game.game_objects.player.acceleration[0]=0
 
                 self.stage = 1
@@ -318,9 +320,10 @@ class Cultist_encounter(Cutscene_engine):
             if self.timer>200:
                 spawn_pos = self.parent_class.game.game_objects.player.rect.topright
                 self.entity2=Entities.Cultist_rogue(spawn_pos, self.parent_class.game.game_objects)
+                self.entity2.AI.deactivate()
                 self.entity2.dir[0]=-1
                 self.entity2.currentstate.enter_state('Ambush_pre')
-                self.entity2.AI.enter_AI('Nothing')
+
                 self.parent_class.game.game_objects.enemies.add(self.entity2)
 
                 self.stage=2
@@ -331,7 +334,7 @@ class Cultist_encounter(Cutscene_engine):
                 self.exit_state()
 
     def exit_state(self):
-        self.entity1.AI.enter_AI('Chase')
-        self.entity2.AI.enter_AI('Chase')
+        self.entity1.AI.activate()
+        self.entity2.AI.activate()
         self.parent_class.game.game_objects.camera.exit_state()
         super().exit_state()

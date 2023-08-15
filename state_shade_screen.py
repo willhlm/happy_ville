@@ -21,6 +21,7 @@ class Turn(Basic_states):#smoothlyc hange colour
     def __init__(self,entity,next_colour):
         super().__init__(entity,next_colour)
         self.sign = []
+        self.change_vel = 2#the speed to change the colour
         for colour_code in range(3):
             if self.entity.colour[colour_code] - next_colour[colour_code] > 0:#determine which way to change the colur
                 self.sign.append(-1)
@@ -30,12 +31,17 @@ class Turn(Basic_states):#smoothlyc hange colour
     def update(self):
         temp_colour = []
         for index, colour in enumerate(self.entity.colour[:3]):
-            colour = colour + self.sign[index]
-            temp_colour.append(colour)
-        temp_colour.append(self.entity.colour[-1])
+            colour = colour + self.sign[index]*self.change_vel*self.entity.game_objects.game.dt
+            temp_colour.append(int(colour))
+        temp_colour.append(self.entity.colour[-1])#append the alpha value
 
         self.entity.image.fill(temp_colour)
-        self.entity.colour = temp_colour
+        self.entity.colour = temp_colour#update the colour
+        self.finish()
 
-        if self.entity.colour[:3] == self.next_colour[:3]:
-            self.enter_state('Idle')
+    def finish(self):#if the difference for all 3 colour code are smaller than 3, go to idle
+        for colour_code in range(3):
+            if abs(self.entity.colour[colour_code] - self.next_colour[colour_code]) < self.change_vel + 1:
+                self.sign[colour_code] = 0
+            else: return
+        self.enter_state('Idle')

@@ -162,8 +162,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1376,
-                         "y":544
+                         "x":1296,
+                         "y":496
                         }, 
                         {
                          "gid":15,
@@ -320,18 +320,7 @@
                          "width":28,
                          "x":1729,
                          "y":511
-                        }],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":2,
-                 "name":"collision",
-                 "objects":[
+                        }, 
                         {
                          "gid":8,
                          "height":16,

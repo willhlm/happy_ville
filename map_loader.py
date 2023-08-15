@@ -1,5 +1,5 @@
 import pygame, csv, math
-import Entities, Read_files, weather, tiled_objects
+import Entities, Read_files, weather, layered_objects
 import constants as C
 
 from PIL import Image, ImageFilter#for blurring
@@ -15,7 +15,7 @@ class Level():
         self.area_change = True#a flag to chenge if we change area
 
     def load_map(self,map_name,spawn):
-        self.references = {'shade':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading        
+        self.references = {'shade':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
         self.level_name = map_name
         self.spawn = spawn
@@ -92,7 +92,7 @@ class Level():
 
     def load_groups(self):
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
-        load_front_objects = {'light_forest_front':self.load_light_forest_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
+        load_front_objects = {'light_forest_front':self.load_light_forest_objects,'light_forest_cave_front':self.load_light_forest_cave_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
         load_back_objects = {'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
         self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer or other information
 
@@ -261,8 +261,7 @@ class Level():
                     new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
                     self.game_objects.interactables.add(new_trigger)
 
-            #reflection object
-            elif id == 20:
+            elif id == 20:#reflection object
                 for property in properties:
                     if property['name'] == 'direction':
                         dir = property['value']
@@ -279,7 +278,7 @@ class Level():
                 self.references['shade_trigger'] = new_interacable
                 self.game_objects.interactables.add(new_interacable)
 
-            #move to front objects
+            #move to interactables objects
             elif id == 24:#event: e.g. bridge that is built when the reindeer dies
                 values={}
                 for property in properties:
@@ -291,14 +290,6 @@ class Level():
                         if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
                             new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
                             self.game_objects.interactables.add(new_interactable)
-
-            elif id == 26:#uberstone
-                runestone = Entities.Uber_runestone(object_position,self.game_objects)
-                self.game_objects.interactables.add(runestone)
-
-            elif id == 27:#inorinoki
-                inorinoki = Entities.Inorinoki(object_position,self.game_objects)
-                self.game_objects.interactables.add(inorinoki)
 
             elif id == 28:#key items: soul_essence etc.
                 for property in properties:
@@ -370,6 +361,14 @@ class Level():
                 fast_travel = Entities.Fast_travel(object_position,self.game_objects,self.level_name)
                 self.game_objects.interactables.add(fast_travel)
 
+            elif id == 8:#inorinoki
+                inorinoki = Entities.Inorinoki(object_position,self.game_objects)
+                self.game_objects.interactables.add(inorinoki)
+
+            elif id == 9:#uberstone
+                runestone = Entities.Uber_runestone(object_position,self.game_objects)
+                self.game_objects.interactables.add(runestone)
+
     def load_light_forest_objects(self,data,parallax,offset):#load objects back of layers
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
@@ -402,6 +401,13 @@ class Level():
 
             if id == 0:#cave grass
                 new_grass = Entities.Cave_grass(object_position,self.game_objects)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_grass)
+                else:
+                    self.game_objects.all_bgs.add(new_grass)
+
+            elif id == 1:#ljusmaksar
+                new_grass = layered_objects.Ljusmaskar(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_grass)
                 else:

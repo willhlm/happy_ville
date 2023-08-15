@@ -345,7 +345,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.health -= dmg
 
         if self.health > 0:#check if dead¨
-            self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+            self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
             self.animation.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             self.game_objects.camera.camera_shake(3,10)
@@ -353,6 +353,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.aggro = False
             self.invincibile = True
             self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+            self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
@@ -417,7 +418,7 @@ class Player(Character):
             self.animation.handle_input('Hurt')#turn white
             self.animation.handle_input('Invincibile')#blink a bit. need to be after hurt
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.hurt_particles(lifetime=40,vel=[3,8],colour=[0,0,0,255],scale=3,number_particles=60)
+            self.hurt_particles(lifetime=40,vel={'linear':[3,8]},colour=[0,0,0,255],scale=3,number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
         else:#if health < 0
@@ -506,8 +507,7 @@ class Enemy(Character):
         self.original_pos = pos
 
         self.currentstate = states_enemy.Idle(self)
-        #self.AI = AI_enemy.Peace(self)
-        AI_enemy.build_tree(self)#AI_exploding_mygga.Peace(self)#
+        AI_enemy.build_tree(self)#self.AI = AI_enemy.Peace(self)
 
         self.inventory = {'Amber_Droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -554,10 +554,10 @@ class Enemy(Character):
         pass
 
     def chase(self):#called from AI: when chaising
-        self.velocity[0] += self.dir[0]*0.5#*abs(math.sin(self.init_time))
+        self.velocity[0] += self.dir[0]*0.5
 
     def patrol(self,position):#called from AI: when patroling
-        self.velocity[0] += self.dir[0]*0.3#self.entity.walk()
+        self.velocity[0] += self.dir[0]*0.3
 
 class Packun(Enemy):
     def __init__(self,pos,game_objects):
@@ -588,10 +588,6 @@ class Sandrew(Enemy):
         self.health = 3
         self.attack_distance = [250,50]
         self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
-
-    def update(self):
-        super().update()
-        #self.AI.print_leaf()
 
 class Mygga(Enemy):
     def __init__(self,pos,game_objects):
@@ -624,11 +620,10 @@ class Exploding_Mygga(Enemy):
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
-        self.attack_distance = [50,50]
+        self.attack_distance = [20,20]
         self.aggro_distance = [150,100]
         self.dir[1] = 1
         self.size = [64,64]#hurtbox size
-        #self.shader = shader_entities.Shader_entities(self)
 
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
@@ -905,7 +900,7 @@ class Cultist_rogue(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 10
-        self.attack_distance = 80
+        self.attack_distance = [80,10]
         self.attack = Sword
         self.currentstate = states_rogue_cultist.Idle(self)
 
@@ -917,7 +912,7 @@ class Cultist_warrior(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 10
-        self.attack_distance = 80
+        self.attack_distance = [80,10]
         self.attack = Sword
 
 class John(Enemy):
@@ -1022,12 +1017,10 @@ class Boss(Enemy):
         self.health_bar = Health_bar(self)
 
     def dead(self):
-        self.aggro = False
-        self.invincibile = True
-        self.AI.deactivate()
         self.loots()
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
+        self.game_objects.world_state.update_event(str(type(self).__name__).lower())
         new_game_state = states.New_ability(self.game_objects.game,self.abillity)
         new_game_state.enter_state()
         new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
@@ -1048,7 +1041,6 @@ class Reindeer(Boss):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-
         self.currentstate = states_reindeer.Idle(self)
         AI_reindeer.build_tree(self)
 
@@ -1578,6 +1570,7 @@ class Aila_sword(Sword):
 
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
+        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         for stone in self.equip:
             self.stones[stone].collision()#call collision specific for stone
 
@@ -1703,7 +1696,7 @@ class Projectile_1(Ranged):
         self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy)
 
 class Horn_vines(Ranged):
-    def __init__(self,entity,pos):
+    def __init__(self, entity, pos):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/horn_vines/')
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()

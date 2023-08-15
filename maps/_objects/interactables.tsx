@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="160" tileheight="137" tilecount="6" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="8" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -28,5 +28,11 @@
  </tile>
  <tile id="7">
   <image width="80" height="80" source="../../Sprites/animations/fast_travel/idle/altar1.png"/>
+ </tile>
+ <tile id="8">
+  <image width="224" height="160" source="../../Sprites/animations/inorinoki/idle/tree01.png"/>
+ </tile>
+ <tile id="9">
+  <image width="192" height="288" source="../../Sprites/animations/uber_runestone/idle/uberrunestone2.png"/>
  </tile>
 </tileset>
