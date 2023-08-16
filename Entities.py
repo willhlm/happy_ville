@@ -161,7 +161,7 @@ class Collision_right_angle(Platform):
                 entity.go_through = False
 
         elif entity.hitbox.bottom < target:
-            entity.go_through = False
+                entity.go_through = False
 
         if not entity.go_through:
             if entity.hitbox.bottom > target:
@@ -316,7 +316,9 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground. But not on ramps
-        self.velocity[1] = 1/self.game_objects.game.dt
+        point = [self.hitbox.midbottom[0]+5*self.dir[0],self.hitbox.midbottom[1]+10]#infront flightly below
+        if not self.game_objects.collisions.check_ramp(point):#there is not ramp in front
+            self.velocity[1] = 1/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):

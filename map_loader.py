@@ -378,14 +378,14 @@ class Level():
             id = obj['gid'] - self.map_data['objects_firstgid']
 
             if id == 2:#light forest tree tree
-                new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                new_tree = layered_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
             elif id == 3:#light forest tree tree
-                new_tree = tiled_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
+                new_tree = layered_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
