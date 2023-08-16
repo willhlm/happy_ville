@@ -117,7 +117,7 @@ class Walk_main(Player_states):
 
     def handle_movement(self,input):
         super().handle_movement(input)
-        if self.entity.acceleration[0]==0:
+        if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
 
     def swing_sword(self):

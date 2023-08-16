@@ -116,11 +116,10 @@ class Stop_top(Basic_states):
         #if self.distance[1] > 0:#when crossing the camera stop
         #    self.enter_state('Idle_top')
 
-class Center(Basic_states):
+class Idle_center(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.camera.center[0] = self.entity.game_objects.player.hitbox.centerx - (self.entity.rect.centerx - self.entity.game_objects.game.WINDOW_SIZE[0]*0.5)
-        self.entity.game_objects.camera.center[1] = self.entity.game_objects.player.hitbox.centery - (self.entity.rect.centery - self.entity.game_objects.game.WINDOW_SIZE[1]*0.5)
 
     def update(self):
-        pass
+        self.entity.game_objects.camera.center[0] = self.entity.game_objects.player.hitbox.centerx - (self.entity.rect.centerx - self.entity.game_objects.game.WINDOW_SIZE[0]*0.5)
+        self.entity.game_objects.camera.center[1] = self.entity.game_objects.player.hitbox.centery - (self.entity.rect.centery - self.entity.game_objects.game.WINDOW_SIZE[1]*0.5)

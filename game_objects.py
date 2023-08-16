@@ -1,6 +1,6 @@
 import pygame
 import Read_files
-import Engine
+import collisions
 import Entities
 import map_loader
 import sound
@@ -24,7 +24,7 @@ class Game_Objects():
         self.sound = sound.Sound()
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
-        self.collisions = Engine.Collisions(self)
+        self.collisions = collisions.Collisions(self)
         self.map = map_loader.Level(self)
         self.camera = camera.Camera(self)
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here

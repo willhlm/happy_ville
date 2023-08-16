@@ -22,6 +22,10 @@ class Idle(Enemy_states):
         super().__init__(entity)
         self.stay_still()
 
+    def update_state(self):
+        if abs(self.entity.velocity[0]) > 0.2:
+            self.enter_state('Walk')
+
     def handle_input(self,input):
         if input=='Walk':
              self.enter_state('Walk')
@@ -33,7 +37,10 @@ class Idle(Enemy_states):
 class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.walk()
+
+    def update_state(self):
+        if abs(self.entity.velocity[0]) <= 0.2:
+            self.enter_state('Idle')
 
     def handle_input(self,input):
         if input=='Idle':

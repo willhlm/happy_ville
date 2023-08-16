@@ -264,7 +264,7 @@ class Special_attack_main(Reindeer_states):
 
     def make_attacks(self):
         for i in range(0,5):
-            pos = [100 + 100*i, 300]
+            pos = (self.entity.game_objects.camera.scroll[0] + 100 + 100*i,self.entity.game_objects.camera.scroll[1] + 300)
             attack = self.entity.special_attack(self.entity,pos)#make the object
             self.entity.projectiles.add(attack)#add to group but in main phase
 

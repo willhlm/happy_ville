@@ -10,6 +10,12 @@ class Collisions():
                 return True
         return False
 
+    def check_ramp(self,point):#called from AI
+        for platform in self.game_objects.platforms_ramps:
+            if platform.hitbox.collidepoint(point):
+                return True
+        return False
+
     def pass_through(self):#for ramps, called when pressing down
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         if ramp:
@@ -99,3 +105,7 @@ class Collisions():
     @staticmethod
     def collided(dynamic_Entities,static_entities):
         return dynamic_Entities.hitbox.colliderect(static_entities.hitbox)
+
+    @staticmethod
+    def collided_point(dynamic_Entities,static_entities):
+        return static_entities.hitbox.collidepoint(dynamic_Entities.hitbox.midbottom)

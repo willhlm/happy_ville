@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, states, particles, animation, sound, dialogue
-import states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -128,11 +128,13 @@ class Collision_right_angle(Platform):
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
-            self.shift_up(rel_x,other_side,entity)
+            benethe = entity.hitbox.bottom - self.hitbox.bottom
+            self.shift_up(rel_x,other_side,entity,benethe)
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
-            self.shift_up(rel_x,other_side,entity)
+            benethe = entity.hitbox.bottom - self.hitbox.bottom
+            self.shift_up(rel_x,other_side,entity,benethe)
         elif self.orientation == 2:
             rel_x = self.hitbox.right - entity.hitbox.left
             self.shift_down(rel_x,entity)
@@ -149,17 +151,17 @@ class Collision_right_angle(Platform):
             entity.velocity[0] = 0 #need to have a value to avoid "dragin in air" while running
             entity.update_rect_y()
 
-    def shift_up(self,rel_x,other_side,entity):
+    def shift_up(self,rel_x,other_side,entity,benethe):
         target = -rel_x*self.ratio + self.hitbox.bottom
 
-        if other_side > 0:
+        if other_side > 0 or benethe > 0:
             if entity.hitbox.bottom > target:
                 entity.go_through = True
             else:
                 entity.go_through = False
 
         elif entity.hitbox.bottom < target:
-            entity.go_through = False
+                entity.go_through = False
 
         if not entity.go_through:
             if entity.hitbox.bottom > target:
@@ -314,7 +316,9 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground. But not on ramps
-        self.velocity[1] = 1/self.game_objects.game.dt
+        point = [self.hitbox.midbottom[0]+5*self.dir[0],self.hitbox.midbottom[1]+10]#infront flightly below
+        if not self.game_objects.collisions.check_ramp(point):#there is not ramp in front
+            self.velocity[1] = 1/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -343,7 +347,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.health -= dmg
 
         if self.health > 0:#check if dead¨
-            self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+            self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
             self.animation.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             self.game_objects.camera.camera_shake(3,10)
@@ -351,6 +355,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.aggro = False
             self.invincibile = True
             self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+            self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
@@ -415,7 +420,7 @@ class Player(Character):
             self.animation.handle_input('Hurt')#turn white
             self.animation.handle_input('Invincibile')#blink a bit. need to be after hurt
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.hurt_particles(lifetime=40,vel=[3,8],colour=[0,0,0,255],scale=3,number_particles=60)
+            self.hurt_particles(lifetime=40,vel={'linear':[3,8]},colour=[0,0,0,255],scale=3,number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
         else:#if health < 0
@@ -504,8 +509,7 @@ class Enemy(Character):
         self.original_pos = pos
 
         self.currentstate = states_enemy.Idle(self)
-        #self.AI = AI_enemy.Peace(self)
-        AI_enemy.build_tree(self)#AI_exploding_mygga.Peace(self)#
+        AI_enemy.build_tree(self)#self.AI = AI_enemy.Peace(self)
 
         self.inventory = {'Amber_Droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -552,10 +556,10 @@ class Enemy(Character):
         pass
 
     def chase(self):#called from AI: when chaising
-        self.velocity[0] += self.dir[0]*0.5#*abs(math.sin(self.init_time))
+        self.velocity[0] += self.dir[0]*0.5
 
     def patrol(self,position):#called from AI: when patroling
-        self.velocity[0] += self.dir[0]*0.3#self.entity.walk()
+        self.velocity[0] += self.dir[0]*0.3
 
 class Packun(Enemy):
     def __init__(self,pos,game_objects):
@@ -586,10 +590,6 @@ class Sandrew(Enemy):
         self.health = 3
         self.attack_distance = [250,50]
         self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
-
-    def update(self):
-        super().update()
-        #self.AI.print_leaf()
 
 class Mygga(Enemy):
     def __init__(self,pos,game_objects):
@@ -622,11 +622,10 @@ class Exploding_Mygga(Enemy):
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
-        self.attack_distance = [50,50]
+        self.attack_distance = [20,20]
         self.aggro_distance = [150,100]
         self.dir[1] = 1
         self.size = [64,64]#hurtbox size
-        #self.shader = shader_entities.Shader_entities(self)
 
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
@@ -903,7 +902,7 @@ class Cultist_rogue(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 10
-        self.attack_distance = 80
+        self.attack_distance = [80,10]
         self.attack = Sword
         self.currentstate = states_rogue_cultist.Idle(self)
 
@@ -915,7 +914,7 @@ class Cultist_warrior(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 10
-        self.attack_distance = 80
+        self.attack_distance = [80,10]
         self.attack = Sword
 
 class John(Enemy):
@@ -1020,12 +1019,10 @@ class Boss(Enemy):
         self.health_bar = Health_bar(self)
 
     def dead(self):
-        self.aggro = False
-        self.invincibile = True
-        self.AI.deactivate()
         self.loots()
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
+        self.game_objects.world_state.update_event(str(type(self).__name__).lower())
         new_game_state = states.New_ability(self.game_objects.game,self.abillity)
         new_game_state.enter_state()
         new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
@@ -1046,7 +1043,6 @@ class Reindeer(Boss):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-
         self.currentstate = states_reindeer.Idle(self)
         AI_reindeer.build_tree(self)
 
@@ -1179,19 +1175,13 @@ class Spawner(Staticentity):#an entity spawner
 
 class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. caves. loaded in maploader
     def __init__(self, game_objects, colour = (10,10,10,200)):
-        super().__init__(pos = [0,0])
+        super().__init__([0,0], pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))))
         self.game_objects = game_objects
         self.colour = colour
-        self.image = pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))).convert_alpha()#ONLY USED FOR DARK MODE
-        self.rect = self.image.get_rect()
 
     def update(self):
-        self.rect.topleft  = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]#this is [0,0]
+        self.rect.topleft  = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
         self.image.fill(self.colour)#make it dark again
-
-class Transparent_screen(Staticentity):#a placeholder for normal stages. initialised in maploader
-    def __init__(self):
-        super().__init__(pos = [0,0])
 
 class Light_glow(Staticentity):#a light glow anounf an entity.
     def __init__(self, entity, radius = 200,layers = 40):
@@ -1301,6 +1291,19 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 
     def finish(self):#called when fading out should start
         self.page = 1
+
+class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
+    def __init__(self, game_objects, parallax, colour):
+        super().__init__([0,0], pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32))
+        self.game_objects = game_objects
+        self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
+        self.original_colour = self.colour.copy()
+        self.image.fill(self.colour)#make it dark again
+        self.currentstate = state_shade_screen.Idle(self,self.original_colour)
+
+    def update(self):
+        self.currentstate.update()
+        self.true_pos = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -1569,6 +1572,7 @@ class Aila_sword(Sword):
 
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
+        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         for stone in self.equip:
             self.stones[stone].collision()#call collision specific for stone
 
@@ -1690,11 +1694,11 @@ class Projectile_1(Ranged):
         dy = self.rect.centery - pos[1]
         dx = self.rect.centerx - pos[0]
 
-        self.velocity[0] = dir[0]*(10-abs(dx)*0.2) - dir[1]*self.velocity[0]*dx*0.05
-        self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy)
+        self.velocity[0] = -dir[1]*self.velocity[0]*dx*0.05 + dir[0]*(10 - abs(dx)*0.1)
+        self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy) + dir[0]*dy*0.2
 
 class Horn_vines(Ranged):
-    def __init__(self,entity,pos):
+    def __init__(self, entity, pos):
         super().__init__(entity)
         self.sprites = Read_files.Sprites_Player('Sprites/Attack/horn_vines/')
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
@@ -2296,6 +2300,36 @@ class Path_inter(Interactable):
     def interact(self):
         self.game_objects.load_map(self.destination, self.spawn)
 
+class Shade_trigger(Interactable):
+    def __init__(self,pos,game_objects,size,colour):
+        super().__init__(pos,game_objects)
+        self.new_colour = [colour.g,colour.b,colour.a]
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/shade_trigger/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = pygame.Rect(pos,size)
+        self.rect.topleft = pos
+        self.hitbox = self.rect.inflate(0,0)
+
+    def update(self):
+        pass
+
+    def player_collision(self):#player collision
+        for layer in self.layers_one:
+            colour = self.new_colour + [layer.colour[-1]]
+            layer.currentstate.enter_state('Turn',colour)
+            self.layers_two.append(layer)
+            self.layers_one.remove(layer)
+
+    def player_noncollision(self):#when player doesn't collide: for grass
+        for layer in self.layers_two:
+            layer.currentstate.enter_state('Turn',layer.original_colour)
+            self.layers_one.append(layer)
+            self.layers_two.remove(layer)
+
+    def add_shade_layers(self, layers):#called from map loader
+        self.layers_one = layers#a list of shahde layers
+        self.layers_two = []#similar to self.layer, keeps the layers of the shade screen
+
 class Cutscene_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):
         super().__init__(pos,game_objects)
@@ -2363,7 +2397,7 @@ class Cave_grass(Interactable_bushes):
     def release_particles(self,number_particles=12):#should release particles when hurt and death
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=30,lifetime=300,vel={'wave':[7,14]},dir='isotropic',scale=2,colour=color)
+            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=30,lifetime=300,vel={'wave':[3,14]},dir='isotropic',scale=2,colour=color)
             self.game_objects.cosmetics.add(obj1)
 
 class Runestones(Interactable):

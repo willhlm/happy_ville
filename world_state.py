@@ -16,7 +16,7 @@ class World_state():
     def update_event(self,event):#called when an event has happened and set it to True
         self.events[event] = True
 
-    def increase_progress(self,path):#called when e.g. a boss dies. It is the happinies degree of the world
+    def increase_progress(self):#called when e.g. a boss dies. It is the happinies degree of the world
         self.progress += 1
 
     def update_kill_statistics(self,enemy):#called when an enemy is killed
@@ -40,7 +40,7 @@ class World_state():
 
         chest_int = 1
         soul_essence_int = 1
-        
+
         self.state[level_name] = {'chest':{},'soul_essence':{},'runestone':{}}#a place holder for things that should depend on map state
 
         for obj in map_statics['objects']:

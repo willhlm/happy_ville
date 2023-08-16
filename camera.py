@@ -53,8 +53,8 @@ class Camera_shake(Camera):
 
 #cutscene cameras
 class Cutscenes(Camera):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, scroll):
+        super().__init__(game_objects, scroll)
         self.shaking = False
 
     def update(self):
@@ -78,8 +78,8 @@ class Cutscenes(Camera):
         self.set_camera('Camera')
 
 class Deer_encounter(Cutscenes):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, scroll):
+        super().__init__(game_objects,scroll)
 
     def update(self):
         self.center[0] -= 5*self.game_objects.game.dt
@@ -87,8 +87,8 @@ class Deer_encounter(Cutscenes):
         super().update()
 
 class Cultist_encounter(Cutscenes):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, scroll):
+        super().__init__(game_objects, scroll)
 
     def update(self):
         self.center[0] += 2*self.game_objects.game.dt
@@ -96,8 +96,8 @@ class Cultist_encounter(Cutscenes):
         super().update()
 
 class New_game(Cutscenes):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, scroll):
+        super().__init__(game_objects, scroll)
         self.center[1] = 1000
 
     def update(self):
@@ -106,8 +106,8 @@ class New_game(Cutscenes):
         super().update()
 
 class Title_screen(Cutscenes):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
+    def __init__(self, game_objects, scroll):
+        super().__init__(game_objects, scroll)
 
     def update(self):
         self.center[1] += 2*self.game_objects.game.dt

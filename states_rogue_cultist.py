@@ -24,6 +24,10 @@ class Idle(Enemy_states):
         super().__init__(entity)
         self.stay_still()
 
+    def update_state(self):
+        if abs(self.entity.velocity[0]) > 0.2:
+            self.enter_state('Walk')
+
     def handle_input(self,input):
         if input=='Walk':
              self.enter_state('Walk')
@@ -33,7 +37,10 @@ class Idle(Enemy_states):
 class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.walk()
+
+    def update_state(self):
+        if abs(self.entity.velocity[0]) <= 0.2:
+            self.enter_state('Idle')
 
     def handle_input(self,input):
         if input=='Idle':
@@ -86,12 +93,18 @@ class Attack_main(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
-        self.entity.AI.finish_action()
+        self.entity.AI.handle_input('Attack')
 
 class Ambush_pre(Attack_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
+    def increase_phase(self):
+        self.enter_state('Ambush_main')        
+
 class Ambush_main(Attack_main):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def increase_phase(self):
+        self.enter_state('Idle')
