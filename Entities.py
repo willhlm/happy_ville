@@ -1694,8 +1694,8 @@ class Projectile_1(Ranged):
         dy = self.rect.centery - pos[1]
         dx = self.rect.centerx - pos[0]
 
-        self.velocity[0] = dir[0]*(10-abs(dx)*0.2) - dir[1]*self.velocity[0]*dx*0.05
-        self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy)
+        self.velocity[0] = -dir[1]*self.velocity[0]*dx*0.05 + dir[0]*(10 - abs(dx)*0.1)
+        self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy) + dir[0]*dy*0.2
 
 class Horn_vines(Ranged):
     def __init__(self, entity, pos):
