@@ -73,7 +73,7 @@ class Idle_main(Player_states):
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0] != 0:
-            self.enter_state('Run_main')
+            self.enter_state('Run_pre')
 
     def swing_sword(self):
         if not self.entity.sword_swinging:
@@ -129,6 +129,53 @@ class Walk_main(Player_states):
             elif self.entity.dir[1]>0.8:
                 self.enter_state('Sword_up_main')
 
+class Run_pre(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.particle_timer = 0
+
+    def update_state(self):
+        self.particle_timer -= self.entity.game_objects.game.dt
+        if self.particle_timer < 0:
+            self.running_particles()
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+
+        if not self.entity.collision_types['bottom']:#disable this one while on ramp
+            self.enter_state('Fall_run_pre')
+
+    def increase_phase(self):
+        self.enter_state('Run_main')
+
+    def running_particles(self):
+        particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
+        self.entity.game_objects.cosmetics.add(particle)
+        self.particle_timer = 10
+
+    def handle_press_input(self,input):
+        super().handle_press_input(input)
+        if input[-1]=='a':
+            self.enter_state('Jump_run_pre')
+        elif input[-1]=='lb':
+            self.enter_state('Dash_pre')
+        elif input[-1]=='x':
+            self.swing_sword()
+        elif input[-1]=='b':#depends on if the abillities have pre or main animation
+            self.do_ability()
+
+    def handle_movement(self,input):
+        super().handle_movement(input)
+        if self.entity.acceleration[0]==0:
+            self.enter_state('Run_post')
+
+    def swing_sword(self):
+        if not self.entity.sword_swinging:
+            if abs(self.entity.dir[1])<0.8:
+                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
+                self.enter_state(state)
+                self.entity.sword.swing = not self.entity.sword.swing
+            elif self.entity.dir[1]>0.8:
+                self.enter_state('Sword_up_main')
+
 class Run_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -162,7 +209,7 @@ class Run_main(Player_states):
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0]==0:
-            self.enter_state('Idle_main')
+            self.enter_state('Run_post')
 
     def swing_sword(self):
         if not self.entity.sword_swinging:
@@ -172,6 +219,45 @@ class Run_main(Player_states):
                 self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
                 self.enter_state('Sword_up_main')
+
+class Run_post(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def update_state(self):
+        if not self.entity.collision_types['bottom']:
+            self.enter_state('Fall_stand_pre')
+
+    def handle_press_input(self,input):
+        super().handle_press_input(input)
+        if input[-1]=='a':
+            self.enter_state('Jump_stand_pre')
+        elif input[-1]=='lb':
+            self.enter_state('Dash_pre')
+        elif input[-1]=='x':
+            self.swing_sword()
+        elif input[-1]=='b':#depends on if the abillities have pre or main animation
+            self.do_ability()
+        elif input[-1] == 'rt':
+            self.enter_state('Counter_pre')
+
+    def handle_movement(self,input):
+        super().handle_movement(input)
+        if self.entity.acceleration[0] != 0:
+            self.enter_state('Run_pre')
+
+    def swing_sword(self):
+        if not self.entity.sword_swinging:
+            if self.entity.dir[1]==0:
+                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
+                self.enter_state(state)
+                self.entity.sword.swing = not self.entity.sword.swing
+
+            elif self.entity.dir[1]>0:
+                self.enter_state('Sword_up_main')
+
+    def increase_phase(self):
+        self.enter_state('Idle_main')
 
 class Jump_stand_pre(Player_states):
     def __init__(self,entity):
