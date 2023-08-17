@@ -85,7 +85,6 @@ class Chase(behaviour_tree.Leaf):
 
     def update(self):
         self.entity.chase()
-
         if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance[0] and abs(self.entity.AI.black_board['player_distance'][1]) < self.entity.attack_distance[1]:
             return 'SUCCESS'
         else:

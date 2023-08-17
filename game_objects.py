@@ -57,7 +57,7 @@ class Game_Objects():
 
     def load_map(self, map_name, spawn = '1',fade = True):
         t1_start = perf_counter()
-        self.player.enter_idle()
+        self.player.currentstate.enter_state('Idle_main')
         self.player.reset_movement()
         self.clean_groups()
         self.map.load_map(map_name,spawn)

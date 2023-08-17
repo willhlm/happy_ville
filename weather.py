@@ -124,10 +124,10 @@ class Circles(Bound_entity):
 
         self.frequency = 0.003#the frequncy of grow and shrinking
         try:#the images are stored in an class variable such that the animations are only made once. This way, many particles can be made with very small performance.
-            self.images = Circles.animations[tuple(self.parallax)]
+            self.images = type(self).animations[tuple(self.parallax)]
         except:#if it is the first time making that circle size (depends on parallax)
             self.prepare_animation()#make the circles once and store each frame in a list: takes performance to make many
-            Circles.animations[tuple(self.parallax)] = self.images
+            type(self).animations[tuple(self.parallax)] = self.images
 
         self.frame = random.randint(0, len(self.images)-1)#randomise the starting frame
         self.animation_speed = 1
@@ -154,10 +154,10 @@ class Circles(Bound_entity):
     def prepare_animation(self):
         self.prepare_canvas()
         self.frame = 0
-        Circles.images = []#store each animation frame
+        type(self).images = []#store each animation frame
         for i in range(round(1/self.frequency)):#number of frames
             self.prepare_images()
-            Circles.images.append(self.image)#store each animation frame
+            type(self).images.append(self.image)#store each animation frame
 
     def prepare_canvas(self):
         self.surface = pygame.Surface((self.glow_radius * 2, self.glow_radius * 2),pygame.SRCALPHA,32).convert_alpha()

@@ -43,6 +43,10 @@ class Treenode():
         for child in self.children:
             child.print_tree()
 
+    def blit_tree(self,surface):
+        for child in self.children:
+            child.blit_tree(surface)
+
     #for cutscene to do nothing
     def deactivate(self):
         self.save_children = self.children.copy()

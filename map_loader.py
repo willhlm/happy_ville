@@ -1,5 +1,5 @@
 import pygame, csv, math
-import Entities, Read_files, weather, layered_objects
+import Entities, Read_files, weather, parallax_objects
 import constants as C
 
 from PIL import Image, ImageFilter#for blurring
@@ -378,14 +378,14 @@ class Level():
             id = obj['gid'] - self.map_data['objects_firstgid']
 
             if id == 2:#light forest tree tree
-                new_tree = layered_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                new_tree = parallax_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
             elif id == 3:#light forest tree tree
-                new_tree = layered_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
+                new_tree = parallax_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
@@ -407,7 +407,7 @@ class Level():
                     self.game_objects.all_bgs.add(new_grass)
 
             elif id == 1:#ljusmaksar
-                new_grass = layered_objects.Ljusmaskar(object_position,self.game_objects,parallax)
+                new_grass = parallax_objects.Ljusmaskar(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_grass)
                 else:

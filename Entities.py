@@ -360,7 +360,7 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def knock_back(self,dir):
         self.velocity[0] = dir[0]*30
-        self.velocity[1] = -dir[1]*30
+        self.velocity[1] = -dir[1]*10
 
     def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
         for i in range(0,number_particles):
@@ -395,7 +395,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Dash':True,'Wall_glide':True,'Double_jump':True,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
@@ -445,9 +445,6 @@ class Player(Character):
     def dead(self):#called when death animation is finished
         new_game_state = states.Cutscenes(self.game_objects.game,'Death')
         new_game_state.enter_state()
-
-    def enter_idle(self):
-        self.currentstate = states_player.Idle_main(self)
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.velocity = [0,0]
@@ -561,6 +558,58 @@ class Enemy(Character):
     def patrol(self,position):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
 
+class Flying_enemy(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.acceleration = [0,0]
+        self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
+        self.max_vel = [C.max_vel[0],C.max_vel[0]]
+        self.dir[1] = 1
+
+    def update_hitbox(self):
+        self.hitbox.center = self.rect.center
+
+    def knock_back(self,dir):
+        self.velocity[0] = dir[0]*30
+        self.velocity[1] = -dir[1]*30
+
+    def chase(self):#called from AI: when chaising
+        self.velocity[0] += self.dir[0]*0.3#*abs(math.sin(self.init_time))
+        self.velocity[1] += (self.AI.black_board['player_distance'][1] - 30)*0.002
+
+    def patrol(self,position):#called from AI: when patroling
+        self.velocity[0] += 0.001*(position[0]-self.rect.centerx)+0.02*self.dir[0]
+        self.velocity[0] = math.copysign(1,self.velocity[0])*min(abs(self.velocity[0]),1)#limit the max abs velocity to 1
+        self.velocity[1] += 0.001*(position[1]-self.rect.centery)
+
+class Mygga(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+        self.currentstate = states_mygga.Idle(self)
+        self.health = 3
+
+class Exploding_Mygga(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/exploding_mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
+        self.currentstate = states_mygga.Idle(self)
+        AI_exploding_mygga.build_tree(self)#AI_exploding_mygga.Peace(self)#
+        self.health = 4
+        self.attack_distance = [20,20]
+        self.aggro_distance = [150,100]
+        self.size = [64,64]#hurtbox size for hurt box
+
+    def suicide(self):
+        self.projectiles.add(Hurt_box(self,lifetime = 50))
+        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
+
 class Packun(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -590,58 +639,6 @@ class Sandrew(Enemy):
         self.health = 3
         self.attack_distance = [250,50]
         self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
-
-class Mygga(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.currentstate = states_mygga.Idle(self)
-        self.health = 3
-        self.acceleration = [0,0]
-        self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
-        self.max_vel = [C.max_vel[0],C.max_vel[0]]
-        self.dir[1] = 1
-
-    def update_hitbox(self):
-        self.hitbox.center = self.rect.center
-
-class Exploding_Mygga(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/exploding_mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.original_pos = pos
-        self.currentstate = states_mygga.Idle(self)
-        AI_exploding_mygga.build_tree(self)#AI_exploding_mygga.Peace(self)#
-        self.health = 4
-        self.acceleration = [0,0]
-        self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
-        self.max_vel = [C.max_vel[0],C.max_vel[0]]
-        self.attack_distance = [20,20]
-        self.aggro_distance = [150,100]
-        self.dir[1] = 1
-        self.size = [64,64]#hurtbox size
-
-    def update_hitbox(self):
-        self.hitbox.center = self.rect.center
-
-    def suicide(self):
-        self.projectiles.add(Hurt_box(self,lifetime = 50))
-        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
-
-    def chase(self):#called from AI: when chaising
-        self.velocity[0] += self.dir[0]*0.3#*abs(math.sin(self.init_time))
-        self.velocity[1] += (self.AI.black_board['player_distance'][1] - 30)*0.002
-
-    def patrol(self,position):#called from AI: when patroling
-        self.velocity[0] += 0.001*(position[0]-self.rect.centerx)+0.02*self.dir[0]
-        self.velocity[0] = math.copysign(1,self.velocity[0])*min(abs(self.velocity[0]),1)#limit the max abs velocity to 1
-        self.velocity[1] += 0.001*(position[1]-self.rect.centery)
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -747,7 +744,7 @@ class Larv_simple(Enemy):
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/larv_simple/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
+        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
 
 class Blue_bird(Enemy):
     def __init__(self,pos,game_objects):

@@ -62,7 +62,7 @@ class Idle_main(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_stand_pre')
         elif input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation
@@ -109,7 +109,7 @@ class Walk_main(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_run_pre')
         elif input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation. Should all have pre?
@@ -153,7 +153,7 @@ class Run_main(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_run_pre')
         elif input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation
@@ -184,7 +184,7 @@ class Jump_stand_pre(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Air_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -234,7 +234,7 @@ class Jump_run_pre(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Air_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -319,7 +319,7 @@ class Fall_run_pre(Player_states):
         if input[-1]=='b':
             self.do_ability()
         elif input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Air_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='a':
@@ -375,7 +375,7 @@ class Fall_stand_pre(Player_states):
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Air_dash_pre')
         elif input[-1]=='a':
             self.enter_state('Double_jump_pre')
 
@@ -441,7 +441,7 @@ class Wall_glide_main(Player_states):
         self.entity.friction[1] = C.friction_player[1]
         super().enter_state(input)
 
-class Dash_pre(Player_states):
+class Air_dash_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
@@ -468,78 +468,23 @@ class Dash_pre(Player_states):
             self.enter_state('Idle_main')
 
     def increase_phase(self):
-        next_dash = 'Dash_' + str(self.entity.abilities.movement_dict['Dash'].level) + 'main'
-        self.enter_state(next_dash)
+        self.enter_state('Air_dash_main')
 
-class Dash_1main(Dash_pre):#level one dash: normal
+class Air_dash_main(Air_dash_pre):#level one dash: normal
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['dash'])
 
-    def increase_phase(self):
-        self.enter_state('Dash_post')
-
-class Dash_2main(Dash_pre):#level 2 dash: free dash
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.velocity[0] = 20*self.dir[0]
+    def exit(self):
+        if self.dash_length < 0:
+            self.increase_phase()
 
     def increase_phase(self):
-        self.enter_state('Dash_post')
+        self.enter_state('Air_dash_post')
 
-class Dash_3main(Dash_pre):#level 3 dash: invinsible
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.velocity[0] = 20*self.dir[0]
-        self.entity.invincibile = True
-
-    def handle_input(self,input):#if hit wall
-        if input == 'Wall':
-            if self.entity.acceleration[0]!=0:
-                self.enter_state('Wall_glide_main')
-            else:
-                self.enter_state('Idle_main')
-
-    def increase_phase(self):
-        self.enter_state('Dash_post')
-
-    def enter_state(self,state):
-        super().enter_state(state)
-        self.entity.invincibile = False
-
-class Dash_4main(Dash_pre):#level 4 dash: allow dash attack
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.velocity[0] = 20*self.dir[0]
-        self.entity.invincibile = True
-        self.counter = 6#within how many frames you can press x to enter attack
-
-    def update_state(self):
-        super().update_state()
-        self.counter -= self.entity.game_objects.game.dt
-
-    def handle_input(self,input):#if hit wall
-        if input == 'Wall':
-            if self.entity.acceleration[0]!=0:
-                self.enter_state('Wall_glide_main')
-            else:
-                self.enter_state('Idle_main')
-
-    def handle_press_input(self,input):
-        if input[-1]=='x' and self.counter > 0:#if pressed within three frames
-            self.enter_state('Dash_attack_main')
-            self.entity.timer_jobs['invincibility'].activate()
-
-    def increase_phase(self):
-        self.enter_state('Dash_post')
-
-    def enter_state(self,state):
-        super().enter_state(state)
-        self.entity.invincibile = False
-
-class Dash_post(Dash_pre):
+class Air_dash_post(Air_dash_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -554,6 +499,32 @@ class Dash_post(Dash_pre):
             self.enter_state('Idle_main')
         else:
             self.enter_state('Run_main')
+
+class Ground_dash_pre(Air_dash_pre):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def exit(self):
+        if self.dash_length < 0:
+            self.increase_phase()
+
+    def increase_phase(self):
+        self.enter_state('Ground_dash_main')
+
+class Ground_dash_main(Air_dash_main):#level one dash: normal
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def exit(self):
+        if self.dash_length < 0:
+            self.increase_phase()
+
+    def increase_phase(self):
+        self.enter_state('Ground_dash_post')
+
+class Ground_dash_post(Air_dash_post):
+    def __init__(self,entity):
+        super().__init__(entity)
 
 class Dash_attack_main(Player_states):#enters from pre dash
     def __init__(self,entity):
