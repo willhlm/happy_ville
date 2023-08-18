@@ -35,13 +35,15 @@ class World_state():
             self.travel_points[map] = cord
 
     def init_state_file(self,level_name,map_data):#make a state file if it is the first time loading this map
-        map_statics = map_data['groups']['bg1']['objects'].get('interactables',False)
+        map_statics = map_data['groups']['bg1']['objects'].get('interactables',False)#check if we have interactaböes in thi smap
         if not map_statics: return#if there are no interactables in this stage
 
         chest_int = 1
         soul_essence_int = 1
+        lever_int = 1
 
-        self.state[level_name] = {'chest':{},'soul_essence':{},'runestone':{}}#a place holder for things that should depend on map state
+
+        self.state[level_name] = {'chest':{},'lever':{},'soul_essence':{},'runestone':{}}#a place holder for things that should depend on map state
 
         for obj in map_statics['objects']:
             id = obj['gid'] - map_data['interactables_firstgid']
@@ -54,6 +56,10 @@ class World_state():
 
             elif id == 4:#chests
                 self.state[level_name]['chest'][str(chest_int)] = 'idle'
+                chest_int += 1
+
+            elif id == 10:#lever
+                self.state[level_name]['lever'][str(chest_int)] = 'idle'
                 chest_int += 1
 
             elif id == 28:#key items: Soul_essence etc.

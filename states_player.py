@@ -156,7 +156,7 @@ class Run_pre(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_run_pre')
         elif input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation
@@ -233,7 +233,7 @@ class Run_post(Player_states):
         if input[-1]=='a':
             self.enter_state('Jump_stand_pre')
         elif input[-1]=='lb':
-            self.enter_state('Dash_pre')
+            self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation

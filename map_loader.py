@@ -15,7 +15,7 @@ class Level():
         self.area_change = True#a flag to chenge if we change area
 
     def load_map(self,map_name,spawn):
-        self.references = {'shade':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
+        self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
         self.level_name = map_name
         self.spawn = spawn
@@ -45,11 +45,6 @@ class Level():
             self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
         elif level_name == 'dark_forest':
             self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
-
-    def orginise_references(self):
-        for key in self.references.keys():
-            if key == 'shade_trigger':
-                self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
@@ -111,7 +106,11 @@ class Level():
     def load_objects(self,data,parallax,offset,method):
         for object in method.keys():#load each object in group
             if data.get(object[object.rfind('_')+1:],False):
-                method[object](data[object[object.rfind('_')+1:]],parallax,offset)
+                if object[object.rfind('_')+1:] == 'back' or object[object.rfind('_')+1:] == 'front':
+                    key = self.level_name[:self.level_name.rfind('_')+1] + object[object.rfind('_')+1:]#make sure to only load the rellavant map
+                else:
+                    key = object
+                method[key](data[object[object.rfind('_')+1:]],parallax,offset)
 
     def load_statics(self,data,parallax,offset):#load statics and collision
         chest_int = 1
@@ -316,6 +315,7 @@ class Level():
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
+        lever_int = 1
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
@@ -369,6 +369,22 @@ class Level():
                 runestone = Entities.Uber_runestone(object_position,self.game_objects)
                 self.game_objects.interactables.add(runestone)
 
+            elif id == 10:#lever
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID = property['value']
+                lever = Entities.Lever(object_position,self.game_objects, self.game_objects.world_state.state[self.level_name]['lever'][str(lever_int)], str(lever_int), ID)
+                self.references['lever'].append(lever)
+                self.game_objects.interactables.add(lever)
+
+            elif id == 11:#gate
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID = property['value']
+                gate = Entities.Gate(object_position,self.game_objects,ID)
+                self.references['gate'].append(gate)
+                self.game_objects.interactables.add(gate)
+
     def load_light_forest_objects(self,data,parallax,offset):#load objects back of layers
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
@@ -412,6 +428,13 @@ class Level():
                     self.game_objects.all_fgs.add(new_grass)
                 else:
                     self.game_objects.all_bgs.add(new_grass)
+
+            elif id == 2:#droplet
+                new_drop = parallax_objects.Droplet_source(object_position,self.game_objects,parallax)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_drop)
+                else:
+                    self.game_objects.all_bgs.add(new_drop)
 
     @staticmethod
     def blur_value(parallax):#called from load_laters and load_back/front_objects
@@ -520,3 +543,14 @@ class Level():
                         self.game_objects.all_fgs.add(bg_animation)
                     elif 'bg' in tile_layer:
                         self.game_objects.all_bgs.add(bg_animation)
+
+    def orginise_references(self):
+        if self.references.get('shade_trigger',False):
+            self.references['shade_trigger'].add_shade_layers(self.references['shade'])
+
+        if self.references.get('lever',False):#assume that there is not only a gate
+            for lever in self.references['lever']:
+                for gate in self.references['gate']:
+                    if lever.ID == gate.ID:
+                        lever.add_gate(gate)
+                    break#go to next lever
