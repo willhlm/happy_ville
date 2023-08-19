@@ -13,11 +13,6 @@ class Weather():
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
 
-    def create_leaves(self,information,parallax,group,number_particles = 10):#there is a static stamp
-        for i in range(0,number_particles):
-            obj = Leaves(self.game_objects,parallax,information)
-            group.add(obj)
-
     def update(self):
         self.currentstate.update()
 
@@ -98,7 +93,7 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
 
     def update_pos(self):
         self.true_pos = [self.true_pos[0] + self.velocity[0]*self.parallax[0], self.true_pos[1] + self.velocity[1]*self.parallax[1]]
-        self.rect.topleft = self.true_pos
+        self.rect.topleft = self.true_pos.copy()
 
     def boundary(self):#continiouse falling
         return
@@ -339,48 +334,3 @@ class Rain(Weather_particles):
 
     def speed(self):
         pass
-
-class Leaves(Weather_particles):#leaves from trees
-    def __init__(self,game_objects,parallax,information,kill = False):
-        super().__init__(game_objects,parallax)
-        self.init_pos = [information[0][0]+information[1][0]*0.5,information[0][1]-information[1][1]*0.5]#center
-        self.spawn_size = information[1]
-        rand = random.randint(1,1)#randomly choose a leaf type
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.reset()
-        self.resetting = {False:self.reset,True:self.kill}[kill]
-
-        colours=[(60,179,113),(154,205,50),(34,139,34),(46,139,87)]
-        colour = colours[random.randint(0, len(colours)-1)]
-
-        self.set_color(colour)
-        #self.blur()
-
-    def blur(self):#doesn't work if the sprite is too small (i.e. very low parallax)
-        if self.parallax[0] == 1: return
-        blur_value = round(1/self.parallax[0])
-        for state in self.sprites.sprite_dict.keys():
-            for frame, image in enumerate(self.sprites.sprite_dict[state]):
-                self.sprites.sprite_dict[state][frame] = pygame.transform.box_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
-
-    def update(self):
-        super().update()
-        self.alpha -= self.game_objects.game.dt*0.2
-        self.image.set_alpha(self.alpha)
-
-    def boundary(self):
-        if self.alpha < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1] > self.game_objects.game.WINDOW_SIZE[1]+50:
-            self.resetting()
-
-    def speed(self):
-        return (math.sin(self.time*0.1+self.phase))*self.parallax[0]*0.3
-
-    def reset(self):
-        self.alpha = random.uniform(255*self.parallax[0],255)
-        self.velocity[1] = random.uniform(0.2,0.5)
-        self.time = 0
-        self.image.set_alpha(self.alpha)
-        self.true_pos = [self.init_pos[0]+random.uniform(-self.spawn_size[0]*0.5,self.spawn_size[0]*0.5),self.init_pos[1]+random.uniform(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]
-        self.rect.topleft = self.true_pos.copy()

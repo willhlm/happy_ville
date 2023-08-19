@@ -1,5 +1,5 @@
 import pygame, csv, math
-import Entities, Read_files, weather, parallax_objects
+import Entities, Read_files, weather, tiled_objects
 import constants as C
 
 from PIL import Image, ImageFilter#for blurring
@@ -106,9 +106,10 @@ class Level():
     def load_objects(self,data,parallax,offset,method):
         for object in method.keys():#load each object in group
             if data.get(object[object.rfind('_')+1:],False):
-                if object[object.rfind('_')+1:] == 'back' or object[object.rfind('_')+1:] == 'front':
+                if object[object.rfind('_')+1:] == 'back' or object[object.rfind('_')+1:] == 'front':#map specifics
+                    if object[:object.rfind('_')] != self.level_name[:self.level_name.rfind('_')]: continue#check if it macthes the map
                     key = self.level_name[:self.level_name.rfind('_')+1] + object[object.rfind('_')+1:]#make sure to only load the rellavant map
-                else:
+                else:#statics and interactables
                     key = object
                 method[key](data[object[object.rfind('_')+1:]],parallax,offset)
 
@@ -241,12 +242,12 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(new_shade)
 
-            elif id == 17:#leaves
-                information = [object_position,object_size]
-                if self.layer == 'fg':
-                    self.game_objects.weather.create_leaves(information,parallax,self.game_objects.all_fgs)
-                else:
-                    self.game_objects.weather.create_leaves(information,parallax,self.game_objects.all_bgs)
+            #elif id == 17:#leaves
+            #    information = [object_position,object_size]
+            #    if self.layer == 'fg':
+            #        tiled_objects.create_leaves(information,parallax,self.game_objects.all_fgs)
+            #    else:
+            #        tiled_objects.create_leaves(information,parallax,self.game_objects.all_bgs)
 
             elif id == 19:#trigger
                 values={}
@@ -394,14 +395,14 @@ class Level():
             id = obj['gid'] - self.map_data['objects_firstgid']
 
             if id == 2:#light forest tree tree
-                new_tree = parallax_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
             elif id == 3:#light forest tree tree
-                new_tree = parallax_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
+                new_tree = tiled_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
@@ -416,21 +417,25 @@ class Level():
             id = obj['gid'] - self.map_data['objects_firstgid']
 
             if id == 0:#cave grass
-                new_grass = Entities.Cave_grass(object_position,self.game_objects)
-                if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(new_grass)
-                else:
-                    self.game_objects.all_bgs.add(new_grass)
+                if parallax == [1,1]:#if BG1 layer
+                    new_grass = Entities.Cave_grass(object_position,self.game_objects)
+                    self.game_objects.interactables.add(new_grass)
+                else:#if in parallax layers
+                    new_grass = tiled_objects.Cave_grass(object_position,self.game_objects,parallax)
+                    if self.layer == 'fg':
+                        self.game_objects.all_fgs.add(new_grass)
+                    else:
+                        self.game_objects.all_bgs.add(new_grass)
 
             elif id == 1:#ljusmaksar
-                new_grass = parallax_objects.Ljusmaskar(object_position,self.game_objects,parallax)
+                new_grass = tiled_objects.Ljusmaskar(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_grass)
                 else:
                     self.game_objects.all_bgs.add(new_grass)
 
             elif id == 2:#droplet
-                new_drop = parallax_objects.Droplet_source(object_position,self.game_objects,parallax)
+                new_drop = tiled_objects.Droplet_source(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_drop)
                 else:
