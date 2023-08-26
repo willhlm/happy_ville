@@ -305,7 +305,7 @@ class Level():
                         new_keyitem = getattr(Entities, keyitem)(object_position,self.game_objects)
                         self.game_objects.loot.add(new_keyitem)
 
-            elif id == 30:#traps
+            elif id == 30:#trapsª
                 for property in properties:
                     if property['name'] == 'type':
                         trap_type = property['value']
@@ -418,28 +418,35 @@ class Level():
 
             if id == 0:#cave grass
                 if parallax == [1,1]:#if BG1 layer
-                    new_grass = Entities.Cave_grass(object_position,self.game_objects)
+                    new_grass = Entities.Cave_grass(object_position, self.game_objects)
                     self.game_objects.interactables.add(new_grass)
                 else:#if in parallax layers
-                    new_grass = tiled_objects.Cave_grass(object_position,self.game_objects,parallax)
+                    new_grass = tiled_objects.Cave_grass(object_position, self.game_objects, parallax)
                     if self.layer == 'fg':
                         self.game_objects.all_fgs.add(new_grass)
                     else:
                         self.game_objects.all_bgs.add(new_grass)
 
             elif id == 1:#ljusmaksar
-                new_grass = tiled_objects.Ljusmaskar(object_position,self.game_objects,parallax)
+                new_grass = tiled_objects.Ljusmaskar(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_grass)
                 else:
                     self.game_objects.all_bgs.add(new_grass)
 
             elif id == 2:#droplet
-                new_drop = tiled_objects.Droplet_source(object_position,self.game_objects,parallax)
+                new_drop = tiled_objects.Droplet_source(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_drop)
                 else:
                     self.game_objects.all_bgs.add(new_drop)
+
+            elif id == 3:#falling rock trap
+                new_rock = tiled_objects.Falling_rock_source(object_position, self.game_objects, parallax)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(new_rock)
+                else:
+                    self.game_objects.all_bgs.add(new_rock)
 
     @staticmethod
     def blur_value(parallax):#called from load_laters and load_back/front_objects

@@ -395,7 +395,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
@@ -404,7 +404,7 @@ class Player(Character):
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
 
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -528,7 +528,6 @@ class Enemy(Character):
     def player_collision(self,player):#when player collides with enemy
         if not self.aggro: return
         if player.invincibile: return
-        #if player.currentstate.state_name == 'death': return
         player.take_dmg(1)
         sign = math.copysign(1,(player.hitbox.center[0]-self.hitbox.center[0]))
         player.knock_back([sign,0])
@@ -574,7 +573,7 @@ class Flying_enemy(Enemy):
         self.velocity[1] = -dir[1]*30
 
     def chase(self):#called from AI: when chaising
-        self.velocity[0] += self.dir[0]*0.3#*abs(math.sin(self.init_time))
+        self.velocity[0] += (self.AI.black_board['player_distance'][0] - 30)*0.002#self.dir[0]*0.3
         self.velocity[1] += (self.AI.black_board['player_distance'][1] - 30)*0.002
 
     def patrol(self,position):#called from AI: when patroling
@@ -613,10 +612,10 @@ class Exploding_Mygga(Flying_enemy):
 class Packun(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/packun/')
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/packun/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
-        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.health = 3
         self.dmg = 1
         self.attack = Projectile_1
@@ -656,18 +655,13 @@ class Slime_giant(Enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],48,48)
-        self.number = random.randint(1, 6)
+        self.number = random.randint(1, 6)#number of minions
 
-    def dead(self):
-        self.game_objects.world_state.update_kill_statistics(type(self).__name__.lower())
-        self.spawn_minions()
-        self.kill()
-
-    def spawn_minions(self):
+    def loot(self):#spawn minions
         pos = [self.hitbox.centerx,self.hitbox.centery-10]
         for i in range(0,self.number):
             obj = Slime(pos,self.game_objects)
-            obj.velocity=[random.randint(-10, 10),random.randint(-10, -5)]
+            obj.velocity = [random.randint(-10, 10),random.randint(-10, -5)]
             self.game_objects.enemies.add(obj)
 
 class Wall_slime(Enemy):
@@ -754,8 +748,8 @@ class Blue_bird(Enemy):
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,16)
         self.currentstate = states_bluebird.Idle(self)
-        self.aggro=False
-        self.health=1
+        self.aggro = False
+        self.health = 1
         self.AI = AI_bluebird.Peace(self)#should we make it into a tree as well?
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
@@ -1154,6 +1148,9 @@ class Camera_Stop(Staticentity):
 
         self.currentstate = states_camerastop.Idle(self)
         self.currentstate.enter_state('Idle_'+dir)
+
+    def update(self):
+        self.currentstate.update()
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
@@ -1694,6 +1691,25 @@ class Projectile_1(Ranged):
         self.velocity[0] = -dir[1]*self.velocity[0]*dx*0.05 + dir[0]*(10 - abs(dx)*0.1)
         self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy) + dir[0]*dy*0.2
 
+class Falling_rock(Ranged):#things that can be placed in cave, the source makes this and can hurt player
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/falling_rock/rock/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = entity.rect.topleft
+        self.hitbox = self.rect.copy()
+        self.lifetime = 100
+        self.dmg = 1
+
+    def update(self):
+        super().update()
+        self.update_vel()
+
+    def update_vel(self):
+        self.velocity[1] += 1
+        self.velocity[1] = min(7,self.velocity[1])
+
 class Horn_vines(Ranged):
     def __init__(self, entity, pos):
         super().__init__(entity)
@@ -1882,7 +1898,7 @@ class Spirit_container(Loot):
     def update_vel(self):
         self.velocity[1]=3*self.game_objects.game.dt*self.slow_motion
 
-    def player_collision(self):
+    def player_collision(self,player):
         self.game_objects.player.max_spirit += 1
         #a cutscene?
         self.kill()
@@ -1930,7 +1946,7 @@ class Spiritorb(Loot):#the thing that gives spirit
         self.rect = self.image.get_rect(center=pos)
         self.hitbox=self.rect.copy()
 
-    def player_collision(self):
+    def player_collision(self,player):
         self.game_objects.player.add_spirit(1)
         self.kill()
 
@@ -3118,3 +3134,22 @@ class Shroomjump_timer(Timer):
     def deactivate(self):#called when timer expires
         super().deactivate()
         self.shrooming = False
+
+class Wall_timer(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+        self.active = False
+
+    def activate(self):
+        super().activate()
+        self.active = True
+
+    def deactivate(self):
+        super().deactivate()
+        self.active = False
+
+    def handle_input(self,input):
+        if not self.active: return
+        if input=='a':#pressed jump
+            self.entity.velocity[0] = self.entity.dir[0]*10
+            self.entity.velocity[1] = -7#to get a vertical velocity

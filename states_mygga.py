@@ -95,4 +95,4 @@ class Death(Enemy_states):
 
     def increase_phase(self):
         self.entity.dead()
-        self.entity.AI.handle_input('Attack')
+        #self.entity.AI.handle_input('Attack')

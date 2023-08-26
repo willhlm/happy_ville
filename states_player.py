@@ -21,6 +21,7 @@ class Player_states(Entity_States):
         if input[-1] == 'a':
             self.entity.timer_jobs['shroomjump'].activate()
             self.entity.timer_jobs['jump'].activate()
+            self.entity.timer_jobs['wall'].handle_input('a')
 
     def handle_release_input(self,input):#all states should inehrent this function
         if input[-1] == 'a':
@@ -501,7 +502,9 @@ class Wall_glide_main(Player_states):
 
     def update_state(self):
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
+            self.entity.timer_jobs['wall'].activate()
             self.enter_state('Fall_stand_pre')
+
 
     def handle_press_input(self,input):
         #super().handle_press_input(input)
@@ -511,11 +514,13 @@ class Wall_glide_main(Player_states):
             self.enter_state('Jump_run_main')
         elif input[-1] == 'right' or input[-1] == 'left':
             self.entity.velocity[0] = self.entity.dir[0]*2
+            self.entity.timer_jobs['wall'].activate()
             self.enter_state('Fall_run_pre')
 
     def handle_release_input(self,input):
         super().handle_release_input(input)
         if input[-1] == 'right' or input[-1] == 'left':
+            self.entity.timer_jobs['wall'].activate()            
             self.entity.velocity[0] = -self.entity.dir[0]*2
             self.enter_state('Fall_stand_pre')
 

@@ -38,7 +38,7 @@ class Shader:
             s = pygame.Surface(target_texture.get_size())
             self.screen_texture = Texture(s, self.ctx)
 
-    def update_pos(self,pos):
+    def update_pos(self,pos):#not in use
         self.render_rect.update_pos(pos)
 
     def send(self, name, data):
@@ -107,7 +107,7 @@ class ScreenRect:
 
         self.program = program
 
-    def update_pos(self,offset):
+    def update_pos(self,offset):#not in use
         offset = (offset[0]/self.current_w, offset[1]/self.current_h)
 
         self.data[:,0:2] = [
