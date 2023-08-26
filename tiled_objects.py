@@ -115,7 +115,7 @@ class Droplet_source(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/droplet/source')
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/droplet/source/')
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
@@ -163,7 +163,7 @@ class Dynamic_layered_objects(Layered_objects):
 class Droplet(Dynamic_layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/droplet/droplet')
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/droplet/droplet/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
