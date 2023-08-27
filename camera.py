@@ -9,7 +9,6 @@ class Camera():
         self.original_center = self.center.copy()
 
     def update(self):
-        self.check_camera_border_new()#this need to be checked before the camera calculates the scroll
         self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
         self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
         self.scroll = self.true_scroll.copy()
@@ -26,10 +25,6 @@ class Camera():
 
     def reset_player_center(self):
         self.center = self.original_center.copy()
-
-    def check_camera_border_new(self):
-        for block in self.game_objects.camera_blocks:
-            block.currentstate.update()
 
 class Camera_shake(Camera):
     def __init__(self, game_objects,scroll, amp,duration):

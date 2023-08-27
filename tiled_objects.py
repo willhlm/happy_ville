@@ -1,9 +1,9 @@
 import pygame, random, math
-from Entities import Animatedentity
+import Entities
 import Read_files
 import states_wind_objects, states_droplet, states_weather_particles
 
-class Layered_objects(Animatedentity):#objects in tiled that goes to different layers
+class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to different layers
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects)
         self.pause_group = game_objects.layer_pause
@@ -137,6 +137,35 @@ class Droplet_source(Layered_objects):
         self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
         obj.add_internal(self.game_objects.all_bgs)
 
+class Falling_rock_source(Layered_objects):
+    animations = {}
+    def __init__(self,pos,game_objects,parallax):
+        super().__init__(pos,game_objects,parallax)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/falling_rock/source/')
+        self.init_sprites()#blur or lead from memory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.currentstate = states_droplet.Idle(self)
+
+    def group_distance(self):
+        pass
+
+    def drop(self):#called from states
+        if self.parallax == [1,1]:
+            obj = Entities.Falling_rock(self)
+            self.game_objects.eprojectiles.add(obj)
+        else:
+            sprites = self.game_objects.all_bgs.sprites()
+            bg = self.game_objects.all_bgs.reference[tuple(self.parallax)]
+            index = sprites.index(bg)#find the index in which the static layer is located
+            pos = self.rect.topleft
+            obj = Falling_rock(pos,self.game_objects,self.parallax)
+            self.game_objects.all_bgs.spritedict[obj] = self.game_objects.all_bgs._init_rect#in add internal
+            self.game_objects.all_bgs._spritelayers[obj] = 0
+            self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
+            obj.add_internal(self.game_objects.all_bgs)
+
 #thigns that move: rains, fog and wather stuff as well?
 class Dynamic_layered_objects(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
@@ -237,3 +266,25 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
                 arr.replace(replace_color,new_colour)
                 self.sprites.sprite_dict[state][frame] =arr.make_surface()
                 arr.close()
+
+class Falling_rock(Dynamic_layered_objects):
+    def __init__(self,pos,game_objects,parallax):
+        super().__init__(pos,game_objects,parallax)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/falling_rock/rock/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.lifetime = 100
+
+    def update(self):
+        super().update()
+        self.update_vel()
+        self.destroy()
+
+    def destroy(self):
+        if self.lifetime < 0:
+            self.kill()
+
+    def update_vel(self):
+        self.velocity[1] += 1
+        self.velocity[1] = min(7,self.velocity[1])

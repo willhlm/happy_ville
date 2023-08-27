@@ -4,6 +4,8 @@ import game_objects
 import sys
 import constants as C
 import shaders
+#import pygame_light2d
+#from pygame_light2d import LightingEngine, PointLight, Hull
 
 class Game():
     def __init__(self):
@@ -20,7 +22,7 @@ class Game():
         self.screen = pygame.Surface(self.WINDOW_SIZE)#do not add .convert_alpha(), should be initiad before display, for some reason
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, flags, vsync = 1)
         #need to be after display
-        self.screen_shader = shaders.Shader(self.WINDOW_SIZE_scaled, self.WINDOW_SIZE_scaled, (0, 0), "shaders/vertex.txt", "shaders/default_frag.txt", self.screen)
+        self.screen_shader = shaders.Shader(self.WINDOW_SIZE, self.WINDOW_SIZE, (0, 0), "shaders/vertex.txt", "shaders/default_frag.txt", self.screen)
 
         #initiate game related values
         self.clock = pygame.time.Clock()

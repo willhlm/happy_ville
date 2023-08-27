@@ -108,8 +108,8 @@ class Game_Objects():
         self.collisions.projectile_collision(self.eprojectiles,self.players)
 
     def update(self):
+        self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
         self.camera.update()#should be first
-        self.weather.update()
         self.platforms.update()
         self.platforms_ramps.update()
         self.layer_pause.update()#should be before all_bgs and all_fgs
@@ -124,9 +124,9 @@ class Game_Objects():
         self.eprojectiles.update()
         self.loot.update()
         self.cosmetics.update()
-        self.camera_blocks.update()
         self.interactables.update()
         self.reflections.update()
+        self.weather.update()
 
     def draw(self):
         self.all_bgs.draw(self.game.screen)
