@@ -590,9 +590,12 @@ class Fadein(Gameplay):
         self.fade_surface.fill((0,0,0))
 
     def update(self):
-        super().update()
+        self.game.game_objects.update()
+        self.game.game_objects.platform_collision()
+        self.game.game_objects.UI['gameplay'].update()
+
         self.count += self.game.dt
-        if self.count > self.fade_length:
+        if self.count > self.fade_length*2:
             self.exit()
 
     def exit(self):
@@ -602,7 +605,7 @@ class Fadein(Gameplay):
         self.exit_state()
 
     def render(self):
-        super().render()
+        super().render()#gameplay render
         self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
         self.game.screen.blit(self.fade_surface, (0,0))
 

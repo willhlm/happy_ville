@@ -2283,7 +2283,7 @@ class Bridge(Interactable):
         self.game_objects.platforms.add(platform)
 
 class Path_col(Interactable):
-    def __init__(self, pos, game_objects,size, destination, spawn):
+    def __init__(self, pos, game_objects, size, destination, spawn):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
@@ -2292,11 +2292,13 @@ class Path_col(Interactable):
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
 
+        self.orientation = size[1] > size[0]#true is vertical, false is horizontal
+
     def update(self):
         self.group_distance()
 
     def player_collision(self):
-        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
+        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn, orientation = self.orientation)
         self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
@@ -2313,7 +2315,7 @@ class Path_inter(Interactable):
         self.group_distance()
 
     def interact(self):
-        self.game_objects.load_map(self.destination, self.spawn)
+        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
 
 class Shade_trigger(Interactable):
     def __init__(self,pos,game_objects,size,colour):
