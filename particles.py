@@ -16,6 +16,7 @@ class Particles(pygame.sprite.Sprite):
         self.fade = colour[-1]
         self.colour = colour
         self.scale = scale
+        self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
 
     def update(self):
         self.update_pos()
@@ -29,7 +30,7 @@ class Particles(pygame.sprite.Sprite):
         self.rect.center = self.true_pos
 
     def wave(self):
-        self.velocity  = [0.5*math.sin(self.lifetime*0.1+self.angle),-1]
+        self.velocity  = [0.5*math.sin(self.lifetime*0.1 + self.angle + self.phase),-1]
 
     def linear(self):
         self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)

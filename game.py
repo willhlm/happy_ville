@@ -4,8 +4,7 @@ import game_objects
 import sys
 import constants as C
 import shaders
-#import pygame_light2d
-#from pygame_light2d import LightingEngine, PointLight, Hull
+import pygame_light2d
 
 class Game():
     def __init__(self):
@@ -15,20 +14,14 @@ class Game():
         self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
         flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF #| pygame.FULLSCREEN#pygame.SCALED | pygame.FULLSCREEN
 
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)#has to be before set_mode
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK,pygame.GL_CONTEXT_PROFILE_CORE)
-
         self.screen = pygame.Surface(self.WINDOW_SIZE)#do not add .convert_alpha(), should be initiad before display, for some reason
         self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, flags, vsync = 1)
         #need to be after display
-        self.screen_shader = shaders.Shader(self.WINDOW_SIZE, self.WINDOW_SIZE, (0, 0), "shaders/vertex.txt", "shaders/default_frag.txt", self.screen)
+        self.lights_engine = pygame_light2d.LightingEngine(native_res=self.WINDOW_SIZE, lightmap_res=(int(self.WINDOW_SIZE[0]/2.5), int(self.WINDOW_SIZE[1]/2.5)))
 
         #initiate game related values
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
-
-        self.fps = C.fps
         self.state_stack = [states.Title_Menu(self)]
 
         #debug flags
@@ -49,10 +42,10 @@ class Game():
 
     def run(self):
         while True:
-            shaders.clear((0, 0, 0))
+            self.lights_engine.clear(255, 255, 255, 255)
 
             #tick clock
-            self.clock.tick(self.fps)
+            self.clock.tick(C.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
 
             #handle event
@@ -63,7 +56,10 @@ class Game():
 
             #render
             self.state_stack[-1].render()#render as usual with blit onto self.screeen
-            self.screen_shader.render(self.screen)#this rener method takes care of rendering to the display
+            #shader render
+            tex = self.lights_engine.surface_to_texture(self.screen)
+            self.lights_engine.render_texture(tex, pygame_light2d.BACKGROUND,pygame.Rect(0, 0, tex.width, tex.height),pygame.Rect(0, 0, tex.width, tex.height))
+            self.lights_engine.render()
 
             #update display
             pygame.display.flip()
@@ -79,5 +75,8 @@ class Game():
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
     pygame.init()#initilise
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)#has to be before set_mode
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)#has to be before set_mode
+    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK,pygame.GL_CONTEXT_PROFILE_CORE)#has to be before set_mode
     g = Game()
     g.run()

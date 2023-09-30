@@ -405,6 +405,7 @@ class Player(Character):
         self.omamoris = Omamoris(self)#
 
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.reset_movement()
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -447,7 +448,7 @@ class Player(Character):
         new_game_state.enter_state()
 
     def reset_movement(self):#called when loading new map or entering conversations
-        self.velocity = [0,0]
+        #self.velocity = [0,0]
         self.acceleration =  [0,C.acceleration[1]]
         self.friction = C.friction_player.copy()
 
@@ -2295,7 +2296,8 @@ class Path_col(Interactable):
         self.group_distance()
 
     def player_collision(self):
-        self.game_objects.load_map(self.destination, self.spawn)
+        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
+        self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn, image):
@@ -2378,7 +2380,7 @@ class Interactable_bushes(Interactable):
         self.currentstate.handle_input('Hurt')
         self.interacted = True#sets to false when player gos away
 
-    def take_dmg(self,projectile):
+    def take_dmg(self,projectile):#when player hits with sword
         self.currentstate.handle_input('Death')
 
     def reset_timer(self):
@@ -2405,7 +2407,7 @@ class Cave_grass(Interactable_bushes):
 
     def take_dmg(self,projectile):
         super().take_dmg(projectile)
-        self.release_particles(30)
+        self.release_particles(3)
 
     def release_particles(self,number_particles=12):#should release particles when hurt and death
         color = [255,255,255,255]

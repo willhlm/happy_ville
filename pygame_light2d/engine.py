@@ -3,7 +3,7 @@ from enum import Enum
 import numpy as np
 import moderngl
 import pygame
-from OpenGL.GL import glBlitNamedFramebuffer, GL_COLOR_BUFFER_BIT, GL_NEAREST
+from OpenGL.GL import glBlitNamedFramebuffer, GL_COLOR_BUFFER_BIT, GL_NEAREST, glGetUniformBlockIndex, glUniformBlockBinding
 
 from pygame_light2d.light import PointLight
 from pygame_light2d.hull import Hull
@@ -14,7 +14,6 @@ from pygame_light2d.double_buff import DoubleBuff
 class Layer(Enum):
     BACKGROUND = 1,
     FOREGROUND = 2,
-
 
 class LightingEngine:
     """A class for managing lighting effects within a Pygame environment."""
@@ -27,10 +26,6 @@ class LightingEngine:
             native_res (tuple[int, int]): Native resolution of the game (width, height).
             lightmap_res (tuple[int, int]): Lightmap resolution (width, height).
         """
-
-        # Configure pygame
-        self._check_and_configure_pygame()
-
         # Initialize private members
         self._native_res = native_res
         self._lightmap_res = lightmap_res
@@ -54,25 +49,10 @@ class LightingEngine:
         self._create_frame_buffers()
 
         # Create SSBO for hull vertices
-        self._ssbo_v = self.ctx.buffer(reserve=4*2048)
-        self._ssbo_v.bind_to_uniform_block(1)
-        self._ssbo_ind = self.ctx.buffer(reserve=4*256)
-        self._ssbo_ind.bind_to_uniform_block(2)
+        self._create_ssbos()
 
-    def _check_and_configure_pygame(self):
-        # Check that pygame has been initialized
-        assert pygame.get_init(), 'Error: Pygame is not initialized. Please ensure you call pygame.init() before using the lighting engine.'
-
-        # Try to get the current screen resolution
-        try:
-            screen_size = pygame.display.get_window_size()
-        except:
-            raise RuntimeError(
-                'Error: Pygame window not initialized. Please create a pygame window before starting the lighting engine.')
-
-        # Configure pygame display
-        pygame.display.set_mode(
-            screen_size, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF)
+        self.set_ambient(255, 255, 255, 255)#the ambient brightness of the screen
+        self.t = 0
 
     def _load_shaders(self):
         # Read source files
@@ -105,7 +85,7 @@ class LightingEngine:
                                       (0.0, 0.0), (1.0, 1.0), (1.0, 0.0)], dtype=np.float32)
         screen_vertex_data = np.hstack([screen_vertices, screen_tex_coords])
 
-        # VAO and VBO for screen mesh
+        # VAO and VBO for screen mesh: these are called in render
         screen_vbo = self.ctx.buffer(screen_vertex_data)
         self._vao_light = self.ctx.vertex_array(self._prog_light, [
             (screen_vbo, '2f 2f', 'vertexPos', 'vertexTexCoord'),
@@ -138,6 +118,22 @@ class LightingEngine:
             self._lightmap_res, components=4, dtype='f2')
         self._tex_ao.filter = (moderngl.LINEAR, moderngl.LINEAR)
         self._fbo_ao = self.ctx.framebuffer([self._tex_ao])
+
+    def _create_ssbos(self):
+        # Set block indices for the SSBOS in the shader program
+        prog_glo = self._prog_light.glo
+
+        blockIndex = glGetUniformBlockIndex(prog_glo, 'hullVSSBO')
+        glUniformBlockBinding(prog_glo, blockIndex, 1)
+
+        blockIndex = glGetUniformBlockIndex(prog_glo, 'hullIndSSBO')
+        glUniformBlockBinding(prog_glo, blockIndex, 2)
+
+        # Create SSBOs
+        self._ssbo_v = self.ctx.buffer(reserve=4*2048)
+        self._ssbo_v.bind_to_uniform_block(1)
+        self._ssbo_ind = self.ctx.buffer(reserve=4*256)
+        self._ssbo_ind.bind_to_uniform_block(2)
 
     def set_filter(self, layer: Layer, filter) -> None:
         """
@@ -286,19 +282,10 @@ class LightingEngine:
         self._render_aomap()
 
         # Render background masked with the lightmap
-        self.ctx.screen.use()
-        self._tex_bg.use()
-
-        self._tex_ao.use(1)
-        self._prog_mask['lightmap'].value = 1
-        self._prog_mask['ambient'].value = self._ambient
-
-        self._vao_mask.render()
+        self._render_background()
 
         # Render foreground onto screen
-        self.ctx.screen.use()
-        self._tex_fg.use()
-        self._vao_draw.render()
+        self._render_foreground()
 
     def _point_to_uv(self, p: tuple[float, float]):
         return [p[0]/self._native_res[0], 1 - (p[1]/self._native_res[1])]
@@ -413,3 +400,18 @@ class LightingEngine:
 
         self._prog_blur['blurRadius'] = self.shadow_blur_radius
         self._vao_blur.render()
+
+    def _render_background(self):
+        self.ctx.screen.use()
+        self._tex_bg.use()
+
+        self._tex_ao.use(1)
+        self._prog_mask['lightmap'].value = 1
+        self._prog_mask['ambient'].value = self._ambient
+
+        self._vao_mask.render()
+
+    def _render_foreground(self):
+        self.ctx.screen.use()
+        self._tex_fg.use()
+        self._vao_draw.render()
