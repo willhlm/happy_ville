@@ -58,7 +58,7 @@ class Game():
             self.state_stack[-1].render()#render as usual with blit onto self.screeen
             #shader render
             tex = self.lights_engine.surface_to_texture(self.screen)
-            self.lights_engine.render_texture(tex, pygame_light2d.BACKGROUND,pygame.Rect(0, 0, tex.width, tex.height),pygame.Rect(0, 0, tex.width, tex.height))            
+            self.lights_engine.render_texture(tex, pygame_light2d.BACKGROUND,pygame.Rect(0, 0, tex.width, tex.height),pygame.Rect(0, 0, tex.width, tex.height))
             self.lights_engine.render()
 
             #update display

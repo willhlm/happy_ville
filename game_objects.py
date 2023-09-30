@@ -55,18 +55,25 @@ class Game_Objects():
         self.players = groups.Group_player(self)#blits on float positions
         self.players.add(self.player)
 
-    def load_map(self, map_name, spawn = '1',fade = True):
-        t1_start = perf_counter()
-        self.player.currentstate.enter_state('Idle_main')
-        self.player.reset_movement()
+    def load_map(self, previous_state, map_name, spawn = '1',fade = True):
+        if fade:
+            new_game_state = states.Fadeout(self.game,previous_state,map_name, spawn,fade)#it will call load_map after loading
+            new_game_state.enter_state()
+        else:
+            self.load_map2(map_name, spawn,fade)
+
+    def load_map2(self, map_name, spawn = '1',fade = True):#called from fadeout
+        #self.player.reset_movement()
+        #self.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
         self.clean_groups()
+        t1_start = perf_counter()
         self.map.load_map(map_name,spawn)
         self.camera.reset_player_center()
         t1_stop = perf_counter()
         print(t1_stop-t1_start)
 
-        if fade:
-            new_game_state = states.Fading(self.game)
+        if fade:#for cutscenes
+            new_game_state = states.Fadein(self.game)
             new_game_state.enter_state()
 
     def load_bg_music(self):#called from fade

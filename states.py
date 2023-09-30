@@ -108,7 +108,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map('light_forest_1','1')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -187,7 +187,7 @@ class Load_Menu(Game_State):
                 new_state.enter_state()
                 map=self.game.game_objects.player.spawn_point['map']
                 point=self.game.game_objects.player.spawn_point['point']
-                self.game.game_objects.load_map(map,point)
+                self.game.game_objects.load_map(self,map,point)
 
     def initiate_buttons(self):
         y_pos = 200
@@ -500,7 +500,7 @@ class Cultist_encounter_gameplay(Gameplay):#if player dies, the plater is not re
             self.exit_state()
         elif input == 'death':
             self.game.game_objects.player.reset_movement()
-            self.game.game_objects.load_map('cultist_hideout_1','2')
+            self.game.game_objects.load_map(self,'cultist_hideout_1','2')
 
 class Slow_motion_gameplay(Gameplay):
     def __init__(self, game):
@@ -579,51 +579,60 @@ class Ability_menu(Gameplay):#when pressing tab
                 self.game.game_objects.player.abilities.equip=self.abilities[self.index]
                 self.exit_state()
 
-class Fading(Gameplay):#fades out and then in
+class Fadein(Gameplay):
     def __init__(self,game):
         super().__init__(game)
-        self.page = 0
-        self.render_fade = [self.render_out,self.render_in]
-        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32)
-        self.fade_surface.fill((0,0,0))
-        self.init_out()
-
-    def init_in(self):
         self.count = 0
         self.fade_length = 20
-        self.fade_surface.set_alpha(255)
 
-    def init_out(self):
-        self.count = 0
-        self.fade_length = 60
-        self.fade_surface.set_alpha(int(255/self.fade_length))
+        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32).convert_alpha()
+        self.fade_surface.set_alpha(255)
+        self.fade_surface.fill((0,0,0))
 
     def update(self):
         super().update()
-        self.count += min(self.game.dt,2)#the framerate jump when loading map. This class is called when loading a map. Need to set maximum dt
+        self.count += self.game.dt
         if self.count > self.fade_length:
-            self.page += 1
-            self.init_in()
-            if self.page == 2:
-                self.exit()
+            self.exit()
 
     def exit(self):
         self.game.game_objects.load_bg_music()
+        self.game.game_objects.player.reset_movement()
+        self.game.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
         self.exit_state()
 
     def render(self):
-        self.render_fade[self.page]()
-        self.game.screen.blit(self.fade_surface, (0,0))
-
-    def render_in(self):
         super().render()
         self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
-
-    def render_out(self):
-        self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
+        self.game.screen.blit(self.fade_surface, (0,0))
 
     def handle_events(self, input):
         pass
+
+class Fadeout(Fadein):
+    def __init__(self,game,previous_state,map_name,spawn,fade):
+        super().__init__(game)
+        self.previous_state = previous_state
+        self.fade_length = 60
+        self.fade_surface.set_alpha(int(255/self.fade_length))
+        self.map_name = map_name
+        self.spawn = spawn
+        self.fade = fade
+
+    def update(self):
+        self.previous_state.update()
+        self.count += self.game.dt
+        if self.count > self.fade_length:
+            self.exit()
+
+    def exit(self):
+        self.exit_state()#has to be before loadmap
+        self.game.game_objects.load_map2(self.map_name, self.spawn, self.fade)
+
+    def render(self):
+        self.previous_state.render()
+        self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
+        self.game.screen.blit(self.fade_surface, (0,0))
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
