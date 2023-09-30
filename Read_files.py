@@ -184,9 +184,13 @@ class Sprites_Player(Sprites):
 
     def get_image(self, input, timer, dir):#input = state,timer=frame, dir
         if dir[0] > 0:
+            self.dir = dir
             return pygame.transform.flip(self.sprite_dict[input][timer],True,False)
         elif dir[0] <= 0:#else
+            self.dir = dir
             return self.sprite_dict[input][timer]
+        else:#if 0
+            self.get_image(input, timer, self.dir)
 
 class Sprites_wallslime(Sprites_Player):
     def __init__(self,path):

@@ -404,7 +404,7 @@ class Player(Character):
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
 
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
@@ -3149,7 +3149,32 @@ class Wall_timer(Timer):
         self.active = False
 
     def handle_input(self,input):
+        return
         if not self.active: return
         if input=='a':#pressed jump
             self.entity.velocity[0] = self.entity.dir[0]*10
             self.entity.velocity[1] = -7#to get a vertical velocity
+
+class Wall_timer_2(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def activate(self,dir):#add timer to the entity timer list
+        super().activate()
+        self.dir = dir.copy()
+
+    def update(self):
+        self.check_sign()
+        super().update()
+
+    def check_sign(self):
+        if self.entity.dir[0]*self.dir[0]>=0:#if it is zero or same direction
+            self.entity.dir[0] = 0
+        else:#if aila change direction
+            self.entity.dir[0] = -self.dir[0]
+            if self not in self.entity.timers: return#do not remove if the timer is not inside
+            self.entity.timers.remove(self)
+
+    def deactivate(self):#lifetime
+        super().deactivate()
+        self.entity.dir[0] = self.dir[0]

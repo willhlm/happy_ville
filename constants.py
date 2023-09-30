@@ -18,7 +18,8 @@ animation_framerate = 0.25#1/animation_framerate is the number of frames to blit
 air_timer = 7#for how long one can press A and keep jumping
 dash_length = 5#how long  Aila dashes
 dash_vel = 13
-wall_timer = 10#how many frams from droping from wall you can still jump
+wall_timer = 3#how many frams from droping from wall you can still jump
+wall_timer_2 = 7#how many frams from jumping till one change change the direction from wall you can still jump
 
 #combat
 invincibility_time_player = 50

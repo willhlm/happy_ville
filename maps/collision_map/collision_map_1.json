@@ -152,24 +152,6 @@
                          "y":240
                         }, 
                         {
-                         "gid":112,
-                         "height":16,
-                         "id":143,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"type",
-                                 "type":"string",
-                                 "value":"Light_crystal"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":352,
-                         "y":240
-                        }, 
-                        {
                          "gid":119,
                          "height":16,
                          "id":145,
@@ -309,15 +291,15 @@
                         }, 
                         {
                          "gid":96,
-                         "height":16,
+                         "height":192,
                          "id":48,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":288,
-                         "x":512,
-                         "y":48
+                         "width":64,
+                         "x":224,
+                         "y":208
                         }, 
                         {
                          "gid":100,
@@ -431,7 +413,7 @@
          "tilewidth":16
         }, 
         {
-         "firstgid":383,
+         "firstgid":380,
          "source":"..\/_objects\/back.tsx"
         }],
  "tilewidth":16,

@@ -505,12 +505,12 @@ class Wall_glide_main(Player_states):
             self.entity.timer_jobs['wall'].activate()
             self.enter_state('Fall_stand_pre')
 
-
     def handle_press_input(self,input):
         #super().handle_press_input(input)
         if input[-1] == 'a':
             self.entity.velocity[0] = -self.dir[0]*10
             self.entity.velocity[1] = -7#to get a vertical velocity
+            self.entity.timer_jobs['wall_2'].activate(self.dir)
             self.enter_state('Jump_run_main')
         elif input[-1] == 'right' or input[-1] == 'left':
             self.entity.velocity[0] = self.entity.dir[0]*2
@@ -520,7 +520,7 @@ class Wall_glide_main(Player_states):
     def handle_release_input(self,input):
         super().handle_release_input(input)
         if input[-1] == 'right' or input[-1] == 'left':
-            self.entity.timer_jobs['wall'].activate()            
+            self.entity.timer_jobs['wall'].activate()
             self.entity.velocity[0] = -self.entity.dir[0]*2
             self.enter_state('Fall_stand_pre')
 
