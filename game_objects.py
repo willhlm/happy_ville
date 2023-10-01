@@ -55,16 +55,21 @@ class Game_Objects():
         self.players = groups.Group_player(self)#blits on float positions
         self.players.add(self.player)
 
-    def load_map(self, previous_state, map_name, spawn = '1',fade = True):
+    def load_map(self, previous_state, map_name, spawn = '1',fade = True, orientation = False):
+        if orientation:#if player was trvelling horizontally, enforce running in that direction
+            self.player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
+            self.player.currentstate.walk()
+        else:#vertical travelling and path interact
+            self.player.reset_movement()
+            self.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
+
         if fade:
-            new_game_state = states.Fadeout(self.game,previous_state,map_name, spawn,fade)#it will call load_map after loading
+            new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn,fade)#it will call load_map after loading
             new_game_state.enter_state()
         else:
-            self.load_map2(map_name, spawn,fade)
+            self.load_map2(map_name, spawn, fade)
 
     def load_map2(self, map_name, spawn = '1',fade = True):#called from fadeout
-        #self.player.reset_movement()
-        #self.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
         self.clean_groups()
         t1_start = perf_counter()
         self.map.load_map(map_name,spawn)
@@ -73,7 +78,7 @@ class Game_Objects():
         print(t1_stop-t1_start)
 
         if fade:#for cutscenes
-            new_game_state = states.Fadein(self.game)
+            new_game_state = states.Fadein(self.game)#when this state is finished, it will set aila to idle
             new_game_state.enter_state()
 
     def load_bg_music(self):#called from fade
@@ -101,10 +106,7 @@ class Game_Objects():
         self.layer_pause.empty()
 
     def collide_all(self):
-        self.collisions.platform_collision(self.players)
-        self.collisions.platform_collision(self.enemies)
-        self.collisions.platform_collision(self.npcs)
-        self.collisions.platform_collision(self.loot)
+        self.platform_collision()
 
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
@@ -113,6 +115,12 @@ class Game_Objects():
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
         self.collisions.projectile_collision(self.fprojectiles,self.enemies)
         self.collisions.projectile_collision(self.eprojectiles,self.players)
+
+    def platform_collision(self):
+        self.collisions.platform_collision(self.players)
+        self.collisions.platform_collision(self.enemies)
+        self.collisions.platform_collision(self.npcs)
+        self.collisions.platform_collision(self.loot)
 
     def update(self):
         self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
