@@ -55,16 +55,9 @@ class Game_Objects():
         self.players = groups.Group_player(self)#blits on float positions
         self.players.add(self.player)
 
-    def load_map(self, previous_state, map_name, spawn = '1',fade = True, orientation = False):
-        if orientation:#if player was trvelling horizontally, enforce running in that direction
-            self.player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
-            self.player.currentstate.walk()
-        else:#vertical travelling and path interact
-            self.player.reset_movement()
-            self.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
-
+    def load_map(self, previous_state, map_name, spawn = '1',fade = True):#fade out before loading the map
         if fade:
-            new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn,fade)#it will call load_map after loading
+            new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn,fade)#it will call load_map2 after loading
             new_game_state.enter_state()
         else:
             self.load_map2(map_name, spawn, fade)

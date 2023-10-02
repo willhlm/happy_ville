@@ -15,11 +15,10 @@ class Layer(Enum):
     BACKGROUND = 1,
     FOREGROUND = 2,
 
-
 class LightingEngine:
     """A class for managing lighting effects within a Pygame environment."""
 
-    def __init__(self, screen_res: tuple[int, int], native_res: tuple[int, int], lightmap_res: tuple[int, int]) -> None:
+    def __init__(self, native_res: tuple[int, int], lightmap_res: tuple[int, int]) -> None:
         """
         Initialize the lighting engine.
 
@@ -27,9 +26,7 @@ class LightingEngine:
             native_res (tuple[int, int]): Native resolution of the game (width, height).
             lightmap_res (tuple[int, int]): Lightmap resolution (width, height).
         """
-
         # Initialize private members
-        self._screen_res = screen_res
         self._native_res = native_res
         self._lightmap_res = lightmap_res
         self._ambient = (.25, .25, .25, .25)
@@ -38,9 +35,6 @@ class LightingEngine:
         self.lights: list[PointLight] = []
         self.hulls: list[Hull] = []
         self.shadow_blur_radius: int = 5
-
-        # Configure pygame
-        self._check_and_configure_pygame()
 
         # Create an OpenGL context
         self.ctx = moderngl.create_context()
@@ -56,22 +50,9 @@ class LightingEngine:
 
         # Create SSBO for hull vertices
         self._create_ssbos()
+
         self.set_ambient(255, 255, 255, 255)#the ambient brightness of the screen
-
-
-    def _check_and_configure_pygame(self):
-        # Check that pygame has been initialized
-        assert pygame.get_init(), 'Error: Pygame is not initialized. Please ensure you call pygame.init() before using the lighting engine.'
-
-        # Set OpenGL version to 3.3 core
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
-        pygame.display.gl_set_attribute(
-            pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
-
-        # Configure pygame display
-        pygame.display.set_mode(
-            self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF)
+        self.t = 0
 
     def _load_shaders(self):
         # Read source files
@@ -104,7 +85,7 @@ class LightingEngine:
                                       (0.0, 0.0), (1.0, 1.0), (1.0, 0.0)], dtype=np.float32)
         screen_vertex_data = np.hstack([screen_vertices, screen_tex_coords])
 
-        # VAO and VBO for screen mesh
+        # VAO and VBO for screen mesh: these are called in render
         screen_vbo = self.ctx.buffer(screen_vertex_data)
         self._vao_light = self.ctx.vertex_array(self._prog_light, [
             (screen_vbo, '2f 2f', 'vertexPos', 'vertexTexCoord'),
@@ -358,10 +339,6 @@ class LightingEngine:
         tex.use()
         fbo.use()
         vao.render()
-
-        # Free vertex data
-        vbo.release()
-        vao.release()
 
     def _send_hull_data(self):
         # Lists with hull vertices and indices

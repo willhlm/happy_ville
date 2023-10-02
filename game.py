@@ -9,15 +9,14 @@ import pygame_light2d
 class Game():
     def __init__(self):
         #initiate all screens
-        self.WINDOW_SIZE = C.window_size.copy()
+        self.window_size = C.window_size.copy()
         self.scale_size()#get the scale according to your display size
-        self.WINDOW_SIZE_scaled = tuple([int(x*self.scale) for x in self.WINDOW_SIZE])
+        window_size_scaled = tuple([int(x*self.scale) for x in self.window_size])
         flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF #| pygame.FULLSCREEN#pygame.SCALED | pygame.FULLSCREEN
 
-        self.screen = pygame.Surface(self.WINDOW_SIZE)#do not add .convert_alpha(), should be initiad before display, for some reason
-        self.display = pygame.display.set_mode(self.WINDOW_SIZE_scaled, flags, vsync = 1)
-        #need to be after display
-        self.lights_engine = pygame_light2d.LightingEngine(native_res=self.WINDOW_SIZE, lightmap_res=(int(self.WINDOW_SIZE[0]/2.5), int(self.WINDOW_SIZE[1]/2.5)))
+        self.screen = pygame.Surface(self.window_size)#do not add .convert_alpha(), should be initiad before display, for some reason
+        self.display = pygame.display.set_mode(window_size_scaled, flags, vsync = 1)
+        self.lights_engine = pygame_light2d.LightingEngine(screen_res = window_size_scaled, native_res=self.window_size, lightmap_res=(int(self.window_size[0]/2.5), int(self.window_size[1]/2.5)))#need to be after display
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -41,6 +40,7 @@ class Game():
                 self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
     def run(self):
+        rect = pygame.Rect(0, 0, self.window_size[0], self.window_size[1])
         while True:
             self.lights_engine.clear(255, 255, 255, 255)
 
@@ -58,8 +58,9 @@ class Game():
             self.state_stack[-1].render()#render as usual with blit onto self.screeen
             #shader render
             tex = self.lights_engine.surface_to_texture(self.screen)
-            self.lights_engine.render_texture(tex, pygame_light2d.BACKGROUND,pygame.Rect(0, 0, tex.width, tex.height),pygame.Rect(0, 0, tex.width, tex.height))
+            self.lights_engine.render_texture(tex, pygame_light2d.BACKGROUND, rect, rect)
             self.lights_engine.render()
+            tex.release()#prevent memory leak
 
             #update display
             pygame.display.flip()
@@ -68,8 +69,8 @@ class Game():
         if scale:
             self.scale = scale
         else:
-            scale_w=pygame.display.Info().current_w/self.WINDOW_SIZE[0]
-            scale_h=pygame.display.Info().current_h/self.WINDOW_SIZE[1]
+            scale_w = pygame.display.Info().current_w/self.window_size[0]
+            scale_h = pygame.display.Info().current_h/self.window_size[1]
             self.scale = min(scale_w,scale_h)
 
 if __name__ == '__main__':

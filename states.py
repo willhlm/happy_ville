@@ -60,7 +60,7 @@ class Title_Menu(Game_State):
         self.game.screen.blit(self.image, (0,0))
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.WINDOW_SIZE[0]/2 - self.title.get_width()/2,50))
+        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,50))
         self.game.screen.blit(self.bg, (70,180))
 
         #blit buttons
@@ -158,7 +158,7 @@ class Load_Menu(Game_State):
         self.game.screen.blit(self.image, (0,0))
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.WINDOW_SIZE[0]/2 - self.title.get_width()/2,50))
+        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,50))
         self.game.screen.blit(self.bg, (70,180))
 
         #blit buttons
@@ -236,7 +236,7 @@ class Start_Option_Menu(Game_State):
         self.game.screen.blit(self.image, (0,0))
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.WINDOW_SIZE[0]/2 - self.title.get_width()/2,50))
+        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,50))
         self.game.screen.blit(self.bg, (70,180))
 
         #blit buttons
@@ -293,7 +293,7 @@ class Option_Menu(Game_State):
         self.game.screen.fill((255,255,255))
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.WINDOW_SIZE[0]/2 - self.title.get_width()/2,50))
+        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,50))
 
         #blit buttons
         for b in self.buttons:
@@ -323,7 +323,7 @@ class Option_Menu(Game_State):
         self.button_rects = {}
         for b in self.buttons:
             self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
-            self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
+            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
     def update_options(self):
@@ -351,7 +351,7 @@ class Gameplay(Game_State):
 
     def blit_fps(self):
         fps_string = str(int(self.game.clock.get_fps()))
-        self.game.screen.blit(self.game.game_objects.font.render((30,12),'fps ' + fps_string),(self.game.WINDOW_SIZE[0]-40,20))
+        self.game.screen.blit(self.game.game_objects.font.render((30,12),'fps ' + fps_string),(self.game.window_size[0]-40,20))
 
     def handle_events(self, input):
         self.game.game_objects.player.currentstate.handle_movement(input)#move around
@@ -414,10 +414,10 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         #fill game.screen
         super().render()
         self.game.screen.fill((50,50,50),special_flags=pygame.BLEND_RGB_ADD)
-        self.game.screen.blit(self.bg, (self.game.WINDOW_SIZE[0]/2 - self.bg.get_width()/2,100))
+        self.game.screen.blit(self.bg, (self.game.window_size[0]/2 - self.bg.get_width()/2,100))
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.WINDOW_SIZE[0]/2 - self.title.get_width()/2,110))
+        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,110))
 
         #blit buttons
         for b in self.buttons:
@@ -449,7 +449,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             text = (self.game.game_objects.font.render(text = b))
             text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((self.game.WINDOW_SIZE[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
+            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
             y_pos += 20
 
     def change_state(self):
@@ -513,7 +513,7 @@ class Slow_motion_gameplay(Gameplay):
         self.meter = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites.sprite_dict['meter'][0].copy()
         self.width = self.meter.get_width()
 
-        self.pos = [self.game.WINDOW_SIZE[0]*0.5 - self.width*0.5,3]
+        self.pos = [self.game.window_size[0]*0.5 - self.width*0.5,3]
         self.rate =self.meter.get_width()/self.duration
 
     def update(self):
@@ -585,7 +585,7 @@ class Fadein(Gameplay):
         self.count = 0
         self.fade_length = 20
 
-        self.fade_surface = pygame.Surface(self.game.WINDOW_SIZE, pygame.SRCALPHA, 32).convert_alpha()
+        self.fade_surface = pygame.Surface(self.game.window_size, pygame.SRCALPHA, 32).convert_alpha()
         self.fade_surface.set_alpha(255)
         self.fade_surface.fill((0,0,0))
 
@@ -643,15 +643,15 @@ class Conversation(Gameplay):
         self.game.game_objects.player.reset_movement()
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
-        self.text_WINDOW_SIZE = (352, 96)
-        self.blit_pos = [int((self.game.WINDOW_SIZE[0]-self.text_WINDOW_SIZE[0])*0.5),60]
+        self.text_window_size = (352, 96)
+        self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),60]
         self.clean_slate()
 
         self.conv = self.npc.dialogue.get_conversation()
 
     def clean_slate(self):
         self.letter_frame = 0
-        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_WINDOW_SIZE)
+        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
         self.text_window.blit(self.npc.portrait,(0,10))
 
     def update(self):
@@ -742,7 +742,7 @@ class New_ability(Gameplay):#when player obtaines a new ability
         self.img = self.game.game_objects.player.sprites.sprite_dict[ability][0].copy()
         self.game.game_objects.player.reset_movement()
 
-        self.surface = pygame.Surface((int(self.game.WINDOW_SIZE[0]), int(self.game.WINDOW_SIZE[1])), pygame.SRCALPHA, 32).convert_alpha()
+        self.surface = pygame.Surface((int(self.game.window_size[0]), int(self.game.window_size[1])), pygame.SRCALPHA, 32).convert_alpha()
         self.surface.fill((0,0,0))
 
         self.fade = 0

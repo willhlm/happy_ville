@@ -27,7 +27,7 @@ class Wind(pygame.sprite.Sprite):
     def __init__(self,weather):
         super().__init__()
         self.weather = weather
-        self.image = pygame.Surface([weather.game_objects.game.WINDOW_SIZE[0],weather.game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
+        self.image = pygame.Surface([weather.game_objects.game.window_size[0],weather.game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.rect = self.image.get_rect()
         self.velocity = [0,0]
         self.lifetime = 300
@@ -59,10 +59,10 @@ class Fog(pygame.sprite.Sprite):
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
         super().__init__()
-        self.image = pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32).convert_alpha()
+        self.image = pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.image.fill((255,255,255,255))
         self.rect = self.image.get_rect()
-        self.rect.center = [game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]]
+        self.rect.center = [game_objects.game.window_size[0],game_objects.game.window_size[1]]
         self.count = 0
         self.fade_length = 20
         self.image.set_alpha(int(255/self.fade_length))
@@ -82,8 +82,8 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
     def __init__(self,game_objects, parallax):
         super().__init__([0,0],game_objects)
         self.parallax = parallax
-        self.width = self.game_objects.game.WINDOW_SIZE[0] + 0.6*self.game_objects.game.WINDOW_SIZE[0]
-        self.height = self.game_objects.game.WINDOW_SIZE[1] + 0.6*self.game_objects.game.WINDOW_SIZE[1]
+        self.width = self.game_objects.game.window_size[0] + 0.6*self.game_objects.game.window_size[0]
+        self.height = self.game_objects.game.window_size[1] + 0.6*self.game_objects.game.window_size[1]
         self.velocity = [0,0]
 
     def update(self):
