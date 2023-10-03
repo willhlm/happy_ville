@@ -59,6 +59,7 @@
  <tile id="14">
   <properties>
    <property name="direction" value=""/>
+   <property name="offset" value=""/>
   </properties>
  </tile>
  <tile id="15">
@@ -89,7 +90,7 @@
  </tile>
  <tile id="23">
   <properties>
-   <property name="colour" type="color" value=""/>
+   <property name="colour" value=""/>
   </properties>
  </tile>
  <tile id="24">

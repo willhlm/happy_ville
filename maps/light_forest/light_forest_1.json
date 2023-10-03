@@ -1088,7 +1088,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":7328,
+                         "x":7440,
                          "y":800
                         }, 
                         {
@@ -1106,7 +1106,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":7408,
+                         "x":7504,
                          "y":720
                         }, 
                         {
@@ -1224,12 +1224,17 @@
                                  "name":"direction",
                                  "type":"string",
                                  "value":"right"
+                                }, 
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"5"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":7488,
+                         "x":7456,
                          "y":928
                         }, 
                         {
@@ -1956,7 +1961,7 @@
          "y":0
         }],
  "nextlayerid":101,
- "nextobjectid":691,
+ "nextobjectid":693,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

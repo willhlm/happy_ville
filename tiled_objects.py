@@ -245,7 +245,7 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
-        if self.alpha < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1] > self.game_objects.game.WINDOW_SIZE[1]+50:
+        if self.alpha < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
             self.resetting()
 
     def reset(self):

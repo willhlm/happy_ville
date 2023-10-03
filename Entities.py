@@ -1141,14 +1141,13 @@ class Rhoutta_encounter(Boss):
 
 #stuff
 class Camera_Stop(Staticentity):
-    def __init__(self,game_objects, size,pos,dir):
+    def __init__(self, game_objects, size, pos, dir, offset):
         super().__init__(pos,pygame.Surface(size))
         self.game_objects = game_objects
         self.hitbox = self.rect.inflate(0,0)
         self.size = size
-
-        self.currentstate = states_camerastop.Idle(self)
-        self.currentstate.enter_state('Idle_'+dir)
+        self.offset = int(offset)#number of tiles in the "negative direction" in which the stop should apply
+        self.currentstate = getattr(states_camerastop, 'Idle_'+dir)(self)
 
     def update(self):
         self.currentstate.update()
@@ -1170,7 +1169,7 @@ class Spawner(Staticentity):#an entity spawner
 
 class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. caves. loaded in maploader
     def __init__(self, game_objects, colour = (10,10,10,200)):
-        super().__init__([0,0], pygame.Surface((int(game_objects.game.WINDOW_SIZE[0]), int(game_objects.game.WINDOW_SIZE[1]))))
+        super().__init__([0,0], pygame.Surface((int(game_objects.game.window_size[0]), int(game_objects.game.window_size[1]))))
         self.game_objects = game_objects
         self.colour = colour
 
@@ -1250,7 +1249,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
         self.game_objects = entity.game_objects
         self.image = pygame.Surface((400,400), pygame.SRCALPHA, 32).convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.center = [entity.game_objects.game.WINDOW_SIZE[0]*0.5,entity.game_objects.game.WINDOW_SIZE[0]*0.5-100]
+        self.rect.center = [entity.game_objects.game.window_size[0]*0.5,entity.game_objects.game.window_size[0]*0.5-100]
         self.image.fill((0,0,0))
 
         dir = {'left':[self.image.get_width()*0.25,150],'up':[self.image.get_width()*0.5,50],'right':[self.image.get_width()*0.75,150],'down':[self.image.get_width()*0.5,300]}
@@ -1289,7 +1288,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
-        super().__init__([0,0], pygame.Surface([game_objects.game.WINDOW_SIZE[0],game_objects.game.WINDOW_SIZE[1]], pygame.SRCALPHA, 32))
+        super().__init__([0,0], pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32))
         self.game_objects = game_objects
         self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
         self.original_colour = self.colour.copy()
@@ -2240,7 +2239,7 @@ class Health_bar(Animatedentity):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.width = self.rect[2]
-        self.rect.topleft = [self.game_objects.game.WINDOW_SIZE[0]*0.5 - self.width*0.5,3]
+        self.rect.topleft = [self.game_objects.game.window_size[0]*0.5 - self.width*0.5,3]
 
     def resize(self):#in principle, should just be called when boss take dmg
         width = max(self.width * (self.entity.health/self.max_health),0)
@@ -2292,13 +2291,18 @@ class Path_col(Interactable):
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
 
-        self.orientation = size[1] > size[0]#true is vertical, false is horizontal
-
     def update(self):
         self.group_distance()
 
     def player_collision(self):
-        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn, orientation = self.orientation)
+        if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction
+            self.game_objects.player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
+            self.game_objects.player.currentstate.walk()
+        else:#vertical travelling
+            self.game_objects.player.reset_movement()
+            self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
+
+        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
         self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
@@ -2315,6 +2319,8 @@ class Path_inter(Interactable):
         self.group_distance()
 
     def interact(self):
+        self.game_objects.player.reset_movement()
+        self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
         self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
 
 class Shade_trigger(Interactable):
@@ -3153,7 +3159,7 @@ class Wall_timer(Timer):
         self.active = False
 
     def handle_input(self,input):
-        return
+        #return
         if not self.active: return
         if input=='a':#pressed jump
             self.entity.velocity[0] = self.entity.dir[0]*10

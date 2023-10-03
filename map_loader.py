@@ -2,8 +2,8 @@ import pygame, csv, math
 import Entities, Read_files, weather, tiled_objects
 import constants as C
 
-from PIL import Image, ImageFilter#for blurring
-import numpy as np
+#from PIL import Image, ImageFilter#for blurring
+#import numpy as np#for blurring
 
 class Level():
     def __init__(self, game_objects):
@@ -215,10 +215,13 @@ class Level():
                 self.game_objects.interactables.add(new_block)
 
             elif id == 14:#camera stop
+                camera_offset = 0
                 for property in properties:
                     if property['name'] == 'direction':
                         values = property['value']
-                new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values)
+                    if property['name'] == 'offset':
+                        camera_offset = property['value']
+                new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values, camera_offset)
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
             elif id == 15:#bg_particles

@@ -1620,7 +1620,7 @@
                         }, 
                         {
                          "gid":11,
-                         "height":64,
+                         "height":48,
                          "id":221,
                          "name":"",
                          "properties":[
@@ -1639,7 +1639,7 @@
                          "visible":true,
                          "width":192,
                          "x":2720,
-                         "y":1184
+                         "y":1152
                         }, 
                         {
                          "gid":1,
@@ -1656,7 +1656,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":384,
+                         "x":336,
                          "y":912
                         }, 
                         {
@@ -1679,7 +1679,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":464,
+                         "x":416,
                          "y":976
                         }, 
                         {
@@ -1833,12 +1833,17 @@
                                  "name":"direction",
                                  "type":"string",
                                  "value":"left"
+                                }, 
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"7"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":368,
+                         "x":400,
                          "y":976
                         }, 
                         {
@@ -1869,6 +1874,11 @@
                                  "name":"direction",
                                  "type":"string",
                                  "value":"bottom"
+                                }, 
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"0"
                                 }],
                          "rotation":0,
                          "type":"",
