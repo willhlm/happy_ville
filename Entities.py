@@ -13,9 +13,10 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.hitbox = self.rect.inflate(0,0)
 
 class Collision_block(Platform):
-    def __init__(self,pos,size, run_particle):
+    def __init__(self, pos, size, run_particle):
         super().__init__(pos,size)
         self.run_particles = {'dust':Dust_running_particles,'water':Water_running_particles,'grass':Grass_running_particles}[run_particle]
+        self.go_through = False
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -34,26 +35,28 @@ class Collision_block(Platform):
         entity.update_rect_y()
 
 class Collision_oneway_up(Platform):
-    def __init__(self,pos,size,run_particle = 'dust'):
+    def __init__(self,pos,size,run_particle = 'dust', go_through = True):
         super().__init__(pos,size)
         self.run_particles = {'dust':Dust_running_particles,'water':Water_running_particles,'grass':Grass_running_particles}[run_particle]
+        self.go_through = go_through
 
     def collide_x(self,entity):
         pass
 
     def collide_y(self,entity):
-        if entity.velocity[1] > 0:#going down
-            offset = entity.velocity[1] + 1
-            if entity.hitbox.bottom <= self.hitbox.top+offset:
-                entity.down_collision(self.hitbox.top)
-                entity.limit_y()
-                entity.running_particles = self.run_particles#save the particles to make
-                entity.update_rect_y()
+        if entity.velocity[1] < 0: return#going up
+        if entity.go_through: return
+        offset = entity.velocity[1] + 1
+        if entity.hitbox.bottom <= self.hitbox.top + offset:
+            entity.down_collision(self.hitbox.top)#the +1 is to make aila always slightly collising
+            entity.limit_y()
+            entity.running_particles = self.run_particles#save the particles to make
+            entity.update_rect_y()
         else:#going up
             pass
 
 class Collision_right_angle(Platform):
-    def __init__(self,pos,points,go_through=True):
+    def __init__(self,pos,points,go_through = True):
         self.define_values(pos, points)
         super().__init__([self.new_pos[0],self.new_pos[1]-self.size[1]],self.size)
         self.ratio = self.size[1]/self.size[0]
@@ -155,12 +158,13 @@ class Collision_right_angle(Platform):
         target = -rel_x*self.ratio + self.hitbox.bottom
 
         if other_side > 0 or benethe > 0:
-            if entity.hitbox.bottom > target:
+            if entity.hitbox.bottom> target:
                 entity.go_through = True
+                return
             else:
                 entity.go_through = False
 
-        elif entity.hitbox.bottom < target:
+        elif entity.hitbox.bottom< target:
                 entity.go_through = False
 
         if not entity.go_through:

@@ -16,12 +16,17 @@ class Collisions():
                 return True
         return False
 
-    def pass_through(self):#for ramps, called when pressing down
+    def pass_through(self):#called when pressing down
+        self.game_objects.player.hitbox.bottom += 1
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
+        platform = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms,Collisions.collided)
+
         if ramp:
             if not self.game_objects.player.go_through:#enter only once
                 self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
             self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through
+        elif platform:
+            self.game_objects.player.go_through = platform.go_through#a flag that determines if one can go through
 
     def interactables_collision(self):#interactables
         for interactable in self.game_objects.interactables.sprites():
