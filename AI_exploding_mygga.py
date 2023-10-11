@@ -173,4 +173,4 @@ def build_tree(entity):
     entity.AI.add_child(aggro)
     entity.AI.add_child(peace)
 
-    entity.AI.print_tree()
+    #entity.AI.print_tree()
