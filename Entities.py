@@ -155,21 +155,21 @@ class Collision_right_angle(Platform):
             entity.update_rect_y()
 
     def shift_up(self,rel_x,other_side,entity,benethe):
-        target = -rel_x*self.ratio + self.hitbox.bottom
+        self.target = -rel_x*self.ratio + self.hitbox.bottom
 
         if other_side > 0 or benethe > 0:
-            if entity.hitbox.bottom> target:
+            if entity.hitbox.bottom > self.target:
                 entity.go_through = True
                 return
             else:
                 entity.go_through = False
 
-        elif entity.hitbox.bottom< target:
+        elif entity.hitbox.bottom< self.target:
                 entity.go_through = False
 
         if not entity.go_through:
-            if entity.hitbox.bottom > target:
-                entity.down_collision(target)
+            if entity.hitbox.bottom > self.target:
+                entity.down_collision(self.target)
                 entity.update_rect_y()
 
 class Collision_dmg(Platform):
