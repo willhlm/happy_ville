@@ -25,9 +25,9 @@ class Collisions():
 
         if platform:
             if ramp:#if on ramp hitbox and pltoform
-                self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
+                if self.game_objects.player.hitbox.bottom < platform.hitbox.top:
+                    self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
             self.game_objects.player.go_through = platform.go_through#a flag that determines if one can go through
-
         if ramp:
             if ramp.target > self.game_objects.player.hitbox.bottom: return#if from above, do nothing
             elif not self.game_objects.player.go_through:#enter only once
