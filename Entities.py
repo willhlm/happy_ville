@@ -56,7 +56,7 @@ class Collision_oneway_up(Platform):
             pass
 
 class Collision_right_angle(Platform):
-    def __init__(self,pos,points,go_through = True):
+    def __init__(self, pos, points, go_through = True):
         self.define_values(pos, points)
         super().__init__([self.new_pos[0],self.new_pos[1]-self.size[1]],self.size)
         self.ratio = self.size[1]/self.size[0]

@@ -920,62 +920,14 @@
                         {
                          "gid":12,
                          "height":16,
-                         "id":731,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":160,
-                         "x":1200,
-                         "y":688
-                        }, 
-                        {
-                         "gid":12,
-                         "height":16,
                          "id":732,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":96,
-                         "x":1376,
-                         "y":736
-                        }, 
-                        {
-                         "height":0,
-                         "id":739,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":-128
-                                }, 
-                                {
-                                 "x":-272,
-                                 "y":0
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1200,
-                         "y":800
-                        }, 
-                        {
-                         "gid":12,
-                         "height":16,
-                         "id":740,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":208,
-                         "x":944,
-                         "y":720
+                         "x":1296,
+                         "y":768
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1017,7 +969,7 @@
          "y":0
         }],
  "nextlayerid":101,
- "nextobjectid":741,
+ "nextobjectid":742,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
