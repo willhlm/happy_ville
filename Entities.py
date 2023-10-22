@@ -35,7 +35,7 @@ class Collision_block(Platform):
         entity.update_rect_y()
 
 class Collision_oneway_up(Platform):
-    def __init__(self,pos,size,run_particle = 'dust', go_through = True):
+    def __init__(self, pos, size, run_particle = 'dust', go_through = True):
         super().__init__(pos,size)
         self.run_particles = {'dust':Dust_running_particles,'water':Water_running_particles,'grass':Grass_running_particles}[run_particle]
         self.go_through = go_through
@@ -48,7 +48,7 @@ class Collision_oneway_up(Platform):
         if entity.go_through: return
         offset = entity.velocity[1] + 1
         if entity.hitbox.bottom <= self.hitbox.top + offset:
-            entity.down_collision(self.hitbox.top)#the +1 is to make aila always slightly collising
+            entity.down_collision(self.hitbox.top)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
@@ -61,6 +61,7 @@ class Collision_right_angle(Platform):
         super().__init__([self.new_pos[0],self.new_pos[1]-self.size[1]],self.size)
         self.ratio = self.size[1]/self.size[0]
         self.go_through = go_through
+        self.target = 0
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
     #0 = tilting to the right, flatside down
@@ -127,50 +128,43 @@ class Collision_right_angle(Platform):
                 else:
                     self.orientation = 2
 
-    def collide(self,entity):
+    def collide(self,entity):#called through update
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
             benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.shift_up(rel_x,other_side,entity,benethe)
+            self.target = -rel_x*self.ratio + self.hitbox.bottom
+            self.shift_up(other_side,entity,benethe)
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
             benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.shift_up(rel_x,other_side,entity,benethe)
+            self.target = -rel_x*self.ratio + self.hitbox.bottom
+            self.shift_up(other_side,entity,benethe)
         elif self.orientation == 2:
             rel_x = self.hitbox.right - entity.hitbox.left
+            self.target = rel_x*self.ratio + self.hitbox.top
             self.shift_down(rel_x,entity)
         else:#orientation 3
             rel_x = entity.hitbox.right - self.hitbox.left
-            self.shift_down(rel_x,entity)
+            self.target = rel_x*self.ratio + self.hitbox.top
+            self.shift_down(entity)
 
-    def shift_down(self,rel_x,entity):
-        target = rel_x*self.ratio + self.hitbox.top
-
-        if entity.hitbox.top < target:
-            entity.top_collision(target)
-            entity.velocity[1] = 2 #need to have a value to avoid "dragin in air" while running
-            entity.velocity[0] = 0 #need to have a value to avoid "dragin in air" while running
+    def shift_down(self,entity):
+        if entity.hitbox.top < self.target:
+            entity.top_collision(self.target)
+            entity.velocity[1] = 2#need to have a value to avoid "dragin in air" while running
+            entity.velocity[0] = 0#need to have a value to avoid "dragin in air" while running
             entity.update_rect_y()
 
-    def shift_up(self,rel_x,other_side,entity,benethe):
-        self.target = -rel_x*self.ratio + self.hitbox.bottom
-
-        if other_side > 0 or benethe > 0:
-            if entity.hitbox.bottom > self.target:
-                entity.go_through = True
-                return
-            else:
-                entity.go_through = False
-
-        elif entity.hitbox.bottom< self.target:
-                entity.go_through = False
-
-        if not entity.go_through:
-            if entity.hitbox.bottom > self.target:
-                entity.down_collision(self.target)
-                entity.update_rect_y()
+    def shift_up(self,other_side,entity,benethe):
+        if self.target > entity.hitbox.bottom:
+            entity.go_through = False
+        elif other_side > 0 or benethe > 0:
+            entity.go_through = True
+        elif not entity.go_through:
+            entity.down_collision(self.target)
+            entity.update_rect_y()
 
 class Collision_dmg(Platform):
     def __init__(self,pos,size):

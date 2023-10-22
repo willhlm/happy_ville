@@ -108,7 +108,7 @@ class Title_Menu(Game_State):
             #new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'village_11','1')
+            self.game.game_objects.load_map(self,'light_forest_9','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -372,7 +372,7 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             elif input[-1] == 'down':
-                self.game.game_objects.collisions.pass_through()
+                self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
             else:
                 self.game.game_objects.player.currentstate.handle_press_input(input)

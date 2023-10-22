@@ -13,21 +13,27 @@ class Collisions():
     def check_ramp(self,point):#called from limit_y in platform entities
         for platform in self.game_objects.platforms_ramps:
             if platform.hitbox.collidepoint(point):
+                if platform.target > point[1]: return False#if the ramp target position is far way from the check point, then it is most likely just the hitbox
                 return True
         return False
 
-    def pass_through(self):#called when pressing down
+    def pass_through(self, entity):#called when pressing down
         self.game_objects.player.hitbox.bottom += 1
+        #pos = entity.hitbox.midbottom
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         platform = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms,Collisions.collided)
 
-        if ramp:
-            if ramp.target < self.game_objects.player.hitbox.bottom:
-                if not self.game_objects.player.go_through:#enter only once
-                    self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
-            self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through
-        elif platform:
+        if platform:
+            if ramp:#if on ramp hitbox and pltoform
+                self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
             self.game_objects.player.go_through = platform.go_through#a flag that determines if one can go through
+
+        if ramp:
+            if ramp.target > self.game_objects.player.hitbox.bottom: return#if from above, do nothing
+            elif not self.game_objects.player.go_through:#enter only once
+                self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
+            self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through
+
 
     def interactables_collision(self):#interactables
         for interactable in self.game_objects.interactables.sprites():
