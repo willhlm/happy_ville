@@ -2256,15 +2256,21 @@ class Health_bar(Animatedentity):
 
 #interactables
 class Interactable(Animatedentity):#interactables
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects, sfx = None):
         super().__init__(pos,game_objects)
         self.group = game_objects.interactables
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
+        if sfx: self.sfx = pygame.mixer.Sound('Audio/SFX/environment/' + sfx + '.mp3')
+        else: self.sfx = None # make more dynamic incase we want to use more than just mp3
+
 
     def update(self):
         super().update()
         self.group_distance()
+
+    def play_sfx(self):
+        self.game_objects.sound.play_sfx(self.sfx)
 
     def interact(self):#when player press T
         pass
@@ -2314,8 +2320,8 @@ class Path_col(Interactable):
         self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
-    def __init__(self, pos, game_objects, size, destination, spawn, image):
-        super().__init__(pos, game_objects)
+    def __init__(self, pos, game_objects, size, destination, spawn, image, sfx):
+        super().__init__(pos, game_objects, sfx)
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
@@ -2327,6 +2333,7 @@ class Path_inter(Interactable):
         self.group_distance()
 
     def interact(self):
+        if self.sfx: self.play_sfx()
         self.game_objects.player.reset_movement()
         self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
         self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)

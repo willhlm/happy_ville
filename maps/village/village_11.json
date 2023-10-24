@@ -1025,6 +1025,11 @@
                                  "value":"village_12"
                                 }, 
                                 {
+                                 "name":"sfx",
+                                 "type":"string",
+                                 "value":"door"
+                                }, 
+                                {
                                  "name":"spawn",
                                  "type":"string",
                                  "value":"1"
