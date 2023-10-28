@@ -923,13 +923,11 @@ class NPC(Character):
         self.group = game_objects.npcs
         self.pause_group = game_objects.entity_pause
         self.name = str(type(self).__name__)#the name of the class
-
-        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.load_sprites()
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],18,40)
         self.rect.bottom = self.hitbox.bottom   #match bottom of sprite to hitbox
-        self.portrait = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
 
         self.currentstate = states_NPC.Idle(self)
         self.dialogue = dialogue.Dialogue(self)#handles dialoage and what to say
@@ -938,6 +936,10 @@ class NPC(Character):
     def define_conversations(self):#should depend on NPC
         self.priority = ['reindeer','ape']#priority events to say
         self.event = ['aslat']#normal events to say
+
+    def load_sprites(self):
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/" + self.name + "/animation/")
+        self.portrait = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
 
     def update(self):
         super().update()
@@ -1001,6 +1003,14 @@ class MrBanks(NPC):#bank
     def buisness(self):#enters after conversation
         new_state = states.Facilities(self.game_objects.game,'Bank',self)
         new_state.enter_state()
+
+class byFane1(NPC):
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+
+    def load_sprites(self): #to load sprite that is not aligned with class name
+        self.sprites = Read_files.Sprites_Player("Sprites/Enteties/NPC/Sahkar/animation/")
+        self.portrait = pygame.image.load('Sprites/Enteties/NPC/Sahkar/potrait.png').convert_alpha()
 
 class Boss(Enemy):
     def __init__(self,pos,game_objects):
@@ -2246,15 +2256,21 @@ class Health_bar(Animatedentity):
 
 #interactables
 class Interactable(Animatedentity):#interactables
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects, sfx = None):
         super().__init__(pos,game_objects)
         self.group = game_objects.interactables
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
+        if sfx: self.sfx = pygame.mixer.Sound('Audio/SFX/environment/' + sfx + '.mp3')
+        else: self.sfx = None # make more dynamic incase we want to use more than just mp3
+
 
     def update(self):
         super().update()
         self.group_distance()
+
+    def play_sfx(self):
+        self.game_objects.sound.play_sfx(self.sfx)
 
     def interact(self):#when player press T
         pass
@@ -2304,8 +2320,8 @@ class Path_col(Interactable):
         self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
-    def __init__(self, pos, game_objects, size, destination, spawn, image):
-        super().__init__(pos, game_objects)
+    def __init__(self, pos, game_objects, size, destination, spawn, image, sfx):
+        super().__init__(pos, game_objects, sfx)
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
@@ -2317,6 +2333,7 @@ class Path_inter(Interactable):
         self.group_distance()
 
     def interact(self):
+        if self.sfx: self.play_sfx()
         self.game_objects.player.reset_movement()
         self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
         self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)

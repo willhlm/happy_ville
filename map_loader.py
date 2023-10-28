@@ -181,14 +181,19 @@ class Level():
                 self.game_objects.platforms.add(new_block)
 
             elif id == 9:
+                sfx = None
                 for property in properties:
                     if property['name'] == 'path_to':
                         destination = property['value']
-                    if property['name'] == 'spawn':
+                    elif property['name'] == 'spawn':
                         spawn = property['value']
-                    if property['name'] == 'image':
+                    elif property['name'] == 'image':
                         image = property['value']
-                new_path = Entities.Path_inter(object_position,self.game_objects,object_size,destination,spawn,image)
+                    elif property['name'] == 'sfx':
+                        sfx = property['value']
+
+
+                new_path = Entities.Path_inter(object_position,self.game_objects,object_size,destination,spawn,image,sfx)
                 self.game_objects.interactables.add(new_path)
 
             elif id == 10:

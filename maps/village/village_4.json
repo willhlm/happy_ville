@@ -431,7 +431,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"village_11"
+                                 "value":"village_111"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -765,7 +765,7 @@
          "y":0
         }],
  "nextlayerid":16,
- "nextobjectid":18,
+ "nextobjectid":19,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",

@@ -98,6 +98,9 @@ def load_sprites(path_to_folder):
     list_of_sprites.sort()
     return [pygame.image.load(file).convert_alpha() for file in list_of_sprites]
 
+def load_single_sfx(path):
+    return pygame.mixer.Sound(path)
+
 class Sounds():#read in SFX sounds, dorsn't have to be a class
     def __init__(self,path):
         super().__init__()
