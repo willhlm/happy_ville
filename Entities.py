@@ -144,7 +144,7 @@ class Collision_right_angle(Platform):
         elif self.orientation == 2:
             rel_x = self.hitbox.right - entity.hitbox.left
             self.target = rel_x*self.ratio + self.hitbox.top
-            self.shift_down(rel_x,entity)
+            self.shift_down(entity)
         else:#orientation 3
             rel_x = entity.hitbox.right - self.hitbox.left
             self.target = rel_x*self.ratio + self.hitbox.top
