@@ -8,13 +8,13 @@ class Weather():
         self.wind = Wind(self)
         self.currentstate = states_weather.Idle(self)
 
-    def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
+    def create_particles(self,type,parallax,group,number_particles = 50):#called from map loader
         for i in range(0,number_particles):
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
 
     def update(self):
-        self.currentstate.update()
+        self.currentstate.update()#bloew the wind from time to time
 
     def lightning(self):
         self.game_objects.cosmetics.add(Lightning(self.game_objects))
@@ -82,7 +82,7 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
     def __init__(self,game_objects, parallax):
         super().__init__([0,0],game_objects)
         self.parallax = parallax
-        self.width = self.game_objects.game.window_size[0] + 0.6*self.game_objects.game.window_size[0]
+        self.width = self.game_objects.game.window_size[0] + 100
         self.height = self.game_objects.game.window_size[1] + 0.6*self.game_objects.game.window_size[1]
         self.velocity = [0,0]
 
@@ -96,14 +96,14 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
         self.rect.topleft = self.true_pos.copy()
 
     def boundary(self):#continiouse falling
-        return
-        if self.rect.centerx < -100:
+        pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0], self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]]
+        if pos[0] < -100:
             self.true_pos[0] += self.width
-        elif self.rect.centerx > self.width:
+        elif pos[0] > self.width:
             self.true_pos[0] -= self.width
-        elif self.rect.centery > self.height:#if on the lower side of screen.
+        elif pos[1] > self.height:#if on the lower side of screen.
             self.true_pos[1] -= self.height
-        elif self.rect.centery < -100:#if on the higher side of screen.
+        elif pos[1] < -100:#if on the higher side of screen.
             self.true_pos[1] += self.height
 
 class Circles(Bound_entity):
@@ -238,7 +238,7 @@ class Weather_particles(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
         self.currentstate = states_weather_particles.Idle(self)
-        self.true_pos = [random.randint(0, int(self.width)),random.randint(-700, -50)]#starting position
+        self.true_pos = [random.uniform(0, int(self.width)),random.uniform(-700, -50)]#starting position
 
         self.velocity[1] = random.randint(1, 3)
         self.time = 0
@@ -246,6 +246,7 @@ class Weather_particles(Bound_entity):
 
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
         self.friction = [0.5,0]
+        self.size_scale = parallax.copy()
 
     def update(self):
         super().update()
@@ -261,13 +262,13 @@ class Weather_particles(Bound_entity):
 
     def set_color(self,new_colour):
         replace_color = (255,0,0)
-        size = [self.image.get_size()[0]*self.parallax[0],self.image.get_size()[1]*self.parallax[1]]
+        size = [self.image.get_size()[0]*self.size_scale[0],self.image.get_size()[1]*self.size_scale[1]]
         for state in self.sprites.sprite_dict.keys():
             for frame,image in enumerate(self.sprites.sprite_dict[state]):
                 img_copy = pygame.transform.scale(image,size)
                 arr = pygame.PixelArray(img_copy)#make it an pixel arrat since it has a replace color function
                 arr.replace(replace_color,new_colour)
-                self.sprites.sprite_dict[state][frame] =arr.make_surface()
+                self.sprites.sprite_dict[state][frame] = arr.make_surface()
                 arr.close()
 
 class Sakura(Weather_particles):
@@ -279,7 +280,7 @@ class Sakura(Weather_particles):
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
 
-        colours=[[255,192,203],[240,128,128],[255,182,193],[221,160,221],[219,112,147]]
+        colours=[(255,192,203),(240,128,128),(255,182,193),(221,160,221),(219,112,147)]
         colour=colours[random.randint(0, len(colours)-1)]
         self.set_color(colour)
 
@@ -317,20 +318,17 @@ class Snow(Weather_particles):
 class Rain(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
-        rand=random.randint(1,1)
         self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/rain/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
+        self.size_scale = [1,1]
 
-        colours=[[10,191,255],[152,245,255],[61,89,171],[100,149,237]]
+        colours=[(10,191,255),(152,245,255),(61,89,171),(100,149,237)]
         self.colour=colours[random.randint(0, len(colours)-1)]
         self.set_color(self.colour)
-        self.angle=math.acos(self.wind/6)
-        self.scale = 0.5
-        amp = random.randint(2, 4)
-        self.velocity = [amp*math.cos(self.angle),4]
+        self.velocity = [0,random.uniform(5, 10)]
         self.trans_prob = 0#the higher the number, the lwoer the probabillity for the leaf to flip. 0 is 0 %
 
     def speed(self):
-        pass
+        return -1#always drife backwards

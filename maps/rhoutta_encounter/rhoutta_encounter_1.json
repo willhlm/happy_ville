@@ -138,6 +138,35 @@
                  "width":350,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":35,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":1668,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Rain"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":624,
+                         "y":256
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg3",
          "opacity":1,
@@ -160,6 +189,35 @@
                  "type":"tilelayer",
                  "visible":true,
                  "width":350,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":34,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":1667,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Rain"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":736,
+                         "y":320
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
                  "x":0,
                  "y":0
                 }],
@@ -227,6 +285,12 @@
                          "height":64,
                          "id":1631,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -275,6 +339,12 @@
                          "height":48,
                          "id":1634,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -311,6 +381,12 @@
                          "height":16,
                          "id":1636,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -323,6 +399,12 @@
                          "height":112,
                          "id":1637,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -359,6 +441,12 @@
                          "height":16,
                          "id":1639,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -371,6 +459,12 @@
                          "height":32,
                          "id":1640,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -383,6 +477,12 @@
                          "height":32,
                          "id":1641,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -395,6 +495,12 @@
                          "height":32,
                          "id":1642,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -407,6 +513,12 @@
                          "height":16,
                          "id":1643,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -419,6 +531,12 @@
                          "height":64,
                          "id":1644,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -431,6 +549,12 @@
                          "height":176,
                          "id":1645,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -443,6 +567,12 @@
                          "height":64,
                          "id":1655,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -455,6 +585,12 @@
                          "height":16,
                          "id":1656,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -610,6 +746,36 @@
                          "width":16,
                          "x":4448,
                          "y":576
+                        }, 
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":1666,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Rain"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":912,
+                         "y":416
+                        }, 
+                        {
+                         "gid":22,
+                         "height":16,
+                         "id":1669,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":240,
+                         "x":1440,
+                         "y":528
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -688,8 +854,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":34,
- "nextobjectid":1665,
+ "nextlayerid":36,
+ "nextobjectid":1670,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

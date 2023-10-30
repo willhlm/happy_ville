@@ -281,6 +281,14 @@ class Level():
                 reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
                 self.game_objects.reflections.add(reflection)
 
+            elif id == 21:#timer platoform
+                types = 'dust'
+                for property in properties:
+                    if property['name'] == 'particles':
+                        types = property['value']
+                new_block = Entities.Collision_time(object_position,object_size,types,self.game_objects)
+                self.game_objects.platforms.add(new_block)
+
             elif id == 23:#shade trigger
                 for property in properties:
                     if property['name'] == 'colour':

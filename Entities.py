@@ -12,6 +12,12 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.true_pos = self.rect.topleft
         self.hitbox = self.rect.inflate(0,0)
 
+    def collide_x(self,entity):
+        pass
+
+    def collide_y(self,entity):
+        pass
+
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle):
         super().__init__(pos,size)
@@ -190,6 +196,37 @@ class Collision_dmg(Platform):
             entity.top_collision(self.hitbox.bottom)
             entity.velocity[1] = 10#knock back
         entity.take_dmg(self.dmg)
+        entity.update_rect_y()
+
+class Collision_time(Collision_block):#collision block that dissapears if aila stands on it
+    def __init__(self,pos,size,run_particle,game_objects):
+        super().__init__(pos,size,run_particle)
+        self.game_objects = game_objects
+        self.timers = []
+        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,60),'timer_appear':Platform_timer_2(self,60)}#these timers are activated when promt and a job is appeneded to self.timer.
+
+    def deactivate(self):
+        self.hitbox = [self.hitbox[0],self.hitbox[1],0,0]
+        self.timer_jobs['timer_appear'].activate()
+
+    def activate(self):
+        self.hitbox = self.rect.inflate(0,0)
+
+    def update(self):
+        self.update_timers()
+
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
+
+    def collide_y(self,entity):
+        if entity.velocity[1] >= 0:#going down
+            self.timer_jobs['timer_disappear'].activate()        
+            entity.down_collision(self.hitbox.top)
+            entity.limit_y()
+            entity.running_particles = self.run_particles#save the particles to make
+        else:#going up
+            entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
@@ -3088,7 +3125,7 @@ class Timer():
         self.entity.timers.remove(self)
 
     def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt*self.entity.slow_motion
+        self.lifetime -= self.entity.game_objects.game.dt*self.entity.game_objects.player.slow_motion
         if self.lifetime < 0:
             self.deactivate()
 
@@ -3104,6 +3141,22 @@ class Invincibility_timer(Timer):
     def deactivate(self):
         super().deactivate()
         self.entity.invincibile = False
+
+class Platform_timer_1(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def deactivate(self):#when timer runs out
+        super().deactivate()
+        self.entity.deactivate()
+
+class Platform_timer_2(Timer):
+    def __init__(self,entity,duration):
+        super().__init__(entity,duration)
+
+    def deactivate(self):#when timer runs out
+        super().deactivate()
+        self.entity.activate()
 
 class Sword_timer(Timer):
     def __init__(self,entity,duration):
