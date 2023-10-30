@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import Read_files, states, particles, animation, sound, dialogue
+import Read_files, particles, animation, sound, dialogue, states
 import states_gate, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
@@ -163,6 +163,7 @@ class Collision_right_angle(Platform):
         elif other_side > 0 or benethe > 0:
             entity.go_through = True
         elif not entity.go_through:
+            entity.velocity[1] = C.max_vel[1]#make aila sticj to ground to avoid falling animation
             entity.down_collision(self.target)
             entity.update_rect_y()
 
@@ -313,10 +314,10 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
-    def limit_y(self):#limits the velocity on ground. But not on ramps
-        point = [self.hitbox.midbottom[0]+5*self.dir[0],self.hitbox.midbottom[1]+10]#infront flightly below
-        if not self.game_objects.collisions.check_ramp(point):#there is not ramp in front
-            self.velocity[1] = 1/self.game_objects.game.dt
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps
+#        point = [self.hitbox.midbottom[0]+5*self.dir[0],self.hitbox.midbottom[1]+10]#infront flightly below
+    #    if not self.game_objects.collisions.check_ramp(point):#there is not ramp in front
+        self.velocity[1] = 1/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -885,7 +886,7 @@ class Skeleton_archer(Enemy):#change design
         pass
 
 class Cultist_rogue(Enemy):
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects,gameplay_state=None):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_rogue/')
         self.image = self.sprites.sprite_dict['idle'][0]
@@ -895,9 +896,14 @@ class Cultist_rogue(Enemy):
         self.attack_distance = [80,10]
         self.attack = Sword
         self.currentstate = states_rogue_cultist.Idle(self)
+        self.gameplay_state = gameplay_state
+
+    def dead(self):#called when death animation is finished
+        super().dead()
+        if self.gameplay_state: self.gameplay_state.incrase_kill()
 
 class Cultist_warrior(Enemy):
-    def __init__(self,pos,game_objects):
+    def __init__(self,pos,game_objects,gameplay_state=None):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_warrior/')
         self.image = self.sprites.sprite_dict['idle'][0]
@@ -906,6 +912,11 @@ class Cultist_warrior(Enemy):
         self.health = 10
         self.attack_distance = [80,10]
         self.attack = Sword
+        self.gameplay_state = gameplay_state
+
+    def dead(self):#called when death animation is finished
+        super().dead()
+        if self.gameplay_state: self.gameplay_state.incrase_kill()
 
 class John(Enemy):
     def __init__(self,pos,game_objects):
@@ -1004,6 +1015,10 @@ class MrBanks(NPC):#bank
         new_state = states.Facilities(self.game_objects.game,'Bank',self)
         new_state.enter_state()
 
+class MrWood(NPC):#lumber jack
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+
 class byFane1(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1018,7 +1033,7 @@ class Boss(Enemy):
         self.health = 10
         self.health_bar = Health_bar(self)
 
-    def dead(self):
+    def dead(self):#called when death animation is finished
         self.loots()
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
@@ -2264,7 +2279,6 @@ class Interactable(Animatedentity):#interactables
         if sfx: self.sfx = pygame.mixer.Sound('Audio/SFX/environment/' + sfx + '.mp3')
         else: self.sfx = None # make more dynamic incase we want to use more than just mp3
 
-
     def update(self):
         super().update()
         self.group_distance()
@@ -2381,17 +2395,10 @@ class Cutscene_trigger(Interactable):
         #self.group_distance()
 
     def player_collision(self):
-        if self.event not in self.game_objects.world_state.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
-            self.specific()
-            new_game_state = states.Cutscenes(self.game_objects.game,self.event)
-            new_game_state.enter_state()
-
-    def specific(self):
-        if self.event == 'Cultist_encounter':
-            new_game_state = states.Cultist_encounter_gameplay(self.game_objects.game)
-            new_game_state.enter_state()
-        elif self.event == 'test':
-            pass
+#        if self.event not in self.game_objects.world_state.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
+        new_game_state = getattr(states, self.event)(self.game_objects.game)
+        new_game_state.enter_state()
+        self.kill()
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
@@ -2510,7 +2517,6 @@ class Chest(Interactable):
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                #obj = self.game_objects.object_pool.spawn(key)
                 obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop, self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
@@ -2857,7 +2863,7 @@ class Lever(Interactable):
             self.gate.currentstate.handle_input('Transform')
 
 class Gate(Interactable):
-    def __init__(self, pos, game_objects, ID):
+    def __init__(self, pos, game_objects, ID = 0):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/gate/')
         self.image = self.sprites.sprite_dict['idle'][0]

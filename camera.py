@@ -22,7 +22,7 @@ class Camera():
     def camera_shake(self,amp = 3, duration = 100):
         self.game_objects.camera = Camera_shake(self.game_objects,self.true_scroll,amp,duration)
 
-    def reset_player_center(self):#called when loading a map
+    def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
         for stop in self.game_objects.camera_blocks:#apply cameras stopp
             stop.update()
@@ -98,12 +98,16 @@ class Cultist_encounter(Cutscenes):
         self.center[0] = min(500,self.center[0])
         super().update()
 
-class New_game(Cutscenes):
+class New_game(Cutscenes):#initialised in New_game state
     def __init__(self, game_objects, scroll):
         super().__init__(game_objects, scroll)
         self.center[1] = 1000
+        self.timer = 5000
 
     def update(self):
+        self.timer -= self.game_objects.game.dt
+        if self.timer < 0:
+            self.exit_state()
         self.center[1] -= 2*self.game_objects.game.dt
         self.center[1] = max(self.game_objects.map.PLAYER_CENTER[1],self.center[1])
         super().update()

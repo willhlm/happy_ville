@@ -991,6 +991,24 @@
                          "width":944,
                          "x":2544,
                          "y":960
+                        }, 
+                        {
+                         "gid":2,
+                         "height":16,
+                         "id":784,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"MrWood"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2160,
+                         "y":800
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1055,7 +1073,7 @@
          "y":0
         }],
  "nextlayerid":101,
- "nextobjectid":784,
+ "nextobjectid":785,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

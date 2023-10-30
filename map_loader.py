@@ -1,5 +1,5 @@
 import pygame, csv, math
-import Entities, Read_files, weather, tiled_objects
+import Entities, Read_files, weather, tiled_objects, states
 import constants as C
 
 #from PIL import Image, ImageFilter#for blurring
@@ -23,7 +23,7 @@ class Level():
         self.load_map_data()#load the map data
         self.init_state_file()#need to be before load groups
         self.load_groups()
-        self.append_light_effet()#append any light effects depending on map
+        self.map_specifics()#append any light effects depending on map
         self.orginise_references()
 
     def check_pause_sound(self):
@@ -35,7 +35,8 @@ class Level():
         if not self.game_objects.world_state.state.get(self.level_name, False):#if it is the first time loading the map
             self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
 
-    def append_light_effet(self):
+    def map_specifics(self):
+        self.game_objects.camera.reset_player_center()
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
         if level_name == 'light_forest_cave':
             self.screen = Entities.Dark_screen(self.game_objects)#makes the screen dark
@@ -45,6 +46,11 @@ class Level():
             self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
         elif level_name == 'dark_forest':
             self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
+        elif self.level_name == 'rhoutta_encounter_1':#if it is a new game file
+            if self.spawn != '1': return
+            new_state = states.New_game(self.game_objects.game)
+            new_state.enter_state()
+            self.game_objects.camera.true_scroll = [self.game_objects.player.true_pos[0] - self.game_objects.camera.center[0], self.game_objects.player.true_pos[1] - self.game_objects.camera.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
@@ -150,7 +156,6 @@ class Level():
                 new_npc = getattr(Entities, npc_name)
                 self.game_objects.npcs.add(new_npc(object_position,self.game_objects))
 
-
             elif id == 2:#enemies
                 for property in properties:
                     if property['name'] == 'class':
@@ -191,7 +196,6 @@ class Level():
                         image = property['value']
                     elif property['name'] == 'sfx':
                         sfx = property['value']
-
 
                 new_path = Entities.Path_inter(object_position,self.game_objects,object_size,destination,spawn,image,sfx)
                 self.game_objects.interactables.add(new_path)
@@ -457,7 +461,7 @@ class Level():
                     self.game_objects.all_bgs.add(new_rock)
 
     @staticmethod
-    def blur_value(parallax):#called from load_laters and load_back/front_objects
+    def blur_value(parallax):#called from load_layers and load_back/front_objects
         return round(1/parallax[0])
 
     def load_layers(self,data, parallax, offset):
