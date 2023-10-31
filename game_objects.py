@@ -66,7 +66,6 @@ class Game_Objects():
         self.clean_groups()
         t1_start = perf_counter()
         self.map.load_map(map_name,spawn)
-        self.camera.reset_player_center()
         t1_stop = perf_counter()
         print(t1_stop-t1_start)
 

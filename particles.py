@@ -80,8 +80,8 @@ class Spark(Particles):#a general one
         self.fade_scale = 10
 
     def update(self):
-        self.update_spark()
         super().update()
+        self.update_spark()
 
     def update_spark(self):
         self.image = self.surface.copy()

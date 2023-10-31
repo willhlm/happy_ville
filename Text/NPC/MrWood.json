@@ -1,0 +1,11 @@
+{
+
+  "state_1" : {
+      "0" : "You want some Wood little girl?",
+      "1" : "Here, lick this!"
+  },
+    "state_2" : {
+        "0" : "yolo.",
+        "1" : "Wood please"
+    }
+}
