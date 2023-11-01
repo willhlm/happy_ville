@@ -1,5 +1,5 @@
 import pygame, csv, math
-import Entities, Read_files, weather, tiled_objects, states
+import Entities, Read_files, weather, entities_parallax, states, platforms
 import constants as C
 
 #from PIL import Image, ImageFilter#for blurring
@@ -93,8 +93,8 @@ class Level():
 
     def load_groups(self):
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
-        load_front_objects = {'light_forest_front':self.load_light_forest_objects,'light_forest_cave_front':self.load_light_forest_cave_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
-        load_back_objects = {'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
+        load_front_objects = {'rhoutta_encounter_front':self.load_rhoutta_encounter_objects,'light_forest_front':self.load_light_forest_objects,'light_forest_cave_front':self.load_light_forest_cave_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
+        load_back_objects = {'rhoutta_encounter_back':self.load_rhoutta_encounter_objects,'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
         self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer or other information
 
         for group in self.map_data['groups']:
@@ -135,7 +135,7 @@ class Level():
                     points_list.append((point['x'],point['y']))
 
                 fall_through = obj.get('properties',True)
-                new_block = Entities.Collision_right_angle(object_position, points_list,fall_through)
+                new_block = platforms.Collision_right_angle(object_position, points_list,fall_through)
                 self.game_objects.platforms_ramps.add(new_block)
                 continue
 
@@ -178,11 +178,11 @@ class Level():
                 for property in properties:
                     if property['name'] == 'particles':
                         types = property['value']
-                new_block = Entities.Collision_block(object_position,object_size,types)
+                new_block = platforms.Collision_block(object_position,object_size,types)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 8:#spike collision blocks
-                new_block = Entities.Collision_dmg(object_position,object_size)
+                new_block = platforms.Collision_dmg(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 9:
@@ -213,7 +213,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'particles':
                         types = property['value']
-                new_block = Entities.Collision_oneway_up(object_position,object_size,types)
+                new_block = platforms.Collision_oneway_up(object_position,object_size,types)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 13:#breakable collision block
@@ -233,7 +233,7 @@ class Level():
                 new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values, camera_offset)
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
-            elif id == 15:#bg_particles
+            elif id == 15:#bg_particles -> circles, rain etc
                 for property in properties:
                     if property['name'] == 'particle':
                         particle_type = property['value']
@@ -257,9 +257,9 @@ class Level():
             #elif id == 17:#leaves
             #    information = [object_position,object_size]
             #    if self.layer == 'fg':
-            #        tiled_objects.create_leaves(information,parallax,self.game_objects.all_fgs)
+            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_fgs)
             #    else:
-            #        tiled_objects.create_leaves(information,parallax,self.game_objects.all_bgs)
+            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_bgs)
 
             elif id == 19:#trigger
                 values={}
@@ -286,7 +286,8 @@ class Level():
                 for property in properties:
                     if property['name'] == 'particles':
                         types = property['value']
-                new_block = Entities.Collision_time(object_position,object_size,types,self.game_objects)
+                return
+                new_block = platforms.Collision_time(self.game_objects,object_position,object_size,types)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 23:#shade trigger
@@ -415,14 +416,14 @@ class Level():
             id = obj['gid'] - self.map_data['objects_firstgid']
 
             if id == 2:#light forest tree tree
-                new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                new_tree = entities_parallax.Light_forest_tree1(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
             elif id == 3:#light forest tree tree
-                new_tree = tiled_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
+                new_tree = entities_parallax.Light_forest_tree2(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
@@ -441,32 +442,49 @@ class Level():
                     new_grass = Entities.Cave_grass(object_position, self.game_objects)
                     self.game_objects.interactables.add(new_grass)
                 else:#if in parallax layers
-                    new_grass = tiled_objects.Cave_grass(object_position, self.game_objects, parallax)
+                    new_grass = entities_parallax.Cave_grass(object_position, self.game_objects, parallax)
                     if self.layer == 'fg':
                         self.game_objects.all_fgs.add(new_grass)
                     else:
                         self.game_objects.all_bgs.add(new_grass)
 
             elif id == 1:#ljusmaksar
-                new_grass = tiled_objects.Ljusmaskar(object_position, self.game_objects, parallax)
+                new_grass = entities_parallax.Ljusmaskar(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_grass)
                 else:
                     self.game_objects.all_bgs.add(new_grass)
 
             elif id == 2:#droplet
-                new_drop = tiled_objects.Droplet_source(object_position, self.game_objects, parallax)
+                new_drop = entities_parallax.Droplet_source(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_drop)
                 else:
                     self.game_objects.all_bgs.add(new_drop)
 
             elif id == 3:#falling rock trap
-                new_rock = tiled_objects.Falling_rock_source(object_position, self.game_objects, parallax)
+                new_rock = entities_parallax.Falling_rock_source(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_rock)
                 else:
                     self.game_objects.all_bgs.add(new_rock)
+
+    def load_rhoutta_encounter_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['objects_firstgid']
+
+            if id == 2:#time collision
+                types = 'dust'
+                for property in properties:
+                    if property['name'] == 'particles':
+                        types = property['value']
+
+                new_platofrm = platforms.Rhoutta_encounter_1( self.game_objects, object_position,object_size,types)
+                self.game_objects.platforms.add(new_platofrm)
 
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects

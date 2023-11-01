@@ -35,8 +35,8 @@ class Game_Objects():
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group(self)#groups.Shader_group()
         self.npcs = groups.Group(self)#groups.Shader_group()
-        self.platforms = groups.Group(self)
-        self.platforms_ramps = groups.Group(self)
+        self.platforms = groups.Specialdraw_Group()
+        self.platforms_ramps = groups.Specialdraw_Group()
         self.all_bgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
         self.all_fgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
         self.bg_interact = groups.Group(self)#small grass stuff so that interactables blends with BG
@@ -146,7 +146,7 @@ class Game_Objects():
         self.fprojectiles.draw(self.game.screen)
         self.eprojectiles.draw(self.game.screen)
         self.loot.draw(self.game.screen)
-        #self.entity_pause.draw(self.game.screen)
+        self.platforms.draw()
         self.cosmetics.draw(self.game.screen)
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw(self.game.screen)

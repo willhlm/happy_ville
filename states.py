@@ -105,7 +105,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -805,7 +805,7 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
     def exit_state(self):
         for camera_stop in self.camera_stops:
             self.game.game_objects.camera_blocks.add(camera_stop)
-        
+
         self.game.game_objects.camera.exit_state()
         super().exit_state()
 
