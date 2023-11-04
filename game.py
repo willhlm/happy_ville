@@ -13,7 +13,7 @@ class Game():
         scale = self.scale_size()#get the scale according to your display size
         window_size_scaled = tuple([int(x*scale) for x in self.window_size])
         self.screen = pygame.Surface(self.window_size)#do not add .convert_alpha(), should be initiad before display, for some reason
-        flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF #| pygame.FULLSCREEN#pygame.SCALED | pygame.FULLSCREEN
+        flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF #| pygame.FULLSCREEN #|pygame.SCALED
         self.display = pygame.display.set_mode(window_size_scaled, flags, vsync = 1)
         self.lights_engine = pygame_light2d.LightingEngine(screen_res = window_size_scaled, native_res=self.window_size, lightmap_res=(int(self.window_size[0]/2.5), int(self.window_size[1]/2.5)))#need to be after display
 

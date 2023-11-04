@@ -13,6 +13,7 @@ import UI
 import save_load
 import groups
 import object_pool
+import controller
 
 from time import perf_counter
 
@@ -20,7 +21,7 @@ class Game_Objects():
     def __init__(self, game):
         self.game = game
         self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
-        self.controller = Read_files.Controller('ps4')
+        self.controller = controller.Controller('playsation')
         self.sound = sound.Sound()
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
@@ -56,7 +57,7 @@ class Game_Objects():
         self.players.add(self.player)
 
     def load_map(self, previous_state, map_name, spawn = '1',fade = True):#fade out before loading the map
-        if fade:
+        if fade:#for cutscenes
             new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn,fade)#it will call load_map2 after loading
             new_game_state.enter_state()
         else:

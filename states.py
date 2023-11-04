@@ -105,7 +105,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'Rhoutta_encounter_3','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -380,7 +380,7 @@ class Gameplay(Game_State):
 
     def handle_input(self,input):
         if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game,duration=11)
+            new_game_state = Pause_gameplay(self.game,duration = 11)
             new_game_state.enter_state()
         elif input == 'death':#normal death
             self.game.game_objects.player.death()
@@ -665,7 +665,7 @@ class Conversation(Gameplay):
         super().exit_state()
         self.npc.buisness()
 
-class Select_menu(Gameplay):#map, inventory, omamori, journal
+class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
     def __init__(self, game):
         super().__init__(game)
         self.state = getattr(UI_select_menu, 'Inventory')(self)#should it alway go to inventory be default?
@@ -756,7 +756,7 @@ class New_ability(Gameplay):#when player obtaines a new ability
 #cutscenes
 class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
     def __init__(self,game):
-        self.game = game
+        super().__init__(game)
         self.timer = 0
         self.pos = [-self.game.window_size[1],self.game.window_size[1]]
         self.const = 0.8#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
@@ -810,74 +810,34 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
         super().exit_state()
 
 class Title_screen(Cutscene_engine):#screen played after waking up from boss dream
-    def __init__(self,objects):
-        super().__init__(objects)
-        self.title_name = self.parent_class.game.game_objects.font.render(text = 'Happy Ville')
-        self.text1 = self.parent_class.game.game_objects.font.render(text = 'A game by Hjortron games')
-        C.acceleration = [0.3,0.51]#restrict the speed
-        self.stage = 0
-        self.press = False
+    def __init__(self,game):
+        super().__init__(game)
+        self.title_name = self.game.game_objects.font.render(text = 'Happy Ville')
+        self.text1 = self.game.game_objects.font.render(text = 'A game by Hjortron games')
+        self.game.game_objects.player.reset_movement()
+        self.game.game_objects.cosmetics.empty()
 
     def update(self):
-        self.timer+=self.parent_class.game.dt
+        super().update()
+        self.timer += self.game.dt
 
     def render(self):
-        if self.stage == 0:#running slowly and blit title, Hjortron games etc.
-            if self.timer>400:
-                self.parent_class.game.screen.blit(self.title_name,(190,150))
+        super().render()
+        if self.timer>400:
+            self.game.screen.blit(self.title_name,(190,150))
 
-            if self.timer>1000:
-                self.parent_class.game.screen.blit(self.text1,(190,170))
+        if self.timer>800:
+            self.game.screen.blit(self.text1,(190,170))
 
-            if self.timer >1200:
-                self.stage += 1
-                self.init_stage1()
-
-        elif self.stage == 1:#camera moves up and aila runs away
-            if self.timer == 1300:
-                self.parent_class.game.game_objects.player.acceleration[0] = 0
-                self.parent_class.game.game_objects.player.enter_idle()
-
-            if self.timer > 1500:
-                self.parent_class.game.screen.blit(self.title_name,(190,150))
-
-
-            if self.timer > 1550:
-                if self.press:
-                    self.stage += 1
-                    self.parent_class.game.game_objects.camera.exit_state()
-                    self.parent_class.game.game_objects.load_map('village_1')
-                    self.timer = 0
-                    self.pos = [-self.parent_class.game.window_size[1],self.parent_class.game.window_size[1]]
-
-        elif self.stage == 2:#cutscenen in village
-            self.cinematic()
-            if self.timer == 200:#make him movev to aila
-                spawn_pos=(0,130)
-
-                self.entity = Entities.Aslat(spawn_pos, self.parent_class.game.game_objects)
-
-                self.parent_class.game.game_objects.npcs.add(self.entity)
-                self.entity.currentstate.enter_state('Walk')
-            elif self.timer == 320:#make it stay still
-                self.entity.currentstate.enter_state('Idle')
-            elif self.timer == 400:#start conversation
-                self.entity.interact()
-            elif self.timer > 410:
-                self.exit_state()
+        if self.timer >1000:
+            self.game.game_objects.player.acceleration[0] *= 2#bacl to normal speed
+            self.exit_state()
 
     def handle_events(self,input):
         super().handle_events(input)
-        if self.stage == 0:
-            #can only go left
-            if input[2][0] > 0: return
-            self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
-
-    def init_stage1(self):
-        C.acceleration = [1,0.51]#reset to normal movement
-        input = [0,0,[-1,0],0]
-        self.parent_class.game.game_objects.player.currentstate.handle_movement(input)
-        self.parent_class.game.game_objects.camera.set_camera('Title_screen')
+        if input[2]['l_stick'][0] > 0: return#can only go left
+        input[2]['l_stick'][0] *= 0.5#half the speed
+        self.game.game_objects.player.currentstate.handle_movement(input)
 
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,objects):
@@ -978,6 +938,7 @@ class Death(Cutscene_engine):#when aila dies
         self.stage = 0
 
     def update(self):
+        super().update()
         self.timer += self.parent_class.game.dt
         if self.stage == 0:
 
@@ -1088,3 +1049,19 @@ class Cultist_encounter_gameplay(Gameplay):#initialised in the cutscene:if playe
         elif input == 'death':#if aila dies during the fight, this is called
             self.game.game_objects.player.reset_movement()
             self.game.game_objects.load_map(self,'cultist_hideout_1','2')
+
+class Rhoutta_encounter_gameplay(Gameplay):#called from trigger before first rhoutta: shuold spawn lightning and a gap spawns, or something
+    def __init__(self,game):
+        super().__init__(game)
+        spawn_pos = (self.game.game_objects.camera.scroll[0] + 250,self.game.game_objects.camera.scroll[1]+200)
+        gate = Entities.Lighitning_barrier(spawn_pos,self.game.game_objects)
+        effect = Entities.Spawneffect(spawn_pos,self.game.game_objects)
+        effect.rect.midbottom = gate.rect.midbottom
+        self.game.game_objects.cosmetics.add(effect)
+        self.game.game_objects.interactables.add(gate)
+        self.game.game_objects.weather.lightning()
+
+    def handle_input(self,input):
+        if input == 'dmg':
+            new_game_state = Pause_gameplay(self.game,duration=11)
+            new_game_state.enter_state()

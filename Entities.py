@@ -20,7 +20,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
             self.add(self.pause_group)#add to pause
 
 class BG_Block(Staticentity):
-    def __init__(self,pos,img,parallax = 1):
+    def __init__(self,pos,img,parallax = [1,1]):
         super().__init__(pos,img)
         self.parallax = parallax
 
@@ -255,7 +255,7 @@ class Player(Character):
         self.currentstate.enter_state('Death_pre')#overrite any state and go to deat
 
     def dead(self):#called when death animation is finished
-        new_game_state = states.Cutscenes(self.game_objects.game,'Death')
+        new_game_state = states.Death(self.game_objects.game)
         new_game_state.enter_state()
 
     def reset_movement(self):#called when loading new map or entering conversations
@@ -959,20 +959,16 @@ class Rhoutta_encounter(Boss):
         self.image = self.sprites.sprite_dict['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = self.image.get_rect(center=pos)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.health = 5
-        self.attack_distance = 100
+        self.health = 3
+        self.attack_distance = [100,10]
         self.attack = Sword
         self.dmg = 0
-        self.count = 0
 
-    def hurt(self):
-        super().hurt()
-        self.count += 1
-        if self.count > 3:
-            new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
-            new_game_state.enter_state()
-        #new_game_state = states.Fading(self.game_objects.game,1)
-        #new_game_state.enter_state()
+    def dead(self):
+        self.game_objects.game.state_stack[-1].exit_state()
+        self.game_objects.player.reset_movement()
+        new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
+        new_game_state.enter_state()
 
 #stuff
 class Camera_Stop(Staticentity):
@@ -1870,11 +1866,11 @@ class Bone(Enemy_drop):
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
     def use_item(self):
-        if self.game_objects.player.inventory['Bone'] < 0: return#if we don't have bones
+        if self.game_objects.player.inventory['Bone'] <= 0: return#if we don't have bones
         self.game_objects.player.inventory['Bone'] -= 1
         if len(self.game_objects.player.spawn_point) == 2:#if there is already a bone planted somewhere
             self.game_objects.player.spawn_point.pop()
-        self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.player.abs_dist})
+        self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.camera.scroll})
         self.game_objects.player.currentstate.enter_state('Plant_bone_main')
 
     @classmethod#called from object pool
@@ -1998,11 +1994,7 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
         self.image = self.sprites.sprite_dict['once'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
-        self.finish = False
-        #self.shader = shader_entities.Shader_entities(self)
-
-    def update(self):
-        super().update()
+        self.finish = False#needed for the cutscene
 
     def reset_timer(self):
         self.finish = True
@@ -2194,7 +2186,7 @@ class Shade_trigger(Interactable):
         self.layers_one = layers#a list of shahde layers
         self.layers_two = []#similar to self.layer, keeps the layers of the shade screen
 
-class Cutscene_trigger(Interactable):
+class Cutscene_trigger(Interactable):#shoudl be called a state trigger
     def __init__(self,pos,game_objects,size,event):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
@@ -2580,7 +2572,7 @@ class Fireplace(Interactable):
         self.currentstate.handle_input('Interact')#goes to interacted after transform
 
 class Lighitning_barrier(Interactable):#traps
-    def __init__(self,pos,game_objects,size):
+    def __init__(self,pos,game_objects,size=[16,16]):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/lighitning_barrier/')
         if size != [16,16]:

@@ -35,7 +35,7 @@ class Inventory(Select_menu):
         self.define_pointer()
 
     def define_blit_positions(self):#set positions
-        items = self.iventory_UI.items.copy()#a list if empty items
+        items = self.iventory_UI.items.copy()#a list of empty items
         key_items = self.iventory_UI.key_items#a dict of empty key items
         index = 0
         for key in self.game_objects.player.inventory.keys():#crease the object in inventory and sepeerate between useable items and key items
@@ -70,6 +70,7 @@ class Inventory(Select_menu):
         self.blit_sword()
         self.blit_pointer()
         self.blit_description()
+        self.blit_bottons()
 
     def blit_inventory_BG(self):
         self.iventory_UI.BG.set_alpha(230)
@@ -93,7 +94,6 @@ class Inventory(Select_menu):
     def blit_sword(self):
         self.iventory_UI.sword.animation.update()
         self.game_objects.game.screen.blit(self.iventory_UI.sword.image,self.iventory_UI.sword.rect.topleft)
-
         for stone in self.items['sword']:
             stone.animation.update()
             self.game_objects.game.screen.blit(stone.image,stone.rect.topleft)
@@ -103,9 +103,14 @@ class Inventory(Select_menu):
 
     def blit_description(self):
         self.conv = self.items[self.state.state_name][self.item_index[0]].description
-        text = self.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
+        text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
         text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.game.screen.blit(text,(380,120))
+        self.game_objects.game.screen.blit(text,(420,150))
+
+    def blit_bottons(self):
+        for button in self.iventory_UI.buttons.keys():
+            self.iventory_UI.buttons[button].update()
+            self.game_objects.game.screen.blit(self.iventory_UI.buttons[button].image,self.iventory_UI.buttons[button].rect.topleft)#pointer
 
     def handle_events(self,input):
         if input[0]:#press
@@ -116,20 +121,24 @@ class Inventory(Select_menu):
             elif input[-1] == 'lb':#previouse page
                 self.enter_state('Map')
             elif input[-1]=='a' or input[-1]=='return':
+                self.iventory_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
             self.state.handle_input(input)
             self.letter_frame = 0
+        elif input[1]:#release
+            if input[-1]=='a' or input[-1]=='return':
+                self.iventory_UI.buttons['a'].currentstate.handle_input('release')
 
     def use_item(self):
         if not hasattr(self.items[self.state.state_name][self.item_index[0]], 'use_item'): return#if it is a item
         if self.items[self.state.state_name][self.item_index[0]].number <= 0: return#if we have more than 0 item
         self.items[self.state.state_name][self.item_index[0]].use_item()
+        self.items[self.state.state_name][self.item_index[0]].number -= 1
 
 class Omamori(Select_menu):
     def __init__(self, game_state):
         super().__init__(game_state)
         self.omamori_UI = UI_loader.UI_loader(self.game_objects,'omamori')
-
         self.letter_frame = 0#for description
         self.define_blit_positions()
         self.define_pointer()
@@ -323,7 +332,7 @@ class Map(Select_menu):
 
         self.scroll = [0,0]
         self.index = 0
-        self.pos = [-0.5*(self.map_UI.BG.get_width() - self.game_objects.game.WINDOW_SIZE[0]),-0.5*(self.map_UI.BG.get_height() - self.game_objects.game.WINDOW_SIZE[1])]#start offset position
+        self.pos = [-0.5*(self.map_UI.BG.get_width() - self.game_objects.game.window_size[0]),-0.5*(self.map_UI.BG.get_height() - self.game_objects.game.window_size[1])]#start offset position
 
         for object in self.map_UI.objects:
             object.update(self.pos)
@@ -342,20 +351,20 @@ class Map(Select_menu):
 
     def limit_pos(self):
         #self.pos[0] = min(0,self.pos[0])
-        #self.pos[0] = max(self.game.WINDOW_SIZE[0] - self.map_UI.BG.get_width(),self.pos[0])
+        #self.pos[0] = max(self.game.window_size[0] - self.map_UI.BG.get_width(),self.pos[0])
         #self.pos[1] = min(0,self.pos[1])
-        #self.pos[1] = max(self.game.WINDOW_SIZE[1] - self.map_UI.BG.get_height(),self.pos[1])
+        #self.pos[1] = max(self.game.window_size[1] - self.map_UI.BG.get_height(),self.pos[1])
         if self.pos[0] > 0:
             self.pos[0] = 0
             self.scroll[0] = 0
-        elif self.pos[0] < self.game_objects.game.WINDOW_SIZE[0] - self.map_UI.BG.get_width():
-            self.pos[0] = self.game_objects.game.WINDOW_SIZE[0] - self.map_UI.BG.get_width()
+        elif self.pos[0] < self.game_objects.game.window_size[0] - self.map_UI.BG.get_width():
+            self.pos[0] = self.game_objects.game.window_size[0] - self.map_UI.BG.get_width()
             self.scroll[0] = 0
         if self.pos[1] > 0:
             self.pos[1] = 0
             self.scroll[1] = 0
-        elif self.pos[1] < self.game_objects.game.WINDOW_SIZE[1] - self.map_UI.BG.get_height():
-            self.pos[1] = self.game_objects.game.WINDOW_SIZE[1] - self.map_UI.BG.get_height()
+        elif self.pos[1] < self.game_objects.game.window_size[1] - self.map_UI.BG.get_height():
+            self.pos[1] = self.game_objects.game.window_size[1] - self.map_UI.BG.get_height()
             self.scroll[1] = 0
 
     def render(self):
@@ -365,7 +374,7 @@ class Map(Select_menu):
             self.game_objects.game.screen.blit(object.image,object.rect.topleft)
 
     def calculate_position(self):
-        scroll = [-self.map_UI.objects[self.index].rect.center[0]+self.game_objects.game.WINDOW_SIZE[0]*0.5,-self.map_UI.objects[self.index].rect.center[1]+self.game_objects.game.WINDOW_SIZE[1]*0.5]
+        scroll = [-self.map_UI.objects[self.index].rect.center[0]+self.game_objects.game.window_size[0]*0.5,-self.map_UI.objects[self.index].rect.center[1]+self.game_objects.game.window_size[1]*0.5]
         for object in self.map_UI.objects:
             object.update(scroll)
         self.update_pos(scroll)

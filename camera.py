@@ -121,6 +121,5 @@ class Title_screen(Cutscenes):
         self.center[1] = min(1000,self.center[1])
 
         self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
-        self.check_camera_border_new()
         self.scroll=self.true_scroll.copy()
         self.scroll[1]=int(self.scroll[1])
