@@ -1,5 +1,5 @@
 import pygame
-import Entities, states_time_collision, animation, Read_files, states_basic
+import Entities, states_time_collision, animation, Read_files, states_basic, states_gate
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
@@ -24,7 +24,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle):
-        super().__init__(pos,size)
+        super().__init__(pos, size)
         self.run_particles = {'dust':Entities.Dust_running_particles,'water':Entities.Water_running_particles,'grass':Entities.Grass_running_particles}[run_particle]
         self.go_through = False
 
@@ -43,6 +43,34 @@ class Collision_block(Platform):
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()
+
+class Gate(Platform):#a gate that is owned by the lever
+    def __init__(self, pos, game_objects, ID_key):
+        super().__init__(pos)
+        self.game_objects = game_objects
+        self.dir = [1,0]
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/gate/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (pos[0],pos[1])
+        self.hitbox = self.rect.copy()
+        self.ID_key = ID_key#an ID to match with the gate
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_gate.Idle(self)#
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+    def collide_x(self,entity):
+        if entity.velocity[0] > 0:#going to the right
+            entity.right_collision(self.hitbox.left)
+        else:#going to the leftx
+            entity.left_collision(self.hitbox.right)
+        entity.update_rect_x()
+
+    def draw(self):
+        self.game_objects.game.screen.blit(self.image, (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust', go_through = True):
@@ -261,7 +289,7 @@ class Breakable_block(Collision_block):#breakable collision blocks
         self.currentstate = states_basic.Idle(self)#
 
     def update(self):
-        self.update_timers()#invincibililty        
+        self.update_timers()#invincibililty
         self.currentstate.update()
         self.animation.update()
 

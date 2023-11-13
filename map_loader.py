@@ -328,7 +328,6 @@ class Level():
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
-        lever_int = 1
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
@@ -386,7 +385,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                lever = Entities.Lever(object_position,self.game_objects, self.game_objects.world_state.state[self.level_name]['lever'][str(lever_int)], str(lever_int), ID)
+                lever = Entities.Lever(object_position,self.game_objects, self.game_objects.world_state.state[self.level_name]['lever'][str(ID)], ID)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
 
@@ -394,9 +393,9 @@ class Level():
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                gate = Entities.Gate(object_position,self.game_objects,ID)
+                gate = platforms.Gate(object_position,self.game_objects,ID)
                 self.references['gate'].append(gate)
-                self.game_objects.interactables.add(gate)
+                self.game_objects.platforms.add(gate)
 
     def load_light_forest_objects(self,data,parallax,offset):#load objects back of layers
         for obj in data['objects']:
@@ -614,9 +613,8 @@ class Level():
         if self.references.get('shade_trigger',False):
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
-        if self.references.get('lever',False):#assume that there is not only a gate
+        if self.references.get('lever',False):#assume that the gate-lever is on the same map
             for lever in self.references['lever']:
                 for gate in self.references['gate']:
-                    if lever.ID == gate.ID:
+                    if lever.ID_key == gate.ID_key:
                         lever.add_gate(gate)
-                    break#go to next lever

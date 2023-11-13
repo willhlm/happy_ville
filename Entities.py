@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_bg_fade, states_gate, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -999,7 +999,7 @@ class Camera_Stop(Staticentity):
         self.hitbox = self.rect.inflate(0,0)
         self.size = size
         self.offset = int(offset)#number of tiles in the "negative direction" in which the stop should apply
-        self.currentstate = getattr(states_camerastop, 'Idle_'+dir)(self)
+        self.currentstate = getattr(states_camerastop, 'Idle_' + dir)(self)
 
     def update(self):
         self.currentstate.update()
@@ -2602,15 +2602,14 @@ class Lightning_spikes(Interactable):#traps
         self.currentstate.handle_input('Once')
 
 class Lever(Interactable):
-    def __init__(self, pos, game_objects, state, ID_key, ID):
+    def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/lever/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (pos[0],pos[1])
         self.hitbox = pygame.Rect(pos[0],pos[1],26,16)
-        self.ID_key = ID_key#an unique ID key to identify which item that the player is intracting within the world
-        self.ID = ID#an ID to match with the gate
+        self.ID_key = ID_key#an ID to match with the gate and an unique ID key to identify which item that the player is intracting within the world
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
         self.hitbox.midbottom = self.rect.midbottom
@@ -2639,25 +2638,6 @@ class Lever(Interactable):
         self.gate = gate
         if type(self.currentstate).__name__ == 'Interacted':
             self.gate.currentstate.handle_input('Transform')
-
-class Gate(Interactable):
-    def __init__(self, pos, game_objects, ID = 0):
-        super().__init__(pos, game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/gate/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1])
-        self.hitbox = self.rect.copy()
-        self.ID = ID#an ID to match with the gate
-        self.currentstate = states_gate.Idle(self)#
-
-    def player_collision(self):#only sideways collision checks, for now
-        sign = (self.game_objects.player.hitbox.center[0] - self.hitbox.center[0])
-        if sign>0:#plaer on right
-            self.game_objects.player.hitbox.left = self.hitbox.right
-        else:#plyer on left
-            self.game_objects.player.hitbox.right = self.hitbox.left
-        self.game_objects.player.update_rect_x()
 
 #equipable items
 class Infinity_stones():

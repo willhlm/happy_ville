@@ -1,5 +1,4 @@
 import sys, random
-from states_entity import Entity_States
 
 class Basic_states():
     def __init__(self,entity):

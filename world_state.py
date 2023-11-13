@@ -40,8 +40,6 @@ class World_state():
 
         chest_int = 1
         soul_essence_int = 1
-        lever_int = 1
-
 
         self.state[level_name] = {'chest':{},'lever':{},'soul_essence':{},'runestone':{}}#a place holder for things that should depend on map state
 
@@ -59,8 +57,10 @@ class World_state():
                 chest_int += 1
 
             elif id == 10:#lever
-                self.state[level_name]['lever'][str(chest_int)] = 'idle'
-                chest_int += 1
+                for property in obj['properties']:
+                    if property['name'] == 'ID':
+                        ID = property['value']
+                self.state[level_name]['lever'][ID] = 'idle'
 
             elif id == 28:#key items: Soul_essence etc.
                 for property in obj['properties']:

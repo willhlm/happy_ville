@@ -3,6 +3,7 @@ import sys
 class Basic_states():
     def __init__(self,entity):
         self.entity = entity
+        self.center = self.entity.game_objects.camera.center.copy()
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
@@ -13,10 +14,13 @@ class Basic_states():
     def handle_input(self,input):
         pass
 
+    def init_pos(self):#called from camera when loading the map. It is to set correct center
+        pass
+
 class Idle_right(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
+        #self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
 
     def update_state(self):
         distance = [self.entity.rect.left - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
@@ -40,7 +44,7 @@ class Stop_right(Basic_states):
 class Idle_left(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
+        #self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
 
     def update_state(self):
         distance = [self.entity.rect.right - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
@@ -64,7 +68,7 @@ class Stop_left(Basic_states):
 class Idle_bottom(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
+        #self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
 
     def update_state(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
@@ -76,19 +80,37 @@ class Idle_bottom(Basic_states):
 class Stop_bottom(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.determine_sign()
+        self.function = {1:self.function_min,-1:self.function_max}#for smooth transtion
+
+    def init_pos(self):        
         self.entity.game_objects.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
+        self.center = self.entity.game_objects.camera.center.copy()
+
+    def determine_sign(self):
+        target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
+        if self.center[1] > target: self.sign = -1#from up to down
+        else: self.sign = 1#from down to up
+
+    def function_min(self,target):
+        return min(target,self.center[1])
+
+    def function_max(self,target):
+        return max(target,self.center[1])
 
     def update_state(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
         if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:#if on screen on y and coser than half screen on x
-            self.entity.game_objects.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
+            target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
+            self.center[1] += self.sign*3
+            self.entity.game_objects.camera.center[1] = self.function[self.sign](target)#min(target,self.center[1])
         else:
             self.enter_state('Idle_bottom')
 
 class Idle_top(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
+        #self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
 
     def update_state(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.bottom - self.entity.game_objects.player.hitbox.centery]
