@@ -34,7 +34,6 @@ class Collisions():
                 self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
             self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through
 
-
     def interactables_collision(self):#interactables
         for interactable in self.game_objects.interactables.sprites():
             collision_entity = pygame.sprite.spritecollideany(interactable,self.game_objects.players,Collisions.collided)
@@ -62,15 +61,15 @@ class Collisions():
 
             #if hit chest, bushes
             if collision_inetractables:
-                projectile.collision_inetractables(collision_inetractables)
+                projectile.collision_inetractables(collision_inetractables)#go through the projecticle in case there are projectile that should do dmg to interactable
 
             #if hit enemy
             if collision_enemy:
-                projectile.collision_enemy(collision_enemy)
+                projectile.collision_enemy(collision_enemy)#go through the projecticle in case there are projectile that should do dmg to enemy
 
             #hit platform
             if collision_plat:
-                projectile.collision_plat(collision_plat)
+                projectile.collision_plat(collision_plat)#go through the projecticle in case there are projectile that should do dmg to platform
 
     #check for player collision
     def player_collision(self,enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce

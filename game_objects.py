@@ -41,6 +41,7 @@ class Game_Objects():
         self.all_bgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
         self.all_fgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
         self.bg_interact = groups.Group(self)#small grass stuff so that interactables blends with BG
+        self.bg_fade = groups.Group(self)#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
         self.eprojectiles = groups.Group(self)#groups.Shader_group()
         self.fprojectiles = groups.Group(self)#groups.Shader_group()
         self.loot = groups.Group(self)#groups.Shader_group()
@@ -103,6 +104,7 @@ class Game_Objects():
 
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
+        self.collisions.player_collision(self.bg_fade)
         self.collisions.interactables_collision()
 
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
@@ -175,3 +177,5 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,0,0), (int(platform.hitbox[0]-self.camera.scroll[0]),int(platform.hitbox[1]-self.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), (int(ramp.hitbox[0]-self.camera.scroll[0]),int(ramp.hitbox[1]-self.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
+            for fade in self.bg_fade:
+                pygame.draw.rect(self.game.screen, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox

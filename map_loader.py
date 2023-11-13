@@ -17,7 +17,7 @@ class Level():
     def load_map(self,map_name,spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
-        self.level_name = map_name
+        self.level_name = map_name.lower()
         self.spawn = spawn
         self.check_pause_sound()#pause the sound if we change area
         self.load_map_data()#load the map data
@@ -281,15 +281,6 @@ class Level():
                 reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
                 self.game_objects.reflections.add(reflection)
 
-            elif id == 21:#timer platoform
-                types = 'dust'
-                for property in properties:
-                    if property['name'] == 'particles':
-                        types = property['value']
-                return
-                new_block = platforms.Collision_time(self.game_objects,object_position,object_size,types)
-                self.game_objects.platforms.add(new_block)
-
             elif id == 23:#shade trigger
                 for property in properties:
                     if property['name'] == 'colour':
@@ -429,6 +420,13 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
+            elif id == 4:#light forest breakable collisio block
+                new_plarform = platforms.Breakable_block_1(object_position,self.game_objects)
+                if self.layer == 'fg':
+                    self.game_objects.platforms.add(new_plarform)
+                else:
+                    self.game_objects.platforms.add(new_plarform)
+
     def load_light_forest_cave_objects(self,data,parallax,offset):
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
@@ -494,9 +492,11 @@ class Level():
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
         'The offset and parallax should be specified for group, which affects all in that group. Individual tile layers can be specified as well.'
         'Each group needs at least one tile layer (but can be emppty).'
-        'The groups should contain "fg", "bg" or "interact" in their name.'
+        'The groups should contain "fg", "bg" in their name.'
+        'The tile layer in groups can be called whatever.'
+        'recommended convention: bg_#, bg_interact_# or bg_fade_# for the layers. It doesnt have to be called bg but needs _fade_# and _interact_# for the spaceual ones'
         'The main layer needs to be called "bg1"'#world state file reads it
-        'The tile layer in groups can be called whatever. But the objects need to be called statics, interactables, front or back.'
+        'The objects need to be called statics, interactables, front or back.'
         'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
 
         #make empty surfaces
@@ -507,18 +507,22 @@ class Level():
         blit_surfaces = {}#every layer from tiled
         blit_compress_surfaces = {}#the ones with the same paralax are merged
         animation_list = {}#a place holder for animation objects
+        blit_fade_surfaces = {}#fade surfaces that goes away upon collision
+        blit_fade_pos = {}#fade surfaces that goes away upon collision
+
         for tile_layer in data.keys():#make a blank surface
             animation_list[tile_layer] = []
             if 'animated' in tile_layer: continue
             blit_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
             blit_compress_surfaces[tile_layer[0:tile_layer.rfind('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
+            blit_fade_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
+            blit_fade_pos[tile_layer] = []
 
         #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
         for tile_layer in data.keys():
             for index, tile_number in enumerate(data[tile_layer]['data']):
-                if tile_number == 0:
-                    continue
+                if tile_number == 0: continue
                 y = math.floor(index/cols)
                 x = (index - (y*cols))
 
@@ -534,6 +538,7 @@ class Level():
                 else:#if statics
                     blit_pos = (x * self.TILE_SIZE + data[tile_layer]['offsetx'], y * self.TILE_SIZE + data[tile_layer]['offsety'])
                     blit_surfaces[tile_layer].blit(self.spritesheet_dict[tile_number], blit_pos)
+                    blit_fade_pos[tile_layer].append(blit_pos)#for fade layer
 
         #blit all static sublayers onto one single parallax layer in order as drawn in Tiled. And sort the animations into the key grouops
         animation_entities = {}
@@ -544,6 +549,8 @@ class Level():
                     animation_entities[bg].append(animation_list[layer])
                 except KeyError:
                     animation_entities[bg] = [animation_list[layer]]
+            elif 'fade' in layer:
+                blit_fade_surfaces[layer].blit(blit_surfaces[layer], (0,0))
             else:#statics
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
 
@@ -575,17 +582,26 @@ class Level():
             if parallax[0] == 1: break
             blit_compress_surfaces[layer] = pygame.transform.gaussian_blur(blit_compress_surfaces[layer], blur_value,repeat_edge_pixels=True)#box_blur
 
-        #add the bg, fg, animations and objects to the group
+        #add the bg, fg, fade, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():
             pos = (-math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0],-math.ceil((1-parallax[1])*new_map_diff[1])+ offset[1])
-            if self.layer == 'fg':
-                self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
-            elif 'interact' in tile_layer:#the stuff that blits in front of interactables
+
+            if 'fade' in tile_layer:#add fade blocks
+                for fade in blit_fade_surfaces.keys():
+                    if 'fade' in fade:#is needed
+                        bg = Entities.BG_Fade(pos,blit_fade_surfaces[fade],parallax,blit_fade_pos[fade])
+                        if self.layer == 'bg':self.game_objects.all_bgs.add(bg)#bg
+                        else: self.game_objects.all_fgs.add(bg)
+                        self.game_objects.bg_fade.add(bg)
+            elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
                 self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
+
             elif self.layer == 'bg':#bg
                 bg = Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
                 self.game_objects.all_bgs.add(bg)
                 self.game_objects.all_bgs.reference[tuple(parallax)] = bg
+            elif self.layer == 'fg':#fg
+                self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
 
             if animation_entities.get(tile_layer,False):#add animations
                 for bg_animation in animation_entities[tile_layer]:

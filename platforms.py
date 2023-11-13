@@ -1,5 +1,5 @@
 import pygame
-import Entities, states_time_collision, animation, Read_files
+import Entities, states_time_collision, animation, Read_files, states_basic
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
@@ -16,7 +16,10 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def collide_y(self,entity):
         pass
 
-    def draw(self):
+    def draw(self):#conly certain platforms will require draw
+        pass
+
+    def take_dmg(self,projectile,dmg):#called from projectile
         pass
 
 class Collision_block(Platform):
@@ -245,6 +248,56 @@ class Rhoutta_encounter_1(Collision_time):
         super().__init__(game_objects,pos,size,run_particle,go_through)
         self.sprites = Read_files.Sprites_Player('Sprites/block/collision_time/rhoutta_encounter_1/')
         self.image = self.sprites.sprite_dict['idle'][0]
+
+class Breakable_block(Collision_block):#breakable collision blocks
+    def __init__(self, pos, run_particle):
+        super().__init__(pos, size = [16,16],run_particle='dust')
+        self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
+        self.timer_jobs = {'invincibility':Entities.Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.health = 3
+        self.invincibile = False
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.animation = animation.Entity_animation(self)
+        self.currentstate = states_basic.Idle(self)#
+
+    def update(self):
+        self.update_timers()#invincibililty        
+        self.currentstate.update()
+        self.animation.update()
+
+    def dead(self):#called when death animatin finishes
+        self.kill()
+
+    def take_dmg(self,projectile, dmg):
+        if self.invincibile: return
+        self.health -= dmg
+        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+        projectile.clash_particles(self.hitbox.center)
+
+        if self.health > 0:#check if dead¨
+            self.animation.handle_input('Hurt')#turn white
+            self.game_objects.camera.camera_shake(3,10)
+        else:#if dead
+            if self.currentstate.state_name != 'death':#if not already dead
+                self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
+                self.currentstate.enter_state('Death')#overrite any state and go to deat
+
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
+
+    def draw(self):
+        self.game_objects.game.screen.blit(self.image, (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
+
+class Breakable_block_1(Breakable_block):
+    def __init__(self, pos, game_objects,run_particle='dust'):
+        super().__init__(pos, run_particle)
+        self.game_objects = game_objects
+        self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/light_forest/type1/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos
+        self.hitbox = self.rect.copy()
 
 #timer:
 class Platform_timer_1(Entities.Timer):

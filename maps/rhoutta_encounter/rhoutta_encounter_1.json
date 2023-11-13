@@ -283,6 +283,7 @@
                 {
                  "draworder":"topdown",
                  "id":3,
+                 "locked":true,
                  "name":"statics",
                  "objects":[
                         {

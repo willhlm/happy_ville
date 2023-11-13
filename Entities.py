@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_gate, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_bg_fade, states_gate, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -37,6 +37,27 @@ class BG_Animated(BG_Block):
 
     def reset_timer(self):
         pass
+
+class BG_Fade(BG_Block):
+    def __init__(self,pos,img,parallax,positions):
+        super().__init__(pos,img,parallax)
+        self.currentstate = states_bg_fade.Idle(self)
+        self.make_hitbox(positions,pos)
+
+    def make_hitbox(self,positions,offset_position):#the rect is the whole screen, need to make it conly cover the surface part, some how
+        x,y=[],[]
+        for pos in positions:
+            x.append(pos[0]+offset_position[0])
+            y.append(pos[1]+offset_position[1])
+        width = max(x)- min(x)
+        height = max(y)- min(y)
+        self.hitbox = [min(x),min(y),width,height]
+
+    def update(self):
+        self.currentstate.update()
+
+    def player_collision(self,player):
+        self.currentstate.handle_input('collide')
 
 class Reflection(Staticentity):
     def __init__(self,pos,size,dir,game_objects, offset = 12):
@@ -1235,12 +1256,10 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         pass
 
     def collision_enemy(self,collision_enemy):#projecticle enemy collision (inclusing player)
-        if collision_enemy.invincibile: return#is this needed?
         collision_enemy.take_dmg(self.dmg)
-        #self.kill()
 
-    def collision_plat(self,platform):#collision platform
-        pass
+    def collision_plat(self,collision_plat):#collision platform
+        collision_plat.take_dmg(self,self.dmg)
 
     def collision_inetractables(self,interactable):#collusion interactables
         pass
@@ -2359,51 +2378,6 @@ class Door(Interactable):
             self.game_objects.change_map(collision.next_map)
         except:
             pass
-
-class Collision_breakable(Interactable):#a breakable collision block
-    def __init__(self, pos,game_objects,type = 'type1'):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/'+type+'/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.timers = []
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
-        self.health = 3
-
-    def player_collision(self):#only sideways collision checks, for now
-        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-        if sign>0:#plaer on right
-            self.game_objects.player.hitbox.left = self.hitbox.right
-        else:#plyer on left
-            self.game_objects.player.hitbox.right = self.hitbox.left
-        self.game_objects.player.update_rect_x()
-
-    def update(self):
-        super().update()
-        self.update_timers()#invincibililty
-
-    def dead(self):#called when death animatin finishes
-        self.kill()
-
-    def take_dmg(self,projectile):
-        if self.invincibile: return
-        self.health -= 1
-        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
-        projectile.clash_particles(self.hitbox.center)
-
-        if self.health > 0:#check if dead¨
-            self.animation.handle_input('Hurt')#turn white
-            self.game_objects.camera.camera_shake(3,10)
-        else:#if dead
-            if self.currentstate.state_name != 'death':#if not already dead
-                self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
-                self.currentstate.enter_state('Death')#overrite any state and go to deat
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
 
 class Savepoint(Interactable):#save point
     def __init__(self,pos,game_objects,map):
