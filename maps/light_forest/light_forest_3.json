@@ -1714,7 +1714,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Exploding_Mygga"
+                                 "value":"Exploding_mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1750,7 +1750,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Exploding_Mygga"
+                                 "value":"Exploding_mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1876,7 +1876,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Exploding_Mygga"
+                                 "value":"Exploding_mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1899,7 +1899,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1312,
+                         "width":1584,
                          "x":3264,
                          "y":976
                         }, 
@@ -1956,6 +1956,18 @@
                          "width":16,
                          "x":3360,
                          "y":688
+                        }, 
+                        {
+                         "gid":84722,
+                         "height":80,
+                         "id":446,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":64,
+                         "x":4272,
+                         "y":1296
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1993,7 +2005,7 @@
          "y":0
         }],
  "nextlayerid":111,
- "nextobjectid":446,
+ "nextobjectid":447,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -2184,6 +2196,10 @@
          "tilecount":6300,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":84719,
+         "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
  "type":"map",

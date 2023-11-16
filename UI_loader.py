@@ -133,6 +133,7 @@ class UI_loader():#for map, omamori, ability, journal etc
         self.key_items = {}
         self.items = []
         self.stones = {}
+        self.buttons = {}
         for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
@@ -154,3 +155,15 @@ class UI_loader():#for map, omamori, ability, journal etc
                 name = properties[0]['value']#the name of keyitem
                 new_item = entities_UI.Item(topleft_object_position,self.game_objects)
                 self.key_items[name] = new_item
+            elif id == 4:#a button
+                new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'a')
+                self.buttons['a'] = new_button
+            elif id == 5:#b button
+                new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'b')
+                self.buttons['b'] = new_button
+            elif id == 6:#lb button
+                new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'lb')
+                self.buttons['lb'] = new_button
+            elif id == 7:#rb button
+                new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'rb')
+                self.buttons['rb'] = new_button

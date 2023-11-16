@@ -59,20 +59,24 @@ class Fog(pygame.sprite.Sprite):
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
         super().__init__()
+        self.game_objects = game_objects
         self.image = pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.image.fill((255,255,255,255))
         self.rect = self.image.get_rect()
-        self.rect.center = [game_objects.game.window_size[0],game_objects.game.window_size[1]]
+        self.rect.topleft = [game_objects.camera.scroll[0],game_objects.camera.scroll[1]]
         self.count = 0
         self.fade_length = 20
         self.image.set_alpha(int(255/self.fade_length))
-        self.true_pos = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]
 
     def update(self):
         self.update_img()
-        self.count += 1
+        self.update_pos()
+        self.count += self.game_objects.game.dt
         if self.count > self.fade_length:
             self.kill()
+
+    def update_pos(self):
+        self.rect.topleft = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]
 
     def update_img(self):
         self.image.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))

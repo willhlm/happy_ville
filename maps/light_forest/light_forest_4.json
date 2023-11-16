@@ -651,8 +651,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":5552,
-                         "y":464
+                         "x":192,
+                         "y":528
                         }, 
                         {
                          "gid":11,
@@ -776,7 +776,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Exploding_Mygga"
+                                 "value":"Exploding_mygga"
                                 }],
                          "rotation":0,
                          "type":"",

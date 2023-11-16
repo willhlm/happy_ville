@@ -42,6 +42,9 @@
   <image width="32" height="32" source="../../Sprites/animations/lever/idle/lever1.png"/>
  </tile>
  <tile id="11">
+  <properties>
+   <property name="ID" value=""/>
+  </properties>
   <image width="32" height="144" source="../../Sprites/animations/gate/idle/vines6.png"/>
  </tile>
 </tileset>

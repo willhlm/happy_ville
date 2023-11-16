@@ -500,7 +500,7 @@ class Wall_glide_main(Player_states):
         self.entity.friction[1] = 0.4
         self.entity.ground = True#so that we can jump
 
-    def update_state(self):
+    def update_state(self):        
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
             self.entity.timer_jobs['wall'].activate()
             self.enter_state('Fall_stand_pre')

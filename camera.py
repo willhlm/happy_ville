@@ -26,6 +26,7 @@ class Camera():
         self.center = self.original_center.copy()
         for stop in self.game_objects.camera_blocks:#apply cameras stopp
             stop.update()
+            stop.currentstate.init_pos()
 
         if self.center[0] == self.original_center[0]: offset_x = 0#if there was no cameras topp
         else: offset_x = self.game_objects.player.rect[2]*0.5#if there was a camera stopp, add this offset
@@ -121,6 +122,5 @@ class Title_screen(Cutscenes):
         self.center[1] = min(1000,self.center[1])
 
         self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
-        self.check_camera_border_new()
         self.scroll=self.true_scroll.copy()
         self.scroll[1]=int(self.scroll[1])

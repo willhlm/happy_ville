@@ -215,6 +215,12 @@
                          "height":64,
                          "id":1631,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -227,6 +233,12 @@
                          "height":48,
                          "id":1634,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -298,6 +310,12 @@
                          "height":48,
                          "id":1665,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"particles",
+                                 "type":"string",
+                                 "value":"water"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -334,6 +352,83 @@
                          "width":16,
                          "x":2368,
                          "y":416
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":1668,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Rhoutta_encounter"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2144,
+                         "y":304
+                        }, 
+                        {
+                         "gid":20,
+                         "height":416,
+                         "id":1669,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"Rhoutta_encounter_gameplay"
+                                }, 
+                                {
+                                 "name":"event_type",
+                                 "type":"string",
+                                 "value":"cutscene"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1568,
+                         "y":416
+                        }, 
+                        {
+                         "gid":15,
+                         "height":16,
+                         "id":1670,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"bottom"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":1136,
+                         "x":1376,
+                         "y":512
+                        }, 
+                        {
+                         "gid":16,
+                         "height":16,
+                         "id":1671,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Rain"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":704,
+                         "y":432
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -425,7 +520,7 @@
          "y":0
         }],
  "nextlayerid":34,
- "nextobjectid":1668,
+ "nextobjectid":1672,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

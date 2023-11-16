@@ -13,6 +13,7 @@ import UI
 import save_load
 import groups
 import object_pool
+import controller
 
 from time import perf_counter
 
@@ -20,7 +21,7 @@ class Game_Objects():
     def __init__(self, game):
         self.game = game
         self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
-        self.controller = Read_files.Controller('ps4')
+        self.controller = controller.Controller('playsation')
         self.sound = sound.Sound()
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
@@ -35,11 +36,12 @@ class Game_Objects():
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group(self)#groups.Shader_group()
         self.npcs = groups.Group(self)#groups.Shader_group()
-        self.platforms = groups.Group(self)
-        self.platforms_ramps = groups.Group(self)
+        self.platforms = groups.Specialdraw_Group()
+        self.platforms_ramps = groups.Specialdraw_Group()
         self.all_bgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
         self.all_fgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
         self.bg_interact = groups.Group(self)#small grass stuff so that interactables blends with BG
+        self.bg_fade = groups.Group(self)#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
         self.eprojectiles = groups.Group(self)#groups.Shader_group()
         self.fprojectiles = groups.Group(self)#groups.Shader_group()
         self.loot = groups.Group(self)#groups.Shader_group()
@@ -56,7 +58,7 @@ class Game_Objects():
         self.players.add(self.player)
 
     def load_map(self, previous_state, map_name, spawn = '1',fade = True):#fade out before loading the map
-        if fade:
+        if fade:#for cutscenes
             new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn,fade)#it will call load_map2 after loading
             new_game_state.enter_state()
         else:
@@ -102,6 +104,7 @@ class Game_Objects():
 
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
+        self.collisions.player_collision(self.bg_fade)
         self.collisions.interactables_collision()
 
         self.collisions.counter(self.fprojectiles,self.eprojectiles)
@@ -146,7 +149,7 @@ class Game_Objects():
         self.fprojectiles.draw(self.game.screen)
         self.eprojectiles.draw(self.game.screen)
         self.loot.draw(self.game.screen)
-        #self.entity_pause.draw(self.game.screen)
+        self.platforms.draw()
         self.cosmetics.draw(self.game.screen)
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw(self.game.screen)
@@ -174,3 +177,5 @@ class Game_Objects():
                 pygame.draw.rect(self.game.screen, (255,0,0), (int(platform.hitbox[0]-self.camera.scroll[0]),int(platform.hitbox[1]-self.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
             for ramp in self.platforms_ramps:
                 pygame.draw.rect(self.game.screen, (255,100,100), (int(ramp.hitbox[0]-self.camera.scroll[0]),int(ramp.hitbox[1]-self.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
+            for fade in self.bg_fade:
+                pygame.draw.rect(self.game.screen, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox

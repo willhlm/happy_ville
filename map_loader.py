@@ -1,5 +1,5 @@
 import pygame, csv, math
-import Entities, Read_files, weather, tiled_objects, states
+import Entities, Read_files, weather, entities_parallax, states, platforms
 import constants as C
 
 #from PIL import Image, ImageFilter#for blurring
@@ -17,7 +17,7 @@ class Level():
     def load_map(self,map_name,spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
-        self.level_name = map_name
+        self.level_name = map_name.lower()
         self.spawn = spawn
         self.check_pause_sound()#pause the sound if we change area
         self.load_map_data()#load the map data
@@ -93,8 +93,8 @@ class Level():
 
     def load_groups(self):
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
-        load_front_objects = {'light_forest_front':self.load_light_forest_objects,'light_forest_cave_front':self.load_light_forest_cave_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
-        load_back_objects = {'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
+        load_front_objects = {'rhoutta_encounter_front':self.load_rhoutta_encounter_objects,'light_forest_front':self.load_light_forest_objects,'light_forest_cave_front':self.load_light_forest_cave_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
+        load_back_objects = {'rhoutta_encounter_back':self.load_rhoutta_encounter_objects,'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
         self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer or other information
 
         for group in self.map_data['groups']:
@@ -103,7 +103,6 @@ class Level():
 
             if 'bg' in group: self.layer = 'bg'
             elif 'fg' in group: self.layer = 'fg'
-            elif 'interact' in group: self.layer = 'interact'
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_back_objects)#objects behind layers
             self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
@@ -135,7 +134,7 @@ class Level():
                     points_list.append((point['x'],point['y']))
 
                 fall_through = obj.get('properties',True)
-                new_block = Entities.Collision_right_angle(object_position, points_list,fall_through)
+                new_block = platforms.Collision_right_angle(object_position, points_list,fall_through)
                 self.game_objects.platforms_ramps.add(new_block)
                 continue
 
@@ -178,11 +177,11 @@ class Level():
                 for property in properties:
                     if property['name'] == 'particles':
                         types = property['value']
-                new_block = Entities.Collision_block(object_position,object_size,types)
+                new_block = platforms.Collision_block(object_position,object_size,types)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 8:#spike collision blocks
-                new_block = Entities.Collision_dmg(object_position,object_size)
+                new_block = platforms.Collision_dmg(object_position,object_size)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 9:
@@ -213,7 +212,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'particles':
                         types = property['value']
-                new_block = Entities.Collision_oneway_up(object_position,object_size,types)
+                new_block = platforms.Collision_oneway_up(object_position,object_size,types)
                 self.game_objects.platforms.add(new_block)
 
             elif id == 13:#breakable collision block
@@ -233,7 +232,7 @@ class Level():
                 new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values, camera_offset)
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
-            elif id == 15:#bg_particles
+            elif id == 15:#bg_particles -> circles, rain etc
                 for property in properties:
                     if property['name'] == 'particle':
                         particle_type = property['value']
@@ -257,9 +256,9 @@ class Level():
             #elif id == 17:#leaves
             #    information = [object_position,object_size]
             #    if self.layer == 'fg':
-            #        tiled_objects.create_leaves(information,parallax,self.game_objects.all_fgs)
+            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_fgs)
             #    else:
-            #        tiled_objects.create_leaves(information,parallax,self.game_objects.all_bgs)
+            #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_bgs)
 
             elif id == 19:#trigger
                 values={}
@@ -280,14 +279,6 @@ class Level():
                 dir = 'up'
                 reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
                 self.game_objects.reflections.add(reflection)
-
-            elif id == 21:#timer platoform
-                types = 'dust'
-                for property in properties:
-                    if property['name'] == 'particles':
-                        types = property['value']
-                new_block = Entities.Collision_time(object_position,object_size,types,self.game_objects)
-                self.game_objects.platforms.add(new_block)
 
             elif id == 23:#shade trigger
                 for property in properties:
@@ -336,7 +327,6 @@ class Level():
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
-        lever_int = 1
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
@@ -394,7 +384,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                lever = Entities.Lever(object_position,self.game_objects, self.game_objects.world_state.state[self.level_name]['lever'][str(lever_int)], str(lever_int), ID)
+                lever = Entities.Lever(object_position,self.game_objects, self.game_objects.world_state.state[self.level_name]['lever'][str(ID)], ID)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
 
@@ -402,9 +392,9 @@ class Level():
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                gate = Entities.Gate(object_position,self.game_objects,ID)
+                gate = platforms.Gate(object_position,self.game_objects,ID)
                 self.references['gate'].append(gate)
-                self.game_objects.interactables.add(gate)
+                self.game_objects.platforms.add(gate)
 
     def load_light_forest_objects(self,data,parallax,offset):#load objects back of layers
         for obj in data['objects']:
@@ -415,18 +405,25 @@ class Level():
             id = obj['gid'] - self.map_data['objects_firstgid']
 
             if id == 2:#light forest tree tree
-                new_tree = tiled_objects.Light_forest_tree1(object_position,self.game_objects,parallax)
+                new_tree = entities_parallax.Light_forest_tree1(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
 
             elif id == 3:#light forest tree tree
-                new_tree = tiled_objects.Light_forest_tree2(object_position,self.game_objects,parallax)
+                new_tree = entities_parallax.Light_forest_tree2(object_position,self.game_objects,parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_tree)
                 else:
                     self.game_objects.all_bgs.add(new_tree)
+
+            elif id == 4:#light forest breakable collisio block
+                new_plarform = platforms.Breakable_block_1(object_position,self.game_objects)
+                if self.layer == 'fg':
+                    self.game_objects.platforms.add(new_plarform)
+                else:
+                    self.game_objects.platforms.add(new_plarform)
 
     def load_light_forest_cave_objects(self,data,parallax,offset):
         for obj in data['objects']:
@@ -441,32 +438,49 @@ class Level():
                     new_grass = Entities.Cave_grass(object_position, self.game_objects)
                     self.game_objects.interactables.add(new_grass)
                 else:#if in parallax layers
-                    new_grass = tiled_objects.Cave_grass(object_position, self.game_objects, parallax)
+                    new_grass = entities_parallax.Cave_grass(object_position, self.game_objects, parallax)
                     if self.layer == 'fg':
                         self.game_objects.all_fgs.add(new_grass)
                     else:
                         self.game_objects.all_bgs.add(new_grass)
 
             elif id == 1:#ljusmaksar
-                new_grass = tiled_objects.Ljusmaskar(object_position, self.game_objects, parallax)
+                new_grass = entities_parallax.Ljusmaskar(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_grass)
                 else:
                     self.game_objects.all_bgs.add(new_grass)
 
             elif id == 2:#droplet
-                new_drop = tiled_objects.Droplet_source(object_position, self.game_objects, parallax)
+                new_drop = entities_parallax.Droplet_source(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_drop)
                 else:
                     self.game_objects.all_bgs.add(new_drop)
 
             elif id == 3:#falling rock trap
-                new_rock = tiled_objects.Falling_rock_source(object_position, self.game_objects, parallax)
+                new_rock = entities_parallax.Falling_rock_source(object_position, self.game_objects, parallax)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(new_rock)
                 else:
                     self.game_objects.all_bgs.add(new_rock)
+
+    def load_rhoutta_encounter_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['objects_firstgid']
+
+            if id == 2:#time collision
+                types = 'dust'
+                for property in properties:
+                    if property['name'] == 'particles':
+                        types = property['value']
+
+                new_platofrm = platforms.Rhoutta_encounter_1( self.game_objects, object_position,object_size,types)
+                self.game_objects.platforms.add(new_platofrm)
 
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects
@@ -476,9 +490,11 @@ class Level():
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
         'The offset and parallax should be specified for group, which affects all in that group. Individual tile layers can be specified as well.'
         'Each group needs at least one tile layer (but can be emppty).'
-        'The groups should contain "fg", "bg" or "interact" in their name.'
-        'The main layer needs to be called "bg1"'#world state file reads it
-        'The tile layer in groups can be called whatever. But the objects need to be called statics, interactables, front or back.'
+        'The groups should contain "fg", "bg" in their name.'
+        'The tile layer in groups can be called whatever.'
+        'recommended convention: bg_#, bg_interact_# or bg_fade_# for the layers. It doesnt have to be called bg but needs _fade_# and _interact_# for the spaceial ones'
+        'The main group needs to be called "bg1"'#world state file reads it
+        'The objects need to be called statics, interactables, front or back.'
         'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
 
         #make empty surfaces
@@ -489,18 +505,22 @@ class Level():
         blit_surfaces = {}#every layer from tiled
         blit_compress_surfaces = {}#the ones with the same paralax are merged
         animation_list = {}#a place holder for animation objects
+        blit_fade_surfaces = {}#fade surfaces that goes away upon collision
+        blit_fade_pos = {}#fade surfaces that goes away upon collision
+
         for tile_layer in data.keys():#make a blank surface
             animation_list[tile_layer] = []
             if 'animated' in tile_layer: continue
             blit_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
             blit_compress_surfaces[tile_layer[0:tile_layer.rfind('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
+            blit_fade_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
+            blit_fade_pos[tile_layer] = []
 
         #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
         for tile_layer in data.keys():
             for index, tile_number in enumerate(data[tile_layer]['data']):
-                if tile_number == 0:
-                    continue
+                if tile_number == 0: continue
                 y = math.floor(index/cols)
                 x = (index - (y*cols))
 
@@ -516,6 +536,7 @@ class Level():
                 else:#if statics
                     blit_pos = (x * self.TILE_SIZE + data[tile_layer]['offsetx'], y * self.TILE_SIZE + data[tile_layer]['offsety'])
                     blit_surfaces[tile_layer].blit(self.spritesheet_dict[tile_number], blit_pos)
+                    blit_fade_pos[tile_layer].append(blit_pos)#for fade layer
 
         #blit all static sublayers onto one single parallax layer in order as drawn in Tiled. And sort the animations into the key grouops
         animation_entities = {}
@@ -526,6 +547,8 @@ class Level():
                     animation_entities[bg].append(animation_list[layer])
                 except KeyError:
                     animation_entities[bg] = [animation_list[layer]]
+            elif 'fade' in layer:
+                blit_fade_surfaces[layer].blit(blit_surfaces[layer], (0,0))
             else:#statics
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
 
@@ -557,17 +580,26 @@ class Level():
             if parallax[0] == 1: break
             blit_compress_surfaces[layer] = pygame.transform.gaussian_blur(blit_compress_surfaces[layer], blur_value,repeat_edge_pixels=True)#box_blur
 
-        #add the bg, fg, animations and objects to the group
+        #add the bg, fg, fade, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():
             pos = (-math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0],-math.ceil((1-parallax[1])*new_map_diff[1])+ offset[1])
-            if self.layer == 'fg':
-                self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
-            elif 'interact' in tile_layer:#the stuff that blits in front of interactables
+
+            if 'fade' in tile_layer:#add fade blocks
+                for fade in blit_fade_surfaces.keys():
+                    if 'fade' in fade:#is needed
+                        bg = Entities.BG_Fade(pos,blit_fade_surfaces[fade],parallax,blit_fade_pos[fade])
+                        if self.layer == 'bg':self.game_objects.all_bgs.add(bg)#bg
+                        else: self.game_objects.all_fgs.add(bg)
+                        self.game_objects.bg_fade.add(bg)
+            elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
                 self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
+
             elif self.layer == 'bg':#bg
                 bg = Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
                 self.game_objects.all_bgs.add(bg)
                 self.game_objects.all_bgs.reference[tuple(parallax)] = bg
+            elif self.layer == 'fg':#fg
+                self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
 
             if animation_entities.get(tile_layer,False):#add animations
                 for bg_animation in animation_entities[tile_layer]:
@@ -580,9 +612,8 @@ class Level():
         if self.references.get('shade_trigger',False):
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
-        if self.references.get('lever',False):#assume that there is not only a gate
+        if self.references.get('lever',False):#assume that the gate-lever is on the same map
             for lever in self.references['lever']:
                 for gate in self.references['gate']:
-                    if lever.ID == gate.ID:
+                    if lever.ID_key == gate.ID_key:
                         lever.add_gate(gate)
-                    break#go to next lever

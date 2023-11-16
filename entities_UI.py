@@ -1,5 +1,5 @@
 import pygame
-import Read_files, animation, states_health, states_basic
+import Read_files, animation, states_health, states_basic, states_buttons
 from sys import platform
 
 #for map UI
@@ -242,3 +242,28 @@ class Menu_Box():
     def draw(self,screen):
         pass
         #screen.blit(self.img, self.rect.topleft)
+
+#controllers
+class Controllers():
+    def __init__(self, pos, game_objects,type):
+        self.game_objects = game_objects#animation need it
+        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.animation = animation.Entity_animation(self)
+        self.currentstate =  getattr(states_buttons, type.capitalize() + '_idle')(self)
+
+    def update(self):
+        self.animation.update()
+
+class Xbox(Controllers):
+    def __init__(self, pos, game_objects,type):
+        super().__init__(pos, game_objects,type)
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/controller/xbox/')
+        self.image = self.sprites.sprite_dict['a_idle'][0]
+        self.rect = self.image.get_rect(topleft=pos)
+
+class Playsation(Controllers):
+    def __init__(self, pos, game_objects,type):
+        super().__init__(pos, game_objects,type)
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/controller/playstation/')
+        self.image = self.sprites.sprite_dict['a_idle'][0]
+        self.rect = self.image.get_rect(topleft=pos)
