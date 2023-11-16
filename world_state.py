@@ -28,7 +28,7 @@ class World_state():
     def update_money_statistcis(self):#called when amber is picked up
         self.statistics['ambers'] += 1#increaase total money
 
-    def save_travelpoint(self,map,cord):#called when inetracted with savepoint
+    def save_travelpoint(self,map,cord):#called when inetracted with fast travel
         try:#if already saved, do nothing
             self.travel_points[map]
         except:#if first time intercted with it
@@ -72,58 +72,3 @@ class World_state():
                     soul_essence_int += 1
 
         self.state.pop('placeholder_level', 0)#removes the placeholder tag
-
-class State_tree():#the top node. Should have children that represen main progress events (like killing boss)
-    ID = 0#this is will uniqly show which boss that has been killed and in which order
-    def __init__(self, name):
-        self.name = name
-        self.children = {}
-        self.parent = None
-        self.curr_child = None
-        State_tree.ID += 1
-        self.ID = State_tree.ID#give unique id when child is made
-
-    def add_child(self, child):
-        child.parent = self
-        self.children[child.name] = child
-
-    def set_path(self,path):#this should be called when e.g. defeating a boss. Bass the string of boss. It returns the ID of the current state
-        if self.curr_child is None:#if there is not child
-            self.curr_child = path
-            return self.children[path].ID#return the ID
-        else:#if there is a child, go down in tree and try again
-            return self.children[self.curr_child].set_path(path)
-
-    #for printing
-    def print_tree(self):
-        spaces = ' ' * self.get_level() * 3
-        prefix = spaces + "|__" if self.parent else ""
-        print(prefix + self.name, self.ID)
-        for child in self.children.keys():
-            self.children[child].print_tree()
-
-    def get_level(self):
-        level = 0
-        p = self.parent
-        while p:
-            level += 1
-            p = p.parent
-        return level
-
-def build_tree():
-    main_node = State_tree('Yggdrasill')
-    deer = State_tree('Deer')
-    main_node.add_child(deer)
-    ape = State_tree('Ape')
-    main_node.add_child(ape)
-    wolf = State_tree('Wolf')
-    ai = State_tree('AI')
-    deer2 = State_tree('Deer')
-    ai.add_child(deer2)
-    wolf.add_child(ai)
-    main_node.add_child(wolf)
-    lion = State_tree('Lion')
-    main_node.add_child(lion)
-
-    main_node.print_tree()
-    return main_node

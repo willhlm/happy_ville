@@ -62,3 +62,49 @@ class B_press(Basic_states):
     def handle_input(self,input):
         if input == 'release':
             self.enter_state('B_idle')
+
+class Lb_idle(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input == 'press':
+            self.enter_state('Lb_select')
+
+class Lb_select(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def increase_phase(self):
+        self.enter_state('Lb_press')
+
+class Lb_press(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input == 'release':
+            self.enter_state('Lb_idle')
+
+class Rb_idle(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input == 'press':
+            self.enter_state('Rb_select')
+
+class Rb_select(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def increase_phase(self):
+        self.enter_state('Rb_press')
+
+class Rb_press(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input):
+        if input == 'release':
+            self.enter_state('Rb_idle')

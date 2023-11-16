@@ -257,13 +257,13 @@ class Controllers():
 class Xbox(Controllers):
     def __init__(self, pos, game_objects,type):
         super().__init__(pos, game_objects,type)
-        self.sprites = Read_files.Sprites_Player('UI/controller/xbox/')
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/controller/xbox/')
         self.image = self.sprites.sprite_dict['a_idle'][0]
         self.rect = self.image.get_rect(topleft=pos)
 
 class Playsation(Controllers):
     def __init__(self, pos, game_objects,type):
         super().__init__(pos, game_objects,type)
-        self.sprites = Read_files.Sprites_Player('UI/controller/playstation/')        
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/controller/playstation/')
         self.image = self.sprites.sprite_dict['a_idle'][0]
         self.rect = self.image.get_rect(topleft=pos)

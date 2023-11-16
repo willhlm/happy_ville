@@ -414,6 +414,14 @@ class Flying_enemy(Enemy):
         self.velocity[0] = math.copysign(1,self.velocity[0])*min(abs(self.velocity[0]),1)#limit the max abs velocity to 1
         self.velocity[1] += 0.001*(position[1]-self.rect.centery)
 
+    def update_rect_y(self):
+        self.rect.center = self.hitbox.center
+        self.true_pos[1] = self.rect.top
+
+    def update_rect_x(self):
+        self.rect.center = self.hitbox.center
+        self.true_pos[0] = self.rect.left
+
 class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -424,7 +432,7 @@ class Mygga(Flying_enemy):
         self.currentstate = states_mygga.Idle(self)
         self.health = 3
 
-class Exploding_Mygga(Flying_enemy):
+class Exploding_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/exploding_mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -1384,8 +1392,8 @@ class Aila_sword(Sword):
         super().__init__(entity)
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
-        self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
-        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self),'purple':Red_infinity_stone(self)}#the ones aila has picked up
+        self.equip = ['red']#stone pointers, the ones attached to the sword, strings
+        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#the ones aila has picked up
         self.colour = {'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
         self.swing = 0#a flag to check which swing we are at (0 or 1)
 
@@ -2092,6 +2100,21 @@ class Health_bar(Animatedentity):
         for index, sprite in  enumerate(self.sprites.sprite_dict['idle']):
             self.sprites.sprite_dict['idle'][index] = pygame.transform.scale(sprite,[width,self.rect[3]])
 
+class Logo_loading(Animatedentity):
+    def __init__(self, game_objects):
+        super().__init__([500,300],game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/UI/logo_loading/')
+        self.image = self.sprites.sprite_dict['death'][0]
+        self.rect = self.image.get_rect()
+        self.currentstate =  states_basic.Death(self)
+
+    def update(self):
+        super().update()
+        self.rect.topleft = [self.true_pos[0] + self.game_objects.camera.scroll[0],self.true_pos[1] + self.game_objects.camera.scroll[1]]
+
+    def reset_timer(self):
+        self.kill()
+
 #interactables
 class Interactable(Animatedentity):#interactables
     def __init__(self,pos,game_objects, sfx = None):
@@ -2399,6 +2422,7 @@ class Savepoint(Interactable):#save point
             self.game_objects.player.spawn_point[0]['map']=self.map
             self.game_objects.player.spawn_point[0]['point']=self.init_cord
             self.currentstate.handle_input('Once')
+            self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
         else:#odoulbe click
             self.game_objects.player.currentstate.handle_input('special')
             new_state = states.Facilities(self.game_objects.game,'Spirit_upgrade_menu')
@@ -2420,7 +2444,7 @@ class Inorinoki(Interactable):#the place where you trade soul essence for spirit
         new_state = states.Soul_essence(self.game_objects.game)
         new_state.enter_state()
 
-class Fast_travel(Interactable):#save point
+class Fast_travel(Interactable):
     cost = 50
     def __init__(self,pos,game_objects,map):
         super().__init__(pos,game_objects)
@@ -2937,11 +2961,11 @@ class Wall_timer(Timer):
         super().deactivate()
         self.active = False
 
-    def handle_input(self,input):
+    def handle_input(self,input):#called from handle press input in player states
         #return
         if not self.active: return
         if input=='a':#pressed jump
-            self.entity.velocity[0] = self.entity.dir[0]*10
+            #self.entity.velocity[0] = -self.entity.dir[0]*10
             self.entity.velocity[1] = -7#to get a vertical velocity
 
 class Wall_timer_2(Timer):

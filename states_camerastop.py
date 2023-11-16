@@ -81,16 +81,19 @@ class Stop_bottom(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.determine_sign()
-        self.function = {1:self.function_min,-1:self.function_max}#for smooth transtion
 
-    def init_pos(self):        
+    def init_pos(self):
         self.entity.game_objects.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
         self.center = self.entity.game_objects.camera.center.copy()
 
     def determine_sign(self):
-        target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
-        if self.center[1] > target: self.sign = -1#from up to down
-        else: self.sign = 1#from down to up
+        target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - (self.entity.game_objects.player.hitbox.centery-self.entity.game_objects.player.velocity[1])) - self.entity.game_objects.player.rect[3]*0.5
+        if self.center[1] > target:
+            self.sign = -1#from up to down
+            self.function = self.function_max
+        else:
+            self.sign = 1#from down to up
+            self.function = self.function_min
 
     def function_min(self,target):
         return min(target,self.center[1])
@@ -103,7 +106,7 @@ class Stop_bottom(Basic_states):
         if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:#if on screen on y and coser than half screen on x
             target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
             self.center[1] += self.sign*3
-            self.entity.game_objects.camera.center[1] = self.function[self.sign](target)#min(target,self.center[1])
+            self.entity.game_objects.camera.center[1] = self.function(target)#min or max
         else:
             self.enter_state('Idle_bottom')
 

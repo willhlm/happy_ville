@@ -103,7 +103,6 @@ class Level():
 
             if 'bg' in group: self.layer = 'bg'
             elif 'fg' in group: self.layer = 'fg'
-            elif 'interact' in group: self.layer = 'interact'
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_back_objects)#objects behind layers
             self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
@@ -493,8 +492,8 @@ class Level():
         'Each group needs at least one tile layer (but can be emppty).'
         'The groups should contain "fg", "bg" in their name.'
         'The tile layer in groups can be called whatever.'
-        'recommended convention: bg_#, bg_interact_# or bg_fade_# for the layers. It doesnt have to be called bg but needs _fade_# and _interact_# for the spaceual ones'
-        'The main layer needs to be called "bg1"'#world state file reads it
+        'recommended convention: bg_#, bg_interact_# or bg_fade_# for the layers. It doesnt have to be called bg but needs _fade_# and _interact_# for the spaceial ones'
+        'The main group needs to be called "bg1"'#world state file reads it
         'The objects need to be called statics, interactables, front or back.'
         'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
 

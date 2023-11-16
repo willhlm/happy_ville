@@ -161,3 +161,9 @@ class UI_loader():#for map, omamori, ability, journal etc
             elif id == 5:#b button
                 new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'b')
                 self.buttons['b'] = new_button
+            elif id == 6:#lb button
+                new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'lb')
+                self.buttons['lb'] = new_button
+            elif id == 7:#rb button
+                new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'rb')
+                self.buttons['rb'] = new_button

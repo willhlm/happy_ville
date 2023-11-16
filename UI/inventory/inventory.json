@@ -182,18 +182,6 @@
                  "y":160
                 }, 
                 {
-                 "gid":881,
-                 "height":160,
-                 "id":19,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":80,
-                 "x":112,
-                 "y":288
-                }, 
-                {
                  "gid":883,
                  "height":16,
                  "id":20,
@@ -464,96 +452,6 @@
                  "y":192
                 }, 
                 {
-                 "gid":882,
-                 "height":23,
-                 "id":35,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"stone",
-                         "type":"string",
-                         "value":"blue"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":18,
-                 "x":176,
-                 "y":240
-                }, 
-                {
-                 "gid":882,
-                 "height":23,
-                 "id":36,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"stone",
-                         "type":"string",
-                         "value":"green"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":18,
-                 "x":176,
-                 "y":192
-                }, 
-                {
-                 "gid":882,
-                 "height":23,
-                 "id":37,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"stone",
-                         "type":"string",
-                         "value":"purple"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":18,
-                 "x":144,
-                 "y":160
-                }, 
-                {
-                 "gid":882,
-                 "height":23,
-                 "id":38,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"stone",
-                         "type":"string",
-                         "value":"orange"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":18,
-                 "x":112,
-                 "y":192
-                }, 
-                {
-                 "gid":882,
-                 "height":23,
-                 "id":39,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"stone",
-                         "type":"string",
-                         "value":"red"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":18,
-                 "x":112,
-                 "y":240
-                }, 
-                {
                  "gid":885,
                  "height":16,
                  "id":40,
@@ -576,6 +474,132 @@
                  "width":16,
                  "x":592,
                  "y":320
+                }, 
+                {
+                 "gid":887,
+                 "height":16,
+                 "id":42,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":224,
+                 "y":32
+                }, 
+                {
+                 "gid":888,
+                 "height":16,
+                 "id":43,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":400,
+                 "y":32
+                }, 
+                {
+                 "gid":881,
+                 "height":112,
+                 "id":44,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":144,
+                 "y":272
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":45,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"stone",
+                         "type":"string",
+                         "value":"purple"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":144,
+                 "y":160
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":46,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"stone",
+                         "type":"string",
+                         "value":"green"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":176,
+                 "y":192
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":48,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"stone",
+                         "type":"string",
+                         "value":"orange"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":176,
+                 "y":240
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":49,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"stone",
+                         "type":"string",
+                         "value":"red"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":112,
+                 "y":240
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":50,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"stone",
+                         "type":"string",
+                         "value":"blue"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":112,
+                 "y":192
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -584,7 +608,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":42,
+ "nextobjectid":52,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
