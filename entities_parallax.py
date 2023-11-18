@@ -90,8 +90,7 @@ class Ljusmaskar(Layered_objects):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/ljusmaskar/')
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect = self.image.get_rect(topleft = pos)
         self.true_pos = self.rect.topleft
 
     def group_distance(self):
@@ -104,12 +103,21 @@ class Cave_grass(Layered_objects):
         self.sprites = Read_files.Sprites_Player('Sprites/animations/bushes/cave_grass/')
         self.init_sprites()#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect = self.image.get_rect(topleft = pos)
         self.true_pos = self.rect.topleft
 
     def group_distance(self):
         pass
+
+class Cocoon(Layered_objects):#larv cocoon in light forest
+    animations = {}
+    def __init__(self, pos, game_objects,parallax):
+        super().__init__(pos, game_objects,parallax)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/cocoon/')
+        self.init_sprites()#blur or lead from memory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(topleft = pos)
+        self.true_pos = self.rect.topleft
 
 class Droplet_source(Layered_objects):
     animations = {}

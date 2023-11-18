@@ -81,32 +81,28 @@ class Stop_bottom(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.determine_sign()
+        self.true_center = self.center.copy()
 
     def init_pos(self):
         self.entity.game_objects.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
         self.center = self.entity.game_objects.camera.center.copy()
+        self.sign = 1
 
     def determine_sign(self):
         target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - (self.entity.game_objects.player.hitbox.centery-self.entity.game_objects.player.velocity[1])) - self.entity.game_objects.player.rect[3]*0.5
         if self.center[1] > target:
-            self.sign = -1#from up to down
-            self.function = self.function_max
+            self.sign = 1#from up to down
         else:
-            self.sign = 1#from down to up
-            self.function = self.function_min
-
-    def function_min(self,target):
-        return min(target,self.center[1])
-
-    def function_max(self,target):
-        return max(target,self.center[1])
+            self.sign = -1#from down to up
 
     def update_state(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
         if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:#if on screen on y and coser than half screen on x
             target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
-            self.center[1] += self.sign*3
-            self.entity.game_objects.camera.center[1] = self.function(target)#min or max
+            self.true_center[1] -= (self.entity.game_objects.camera.center[1]-target)*0.1
+            self.center[1] = int(self.true_center[1])
+            #self.center[1] -= self.sign*3#self.sign*(abs(self.entity.game_objects.camera.center[1]-target))*0.1
+            self.entity.game_objects.camera.center[1] = self.sign*max(self.sign*target,self.sign*self.center[1])#when sign is negative, it works as min
         else:
             self.enter_state('Idle_bottom')
 

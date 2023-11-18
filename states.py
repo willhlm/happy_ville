@@ -105,7 +105,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'light_forest_8','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -1065,3 +1065,27 @@ class Rhoutta_encounter_gameplay(Gameplay):#called from trigger before first rho
         if input == 'dmg':
             new_game_state = Pause_gameplay(self.game,duration=11)
             new_game_state.enter_state()
+
+class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
+    def __init__(self,game):
+        super().__init__(game)
+        self.stage = 0
+        object_position = [2128,1456]
+        self.cocoon = Entities.Cocoon_boss(object_position, self.game.game_objects)
+        self.game.game_objects.interactables.add(self.cocoon)
+
+    def update(self):
+        super().update()
+        self.timer+=self.game.dt
+        if self.stage ==0:
+            if self.timer<50:
+                self.game.game_objects.player.velocity[0]=-4
+                self.game.game_objects.player.acceleration[0]=1
+
+            elif self.timer > 50:
+                self.game.game_objects.player.currentstate.enter_state('Idle_main')
+                self.game.game_objects.player.acceleration[0]=0
+                self.stage = 1
+        elif self.stage == 1:
+            if self.timer > 200:
+                self.exit_state()

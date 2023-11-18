@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
+import states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
@@ -82,7 +82,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
         super().__init__(pos)
         self.game_objects = game_objects#animation need dt
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Entity_animation(self)
         self.currentstate = states_basic.Idle(self)#
 
@@ -387,7 +387,7 @@ class Enemy(Character):
     def chase(self):#called from AI: when chaising
         self.velocity[0] += self.dir[0]*0.5
 
-    def patrol(self,position):#called from AI: when patroling
+    def patrol(self,position = 0):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
 
 class Flying_enemy(Enemy):
@@ -572,6 +572,19 @@ class Larv_poison(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.attack=Poisonblobb
         self.attack_distance=150
+
+class Maggot(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/enemies/maggot/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.currentstate = states_maggot.Fall_stand(self)
+        self.AI = AI_maggot.Idle(self)
+        self.health = 1
+        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
+        self.friction[0] = C.friction[0]*2
 
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
@@ -1392,8 +1405,8 @@ class Aila_sword(Sword):
         super().__init__(entity)
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
-        self.equip = ['red']#stone pointers, the ones attached to the sword, strings
-        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self)}#the ones aila has picked up
+        self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
+        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self),'purple':Orange_infinity_stone(self)}#the ones aila has picked up
         self.colour = {'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
         self.swing = 0#a flag to check which swing we are at (0 or 1)
 
@@ -2290,6 +2303,49 @@ class Cave_grass(Interactable_bushes):
         for i in range(0,number_particles):
             obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=30,lifetime=300,vel={'wave':[3,14]},dir='isotropic',scale=2,colour=color)
             self.game_objects.cosmetics.add(obj1)
+
+class Cocoon(Interactable):#larv cocoon in light forest
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/cocoon/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(topleft = pos)
+        self.hitbox = self.rect.copy()
+        self.health = 3
+        self.timers = []
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+
+    def update(self):
+        super().update()
+        self.update_timers()#invincibililty
+
+    def take_dmg(self,projectile):
+        if self.invincibile: return
+        #projectile.clash_particles(self.hitbox.center)
+        self.health -= 1
+        self.timer_jobs['invincibility'].activate()
+
+        if self.health > 0:
+            self.currentstate.handle_input('Hurt')
+            #self.animation.handle_input('Hurt')#turn white
+        else:#death
+            self.currentstate.handle_input('Interact')
+            self.game_objects.enemies.add(Maggot(self.rect.center,self.game_objects))
+
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
+
+class Cocoon_boss(Cocoon):#boss cocoon in light forest
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/animations/cocoon_boss/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(bottomleft = pos)
+        self.hitbox = self.rect.copy()
+
+    def take_dmg(self,projectile):
+        pass
 
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
