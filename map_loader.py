@@ -425,6 +425,17 @@ class Level():
                 else:
                     self.game_objects.platforms.add(new_plarform)
 
+            elif id == 5:#cocoon
+                if parallax == [1,1]:#if BG1 layer
+                    new_cocoon = Entities.Cocoon(object_position, self.game_objects)
+                    self.game_objects.interactables.add(new_cocoon)
+                else:#if in parallax layers
+                    new_cocoon = entities_parallax.Cocoon(object_position, self.game_objects, parallax)
+                    if self.layer == 'fg':
+                        self.game_objects.all_fgs.add(new_cocoon)
+                    else:
+                        self.game_objects.all_bgs.add(new_cocoon)
+
     def load_light_forest_cave_objects(self,data,parallax,offset):
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]

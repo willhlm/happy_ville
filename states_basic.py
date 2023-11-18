@@ -111,11 +111,8 @@ class Hurt(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_input(self,input):
-        if input == 'Death':
-            self.enter_state('Death')
-        elif input=='Idle':
-             self.enter_state('Idle')
+    def increase_phase(self):
+        self.enter_state('Idle')
 
 class Death(Basic_states):
     def __init__(self,entity):
