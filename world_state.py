@@ -3,7 +3,7 @@ import Read_files
 class World_state():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.cutscenes_complete = []#when a cutscenne has been played, its name gets appended here
+        self.cutscenes_complete = {}#when a cutscenne has been played, its name gets appended here
         self.statistics = {'kill':{},'ambers':0}#collects stuff aila has done
         self.state = Read_files.read_json("map_state.json")
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked

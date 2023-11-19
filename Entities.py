@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_cocoon_boss, states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -740,7 +740,7 @@ class Skeleton_archer(Enemy):#change design
         pass
 
 class Cultist_rogue(Enemy):
-    def __init__(self,pos,game_objects,gameplay_state=None):
+    def __init__(self,pos,game_objects, gameplay_state = None):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_rogue/')
         self.image = self.sprites.sprite_dict['idle'][0]
@@ -831,7 +831,7 @@ class Aslat(NPC):
     def buisness(self):#enters after conversation
         if 'reindeer' not in self.priority:#if player has deafated the reindeer
             if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet
-                new_game_state = states.New_ability(self.game_objects.game,'Wall_glide')
+                new_game_state = states.Blit_image_text(self.game_objects.game,self.game.game_objects.player.sprites.sprite_dict[Wall_glide][0].copy())
                 new_game_state.enter_state()
                 self.game_objects.player.states['Wall_glide'] = True
 
@@ -904,6 +904,13 @@ class Boss(Enemy):
     def give_abillity(self):
         self.game_objects.player.abilities.Player_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
 
+    def knock_back(self,dir):
+        pass
+
+    def take_dmg(self,dmg):
+        super().take_dmg(dmg)
+        self.health_bar.resize()
+
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -923,12 +930,17 @@ class Reindeer(Boss):
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
-    def take_dmg(self,dmg):
-        super().take_dmg(dmg)
-        self.health_bar.resize()
+class Butterfly(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/butterfly/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(topleft=pos)
+        self.hitbox = self.rect.copy()
 
-    def knock_back(self,dir):
-        pass
+    def dead(self):#called when death animation is finished
+        self.game_objects.game.state_stack[-1].incrase_kill()
+        super().dead()
 
 class Idun(Boss):
     def __init__(self,pos,game_objects):
@@ -1057,11 +1069,15 @@ class Light_glow(Staticentity):#a light glow anounf an entity.
         self.game_objects = entity.game_objects
         self.radius = radius
         self.layers = layers
+        self.constant = radius/layers
         self.make_glow()
         self.image = self.glow
         self.rect = self.image.get_rect()
         self.rect.center = entity.rect.center
         self.alpha = 255
+
+    def update(self):
+        self.rect.center = self.entity.rect.center
 
     def diminish(self):#slowly reduce the light
         self.image.set_alpha(int(self.alpha))
@@ -1072,7 +1088,7 @@ class Light_glow(Staticentity):#a light glow anounf an entity.
 
         for i in range(self.layers):
             temp = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-            pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*5+1)
+            pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*self.constant+1)
             self.glow.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
 class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark screen/layer in e.g. caves. It can be combined with light_glow
@@ -1944,6 +1960,34 @@ class Heal_item(Enemy_drop):
         obj.sounds = Read_files.Sounds('Audio/SFX/enteties/items/heal_item/')
         return obj
 
+class Interactable_item(Enemy_drop):
+    def __init__(self, pos, game_objects, item):
+        super().__init__(pos, game_objects)
+        self.velocity = [random.uniform(0, 3),-4]
+        self.item = item
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/interactable_item/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox = self.rect.copy()
+        self.light = Light_glow(self,radius = 50, layers = 40)
+        self.game_objects.cosmetics.add(self.light)
+
+    def interact(self):#when player press T
+        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        new_game_state = states.Blit_image_text(self.game_objects.game,self.sprites.sprite_dict['idle'][0],'thank you')
+        new_game_state.enter_state()
+        self.light.kill()
+        self.kill()
+
+    def destory(self):#don't destroy it after lifetime
+        pass
+
+    def player_collision(self,player):#when the player collides with this object
+        pass
+
+    def attract(self,pos):#the omamori calls on this in loot group
+        pass
+
 #cosmetics
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
@@ -2241,7 +2285,7 @@ class Shade_trigger(Interactable):
         self.layers_one = layers#a list of shahde layers
         self.layers_two = []#similar to self.layer, keeps the layers of the shade screen
 
-class Cutscene_trigger(Interactable):#shoudl be called a state trigger
+class State_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
@@ -2254,10 +2298,13 @@ class Cutscene_trigger(Interactable):#shoudl be called a state trigger
         #self.group_distance()
 
     def player_collision(self):
-#        if self.event not in self.game_objects.world_state.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
+        if self.game_objects.world_state.cutscenes_complete.get(self.event, False): return#if the cutscene has not been shown before. Shold we kill the object instead?
+        if self.event == 'Butterfly_encounter':
+            if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggrp is not chosen
+
         new_game_state = getattr(states, self.event)(self.game_objects.game)
         new_game_state.enter_state()
-        self.kill()
+        self.kill()#is this a pronlen in re spawn?
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
@@ -2341,11 +2388,19 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/cocoon_boss/')
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(bottomleft = pos)
+        self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = self.rect.copy()
+        self.aggro_distance = [200,50]
+        self.currentstate = states_cocoon_boss.Idle(self)
+        self.item = Interactable_item
+
+    def particle_release(self):
+        for i in range(0,30):
+            obj1 = getattr(particles, 'Circle')(self.rect.center,self.game_objects,distance=0,lifetime=55,vel={'linear':[7,14]},dir='isotropic',scale=0.5,colour = [255,255,255,255])
+            self.game_objects.cosmetics.add(obj1)
 
     def take_dmg(self,projectile):
-        pass
+        self.game_objects.game.state_stack[-1].handle_input('butterfly')
 
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):

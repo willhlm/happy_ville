@@ -261,16 +261,11 @@ class Level():
             #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_bgs)
 
             elif id == 19:#trigger
-                values={}
                 for property in properties:
                     if property['name'] == 'event':
-                        values['event'] = property['value']
-                    elif property['name'] == 'event_type':
-                        values['event_type']=property['value']
-
-                if values['event_type'] == 'cutscene':
-                    new_trigger = Entities.Cutscene_trigger(object_position,self.game_objects,object_size ,values['event'])
-                    self.game_objects.interactables.add(new_trigger)
+                        value = property['value']
+                new_trigger = Entities.State_trigger(object_position,self.game_objects,object_size ,value)
+                self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object
                 for property in properties:
@@ -435,6 +430,11 @@ class Level():
                         self.game_objects.all_fgs.add(new_cocoon)
                     else:
                         self.game_objects.all_bgs.add(new_cocoon)
+
+            elif id == 8:#cocoon
+                new_cocoon = Entities.Cocoon_boss(object_position, self.game_objects)
+                self.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
+                self.game_objects.interactables.add(new_cocoon)
 
     def load_light_forest_cave_objects(self,data,parallax,offset):
         for obj in data['objects']:

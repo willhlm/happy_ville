@@ -82,11 +82,14 @@ class Collisions():
     def check_interaction_collision(self):
         npc =  pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.npcs,Collisions.collided)#check collision
         interactable = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.interactables,Collisions.collided)#check collision
+        loot = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.loot,Collisions.collided)#check collision
 
         if npc:
             npc.interact()
         elif interactable:
             interactable.interact()
+        if loot:
+            loot.interact()
 
     #collision of player, enemy and loot: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one
@@ -96,8 +99,8 @@ class Collisions():
 
             #move in x every dynamic sprite
             entity.update_true_pos_x()
-            static_entity_x = pygame.sprite.spritecollideany(entity,self.game_objects.platforms,Collisions.collided)
-            if static_entity_x:
+            static_entity_x = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
+            for static_entity_x in static_entity_x:
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite

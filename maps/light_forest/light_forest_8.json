@@ -274,8 +274,32 @@
                          "type":"",
                          "visible":true,
                          "width":80,
+                         "x":2656,
+                         "y":1424
+                        }, 
+                        {
+                         "gid":45080,
+                         "height":128,
+                         "id":551,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
                          "x":4384,
                          "y":1232
+                        }, 
+                        {
+                         "gid":45083,
+                         "height":144,
+                         "id":552,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":2080,
+                         "y":1456
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -362,7 +386,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2848,
+                         "x":2784,
                          "y":1376
                         }, 
                         {
@@ -1248,18 +1272,13 @@
                         {
                          "gid":20,
                          "height":208,
-                         "id":548,
+                         "id":553,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"event",
                                  "type":"string",
                                  "value":"Butterfly_encounter"
-                                }, 
-                                {
-                                 "name":"event_type",
-                                 "type":"string",
-                                 "value":"cutscene"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1294,7 +1313,7 @@
          "y":0
         }],
  "nextlayerid":93,
- "nextobjectid":549,
+ "nextobjectid":554,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
