@@ -27,7 +27,8 @@ class Idle(Basic_states):
 class Birth(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.loot.add(self.entity.item(self.entity.rect.center,self.entity.game_objects,'omamori'))
+        loot = self.entity.item(self.entity.rect.center,self.entity.game_objects)
+        self.entity.game_objects.loot.add(loot)#.rect.center,self.entity.game_objects
 
     def increase_phase(self):
         self.enter_state('Idle2')

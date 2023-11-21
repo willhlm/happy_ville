@@ -714,7 +714,7 @@ class Cutscenes(Gameplay):#basically, this class is not needed but would be nice
     def handle_events(self, input):
         self.current_scene.handle_events(input)
 
-class Blit_image_text(Gameplay):#when player obtaines a new ability
+class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item
     def __init__(self, game,img,text=''):
         super().__init__(game)
         self.page = 0
@@ -1116,7 +1116,7 @@ class Butterfly_encounter_gameplay(Gameplay):#if aggro path is chosen: and shoul
         self.butterfly = Entities.Butterfly(spawn_pos, self.game.game_objects)
         self.game.game_objects.enemies.add(self.butterfly)
         self.game.game_objects.map.references['cocoon_boss'].currentstate.handle_input('Hurt')
-        spawn_pos = [2576,1520]
+        spawn_pos = [2576,1320]
         self.gate = Entities.Lighitning_barrier(spawn_pos,self.game.game_objects)
         self.game.game_objects.interactables.add(self.gate)
 
