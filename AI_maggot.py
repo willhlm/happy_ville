@@ -8,6 +8,9 @@ class AI():
     def enter_AI(self,newAI, **kwarg):
         self.entity.AI = getattr(sys.modules[__name__], newAI)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
 
+    def update(self):
+        pass
+
     def handle_input(self,input):
         pass
 
