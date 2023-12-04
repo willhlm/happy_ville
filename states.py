@@ -384,6 +384,9 @@ class Gameplay(Game_State):
             new_game_state.enter_state()
         elif input == 'death':#normal death
             self.game.game_objects.player.death()
+        elif input == 'butterfly':#the cacoon was hit
+            new_state = Butterfly_encounter_gameplay(self.game)
+            new_state.enter_state()
 
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self,game):
@@ -711,13 +714,16 @@ class Cutscenes(Gameplay):#basically, this class is not needed but would be nice
     def handle_events(self, input):
         self.current_scene.handle_events(input)
 
-class New_ability(Gameplay):#when player obtaines a new ability
-    def __init__(self, game,ability):
+class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item
+    def __init__(self, game,img,text=''):
         super().__init__(game)
         self.page = 0
         self.render_fade=[self.render_in,self.render_out]
 
-        self.img = self.game.game_objects.player.sprites.sprite_dict[ability][0].copy()
+        self.img = img
+        self.text = self.game.game_objects.font.render((140,80), text)
+        self.text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+
         self.game.game_objects.player.reset_movement()
 
         self.surface = pygame.Surface((int(self.game.window_size[0]), int(self.game.window_size[1])), pygame.SRCALPHA, 32).convert_alpha()
@@ -730,8 +736,9 @@ class New_ability(Gameplay):#when player obtaines a new ability
         super().render()
         self.surface.set_alpha(int(self.fade))
         self.render_fade[self.page]()
+        self.surface.blit(self.img,(200, 200))#blit directly on screen to avoid alpha change on this
+        self.surface.blit(self.text,(420,150))
         self.game.screen.blit(self.surface,(0, 0))
-        self.game.screen.blit(self.img,(200, 200))#blit directly on screen to avoid alpha change on this
 
     def render_in(self):
         self.fade += 1
@@ -744,6 +751,7 @@ class New_ability(Gameplay):#when player obtaines a new ability
         self.img.set_alpha(int(self.fade))
 
         if self.fade == 0:
+            self.game.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
             self.exit_state()
 
     def handle_events(self,input):
@@ -759,7 +767,7 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
         super().__init__(game)
         self.timer = 0
         self.pos = [-self.game.window_size[1],self.game.window_size[1]]
-        self.const = 0.8#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
+        self.const = [0.8,0.8]#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
 
     def render(self):
         super().render()
@@ -767,15 +775,16 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
 
     def cinematic(self):#black box stuff
         self.pos[0]+=self.game.dt#the upper balck box
+        self.pos[1]-=self.game.dt#the lower balck box
+
+        self.pos[0]=min(-self.game.window_size[1]*self.const[0],self.pos[0])
+        self.pos[1]=max(self.game.window_size[1]*self.const[1],self.pos[1])
+
         rect1=(0, int(self.pos[0]), self.game.window_size[0], self.game.window_size[1])
         pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
 
-        self.pos[1]-=self.game.dt#the lower balck box
         rect2=(0, int(self.pos[1]), self.game.window_size[0], self.game.window_size[1])
         pygame.draw.rect(self.game.screen, (0, 0, 0), rect2)
-
-        self.pos[0]=min(-self.game.window_size[1]*self.const,self.pos[0])
-        self.pos[1]=max(self.game.window_size[1]*self.const,self.pos[1])
 
     def handle_events(self,input):
         if input[0]:#press
@@ -972,7 +981,7 @@ class Death(Cutscene_engine):#when aila dies
     def cinematic(self):
         pass
 
-#cultist encountter
+#encountters and corresponding cutscenes
 class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
@@ -1038,7 +1047,7 @@ class Cultist_encounter_gameplay(Gameplay):#initialised in the cutscene:if playe
     def incrase_kill(self):#called when entity1 and 2 are killed
         self.kill += 1
         if self.kill == 2:#both cultist have died
-            self.game.game_objects.world_state.cutscenes_complete.append(type(self).__name__.replace('_gameplay',''))
+            self.game.game_objects.world_state.cutscenes_complete[type(self).__name__.replace('_gameplay','')] = True
             self.gate.currentstate.handle_input('Transform')
             self.exit_state()#if there was a gate, we can open it
 
@@ -1070,22 +1079,53 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
         self.stage = 0
-        object_position = [2128,1456]
-        self.cocoon = Entities.Cocoon_boss(object_position, self.game.game_objects)
-        self.game.game_objects.interactables.add(self.cocoon)
+        self.cocoon = self.game.game_objects.map.references['cocoon_boss']
+        self.const[1] = 0.9
 
     def update(self):
         super().update()
         self.timer+=self.game.dt
-        if self.stage ==0:
+        if self.stage ==0:#approch
             if self.timer<50:
                 self.game.game_objects.player.velocity[0]=-4
-                self.game.game_objects.player.acceleration[0]=1
+                self.game.game_objects.player.acceleration[0] = 1
 
-            elif self.timer > 50:
+            elif self.timer > 50:#stay
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')
                 self.game.game_objects.player.acceleration[0]=0
                 self.stage = 1
-        elif self.stage == 1:
+
+        elif self.stage == 1:#aggro
+
             if self.timer > 200:
+                self.game.game_objects.camera.camera_shake(duration = 200)
+                self.stage = 2
+
+        elif self.stage == 2:#spawn
+            self.cocoon.particle_release()
+            if self.timer > 400:
                 self.exit_state()
+                new_state = Butterfly_encounter_gameplay(self.game)#it will make the gate
+                new_state.enter_state()
+
+class Butterfly_encounter_gameplay(Gameplay):#if aggro path is chosen: and should be called if cocoon gets hurt
+    def __init__(self,game):
+        super().__init__(game)
+        spawn_pos = self.game.game_objects.map.references['cocoon_boss'].rect.topleft
+        self.game.game_objects.weather.lightning()
+        self.butterfly = Entities.Butterfly(spawn_pos, self.game.game_objects)
+        self.game.game_objects.enemies.add(self.butterfly)
+        self.game.game_objects.map.references['cocoon_boss'].currentstate.handle_input('Hurt')
+        spawn_pos = [2576,1320]
+        self.gate = Entities.Lighitning_barrier(spawn_pos,self.game.game_objects)
+        self.game.game_objects.interactables.add(self.gate)
+
+    def incrase_kill(self):#called when butterfly is dead
+        self.game.game_objects.world_state.cutscenes_complete[type(self).__name__.replace('_gameplay','')] = True
+        self.gate.currentstate.handle_input('Transform')#if there was a gate, we can open it
+        self.exit_state()
+
+    def handle_input(self,input):
+        if input == 'dmg':
+            new_game_state = Pause_gameplay(self.game,duration=11)
+            new_game_state.enter_state()

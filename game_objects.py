@@ -84,7 +84,7 @@ class Game_Objects():
             print("No BG music found")
 
     def clean_groups(self):
-        self.npcs.empty()#maybe a problem if we have a bank? -> save the money to world state
+        self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()

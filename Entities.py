@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_cocoon_boss, states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -740,7 +740,7 @@ class Skeleton_archer(Enemy):#change design
         pass
 
 class Cultist_rogue(Enemy):
-    def __init__(self,pos,game_objects,gameplay_state=None):
+    def __init__(self,pos,game_objects, gameplay_state = None):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.Sprites_Player('Sprites/Enteties/enemies/cultist_rogue/')
         self.image = self.sprites.sprite_dict['idle'][0]
@@ -831,7 +831,7 @@ class Aslat(NPC):
     def buisness(self):#enters after conversation
         if 'reindeer' not in self.priority:#if player has deafated the reindeer
             if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet
-                new_game_state = states.New_ability(self.game_objects.game,'Wall_glide')
+                new_game_state = states.Blit_image_text(self.game_objects.game,self.game.game_objects.player.sprites.sprite_dict[Wall_glide][0].copy())
                 new_game_state.enter_state()
                 self.game_objects.player.states['Wall_glide'] = True
 
@@ -904,6 +904,13 @@ class Boss(Enemy):
     def give_abillity(self):
         self.game_objects.player.abilities.Player_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
 
+    def knock_back(self,dir):
+        pass
+
+    def take_dmg(self,dmg):
+        super().take_dmg(dmg)
+        self.health_bar.resize()
+
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -923,12 +930,17 @@ class Reindeer(Boss):
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
-    def take_dmg(self,dmg):
-        super().take_dmg(dmg)
-        self.health_bar.resize()
+class Butterfly(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/boss/butterfly/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(topleft=pos)
+        self.hitbox = self.rect.copy()
 
-    def knock_back(self,dir):
-        pass
+    def dead(self):#called when death animation is finished
+        self.game_objects.game.state_stack[-1].incrase_kill()
+        super().dead()
 
 class Idun(Boss):
     def __init__(self,pos,game_objects):
@@ -1054,26 +1066,28 @@ class Light_glow(Staticentity):#a light glow anounf an entity.
     def __init__(self, entity, radius = 200,layers = 40):
         super().__init__(entity.rect.center)
         self.entity = entity
-        self.game_objects = entity.game_objects
         self.radius = radius
         self.layers = layers
         self.make_glow()
-        self.image = self.glow
-        self.rect = self.image.get_rect()
-        self.rect.center = entity.rect.center
+        self.rect = self.image.get_rect(center = entity.rect.center)
         self.alpha = 255
+
+    def update(self):
+        self.rect.center = self.entity.rect.center
 
     def diminish(self):#slowly reduce the light
         self.image.set_alpha(int(self.alpha))
-        self.alpha -= self.game_objects.game.dt*self.slow_motion
+        self.alpha -= self.entity.game_objects.game.dt*self.slow_motion
 
     def make_glow(self):#init
-        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
+        self.image = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
+        surface = self.image.copy()
 
+        constant = self.radius/self.layers
         for i in range(self.layers):
-            temp = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-            pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*5+1)
-            self.glow.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
+            temp = surface.copy()
+            pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*constant+1)
+            self.image.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
 class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark screen/layer in e.g. caves. It can be combined with light_glow
     def __init__(self, entity, radius = 200, layers = 40):
@@ -1236,6 +1250,34 @@ class Wall_glide(Movement_abilities):
 class Double_jump(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
+
+class Omamoris():#omamori handler
+    def __init__(self,entity):
+        self.entity = entity
+        self.equipped = {}#equiped omamoris
+        self.inventory = {'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)}#omamoris in inventory.
+        self.number = 3#number of omamori we can equip
+        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)
+
+    def update(self):
+        for omamori in self.equipped.values():
+            omamori.update()
+
+    def handle_input(self,input):
+        for omamori in self.equipped.values():
+            omamori.handle_input(input)
+
+    def equip_omamori(self,omamori_string):
+        if not self.equipped.get(omamori_string,False):#if it is not equipped
+            if len(self.equipped) < self.number:#maximum number of omamoris to equip
+                new_omamori = getattr(sys.modules[__name__], omamori_string)(self.entity)#make a class based on the name of the newstate: need to import sys
+                self.equipped[omamori_string] = new_omamori
+                self.inventory[omamori_string].currentstate.handle_input('Equip')
+                new_omamori.attach()
+        else:##if equiped -> remove
+            self.inventory[omamori_string].currentstate.handle_input('Idle')
+            self.equipped[omamori_string].detach()#call the detach function of omamori
+            del self.equipped[omamori_string]
 
 #projectiles
 class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
@@ -1406,8 +1448,7 @@ class Aila_sword(Sword):
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
         self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
-        self.stones = {'red':Red_infinity_stone(self),'green':Green_infinity_stone(self),'blue':Blue_infinity_stone(self),'orange':Orange_infinity_stone(self),'purple':Orange_infinity_stone(self)}#the ones aila has picked up
-        self.colour = {'red':[255,64,64,255],'blue':[0,0,205,255],'green':[105,139,105,255],'orange':[255,127,36,255],'purple':[154,50,205,255]}#spark colour
+        self.stones = {'red':Red_infinity_stone([0,0],entity.game_objects, self),'green':Green_infinity_stone([0,0],entity.game_objects, self),'blue':Blue_infinity_stone([0,0],entity.game_objects, self),'orange':Orange_infinity_stone([0,0],entity.game_objects, self),'purple':Purple_infinity_stone([0,0],entity.game_objects, self)}#the ones aila has picked up
         self.swing = 0#a flag to check which swing we are at (0 or 1)
 
     def init(self):
@@ -1729,15 +1770,39 @@ class Loot(Platform_entity):#
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.description = ''
+        self.velocity = [0,0]
+
+    def update_vel(self):#add gravity
+        self.velocity[1] += 0.3*self.game_objects.game.dt*self.slow_motion
 
     def update(self):
         super().update()
         self.update_vel()
 
-    def update_vel(self):
+    def attract(self,pos):#the omamori calls on this in loot group
         pass
 
-    def attract(self,pos):#the omamori calls on this in loot group
+    def interact(self):#when player press T
+        pass
+
+    def player_collision(self,player):#when the player collides with this object
+        pass
+
+    #plotfprm collisions
+    def down_collision(self,hitbox):
+        super().down_collision(hitbox)
+        self.velocity[0] = 0.5*self.velocity[0]
+        self.velocity[1] = -0.3*self.velocity[1]
+
+    def right_collision(self,hitbox):
+        super().right_collision(hitbox)
+        self.velocity[0] = -self.velocity[0]
+
+    def left_collision(self,hitbox):
+        super().left_collision(hitbox)
+        self.velocity[0] = -self.velocity[0]
+
+    def limit_y(self):
         pass
 
 class Heart_container(Loot):
@@ -1795,19 +1860,8 @@ class Soul_essence(Loot):
         obj1 = getattr(particles, 'Spark')(self.rect.center,self.game_objects,distance = 100,lifetime=20,vel={'linear':[2,4]},dir='isotropic',scale = 1, colour = [255,255,255,255])
         self.game_objects.cosmetics.add(obj1)
 
-class Tungsten(Loot):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/tungsten/')
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(center=pos)
-        self.hitbox=self.rect.copy()
-        self.description = 'A heavy rock'
-
-    def player_collision(self):
-        self.game_objects.player.inventory['Tungsten'] += 1
-        #a cutscene?
-        self.kill()
+    def update_vel(self):
+        pass
 
 class Spiritorb(Loot):#the thing that gives spirit
     def __init__(self,pos,game_objects):
@@ -1821,14 +1875,14 @@ class Spiritorb(Loot):#the thing that gives spirit
         self.game_objects.player.add_spirit(1)
         self.kill()
 
+    def update_vel(self):
+        pass
+
 class Enemy_drop(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.velocity = [random.uniform(-3, 3),-4]
         self.lifetime = 500
-
-    def update_vel(self):#add gravity
-        self.velocity[1] += 0.3*self.game_objects.game.dt*self.slow_motion
+        self.velocity = [random.uniform(-3, 3),-4]
 
     def update(self):
         super().update()
@@ -1852,23 +1906,6 @@ class Enemy_drop(Loot):
         except:
             self.game_objects.player.inventory[obj] = 1
         self.currentstate.handle_input('Death')
-
-    #plotfprm collisions
-    def down_collision(self,hitbox):
-        super().down_collision(hitbox)
-        self.velocity[0] = 0.5*self.velocity[0]
-        self.velocity[1] = -0.3*self.velocity[1]
-
-    def right_collision(self,hitbox):
-        super().right_collision(hitbox)
-        self.velocity[0] = -self.velocity[0]
-
-    def left_collision(self,hitbox):
-        super().left_collision(hitbox)
-        self.velocity[0] = -self.velocity[0]
-
-    def limit_y(self):
-        pass
 
 class Amber_Droplet(Enemy_drop):
     def __init__(self,pos,game_objects):
@@ -1943,6 +1980,205 @@ class Heal_item(Enemy_drop):
         obj.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/heal_item/')
         obj.sounds = Read_files.Sounds('Audio/SFX/enteties/items/heal_item/')
         return obj
+
+class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.velocity = [random.uniform(0, 3),-4]
+        self.light = Light_glow(self,radius = 50, layers = 40)
+        self.game_objects.cosmetics.add(self.light)
+        self.twinkle()
+
+    def twinkle(self, num = 3):
+        self.twinkles = []
+        for i in range(0,num + 1):
+            self.twinkles.append(Twinkle(self,self.game_objects))
+            self.twinkles[-1].animation.frame = random.randint(0,len(self.twinkles[-1].sprites.sprite_dict['idle_1'])-1)
+            self.game_objects.cosmetics.add(self.twinkles[-1])
+
+    def interact(self):#when player press T
+        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        self.pickup()
+        new_game_state = states.Blit_image_text(self.game_objects.game,self.sprites.sprite_dict['idle'][0],self.description)
+        new_game_state.enter_state()
+        self.kill()
+
+    def kill(self):
+        super().kill()
+        for twinkle in self.twinkles:
+            twinkle.kill()
+        self.light.kill()
+
+class Tungsten(Interactable_item):#move omamori and infiinity stones to here a swell
+    def __init__(self,pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/tungsten/')
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center=pos)
+        self.hitbox=self.rect.copy()
+        self.description = 'A heavy rock'
+
+    def pickup(self):
+        self.game_objects.player.inventory['Tungsten'] += 1
+
+class Infinity_stones(Interactable_item):
+    def __init__(self, pos, game_objects, sword):
+        super().__init__(pos, game_objects)
+        self.sword = sword
+        self.description = ''
+
+    def set_pos(self, pos):#for inventory
+        self.rect.center = pos
+
+    def reset_timer(self):
+        pass
+
+    def attach(self):#called from sword when balcksmith attached the stone
+        pass
+
+    def detach(self):
+        pass
+
+    def collision(self):#hit enemy
+        pass
+
+    def slash(self):#called when swingin sword
+        pass
+
+    def pickup(self):
+        self.game_objects.player.sword.stones[self.colour.keys()[0]] = self
+
+class Red_infinity_stone(Infinity_stones):#more dmg
+    def __init__(self, pos, game_objects, sword):
+        super().__init__(pos, game_objects,sword)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/red/')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.hitbox = self.rect.copy()
+        self.colour = {'red':[255,64,64,255]}
+        self.description = '10 procent more damage'
+
+    def attach(self):
+        self.sword.dmg*=1.1
+
+    def detach(self):
+        self.sword.dmg*=(1/1.1)
+
+class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
+    def __init__(self, pos, game_objects, sword):
+        super().__init__(pos, game_objects,sword)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/green/')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.hitbox = self.rect.copy()
+        self.colour = {'green':[105,139,105,255]}
+        self.description = 'fast sword swings'
+
+    def slash(self):
+        self.sword.entity.animation.framerate = 0.33
+
+class Blue_infinity_stone(Infinity_stones):#get spirit at collision
+    def __init__(self, pos, game_objects, sword):
+        super().__init__(pos, game_objects,sword)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/blue/')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.hitbox = self.rect.copy()
+        self.colour = {'blue':[0,0,205,255]}
+        self.description = 'add spirit to the swinger'
+
+    def collision(self):
+        self.sword.entity.add_spirit()
+
+class Orange_infinity_stone(Infinity_stones):#bigger hitbox
+    def __init__(self, pos, game_objects, sword):
+        super().__init__(pos, game_objects,sword)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/orange/')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.hitbox = self.rect.copy()
+        self.colour = {'orange':[255,127,36,255]}
+        self.description = 'larger hitbox'
+
+    def detach(self):
+        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,40,40)
+        self.sword.hitbox = self.sword.rect.copy()
+
+    def attach(self):
+        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,80,40)
+        self.sword.hitbox = self.sword.rect.copy()
+
+class Purple_infinity_stone(Infinity_stones):#reflect projectile
+    def __init__(self, pos, game_objects, sword):
+        super().__init__(pos, game_objects,sword)
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/purple/')#for inventory
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect()
+        self.hitbox = self.rect.copy()
+        self.colour = {'purple':[154,50,205,255]}
+        self.description = 'reflects projectiels'
+
+class Omamori(Interactable_item):
+    def __init__(self,pos, game_objects, entity):
+        super().__init__(pos, game_objects)
+        self.entity = entity
+        self.image = self.sprites.sprite_dict['idle'][0]
+        self.rect = self.image.get_rect(center = pos)
+        self.hitbox = self.rect.copy()
+        self.description = ''#for inventory
+
+    def pickup(self):
+        self.game_objects.player.omamoris.inventory[type(self).__name__] = self
+
+    def handle_input(self,input):
+        pass
+
+    def detach(self):
+        self.currentstate.handle_input('Idle')
+
+    def attach(self):
+        self.currentstate.handle_input('Equip')
+
+    def reset_timer(self):
+        pass
+
+    def set_pos(self,pos):#for inventory
+        self.rect.center = pos
+
+class Half_dmg(Omamori):
+    def __init__(self,pos, game_objects, entity):
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/double_jump/')#for inventory
+        super().__init__(pos, game_objects, entity)
+        self.description = 'Take half dmg'
+
+    def attach(self):
+        super().attach()
+        self.entity.dmg_scale = 0.5
+
+    def detach(self):
+        super().detach()
+        self.entity.dmg_scale = 1
+
+class Loot_magnet(Omamori):
+    def __init__(self,pos, game_objects, entity):
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/loot_magnet/')#for inventory
+        super().__init__(pos, game_objects, entity)
+        self.description = 'Attracts loot'
+
+    def update(self):
+        for loot in self.entity.game_objects.loot.sprites():
+            loot.attract(self.entity.rect.center)
+
+class Boss_HP(Omamori):
+    def __init__(self,pos, game_objects, entity):
+        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/boss_HP/')#for inventor
+        super().__init__(pos, game_objects,entity)
+        self.description = 'Visible boss HP'
+
+    def attach(self):
+        super().attach()
+        for enemy in self.entity.game_objects.enemies.sprites():
+            enemy.health_bar()#attached a healthbar on boss
 
 #cosmetics
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
@@ -2128,6 +2364,18 @@ class Logo_loading(Animatedentity):
     def reset_timer(self):
         self.kill()
 
+class Twinkle(Animatedentity):
+    def __init__(self, entity, game_objects):
+        super().__init__(entity.rect.center,game_objects)
+        self.entity = entity
+        self.sprites = Read_files.Sprites_Player('Sprites/GFX/twinkle/')
+        self.image = self.sprites.sprite_dict['idle_1'][0]
+        self.rect = self.image.get_rect(center = entity.rect.center)
+        self.currentstate = states_basic.Idle_1(self)
+
+    def reset_timer(self):#called when an animation cyckle is finished
+        self.rect.center = [self.entity.rect.centerx + random.randint(-30,30),self.entity.rect.centery + random.randint(-30,30)]
+
 #interactables
 class Interactable(Animatedentity):#interactables
     def __init__(self,pos,game_objects, sfx = None):
@@ -2241,7 +2489,7 @@ class Shade_trigger(Interactable):
         self.layers_one = layers#a list of shahde layers
         self.layers_two = []#similar to self.layer, keeps the layers of the shade screen
 
-class Cutscene_trigger(Interactable):#shoudl be called a state trigger
+class State_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):
         super().__init__(pos,game_objects)
         self.rect = pygame.Rect(pos,size)
@@ -2254,10 +2502,13 @@ class Cutscene_trigger(Interactable):#shoudl be called a state trigger
         #self.group_distance()
 
     def player_collision(self):
-#        if self.event not in self.game_objects.world_state.cutscenes_complete:#if the cutscene has not been shown before. Shold we kill the object instead?
+        if self.game_objects.world_state.cutscenes_complete.get(self.event, False): return#if the cutscene has not been shown before. Shold we kill the object instead?
+        if self.event == 'Butterfly_encounter':
+            if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggrp is not chosen
+
         new_game_state = getattr(states, self.event)(self.game_objects.game)
         new_game_state.enter_state()
-        self.kill()
+        self.kill()#is this a pronlen in re spawn?
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
@@ -2341,11 +2592,21 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
         super().__init__(pos, game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/animations/cocoon_boss/')
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect(bottomleft = pos)
+        self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = self.rect.copy()
+        self.aggro_distance = [200,50]
+        self.currentstate = states_cocoon_boss.Idle(self)
+        self.item = Tungsten
+
+    def particle_release(self):
+        for i in range(0,30):
+            obj1 = getattr(particles, 'Circle')(self.rect.center,self.game_objects,distance=0,lifetime=55,vel={'linear':[7,14]},dir='isotropic',scale=0.5,colour = [255,255,255,255])
+            self.game_objects.cosmetics.add(obj1)
 
     def take_dmg(self,projectile):
-        pass
+        if self.invincibile: return
+        self.invincibile = True
+        self.game_objects.game.state_stack[-1].handle_input('butterfly')
 
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
@@ -2718,197 +2979,6 @@ class Lever(Interactable):
         self.gate = gate
         if type(self.currentstate).__name__ == 'Interacted':
             self.gate.currentstate.handle_input('Transform')
-
-#equipable items
-class Infinity_stones():
-    def __init__(self,sword):
-        self.sword = sword
-        self.game_objects = sword.game_objects
-        self.dir = [1,0]#animation and state need this
-        self.animation = animation.Entity_animation(self)
-        self.currentstate = states_basic.Idle(self)#
-        self.description = ''
-
-    def set_pos(self, pos):
-        self.rect.center = pos
-
-    def reset_timer(self):
-        pass
-
-    def attach(self):#called from sword when balcksmith attached the stone
-        pass
-
-    def detach(self):
-        pass
-
-    def collision(self):#hit enemy
-        pass
-
-    def slash(self):#called when swingin sword
-        pass
-
-class Red_infinity_stone(Infinity_stones):#more dmg
-    def __init__(self,sword):
-        super().__init__(sword)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/red/')#for inventory
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.colour = 'red'
-        self.description = '10 procent more damage'
-
-    def attach(self):
-        self.sword.dmg*=1.1
-
-    def detach(self):
-        self.sword.dmg*=(1/1.1)
-
-class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
-    def __init__(self,sword):
-        super().__init__(sword)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/green/')#for inventory
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.colour = 'green'
-        self.description = 'fast sword swings'
-
-    def slash(self):
-        self.sword.entity.animation.framerate = 0.33
-
-class Blue_infinity_stone(Infinity_stones):#get spirit at collision
-    def __init__(self,sword):
-        super().__init__(sword)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/blue/')#for inventory
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.colour = 'blue'
-        self.description = 'add spirit to the swinger'
-
-    def collision(self):
-        self.sword.entity.add_spirit()
-
-class Orange_infinity_stone(Infinity_stones):#bigger hitbox
-    def __init__(self,sword):
-        super().__init__(sword)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/orange/')#for inventory
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.colour = 'orange'
-        self.description = 'larger hitbox'
-
-    def detach(self):
-        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,40,40)
-        self.sword.hitbox = self.sword.rect.copy()
-
-    def attach(self):
-        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,80,40)
-        self.sword.hitbox = self.sword.rect.copy()
-
-class Purple_infinity_stone(Infinity_stones):#reflect projectile
-    def __init__(self,sword):
-        super().__init__(sword)
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/Items/infinity_stones/purple/')#for inventory
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.colour = 'purple'
-        self.description = 'reflects projectiels'
-
-    def attach(self):
-        pass
-
-    def detach(self):
-        pass
-
-class Omamoris():#omamori handler
-    def __init__(self,entity):
-        self.entity = entity
-        self.equipped = {}#equiped omamoris
-        self.inventory = {'Half_dmg':Half_dmg(entity),'Loot_magnet':Loot_magnet(entity),'Boss_HP':Boss_HP(entity)}#omamoris in inventory.
-        self.number = 3#number of omamori we can equip
-        entity.dmg_scale = 1
-
-    def update(self):
-        for omamori in self.equipped.values():
-            omamori.update()
-
-    def handle_input(self,input):
-        for omamori in self.equipped.values():
-            omamori.handle_input(input)
-
-    def equip_omamori(self,omamori_string):
-        if not self.equipped.get(omamori_string,False):#if it is not equipped
-            if len(self.equipped) < self.number:#maximum number of omamoris to equip
-                new_omamori = getattr(sys.modules[__name__], omamori_string)(self.entity)#make a class based on the name of the newstate: need to import sys
-                self.equipped[omamori_string] = new_omamori
-                self.inventory[omamori_string].currentstate.handle_input('Equip')
-                new_omamori.attach()
-        else:##if equiped -> remove
-            self.inventory[omamori_string].currentstate.handle_input('Idle')
-            self.equipped[omamori_string].detach()#call the detach function of omamori
-            del self.equipped[omamori_string]
-
-class Omamori():
-    def __init__(self,entity):
-        self.entity = entity
-        self.game_objects = entity.game_objects
-        self.dir = [1,0]
-        self.animation = animation.Entity_animation(self)#it is called from inventory
-        self.currentstate = states_basic.Idle(self)#
-        self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
-        self.description = ''#for inventory
-
-    def update(self):
-        pass
-
-    def handle_input(self,input):
-        pass
-
-    def detach(self):
-        self.currentstate.handle_input('Idle')
-
-    def attach(self):
-        self.currentstate.handle_input('Equip')
-
-    def reset_timer(self):
-        pass
-
-    def set_pos(self,pos):#for inventory
-        self.rect.center = pos
-
-class Half_dmg(Omamori):
-    def __init__(self,entity):
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/double_jump/')#for inventory
-        super().__init__(entity)
-        self.description = 'Take half dmg'
-
-    def attach(self):
-        super().attach()
-        self.entity.dmg_scale = 0.5
-
-    def detach(self):
-        super().detach()
-        self.entity.dmg_scale = 1
-
-class Loot_magnet(Omamori):
-    def __init__(self,entity):
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/loot_magnet/')#for inventory
-        super().__init__(entity)
-        self.description = 'Attracts loot'
-
-    def update(self):
-        for loot in self.entity.game_objects.loot.sprites():
-            loot.attract(self.entity.rect.center)
-
-class Boss_HP(Omamori):
-    def __init__(self,entity):
-        self.sprites = Read_files.Sprites_Player('Sprites/Enteties/omamori/boss_HP/')#for inventory
-        super().__init__(entity)
-        self.description = 'Visible boss HP'
-
-    def attach(self):
-        super().attach()
-        for enemy in self.entity.game_objects.enemies.sprites():
-            enemy.health_bar()#attached a healthbar on boss
 
 #timer toools: activate with the attrubute activate, which will run until the specified duration is run out
 class Timer():

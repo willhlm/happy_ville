@@ -17,6 +17,9 @@ class AI():
     def deactivate(self):#called when health < 0
         self.enter_AI('Idle')
 
+    def update(self):
+        pass    
+
 class Idle(AI):
     def __init__(self,entity):
         super().__init__(entity)
