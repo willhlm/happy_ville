@@ -11,10 +11,10 @@ class Game():
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size()#get the scale according to your display size
         window_size_scaled = tuple([int(x*self.scale) for x in self.window_size])
-        self.screen = pygame.Surface(self.window_size)#do not add .convert_alpha(), should be initiad before display, for some reason
 
         self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])#need to be after display
-
+        self.screen = pygame.Surface(self.window_size).convert_alpha()
+        
         #initiate game related values
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
@@ -41,7 +41,7 @@ class Game():
             self.display.clear(0, 0, 0)
 
             #tick clock
-            self.clock.tick(C.fps)
+            self.clock.tick()
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
 
             #handle event
