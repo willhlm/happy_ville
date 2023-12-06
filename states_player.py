@@ -11,19 +11,13 @@ class Player_states(Entity_States):
         if self.entity.states[state]:
              self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def update(self):
-        self.update_state()
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        pass
-
-    def handle_press_input(self,input):#all states should inehrent this function
+    def handle_press_input(self,input):#all states should inehrent this function, if it should be able to jump
         if input[-1] == 'a':
             self.entity.timer_jobs['shroomjump'].activate()
             self.entity.timer_jobs['jump'].activate()
             self.entity.timer_jobs['wall'].handle_input('a')
 
-    def handle_release_input(self,input):#all states should inehrent this function
+    def handle_release_input(self,input):#all states should inehrent this function, if it should be able to jump
         if input[-1] == 'a':
             self.entity.timer_jobs['air'].deactivate()
             self.entity.timer_jobs['jump'].deactivate()
@@ -41,9 +35,6 @@ class Player_states(Entity_States):
         elif value[0] < -0.2:#x
             self.entity.dir[0] = -1
 
-    def handle_input(self,input):
-        pass
-
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         if self.entity.abilities.equip=='Thunder' or self.entity.abilities.equip=='Slow_motion' or self.entity.abilities.equip=='Migawari':
             self.enter_state(self.entity.abilities.equip + '_pre')
@@ -54,7 +45,7 @@ class Idle_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_stand_pre')
 
@@ -91,7 +82,7 @@ class Walk_main(Player_states):
         super().__init__(entity)
         self.particle_timer = 0
 
-    def update_state(self):
+    def update(self):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
@@ -135,7 +126,7 @@ class Run_pre(Player_states):
         super().__init__(entity)
         self.particle_timer = 0
 
-    def update_state(self):
+    def update(self):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
@@ -182,7 +173,7 @@ class Run_main(Player_states):
         super().__init__(entity)
         self.particle_timer = 0
 
-    def update_state(self):
+    def update(self):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
@@ -225,7 +216,7 @@ class Run_post(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_stand_pre')
 
@@ -264,7 +255,7 @@ class Jump_stand_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if self.entity.acceleration[0] != 0:#if you start moving
             self.enter_state('Jump_run_main')
 
@@ -301,7 +292,7 @@ class Jump_stand_main(Jump_stand_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if self.entity.velocity[1] > 0.7:#when you start falling
             self.enter_state('Fall_stand_pre')
         elif self.entity.acceleration[0] != 0:#if you start moving
@@ -314,7 +305,7 @@ class Jump_run_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Jump_stand_main')
 
@@ -351,7 +342,7 @@ class Jump_run_main(Jump_run_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if self.entity.velocity[1] > 0:
             self.enter_state('Fall_run_pre')
         elif self.entity.acceleration[0] == 0:
@@ -368,7 +359,7 @@ class Double_jump_pre(Player_states):
     def init(self):
         self.entity.velocity[1] = C.jump_vel_player
 
-    def update_state(self):
+    def update(self):
         if self.entity.velocity[1] > 0:#falling down
             if self.entity.acceleration[0]==0:
                 self.enter_state('Fall_stand_pre')
@@ -397,7 +388,7 @@ class Fall_run_pre(Player_states):
         self.entity.timer_jobs['ground'].activate()
         #self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
 
-    def update_state(self):
+    def update(self):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Fall_stand_main')
 
@@ -451,7 +442,7 @@ class Fall_stand_pre(Player_states):
         self.entity.timer_jobs['ground'].activate()
         #self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
 
-    def update_state(self):
+    def update(self):
         if self.entity.acceleration[0] != 0:
             self.enter_state('Fall_run_main')
 
@@ -500,7 +491,7 @@ class Wall_glide_main(Player_states):
         self.entity.friction[1] = 0.4
         self.entity.ground = True#so that we can jump
 
-    def update_state(self):        
+    def update(self):
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
             self.entity.timer_jobs['wall'].activate()
             self.enter_state('Fall_stand_pre')
@@ -538,7 +529,7 @@ class Air_dash_pre(Player_states):
         self.dir = self.entity.dir.copy()
         self.dash_length = C.dash_length
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity,100))
@@ -579,7 +570,7 @@ class Air_dash_post(Air_dash_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         pass
 
     def handle_press_input(self,input):
@@ -627,7 +618,7 @@ class Dash_attack_main(Player_states):#enters from pre dash
         self.entity.sword.dir = self.dir.copy()#sword direction
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity[1]=0
         self.entity.velocity[0]=self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
 
@@ -673,7 +664,7 @@ class Death_pre(Player_states):
         else:
             self.dir[0]=-1
 
-    def update_state(self):
+    def update(self):
         self.entity.invincibile = True
 
     def handle_movement(self,input):
@@ -695,7 +686,7 @@ class Death_charge(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.entity.invincibile = True
 
     def handle_movement(self,input):
@@ -715,7 +706,7 @@ class Death_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.entity.invincibile = True
 
     def handle_movement(self,input):
@@ -735,7 +726,7 @@ class Death_post(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.entity.invincibile = True
 
     def handle_movement(self,input):
@@ -838,7 +829,7 @@ class Hurt_main(Player_states):
     def increase_phase(self):
         self.enter_state(self.next_state)
 
-    def update_state(self):
+    def update(self):
         if self.entity.acceleration[0] == 0:
             self.next_state = 'Idle_main'
         else:
@@ -1033,7 +1024,7 @@ class Thunder_main(Thunder_pre):
     def init(self):
         pass
 
-    def update_state(self):
+    def update(self):
         pass
 
     def increase_phase(self):#called when an animation is finihed for that state

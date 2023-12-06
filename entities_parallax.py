@@ -14,10 +14,12 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
         super().update()
         self.group_distance()
 
-    def init_sprites(self):#Only blur if it is the first time loading the object. Otherwise, copy from memory
-        try:#if it is not the first one
-            self.sprites.sprite_dict =  type(self).animations[tuple(self.parallax)]
-        except:#if it is the first tree loading, blur it:
+    def init_sprites(self, path):#Only blur if it is the first time loading the object. Otherwise, copy from memory
+        if  type(self).animations.get(tuple(self.parallax), False):#not the firsy time
+            images = type(self).animations[tuple(self.parallax)]
+            self.sprites = Read_files.Sprites_images(images)
+        else:#first time loading
+            self.sprites = Read_files.Sprites_Player(path)
             if self.parallax[0] != 1:#don't blur if oarallax = 1
                 self.blur(self.game_objects.map.blur_value(self.parallax))
             type(self).animations[tuple(self.parallax)] = self.sprites.sprite_dict#save to memery for later use
@@ -53,8 +55,7 @@ class Light_forest_tree1(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/trees/light_forest_tree1/')
-        self.init_sprites()#blur or lead from memory
+        self.init_sprites('Sprites/animations/trees/light_forest_tree1/')#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -70,8 +71,7 @@ class Light_forest_tree2(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/trees/light_forest_tree2/')
-        self.init_sprites()#blur or lead from memory
+        self.init_sprites('Sprites/animations/trees/light_forest_tree2/')#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -87,8 +87,7 @@ class Ljusmaskar(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/ljusmaskar/')
-        self.init_sprites()#blur or lead from memory
+        self.init_sprites('Sprites/animations/ljusmaskar/')#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(topleft = pos)
         self.true_pos = self.rect.topleft
@@ -100,8 +99,7 @@ class Cave_grass(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/bushes/cave_grass/')
-        self.init_sprites()#blur or lead from memory
+        self.init_sprites('Sprites/animations/bushes/cave_grass/')#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(topleft = pos)
         self.true_pos = self.rect.topleft
@@ -113,8 +111,7 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
     animations = {}
     def __init__(self, pos, game_objects,parallax):
         super().__init__(pos, game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/cocoon/')
-        self.init_sprites()#blur or lead from memory
+        self.init_sprites('Sprites/animations/cocoon/')#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(topleft = pos)
         self.true_pos = self.rect.topleft
@@ -123,8 +120,7 @@ class Droplet_source(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/droplet/source/')
-        self.init_sprites()#blur or lead from memory
+        self.init_sprites('Sprites/animations/droplet/source/')#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -149,8 +145,7 @@ class Falling_rock_source(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/falling_rock/source/')
-        self.init_sprites()#blur or lead from memory
+        self.init_sprites('Sprites/animations/falling_rock/source/')#blur or lead from memory
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos

@@ -67,7 +67,7 @@ class Sword():
         self.currentstate = states_basic.Idle(self)#
 
     def set_level(self,level):
-        self.currentstate.enter_state('Level_'+str(level))
+        self.currentstate.set_animation_name('level_'+str(level))
 
 class Infinity_stone():
     def __init__(self,pos,game_objects):
@@ -104,14 +104,15 @@ class Abilities():
         self.dir = [1,0]
 
         self.animation = animation.Entity_animation(self)
-        self.currentstate = states_basic.Idle_1(self)#
+        self.currentstate = states_basic.Idle(self)#
+        self.currentstate.set_animation_name('idle_1')
 
     def activate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Active_'+str(level))
+        self.currentstate.set_animation_name('active_'+str(level))
         self.level = level
 
     def deactivate(self,level):#for UI of Aila abilities
-        self.currentstate.enter_state('Idle_'+str(level))
+        self.currentstate.set_animation_name('idle_'+str(level))
         self.level = level
 
     def reset_timer(self):

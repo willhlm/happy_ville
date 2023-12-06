@@ -3,7 +3,6 @@ import states
 import game_objects
 import sys
 import constants as C
-import shaders
 import pygame_light2d
 
 class Game():

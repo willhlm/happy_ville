@@ -10,21 +10,12 @@ class Enemy_states(Entity_States):
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def increase_phase(self):
-        pass
-
-    def handle_input(self,input):
-        pass
-
-    def update_state(self):
-        pass
-
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) > 0.2:
             self.enter_state('Walk')
 
@@ -38,7 +29,7 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) <= 0.2:
             self.enter_state('Idle')
 
@@ -70,7 +61,7 @@ class Stun(Enemy_states):
         self.stay_still()
         self.lifetime=duration
 
-    def update_state(self):
+    def update(self):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
@@ -100,7 +91,7 @@ class Ambush_pre(Attack_pre):
         super().__init__(entity)
 
     def increase_phase(self):
-        self.enter_state('Ambush_main')        
+        self.enter_state('Ambush_main')
 
 class Ambush_main(Attack_main):
     def __init__(self,entity):

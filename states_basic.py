@@ -5,8 +5,8 @@ class Basic_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def enter_state(self,newstate):
-        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+    def enter_state(self,newstate,**kwarg):
+        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
 
     def increase_phase(self):
         self.entity.reset_timer()
@@ -15,116 +15,66 @@ class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_input(self,input):
-        if input == 'Invisible':
-            self.enter_state('Invisible')
-        elif input=='Hurt':
-             self.enter_state('Hurt')
+    def handle_input(self,input,**kwarg):
+        if input == 'Once':
+            self.enter_state('Once',**kwarg)
         elif input == 'Death':
              self.enter_state('Death')
+        elif input == 'Invisible':
+            self.enter_state('Invisible')
         elif input == 'Opening':
             self.enter_state('Opening')
-        elif input == 'Once':
-            self.enter_state('Once')
         elif input =='Outline':
             self.enter_state('Outline')
         elif input == 'Transform':
             self.enter_state('Transform')
-        elif input == 'Equip':
-            self.enter_state('Equip')
         elif input == 'Interact':
             self.enter_state('Interact')
 
-    def increase_phase(self):
-        pass
+    def set_animation_name(self,name):#called for UI abilities
+        self.state_name = name
 
-#ability UI
-class Idle_1(Basic_states):
+class Death(Basic_states):#idle once
     def __init__(self,entity):
         super().__init__(entity)
-
-class Idle_2(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Idle_3(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Idle_4(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Active_1(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Active_2(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Active_3(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Active_4(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-#ability UI
-
-class Equip(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def handle_input(self,input):
-        if input == 'Idle':
-            self.enter_state('Idle')
-
-class Idle_once(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
+        self.entity.invincibile = True
 
     def increase_phase(self):
         self.entity.kill()
+
+class Once(Basic_states):
+    def __init__(self,entity,**kwarg):
+        super().__init__(entity)
+        self.next_state = kwarg['next_state']
+        self.state_name = kwarg['state_name']
+
+    def increase_phase(self):
+        super().increase_phase()
+        self.enter_state(self.next_state)
+
+#special ones
+class Outline(Basic_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_input(self,input,**kwarg):
+        if input=='Idle':
+             self.enter_state('Idle')
+        elif input == 'Once':
+            self.enter_state('Once',**kwarg)
+
+    def increase_phase(self):
+        self.enter_state('Idle')
 
 class Invisible(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if random.randint(0,500) == 1:
             self.enter_state('Idle')
 
-class Once(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def increase_phase(self):
-        self.entity.reset_timer()
-        self.enter_state('Idle')
-
-    def handle_input(self,input):
-        if input == 'Death':
-            self.enter_state('Death')
-
-class Hurt(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def increase_phase(self):
-        self.enter_state('Idle')
-
-class Death(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def handle_input(self,input):
-        pass
-
-    def increase_phase(self):
-        self.entity.kill()
-
-class Opening(Once):
+class Opening(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -132,7 +82,7 @@ class Opening(Once):
         self.entity.loots()
         self.enter_state('Interacted')
 
-class Transform(Once):
+class Transform(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -151,55 +101,13 @@ class Interacted(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def increase_phase(self):
-        pass
-
-    def handle_input(self,input):
+    def handle_input(self,input):#fire place
         if input == 'Interact':
             self.enter_state('Pre_idle')
 
-class Pre_idle(Basic_states):
+class Pre_idle(Basic_states):#fire palce
     def __init__(self,entity):
         super().__init__(entity)
 
     def increase_phase(self):
         self.enter_state('Idle')
-
-class Outline(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def handle_input(self,input):
-        if input=='Idle':
-             self.enter_state('Idle')
-        elif input == 'Once':
-            self.enter_state('Once')
-
-    def increase_phase(self):
-        self.enter_state('Idle')
-
-#for slash
-class Slash_1(Idle_once):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Slash_2(Idle_once):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Slash_3(Idle_once):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-#for aila sword
-class Level_1(Idle):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Level_2(Idle):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-class Level_3(Idle):
-    def __init__(self,entity):
-        super().__init__(entity)

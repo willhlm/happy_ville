@@ -8,24 +8,12 @@ class Reindeer_states(Entity_States):
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def increase_phase(self):
-        pass
-
-    def handle_input(self,input):
-        pass
-
-    def update(self):
-        self.update_state()
-
-    def update_state(self):
-        pass
-
 class Idle(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) > 0.01:
             self.enter_state('Walk')
 
@@ -37,7 +25,7 @@ class Walk(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) < 0.01:
             self.enter_state('Idle')
 
@@ -49,7 +37,7 @@ class Death(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
@@ -60,14 +48,14 @@ class Dead(Reindeer_states):
         super().__init__(entity)
         self.entity.dead()
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity = [0,0]
 
 class Transform(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
@@ -78,7 +66,7 @@ class Transform_idle(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) > 0.01:
             self.enter_state('Transform_walk')
 
@@ -105,7 +93,7 @@ class Transform_walk(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) < 0.01:
             self.enter_state('Transform_idle')
 
@@ -143,7 +131,7 @@ class Jump_main(Reindeer_states):
         self.dir = self.entity.dir.copy()#animation direction
         self.entity.velocity[1] = -10
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity[0] += self.entity.AI.black_board['jump_direction']*self.entity.AI.black_board['player_distance'][0]*0.01
         #self.entity.velocity[0] = self.dir[0]*min(abs(self.entity.velocity[0]),4)
         if self.entity.velocity[1] > 0.7:
@@ -154,7 +142,7 @@ class Fall_pre(Reindeer_states):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()#animation direction
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity[0] += self.entity.AI.black_board['jump_direction']*self.dir[0]*0.8
 
     def increase_phase(self):
@@ -165,7 +153,7 @@ class Fall_main(Reindeer_states):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()#animation direction
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity[0] += self.entity.AI.black_board['jump_direction']*self.dir[0]*0.5
 
     def handle_input(self,input):
@@ -188,7 +176,7 @@ class Stun(Reindeer_states):
         self.stay_still()
         self.lifetime=duration
 
-    def update_state(self):
+    def update(self):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
@@ -230,7 +218,7 @@ class Dash_main(Reindeer_states):
         self.dir=self.entity.dir.copy()
         self.entity.velocity[0] = 30*self.dir[0]
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity[1]=0
         self.entity.velocity[0]=self.dir[0]*max(20,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity))

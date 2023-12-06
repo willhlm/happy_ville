@@ -13,7 +13,7 @@ class Idle(Weather_States):
         super().__init__(entity)
         self.time=0
 
-    def update_state(self):
+    def update(self):
         self.time+=1
 
         rand=random.randint(0, self.entity.trans_prob)

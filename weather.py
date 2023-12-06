@@ -122,41 +122,29 @@ class Circles(Bound_entity):
         self.true_pos = [random.randint(0, int(self.width))+self.parallax[0]*self.game_objects.camera.scroll[0],random.randint(0, int(self.height))+self.parallax[1]*self.game_objects.camera.scroll[1]]#starting position
 
         self.frequency = 0.003#the frequncy of grow and shrinking
-        try:#the images are stored in an class variable such that the animations are only made once. This way, many particles can be made with very small performance.
-            self.images = type(self).animations[tuple(self.parallax)]
-        except:#if it is the first time making that circle size (depends on parallax)
-            self.prepare_animation()#make the circles once and store each frame in a list: takes performance to make many
-            type(self).animations[tuple(self.parallax)] = self.images
+        if not type(self).animations.get(tuple(self.parallax),False):#the images are stored in an class variable such that the animations are only made once. This way, many particles can be made with very small performance.
+            #if it is the first time making that circle size (depends on parallax)
+            type(self).animations[tuple(self.parallax)] = self.prepare_animation()#make the circles once and store each frame in a list: takes performance to make many
 
-        self.frame = random.randint(0, len(self.images)-1)#randomise the starting frame
-        self.animation_speed = 1
+        images = type(self).animations[tuple(self.parallax)]
+        self.sprites = Read_files.Sprites_images({'idle':images})
+        self.animation.frame = random.randint(0, len(images)-1)
 
     def set_parameters(self):
         self.colour = [255,255,255,160]#center ball colour
         self.glow_colour = [255,255,255,2]#colour of each glow
         self.radius = 4.9*self.parallax[0]#particle radius, depends on parallax
 
-    def update(self):
-        self.update_pos()
-        self.boundary()
-        self.set_image()
-
-    def set_image(self):
-        self.image = self.images[int(self.frame)]
-        self.frame += self.game_objects.game.dt*self.animation_speed
-
-        if self.frame >= len(self.images):
-            self.frame = 0
-            #set new positions
-            self.true_pos = [random.randint(0, int(self.width))+self.parallax[0]*self.game_objects.camera.scroll[0],random.randint(0, int(self.height))+self.parallax[1]*self.game_objects.camera.scroll[1]]#starting position
+    def reset_timer(self):#caled when animation is finished
+        self.true_pos = [random.randint(0, int(self.width))+self.parallax[0]*self.game_objects.camera.scroll[0],random.randint(0, int(self.height))+self.parallax[1]*self.game_objects.camera.scroll[1]]#starting position
 
     def prepare_animation(self):
         self.prepare_canvas()
-        self.frame = 0
-        type(self).images = []#store each animation frame
+        images = []#store each animation frame
         for i in range(round(1/self.frequency)):#number of frames
-            self.prepare_images()
-            type(self).images.append(self.image)#store each animation frame
+            self.prepare_images(i)
+            images.append(self.image)#store each animation frame
+        return images
 
     def prepare_canvas(self):
         self.surface = pygame.Surface((self.glow_radius * 2, self.glow_radius * 2),pygame.SRCALPHA,32).convert_alpha()
@@ -164,11 +152,11 @@ class Circles(Bound_entity):
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
 
-    def prepare_images(self):
+    def prepare_images(self,i):
         phase = 3*math.pi*0.5
         self.image = self.surface.copy()
-        alpha = (self.colour[-1]*math.sin(self.frame*self.frequency*2*math.pi+phase)+self.colour[-1])*0.5#set alpha
-        radius = (self.radius*math.sin(self.frame*self.frequency*2*math.pi+phase)+self.radius)*0.5#modify redious
+        alpha = (self.colour[-1]*math.sin(i*self.frequency*2*math.pi+phase)+self.colour[-1])*0.5#set alpha
+        radius = (self.radius*math.sin(i*self.frequency*2*math.pi+phase)+self.radius)*0.5#modify redious
         self.prepare_glow(radius)
 
         temp = self.surface.copy()
@@ -176,7 +164,6 @@ class Circles(Bound_entity):
         colour.append(alpha)
         pygame.draw.circle(temp,colour,(self.glow_radius,self.glow_radius),radius)
         self.image.blit(temp,(0,0))#need to blit in order to "stack" the alpha
-        self.frame += 1
 
     def prepare_glow(self,radius):
         temp = self.surface.copy()
@@ -200,14 +187,13 @@ class Vertical_circles(Circles):
         self.update_vel()
 
     def update_vel(self):
-        self.velocity  = [0.5*math.sin(self.frame*0.1+self.phase),-1]
+        self.velocity  = [0.5*math.sin(self.animation.frame*0.1+self.phase),-1]
 
 class Fireflies(Circles):
     animations = {}
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
         self.phase = random.randint(0, 360)#randomise the starting phase
-        self.animation_speed = 0.8
 
     def set_parameters(self):
         self.colour = [153,153,0,150]#center ball colour
@@ -219,23 +205,21 @@ class Fireflies(Circles):
         self.update_vel()
 
     def update_vel(self):
-        self.velocity  = [math.cos(self.frame*0.01+self.phase),math.sin(self.frame*0.01+self.phase)]
+        self.velocity  = [math.cos(self.animation.frame*0.01+self.phase),math.sin(self.animation.frame*0.01+self.phase)]
 
-class Blink(Bound_entity):
+class Twinkle(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/blink/')
+        self.sprites = Read_files.Sprites_Player('Sprites/GFX/twinkle/')
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
 
-        self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
-        self.true_pos = self.pos.copy()
+        self.true_pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
         self.rect.topleft = self.true_pos
-        self.animation.frame = random.randint(0, len(self.sprites.sprite_dict['idle']))
+        self.animation.frame = random.randint(0, len(self.sprites.sprite_dict['idle'])-1)
 
     def reset_timer(self):#called when animation finishes
-        self.pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
-        self.true_pos = self.pos.copy()
+        self.true_pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
 
 #weather particles: snow, leaf, rain etc
 class Weather_particles(Bound_entity):

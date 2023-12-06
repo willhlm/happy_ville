@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_cocoon_boss, states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
+import states_butterfly, states_cocoon_boss, states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
@@ -147,9 +147,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
-    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps
-#        point = [self.hitbox.midbottom[0]+5*self.dir[0],self.hitbox.midbottom[1]+10]#infront flightly below
-    #    if not self.game_objects.collisions.check_ramp(point):#there is not ramp in front
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
         self.velocity[1] = 1/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
@@ -937,10 +935,27 @@ class Butterfly(Flying_enemy):
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.copy()
+        self.AI = AI_butterfly.Idle(self)
+        self.currentstate = states_butterfly.Idle(self)
+
+    def group_distance(self):
+        pass
 
     def dead(self):#called when death animation is finished
         self.game_objects.game.state_stack[-1].incrase_kill()
         super().dead()
+
+    def right_collision(self,hitbox):
+        pass
+
+    def left_collision(self,hitbox):
+        pass
+
+    def down_collision(self,hitbox):
+        pass
+
+    def top_collision(self,hitbox):
+        pass
 
 class Idun(Boss):
     def __init__(self,pos,game_objects):
@@ -1270,12 +1285,12 @@ class Omamoris():#omamori handler
     def equip_omamori(self,omamori_string):
         if not self.equipped.get(omamori_string,False):#if it is not equipped
             if len(self.equipped) < self.number:#maximum number of omamoris to equip
-                new_omamori = getattr(sys.modules[__name__], omamori_string)(self.entity)#make a class based on the name of the newstate: need to import sys
+                new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0],self.entity.game_objects, self.entity)#make a class based on the name of the newstate: need to import sys
                 self.equipped[omamori_string] = new_omamori
-                self.inventory[omamori_string].currentstate.handle_input('Equip')
+                self.inventory[omamori_string].currentstate.set_animation_name('equip')
                 new_omamori.attach()
         else:##if equiped -> remove
-            self.inventory[omamori_string].currentstate.handle_input('Idle')
+            self.inventory[omamori_string].currentstate.set_animation_name('idle')
             self.equipped[omamori_string].detach()#call the detach function of omamori
             del self.equipped[omamori_string]
 
@@ -1993,7 +2008,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         self.twinkles = []
         for i in range(0,num + 1):
             self.twinkles.append(Twinkle(self,self.game_objects))
-            self.twinkles[-1].animation.frame = random.randint(0,len(self.twinkles[-1].sprites.sprite_dict['idle_1'])-1)
+            self.twinkles[-1].animation.frame = random.randint(0,len(self.twinkles[-1].sprites.sprite_dict['idle'])-1)
             self.game_objects.cosmetics.add(self.twinkles[-1])
 
     def interact(self):#when player press T
@@ -2134,10 +2149,10 @@ class Omamori(Interactable_item):
         pass
 
     def detach(self):
-        self.currentstate.handle_input('Idle')
+        self.currentstate.set_animation_name('idle')
 
     def attach(self):
-        self.currentstate.handle_input('Equip')
+        self.currentstate.set_animation_name('equip')
 
     def reset_timer(self):
         pass
@@ -2281,7 +2296,7 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
         super().__init__(pos,game_objects)
         self.sprites = Read_files.Sprites_Player('Sprites/GFX/slash/')
         state = str(random.randint(1, 3))
-        self.currentstate.enter_state('Slash_' + state)
+        self.currentstate.set_animation_name('slash_' + state)
         self.image = self.sprites.sprite_dict['slash_' + state][0]
         self.rect = self.image.get_rect(center=pos)
 
@@ -2369,9 +2384,9 @@ class Twinkle(Animatedentity):
         super().__init__(entity.rect.center,game_objects)
         self.entity = entity
         self.sprites = Read_files.Sprites_Player('Sprites/GFX/twinkle/')
-        self.image = self.sprites.sprite_dict['idle_1'][0]
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect(center = entity.rect.center)
-        self.currentstate = states_basic.Idle_1(self)
+        self.currentstate = states_basic.Idle(self)
 
     def reset_timer(self):#called when an animation cyckle is finished
         self.rect.center = [self.entity.rect.centerx + random.randint(-30,30),self.entity.rect.centery + random.randint(-30,30)]
@@ -2517,7 +2532,7 @@ class Interactable_bushes(Interactable):
 
     def player_collision(self):#player collision
         if self.interacted: return
-        self.currentstate.handle_input('Hurt')
+        self.currentstate.handle_input('Once',state_name ='hurt', next_state = 'idle')
         self.interacted = True#sets to false when player gos away
 
     def take_dmg(self,projectile):#when player hits with sword
@@ -2541,7 +2556,7 @@ class Cave_grass(Interactable_bushes):
 
     def player_collision(self):
         if self.interacted: return
-        self.currentstate.handle_input('Hurt')
+        self.currentstate.handle_input('Once',state_name ='hurt', next_state = 'idle')
         self.interacted = True#sets to false when player gos away
         self.release_particles()
 
@@ -2577,10 +2592,11 @@ class Cocoon(Interactable):#larv cocoon in light forest
         self.timer_jobs['invincibility'].activate()
 
         if self.health > 0:
-            self.currentstate.handle_input('Hurt')
+            self.currentstate.handle_input('Once', state_name = 'hurt',next_state = 'Idle')
             #self.animation.handle_input('Hurt')#turn white
         else:#death
-            self.currentstate.handle_input('Interact')
+            self.invincibile = True        
+            self.currentstate.handle_input('Once', state_name = 'interact',next_state = 'Interacted')
             self.game_objects.enemies.add(Maggot(self.rect.center,self.game_objects))
 
     def update_timers(self):
@@ -2738,7 +2754,7 @@ class Savepoint(Interactable):#save point
             self.game_objects.player.currentstate.enter_state('Pray_pre')
             self.game_objects.player.spawn_point[0]['map']=self.map
             self.game_objects.player.spawn_point[0]['point']=self.init_cord
-            self.currentstate.handle_input('Once')
+            self.currentstate.handle_input('Once',state_name = 'once',next_state='Idle')
             self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
         else:#odoulbe click
             self.game_objects.player.currentstate.handle_input('special')
@@ -2795,7 +2811,7 @@ class Fast_travel(Interactable):
             new_state = states.Facilities(self.game_objects.game,type,self)
         else:
             type = 'Fast_travel_menu'
-            self.currentstate.handle_input('Once')
+            self.currentstate.handle_input('Once',state_name = 'once',next_state='Idle')
             new_state = states.Facilities(self.game_objects.game,type)
         new_state.enter_state()
 
@@ -2812,7 +2828,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
-        self.currentstate.handle_input('Once')
+        self.currentstate.handle_input('Once',state_name = 'once',next_state='Idle')
         new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
         new_game_state.enter_state()
 
