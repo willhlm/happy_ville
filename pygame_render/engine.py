@@ -46,7 +46,7 @@ class RenderEngine:
             pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
 
         # Configure pygame display
-        pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF, vsync = 1) #| pygame.FULLSCREEN #|pygame.SCALED
+        pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL| pygame.DOUBLEBUF, vsync = 1) #| pygame.FULLSCREEN #|pygame.SCALED
 
         # Create an OpenGL context
         self._ctx = moderngl.create_context()
@@ -90,7 +90,7 @@ class RenderEngine:
         """
 
         img_flip = pygame.transform.flip(sfc, False, True)
-        img_data = pygame.image.tostring(img_flip, "RGBA")
+        img_data = pygame.image.tobytes(img_flip, "RGBA")
 
         tex = self._ctx.texture(sfc.get_size(), components=4, data=img_data)
         tex.filter = (moderngl.NEAREST, moderngl.NEAREST)

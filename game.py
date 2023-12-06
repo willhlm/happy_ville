@@ -11,10 +11,10 @@ class Game():
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size()#get the scale according to your display size
         window_size_scaled = tuple([int(x*self.scale) for x in self.window_size])
+        self.screen = pygame.Surface(self.window_size)#do not add convert alpha!
 
         self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])#need to be after display
-        self.screen = pygame.Surface(self.window_size).convert_alpha()
-        
+
         #initiate game related values
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
