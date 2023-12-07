@@ -6,23 +6,13 @@ class Enemy_states(Entity_States):
         super().__init__(entity)
 
     def enter_state(self,newstate):
-        self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
-
-    def increase_phase(self):
-        pass
-
-    def handle_input(self,input):
-        pass
-
-    def update_state(self):
-        pass
+        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) > 0.2:
             self.enter_state('Walk')
 
@@ -38,7 +28,7 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) <= 0.2:
             self.enter_state('Idle')
 
@@ -53,7 +43,6 @@ class Walk(Enemy_states):
 class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def increase_phase(self):
         self.entity.dead()
@@ -61,7 +50,6 @@ class Death(Enemy_states):
 class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def increase_phase(self):
         self.enter_state('Idle')
@@ -69,10 +57,9 @@ class Hurt(Enemy_states):
 class Stun(Enemy_states):
     def __init__(self,entity,duration):
         super().__init__(entity)
-        self.stay_still()
         self.lifetime = duration
 
-    def update_state(self):
+    def update(self):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
@@ -80,7 +67,6 @@ class Stun(Enemy_states):
 class Attack_pre(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
         self.dir=self.entity.dir.copy()#animation direction
 
     def increase_phase(self):
@@ -89,7 +75,6 @@ class Attack_pre(Enemy_states):
 class Attack_main(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
         self.dir=self.entity.dir.copy()#animation direction
         self.entity.attack.lifetime=10
         attack=self.entity.attack(self.entity)#make the object

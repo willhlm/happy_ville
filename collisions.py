@@ -10,13 +10,6 @@ class Collisions():
                 return True
         return False
 
-    def check_ramp(self,point):#called from limit_y in platform entities
-        for platform in self.game_objects.platforms_ramps:
-            if platform.hitbox.collidepoint(point):
-                if platform.target > point[1]: return False#if the ramp target position is far way from the check point, then it is most likely just the hitbox
-                return True
-        return False
-
     def pass_through(self, entity):#called when pressing down
         self.game_objects.player.hitbox.bottom += 1
         #pos = entity.hitbox.midbottom

@@ -10,18 +10,12 @@ class Vatt_states(Entity_States):
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def increase_phase(self):
-        pass
-
-    def update_state(self):
-        pass
-
 class Idle(Vatt_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.stay_still()
 
-    def update_state(self):
+    def update(self):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_stand_pre')
 
@@ -41,7 +35,7 @@ class Idle_aggro(Vatt_states):
         super().__init__(entity)
         self.stay_still()
 
-    def update_state(self):
+    def update(self):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_stand_aggro_pre')
 
@@ -104,7 +98,7 @@ class Run(Vatt_states):
         super().__init__(entity)
         self.entity.acceleration[0] = 1.5
 
-    def update_state(self):
+    def update(self):
         pass
 
     def handle_input(self, input):
@@ -165,7 +159,7 @@ class Stun(Vatt_states):
         self.stay_still()
         self.lifetime=duration
 
-    def update_state(self):
+    def update(self):
         self.lifetime-=1
         if self.lifetime<0:
             self.enter_state('Idle')
@@ -178,7 +172,7 @@ class Javelin_pre(Vatt_states):
         self.counter = 0
         self.pre_pos_increment = [-3,-2,-1,-1,-1,-1]
 
-    def update_state(self):
+    def update(self):
         self.counter += 1
         if int(self.counter/4) >= len(self.pre_pos_increment):
             pass
@@ -193,7 +187,7 @@ class Javelin_main(Javelin_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.counter += 1
         if self.counter > 24:
             self.enter_state('Javelin_post')
@@ -205,7 +199,7 @@ class Javelin_post(Javelin_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         pass
 
     def increase_phase(self):

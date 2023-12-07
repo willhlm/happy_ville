@@ -18,9 +18,9 @@ class AI():
         self.enter_AI('Idle')
 
     def update(self):
-        pass    
+        pass
 
-class Idle(AI):
+class Idle(AI):#initialised here
     def __init__(self,entity):
         super().__init__(entity)
 

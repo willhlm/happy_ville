@@ -8,14 +8,11 @@ class Basic_states(Entity_States):
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def update_state(self):
-        pass
-
 class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) > 0.0001:
             self.enter_state('Walk')
 
@@ -23,7 +20,7 @@ class Walk(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) <= 0.0001:
             self.enter_state('Idle')
 

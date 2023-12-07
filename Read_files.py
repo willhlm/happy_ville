@@ -195,6 +195,10 @@ class Sprites_Player(Sprites):
         else:#if 0
             self.get_image(input, timer, self.dir)
 
+class Sprites_images(Sprites_Player):
+    def __init__(self,images):
+        self.sprite_dict = images
+
 class Sprites_wallslime(Sprites_Player):
     def __init__(self,path):
         super().__init__(path)

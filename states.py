@@ -1119,6 +1119,7 @@ class Butterfly_encounter_gameplay(Gameplay):#if aggro path is chosen: and shoul
         spawn_pos = [2576,1320]
         self.gate = Entities.Lighitning_barrier(spawn_pos,self.game.game_objects)
         self.game.game_objects.interactables.add(self.gate)
+        self.butterfly.AI.activate()
 
     def incrase_kill(self):#called when butterfly is dead
         self.game.game_objects.world_state.cutscenes_complete[type(self).__name__.replace('_gameplay','')] = True

@@ -3,7 +3,6 @@ import states
 import game_objects
 import sys
 import constants as C
-import shaders
 import pygame_light2d
 
 class Game():
@@ -44,7 +43,7 @@ class Game():
             self.lights_engine.clear(255, 255, 255, 255)
 
             #tick clock
-            self.clock.tick(C.fps)
+            self.clock.tick()
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
 
             #handle event

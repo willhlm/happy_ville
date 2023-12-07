@@ -8,24 +8,12 @@ class Enemy_states(Entity_States):
     def enter_state(self,newstate):
         self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def increase_phase(self):
-        pass
-
-    def handle_input(self,input):
-        pass
-
-    def update(self):
-        self.update_state()
-
-    def update_state(self):
-        pass
-
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         #self.stay_still()
 
-    def update_state(self):
+    def update(self):
         if abs(self.entity.velocity[0]) > 0.01:
             self.enter_state('Walk')
 
@@ -40,7 +28,7 @@ class Walk(Enemy_states):
         super().__init__(entity)
         self.init_time = 0
 
-    def update_state(self):
+    def update(self):
         self.init_time += 0.02*self.entity.game_objects.game.dt
         amp = min(abs(self.entity.velocity[0]),0.3)
         self.entity.velocity[1] += amp*math.sin(5*self.init_time)# - self.entity.dir[1]*0.1
@@ -58,7 +46,7 @@ class Pre_explode(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
@@ -78,7 +66,7 @@ class De_explode(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
@@ -90,7 +78,7 @@ class Death(Enemy_states):
         super().__init__(entity)
         self.entity.suicide()
 
-    def update_state(self):
+    def update(self):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):

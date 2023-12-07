@@ -37,7 +37,7 @@ class Controller():
         for joy in self.joysticks:
             if 'xbox' in joy.get_name().lower():
                 self.controller_type.append('xbox')
-            elif 'playsation' in joy.get_name().lower():
+            elif 'playstation' in joy.get_name().lower():
                 self.controller_type.append('ps4')
             elif 'nintendo' in joy.get_name().lower():
                 self.controller_type.append('nintendo')

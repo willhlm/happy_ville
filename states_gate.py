@@ -15,9 +15,6 @@ class Basic_states():
     def increase_phase(self):
         pass
 
-    def handle_input(self,input):
-        pass
-
 class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)

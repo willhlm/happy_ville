@@ -5,17 +5,8 @@ class Basic_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
-        pass
-
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
-
-    def increase_phase(self):
-        pass
-
-    def handle_input(self,input):
-        pass
 
 class A_idle(Basic_states):
     def __init__(self,entity):
