@@ -1465,6 +1465,22 @@ class Aila_sword(Sword):
         self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
         self.stones = {'red':Red_infinity_stone([0,0],entity.game_objects, self),'green':Green_infinity_stone([0,0],entity.game_objects, self),'blue':Blue_infinity_stone([0,0],entity.game_objects, self),'orange':Orange_infinity_stone([0,0],entity.game_objects, self),'purple':Purple_infinity_stone([0,0],entity.game_objects, self)}#the ones aila has picked up
         self.swing = 0#a flag to check which swing we are at (0 or 1)
+        self.load_sprites()
+
+    def load_sprites(self):
+        self.sprites = Read_files.Sprites_Player('Sprites/Attack/aila_slash/')
+        self.image = self.sprites.sprite_dict['slash_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = self.image.get_rect(center = (0,0))
+        self.rect.center = (100,0)
+        self.true_pos = [100,100]
+        #self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y - 32,128,64)
+
+    def update_hitbox(self):
+        super().update_hitbox()
+        if self.dir[0] > 0:
+            self.rect.center = [self.hitbox.center[0] - 28, self.hitbox.center[1] - 14]
+        else:
+            self.rect.center = [self.hitbox.center[0] + 28, self.hitbox.center[1] - 14]
 
     def init(self):
         self.dmg = 1
@@ -2595,7 +2611,7 @@ class Cocoon(Interactable):#larv cocoon in light forest
             self.currentstate.handle_input('Once', state_name = 'hurt',next_state = 'Idle')
             #self.animation.handle_input('Hurt')#turn white
         else:#death
-            self.invincibile = True        
+            self.invincibile = True
             self.currentstate.handle_input('Once', state_name = 'interact',next_state = 'Interacted')
             self.game_objects.enemies.add(Maggot(self.rect.center,self.game_objects))
 

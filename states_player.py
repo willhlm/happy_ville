@@ -878,8 +878,12 @@ class Sword_stand1_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
+        self.entity.sword.currentstate.set_animation_name('slash_1')
+        self.entity.sword.animation.frame = 0
+        self.entity.sword.dir[1] = 0
+        self.entity.sword.dir[0] = self.entity.dir[0]
+        self.entity.sword.currentstate.dir[0] = self.entity.dir[0]
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
-        self.entity.sword.dir[1]=0
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
@@ -890,6 +894,7 @@ class Sword_stand1_main(Sword):
 class Sword_stand2_main(Sword_stand1_main):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.sword.currentstate.set_animation_name('slash_2')
 
 class Sword_run1_main(Sword):
     def __init__(self,entity):
