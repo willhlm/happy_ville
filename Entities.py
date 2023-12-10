@@ -15,6 +15,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.true_pos = list(self.rect.topleft)
         self.parallax = [1,1]
         self.shader = None#which shader program to run
+        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
 
     def group_distance(self):#instead of bound, could calculate distance from center.
         blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1]]
@@ -85,7 +86,6 @@ class Reflection(Staticentity):
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#
 
@@ -1472,9 +1472,9 @@ class Aila_sword(Sword):
         self.load_sprites()
 
     def load_sprites(self):
-        self.sprites = Read_files.Sprites_Player('Sprites/Attack/aila_slash/')
-        self.image = self.sprites.sprite_dict['slash_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = self.image.get_rect(center = (0,0))
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)
+        self.image = self.sprites['slash_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = (100,0)
         self.true_pos = [100,100]
         #self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y - 32,128,64)

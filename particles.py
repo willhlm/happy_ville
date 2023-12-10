@@ -18,7 +18,8 @@ class Particles(pygame.sprite.Sprite):
         self.scale = scale
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
         self.shader = None
-        
+        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+
     def update(self):
         self.update_pos()
         self.lifetime -= self.game_objects.game.dt

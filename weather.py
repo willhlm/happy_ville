@@ -35,6 +35,7 @@ class Wind(pygame.sprite.Sprite):
         self.lifetime = 300
         self.true_pos = [0,0]
         self.shader = None
+        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
 
     def blow(self,dir):#called when weather is initiated
         self.velocity = dir
