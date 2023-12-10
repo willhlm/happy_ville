@@ -30,11 +30,11 @@ class Title_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.arrow = entities_UI.Menu_Arrow()
-        self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE') #temporary
-        self.sprites = Read_files.load_sprites('Sprites/UI/load_screen/new_game')
-        self.image = self.sprites[0]
-        self.animation = animation.Simple_animation(self)
+        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
+        self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
+        self.sprites = {'idle': Read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
+        self.image = self.sprites['idle'][0]
+        self.animation = animation.Animation(self)
 
         #create buttons
         self.buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
@@ -42,34 +42,43 @@ class Title_Menu(Game_State):
         self.initiate_buttons()
         self.define_BG()
 
+    def initiate_buttons(self):
+        y_pos = 200
+        self.button_surfaces = {}
+        self.button_rects = {}
+        for b in self.buttons:
+            text = (self.game.game_objects.font.render(text = b))
+            self.button_surfaces[b] = text
+            self.button_rects[b] = pygame.Rect(100,y_pos,self.button_surfaces[b].width,self.button_surfaces[b].height)
+            y_pos += 20
+
     def define_BG(self):
         size = (90,100)
-        self.bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(self.bg,[20,20,20,200],(0,0,size[0],size[1]),border_radius=10)
+        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
+        self.bg = self.game.display.surface_to_texture(bg)
 
     def reset_timer(self):
         pass
 
-    def update(self):
-        #update menu arrow position
+    def update(self):#update menu arrow position
         self.animation.update()
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
         self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
 
     def render(self):
-        self.game.screen.fill((255,255,255))
-        self.game.screen.blit(self.image, (0,0))
+        self.game.display.render(self.image, self.game.screen)#shader render
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,50))
-        self.game.screen.blit(self.bg, (70,180))
+        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
+        self.game.display.render(self.bg, self.game.screen, position = (70,180))
 
         #blit buttons
         for b in self.buttons:
-            self.game.screen.blit(self.button_surfaces[b], self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
-        self.arrow.draw(self.game.screen)
+        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
 
     def handle_events(self, event):
         #print(event)
@@ -87,17 +96,6 @@ class Title_Menu(Game_State):
             elif event[-1] == 'start':
                 pygame.quit()
                 sys.exit()
-
-    def initiate_buttons(self):
-        y_pos = 200
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b))
-            text.fill(color = (255,255,255), special_flags = pygame.BLEND_ADD)
-            self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((100,y_pos),self.button_surfaces[b].get_size())
-            y_pos += 20
 
     def change_state(self):
         if self.current_button == 0:#new game
@@ -123,11 +121,11 @@ class Load_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.arrow = entities_UI.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
-        self.sprites = Read_files.load_sprites('Sprites/UI/load_screen/new_game')
-        self.image = self.sprites[0]
-        self.animation = animation.Simple_animation(self)
+        self.sprites = {'idle': Read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
+        self.image = self.sprites['idle'][0]
+        self.animation = animation.Animation(self)
 
         #create buttons
         self.buttons = ['SLOT 1','SLOT 2','SLOT 3','SLOT 4']
@@ -137,8 +135,9 @@ class Load_Menu(Game_State):
 
     def define_BG(self):
         size = (90,100)
-        self.bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(self.bg,[20,20,20,200],(0,0,size[0],size[1]),border_radius=10)
+        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
+        self.bg = self.game.display.surface_to_texture(bg)
 
     def reset_timer(self):
         pass
@@ -151,19 +150,18 @@ class Load_Menu(Game_State):
 
     def render(self):
         #fill game.screen
-        self.game.screen.fill((255,255,255))
-        self.game.screen.blit(self.image, (0,0))
+        self.game.display.render(self.image, self.game.screen)
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,50))
-        self.game.screen.blit(self.bg, (70,180))
+        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]/2 - self.title.width/2,50))
+        self.game.display.render(self.bg, self.game.screen, position = (70,180))
 
         #blit buttons
         for b in self.buttons:
-            self.game.screen.blit(self.button_surfaces[b], self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
-        self.arrow.draw(self.game.screen)
+#        self.arrow.draw(self.game.screen)
 
     def handle_events(self, event):
         if event[0]:
@@ -192,20 +190,20 @@ class Load_Menu(Game_State):
         self.button_rects = {}
         for b in self.buttons:
             text = (self.game.game_objects.font.render(text = b))
-            text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((100,y_pos),self.button_surfaces[b].get_size())
+            self.button_rects[b] = pygame.Rect((100,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
 class Start_Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.arrow = entities_UI.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
-        self.sprites = Read_files.load_sprites('Sprites/UI/load_screen/new_game')
-        self.image = self.sprites[0]
-        self.animation = animation.Simple_animation(self)
+        self.sprites = {'idle': Read_files.load_sprites_list('Sprites/UI/load_screen/new_game')}
+        self.image = self.sprites['idle'][0]
+        self.animation = animation.Animation(self)
 
         #create buttons
         self.buttons = ['Option 1','Option 2','Option 3','Option 4','Option 5']
@@ -270,7 +268,7 @@ class Start_Option_Menu(Game_State):
 class Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities_UI.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
 
         #create buttons
@@ -320,7 +318,7 @@ class Option_Menu(Game_State):
         self.button_rects = {}
         for b in self.buttons:
             self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
-            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
+            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
     def update_options(self):
@@ -340,7 +338,6 @@ class Gameplay(Game_State):
         self.game.game_objects.UI['gameplay'].update()
 
     def render(self):
-        self.game.screen.fill((17,22,22))
         self.game.game_objects.draw()
         self.game.game_objects.UI['gameplay'].render()
         if self.game.RENDER_FPS_FLAG:
@@ -348,7 +345,8 @@ class Gameplay(Game_State):
 
     def blit_fps(self):
         fps_string = str(int(self.game.clock.get_fps()))
-        self.game.screen.blit(self.game.game_objects.font.render((30,12),'fps ' + fps_string),(self.game.window_size[0]-40,20))
+        image = self.game.game_objects.font.render((30,12),'fps ' + fps_string)
+        self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-40,20))#shader render
 
     def handle_events(self, input):
         self.game.game_objects.player.currentstate.handle_movement(input)#move around
@@ -391,9 +389,9 @@ class Gameplay(Game_State):
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities_UI.Menu_Arrow()
+        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
-        self.title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        #self.title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         #create buttons
         self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
         self.current_button = 0
@@ -402,29 +400,31 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
 
     def define_BG(self):
         size = (100,120)
-        self.bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(self.bg,[20,20,20,200],(0,0,size[0],size[1]),border_radius=10)
+        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
+        self.bg = self.game.display.surface_to_texture(bg)
+        self.background = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
+        self.background.clear(50,50,50,100)
 
     def update(self):
-        #update menu arrow position
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
         self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
 
     def render(self):
-        #fill game.screen
         super().render()
-        self.game.screen.fill((50,50,50),special_flags=pygame.BLEND_RGB_ADD)
-        self.game.screen.blit(self.bg, (self.game.window_size[0]/2 - self.bg.get_width()/2,100))
+        self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]/2 - self.bg.width/2,100))#shader render
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,110))
+        self.game.display.render(self.title, self.background, position = (self.game.window_size[0]/2 - self.title.width/2,110))#shader render
 
         #blit buttons
         for b in self.buttons:
-            self.game.screen.blit(self.button_surfaces[b], self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.background, position = self.button_rects[b].topleft)#shader render
 
         #blit arrow
-        self.arrow.draw(self.game.screen)
+        self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft)
+
+        self.game.display.render(self.background.texture, self.game.screen)#shader render
 
     def handle_events(self, event):
         if event[0]:
@@ -447,9 +447,9 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.button_rects = {}
         for b in self.buttons:
             text = (self.game.game_objects.font.render(text = b))
-            text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].get_width()/2 ,y_pos),self.button_surfaces[b].get_size())
+            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
     def change_state(self):
@@ -473,19 +473,19 @@ class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
         self.duration = duration
         self.amp = amplitude
         self.game.state_stack[-1].render()#make sure that everything is plotted before making a screen copy
-        self.temp_surface = self.game.screen.copy()
 
     def update(self):
         self.game.game_objects.cosmetics.update()
         self.duration -= self.game.dt
-        self.amp = int(0.8*self.amp)
+        self.amp = int(0.9*self.amp)
         if self.duration < 0:
             self.exit_state()
 
     def render(self):
-        #super().render()
-        self.game.game_objects.cosmetics.draw(self.game.screen)
-        self.game.screen.blit(self.temp_surface, (random.randint(-self.amp,self.amp),random.randint(-self.amp,self.amp)))
+        super().render()
+        #self.game.game_objects.cosmetics.draw()
+        pos = (random.randint(-self.amp,self.amp), random.randint(-self.amp,self.amp))
+        self.game.display.render(self.game.screen.texture, self.game.screen, position = pos)#shader render
 
 class Slow_motion_gameplay(Gameplay):
     def __init__(self, game):
@@ -570,9 +570,8 @@ class Fadein(Gameplay):
         self.count = 0
         self.fade_length = 20
 
-        self.fade_surface = pygame.Surface(self.game.window_size, pygame.SRCALPHA, 32).convert_alpha()
-        self.fade_surface.set_alpha(255)
-        self.fade_surface.fill((0,0,0))
+        self.fade_surface = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
+        self.fade_surface.clear(0,0,0,255)
 
     def update(self):
         self.game.game_objects.update()
@@ -591,8 +590,8 @@ class Fadein(Gameplay):
 
     def render(self):
         super().render()#gameplay render
-        self.fade_surface.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
-        self.game.screen.blit(self.fade_surface, (0,0))
+        self.fade_surface.clear(0,0,0,int((self.fade_length - self.count)*(255/self.fade_length)))
+        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
     def handle_events(self, input):
         pass
@@ -602,7 +601,7 @@ class Fadeout(Fadein):
         super().__init__(game)
         self.previous_state = previous_state
         self.fade_length = 60
-        self.fade_surface.set_alpha(int(255/self.fade_length))
+        self.fade_surface.clear(0,0,0,int(255/self.fade_length))
         self.map_name = map_name
         self.spawn = spawn
         self.fade = fade
@@ -619,8 +618,8 @@ class Fadeout(Fadein):
 
     def render(self):
         self.previous_state.render()
-        self.fade_surface.set_alpha(int(self.count*(255/self.fade_length)))
-        self.game.screen.blit(self.fade_surface, (0,0))
+        self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
+        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):

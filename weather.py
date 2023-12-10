@@ -8,7 +8,7 @@ class Weather():
         self.wind = Wind(self)
         self.currentstate = states_weather.Idle(self)
 
-    def create_particles(self,type,parallax,group,number_particles = 50):#called from map loader
+    def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
         for i in range(0,number_particles):
             obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
             group.add(obj)
@@ -27,11 +27,14 @@ class Wind(pygame.sprite.Sprite):
     def __init__(self,weather):
         super().__init__()
         self.weather = weather
-        self.image = pygame.Surface([weather.game_objects.game.window_size[0],weather.game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
-        self.rect = self.image.get_rect()
+        img = pygame.Surface([weather.game_objects.game.window_size[0],weather.game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
+        self.rect = img.get_rect()
+        self.image = weather.game_objects.game.display.surface_to_texture(img)
+        self.sprites = {'idle':[self.image]}
         self.velocity = [0,0]
         self.lifetime = 300
         self.true_pos = [0,0]
+        self.shader = None
 
     def blow(self,dir):#called when weather is initiated
         self.velocity = dir
@@ -128,6 +131,7 @@ class Circles(Bound_entity):
 
         images = type(self).animations[tuple(self.parallax)]
         self.sprites = Read_files.Sprites_images({'idle':images})
+        self.image = self.sprites.sprite_dict['idle'][0]
         self.animation.frame = random.randint(0, len(images)-1)
 
     def set_parameters(self):
@@ -143,7 +147,7 @@ class Circles(Bound_entity):
         images = []#store each animation frame
         for i in range(round(1/self.frequency)):#number of frames
             self.prepare_images(i)
-            images.append(self.image)#store each animation frame
+            images.append(self.game_objects.game.display.surface_to_texture(self.image))#store each animation frame
         return images
 
     def prepare_canvas(self):
@@ -210,9 +214,9 @@ class Fireflies(Circles):
 class Twinkle(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.sprites = Read_files.Sprites_Player('Sprites/GFX/twinkle/')
+        self.sprites = Read_files.Sprites_entity('Sprites/GFX/twinkle/',game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
 
         self.true_pos = [random.randint(0, int(self.width)),random.randint(0, int(self.height))]#starting position
         self.rect.topleft = self.true_pos

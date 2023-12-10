@@ -3,7 +3,7 @@ import states
 import game_objects
 import sys
 import constants as C
-from pygame_render import RenderEngine
+from pygame_render import RenderEngine, NEAREST
 
 class Game():
     def __init__(self):
@@ -11,9 +11,10 @@ class Game():
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size()#get the scale according to your display size
         window_size_scaled = tuple([int(x*self.scale) for x in self.window_size])
-        self.screen = pygame.Surface(self.window_size)#do not add convert alpha!
 
-        self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])#need to be after display
+        self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])
+        self.screen = self.display.make_layer(self.window_size)
+        self.screen.texture.filter = (NEAREST, NEAREST)#for pixel art
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -38,10 +39,10 @@ class Game():
 
     def run(self):
         while True:
-            self.display.clear(0, 0, 0)
+            self.screen.clear(0, 0, 0)
 
             #tick clock
-            self.clock.tick()
+            self.clock.tick(C.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
 
             #handle event
@@ -51,9 +52,8 @@ class Game():
             self.state_stack[-1].update()
 
             #render
-            self.state_stack[-1].render()#render as usual with blit onto self.screeen
-            tex = self.display.surface_to_texture(self.screen)
-            self.display.render(tex, self.display.screen, scale = self.scale)#shader render
+            self.state_stack[-1].render()#render onto self.screeen
+            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
 
             #update display
             pygame.display.flip()

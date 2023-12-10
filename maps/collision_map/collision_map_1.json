@@ -25,42 +25,6 @@
                  "name":"bg2",
                  "objects":[
                         {
-                         "gid":112,
-                         "height":16,
-                         "id":158,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"type",
-                                 "type":"string",
-                                 "value":"Light_crystal"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":192,
-                         "y":208
-                        }, 
-                        {
-                         "gid":105,
-                         "height":16,
-                         "id":160,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":304,
-                         "y":288
-                        }, 
-                        {
                          "gid":104,
                          "height":16,
                          "id":162,
@@ -120,24 +84,6 @@
                          "width":16,
                          "x":80,
                          "y":80
-                        }, 
-                        {
-                         "gid":91,
-                         "height":16,
-                         "id":53,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Larv_simple"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1216,
-                         "y":144
                         }, 
                         {
                          "gid":110,
@@ -214,7 +160,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Exploding_Mygga"
+                                 "value":"Exploding_mygga"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -376,7 +322,7 @@
          "y":0
         }],
  "nextlayerid":30,
- "nextobjectid":167,
+ "nextobjectid":1373,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

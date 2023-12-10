@@ -20,9 +20,10 @@ from time import perf_counter
 class Game_Objects():
     def __init__(self, game):
         self.game = game
-        self.font = Read_files.Alphabet()#intitilise the alphabet class, scale of alphabet
+        self.font = Read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
         self.controller = controller.Controller('playstation')
         self.sound = sound.Sound()
+        self.shaders = Read_files.load_shaders_dict('shaders/', self)#store all shaders        
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
         self.collisions = collisions.Collisions(self)
@@ -139,43 +140,48 @@ class Game_Objects():
         self.weather.update()
 
     def draw(self):
-        self.all_bgs.draw(self.game.screen)
-        self.interactables.draw(self.game.screen)#should be before bg_interact
-        self.bg_interact.draw(self.game.screen)
+        self.all_bgs.draw()
+        self.interactables.draw()#should be before bg_interact
+        self.bg_interact.draw()
 
-        self.enemies.draw(self.game.screen)
-        self.npcs.draw(self.game.screen)
-        self.players.draw(self.game.screen)
-        self.fprojectiles.draw(self.game.screen)
-        self.eprojectiles.draw(self.game.screen)
-        self.loot.draw(self.game.screen)
+        self.enemies.draw()
+        self.npcs.draw()
+        self.players.draw()
+        self.fprojectiles.draw()
+        self.eprojectiles.draw()
+        self.loot.draw()
         self.platforms.draw()
-        self.cosmetics.draw(self.game.screen)
+        self.cosmetics.draw()
         self.reflections.draw()#do not need to send screen. Should be before fgs
-        self.all_fgs.draw(self.game.screen)
-        #self.camera_blocks.draw(self.game.screen)
+        self.all_fgs.draw()
+        self.camera_blocks.draw()
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
-            pygame.draw.rect(self.game.screen, (0,0,255), (round(self.player.hitbox[0]-self.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
-            pygame.draw.rect(self.game.screen, (255,0,255), (round(self.player.rect[0]-self.camera.true_scroll[0]),round(self.player.rect[1]-self.camera.true_scroll[1]),self.player.rect[2],self.player.rect[3]),2)#draw hitbox
+            image = pygame.Surface(self.game.window_size,pygame.SRCALPHA,32).convert_alpha()
+
+            pygame.draw.rect(image, (255,0,255), (round(self.player.hitbox[0]-self.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
+            pygame.draw.rect(image, (0,0,255), (round(self.player.rect[0]-self.camera.true_scroll[0]),round(self.player.rect[1]-self.camera.true_scroll[1]),self.player.rect[2],self.player.rect[3]),2)#draw hitbox
 
             for projectile in self.fprojectiles.sprites():#go through the group
-                pygame.draw.rect(self.game.screen, (0,0,255), (int(projectile.hitbox[0]-self.camera.scroll[0]),int(projectile.hitbox[1]-self.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (0,0,255), (int(projectile.hitbox[0]-self.camera.scroll[0]),int(projectile.hitbox[1]-self.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
             for projectile in self.eprojectiles.sprites():#go through the group
-                pygame.draw.rect(self.game.screen, (0,0,255), (int(projectile.hitbox[0]-self.camera.scroll[0]),int(projectile.hitbox[1]-self.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (0,0,255), (int(projectile.hitbox[0]-self.camera.scroll[0]),int(projectile.hitbox[1]-self.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
             for enemy in self.enemies.sprites():#go through the group
-                pygame.draw.rect(self.game.screen, (0,0,255), [enemy.hitbox[0]-self.camera.scroll[0],enemy.hitbox[1]-self.camera.scroll[1],enemy.hitbox[2],enemy.hitbox[3]],2)#draw hitbox
-                pygame.draw.rect(self.game.screen, (255,0,255), [enemy.rect[0]-self.camera.scroll[0],enemy.rect[1]-self.camera.scroll[1],enemy.rect[2],enemy.rect[3]],2)#draw hitbox
+                pygame.draw.rect(image, (0,0,255), [enemy.hitbox[0]-self.camera.scroll[0],enemy.hitbox[1]-self.camera.scroll[1],enemy.hitbox[2],enemy.hitbox[3]],2)#draw hitbox
+                pygame.draw.rect(image, (255,0,255), [enemy.rect[0]-self.camera.scroll[0],enemy.rect[1]-self.camera.scroll[1],enemy.rect[2],enemy.rect[3]],2)#draw hitbox
             for cos in self.interactables.sprites():#go through the group
-                pygame.draw.rect(self.game.screen, (0,0,255), (int(cos.hitbox[0]-self.camera.scroll[0]),int(cos.hitbox[1]-self.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
-                pygame.draw.rect(self.game.screen, (255,0,255), (int(cos.rect[0]-self.camera.scroll[0]),int(cos.rect[1]-self.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
+                pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera.scroll[0]),int(cos.hitbox[1]-self.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera.scroll[0]),int(cos.rect[1]-self.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
             for cos in self.loot.sprites():#go through the group
-                pygame.draw.rect(self.game.screen, (0,0,255), (int(cos.hitbox[0]-self.camera.scroll[0]),int(cos.hitbox[1]-self.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
-                pygame.draw.rect(self.game.screen, (255,0,255), (int(cos.rect[0]-self.camera.scroll[0]),int(cos.rect[1]-self.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
+                pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera.scroll[0]),int(cos.hitbox[1]-self.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera.scroll[0]),int(cos.rect[1]-self.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
             for platform in self.platforms:#go through the group
-                pygame.draw.rect(self.game.screen, (255,0,0), (int(platform.hitbox[0]-self.camera.scroll[0]),int(platform.hitbox[1]-self.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,0,0), (int(platform.hitbox[0]-self.camera.scroll[0]),int(platform.hitbox[1]-self.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
             for ramp in self.platforms_ramps:
-                pygame.draw.rect(self.game.screen, (255,100,100), (int(ramp.hitbox[0]-self.camera.scroll[0]),int(ramp.hitbox[1]-self.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,100,100), (int(ramp.hitbox[0]-self.camera.scroll[0]),int(ramp.hitbox[1]-self.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
             for fade in self.bg_fade:
-                pygame.draw.rect(self.game.screen, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
+
+            tex = self.game.display.surface_to_texture(image)
+            self.game.display.render(tex, self.game.screen)#shader render

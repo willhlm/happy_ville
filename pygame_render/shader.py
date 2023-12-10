@@ -6,7 +6,7 @@ class Shader:
     """
     A class for managing shader programs and related objects.
 
-    Note: A Shader object cannot be instantiated directly.
+    Note: A Shader object cannot be instantiated directly. 
     Use RenderEngine.make_shader or RenderEngine.load_shader_from_path to create one.
     """
 
@@ -14,7 +14,7 @@ class Shader:
         """
         Initialize the Shader with a ModernGL shader program.
 
-        Note: A Shader object cannot be instantiated directly.
+        Note: A Shader object cannot be instantiated directly. 
         Use RenderEngine.make_shader or RenderEngine.load_shader_from_path to create one.
         """
         # Set program

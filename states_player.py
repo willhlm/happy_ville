@@ -86,7 +86,7 @@ class Walk_main(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
@@ -130,7 +130,7 @@ class Run_pre(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
@@ -177,7 +177,7 @@ class Run_main(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            #self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['walk'])
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
@@ -557,7 +557,7 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['dash'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'])
 
     def exit(self):
         if self.dash_length < 0:
@@ -762,7 +762,7 @@ class Pray_pre(Player_states):
         effect = Entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['pray'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'])
         self.entity.acceleration[0] = 0
 
     def handle_press_input(self,input):#all states should inehrent this function
@@ -863,7 +863,7 @@ class Sword(Player_states):#main phases shold inheret this
         self.entity.timer_jobs['sword'].activate()
         self.dir = self.entity.dir.copy()#animation direction
         self.entity.sword.dir = self.dir.copy()#sword direction
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['sword'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'])
         self.slash()
 
     def slash(self):#if we have green infinity stone
@@ -994,7 +994,7 @@ class Thunder_pre(Abillitites):
 class Thunder_charge(Thunder_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds.SFX['thunder'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['thunder'])
 
     def init(self):
         self.entity.consume_spirit()
