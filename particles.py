@@ -17,7 +17,8 @@ class Particles(pygame.sprite.Sprite):
         self.colour = colour
         self.scale = scale
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
-
+        self.shader = None
+        
     def update(self):
         self.update_pos()
         self.lifetime -= self.game_objects.game.dt
@@ -37,6 +38,7 @@ class Particles(pygame.sprite.Sprite):
         self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
 
     def fading(self):
+        return
         self.fade -= self.fade_scale*self.game_objects.game.dt
         self.image.set_alpha(self.fade)
 
@@ -65,6 +67,7 @@ class Circle(Particles):#a general one
         self.radius = random.randint(max(self.scale-1,1), round(self.scale+1))
         self.fade_scale = 3
         self.make_circle()
+        self.image = self.game_objects.game.display.surface_to_texture(self.image)
 
     def make_circle(self):
         self.surface =pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
@@ -78,6 +81,7 @@ class Spark(Particles):#a general one
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.make_sparks()
         self.fade_scale = 10
+        self.image = self.game_objects.game.display.surface_to_texture(self.image)
 
     def update(self):
         super().update()
@@ -87,6 +91,7 @@ class Spark(Particles):#a general one
         self.image = self.surface.copy()
         self.spark_shape()
         pygame.draw.polygon(self.image,self.colour,self.points)
+        self.image = self.game_objects.game.display.surface_to_texture(self.image)
 
     def spark_shape(self):
         vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)

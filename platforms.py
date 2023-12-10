@@ -49,9 +49,9 @@ class Gate(Platform):#a gate that is owned by the lever
         super().__init__(pos)
         self.game_objects = game_objects
         self.dir = [1,0]
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/gate/')
+        self.sprites = Read_files.Sprites_entity('Sprites/animations/gate/',game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = (pos[0],pos[1])
         self.hitbox = self.rect.copy()
         self.ID_key = ID_key#an ID to match with the gate
@@ -70,7 +70,7 @@ class Gate(Platform):#a gate that is owned by the lever
         entity.update_rect_x()
 
     def draw(self):
-        self.game_objects.game.screen.blit(self.image, (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust', go_through = True):
@@ -274,7 +274,7 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
 class Rhoutta_encounter_1(Collision_time):
     def __init__(self,game_objects,pos,size,run_particle,go_through=True):
         super().__init__(game_objects,pos,size,run_particle,go_through)
-        self.sprites = Read_files.Sprites_Player('Sprites/block/collision_time/rhoutta_encounter_1/')
+        self.sprites = Read_files.Sprites_entity('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
 
 class Breakable_block(Collision_block):#breakable collision blocks
@@ -321,9 +321,9 @@ class Breakable_block_1(Breakable_block):
     def __init__(self, pos, game_objects,run_particle='dust'):
         super().__init__(pos, run_particle)
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_Player('Sprites/block/breakable/light_forest/type1/')
+        self.sprites = Read_files.Sprites_entity('Sprites/block/breakable/light_forest/type1/',game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.hitbox = self.rect.copy()
 

@@ -598,19 +598,19 @@ class Level():
             if 'fade' in tile_layer:#add fade blocks
                 for fade in blit_fade_surfaces.keys():
                     if 'fade' in fade:#is needed
-                        bg = Entities.BG_Fade(pos,blit_fade_surfaces[fade],parallax,blit_fade_pos[fade])
+                        bg = Entities.BG_Fade(pos, self.game_objects, blit_fade_surfaces[fade],parallax,blit_fade_pos[fade])
                         if self.layer == 'bg':self.game_objects.all_bgs.add(bg)#bg
                         else: self.game_objects.all_fgs.add(bg)
                         self.game_objects.bg_fade.add(bg)
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
-                self.game_objects.bg_interact.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
+                self.game_objects.bg_interact.add(Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
 
             elif self.layer == 'bg':#bg
-                bg = Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
+                bg = Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
                 self.game_objects.all_bgs.add(bg)
                 self.game_objects.all_bgs.reference[tuple(parallax)] = bg
             elif self.layer == 'fg':#fg
-                self.game_objects.all_fgs.add(Entities.BG_Block(pos,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
+                self.game_objects.all_fgs.add(Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
 
             if animation_entities.get(tile_layer,False):#add animations
                 for bg_animation in animation_entities[tile_layer]:

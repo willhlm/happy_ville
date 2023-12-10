@@ -3,18 +3,18 @@ import states
 import game_objects
 import sys
 import constants as C
-import pygame_light2d
+from pygame_render import RenderEngine, NEAREST
 
 class Game():
     def __init__(self):
         #initiate all screens
         self.window_size = C.window_size.copy()
-        scale = self.scale_size()#get the scale according to your display size
-        window_size_scaled = tuple([int(x*scale) for x in self.window_size])
-        self.screen = pygame.Surface(self.window_size)#do not add .convert_alpha(), should be initiad before display, for some reason
-        flags = pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF #| pygame.FULLSCREEN #|pygame.SCALED
-        self.display = pygame.display.set_mode(window_size_scaled, flags, vsync = 1)
-        self.lights_engine = pygame_light2d.LightingEngine(screen_res = window_size_scaled, native_res=self.window_size, lightmap_res=(int(self.window_size[0]/2.5), int(self.window_size[1]/2.5)))#need to be after display
+        self.scale = self.scale_size()#get the scale according to your display size
+        window_size_scaled = tuple([int(x*self.scale) for x in self.window_size])
+
+        self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])
+        self.screen = self.display.make_layer(self.window_size)
+        self.screen.texture.filter = (NEAREST, NEAREST)#for pixel art
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -38,9 +38,8 @@ class Game():
                 self.state_stack[-1].handle_events(self.game_objects.controller.output())
 
     def run(self):
-        rect = pygame.Rect(0, 0, self.window_size[0], self.window_size[1])
         while True:
-            self.lights_engine.clear(255, 255, 255, 255)
+            self.screen.clear(0, 0, 0)
 
             #tick clock
             self.clock.tick()
@@ -53,12 +52,8 @@ class Game():
             self.state_stack[-1].update()
 
             #render
-            self.state_stack[-1].render()#render as usual with blit onto self.screeen
-            #shader render
-            tex = self.lights_engine.surface_to_texture(self.screen)
-            self.lights_engine.render_texture(tex, pygame_light2d.BACKGROUND, rect, rect)
-            self.lights_engine.render()
-            tex.release()#prevent memory leak
+            self.state_stack[-1].render()#render onto self.screeen
+            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
 
             #update display
             pygame.display.flip()
@@ -73,8 +68,5 @@ class Game():
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
     pygame.init()#initilise
-    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)#has to be before set_mode
-    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)#has to be before set_mode
-    pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK,pygame.GL_CONTEXT_PROFILE_CORE)#has to be before set_mode
     g = Game()
     g.run()

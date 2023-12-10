@@ -8,8 +8,8 @@ class Basic_states(Entity_States):
     def enter_state(self,newstate,**kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
 
-    def increase_phase(self):
-        self.entity.reset_timer()
+    def increase_phase(self):#called when animation is finished
+        pass
 
 class Idle(Basic_states):
     def __init__(self,entity):
@@ -32,7 +32,7 @@ class Idle(Basic_states):
             self.enter_state('Interact')
 
     def set_animation_name(self,name):#called for UI abilities
-        self.state_name = name
+        self.entity.state = name
 
 class Death(Basic_states):#idle once
     def __init__(self,entity):
@@ -49,7 +49,6 @@ class Once(Basic_states):
         self.state_name = kwarg['state_name']
 
     def increase_phase(self):
-        super().increase_phase()
         self.enter_state(self.next_state)
 
 #special ones

@@ -13,27 +13,30 @@ class Group_player(pygame.sprite.Group):#playergroup
         super().__init__()
         self.game_objects = game_objects
 
-    def draw(self,surface):
+    def draw(self):
         for spr in self.sprites():
-            self.spritedict[spr] = surface.blit(spr.image, (round(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(spr.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
+            pos = (round(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(spr.true_pos[1]-self.game_objects.camera.true_scroll[1]))
+            self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos, flip = bool(max(spr.dir[0],0)), shader = spr.shader)#shader render
 
 class Group(pygame.sprite.Group):#the rest
     def __init__(self,game_objects):
         super().__init__()
         self.game_objects = game_objects
 
-    def draw(self,surface):
+    def draw(self):
         for spr in self.sprites():
-            self.spritedict[spr] = surface.blit(spr.image, (int(spr.rect[0]-self.game_objects.camera.scroll[0]),int(spr.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
+            pos = (int(spr.rect[0]-self.game_objects.camera.scroll[0]),int(spr.rect[1]-self.game_objects.camera.scroll[1]))
+            self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos, flip = bool(max(spr.dir[0],0)), shader = spr.shader)#shader render
 
 class LayeredUpdates(pygame.sprite.LayeredUpdates):
     def __init__(self,game_objects):
         super().__init__()
         self.game_objects = game_objects
 
-    def draw(self,surface):
+    def draw(self):
         for spr in self.sprites():
-            surface.blit(spr.image, (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1])))#int seem nicer than round
+            pos = (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1]))
+            self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos)#shader render
 
 class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries
     def __init__(self):
