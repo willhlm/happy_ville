@@ -17,7 +17,7 @@ class Shader_states():
 class Idle(Shader_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['idle']
+        self.entity.shader = self.entity.shaders['idle']
 
     def handle_input(self,input):
         if input == 'Hurt':
@@ -27,7 +27,7 @@ class Hurt(Shader_states):#turn white
     def __init__(self,entity):
         super().__init__(entity)
         self.duration = C.hurt_animation_length#hurt animation duration
-        self.entity.shader = self.entity.game_objects.shaders['hurt']
+        self.entity.shader = self.entity.shaders['hurt']
         self.next_animation = 'Idle'
 
     def update(self):
@@ -42,7 +42,7 @@ class Hurt(Shader_states):#turn white
 class Invincibile(Shader_states):#blink white
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['invincible']
+        self.entity.shader = self.entity.shaders['invincible']
         self.duration = C.invincibility_time_player-(C.hurt_animation_length+1)#a duration which considers the player invinsibility
         self.time = 0
 
@@ -53,9 +53,3 @@ class Invincibile(Shader_states):#blink white
 
         if self.duration < 0:
             self.enter_state('Idle')
-
-class Blur(Shader_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['blur']
-        self.entity.shader['blurRadius'] = 1

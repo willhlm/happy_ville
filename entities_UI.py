@@ -9,16 +9,19 @@ class Banner(Animatedentity):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/UI/map/banner/banner_' + type + '/', game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect(topleft = pos)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
         self.original_pos = pos
-        self.blit_text(text)
+        #self.blit_text(text)
 
     def blit_text(self,text):
+        screen = self.game_objects.game.display.make_layer((self.image.width,self.image.height))#make a layer ("surface")
         text_surface = self.game_objects.font.render(text = text)
         for state in self.sprites.keys():
             for frame, image in enumerate(self.sprites[state]):
-                image.blit(text_surface,(image.get_width()*0.5,image.get_height()*0.5))
-                self.sprites[state][frame] = image
+                self.game_objects.game.display.render(image, screen)
+                self.game_objects.game.display.render(text_surface, screen, position = (image.width*0.5,image.height*0.5))
+                self.sprites[state][frame] = screen
 
     def update(self,scroll):
         super().update()
@@ -40,7 +43,8 @@ class Item(Animatedentity):#for invenotry, an empty item
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/item/empty/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
         self.description = ''
         self.number = ''#to bilt the number of items player has. THis class is an empty object so no number
 
@@ -49,7 +53,8 @@ class Sword(Animatedentity):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/sword/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect(topleft = pos)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
 
     def set_level(self,level):
         self.currentstate.set_animation_name('level_'+str(level))
@@ -59,7 +64,8 @@ class Infinity_stone(Animatedentity):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/infinity_stone/empty/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
         self.description = ''
 
 #momamori inventory
@@ -68,7 +74,8 @@ class Omamori(Animatedentity):#this will save the positions needed to the UI
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/omamori/empty/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
         self.description = ''
 
 #ability spirit upgrade UI
@@ -220,13 +227,15 @@ class Controllers():
 class Xbox(Controllers):
     def __init__(self, pos, game_objects,type):
         super().__init__(pos, game_objects,type)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/controller/xbox/')
+        self.sprites = Read_files.load_sprites_dict('Sprites/UI/controller/xbox/',game_objects)
         self.image = self.sprites['a_idle'][0]
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
 
-class Playsation(Controllers):
+class Playstation(Controllers):
     def __init__(self, pos, game_objects,type):
         super().__init__(pos, game_objects,type)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/controller/playstation/')
+        self.sprites = Read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos

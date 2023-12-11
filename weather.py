@@ -131,8 +131,8 @@ class Circles(Bound_entity):
             type(self).animations[tuple(self.parallax)] = self.prepare_animation()#make the circles once and store each frame in a list: takes performance to make many
 
         images = type(self).animations[tuple(self.parallax)]
-        self.sprites = Read_files.Sprites_images({'idle':images})
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.sprites = {'idle':images}
+        self.image = self.sprites['idle'][0]
         self.animation.frame = random.randint(0, len(images)-1)
 
     def set_parameters(self):
@@ -215,7 +215,7 @@ class Fireflies(Circles):
 class Twinkle(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.sprites = Read_files.Sprites_entity('Sprites/GFX/twinkle/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/GFX/twinkle/',game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
 
@@ -268,7 +268,7 @@ class Sakura(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
         rand=random.randint(1,1)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
+        self.sprites=Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(rand)+'/', game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
@@ -281,7 +281,7 @@ class Autumn(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
         rand=random.randint(1,1)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/leaf'+str(rand)+'/')
+        self.sprites=Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(rand)+'/', game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
@@ -294,7 +294,7 @@ class Snow(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
         rand=random.randint(1,1)
-        self.sprites = Read_files.Sprites_Player('Sprites/animations/weather/snow/')
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/weather/snow/', game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos
@@ -311,7 +311,7 @@ class Snow(Weather_particles):
 class Rain(Weather_particles):
     def __init__(self,game_objects,parallax):
         super().__init__(game_objects,parallax)
-        self.sprites=Read_files.Sprites_Player('Sprites/animations/weather/rain/')
+        self.sprites=Read_files.load_sprites_dict('Sprites/animations/weather/rain/',game_objects)
         self.image = self.sprites.sprite_dict['idle'][0]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.true_pos

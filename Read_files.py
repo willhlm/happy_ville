@@ -24,6 +24,11 @@ def read_json(path):
 def write_json():
     pass
 
+def get_folder(file_path):#used when reading sprites for map loader
+    for n in range(len(file_path)):
+        if file_path[-(n+1)] == '/':
+            return file_path[:-n]
+
 def format_tiled_json_group(map_data):#if we want static stamps with parallax -> called from maploader
     formatted_map_data = {}
     formatted_map_data['groups'] = {}
@@ -48,25 +53,29 @@ def format_tiled_json_group(map_data):#if we want static stamps with parallax ->
                 formatted_map_data['groups'][gruop['name']]['layers'][layer['name']] = layer
     return formatted_map_data
 
-'shader loader'
-def load_shaders_dict(base_path, game_objects):#returns a dicy with "state" as key and shader program as value
-    shader_dict = {}
-    for subdir in [d[0] for d in walk(base_path)]:
-        if subdir == base_path:
-            pass
-        shader_dict[subdir.split("/")[-1]] = load_shader_list(subdir, game_objects)
-    return shader_dict
+def format_tiled_json(map_data):#used from UI loader
+    formatted_map_data = {}
+    formatted_map_data['tile_layers'] = {}
+    formatted_map_data['tilesets'] = map_data['tilesets']
 
-def load_shader_list(path_to_folder, game_objects):#returns a list of shader
-    list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
-    if join(path_to_folder,'.DS_Store') in list_of_sprites:
-        list_of_sprites.remove(join(path_to_folder,'.DS_Store'))
-    if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
-        list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
-    if list_of_sprites:
-        list_of_sprites.sort(reverse = True)
-        return game_objects.game.display.load_shader_from_path(list_of_sprites[0],list_of_sprites[1])#vertex first
-    return []
+    for layer in map_data['layers']:
+        if 'data' in layer.keys():#tile layers
+            formatted_map_data['tile_layers'][layer['name']] = layer
+        elif 'objects' in layer.keys():#object: static stamps, collision
+            formatted_map_data[layer['name']] = layer['objects']
+
+    return formatted_map_data
+
+'shader loader'
+def load_shaders_dict(shaders, game_objects):#returns a dicy with "state" as key and shader program as value
+    all_shaders = ['idle','hurt','invincible','blur']#all shaders need to be listed here
+    shader_dict = {}
+    for shader in all_shaders:
+        base_path = 'shaders/' + shader
+        list_of_shader = [base_path +'/'+ f for f in listdir(base_path)]
+        list_of_shader.sort(reverse=True)
+        shader_dict[shader] = game_objects.game.display.load_shader_from_path(list_of_shader[0],list_of_shader[1])#vertex first
+    return shader_dict
 
 'sound loader'
 def load_sounds_dict(base_path):#returns a dict with "stae" as key, the sound file as value
@@ -150,7 +159,7 @@ class Alphabet():
     #returns a surface with size of input, and input text. Automatic line change
     def render(self, surface_size = False, text = "", limit = 1000, inverse_color = False):
         if not surface_size:
-            surface_size = (4*len(text),5)
+            surface_size = (4*(len(text)+1),5)
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
         x, y = 0, 0
         x_max = int(surface_size[0]/self.char_size[0])
@@ -169,7 +178,7 @@ class Alphabet():
                 else:
                     text_surface.blit(self.characters[c],pos)
                 x += 1
-                if x_max * y + x > limit: return text_surface #spot printing at limit
+                if x_max * y + x > limit: return self.game_objects.game.display.surface_to_texture(text_surface) #spot printing at limit
 
             x += 1      #add space after each word
 

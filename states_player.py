@@ -879,7 +879,6 @@ class Sword_stand1_main(Sword):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.set_animation_name('slash_1')
-        self.entity.sword.animation.frame = 0
         self.entity.sword.dir[1] = 0
         self.entity.sword.dir[0] = self.entity.dir[0]
         self.entity.sword.currentstate.dir[0] = self.entity.dir[0]

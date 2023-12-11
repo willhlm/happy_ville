@@ -11,7 +11,6 @@ from pygame_render.layer import Layer
 from pygame_render.shader import Shader
 from pygame_render.util import normalize_color_arguments, create_rotated_rect, to_dest_coords
 
-
 class RenderEngine:
     """
     A rendering engine for 2D graphics using Pygame and ModernGL.
@@ -46,7 +45,7 @@ class RenderEngine:
             pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
 
         # Configure pygame display
-        pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF, vsync = 1) #| pygame.FULLSCREEN #|pygame.SCALED
+        pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF) #| pygame.FULLSCREEN #|pygame.SCALED
 
         # Create an OpenGL context
         self._ctx = moderngl.create_context()

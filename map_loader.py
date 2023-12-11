@@ -563,33 +563,10 @@ class Level():
             else:#statics
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
 
-        #blurring
-        # strFormat = 'RGBA'
-        # for layer in blit_compress_surfaces.keys():
-        #     if parallax[0] == 1: continue
-        #     blur_value = self.blur_value(parallax)
-        #
-        #     #surface to pil
-        #     surface = blit_compress_surfaces[layer]
-        #     raw_str = pygame.image.tobytes(surface, strFormat)
-        #     image = Image.frombytes(strFormat, surface.get_size(), raw_str)
-        #
-        #     #blurImage = image.filter(ImageFilter.BoxBlur(blur_value))
-        #     blurImage = image.filter(ImageFilter.GaussianBlur(blur_value))
-        #
-        #     #remove black border
-        #     blurImage = np.array(blurImage)
-        #     for i in range(3):
-        #         blurImage[:,:,i] = np.divide(blurImage[:,:,i],blurImage[:,:,3].astype('int16')+1)*256
-        #     blurImage =  Image.fromarray(blurImage.astype('uint8'), 'RGBA')
-        #
-        #     #pil to surface
-        #     blit_compress_surfaces[layer] = pygame.image.fromstring(blurImage.tobytes(), blurImage.size, blurImage.mode)
-
-        blur_value = self.blur_value(parallax)
-        for layer in blit_compress_surfaces.keys():
-            if parallax[0] == 1: break
-            blit_compress_surfaces[layer] = pygame.transform.gaussian_blur(blit_compress_surfaces[layer], blur_value,repeat_edge_pixels=True)#box_blur
+        #blur_value = self.blur_value(parallax)
+        #for layer in blit_compress_surfaces.keys():
+            #if parallax[0] == 1: break
+            #blit_compress_surfaces[layer] = pygame.transform.gaussian_blur(blit_compress_surfaces[layer], blur_value,repeat_edge_pixels=True)#box_blur
 
         #add the bg, fg, fade, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():

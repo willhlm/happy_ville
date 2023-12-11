@@ -23,7 +23,6 @@ class Game_Objects():
         self.font = Read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
         self.controller = controller.Controller('playstation')
         self.sound = sound.Sound()
-        self.shaders = Read_files.load_shaders_dict('shaders/', self)#store all shaders        
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
         self.collisions = collisions.Collisions(self)

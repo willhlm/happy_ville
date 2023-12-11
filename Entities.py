@@ -15,7 +15,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.true_pos = list(self.rect.topleft)
         self.parallax = [1,1]
         self.shader = None#which shader program to run
-        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
 
     def group_distance(self):#instead of bound, could calculate distance from center.
         blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1]]
@@ -28,6 +28,13 @@ class BG_Block(Staticentity):
         super().__init__(pos, game_objects, img)
         self.sprites = {'idle':[self.image]}
         self.parallax = parallax
+        shaders = Read_files.load_shaders_dict(['blur'], game_objects)#load shaders of interest
+        self.shader = shaders['blur']
+        if parallax[0] == 1: self.blur = 0.01#basically no blur
+        else: self.blur = 1.2/parallax[0]
+
+    def update(self):
+        self.shader['blurRadius'] = self.blur
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -232,6 +239,7 @@ class Player(Character):
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
+        self.shaders = Read_files.load_shaders_dict(['idle','hurt','invincibile'], game_objects)#load shaders of interest
         self.shader_state = states_shader.Idle(self)
 
         self.spawn_point = [{'map':'light_forest_1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -322,7 +330,7 @@ class Migawari_entity(Character):#player double ganger
             #self.shader_state.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
         else:#if dead
-            if self.currentstate.state_name != 'death':#if not already dead
+            if self.state != 'death':#if not already dead
                 if self.game_objects.player.abilities.spirit_abilities['Migawari'].level == 3:
                     self.game_objects.player.heal(1)
                 self.currentstate.enter_state('Death')#overrite any state and go to deat
@@ -1088,15 +1096,17 @@ class Light_glow(Staticentity):#a light glow anound an entity.
         self.radius = radius
         self.layers = layers
         self.make_glow()
-        self.rect = self.image.get_rect(center = entity.rect.center)
         self.alpha = 255
+        self.image = self.entity.game_objects.game.display.surface_to_texture(self.image)
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.center = entity.rect.center
 
     def update(self):
         self.rect.center = self.entity.rect.center
 
     def diminish(self):#slowly reduce the light
         self.image.set_alpha(int(self.alpha))
-        self.alpha -= self.entity.game_objects.game.dt*self.slow_motion
+        self.alpha -= self.entity.game_objects.game.dt * self.slow_motion
 
     def make_glow(self):#init
         self.image = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
@@ -1140,6 +1150,7 @@ class Dash_effect(Staticentity):
         self.alpha = alpha
         #self.image.set_alpha(self.alpha)
         self.true_pos = self.rect.topleft
+        self.dir = entity.dir.copy()
 
     def update(self):
         self.alpha *= 0.9
@@ -1155,7 +1166,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
         super().__init__(entity.rect.center,entity.game_objects)
         self.game_objects = entity.game_objects
         self.image = pygame.Surface((400,400), pygame.SRCALPHA, 32).convert_alpha()
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = [entity.game_objects.game.window_size[0]*0.5,entity.game_objects.game.window_size[0]*0.5-100]
         self.image.fill((0,0,0))
 
@@ -1372,7 +1383,7 @@ class Hurt_box(Melee):#a hitbox that spawns
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/hurt_box/',entity.game_objects)#invisible
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(entity.rect.x,entity.rect.y,self.image.width,self.image.height)
         self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,entity.size[0],entity.size[1])
         self.lifetime = lifetime
         self.dmg = entity.dmg
@@ -1474,6 +1485,7 @@ class Aila_sword(Sword):
     def load_sprites(self):
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)
         self.image = self.sprites['slash_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.state = 'slash_1'
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = (100,0)
         self.true_pos = [100,100]
@@ -1825,7 +1837,7 @@ class Loot(Platform_entity):#
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
         self.velocity[0] = 0.5*self.velocity[0]
-        self.velocity[1] = -0.3*self.velocity[1]
+        self.velocity[1] = -0.2*self.velocity[1]
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
@@ -1932,7 +1944,7 @@ class Enemy_drop(Loot):
 
     def player_collision(self,player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return
-        self.game_objects.sound.play_sfx(self.sounds.SFX['death'])#should be in states
+        self.game_objects.sound.play_sfx(self.sounds['death'])#should be in states
         obj = (self.__class__.__name__)#get the string in question
         try:
             self.game_objects.player.inventory[obj] += 1
@@ -1946,8 +1958,7 @@ class Amber_Droplet(Enemy_drop):
         self.sprites = game_objects.object_pool.objects['Amber_Droplet'].sprites
         self.sounds = game_objects.object_pool.objects['Amber_Droplet'].sounds
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.center = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = list(self.rect.topleft)
         self.hitbox = pygame.Rect(pos[0],pos[1],8,8)
         self.description = 'moneyy'
@@ -1969,8 +1980,7 @@ class Bone(Enemy_drop):
         self.sprites = game_objects.object_pool.objects['Bone'].sprites
         self.sounds = game_objects.object_pool.objects['Bone'].sounds
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.center = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = list(self.rect.topleft)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.description = 'Ribs from my daugther. You can respawn and stuff'
@@ -1996,8 +2006,7 @@ class Heal_item(Enemy_drop):
         self.sprites = game_objects.object_pool.objects['Heal_item'].sprites
         self.sounds = game_objects.object_pool.objects['Heal_item'].sounds
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.center = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = list(self.rect.topleft)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.description = 'Use it to heal'
@@ -2220,8 +2229,7 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
         self.sprites = game_objects.object_pool.objects['Water_running_particles'].sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites['death'][0]
-        self.rect = self.image.get_rect()
-        self.rect.center = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
 
     def reset_timer(self):
         self.kill()
@@ -2238,7 +2246,7 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
         self.sprites = game_objects.object_pool.objects['Grass_running_particles'].sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites['death'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
 
     def reset_timer(self):
@@ -2257,7 +2265,7 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.true_pos = self.rect.topleft
+        self.rect.center = pos
 
     def reset_timer(self):
         self.kill()
@@ -2274,8 +2282,7 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
         self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/soul/', game_objects)
         self.currentstate = states_basic.Once(self)
         self.image = self.sprites['once'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.timer=0
         self.velocity=[0,0]
 
@@ -2300,8 +2307,7 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
         self.sprites = Read_files.load_sprites_dict('Sprites/GFX/spawneffect/',game_objects)
         self.currentstate = states_basic.Once(self)#
         self.image = self.sprites['once'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.finish = False#needed for the cutscene
 
     def reset_timer(self):
@@ -2337,7 +2343,7 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/thunder_aura/',game_objects)
         self.currentstate = states_basic.Once(self)#
         self.image = self.sprites['once'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()#pygame.Rect(self.entity.rect.x,self.entity.rect.y,50,50)
 
@@ -2359,7 +2365,7 @@ class Pray_effect(Animatedentity):#the thing when aila pray
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/pray_effect/',game_objects)
         self.currentstate = states_basic.Death(self)#
         self.image = self.sprites['death'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
 
     def spawn(self):
@@ -2372,7 +2378,7 @@ class Health_bar(Animatedentity):
         self.entity = entity#the boss
         self.max_health = entity.health
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.width = self.rect[2]
         self.rect.topleft = [self.game_objects.game.window_size[0]*0.5 - self.width*0.5,3]
 
@@ -2386,7 +2392,7 @@ class Logo_loading(Animatedentity):
         super().__init__([500,300],game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/UI/logo_loading/',game_objects)
         self.image = self.sprites['death'][0]
-        self.rect = self.image.get_rect()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate =  states_basic.Death(self)
 
     def update(self):
@@ -2442,8 +2448,7 @@ class Bridge(Interactable):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/bridge/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (pos[0],pos[1])
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         platform = Collision_block(pos,(self.image.get_width(),32))
         self.game_objects.platforms.add(platform)
@@ -2552,7 +2557,7 @@ class Interactable_bushes(Interactable):
 
     def player_collision(self):#player collision
         if self.interacted: return
-        self.currentstate.handle_input('Once',state_name ='hurt', next_state = 'idle')
+        self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'idle')
         self.interacted = True#sets to false when player gos away
 
     def take_dmg(self,projectile):#when player hits with sword
@@ -2575,7 +2580,7 @@ class Cave_grass(Interactable_bushes):
 
     def player_collision(self):
         if self.interacted: return
-        self.currentstate.handle_input('Once',state_name ='hurt', next_state = 'idle')
+        self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'idle')
         self.interacted = True#sets to false when player gos away
         self.release_particles()
 
@@ -2611,11 +2616,11 @@ class Cocoon(Interactable):#larv cocoon in light forest
         self.timer_jobs['invincibility'].activate()
 
         if self.health > 0:
-            self.currentstate.handle_input('Once', state_name = 'hurt',next_state = 'Idle')
+            self.currentstate.handle_input('Once', animation_name = 'hurt',next_state = 'Idle')
             #self.shader_state.handle_input('Hurt')#turn white
         else:#death
             self.invincibile = True
-            self.currentstate.handle_input('Once', state_name = 'interact',next_state = 'Interacted')
+            self.currentstate.handle_input('Once', animation_name = 'interact',next_state = 'Interacted')
             self.game_objects.enemies.add(Maggot(self.rect.center,self.game_objects))
 
     def update_timers(self):
@@ -2766,9 +2771,9 @@ class Savepoint(Interactable):#save point
     def interact(self):#when player press t/y
         if type(self.currentstate).__name__ == 'Outline':#single click
             self.game_objects.player.currentstate.enter_state('Pray_pre')
-            self.game_objects.player.spawn_point[0]['map']=self.map
-            self.game_objects.player.spawn_point[0]['point']=self.init_cord
-            self.currentstate.handle_input('Once',state_name = 'once',next_state='Idle')
+            self.game_objects.player.spawn_point[0]['map'] = self.map
+            self.game_objects.player.spawn_point[0]['point'] = self.init_cord
+            self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
             self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
         else:#odoulbe click
             self.game_objects.player.currentstate.handle_input('special')
@@ -2776,6 +2781,7 @@ class Savepoint(Interactable):#save point
             new_state.enter_state()
 
     def reset_timer(self):#when animation finished
+        super().reset_timer()
         self.game_objects.player.currentstate.handle_input('Pray_post')
 
 class Inorinoki(Interactable):#the place where you trade soul essence for spirit or heart contrainer
@@ -2823,7 +2829,7 @@ class Fast_travel(Interactable):
             new_state = states.Facilities(self.game_objects.game,type,self)
         else:
             type = 'Fast_travel_menu'
-            self.currentstate.handle_input('Once',state_name = 'once',next_state='Idle')
+            self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
             new_state = states.Facilities(self.game_objects.game,type)
         new_state.enter_state()
 
@@ -2839,7 +2845,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
-        self.currentstate.handle_input('Once',state_name = 'once',next_state='Idle')
+        self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
         new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
         new_game_state.enter_state()
 
