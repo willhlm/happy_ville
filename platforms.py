@@ -10,6 +10,9 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.true_pos = self.rect.topleft
         self.hitbox = self.rect.inflate(0,0)
 
+    def reset_timer(self):#aniamtion need it
+        self.currentstate.increase_phase()
+
     def collide_x(self,entity):
         pass
 
@@ -49,13 +52,13 @@ class Gate(Platform):#a gate that is owned by the lever
         super().__init__(pos)
         self.game_objects = game_objects
         self.dir = [1,0]
-        self.sprites = Read_files.Sprites_entity('Sprites/animations/gate/',game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/',game_objects)
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = (pos[0],pos[1])
         self.hitbox = self.rect.copy()
         self.ID_key = ID_key#an ID to match with the gate
-        self.animation = animation.Entity_animation(self)
+        self.animation = animation.Animation(self)
         self.currentstate = states_gate.Idle(self)#
 
     def update(self):
@@ -237,7 +240,7 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
         self.timers = []
         self.timer_jobs = {'timer_disappear':Platform_timer_1(self,60),'timer_appear':Platform_timer_2(self,60)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Entity_animation(self)
+        self.animation = animation.Animation(self)
         self.currentstate = states_time_collision.Idle(self)#
 
     def deactivate(self):
@@ -274,8 +277,8 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
 class Rhoutta_encounter_1(Collision_time):
     def __init__(self,game_objects,pos,size,run_particle,go_through=True):
         super().__init__(game_objects,pos,size,run_particle,go_through)
-        self.sprites = Read_files.Sprites_entity('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
+        self.image = self.sprites['idle'][0]
 
 class Breakable_block(Collision_block):#breakable collision blocks
     def __init__(self, pos, run_particle):
@@ -285,7 +288,7 @@ class Breakable_block(Collision_block):#breakable collision blocks
         self.health = 3
         self.invincibile = False
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Entity_animation(self)
+        self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#
 
     def update(self):
@@ -321,8 +324,8 @@ class Breakable_block_1(Breakable_block):
     def __init__(self, pos, game_objects,run_particle='dust'):
         super().__init__(pos, run_particle)
         self.game_objects = game_objects
-        self.sprites = Read_files.Sprites_entity('Sprites/block/breakable/light_forest/type1/',game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.sprites = Read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/',game_objects)
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.hitbox = self.rect.copy()

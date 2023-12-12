@@ -5,7 +5,7 @@ import entities_UI
 class UI_loader():#for map, omamori, ability, journal etc
     def __init__(self,game_objects,type):
         self.game_objects = game_objects
-        self.BG = pygame.image.load('UI/' + type + '/BG.png').convert_alpha()
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/' + type + '/BG.png').convert_alpha())
         self.source = {'map':'map_UI','omamori':'omamori_UI','journal':'journal_UI','fast_travel':'fast_travel_UI','ability_spirit_upgrade':'ability_spirit_upgrade_UI','ability_movement_upgrade':'ability_movement_upgrade_UI','inventory':'inventory_UI'}[type]#the name of the tmx file with the objects
         self.load_UI_data(type)
         self.load_data = {'map':self.load_map_data,'omamori':self.load_omamori_data,'journal':self.load_journal_data,'fast_travel':self.load_fast_travel_data,'ability_spirit_upgrade':self.load_ability_spirit_upgrade_data,'ability_movement_upgrade':self.load_ability_movement_upgrade_data,'inventory':self.load_inventory_data}[type]()

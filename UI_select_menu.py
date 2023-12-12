@@ -8,10 +8,10 @@ class Select_menu():
         self.game_state = game_state
         self.game_objects = game_state.game.game_objects
         self.screen_alpha = screen_alpha
-        self.screen = pygame.Surface(self.game_objects.game.window_size, pygame.SRCALPHA, 32).convert_alpha()
+        self.screen = self.game_objects.game.display.make_layer(self.game_objects.game.window_size)#make a layer ("surface")
 
     def enter_state(self,newstate):
-         self.game_state.state = getattr(sys.modules[__name__], newstate)(self.game_state, 230)#make a class based on the name of the newstate: need to import sys
+        self.game_state.state = getattr(sys.modules[__name__], newstate)(self.game_state, 230)#make a class based on the name of the newstate: need to import sys
 
     def update(self):
         self.letter_frame += self.game_objects.game.dt
@@ -28,8 +28,8 @@ class Select_menu():
         self.game_state.exit_state()
 
     def blit_screen(self):#blits everything first to self.screen. Then blit it to the game screen at the end
-        self.screen.set_alpha(self.screen_alpha)
-        self.game_objects.game.screen.blit(self.screen,(0,0))
+        #self.screen.set_alpha(self.screen_alpha)
+        self.game_objects.game.display.render(self.screen.texture, self.game_objects.game.screen)
 
 class Inventory(Select_menu):
     def __init__(self, game_state, screen_alpha = 0):
@@ -47,8 +47,8 @@ class Inventory(Select_menu):
         convs = ['select','exit','Map','Omamori']
         self.texts = []
         for conv in convs:
-            self.texts.append(self.game_objects.font.render((32,32), conv, len(conv)))
-            self.texts[-1].fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.texts.append(self.game_objects.font.render((32,32), conv, len(conv), inverse_color = True))
+            #self.texts[-1].fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
 
     def define_blit_positions(self):#set positions
         items = self.iventory_UI.items.copy()#a list of empty items
@@ -76,6 +76,7 @@ class Inventory(Select_menu):
     def define_pointer(self,size = [16,16]):#called everytime we move from one area to another
         self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
         pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
+        self.pointer = self.game_objects.game.display.surface_to_texture(self.pointer)
 
     def render(self):
         self.blit_inventory_BG()
@@ -87,45 +88,38 @@ class Inventory(Select_menu):
         self.blit_screen()
 
     def blit_inventory_BG(self):
-        self.iventory_UI.BG.set_alpha(230)
-        self.screen.blit(self.iventory_UI.BG,(0,0))
+        #self.iventory_UI.BG.set_alpha(230)
+        self.game_objects.game.display.render(self.iventory_UI.BG, self.screen)#shader render
 
     def blit_inventory(self):
-        for index, item in enumerate(self.items['items']):#items we can use
+        for index, item in enumerate(self.items['items'] + self.items['key_items']):#items we can use
             item.animation.update()
-            self.screen.blit(pygame.transform.scale(item.image,(16,16)),item.rect.topleft)
+            self.game_objects.game.display.render(item.image, self.screen, position = item.rect.topleft)#shader render
             number = self.game_objects.font.render(text = str(item.number))
-            number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.screen.blit(number,item.rect.center)
-
-        for index, item in enumerate(self.items['key_items']):
-            item.animation.update()
-            self.screen.blit(pygame.transform.scale(item.image,(16,16)),item.rect.topleft)
-            number = self.game_objects.font.render(text = str(item.number))
-            number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.screen.blit(number,item.rect.center)
+            #number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.game_objects.game.display.render(number, self.screen, position = item.rect.center)#shader render
 
     def blit_sword(self):
         self.iventory_UI.sword.animation.update()
-        self.screen.blit(self.iventory_UI.sword.image,self.iventory_UI.sword.rect.topleft)
+        self.game_objects.game.display.render(self.iventory_UI.sword.image, self.screen, position = self.iventory_UI.sword.rect.topleft)#shader render
         for stone in self.items['sword']:
             stone.animation.update()
-            self.screen.blit(stone.image,stone.rect.topleft)
+            self.game_objects.game.display.render(stone.image, self.screen, position = stone.rect.topleft)#shader render
 
     def blit_pointer(self):
-        self.screen.blit(self.pointer,self.items[self.state.state_name][self.item_index[0]].rect.topleft)#pointer
+        self.game_objects.game.display.render(self.pointer, self.screen, position = self.items[self.state.state_name][self.item_index[0]].rect.topleft)#shader render
 
     def blit_description(self):
         self.conv = self.items[self.state.state_name][self.item_index[0]].description
         text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
-        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.screen.blit(text,(420,150))
+        #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game_objects.game.display.render(text, self.screen, position = (420,150))#shader render
 
     def blit_bottons(self):
         for index, button in enumerate(self.iventory_UI.buttons.keys()):
             self.iventory_UI.buttons[button].update()
-            self.screen.blit(self.iventory_UI.buttons[button].image,self.iventory_UI.buttons[button].rect.topleft)#pointer
-            self.screen.blit(self.texts[index],self.iventory_UI.buttons[button].rect.center)
+            self.game_objects.game.display.render(self.iventory_UI.buttons[button].image, self.screen, position = self.iventory_UI.buttons[button].rect.topleft)#shader render
+            self.game_objects.game.display.render(self.texts[index], self.screen, position = self.iventory_UI.buttons[button].rect.center)#shader render
 
     def handle_events(self,input):
         if input[0]:#press
@@ -177,6 +171,7 @@ class Omamori(Select_menu):
         size = self.omamori_list[0].rect.size
         self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
         pygame.draw.rect(self.pointer,[200,50,50,255],(size[0]*0.5-8,size[1]*0.5+8,16,16),width=1,border_radius=5)
+        self.pointer = self.game_objects.game.display.surface_to_texture(self.pointer)
 
     def render(self):
         self.blit_omamori_BG()
@@ -186,27 +181,26 @@ class Omamori(Select_menu):
         self.blit_screen()
 
     def blit_omamori_BG(self):
-        self.omamori_UI.BG.set_alpha(230)
-        self.screen.blit(self.omamori_UI.BG,(0,0))
+        #self.omamori_UI.BG.set_alpha(230)
+        self.game_objects.game.display.render(self.omamori_UI.BG, self.screen)
 
     def blit_omamori_menu(self):
         for omamori in self.game_objects.player.omamoris.equipped.values():#equipped ones
             omamori.animation.update()
-            self.screen.blit(omamori.image,omamori.rect.topleft)
+            self.game_objects.game.display.render(omamori.image, self.screen, position = omamori.rect.topleft)
 
         for omamori in self.omamori_list:
             omamori.animation.update()
-            self.screen.blit(omamori.image,omamori.rect.topleft)
+            self.game_objects.game.display.render(omamori.image, self.screen, position = omamori.rect.topleft)
 
     def blit_description(self):
         self.conv = self.omamori_list[self.omamori_index].description
         text = self.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
-        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.screen.blit(text,(380,120))
+        #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game_objects.game.display.render(text, self.screen, position = (380,120))
 
     def blit_pointer(self):
-        pos = self.omamori_list[self.omamori_index].rect.topleft
-        self.screen.blit(self.pointer,pos)#pointer
+        self.game_objects.game.display.render(self.pointer, self.screen, position = self.omamori_list[self.omamori_index].rect.topleft)
 
     def handle_events(self,input):
         if input[0]:#press
@@ -272,6 +266,7 @@ class Journal(Select_menu):
         size = [48,16]
         self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
         pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
+        self.pointer = self.game_objects.game.display.surface_to_texture(self.pointer)
 
     def render(self):
         self.blit_journal_BG()
@@ -282,31 +277,31 @@ class Journal(Select_menu):
         self.blit_screen()
 
     def blit_journal_BG(self):
-        self.journal_UI.BG.set_alpha(230)
-        self.screen.blit(self.journal_UI.BG,(0,0))
+        #self.journal_UI.BG.set_alpha(230)
+        self.game_objects.game.display.render(self.journal_UI.BG, self.screen)
 
     def blit_names(self):
         for index, enemy in enumerate(self.selected_enemies):
             name = enemy.__class__.__name__
             text = self.game_objects.font.render((152,80), name, 100)
-            text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.screen.blit(text,self.journal_UI.name_pos[index])
+            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.game_objects.game.display.render(text, self.screen, position = self.journal_UI.name_pos[index])
 
     def blit_pointer(self):
         pos = [self.journal_UI.name_pos[self.journal_index[0]][0],self.journal_UI.name_pos[self.journal_index[0]][1]-5]#add a offset
-        self.screen.blit(self.pointer,pos)#pointer
+        self.game_objects.game.display.render(self.pointer, self.screen, position = pos)
 
     def blit_enemy(self):
         enemy = self.selected_enemies[self.journal_index[0]]
         enemy.rect.midbottom = self.journal_UI.image_pos#allign based on bottom
         enemy.animation.update()
-        self.screen.blit(enemy.image,[enemy.rect.center[0]-enemy.rect.width*0.5,enemy.rect.center[1]-enemy.rect.height*0.5])#it blits the top left courner so need to correct based on the rectanle size
+        self.game_objects.game.display.render(enemy.image, self.screen, position = [enemy.rect.center[0]-enemy.rect.width*0.5,enemy.rect.center[1]-enemy.rect.height*0.5])
 
     def blit_description(self):
         self.conv = self.selected_enemies[self.journal_index[0]].description
         text = self.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
-        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.screen.blit(text,(380,120))
+        #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+        self.game_objects.game.display.render(text, self.screen, position = (380,120))
 
     def handle_events(self,input):
         if input[0]:#press
@@ -341,7 +336,7 @@ class Map(Select_menu):
 
         self.scroll = [0,0]
         self.index = 0
-        self.pos = [-0.5*(self.map_UI.BG.get_width() - self.game_objects.game.window_size[0]),-0.5*(self.map_UI.BG.get_height() - self.game_objects.game.window_size[1])]#start offset position
+        self.pos = [-0.5*(self.map_UI.BG.width - self.game_objects.game.window_size[0]),-0.5*(self.map_UI.BG.height - self.game_objects.game.window_size[1])]#start offset position
 
         for object in self.map_UI.objects:
             object.update(self.pos)
@@ -351,8 +346,6 @@ class Map(Select_menu):
         self.limit_pos()
         for object in self.map_UI.objects:
             object.update(self.scroll)
-
-        self.map_UI.objects[self.index].currentstate.handle_input('Equip')
 
     def update_pos(self,scroll):
         self.pos = [self.pos[0]+scroll[0],self.pos[1]+scroll[1]]
@@ -365,20 +358,20 @@ class Map(Select_menu):
         if self.pos[0] > 0:
             self.pos[0] = 0
             self.scroll[0] = 0
-        elif self.pos[0] < self.game_objects.game.window_size[0] - self.map_UI.BG.get_width():
-            self.pos[0] = self.game_objects.game.window_size[0] - self.map_UI.BG.get_width()
+        elif self.pos[0] < self.game_objects.game.window_size[0] - self.map_UI.BG.width:
+            self.pos[0] = self.game_objects.game.window_size[0] - self.map_UI.BG.width
             self.scroll[0] = 0
         if self.pos[1] > 0:
             self.pos[1] = 0
             self.scroll[1] = 0
-        elif self.pos[1] < self.game_objects.game.window_size[1] - self.map_UI.BG.get_height():
-            self.pos[1] = self.game_objects.game.window_size[1] - self.map_UI.BG.get_height()
+        elif self.pos[1] < self.game_objects.game.window_size[1] - self.map_UI.BG.height:
+            self.pos[1] = self.game_objects.game.window_size[1] - self.map_UI.BG.height
             self.scroll[1] = 0
 
     def render(self):
-        self.screen.blit(self.map_UI.BG,self.pos)
+        self.game_objects.game.display.render(self.map_UI.BG, self.screen, position = self.pos)
         for object in self.map_UI.objects:
-            self.screen.blit(object.image,object.rect.topleft)
+            self.game_objects.game.display.render(object.image, self.screen, position = object.rect.topleft)
         self.blit_screen()
 
     def calculate_position(self):
@@ -396,14 +389,16 @@ class Map(Select_menu):
             elif input[-1] == 'rb':#nezt page
                 self.enter_state('Inventory')
             elif input[-1] == 'right':#should it be left analogue stick?
-                self.map_UI.objects[self.index].currentstate.handle_input('Idle')
+                self.map_UI.objects[self.index].currentstate.set_animation_name('idle')
                 self.index += 1
                 self.index = min(self.index,len(self.map_UI.objects)-1)
+                self.map_UI.objects[self.index].currentstate.set_animation_name('equip')
                 self.calculate_position()
             elif input[-1] == 'left':#should it be left analogue stick?
-                self.map_UI.objects[self.index].currentstate.handle_input('Idle')
+                self.map_UI.objects[self.index].currentstate.set_animation_name('idle')
                 self.index -= 1
                 self.index = max(0,self.index)
+                self.map_UI.objects[self.index].currentstate.set_animation_name('equip')
                 self.calculate_position()
             elif input[-1] == 'a':#when pressing a
                 self.map_UI.objects[self.index].activate()#open the local map. I guess it should be a new state

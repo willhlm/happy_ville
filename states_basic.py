@@ -11,6 +11,9 @@ class Basic_states(Entity_States):
     def increase_phase(self):#called when animation is finished
         pass
 
+    def handle_input(self,input):
+        pass
+
 class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -33,6 +36,7 @@ class Idle(Basic_states):
 
     def set_animation_name(self,name):#called for UI abilities
         self.entity.state = name
+        self.entity.animation.frame = 0
 
 class Death(Basic_states):#idle once
     def __init__(self,entity):
@@ -46,7 +50,7 @@ class Once(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
         self.next_state = kwarg['next_state']
-        self.state_name = kwarg['state_name']
+        self.entity.state = kwarg['animation_name']
 
     def increase_phase(self):
         self.enter_state(self.next_state)
@@ -86,7 +90,6 @@ class Transform(Basic_states):
         super().__init__(entity)
 
     def increase_phase(self):
-        self.entity.reset_timer()
         self.enter_state('Interacted')
 
 class Interact(Basic_states):

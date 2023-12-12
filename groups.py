@@ -36,7 +36,7 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):
     def draw(self):
         for spr in self.sprites():
             pos = (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1]))
-            self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos)#shader render
+            self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos, shader = spr.shader)#shader render
 
 class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries
     def __init__(self):

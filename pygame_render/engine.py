@@ -11,7 +11,6 @@ from pygame_render.layer import Layer
 from pygame_render.shader import Shader
 from pygame_render.util import normalize_color_arguments, create_rotated_rect, to_dest_coords
 
-
 class RenderEngine:
     """
     A rendering engine for 2D graphics using Pygame and ModernGL.

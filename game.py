@@ -44,7 +44,7 @@ class Game():
             #tick clock
             self.clock.tick(60)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-            print(self.clock.get_fps())
+
             #handle event
             self.event_loop()
 

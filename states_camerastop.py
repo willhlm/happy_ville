@@ -83,7 +83,7 @@ class Stop_bottom(Basic_states):
         self.determine_sign()
         self.true_center = self.center.copy()
 
-    def init_pos(self):
+    def init_pos(self):#called from map loader
         self.entity.game_objects.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
         self.center = self.entity.game_objects.camera.center.copy()
         self.sign = 1

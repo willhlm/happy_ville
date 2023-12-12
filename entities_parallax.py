@@ -17,17 +17,17 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
     def init_sprites(self, path):#Only blur if it is the first time loading the object. Otherwise, copy from memory
         if  type(self).animations.get(tuple(self.parallax), False):#not the firsy time
             images = type(self).animations[tuple(self.parallax)]
-            self.sprites = Read_files.Sprites_images(images)
+            self.sprites = images
         else:#first time loading
-            self.sprites = Read_files.Sprites_entity(path,self.game_objects)
+            self.sprites = Read_files.load_sprites_dict(path,self.game_objects)
             #if self.parallax[0] != 1:#don't blur if oarallax = 1
             #    self.blur(self.game_objects.map.blur_value(self.parallax))
-            type(self).animations[tuple(self.parallax)] = self.sprites.sprite_dict#save to memery for later use
+            type(self).animations[tuple(self.parallax)] = self.sprites#save to memery for later use
 
     def blur(self,blur_value):#
-        for state in self.sprites.sprite_dict.keys():
-            for frame, image in enumerate(self.sprites.sprite_dict[state]):
-                self.sprites.sprite_dict[state][frame] = pygame.transform.gaussian_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
+        for state in self.sprites.keys():
+            for frame, image in enumerate(self.sprites[state]):
+                self.sprites[state][frame] = pygame.transform.gaussian_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
 
 class Trees(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
@@ -56,7 +56,7 @@ class Light_forest_tree1(Trees):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
         self.init_sprites('Sprites/animations/trees/light_forest_tree1/')#blur or lead from memory
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
@@ -72,7 +72,7 @@ class Light_forest_tree2(Trees):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
         self.init_sprites('Sprites/animations/trees/light_forest_tree2/')#blur or lead from memory
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
@@ -88,7 +88,7 @@ class Ljusmaskar(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
         self.init_sprites('Sprites/animations/ljusmaskar/')#blur or lead from memory
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
@@ -101,7 +101,7 @@ class Cave_grass(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
         self.init_sprites('Sprites/animations/bushes/cave_grass/')#blur or lead from memory
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
@@ -114,7 +114,7 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
     def __init__(self, pos, game_objects,parallax):
         super().__init__(pos, game_objects,parallax)
         self.init_sprites('Sprites/animations/cocoon/')#blur or lead from memory
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
@@ -124,7 +124,7 @@ class Droplet_source(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
         self.init_sprites('Sprites/animations/droplet/source/')#blur or lead from memory
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.droplet = Droplet
@@ -197,8 +197,8 @@ class Dynamic_layered_objects(Layered_objects):
 class Droplet(Dynamic_layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_entity('Sprites/animations/droplet/droplet/', game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.lifetime = 100
@@ -219,8 +219,8 @@ class Droplet(Dynamic_layered_objects):
 class Leaves(Dynamic_layered_objects):#leaves from trees
     def __init__(self, pos, game_objects, parallax, size, kill = False):
         super().__init__(pos, game_objects,parallax)
-        self.sprites = Read_files.Sprites_entity('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_weather_particles.Idle(self)
 
@@ -265,19 +265,19 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         return
         replace_color = (255,0,0)
         size = [self.image.width[0]*self.parallax[0],self.image.height[1]*self.parallax[1]]
-        for state in self.sprites.sprite_dict.keys():
-            for frame,image in enumerate(self.sprites.sprite_dict[state]):
+        for state in self.sprites.keys():
+            for frame,image in enumerate(self.sprites[state]):
                 img_copy = pygame.transform.scale(image,size)
                 arr = pygame.PixelArray(img_copy)#make it an pixel arrat since it has a replace color function
                 arr.replace(replace_color,new_colour)
-                self.sprites.sprite_dict[state][frame] =arr.make_surface()
+                self.sprites[state][frame] =arr.make_surface()
                 arr.close()
 
 class Falling_rock(Dynamic_layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.Sprites_entity('Sprites/animations/falling_rock/rock/', game_objects)
-        self.image = self.sprites.sprite_dict['idle'][0]
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.lifetime = 100

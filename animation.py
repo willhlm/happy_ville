@@ -1,4 +1,3 @@
-import pygame, sys
 import constants as C
 
 class Animation():
@@ -14,7 +13,7 @@ class Animation():
 
     def update(self):
         self.entity.image = self.entity.sprites[self.entity.state][int(self.frame)]
-        self.frame += self.framerate*self.entity.game_objects.game.dt*self.entity.slow_motion
+        self.frame += self.framerate * self.entity.game_objects.game.dt * self.entity.slow_motion
 
         if self.frame >= len(self.entity.sprites[self.entity.state]):
             self.entity.reset_timer()

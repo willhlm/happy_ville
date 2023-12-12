@@ -103,7 +103,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_3','2')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -285,17 +285,17 @@ class Option_Menu(Game_State):
 
     def render(self):
         #fill game.screen
-        self.game.screen.fill((255,255,255))
+        self.game.screen.clear(255,255,255)
 
         #blit title
-        self.game.screen.blit(self.title, (self.game.window_size[0]/2 - self.title.get_width()/2,50))
+        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
 
         #blit buttons
         for b in self.buttons:
-            self.game.screen.blit(self.button_surfaces[b], self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
-        self.arrow.draw(self.game.screen)
+        #self.arrow.draw(self.game.screen)
 
     def handle_events(self, event):
         if event[0]:
@@ -590,7 +590,8 @@ class Fadein(Gameplay):
 
     def render(self):
         super().render()#gameplay render
-        self.fade_surface.clear(0,0,0,int((self.fade_length - self.count)*(255/self.fade_length)))
+        alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
+        self.fade_surface.clear(0,0,0,alpha)
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
     def handle_events(self, input):
@@ -625,18 +626,20 @@ class Conversation(Gameplay):
     def __init__(self, game, npc):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()
+        self.game.game_objects.player.velocity = [0,0]
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
         self.text_window_size = (352, 96)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),60]
+        self.background = self.game.display.make_layer(self.text_window_size)#make a layer ("surface")
         self.clean_slate()
-
         self.conv = self.npc.dialogue.get_conversation()
 
     def clean_slate(self):
         self.letter_frame = 0
         self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
-        self.text_window.blit(self.npc.portrait,(0,10))
+        self.game.display.render(self.text_window, self.background)#shader render
+        self.game.display.render(self.npc.portrait, self.background, position = (0,10))#shader render
 
     def update(self):
         super().update()
@@ -645,8 +648,8 @@ class Conversation(Gameplay):
     def render(self):
         super().render()
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
-        self.text_window.blit(text,(64,8))
-        self.game.screen.blit(self.text_window,self.blit_pos)
+        self.game.display.render(text, self.background, position = (64,8))#shader render
+        self.game.display.render(self.background.texture, self.game.screen, position = self.blit_pos)#shader render
 
     def handle_events(self, input):
         if input[0]:
