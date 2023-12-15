@@ -258,6 +258,24 @@
                          "width":336,
                          "x":608,
                          "y":160
+                        }, 
+                        {
+                         "gid":104,
+                         "height":16,
+                         "id":1373,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"particle",
+                                 "type":"string",
+                                 "value":"Vertical_circles"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":400,
+                         "y":176
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -322,7 +340,7 @@
          "y":0
         }],
  "nextlayerid":30,
- "nextobjectid":1373,
+ "nextobjectid":1374,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

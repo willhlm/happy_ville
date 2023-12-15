@@ -53,7 +53,7 @@
          "parallaxx":0.1,
          "parallaxy":0.1,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -108,7 +108,7 @@
          "parallaxx":0.2,
          "parallaxy":0.2,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -163,7 +163,7 @@
          "parallaxx":0.3,
          "parallaxy":0.3,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -177,7 +177,7 @@
                  "name":"bg7_2",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":500,
                  "x":0,
                  "y":0
@@ -189,7 +189,7 @@
                  "name":"bg7_1",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":500,
                  "x":0,
                  "y":0
@@ -220,7 +220,7 @@
                         {
                          "gid":16,
                          "height":16,
-                         "id":673,
+                         "id":1017,
                          "name":"",
                          "properties":[
                                 {
@@ -328,7 +328,7 @@
                         {
                          "gid":16,
                          "height":16,
-                         "id":594,
+                         "id":1016,
                          "name":"",
                          "properties":[
                                 {
@@ -356,7 +356,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -464,7 +464,7 @@
          "parallaxx":0.6,
          "parallaxy":0.6,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -570,7 +570,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -748,7 +748,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -914,7 +914,7 @@
          "parallaxx":0.9,
          "parallaxy":0.9,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -1996,7 +1996,7 @@
          "name":"bg1",
          "opacity":1,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -2020,12 +2020,12 @@
          "offsety":300,
          "opacity":1,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }],
  "nextlayerid":106,
- "nextobjectid":1016,
+ "nextobjectid":1018,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -15,6 +15,7 @@ class Group_player(pygame.sprite.Group):#playergroup
 
     def draw(self):
         for spr in self.sprites():
+            spr.draw_shader()#has to be just before the draw
             pos = (round(spr.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(spr.true_pos[1]-self.game_objects.camera.true_scroll[1]))
             self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos, flip = bool(max(spr.dir[0],0)), shader = spr.shader)#shader render
 
@@ -25,6 +26,7 @@ class Group(pygame.sprite.Group):#the rest
 
     def draw(self):
         for spr in self.sprites():
+            spr.draw_shader()#has to be just before the draw
             pos = (int(spr.rect[0]-self.game_objects.camera.scroll[0]),int(spr.rect[1]-self.game_objects.camera.scroll[1]))
             self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos, flip = bool(max(spr.dir[0],0)), shader = spr.shader)#shader render
 
@@ -35,6 +37,7 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):
 
     def draw(self):
         for spr in self.sprites():
+            spr.draw_shader()#has to be just before the draw
             pos = (int(spr.true_pos[0]-spr.parallax[0]*self.game_objects.camera.scroll[0]),int(spr.true_pos[1]-spr.parallax[0]*self.game_objects.camera.scroll[1]))
             self.game_objects.game.display.render(spr.image, self.game_objects.game.screen, position = pos, shader = spr.shader)#shader render
 

@@ -13,12 +13,10 @@ class Particles(pygame.sprite.Sprite):
         self.update_velocity = {'linear':self.linear,'wave':self.wave}[motion]
         amp = random.randint(vel[motion][0], vel[motion][1])
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
-        self.fade = colour[-1]
         self.colour = colour
         self.scale = scale
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
-        self.shader = None
-        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.dir = [-1,0]#gruop draw need it
 
     def update(self):
         self.update_pos()
@@ -39,9 +37,8 @@ class Particles(pygame.sprite.Sprite):
         self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
 
     def fading(self):
-        return
-        self.fade -= self.fade_scale*self.game_objects.game.dt
-        self.image.set_alpha(self.fade)
+        self.colour[-1] -= self.fade_scale*self.game_objects.game.dt
+        self.colour[-1] = max(self.colour[-1],0)
 
     def destroy(self):
         if self.lifetime < 0:
@@ -62,39 +59,49 @@ class Particles(pygame.sprite.Sprite):
             angle=random.randint(dir-spawn_angle, dir+spawn_angle)#the ejection anglex
         return angle
 
-class Circle(Particles):#a general one
+class Circle(Particles):
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour):
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
         self.radius = random.randint(max(self.scale-1,1), round(self.scale+1))
-        self.fade_scale = 3
-        self.make_circle()
-        self.image = self.game_objects.game.display.surface_to_texture(self.image)
-
-    def make_circle(self):
-        self.surface =pygame.Surface((2*self.radius,2*self.radius), pygame.SRCALPHA, 32).convert_alpha()
-        self.image = self.surface.copy()
-        pygame.draw.circle(self.image,self.colour,(self.radius,self.radius),self.radius)
-        self.rect = self.image.get_rect()
+        self.fade_scale = 0.1#how fast alpha should do down
+        self.image = Circle.image
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = self.true_pos
+
+        self.shader = game_objects.shaders['circle']#draws a circle
+        self.shader['size'] = self.image.size
+        self.shader['gradient'] = 0#one means gradient, 0 is without
+
+    def draw_shader(self):#his called just before the draw
+        self.shader['color'] = self.colour
+        self.shader['radius'] = self.radius
+
+    def pool(game_objects):#save the stuff in memory for later use
+        Circle.image = game_objects.game.display.make_layer((50,50)).texture
 
 class Spark(Particles):#a general one
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale,colour):
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
-        self.make_sparks()
-        self.fade_scale = 10
-        self.image = self.game_objects.game.display.surface_to_texture(self.image)
+        self.fade_scale = 0
 
-    def update(self):
-        super().update()
-        self.update_spark()
+        self.image = Spark.image
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.center = self.true_pos
 
-    def update_spark(self):
-        self.image = self.surface.copy()
-        self.spark_shape()
-        pygame.draw.polygon(self.image,self.colour,self.points)
-        self.image = self.game_objects.game.display.surface_to_texture(self.image)
+        self.shader = game_objects.shaders['spark']
+        self.shader['size'] = self.image.size
+        self.shader['colour'] = self.colour
 
-    def spark_shape(self):
+    def pool(game_objects):#save the stuff in memory for later use
+        Spark.image = game_objects.game.display.make_layer((50,50)).texture
+
+    def draw_shader(self):#called from group draw
+        #self.shader['p'] = (0.3,0.3)
+        self.shader['b'] = (0,0)
+        self.shader['a'] = (0.3,0.3)
+        self.shader['w'] = 0.2
+
+    def spark_shape(self):#move this to shader somehow
         vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
 
         self.points = [
@@ -103,12 +110,3 @@ class Spark(Particles):#a general one
         [self.canvas_size*0.5-math.cos(self.angle)*vel*self.scale*3.5,self.canvas_size*0.5-math.sin(self.angle)*vel*self.scale*3.5],
         [self.canvas_size*0.5+math.cos(self.angle-math.pi*0.5)*vel*self.scale*0.3,self.canvas_size*0.5-math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3]
         ]
-
-    def make_sparks(self):
-        self.canvas_size = 60
-        self.surface = pygame.Surface((self.canvas_size,self.canvas_size), pygame.SRCALPHA, 32).convert_alpha()
-        self.image = self.surface.copy()
-        self.spark_shape()#define the shape of spark
-        pygame.draw.polygon(self.image,self.colour,self.points)
-        self.rect = self.image.get_rect()
-        self.rect.center = self.true_pos

@@ -219,7 +219,7 @@ class Droplet(Dynamic_layered_objects):
 class Leaves(Dynamic_layered_objects):#leaves from trees
     def __init__(self, pos, game_objects, parallax, size, kill = False):
         super().__init__(pos, game_objects,parallax)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
+        self.sprites = Leaves.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_weather_particles.Idle(self)
@@ -228,50 +228,44 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.spawn_size = size
         self.velocity[1] = random.randint(1, 3)
 
+        colours = [[60,179,113,255],[154,205,50,255],[34,139,34,255],[46,139,87,255]]#colourd of the leaves
+        self.colour = colours[random.randint(0, len(colours)-1)]
+
         self.reset()
         self.resetting = {False:self.reset,True:self.kill}[kill]
         self.time = 0
         self.phase = random.randint(0, 100)#for velocity
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
 
-        colours = [(60,179,113),(154,205,50),(34,139,34),(46,139,87)]#colourd of the leaves
-        colour = colours[random.randint(0, len(colours)-1)]
-        self.set_color(colour)
+        self.shader =  game_objects.shaders['colour']
+        
+    def draw_shader(self):
+        self.shader['colour'] = self.colour
+
+    def pool(game_objects):#save the texture in memory for later use
+        Leaves.sprites = Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
 
     def update(self):
         super().update()
         self.time += self.game_objects.game.dt
         self.update_vel()
-        self.alpha -= self.game_objects.game.dt*0.2
-        #self.image.set_alpha(self.alpha)
+        self.colour[-1] -= self.game_objects.game.dt*0.2
+        self.colour[-1] = max(self.colour[-1],0)
 
     def update_vel(self):
         self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[0] - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
         self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
-        if self.alpha < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
+        if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
             self.resetting()
 
     def reset(self):
-        self.alpha = random.uniform(255*self.parallax[0],255)
+        self.colour[-1] = random.uniform(255*self.parallax[0],255)
         self.velocity[1] = random.uniform(0.2,0.5)
         self.time = 0
-        #self.image.set_alpha(self.alpha)
-        self.true_pos = [self.init_pos[0]+random.uniform(-self.spawn_size[0]*0.5,self.spawn_size[0]*0.5),self.init_pos[1]+random.uniform(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]
+        self.true_pos = [self.init_pos[0] + random.uniform(-self.spawn_size[0]*0.5, self.spawn_size[0]*0.5), self.init_pos[1] + random.uniform(-self.spawn_size[1]*0.5,self.spawn_size[1]*0.5)]
         self.rect.topleft = self.true_pos.copy()
-
-    def set_color(self,new_colour):
-        return
-        replace_color = (255,0,0)
-        size = [self.image.width[0]*self.parallax[0],self.image.height[1]*self.parallax[1]]
-        for state in self.sprites.keys():
-            for frame,image in enumerate(self.sprites[state]):
-                img_copy = pygame.transform.scale(image,size)
-                arr = pygame.PixelArray(img_copy)#make it an pixel arrat since it has a replace color function
-                arr.replace(replace_color,new_colour)
-                self.sprites[state][frame] =arr.make_surface()
-                arr.close()
 
 class Falling_rock(Dynamic_layered_objects):
     def __init__(self,pos,game_objects,parallax):

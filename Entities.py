@@ -23,18 +23,23 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
             self.remove(self.group)#remove from group
             self.add(self.pause_group)#add to pause
 
+    def draw_shader(self):#called just before draw in group
+        pass
+
 class BG_Block(Staticentity):
     def __init__(self, pos, game_objects, img, parallax):
         super().__init__(pos, game_objects, img)
-        self.sprites = {'idle':[self.image]}
         self.parallax = parallax
-        shaders = Read_files.load_shaders_dict(['blur'], game_objects)#load shaders of interest
-        self.shader = shaders['blur']
-        if parallax[0] == 1: self.blur = 0.01#basically no blur
-        else: self.blur = 1.2/parallax[0]
+        self.blur()#blur only during init
 
-    def update(self):
-        self.shader['blurRadius'] = self.blur
+    def blur(self):
+        if self.parallax[0] != 1:#don't blur if there is no parallax
+            shader = self.game_objects.shaders['blur']
+            shader['blurRadius'] = 1.2/self.parallax[0]#set the blur redius
+            layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
+            self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
+            self.image = layer.texture#get the texture of the layer
+        self.sprites = {'idle':[self.image]}
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -239,7 +244,6 @@ class Player(Character):
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
-        self.shaders = Read_files.load_shaders_dict(['idle','hurt','invincibile'], game_objects)#load shaders of interest
         self.shader_state = states_shader.Idle(self)
 
         self.spawn_point = [{'map':'light_forest_1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
@@ -297,6 +301,10 @@ class Player(Character):
         super().update()
         self.shader_state.update()
         self.omamoris.update()
+
+    def draw_shader(self):#called before draw in group
+        self.shader_state.draw()
+        #pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]+self.image.width*0.5),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]+self.image.height*0.5))
 
 class Migawari_entity(Character):#player double ganger
     def __init__(self,pos,game_objects):
@@ -1955,8 +1963,8 @@ class Enemy_drop(Loot):
 class Amber_Droplet(Enemy_drop):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = game_objects.object_pool.objects['Amber_Droplet'].sprites
-        self.sounds = game_objects.object_pool.objects['Amber_Droplet'].sounds
+        self.sprites = Amber_Droplet.sprites
+        self.sounds = Amber_Droplet.sounds
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = list(self.rect.topleft)
@@ -1967,18 +1975,15 @@ class Amber_Droplet(Enemy_drop):
         super().player_collision(player)
         self.game_objects.world_state.update_money_statistcis()
 
-    @classmethod#called from object pool
-    def pool(cls,game_objects):#all things that should be saved in object pool
-        obj = cls.__new__(cls)#creatate without runing initmethod
-        obj.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/amber_droplet/',game_objects)
-        obj.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/amber_droplet/')
-        return obj
+    def pool(game_objects):#all things that should be saved in object pool
+        Amber_Droplet.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/amber_droplet/',game_objects)
+        Amber_Droplet.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/amber_droplet/')
 
 class Bone(Enemy_drop):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = game_objects.object_pool.objects['Bone'].sprites
-        self.sounds = game_objects.object_pool.objects['Bone'].sounds
+        self.sprites = Bone.sprites
+        self.sounds = Bone.sounds
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = list(self.rect.topleft)
@@ -1993,18 +1998,15 @@ class Bone(Enemy_drop):
         self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.camera.scroll})
         self.game_objects.player.currentstate.enter_state('Plant_bone_main')
 
-    @classmethod#called from object pool
-    def pool(cls,game_objects):#all things that should be saved in object pool
-        obj = cls.__new__(cls)#creatate without runing initmethod
-        obj.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/bone/',game_objects)
-        obj.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/bone/')
-        return obj
+    def pool(game_objects):#all things that should be saved in object pool
+        Bone.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/bone/',game_objects)
+        Bone.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/bone/')
 
 class Heal_item(Enemy_drop):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = game_objects.object_pool.objects['Heal_item'].sprites
-        self.sounds = game_objects.object_pool.objects['Heal_item'].sounds
+        self.sprites = Heal_item.sprites
+        self.sounds = Heal_item.sounds
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = list(self.rect.topleft)
@@ -2016,12 +2018,9 @@ class Heal_item(Enemy_drop):
         self.game_objects.player.inventory['Heal_item'] -= 1
         self.game_objects.player.heal(1)
 
-    @classmethod#called from object pool
-    def pool(cls,game_objects):#all things that should be saved in object pool
-        obj = cls.__new__(cls)#creatate without runing initmethod
-        obj.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/heal_item/',game_objects)
-        obj.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/heal_item/')
-        return obj
+    def pool(game_objects):#all things that should be saved in object pool: #obj = cls.__new__(cls)#creatate without runing initmethod
+        Heal_item.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/heal_item/',game_objects)
+        Heal_item.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/heal_item/')
 
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects):
@@ -2236,9 +2235,8 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
 
     @classmethod#called from object pool
     def pool(cls, game_objects):#all things that should be saved in object pool
-        obj = cls.__new__(cls)#creatate without runing initmethod
-        obj.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/water/', game_objects)
-        return obj
+        cls.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/water/', game_objects)
+        return cls
 
 class Grass_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
@@ -2254,9 +2252,8 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
 
     @classmethod#called from object pool
     def pool(cls, game_objects):#all things that should be saved in object pool
-        obj = cls.__new__(cls)#creatate without runing initmethod
-        obj.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/grass/', game_objects)
-        return obj
+        cls.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/grass/', game_objects)
+        return cls
 
 class Dust_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
@@ -2272,9 +2269,8 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
 
     @classmethod#called from object pool
     def pool(cls, game_objects):#all things that should be saved in object pool
-        obj = cls.__new__(cls)#creatate without runing initmethod
-        obj.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/dust/', game_objects)
-        return obj
+        cls.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/dust/', game_objects)
+        return cls
 
 class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def __init__(self,pos,game_objects):
