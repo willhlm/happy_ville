@@ -1474,7 +1474,7 @@ class Sword(Melee):
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=20,vel={'linear':[7,14]},dir=angle,scale=0.5,colour = [255,255,255,255])
+            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=20,vel={'linear':[7,14]},dir=angle,scale=1,colour = [255,255,255,255])
             self.entity.game_objects.cosmetics.add(obj1)
 
     def collision_inetractables(self,interactable):#called when projectile hits interactables
@@ -1541,7 +1541,7 @@ class Aila_sword(Sword):
         angle = random.randint(-180, 180)#the ejection anglex
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel={'linear':[7,14]},dir=angle,scale=0.4,colour=color)
+            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel={'linear':[7,14]},dir=angle,scale=1,colour=color)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword

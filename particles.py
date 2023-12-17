@@ -14,7 +14,6 @@ class Particles(pygame.sprite.Sprite):
         amp = random.randint(vel[motion][0], vel[motion][1])
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.colour = colour
-        self.scale = scale
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
         self.dir = [-1,0]#gruop draw need it
 
@@ -62,7 +61,7 @@ class Particles(pygame.sprite.Sprite):
 class Circle(Particles):
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour):
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
-        self.radius = random.randint(max(self.scale-1,1), round(self.scale+1))
+        self.radius = random.randint(max(scale-1,1), round(scale+1))
         self.fade_scale = 0.1#how fast alpha should do down
         self.image = Circle.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -82,7 +81,7 @@ class Circle(Particles):
 class Spark(Particles):#a general one
     def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale,colour):
         super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
-        self.fade_scale = 0
+        self.fade_scale = 0.4
 
         self.image = Spark.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -90,23 +89,11 @@ class Spark(Particles):#a general one
 
         self.shader = game_objects.shaders['spark']
         self.shader['size'] = self.image.size
+        self.shader['scale'] = scale
+
+    def draw_shader(self):#called from group draw
         self.shader['colour'] = self.colour
+        self.shader['velocity'] =self.velocity
 
     def pool(game_objects):#save the stuff in memory for later use
         Spark.image = game_objects.game.display.make_layer((50,50)).texture
-
-    def draw_shader(self):#called from group draw
-        #self.shader['p'] = (0.3,0.3)
-        self.shader['b'] = (0,0)
-        self.shader['a'] = (0.3,0.3)
-        self.shader['w'] = 0.2
-
-    def spark_shape(self):#move this to shader somehow
-        vel = math.sqrt(self.velocity[0]**2+self.velocity[1]**2)
-
-        self.points = [
-        [self.canvas_size*0.5+math.cos(self.angle)*vel*self.scale,self.canvas_size*0.5+math.sin(self.angle)*vel*self.scale],
-        [self.canvas_size*0.5+math.cos(self.angle+math.pi*0.5)*vel*self.scale*0.3,self.canvas_size*0.5+math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3],
-        [self.canvas_size*0.5-math.cos(self.angle)*vel*self.scale*3.5,self.canvas_size*0.5-math.sin(self.angle)*vel*self.scale*3.5],
-        [self.canvas_size*0.5+math.cos(self.angle-math.pi*0.5)*vel*self.scale*0.3,self.canvas_size*0.5-math.sin(self.angle+math.pi*0.5)*vel*self.scale*0.3]
-        ]

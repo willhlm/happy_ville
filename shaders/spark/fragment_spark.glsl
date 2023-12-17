@@ -1,33 +1,35 @@
 #version 330 core
 
-uniform vec2 p;
-uniform vec2 b;
-uniform vec2 a;
-uniform float w = 1;
-
+uniform vec2 velocity;//to caluclate the angle
 uniform vec2 size;//size of the texture: set in init
 uniform vec4 colour;// color: set in init
-
-vec4 norm_colour;//store the output here
+uniform float scale;// size of it
 
 out vec4 fragColor;
 in vec2 fragmentTexCoord;// top-left is [0, 1] and bottom-right is [1, 0]
 
-float sdOrientedVesica( vec2 p, vec2 a, vec2 b, float w )
+float ndot(vec2 a, vec2 b ) { return a.x*b.x - a.y*b.y; }
+float sdRhombus( in vec2 p, in vec2 b )
 {
-    float r = 0.5*length(b-a);
-    float d = 0.5*(r*r-w*w)/w;
-    vec2 v = (b-a)/r;
-    vec2 c = (b+a)*0.5;
-    vec2 q = 0.5*abs(mat2(v.y,v.x,-v.x,v.y)*(p-c));
-    vec3 h = (r*q.x<d*(q.y-r)) ? vec3(0.0,r,0.0) : vec3(-d,0.0,d+w);
-    return length( q-h.xy) - h.z;
+    p = abs(p);
+    float h = clamp( ndot(b-2.0*p,b)/dot(b,b), -1.0, 1.0 );
+    float d = length( p-0.5*b*vec2(1.0-h,1.0+h) );
+    return d * sign( p.x*b.y + p.y*b.x - b.x*b.y );
+}
+
+mat2 rotate(float _angle){
+    return mat2(cos(_angle),-sin(_angle),sin(_angle),cos(_angle));
 }
 
 void main()
 {
-    float SDF = sdOrientedVesica(size*fragmentTexCoord, size*a, size*b, w);
-    norm_colour = colour/vec4(255);//normalise
-    norm_colour.w = step(SDF,0);
+    vec2 norm_velocity = velocity/sqrt(velocity.x*velocity.x+velocity.y*velocity.y);
+
+    float angle = -1*sign(asin(norm_velocity.y))*acos(norm_velocity.x);
+    float SDF = sdRhombus(rotate(angle)*(size*fragmentTexCoord-size*vec2(0.5)), scale*size*vec2(0.15,0.05));
+
+    vec4 norm_colour = colour/vec4(255);//normalise
+    norm_colour.w = step(SDF,0)*norm_colour.w;
+
     fragColor = vec4(norm_colour);
 }

@@ -9,9 +9,9 @@ class Weather():
         self.currentstate = states_weather.Idle(self)
 
     def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
-        for i in range(0,number_particles):
-            obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
-            group.add(obj)
+        #for i in range(0,number_particles):
+        #    obj = getattr(sys.modules[__name__], type)(self.game_objects,parallax)
+        group.add(Screen_particles(self.game_objects,parallax,number_particles))
 
     def update(self):
         self.currentstate.update()#bloew the wind from time to time
@@ -70,7 +70,7 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
         self.image = pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
         self.image.fill((255,255,255,255))
         self.rect = self.image.get_rect()
-        self.rect.topleft = [game_objects.camera.scroll[0],game_objects.camera.scroll[1]]
+        self.rect.topleft = [game_objects.camera.scroll[0], game_objects.camera.scroll[1]]
         self.count = 0
         self.fade_length = 20
         self.image.set_alpha(int(255/self.fade_length))
@@ -87,6 +87,87 @@ class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
 
     def update_img(self):
         self.image.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
+
+class Screen_particles(pygame.sprite.Sprite):
+    def __init__(self,game_objects, parallax, number_particles):
+        super().__init__()
+        self.game_objects = game_objects
+        self.parallax = parallax
+
+        self.number_particles = number_particles#max 20, hard coded in shader
+        self.centers, self.radius, self.phase, self.velocity = [], [], [], []
+        self.max_radius = 10*parallax[0]
+        for i in range(0, self.number_particles):
+            x = random.uniform(-self.max_radius, self.game_objects.game.window_size[0] + self.max_radius)
+            y = random.uniform(-self.max_radius, self.game_objects.game.window_size[1] + self.max_radius)
+            self.centers.append([x,y])
+            self.radius.append(self.max_radius)
+            self.phase.append(random.uniform(-math.pi,math.pi))
+            self.velocity.append([0,0])
+
+        self.width = int(self.game_objects.game.window_size[0] + 2*self.max_radius)
+        self.height = int(self.game_objects.game.window_size[1] + 2*self.max_radius)
+
+        self.image = self.game_objects.game.display.make_layer((self.width,self.height)).texture
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.true_pos = list(self.rect.topleft)
+
+        self.shader = self.game_objects.shaders['circles']
+        self.shader['size'] = self.image.size
+        self.shader['gradient'] = 1
+        self.shader['number_particles'] = self.number_particles
+        self.shader['colour'] = (255,255,255,255)
+
+        self.temp_scroll = self.game_objects.camera.true_scroll.copy()
+        self.shift = [0,0]#an attribute so that first frame wil be [0,0]
+        self.time = 0
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+        self.update_pos()
+        self.update_partciles()
+
+    def update_pos(self):
+        self.true_pos = [self.game_objects.camera.scroll[0]*self.parallax[0]-self.max_radius,self.game_objects.camera.scroll[1]*self.parallax[1]-self.max_radius]#(0,0)
+        self.rect.topleft = self.true_pos.copy()
+
+    def update_partciles(self):
+        for i in range(0,self.number_particles):
+            self.update_vel(i)
+            self.update_centers(i)
+            self.update_radius(i)
+
+        self.shift = [self.temp_scroll[0] - self.game_objects.camera.true_scroll[0],self.temp_scroll[1] - self.game_objects.camera.true_scroll[1]]#shift in pixels
+        self.temp_scroll = self.game_objects.camera.true_scroll.copy()
+
+    def update_centers(self, i):
+        new_pos = [self.centers[i][0] + self.shift[0] + self.game_objects.game.dt*self.velocity[i][0]*self.parallax[0], self.centers[i][1] - self.shift[1] - self.game_objects.game.dt*self.velocity[i][1]*self.parallax[1]]
+        self.centers[i] = self.boundary(new_pos)
+
+    def update_radius(self, i):
+        self.radius[i] = self.max_radius * math.sin(self.time*0.01 + self.phase[i]) + self.max_radius*0.5
+        if self.radius[i] < 1:
+            x = random.uniform(0, self.game_objects.game.window_size[0])
+            y = random.uniform(0, self.game_objects.game.window_size[1])
+            self.centers[i] = [x,y]
+
+    def update_vel(self, i):
+        self.velocity[i]  = [0.5*math.sin(self.time*0.01 + self.phase[i]),-1]
+
+    def draw_shader(self):
+        self.shader['centers'] = self.centers
+        self.shader['radius'] = self.radius
+
+    def boundary(self, new_pos):#continiouse falling
+        if new_pos[0] < -self.max_radius:
+            new_pos[0] += self.width+ self.max_radius
+        elif new_pos[0] > self.width + self.max_radius:
+            new_pos[0] -= self.width+ self.max_radius
+        elif new_pos[1] > self.height + self.max_radius:#if on the lower side of screen.
+            new_pos[1] -= self.height+ self.max_radius
+        elif new_pos[1] < -self.max_radius:#if on the higher side of screen.
+            new_pos[1] += self.height+ self.max_radius
+        return new_pos
 
 #particles
 class Bound_entity(Animatedentity):#entities bound to the scereen, should it be inheriting from animated entities (if we intendo to use animation) or static entity (if we intend to use pygame for particles)
@@ -116,6 +197,7 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
             self.true_pos[1] -= self.height
         elif pos[1] < -100:#if on the higher side of screen.
             self.true_pos[1] += self.height
+
 
 class Circles(Bound_entity):#shader circles
     animations = {}
