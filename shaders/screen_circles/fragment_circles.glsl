@@ -15,10 +15,11 @@ in vec2 fragmentTexCoord;//from vertex
 out vec4 fragout_colour;
 
 void main(){
+  norm_color = colour/vec4(255);
+
   for(int i = 0; i < number_particles; i++){
     float distance = length(fragmentTexCoord * size - centers[i]);//in pixels
 
-    norm_color = colour/vec4(255);
     out_colour.xyz += norm_color.xyz * step(distance, radius[i]);//change colour
     out_colour.w += norm_color.w * (1 - gradient * distance/radius[i]) * step(distance,radius[i]);//change alpha.
   }
