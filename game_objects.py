@@ -21,6 +21,7 @@ class Game_Objects():
     def __init__(self, game):
         self.game = game
         self.font = Read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
+        self.shaders = Read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller('playstation')
         self.sound = sound.Sound()
         self.create_groups()
@@ -156,7 +157,7 @@ class Game_Objects():
         self.camera_blocks.draw()
 
         #temporaries draws. Shuold be removed
-        if self.game.RENDER_HITBOX_FLAG:
+        if self.game.RENDER_HITBOX_FLAG:            
             image = pygame.Surface(self.game.window_size,pygame.SRCALPHA,32).convert_alpha()
 
             pygame.draw.rect(image, (255,0,255), (round(self.player.hitbox[0]-self.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
@@ -184,3 +185,4 @@ class Game_Objects():
 
             tex = self.game.display.surface_to_texture(image)
             self.game.display.render(tex, self.game.screen)#shader render
+            tex.release()

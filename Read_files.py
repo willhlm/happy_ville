@@ -67,15 +67,22 @@ def format_tiled_json(map_data):#used from UI loader
     return formatted_map_data
 
 'shader loader'
-def load_shaders_dict(shaders, game_objects):#returns a dicy with "state" as key and shader program as value
-    all_shaders = ['idle','hurt','invincible','blur']#all shaders need to be listed here
+def load_shaders_dict(game_objects):#returns a dicy with "state" as key and shader program as value
     shader_dict = {}
-    for shader in all_shaders:
-        base_path = 'shaders/' + shader
-        list_of_shader = [base_path +'/'+ f for f in listdir(base_path)]
-        list_of_shader.sort(reverse=True)
-        shader_dict[shader] = game_objects.game.display.load_shader_from_path(list_of_shader[0],list_of_shader[1])#vertex first
+    base_path = 'shaders'
+    for subdir in [d[0] for d in walk(base_path) if d[0] != base_path]:
+        shader_dict[subdir.split("/")[-1]] = load_shader_list(subdir,game_objects)
     return shader_dict
+
+def load_shader_list(path_to_folder,game_objects):#use this to load multiple sprites in a path_to_folder
+    list_of_shader = []
+    for f in listdir(path_to_folder):
+        if not isfile(join(path_to_folder, f)): continue#skip the folders
+        if '.DS_Store' in join(path_to_folder, f): continue#skip this file
+        if '.gitkeep' in join(path_to_folder, f): continue#skip this file
+        list_of_shader.append(join(path_to_folder, f))
+    list_of_shader.sort(reverse = True)
+    return game_objects.game.display.load_shader_from_path(list_of_shader[0],list_of_shader[1])#vertex first
 
 'sound loader'
 def load_sounds_dict(base_path):#returns a dict with "stae" as key, the sound file as value

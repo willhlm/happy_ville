@@ -103,7 +103,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_3','1')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -347,6 +347,7 @@ class Gameplay(Game_State):
         fps_string = str(int(self.game.clock.get_fps()))
         image = self.game.game_objects.font.render((30,12),'fps ' + fps_string)
         self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-40,20))#shader render
+        image.release()
 
     def handle_events(self, input):
         self.game.game_objects.player.currentstate.handle_movement(input)#move around

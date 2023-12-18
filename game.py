@@ -3,7 +3,7 @@ import states
 import game_objects
 import sys
 import constants as C
-from pygame_render import RenderEngine, NEAREST
+from pygame_render import RenderEngine
 
 class Game():
     def __init__(self):
@@ -14,7 +14,6 @@ class Game():
 
         self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])
         self.screen = self.display.make_layer(self.window_size)
-        self.screen.texture.filter = (NEAREST, NEAREST)#for pixel art
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -42,7 +41,7 @@ class Game():
             self.screen.clear(0, 0, 0)
 
             #tick clock
-            self.clock.tick(60)
+            self.clock.tick(C.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
 
             #handle event

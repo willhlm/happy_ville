@@ -220,7 +220,7 @@
                         {
                          "gid":16,
                          "height":16,
-                         "id":673,
+                         "id":1017,
                          "name":"",
                          "properties":[
                                 {
@@ -328,7 +328,7 @@
                         {
                          "gid":16,
                          "height":16,
-                         "id":594,
+                         "id":1016,
                          "name":"",
                          "properties":[
                                 {
@@ -2025,7 +2025,7 @@
          "y":0
         }],
  "nextlayerid":106,
- "nextobjectid":1016,
+ "nextobjectid":1018,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
