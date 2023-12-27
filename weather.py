@@ -9,7 +9,7 @@ class Weather():
         self.currentstate = states_weather.Idle(self)
 
     def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
-        group.add(Screen_vertical_circles(self.game_objects,parallax,number_particles))
+        group.add(Screen_rain(self.game_objects,parallax,number_particles))
 
     def update(self):
         self.currentstate.update()#bloew the wind from time to time

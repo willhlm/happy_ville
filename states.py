@@ -674,6 +674,8 @@ class Conversation(Gameplay):
 class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
     def __init__(self, game):
         super().__init__(game)
+        self.screen = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
+        self.shader = game.game_objects.shaders['alpha']
         self.state = getattr(UI_select_menu, 'Inventory')(self)#should it alway go to inventory be default?
 
     def update(self):

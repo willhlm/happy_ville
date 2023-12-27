@@ -14,6 +14,7 @@ import save_load
 import groups
 import object_pool
 import controller
+import lights
 
 from time import perf_counter
 
@@ -33,6 +34,7 @@ class Game_Objects():
         self.UI = {'gameplay':UI.Gameplay_UI(self)}
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.object_pool = object_pool.Object_pool(self)
+        self.lights = lights.Lights(self)
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group(self)#groups.Shader_group()
@@ -138,6 +140,7 @@ class Game_Objects():
         self.interactables.update()
         self.reflections.update()
         self.weather.update()
+        self.lights.update()
 
     def draw(self):
         self.all_bgs.draw()
@@ -155,9 +158,10 @@ class Game_Objects():
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw()
         self.camera_blocks.draw()
+        self.lights.draw()#should be last
 
         #temporaries draws. Shuold be removed
-        if self.game.RENDER_HITBOX_FLAG:            
+        if self.game.RENDER_HITBOX_FLAG:
             image = pygame.Surface(self.game.window_size,pygame.SRCALPHA,32).convert_alpha()
 
             pygame.draw.rect(image, (255,0,255), (round(self.player.hitbox[0]-self.camera.true_scroll[0]),round(self.player.hitbox[1]-self.camera.true_scroll[1]),self.player.hitbox[2],self.player.hitbox[3]),2)#draw hitbox
@@ -182,6 +186,9 @@ class Game_Objects():
                 pygame.draw.rect(image, (255,100,100), (int(ramp.hitbox[0]-self.camera.scroll[0]),int(ramp.hitbox[1]-self.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
             for fade in self.bg_fade:
                 pygame.draw.rect(image, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
+            for light in self.lights.lights_sources:
+                pygame.draw.rect(image, (255,100,100), (int(light.hitbox[0]-self.camera.scroll[0]),int(light.hitbox[1]-self.camera.scroll[1]),light.hitbox[2],light.hitbox[3]),1)#draw hitbox
+
 
             tex = self.game.display.surface_to_texture(image)
             self.game.display.render(tex, self.game.screen)#shader render

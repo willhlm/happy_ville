@@ -9,10 +9,10 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         super().__init__()
         self.game_objects = game_objects
         self.image = game_objects.game.display.surface_to_texture(img.convert_alpha())
-        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
-        self.rect.topleft = pos
-        self.bounds = [-200, 800, -100, 350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.true_pos = list(self.rect.topleft)
+
+        self.bounds = [-200, 800, -100, 350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
         self.parallax = [1,1]
         self.shader = None#which shader program to run
         self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
@@ -240,7 +240,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
@@ -1151,19 +1151,22 @@ class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark
 class Dash_effect(Staticentity):
     def __init__(self, entity, alpha = 255):
         super().__init__(entity.rect.center,entity.game_objects)
-        self.sprites = Read_files.load_sprites_dict('',entity.game_objects)
         self.image = entity.image
+        self.sprites = {'idle':self.image}
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = entity.rect.center
         self.alpha = alpha
-        #self.image.set_alpha(self.alpha)
+        self.shader = entity.game_objects.shaders['alpha']
+        self.shader['alpha'] = alpha
         self.true_pos = self.rect.topleft
         self.dir = entity.dir.copy()
 
     def update(self):
-        self.alpha *= 0.9
-        #self.image.set_alpha(self.alpha)
+        self.alpha *= 0.95
         self.destroy()
+
+    def draw_shader(self):
+        self.shader['alpha'] = self.alpha
 
     def destroy(self):
         if self.alpha < 5:

@@ -2,11 +2,12 @@
 
 in vec2 fragmentTexCoord;// top-left is [0, 1] and bottom-right is [1, 0]
 uniform sampler2D imageTexture;// texture in location 0
+uniform float alpha;
 
 out vec4 color;
 
 void main()
 {
     color = texture(imageTexture,fragmentTexCoord);
-    color.xyz = vec3(1);
+    color.a *= alpha/255;
 }
