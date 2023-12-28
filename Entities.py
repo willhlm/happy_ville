@@ -45,7 +45,7 @@ class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
         super().__init__(pos,game_objects, pygame.Surface((16,16)),parallax)
         self.game_objects = game_objects#animation need it
-        self.sprites = {'idle': Read_files.load_sprites(sprite_folder_path)}
+        self.sprites = {'idle': Read_files.load_sprite(sprite_folder_path)}
         self.image = self.sprites[0]
         self.animation = animation.Simple_animation(self)
 
