@@ -45,9 +45,9 @@ class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
         super().__init__(pos,game_objects, pygame.Surface((16,16)),parallax)
         self.game_objects = game_objects#animation need it
-        self.sprites = {'idle': Read_files.load_sprites(sprite_folder_path)}
-        self.image = self.sprites[0]
-        self.animation = animation.Simple_animation(self)
+        self.sprites = {'idle': Read_files.load_sprites_list(sprite_folder_path, game_objects)}
+        self.image = self.sprites['idle'][0]
+        self.animation = animation.Animation(self)
 
     def update(self):
         self.animation.update()
@@ -77,23 +77,25 @@ class BG_Fade(BG_Block):
         self.currentstate.handle_input('collide')
 
 class Reflection(Staticentity):
-    def __init__(self,pos,size,dir,game_objects, offset = 12):
+    def __init__(self,pos,size,dir,game_objects, offset = 25):
         super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.game_objects = game_objects
         self.size = size
-        self.dir = dir
         self.offset = offset
         self.squeeze = 0.75
-        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, self.size[0], self.size[1])
+        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, self.size[0], self.size[1]/self.squeeze)
+
+        self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.shader = game_objects.shaders['blend_reflect']
 
     def draw(self):
-        self.reflect_rect.center = [self.rect.center[0]- self.game_objects.camera.scroll[0],self.game_objects.game.screen.get_height() - self.rect.center[1]+ self.size[1]*self.squeeze + self.offset + self.game_objects.camera.scroll[1]]
-        reflect_surface = self.game_objects.game.screen.copy()
-        reflect_surface.convert_alpha()#do we need this?
-        reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*self.squeeze))
-        #reflect_surface.set_alpha(100)
-        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0],self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
-        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), blit_pos, self.reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
+        self.layer1.clear(0,0,0,1)
+        self.reflect_rect.topleft = [self.rect.topleft[0] - self.game_objects.camera.scroll[0],self.offset + self.game_objects.game.window_size[1] - self.rect.topleft[1] + self.game_objects.camera.scroll[1]]# the part to cut. the position indicates the part to cut of unflipped image
+        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
+
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.layer1)
+        self.shader['background'] = self.game_objects.game.screen.texture
+        self.game_objects.game.display.render(self.layer1.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, flip = [False, True], scale = [1, self.squeeze], shader = self.shader)#would maybe be more efficient to cut out teh interesting parts and apply the shader
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -304,7 +306,6 @@ class Player(Character):
 
     def draw_shader(self):#called before draw in group
         self.shader_state.draw()
-        #pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]+self.image.width*0.5),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]+self.image.height*0.5))
 
 class Migawari_entity(Character):#player double ganger
     def __init__(self,pos,game_objects):
@@ -1088,15 +1089,6 @@ class Spawner(Staticentity):#an entity spawner
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
 
-class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. caves. loaded in maploader
-    def __init__(self, game_objects, colour = (10,10,10,200)):
-        super().__init__([0,0], game_objects, pygame.Surface((int(game_objects.game.window_size[0]), int(game_objects.game.window_size[1]))))
-        self.colour = colour
-
-    def update(self):
-        self.rect.topleft  = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
-        self.image.fill(self.colour)#make it dark again
-
 class Light_glow(Staticentity):#a light glow anound an entity.
     def __init__(self, entity, radius = 200,layers = 40):
         super().__init__(entity.rect.center,entity.game_objects)
@@ -1125,28 +1117,6 @@ class Light_glow(Staticentity):#a light glow anound an entity.
             temp = surface.copy()
             pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*constant+1)
             self.image.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
-
-class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark screen/layer in e.g. caves. It can be combined with light_glow
-    def __init__(self, entity, radius = 200, layers = 40):
-        super().__init__(entity.rect.center,entity.game_objects)
-        self.entity = entity
-        self.game_objects = entity.game_objects
-        self.radius = radius
-        self.layers = layers
-        self.make_glow()
-
-    def update(self):
-        pos = [self.entity.rect.centerx - self.radius - self.game_objects.camera.scroll[0], self.entity.rect.centery - self.radius - self.game_objects.camera.scroll[1]]
-        self.game_objects.map.screen.image.blit(self.glow, pos, special_flags = pygame.BLEND_RGBA_SUB)
-        #self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), special_flags = pygame.BLEND_RGB_SUB)#inverting
-
-    def make_glow(self,const = 6):#init
-        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-
-        for i in range(self.layers):
-            k = i*const
-            k = min(k,255)
-            pygame.draw.circle(self.glow,(0,0,0,k),self.glow.get_rect().center,self.radius-i*5)
 
 class Dash_effect(Staticentity):
     def __init__(self, entity, alpha = 255):
@@ -1666,7 +1636,7 @@ class Falling_rock(Ranged):#things that can be placed in cave, the source makes 
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/',entity.game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(entity.rect.center[0],entity.rect.center[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.dmg = 1
@@ -2563,6 +2533,7 @@ class Interactable_bushes(Interactable):
         self.currentstate.handle_input('Death')
 
     def reset_timer(self):
+        super().reset_timer()
         self.currentstate.handle_input('Idle')
 
     def player_noncollision(self):#when player doesn't collide
@@ -2579,7 +2550,7 @@ class Cave_grass(Interactable_bushes):
 
     def player_collision(self):
         if self.interacted: return
-        self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'idle')
+        self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'Idle')
         self.interacted = True#sets to false when player gos away
         self.release_particles()
 

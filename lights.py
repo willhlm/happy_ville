@@ -3,8 +3,8 @@ import pygame
 class Lights():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.ambient = (0,0,0,1)#ambient colour
-        self.lights_sources = [Light(game_objects)]#append lights
+        self.ambient = (0,0,0,0)#ambient colour
+        self.lights_sources = []#append lights
         self.shaders = {'light':game_objects.shaders['light'],'blur':game_objects.shaders['blur'],'blend':game_objects.shaders['blend']}
 
         self.shaders['light']['resolution'] = self.game_objects.game.window_size
@@ -36,8 +36,16 @@ class Lights():
             l = l + [(rec.hitbox.topleft[0] - self.game_objects.camera.scroll[0],rec.hitbox.topleft[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.topright[0] - self.game_objects.camera.scroll[0],rec.hitbox.topright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomright[0] - self.game_objects.camera.scroll[0],rec.hitbox.bottomright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomleft[0] - self.game_objects.camera.scroll[0],rec.hitbox.bottomleft[1] - self.game_objects.camera.scroll[1])]
         return l
 
-    def add_light(self, light):#not implemented
-        self.lights_sources.append(light)
+    def clear_lights(self):
+        self.lights_sources = []
+
+    def add_light(self, position = [0,0], colour = (1,1,1), radius = 200):
+        self.lights_sources.append(Light(self.game_objects, position, colour, radius))
+        self.shaders['light']['num_lights'] = len(self.lights_sources)
+
+    def remove_light(self, light):
+        self.lights_sources.remove(light)
+        self.shaders['light']['num_lights'] = len(self.lights_sources)
 
     def draw(self):
         self.layer1.clear(0,0,0,1)
@@ -48,7 +56,6 @@ class Lights():
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
         self.shaders['light']['colour'] = self.colour
-        self.shaders['light']['num_lights'] = 1
 
         self.shaders['blend']['ambient'] = self.ambient
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture
@@ -58,14 +65,14 @@ class Lights():
         self.game_objects.game.display.render(self.layer3.texture, self.game_objects.game.screen, shader = self.shaders['blend'])
 
 class Light():#light source
-    def __init__(self,game_objects):
+    def __init__(self,game_objects, position, colour, radius):
         self.game_objects = game_objects
-        self.radius = 200
-        self.colour = (1,1,1)
-        self.position = [0,0]
+        self.radius = radius
+        self.colour = colour
+        self.position = position
         self.hitbox = pygame.Rect(self.position[0]-self.radius,self.position[1]-self.radius,self.radius*2,2*self.radius)
         self.rect = self.hitbox.copy()
 
-    def update(self):#for collision
+    def update(self):#for collision -> depends on type of light, if they e.g. move around
         self.position = self.game_objects.player.hitbox.center#[self.positions[0] + self.game_objects.camera.scroll[0],self.positions[1] + self.game_objects.camera.scroll[1]]
         self.hitbox.center = self.position

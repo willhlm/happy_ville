@@ -11,7 +11,5 @@ void main()
 {
     color = texture(imageTexture,fragmentTexCoord);
     float intensity = 0.5*sin(time)+0.5;
-    color.r += intensity;
-    color.g += intensity;
-    color.b += intensity;
+    color.xyz += vec3(intensity);
 }

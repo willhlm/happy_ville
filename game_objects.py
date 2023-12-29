@@ -188,6 +188,9 @@ class Game_Objects():
                 pygame.draw.rect(image, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
             for light in self.lights.lights_sources:
                 pygame.draw.rect(image, (255,100,100), (int(light.hitbox[0]-self.camera.scroll[0]),int(light.hitbox[1]-self.camera.scroll[1]),light.hitbox[2],light.hitbox[3]),1)#draw hitbox
+            for reflect in self.reflections:
+                pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),340-int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
 
             tex = self.game.display.surface_to_texture(image)

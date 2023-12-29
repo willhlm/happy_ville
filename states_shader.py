@@ -1,4 +1,4 @@
-import sys
+import sys, math
 import constants as C
 
 class Shader_states():
@@ -30,8 +30,11 @@ class Hurt(Shader_states):#turn white
     def __init__(self,entity):
         super().__init__(entity)
         self.duration = C.hurt_animation_length#hurt animation duration
-        self.entity.shader = self.entity.game_objects.shaders['hurt']
+        self.entity.shader = self.entity.game_objects.shaders['colour']
         self.next_animation = 'Idle'
+
+    def draw(self):
+        self.entity.shader['colour'] = (255,255,255)
 
     def update(self):
         self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
@@ -52,9 +55,8 @@ class Invincibile(Shader_states):#blink white
     def update(self):
         self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
         self.time += 0.5 * self.entity.game_objects.game.dt*self.entity.slow_motion
-
         if self.duration < 0:
             self.enter_state('Idle')
 
     def draw(self):
-        self.entity.shader['time'] = self.time
+        self.entity.shader['time']  = self.time#(colour,colour,colour)

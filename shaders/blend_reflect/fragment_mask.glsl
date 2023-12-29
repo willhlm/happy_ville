@@ -5,16 +5,14 @@ uniform sampler2D imageTexture;// used texture unit
 
 uniform sampler2D background;
 
-uniform vec4 ambient;
-
 out vec4 color;
 
 void main()
 {
-    vec4 lightval=texture(imageTexture,fragmentTexCoord);
+    vec4 image=texture(imageTexture,fragmentTexCoord);
     vec4 background=texture(background,fragmentTexCoord);
-    vec4 norm_ambient = ambient/1;
-    color.xyz = background.xyz*(norm_ambient.xyz+lightval.xyz);
-    color.w = background.w*norm_ambient.w*lightval.w;
+
+    color.xyz = background.xyz*image.xyz;
+    color.w = background.w*image.w*0.75;
 
 }

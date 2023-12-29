@@ -157,19 +157,7 @@
                  "draworder":"topdown",
                  "id":48,
                  "name":"front",
-                 "objects":[
-                        {
-                         "gid":39193,
-                         "height":32,
-                         "id":1848,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":3248,
-                         "y":1600
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -400,19 +388,7 @@
                  "draworder":"topdown",
                  "id":47,
                  "name":"front",
-                 "objects":[
-                        {
-                         "gid":39193,
-                         "height":32,
-                         "id":1847,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":4368,
-                         "y":1520
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -482,42 +458,6 @@
                         {
                          "gid":39192,
                          "height":64,
-                         "id":1840,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":80,
-                         "x":4064,
-                         "y":1680
-                        }, 
-                        {
-                         "gid":39192,
-                         "height":64,
-                         "id":1841,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":80,
-                         "x":3984,
-                         "y":1680
-                        }, 
-                        {
-                         "gid":39192,
-                         "height":64,
-                         "id":1842,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":80,
-                         "x":4272,
-                         "y":1664
-                        }, 
-                        {
-                         "gid":39192,
-                         "height":64,
                          "id":1843,
                          "name":"",
                          "rotation":0,
@@ -526,30 +466,6 @@
                          "width":80,
                          "x":4400,
                          "y":1648
-                        }, 
-                        {
-                         "gid":39193,
-                         "height":32,
-                         "id":1846,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":4640,
-                         "y":1648
-                        }, 
-                        {
-                         "gid":39194,
-                         "height":32,
-                         "id":1849,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":4512,
-                         "y":1456
                         }, 
                         {
                          "gid":39195,
