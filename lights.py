@@ -14,6 +14,7 @@ class Lights():
         self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.update()
+        self.add_light()
 
     def update(self):
         self.points, self.positions, self.radius, self.colour = [], [], [], []
@@ -47,7 +48,7 @@ class Lights():
         self.lights_sources.remove(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
-    def draw(self):
+    def draw(self):          
         self.layer1.clear(0,0,0,1)
         self.layer2.clear(0,0,0,1)
         self.layer3.clear(0,0,0,1)
@@ -56,6 +57,7 @@ class Lights():
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
         self.shaders['light']['colour'] = self.colour
+        self.shaders['light']['background'] = self.ambient
 
         self.shaders['blend']['ambient'] = self.ambient
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture

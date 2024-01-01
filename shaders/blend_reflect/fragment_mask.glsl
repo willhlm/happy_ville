@@ -14,5 +14,4 @@ void main()
 
     color.xyz = background.xyz*image.xyz;
     color.w = background.w*image.w*0.75;
-
 }

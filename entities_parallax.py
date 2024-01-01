@@ -238,7 +238,7 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
 
         self.shader =  game_objects.shaders['colour']
-        
+
     def draw_shader(self):
         self.shader['colour'] = self.colour
 

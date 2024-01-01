@@ -9,6 +9,7 @@ uniform vec2 resolution;
 uniform vec2 lightPositions[3]; // Assuming up to 3 light sources
 uniform float lightRadii[3];     // Corresponding radius for each light source
 uniform vec3 colour[3];
+uniform vec4 background;//texture(imageTexture, fragmentTexCoord); // Get background color
 
 uniform vec2 rectangleCorners[16]; // x/4 is the number of rectangles
 uniform int num_rectangle;
@@ -47,8 +48,7 @@ bool isOcluded(vec2 p, vec2 q, vec2 lightPos, float lightRadius) {
 }
 
 void main() {
-    vec4 backgroundColor = vec4(0,0,0,1);//texture(imageTexture, fragmentTexCoord); // Get background color
-
+    vec4 backgroundColor = background;
     for (int l = 0; l < num_lights; l++) { // number of light sources
         vec2 lightPos = lightPositions[l];
         float lightRadius = lightRadii[l];

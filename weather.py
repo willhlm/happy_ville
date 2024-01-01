@@ -203,10 +203,10 @@ class Screen_rain(Screen_particles):
         self.shader = self.game_objects.shaders['screen_rectangle']
         self.shader['size'] = self.image.size
         self.shader['number_particles'] = self.number_particles
+        self.shader['angle'] = 0#rotation angle of the rectangle
         colours=[(10,191,255,255),(152,245,255,255),(61,89,171,255),(100,149,237,255)]
         self.shader['colour'] = colours[random.randint(0, len(colours)-1)]
         self.shader['scale'] = (self.parallax[0],self.parallax[0])
-        self.shader['angle'] = 0#rotation angle of the rectangle
 
     def set_parameters(self):#parameters needed for the shader
         self.canvas_size = self.parallax[0]

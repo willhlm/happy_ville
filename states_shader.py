@@ -25,6 +25,8 @@ class Idle(Shader_states):
     def handle_input(self,input):
         if input == 'Hurt':
             self.enter_state('Hurt')
+        elif input == 'mix_colour':
+            self.enter_state('Mix_colour')
 
 class Hurt(Shader_states):#turn white
     def __init__(self,entity):
@@ -34,7 +36,7 @@ class Hurt(Shader_states):#turn white
         self.next_animation = 'Idle'
 
     def draw(self):
-        self.entity.shader['colour'] = (255,255,255)
+        self.entity.shader['colour'] = (255,255,255,255)
 
     def update(self):
         self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
@@ -60,3 +62,18 @@ class Invincibile(Shader_states):#blink white
 
     def draw(self):
         self.entity.shader['time']  = self.time#(colour,colour,colour)
+
+class Mix_colour(Shader_states):#shade screen uses it
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['mix_colour']
+        self.entity.shader['position'] = 0
+
+    def draw(self):
+        self.entity.shader['colour'] = self.entity.colour#higher alpha for lower parallax
+        self.entity.shader['new_colour'] = self.entity.new_colour#higher alpha for lower parallax
+        self.entity.shader['position'] = max((self.entity.game_objects.player.hitbox.centerx - self.entity.bounds.left)/self.entity.bounds[2],0)
+
+    def handle_input(self,input):
+        if input == 'idle':
+            self.enter_state('Idle')

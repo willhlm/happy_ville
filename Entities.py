@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_bg_fade, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -39,7 +39,6 @@ class BG_Block(Staticentity):
             layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
             self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
             self.image = layer.texture#get the texture of the layer
-        self.sprites = {'idle':[self.image]}
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -1188,15 +1187,21 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
         super().__init__([0,0],game_objects, pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32))
-        self.game_objects = game_objects
-        self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
-        self.original_colour = self.colour.copy()
-        #self.image.fill(self.colour)#make it dark again
-        self.currentstate = state_shade_screen.Idle(self,self.original_colour)
+        if parallax[0] == 1: self.colour = (colour.g,colour.b,colour.a,0)
+        else: self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
+
+        self.shader_state = states_shader.Idle(self)
+
+        layer1 = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
+        layer1.clear(self.colour)
+        self.image = layer1.texture#get the texture of the layer
 
     def update(self):
-        self.currentstate.update()
-        self.true_pos = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
+        self.true_pos = [self.parallax[0]*self.game_objects.camera.scroll[0], self.parallax[1]*self.game_objects.camera.scroll[1]]#this is [0,0]
+        self.shader_state.update()
+
+    def draw_shader(self):
+        self.shader_state.draw()
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -2471,8 +2476,6 @@ class Shade_trigger(Interactable):
     def __init__(self,pos,game_objects,size,colour):
         super().__init__(pos,game_objects)
         self.new_colour = [colour.g,colour.b,colour.a]
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/shade_trigger/',game_objects)
-        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
@@ -2481,21 +2484,18 @@ class Shade_trigger(Interactable):
         pass
 
     def player_collision(self):#player collision
-        for layer in self.layers_one:
-            colour = self.new_colour + [layer.colour[-1]]
-            layer.currentstate.enter_state('Turn',colour)
-            self.layers_two.append(layer)
-            self.layers_one.remove(layer)
+        for layer in self.layers:
+            layer.shader_state.handle_input('mix_colour')
 
     def player_noncollision(self):#when player doesn't collide: for grass
-        for layer in self.layers_two:
-            layer.currentstate.enter_state('Turn',layer.original_colour)
-            self.layers_one.append(layer)
-            self.layers_two.remove(layer)
+        for layer in self.layers:
+            layer.shader_state.handle_input('idle')
 
     def add_shade_layers(self, layers):#called from map loader
-        self.layers_one = layers#a list of shahde layers
-        self.layers_two = []#similar to self.layer, keeps the layers of the shade screen
+        self.layers = layers
+        for layer in layers:
+            layer.new_colour = self.new_colour + [layer.colour[-1]]
+            layer.bounds = self.rect
 
 class State_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):

@@ -588,7 +588,7 @@ class Level():
                     elif 'bg' in tile_layer:
                         self.game_objects.all_bgs.add(bg_animation)
 
-    def orginise_references(self):
+    def orginise_references(self):#called at the end of the loader
         if self.references.get('shade_trigger',False):
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 

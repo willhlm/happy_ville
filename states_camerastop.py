@@ -99,7 +99,7 @@ class Stop_bottom(Basic_states):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
         if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:#if on screen on y and coser than half screen on x
             target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
-            self.true_center[1] -= (self.entity.game_objects.camera.center[1]-target)*0.1
+            self.true_center[1] -= (self.entity.game_objects.camera.center[1]-target)*(0.03 - self.sign*0.01)
             self.center[1] = int(self.true_center[1])
             #self.center[1] -= self.sign*3#self.sign*(abs(self.entity.game_objects.camera.center[1]-target))*0.1
             self.entity.game_objects.camera.center[1] = self.sign*max(self.sign*target,self.sign*self.center[1])#when sign is negative, it works as min
