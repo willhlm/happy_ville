@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_bg_fade, state_shade_screen, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_bg_fade, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -9,10 +9,10 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         super().__init__()
         self.game_objects = game_objects
         self.image = game_objects.game.display.surface_to_texture(img.convert_alpha())
-        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
-        self.rect.topleft = pos
-        self.bounds = [-200, 800, -100, 350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.true_pos = list(self.rect.topleft)
+
+        self.bounds = [-200, 800, -100, 350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
         self.parallax = [1,1]
         self.shader = None#which shader program to run
         self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
@@ -39,15 +39,14 @@ class BG_Block(Staticentity):
             layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
             self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
             self.image = layer.texture#get the texture of the layer
-        self.sprites = {'idle':[self.image]}
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
         super().__init__(pos,game_objects, pygame.Surface((16,16)),parallax)
         self.game_objects = game_objects#animation need it
-        self.sprites = {'idle': Read_files.load_sprite(sprite_folder_path)}
-        self.image = self.sprites[0]
-        self.animation = animation.Simple_animation(self)
+        self.sprites = {'idle': Read_files.load_sprites_list(sprite_folder_path, game_objects)}
+        self.image = self.sprites['idle'][0]
+        self.animation = animation.Animation(self)
 
     def update(self):
         self.animation.update()
@@ -77,23 +76,25 @@ class BG_Fade(BG_Block):
         self.currentstate.handle_input('collide')
 
 class Reflection(Staticentity):
-    def __init__(self,pos,size,dir,game_objects, offset = 12):
+    def __init__(self,pos,size,dir,game_objects, offset = 25):
         super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.game_objects = game_objects
         self.size = size
-        self.dir = dir
         self.offset = offset
         self.squeeze = 0.75
-        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, self.size[0], self.size[1])
+        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, self.size[0], self.size[1]/self.squeeze)
+
+        self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.shader = game_objects.shaders['blend_reflect']
 
     def draw(self):
-        self.reflect_rect.center = [self.rect.center[0]- self.game_objects.camera.scroll[0],self.game_objects.game.screen.get_height() - self.rect.center[1]+ self.size[1]*self.squeeze + self.offset + self.game_objects.camera.scroll[1]]
-        reflect_surface = self.game_objects.game.screen.copy()
-        reflect_surface.convert_alpha()#do we need this?
-        reflect_surface = pygame.transform.scale(reflect_surface, (reflect_surface.get_width(), reflect_surface.get_height()*self.squeeze))
-        #reflect_surface.set_alpha(100)
-        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0],self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
-        self.game_objects.game.screen.blit(pygame.transform.flip(reflect_surface, False, True), blit_pos, self.reflect_rect, special_flags = pygame.BLEND_RGBA_MULT)#BLEND_RGBA_MIN
+        self.layer1.clear(0,0,0,1)
+        self.reflect_rect.topleft = [self.rect.topleft[0] - self.game_objects.camera.scroll[0],self.offset + self.game_objects.game.window_size[1] - self.rect.topleft[1] + self.game_objects.camera.scroll[1]]# the part to cut. the position indicates the part to cut of unflipped image
+        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
+
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.layer1)
+        self.shader['background'] = self.game_objects.game.screen.texture
+        self.game_objects.game.display.render(self.layer1.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, flip = [False, True], scale = [1, self.squeeze], shader = self.shader)#would maybe be more efficient to cut out teh interesting parts and apply the shader
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -240,7 +241,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True}
         self.currentstate = states_player.Idle_main(self)
@@ -304,7 +305,6 @@ class Player(Character):
 
     def draw_shader(self):#called before draw in group
         self.shader_state.draw()
-        #pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]+self.image.width*0.5),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]+self.image.height*0.5))
 
 class Migawari_entity(Character):#player double ganger
     def __init__(self,pos,game_objects):
@@ -1088,15 +1088,6 @@ class Spawner(Staticentity):#an entity spawner
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
 
-class Dark_screen(Staticentity):#a dark layer ontop of  stagge, used in e.g. caves. loaded in maploader
-    def __init__(self, game_objects, colour = (10,10,10,200)):
-        super().__init__([0,0], game_objects, pygame.Surface((int(game_objects.game.window_size[0]), int(game_objects.game.window_size[1]))))
-        self.colour = colour
-
-    def update(self):
-        self.rect.topleft  = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
-        self.image.fill(self.colour)#make it dark again
-
 class Light_glow(Staticentity):#a light glow anound an entity.
     def __init__(self, entity, radius = 200,layers = 40):
         super().__init__(entity.rect.center,entity.game_objects)
@@ -1126,44 +1117,25 @@ class Light_glow(Staticentity):#a light glow anound an entity.
             pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*constant+1)
             self.image.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
-class Dark_glow(Staticentity):#the glow to use in dark area; it removes the dark screen/layer in e.g. caves. It can be combined with light_glow
-    def __init__(self, entity, radius = 200, layers = 40):
-        super().__init__(entity.rect.center,entity.game_objects)
-        self.entity = entity
-        self.game_objects = entity.game_objects
-        self.radius = radius
-        self.layers = layers
-        self.make_glow()
-
-    def update(self):
-        pos = [self.entity.rect.centerx - self.radius - self.game_objects.camera.scroll[0], self.entity.rect.centery - self.radius - self.game_objects.camera.scroll[1]]
-        self.game_objects.map.screen.image.blit(self.glow, pos, special_flags = pygame.BLEND_RGBA_SUB)
-        #self.game_objects.map.screen.image.blit(self.game_objects.map.screen.image, (0,0), special_flags = pygame.BLEND_RGB_SUB)#inverting
-
-    def make_glow(self,const = 6):#init
-        self.glow = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-
-        for i in range(self.layers):
-            k = i*const
-            k = min(k,255)
-            pygame.draw.circle(self.glow,(0,0,0,k),self.glow.get_rect().center,self.radius-i*5)
-
 class Dash_effect(Staticentity):
     def __init__(self, entity, alpha = 255):
         super().__init__(entity.rect.center,entity.game_objects)
-        self.sprites = Read_files.load_sprites_dict('',entity.game_objects)
         self.image = entity.image
+        self.sprites = {'idle':self.image}
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = entity.rect.center
         self.alpha = alpha
-        #self.image.set_alpha(self.alpha)
+        self.shader = entity.game_objects.shaders['alpha']
+        self.shader['alpha'] = alpha
         self.true_pos = self.rect.topleft
         self.dir = entity.dir.copy()
 
     def update(self):
-        self.alpha *= 0.9
-        #self.image.set_alpha(self.alpha)
+        self.alpha *= 0.95
         self.destroy()
+
+    def draw_shader(self):
+        self.shader['alpha'] = self.alpha
 
     def destroy(self):
         if self.alpha < 5:
@@ -1215,15 +1187,21 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
         super().__init__([0,0],game_objects, pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32))
-        self.game_objects = game_objects
-        self.colour = [colour.g,colour.b,colour.a,7/parallax[0]]#higher alpha for lower parallax
-        self.original_colour = self.colour.copy()
-        #self.image.fill(self.colour)#make it dark again
-        self.currentstate = state_shade_screen.Idle(self,self.original_colour)
+        if parallax[0] == 1: self.colour = (colour.g,colour.b,colour.a,0)
+        else: self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
+
+        self.shader_state = states_shader.Idle(self)
+
+        layer1 = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
+        layer1.clear(self.colour)
+        self.image = layer1.texture#get the texture of the layer
 
     def update(self):
-        self.currentstate.update()
-        self.true_pos = [self.game_objects.camera.scroll[0], self.game_objects.camera.scroll[1]]#this is [0,0]
+        self.true_pos = [self.parallax[0]*self.game_objects.camera.scroll[0], self.parallax[1]*self.game_objects.camera.scroll[1]]#this is [0,0]
+        self.shader_state.update()
+
+    def draw_shader(self):
+        self.shader_state.draw()
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -1663,7 +1641,7 @@ class Falling_rock(Ranged):#things that can be placed in cave, the source makes 
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/',entity.game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(entity.rect.center[0],entity.rect.center[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.dmg = 1
@@ -2498,8 +2476,6 @@ class Shade_trigger(Interactable):
     def __init__(self,pos,game_objects,size,colour):
         super().__init__(pos,game_objects)
         self.new_colour = [colour.g,colour.b,colour.a]
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/shade_trigger/',game_objects)
-        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
@@ -2508,21 +2484,18 @@ class Shade_trigger(Interactable):
         pass
 
     def player_collision(self):#player collision
-        for layer in self.layers_one:
-            colour = self.new_colour + [layer.colour[-1]]
-            layer.currentstate.enter_state('Turn',colour)
-            self.layers_two.append(layer)
-            self.layers_one.remove(layer)
+        for layer in self.layers:
+            layer.shader_state.handle_input('mix_colour')
 
     def player_noncollision(self):#when player doesn't collide: for grass
-        for layer in self.layers_two:
-            layer.currentstate.enter_state('Turn',layer.original_colour)
-            self.layers_one.append(layer)
-            self.layers_two.remove(layer)
+        for layer in self.layers:
+            layer.shader_state.handle_input('idle')
 
     def add_shade_layers(self, layers):#called from map loader
-        self.layers_one = layers#a list of shahde layers
-        self.layers_two = []#similar to self.layer, keeps the layers of the shade screen
+        self.layers = layers
+        for layer in layers:
+            layer.new_colour = self.new_colour + [layer.colour[-1]]
+            layer.bounds = self.rect
 
 class State_trigger(Interactable):
     def __init__(self,pos,game_objects,size,event):
@@ -2560,6 +2533,7 @@ class Interactable_bushes(Interactable):
         self.currentstate.handle_input('Death')
 
     def reset_timer(self):
+        super().reset_timer()
         self.currentstate.handle_input('Idle')
 
     def player_noncollision(self):#when player doesn't collide
@@ -2576,7 +2550,7 @@ class Cave_grass(Interactable_bushes):
 
     def player_collision(self):
         if self.interacted: return
-        self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'idle')
+        self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'Idle')
         self.interacted = True#sets to false when player gos away
         self.release_particles()
 

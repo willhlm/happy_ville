@@ -1,7 +1,7 @@
 import random, sys
 
 class Camera():
-    def __init__(self,game_objects,scroll = [0,0]):
+    def __init__(self, game_objects, scroll = [0,0]):
         self.game_objects = game_objects
         self.true_scroll = scroll
         self.scroll = self.true_scroll.copy()

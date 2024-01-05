@@ -9,7 +9,7 @@ class Weather():
         self.currentstate = states_weather.Idle(self)
 
     def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
-        group.add(Screen_vertical_circles(self.game_objects,parallax,number_particles))
+        group.add(Screen_rain(self.game_objects,parallax,number_particles))
 
     def update(self):
         self.currentstate.update()#bloew the wind from time to time
@@ -203,10 +203,10 @@ class Screen_rain(Screen_particles):
         self.shader = self.game_objects.shaders['screen_rectangle']
         self.shader['size'] = self.image.size
         self.shader['number_particles'] = self.number_particles
+        self.shader['angle'] = 0#rotation angle of the rectangle
         colours=[(10,191,255,255),(152,245,255,255),(61,89,171,255),(100,149,237,255)]
         self.shader['colour'] = colours[random.randint(0, len(colours)-1)]
         self.shader['scale'] = (self.parallax[0],self.parallax[0])
-        self.shader['angle'] = 0#rotation angle of the rectangle
 
     def set_parameters(self):#parameters needed for the shader
         self.canvas_size = self.parallax[0]

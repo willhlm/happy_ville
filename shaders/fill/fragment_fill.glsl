@@ -3,12 +3,11 @@
 in vec2 fragmentTexCoord;// top-left is [0, 1] and bottom-right is [1, 0]
 uniform sampler2D imageTexture;// texture in location 0
 
-out vec4 color;
+uniform vec4 colour; // This is the color uniform
+out vec4 FragColor;
 
 void main()
 {
-    color = texture(imageTexture,fragmentTexCoord);
-    color.r = 1;
-    color.g = 1;
-    color.b = 1;
+    FragColor = vec4(colour/255);//change color
+
 }

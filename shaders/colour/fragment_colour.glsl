@@ -10,5 +10,5 @@ out vec4 new_colour;
 void main()
 {
     new_colour = texture(imageTexture,fragmentTexCoord);//get the texture
-    new_colour *= colour/255;//change color    
+    new_colour.xyz = vec3(colour/255);//change color
 }

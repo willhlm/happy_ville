@@ -12,7 +12,6 @@ class Collisions():
 
     def pass_through(self, entity):#called when pressing down
         self.game_objects.player.hitbox.bottom += 1
-        #pos = entity.hitbox.midbottom
         ramp = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms_ramps,Collisions.collided)
         platform = pygame.sprite.spritecollideany(self.game_objects.player,self.game_objects.platforms,Collisions.collided)
 
@@ -26,6 +25,7 @@ class Collisions():
             elif not self.game_objects.player.go_through:#enter only once
                 self.game_objects.player.velocity[1] = 1#so that it looks more natural (cannot be 0, needs to be finite)
             self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through
+        self.game_objects.player.hitbox.bottom -= 1#move back
 
     def interactables_collision(self):#interactables
         for interactable in self.game_objects.interactables.sprites():
@@ -37,6 +37,9 @@ class Collisions():
 
     def thunder_attack(self,aura):
         return pygame.sprite.spritecollide(aura,self.game_objects.enemies,False,Collisions.collided)#check collision
+
+    def light_collision(self, light):
+        return pygame.sprite.spritecollide(light, self.game_objects.platforms, False, Collisions.collided)
 
     @staticmethod
     def counter(fprojectiles,eprojectiles):

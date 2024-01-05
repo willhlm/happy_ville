@@ -2,9 +2,6 @@ import pygame, csv, math
 import Entities, Read_files, weather, entities_parallax, states, platforms
 import constants as C
 
-#from PIL import Image, ImageFilter#for blurring
-#import numpy as np#for blurring
-
 class Level():
     def __init__(self, game_objects):
         self.game_objects = game_objects
@@ -39,13 +36,8 @@ class Level():
         self.game_objects.camera.reset_player_center()
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
         if level_name == 'light_forest_cave':
-            self.screen = Entities.Dark_screen(self.game_objects)#makes the screen dark
-            self.game_objects.cosmetics.add(self.screen)#need to be added before Dark glow on player
-            self.game_objects.cosmetics.add(Entities.Dark_glow(self.game_objects.player))
-        elif level_name == 'village_cave':
-            self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
-        elif level_name == 'dark_forest':
-            self.game_objects.cosmetics.add(Entities.Light_glow(self.game_objects.player))#add a light glow around the player
+            self.game_objects.lights.ambient = (10/255,10/255,10/255,255/255)
+            self.game_objects.lights.add_light()
         elif self.level_name == 'rhoutta_encounter_1':#if it is a new game file
             if self.spawn != '1': return
             new_state = states.New_game(self.game_objects.game)
@@ -596,7 +588,7 @@ class Level():
                     elif 'bg' in tile_layer:
                         self.game_objects.all_bgs.add(bg_animation)
 
-    def orginise_references(self):
+    def orginise_references(self):#called at the end of the loader
         if self.references.get('shade_trigger',False):
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
