@@ -157,7 +157,7 @@ class Game_Objects():
         self.cosmetics.draw()
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw()
-        self.camera_blocks.draw()
+        #self.camera_blocks.draw()
         self.lights.draw()#should be last
 
         #temporaries draws. Shuold be removed

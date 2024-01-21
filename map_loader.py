@@ -428,6 +428,13 @@ class Level():
                 self.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.game_objects.interactables.add(new_cocoon)
 
+            elif id == 9:#god rays
+                god_rays = entities_parallax.God_rays(object_position, self.game_objects, parallax, object_size)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(god_rays)
+                else:
+                    self.game_objects.all_bgs.add(god_rays)
+
     def load_light_forest_cave_objects(self,data,parallax,offset):
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]

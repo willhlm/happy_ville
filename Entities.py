@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_bg_fade, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -35,7 +35,7 @@ class BG_Block(Staticentity):
     def blur(self):
         if self.parallax[0] != 1:#don't blur if there is no parallax
             shader = self.game_objects.shaders['blur']
-            shader['blurRadius'] = 1.2/self.parallax[0]#set the blur redius
+            shader['blurRadius'] = 1/self.parallax[0]#set the blur redius
             layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
             self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
             self.image = layer.texture#get the texture of the layer
@@ -43,7 +43,6 @@ class BG_Block(Staticentity):
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
         super().__init__(pos,game_objects, pygame.Surface((16,16)),parallax)
-        self.game_objects = game_objects#animation need it
         self.sprites = {'idle': Read_files.load_sprites_list(sprite_folder_path, game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
@@ -57,10 +56,10 @@ class BG_Animated(BG_Block):
 class BG_Fade(BG_Block):
     def __init__(self,pos,game_objects, img,parallax,positions):
         super().__init__(pos,game_objects,img,parallax)
-        self.currentstate = states_bg_fade.Idle(self)
+        self.shader_state = states_shader.Idle(self)
         self.make_hitbox(positions,pos)
 
-    def make_hitbox(self,positions,offset_position):#the rect is the whole screen, need to make it conly cover the surface part, some how
+    def make_hitbox(self,positions,offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
         x,y=[],[]
         for pos in positions:
             x.append(pos[0]+offset_position[0])
@@ -70,10 +69,13 @@ class BG_Fade(BG_Block):
         self.hitbox = [min(x),min(y),width,height]
 
     def update(self):
-        self.currentstate.update()
+        self.shader_state.update()
+
+    def draw_shader(self):#called before draw in group
+        self.shader_state.draw()
 
     def player_collision(self,player):
-        self.currentstate.handle_input('collide')
+        self.shader_state.handle_input('alpha')
 
 class Reflection(Staticentity):
     def __init__(self,pos,size,dir,game_objects, offset = 25):
@@ -1064,8 +1066,7 @@ class Rhoutta_encounter(Boss):
 #stuff
 class Camera_Stop(Staticentity):
     def __init__(self, game_objects, size, pos, dir, offset):
-        super().__init__(pos,game_objects,pygame.Surface(size))
-        self.sprites = {'idle': [self.image]}
+        super().__init__(pos, game_objects, pygame.Surface(size))
         self.hitbox = self.rect.inflate(0,0)
         self.size = size
         self.offset = int(offset)#number of tiles in the "negative direction" in which the stop should apply
@@ -1427,7 +1428,7 @@ class Sword(Melee):
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/',entity.game_objects)
         self.init()
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
+        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width*2,self.image.height*2)
         self.hitbox = self.rect.copy()
 
     def init(self):
@@ -1944,9 +1945,10 @@ class Amber_Droplet(Enemy_drop):
         self.sprites = Amber_Droplet.sprites
         self.sounds = Amber_Droplet.sounds
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.midbottom = pos
+        self.hitbox = self.rect.copy()
         self.true_pos = list(self.rect.topleft)
-        self.hitbox = pygame.Rect(pos[0],pos[1],8,8)
         self.description = 'moneyy'
 
     def player_collision(self,player):#when the player collides with this object
@@ -1963,9 +1965,10 @@ class Bone(Enemy_drop):
         self.sprites = Bone.sprites
         self.sounds = Bone.sounds
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.midbottom = pos
+        self.hitbox = self.rect.copy()
         self.true_pos = list(self.rect.topleft)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
     def use_item(self):
@@ -1986,9 +1989,10 @@ class Heal_item(Enemy_drop):
         self.sprites = Heal_item.sprites
         self.sounds = Heal_item.sounds
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.midbottom = pos
+        self.hitbox = self.rect.copy()
         self.true_pos = list(self.rect.topleft)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
         self.description = 'Use it to heal'
 
     def use_item(self):
@@ -3025,6 +3029,12 @@ class Sword_timer(Timer):
 class Jump_timer(Timer):#can be combined with shroomjump?
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
+
+    def activate(self):
+        if self in self.entity.timers: return#do not append if the timer is already inside
+        self.lifetime = self.duration
+        self.entity.timers.append(self)
+        self.entity.velocity[1] = C.jump_vel_player
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once

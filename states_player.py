@@ -52,7 +52,7 @@ class Idle_main(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_stand_pre')
+            self.enter_state('Jump_stand_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -223,7 +223,7 @@ class Run_post(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_stand_pre')
+            self.enter_state('Jump_stand_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':

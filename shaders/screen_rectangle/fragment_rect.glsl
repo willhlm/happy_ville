@@ -24,8 +24,10 @@ mat2 rotate(float _angle){
 
 void main(){
   norm_color = colour/vec4(255);
+  mat2 rotated = rotate(angle);//outside the loop
+  
   for(int i = 0; i < number_particles; i++){
-    float distance = sdBox(rotate(angle)*(fragmentTexCoord * size - centers[i]), scale * vec2(0.5,3));
+    float distance = sdBox(rotated*(fragmentTexCoord * size - centers[i]), scale * vec2(0.5,3));
     out_colour += norm_color * step(distance, 0);//change colour
   }
   fragout_colour = vec4(out_colour);
