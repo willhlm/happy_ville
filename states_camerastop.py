@@ -89,7 +89,7 @@ class Stop_bottom(Basic_states):
         self.sign = 1
 
     def determine_sign(self):
-        target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - (self.entity.game_objects.player.hitbox.centery-self.entity.game_objects.player.velocity[1])) - self.entity.game_objects.player.rect[3]*0.5
+        target = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - (self.entity.game_objects.player.hitbox.centery - self.entity.game_objects.player.velocity[1]*2)) - self.entity.game_objects.player.rect[3]*0.5
         if self.center[1] > target:
             self.sign = 1#from up to down
         else:

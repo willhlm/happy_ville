@@ -78,25 +78,40 @@ class BG_Fade(BG_Block):
         self.shader_state.handle_input('alpha')
 
 class Reflection(Staticentity):
-    def __init__(self,pos,size,dir,game_objects, offset = 25):
+    def __init__(self,pos,size,dir,game_objects, offset = 10):
         super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.game_objects = game_objects
-        self.size = size
         self.offset = offset
         self.squeeze = 0.75
-        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, self.size[0], self.size[1]/self.squeeze)
+        self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, size[0], size[1]/self.squeeze)
 
-        self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
-        self.shader = game_objects.shaders['blend_reflect']
+        self.empty = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.shader_noise = game_objects.shaders['noise_perlin']
+        self.shader_water = game_objects.shaders['water']
+        self.shader_noise['u_resolution'] = game_objects.game.window_size
+        self.shader_water['u_resolution'] = game_objects.game.window_size
+        self.time = 0
 
     def draw(self):
-        self.layer1.clear(0,0,0,1)
-        self.reflect_rect.topleft = [self.rect.topleft[0] - self.game_objects.camera.scroll[0],self.offset + self.game_objects.game.window_size[1] - self.rect.topleft[1] + self.game_objects.camera.scroll[1]]# the part to cut. the position indicates the part to cut of unflipped image
-        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
+        self.time += self.game_objects.game.dt*0.01
 
-        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.layer1)
-        self.shader['background'] = self.game_objects.game.screen.texture
-        self.game_objects.game.display.render(self.layer1.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, flip = [False, True], scale = [1, self.squeeze], shader = self.shader)#would maybe be more efficient to cut out teh interesting parts and apply the shader
+        #noise
+        self.shader_noise['u_time'] = self.time
+        self.shader_noise['scroll'] = self.game_objects.camera.scroll#this is working.
+        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.shader_noise)#make perlin noise texture
+
+        #water
+        self.shader_water['noise_texture'] = self.noise_layer.texture
+        self.shader_water['noise_texture2'] = self.noise_layer.texture
+        self.shader_water['TIME'] = self.time
+        self.shader_water['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
+        self.shader_water['scroll'] = self.game_objects.camera.scroll
+
+        #final rendering
+        self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.game_objects.camera.scroll[1]]# the part to cut
+        blit_pos = [-23 + self.rect.topleft[0] - self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera.scroll[1]]#what do we need the -23?...
+        self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.shader_water)#
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
