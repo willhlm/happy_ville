@@ -30,10 +30,10 @@ void main()
     for(int x=-int(blurRadius);x<=int(blurRadius);++x){
         for(int y=-int(blurRadius);y<=int(blurRadius);++y){
             vec2 offset=vec2(float(x),float(y))*texelSize;
-            float w=weights[x+int(blurRadius)]*weights[y+int(blurRadius)];
-            blurredColor+=texture(imageTexture,fragmentTexCoord+offset)*w;
+            float w = weights[x+int(blurRadius)]*weights[y+int(blurRadius)];
+            blurredColor += texture(imageTexture,fragmentTexCoord+offset)*w;
         }
     }
 
-    color=vec4(blurredColor.xyz,blurredColor.w);
+    color = vec4(blurredColor.xyz, blurredColor.w);
 }

@@ -27,6 +27,8 @@ class Idle(Shader_states):
             self.enter_state('Hurt')
         elif input == 'mix_colour':
             self.enter_state('Mix_colour')
+        elif input == 'alpha':
+            self.enter_state('Alpha')
 
 class Hurt(Shader_states):#turn white
     def __init__(self,entity):
@@ -77,3 +79,17 @@ class Mix_colour(Shader_states):#shade screen uses it
     def handle_input(self,input):
         if input == 'idle':
             self.enter_state('Idle')
+
+class Alpha(Shader_states):#fade screen uses it
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['alpha']
+        self.alpha = 255
+
+    def update(self):
+        self.alpha *= 0.9
+        if self.alpha < 5:
+            self.entity.kill()
+
+    def draw(self):
+        self.entity.shader['alpha'] = self.alpha

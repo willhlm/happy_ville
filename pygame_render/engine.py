@@ -1,5 +1,6 @@
 from importlib import resources
 import numbers
+import platform
 
 import moderngl
 from moderngl import Texture, Context, NEAREST
@@ -38,11 +39,11 @@ class RenderEngine:
         # Check that pygame has been initialized
         assert pygame.get_init(), 'Error: Pygame is not initialized. Please ensure you call pygame.init() before using the lighting engine.'
 
-        # Set OpenGL version to 3.3 core
-        #pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
-        #pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
-        #pygame.display.gl_set_attribute(
-            #pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
+        if platform.system() == 'Darwin' or platform.system() == 'Linux':#mac or linux
+            # Set OpenGL version to 3.3 core
+            pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
+            pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
+            pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
 
         # Configure pygame display
         pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF , vsync = 1) #| pygame.FULLSCREEN #|pygame.SCALED
@@ -58,14 +59,11 @@ class RenderEngine:
         self._ctx.screen
 
         # Read draw shader source files
-        vertex_src = resources.read_text(
-            'pygame_render', 'vertex.glsl')
-        fragment_src_draw = resources.read_text(
-            'pygame_render', 'fragment_draw.glsl')
+        vertex_src = resources.read_text('pygame_render', 'vertex.glsl')
+        fragment_src_draw = resources.read_text('pygame_render', 'fragment_draw.glsl')
 
         # Create draw shader program
-        prog_draw = self._ctx.program(vertex_shader=vertex_src,
-                                      fragment_shader=fragment_src_draw)
+        prog_draw = self._ctx.program(vertex_shader=vertex_src,fragment_shader=fragment_src_draw)
         self._shader_draw = Shader(prog_draw)
 
     @property

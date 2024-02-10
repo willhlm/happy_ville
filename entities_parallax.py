@@ -19,15 +19,19 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
             images = type(self).animations[tuple(self.parallax)]
             self.sprites = images
         else:#first time loading
-            self.sprites = Read_files.load_sprites_dict(path,self.game_objects)
-            #if self.parallax[0] != 1:#don't blur if oarallax = 1
-            #    self.blur(self.game_objects.map.blur_value(self.parallax))
+            self.sprites = Read_files.load_sprites_dict(path, self.game_objects)
+            if self.parallax[0] != 1:#don't blur if parallax = 1
+                self.blur()
             type(self).animations[tuple(self.parallax)] = self.sprites#save to memery for later use
 
-    def blur(self,blur_value):#
+    def blur(self):#
+        shader = self.game_objects.shaders['blur']
+        shader['blurRadius'] = 1/self.parallax[0]
         for state in self.sprites.keys():
             for frame, image in enumerate(self.sprites[state]):
-                self.sprites[state][frame] = pygame.transform.gaussian_blur(image, blur_value,repeat_edge_pixels=True)#box_blur
+                empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)
+                self.game_objects.game.display.render(self.sprites[state][frame],empty_layer,shader = shader)
+                self.sprites[state][frame] = empty_layer.texture
 
 class Trees(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
@@ -170,6 +174,25 @@ class Falling_rock_source(Layered_objects):
             self.game_objects.all_bgs._spritelayers[obj] = 0
             self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
             obj.add_internal(self.game_objects.all_bgs)
+
+class God_rays(Layered_objects):
+    def __init__(self, pos, game_objects, parallax, size, colour = (1.0, 0.9, 0.65, 0.6)):
+        super().__init__(pos, game_objects, parallax)
+        self.colour = colour
+        self.sprites = {'idle': [game_objects.game.display.make_layer(size).texture]}
+        self.image = self.sprites['idle'][0]
+        self.shader = game_objects.shaders['rays']
+        self.shader['resolution'] = self.game_objects.game.window_size
+        self.time = 0
+
+    def update(self):
+        self.group_distance()
+        self.time += self.game_objects.game.dt * 0.1
+
+    def draw_shader(self):
+        self.shader['time'] = self.time
+        self.shader['size'] = self.image.size
+        self.shader['color'] = self.colour
 
 #thigns that move: rains, fog and wather stuff as well?
 class Dynamic_layered_objects(Layered_objects):

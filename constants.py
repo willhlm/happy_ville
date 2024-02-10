@@ -1,7 +1,6 @@
 #game settings
 fps = 60#this is the screeen resfresh rate
 window_size = [640,360]
-#window_size = [560,320]
 player_center = [window_size[0]*0.5,window_size[1]*0.5]
 tile_size = 16
 

@@ -157,7 +157,7 @@ class Game_Objects():
         self.cosmetics.draw()
         self.reflections.draw()#do not need to send screen. Should be before fgs
         self.all_fgs.draw()
-        self.camera_blocks.draw()
+        #self.camera_blocks.draw()
         self.lights.draw()#should be last
 
         #temporaries draws. Shuold be removed
@@ -189,7 +189,7 @@ class Game_Objects():
             for light in self.lights.lights_sources:
                 pygame.draw.rect(image, (255,100,100), (int(light.hitbox[0]-self.camera.scroll[0]),int(light.hitbox[1]-self.camera.scroll[1]),light.hitbox[2],light.hitbox[3]),1)#draw hitbox
             for reflect in self.reflections:
-                pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),340-int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
                 pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
 
