@@ -52,7 +52,7 @@ class Idle_main(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_stand_pre')
+            self.enter_state('Jump_stand_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -99,7 +99,7 @@ class Walk_main(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_run_pre')
+            self.enter_state('Jump_run_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -146,7 +146,7 @@ class Run_pre(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_run_pre')
+            self.enter_state('Jump_run_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -190,7 +190,7 @@ class Run_main(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_run_pre')
+            self.enter_state('Jump_run_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -223,7 +223,7 @@ class Run_post(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_stand_pre')
+            self.enter_state('Jump_stand_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -293,6 +293,7 @@ class Jump_stand_main(Jump_stand_pre):
         super().__init__(entity)
 
     def update(self):
+        print('fefe')
         if self.entity.velocity[1] > 0.7:#when you start falling
             self.enter_state('Fall_stand_pre')
         elif self.entity.acceleration[0] != 0:#if you start moving
@@ -343,7 +344,8 @@ class Jump_run_main(Jump_run_pre):
         super().__init__(entity)
 
     def update(self):
-        if self.entity.velocity[1] > 0:
+        print(self.entity.velocity[1])
+        if self.entity.velocity[1] > 0.7:
             self.enter_state('Fall_run_pre')
         elif self.entity.acceleration[0] == 0:
             self.enter_state('Jump_stand_main')

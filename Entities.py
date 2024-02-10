@@ -3026,6 +3026,12 @@ class Jump_timer(Timer):#can be combined with shroomjump?
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
 
+    def activate(self):
+        if self in self.entity.timers: return#do not append if the timer is already inside
+        self.lifetime = self.duration
+        self.entity.timers.append(self)
+        self.entity.velocity[1] = C.jump_vel_player
+
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
             self.entity.ground = False

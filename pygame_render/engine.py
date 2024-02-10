@@ -39,10 +39,10 @@ class RenderEngine:
         assert pygame.get_init(), 'Error: Pygame is not initialized. Please ensure you call pygame.init() before using the lighting engine.'
 
         # Set OpenGL version to 3.3 core
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
-        pygame.display.gl_set_attribute(
-            pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
+        #pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
+        #pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
+        #pygame.display.gl_set_attribute(
+            #pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
 
         # Configure pygame display
         pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF , vsync = 1) #| pygame.FULLSCREEN #|pygame.SCALED
