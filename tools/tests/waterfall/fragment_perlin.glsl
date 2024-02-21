@@ -1,11 +1,11 @@
 #version 330 core
 
-//precision mediump float;
+precision mediump float;
 
 uniform float u_time;
 uniform vec2 u_resolution;
-uniform vec2 scale;
-uniform vec2 scroll;
+float scale = 100;
+uniform vec2 shift;
 
 out vec4 colour;
 in vec2 fragmentTexCoord;
@@ -29,12 +29,19 @@ vec2 quintic(vec2 p) {
 
 void main() {
   // part 0 - basic shader setup
-  vec2 uv = (fragmentTexCoord + scroll/u_resolution)/ u_resolution;
+  vec2 translateUV = shift / (u_resolution);
+  vec2 uv = (fragmentTexCoord + translateUV*100) / u_resolution;
+  //vec2 uv = (fragmentTexCoord.xy+shift) / u_resolution;
+
+  vec3 black = vec3(0.0);
+  vec3 white = vec3(1.0);
+  vec3 color = black;
 
   // part 1 - set up a grid of cells
   uv = uv * u_resolution * scale;
   vec2 gridId = floor(uv);
   vec2 gridUv = fract(uv);
+  color = vec3(gridUv, 0.0);
 
   // part 2.1 - start by finding the coords of grid corners
   vec2 bl = mod(gridId, scale);
@@ -69,7 +76,7 @@ void main() {
   float perlin = mix(b, t, gridUv.y);
 
   // part 4.3 - display perlin noise
-  vec3 color = vec3(perlin + 0.2);
+  color = vec3(perlin + 0.2);
 
   colour = vec4(color, 1.0);
 }

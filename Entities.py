@@ -17,7 +17,7 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         self.shader = None#which shader program to run
         self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
 
-    def group_distance(self):#instead of bound, could calculate distance from center.
+    def group_distance(self):
         blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1]]
         if blit_pos[0] < self.bounds[0] or blit_pos[0] > self.bounds[1] or blit_pos[1] < self.bounds[2] or blit_pos[1] > self.bounds[3]:
             self.remove(self.group)#remove from group
@@ -82,36 +82,39 @@ class Reflection(Staticentity):
         super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.game_objects = game_objects
         self.offset = offset
-        self.squeeze = 0.75
+        self.squeeze = 1#the water flickers if it is not 1
         self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, size[0], size[1]/self.squeeze)
 
         self.empty = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
-        self.shader_noise = game_objects.shaders['noise_perlin']
-        self.shader_water = game_objects.shaders['water']
-        self.shader_noise['u_resolution'] = game_objects.game.window_size
-        self.shader_water['u_resolution'] = game_objects.game.window_size
+        self.water_noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = game_objects.game.window_size
+        self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
         self.time = 0
 
-    def draw(self):
-        self.time += self.game_objects.game.dt*0.01
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.01
 
+    def draw(self):
         #noise
-        self.shader_noise['u_time'] = self.time
-        self.shader_noise['scroll'] = self.game_objects.camera.scroll#this is working.
-        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.shader_noise)#make perlin noise texture
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
+        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]#"standard"
+        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y
+        self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #water
-        self.shader_water['noise_texture'] = self.noise_layer.texture
-        self.shader_water['noise_texture2'] = self.noise_layer.texture
-        self.shader_water['TIME'] = self.time
-        self.shader_water['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
-        self.shader_water['scroll'] = self.game_objects.camera.scroll
+        self.game_objects.shaders['water']['noise_texture'] = self.noise_layer.texture
+        self.game_objects.shaders['water']['noise_texture2'] = self.water_noise_layer.texture
+        self.game_objects.shaders['water']['TIME'] = self.time
+        self.game_objects.shaders['water']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
 
         #final rendering
         self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.game_objects.camera.scroll[1]]# the part to cut
-        blit_pos = [-23 + self.rect.topleft[0] - self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera.scroll[1]]#what do we need the -23?...
-        self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.shader_water)#
+        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
+        self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water'])
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
