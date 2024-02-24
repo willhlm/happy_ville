@@ -1,4 +1,4 @@
-import pygame
+import pygame, math
 
 class Lights():
     def __init__(self, game_objects):
@@ -28,7 +28,6 @@ class Lights():
         platforms = self.game_objects.collisions.light_collision(light)#collision -> collision occures at coordinates as pe tiled position
         self.shaders['light']['num_rectangle'] = len(platforms)#update numbe rof rectanges
         self.points = self.points + self.get_points(platforms)
-        light.position = [light.position[0] - self.game_objects.camera.scroll[0],light.position[1] - self.game_objects.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
 
     def get_points(self,platforms):
         l = []
@@ -39,8 +38,8 @@ class Lights():
     def clear_lights(self):
         self.lights_sources = []
 
-    def add_light(self, position = [0,0], colour = (1,1,1), radius = 200):
-        self.lights_sources.append(Light(self.game_objects, position, colour, radius))
+    def add_light(self, target, colour = [1,1,1,1], radius = 200):
+        self.lights_sources.append(Light(self.game_objects, target, colour, radius))
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
     def remove_light(self, light):
@@ -66,14 +65,29 @@ class Lights():
         self.game_objects.game.display.render(self.layer3.texture, self.game_objects.game.screen, shader = self.shaders['blend'])
 
 class Light():#light source
-    def __init__(self,game_objects, position, colour, radius):
+    def __init__(self,game_objects, target, colour, radius):
         self.game_objects = game_objects
+        self.init_radius = radius
         self.radius = radius
         self.colour = colour
-        self.position = position
+        self.target = target
+        self.position = target.hitbox.center#the blit position
         self.hitbox = pygame.Rect(self.position[0]-self.radius,self.position[1]-self.radius,self.radius*2,2*self.radius)
         self.rect = self.hitbox.copy()
+        self.time = 0
+        self.updates = [self.set_pos]#self.fade#can decide what to do by appending things here
+
+    def fade(self, rate = 0.99):
+        self.colour[-1] *= rate
+
+    def pulsating(self):#
+        self.time += self.game_objects.game.dt*0.01
+        self.radius = 0.5 * self.init_radius * math.sin(self.time) + self.init_radius * 0.5
+
+    def set_pos(self):#I think all should do this
+        self.hitbox.center = self.target.hitbox.center
+        self.position = [self.target.hitbox.center[0] - self.game_objects.camera.scroll[0],self.target.hitbox.center[1] - self.game_objects.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
 
     def update(self):#for collision -> depends on type of light, if they e.g. move around
-        self.position = self.game_objects.player.hitbox.center#[self.positions[0] + self.game_objects.camera.scroll[0],self.positions[1] + self.game_objects.camera.scroll[1]]
-        self.hitbox.center = self.position
+        for update in self.updates:
+            update()

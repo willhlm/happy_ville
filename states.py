@@ -103,7 +103,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'village_ola_1','1')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -379,7 +379,7 @@ class Gameplay(Game_State):
 
     def handle_input(self,input):
         if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game,duration = 11)
+            new_game_state = Pause_gameplay(self.game, duration = 20)
             new_game_state.enter_state()
         elif input == 'death':#normal death
             self.game.game_objects.player.death()
@@ -469,23 +469,23 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             sys.exit()
 
 class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
-    def __init__(self,game, duration=10, amplitude = 20):
+    def __init__(self,game, duration=12, amplitude = 20):
         super().__init__(game)
         self.duration = duration
         self.amp = amplitude
         self.game.state_stack[-1].render()#make sure that everything is plotted before making a screen copy
 
     def update(self):
-        self.game.game_objects.cosmetics.update()
+        #self.game.game_objects.cosmetics.update()
         self.duration -= self.game.dt
-        self.amp = int(0.9*self.amp)
+        self.amp = 0.9*self.amp
         if self.duration < 0:
             self.exit_state()
 
     def render(self):
         super().render()
         #self.game.game_objects.cosmetics.draw()
-        pos = (random.randint(-self.amp,self.amp), random.randint(-self.amp,self.amp))
+        pos = (random.uniform(-self.amp,self.amp), random.uniform(-self.amp,self.amp))
         self.game.display.render(self.game.screen.texture, self.game.screen, position = pos)#shader render
 
 class Slow_motion_gameplay(Gameplay):

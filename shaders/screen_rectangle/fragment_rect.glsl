@@ -7,6 +7,8 @@ uniform vec2 scale;//set in init
 uniform float angle;//set in init
 
 uniform vec2 centers[20];//input
+uniform vec2 parallax;//input
+uniform vec2 scroll;//input
 
 vec4 norm_color;//store calc here
 vec4 out_colour = vec4(0,0,0,0);
@@ -25,9 +27,12 @@ mat2 rotate(float _angle){
 void main(){
   norm_color = colour/vec4(255);
   mat2 rotated = rotate(angle);//outside the loop
-  
+
   for(int i = 0; i < number_particles; i++){
-    float distance = sdBox(rotated*(fragmentTexCoord * size - centers[i]), scale * vec2(0.5,3));
+    vec2 shift = parallax*vec2(-scroll.x,scroll.y);
+    vec2 position = centers[i]+shift - size*floor((centers[i]+shift)/size);
+
+    float distance = sdBox(rotated*(fragmentTexCoord * size - position), scale * vec2(0.5,3));
     out_colour += norm_color * step(distance, 0);//change colour
   }
   fragout_colour = vec4(out_colour);

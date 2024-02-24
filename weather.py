@@ -57,9 +57,40 @@ class Wind(pygame.sprite.Sprite):
         self.rect.topleft = self.true_pos
 
 class Fog(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, game_objects, parallax, num):
         super().__init__()
-        pass
+        self.game_objects = game_objects
+        self.parallax = parallax
+
+        self.image = self.game_objects.game.display.make_layer((self.game_objects.game.window_size[0], self.game_objects.game.window_size[1])).texture
+        self.empty = self.game_objects.game.display.make_layer((self.game_objects.game.window_size[0], self.game_objects.game.window_size[1]))
+
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.true_pos = list(self.rect.topleft)
+
+        self.time = 0
+        self.shader = game_objects.shaders['fog']
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+        self.update_pos()
+
+    def draw_shader(self):
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.01
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = (640,360)
+        self.game_objects.shaders['noise_perlin']['scale'] = (10,10)
+        self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
+
+        self.game_objects.game.display.render(self.image, self.empty, shader = self.game_objects.shaders['noise_perlin'])
+        self.shader['noise'] = self.empty.texture
+        self.shader['TIME'] = self.time*0.001
+        self.shader['scroll'] = self.game_objects.camera.scroll
+        #self.shader['parallax'] = self.parallax
+        #self.image = self.empty.texture
+
+    def update_pos(self):#do not move the canvas
+        self.true_pos = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]#(0,0)
+        self.rect.topleft = self.true_pos.copy()
 
 class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
     def __init__(self,game_objects):
@@ -101,8 +132,6 @@ class Screen_particles(pygame.sprite.Sprite):#make a layer on screen, then use s
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.true_pos = list(self.rect.topleft)
 
-        self.temp_scroll = self.game_objects.camera.true_scroll.copy()
-        self.shift = [0,0]#an attribute so that first frame wil be [0,0]
         self.time = 0
 
     def set_parameters(self):#set stuff specific for particles
@@ -123,29 +152,14 @@ class Screen_particles(pygame.sprite.Sprite):#make a layer on screen, then use s
             self.update_centers(i)
             self.update_size(i)
 
-        self.shift = [self.temp_scroll[0] - self.game_objects.camera.true_scroll[0],self.temp_scroll[1] - self.game_objects.camera.true_scroll[1]]#shift in pixels
-        self.temp_scroll = self.game_objects.camera.true_scroll.copy()
-
     def update_vel(self, i):
         pass
 
     def update_centers(self, i):
-        new_pos = [self.centers[i][0] + self.shift[0] + self.game_objects.game.dt*self.velocity[i][0]*self.parallax[0], self.centers[i][1] - self.shift[1] - self.game_objects.game.dt*self.velocity[i][1]*self.parallax[1]]
-        self.centers[i] = self.boundary(new_pos)
+        self.centers[i] = [self.centers[i][0] + self.game_objects.game.dt*self.velocity[i][0]*self.parallax[0], self.centers[i][1] - self.game_objects.game.dt*self.velocity[i][1]*self.parallax[1]]
 
     def update_size(self, i):
         pass
-
-    def boundary(self, new_pos):#continiouse falling
-        if new_pos[0] < -self.canvas_size:
-            new_pos[0] += self.image.width + self.canvas_size
-        elif new_pos[0] > self.image.width + self.canvas_size:
-            new_pos[0] -= self.image.width + self.canvas_size
-        elif new_pos[1] > self.image.height + self.canvas_size:#if on the lower side of screen.
-            new_pos[1] -= self.image.height + self.canvas_size
-        elif new_pos[1] < -self.canvas_size:#if on the higher side of screen.
-            new_pos[1] += self.image.height + self.canvas_size
-        return new_pos
 
 class Screen_vertical_circles(Screen_particles):
     def __init__(self, game_objects, parallax, number_particles):
@@ -168,18 +182,16 @@ class Screen_vertical_circles(Screen_particles):
             self.velocity.append([0,0])
 
     def draw_shader(self):
+        self.shader['parallax'] = self.parallax
         self.shader['centers'] = self.centers
         self.shader['radius'] = self.radius
+        self.shader['scroll'] = self.game_objects.camera.scroll
 
     def update_vel(self, i):#how it should move
         self.velocity[i]  = [0.5*math.sin(self.time*0.01 + self.phase[i]),-1]
 
     def update_size(self, i):
         self.radius[i] = self.canvas_size * math.sin(self.time*0.01 + self.phase[i]) + self.canvas_size*0.5
-        if self.radius[i] < 1:#if circle is small
-            x = random.uniform(0, self.game_objects.game.window_size[0])
-            y = random.uniform(0, self.game_objects.game.window_size[1])
-            self.centers[i] = [x,y]
 
 class Screen_circles(Screen_vertical_circles):
     def __init__(self, game_objects, parallax, number_particles):
@@ -187,6 +199,13 @@ class Screen_circles(Screen_vertical_circles):
 
     def update_vel(self, i):#how it should move
         pass
+
+    def update_size(self,i):
+        super().update_size(i)
+        if self.radius[i] < 0.1:#if circle is small
+            x = random.uniform(0, self.game_objects.game.window_size[0])
+            y = random.uniform(0, self.game_objects.game.window_size[1])
+            self.centers[i] = [x,y]
 
 class Screen_fireflies(Screen_vertical_circles):
     def __init__(self, game_objects, parallax, number_particles):
@@ -218,7 +237,9 @@ class Screen_rain(Screen_particles):
             self.velocity.append([0,0])
 
     def draw_shader(self):
+        self.shader['parallax'] = self.parallax
         self.shader['centers'] = self.centers
+        self.shader['scroll'] = self.game_objects.camera.scroll
 
     def update_vel(self, i):#how it should move
         self.velocity[i]  = [-1, 5]

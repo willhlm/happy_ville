@@ -8,7 +8,7 @@ uniform vec2 resolution;
 
 uniform vec2 lightPositions[3]; // Assuming up to 3 light sources
 uniform float lightRadii[3];     // Corresponding radius for each light source
-uniform vec3 colour[3];
+uniform vec4 colour[3];
 uniform vec4 background;//texture(imageTexture, fragmentTexCoord); // Get background color
 
 uniform vec2 rectangleCorners[16]; // x/4 is the number of rectangles
@@ -89,11 +89,11 @@ void main() {
             // light intensity
             float lightIntensity = 1.0 - distanceToLight / lightRadius;
 
-            vec3 norm_colour = colour[l]/1;//normalise
+            vec4 norm_colour = colour[l]/1;//normalise
 
             // add light together
             float fade = smoothstep(0.0, 0.2, lightIntensity);
-            backgroundColor += vec4(norm_colour * lightIntensity * fade, lightIntensity * fade);
+            backgroundColor += vec4(norm_colour.xyz * lightIntensity * fade*norm_colour.w,norm_colour.w*lightIntensity * fade);
         }
     }
     // smooth transition for the combined light intensities

@@ -943,6 +943,12 @@
                          "height":223,
                          "id":1018,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#96ffc800"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,

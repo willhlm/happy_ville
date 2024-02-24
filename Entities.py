@@ -2313,11 +2313,15 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
 class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/GFX/slash/',game_objects)
+        self.sprites = Slash.sprites
         state = str(random.randint(1, 3))
         self.currentstate.set_animation_name('slash_' + state)
         self.image = self.sprites['slash_' + state][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.center = pos
+
+    def pool(game_objects):#all things that should be saved in object pool
+        Slash.sprites = Read_files.load_sprites_dict('Sprites/GFX/slash/',game_objects)
 
     def reset_timer(self):
         self.kill()

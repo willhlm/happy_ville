@@ -11,10 +11,8 @@ out vec4 color;
 
 void main()
 {
-    vec4 lightval=texture(imageTexture,fragmentTexCoord);
-    vec4 background=texture(background,fragmentTexCoord);
-    vec4 norm_ambient = ambient/1;
-    color.xyz = background.xyz*(norm_ambient.xyz+lightval.xyz);
-    color.w = 2*background.w*(norm_ambient.w*lightval.w);//2 is needed to remove the boundaries
-
+    vec4 lightval = texture(imageTexture,fragmentTexCoord);
+    vec4 background=texture(background,fragmentTexCoord);//screen
+    color.xyz =(lightval.xyz+ambient.xyz)*(background.xyz * ambient.w + 1 - ambient.w);//background.xyz when ambient = 1, 1 when ambient = 0
+    color.w = background.w*lightval.w;
 }
