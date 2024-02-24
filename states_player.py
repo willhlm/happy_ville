@@ -115,7 +115,7 @@ class Walk_main(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if abs(self.entity.dir[1])<0.8:
-                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
+                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
@@ -206,7 +206,7 @@ class Run_main(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if abs(self.entity.dir[1])<0.8:
-                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
+                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
@@ -885,6 +885,10 @@ class Sword_stand1_main(Sword):
         self.entity.sword.dir[0] = self.entity.dir[0]
         self.entity.sword.currentstate.dir[0] = self.entity.dir[0]
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+
+    def update(self):
+        super().update()
+        self.entity.velocity[0] *= 0.8
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:

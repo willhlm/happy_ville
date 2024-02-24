@@ -89,7 +89,7 @@ class Reflection(Staticentity):
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.water_noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.game_objects.shaders['noise_perlin']['u_resolution'] = game_objects.game.window_size
-        self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
+        #self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
         self.time = 0
 
     def update(self):
