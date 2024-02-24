@@ -18,6 +18,12 @@
   <image width="112" height="176" source="../../../Sprites/animations/cocoon_boss/idle/idle.png"/>
  </tile>
  <tile id="9">
+  <properties>
+   <property name="angle" value=""/>
+   <property name="colour" type="color" value=""/>
+   <property name="falloff" value=""/>
+   <property name="position" value=""/>
+  </properties>
   <image width="16" height="16" source="../../../Sprites/animations/god_rays/idle/Sprite-0001.png"/>
  </tile>
 </tileset>

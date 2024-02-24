@@ -9,11 +9,12 @@ uniform vec2 resolution;
 uniform vec2 size;
 uniform vec4 color;
 
-uniform float angle = -0.2 * 3.141592;
-uniform float position = 0;
-uniform float spread = 0.3;
+uniform float angle = -0.2;//input
+uniform vec2 position = vec2(0,0);//input
+uniform vec2 falloff = vec2(0,0.3); //input left fade (use when roated) and bottom fade
+
+uniform float spread = 0.3;//
 uniform float cutoff = 0.1; // side somehow
-uniform float falloff = 0.2; // bottom fade
 uniform float edge_fade = 0.3; // side fade
 uniform float thickness = 300; // thickness
 
@@ -74,7 +75,7 @@ void main()
     // Rotate, skew and move the pygame_positions
     vec2 pixelCoord = vec2(fragmentTexCoord.x * resolution.x*scale , (1.0 - fragmentTexCoord.y) * resolution.y);
 
-    vec2 transformed_pygame_position = (rotate(angle) * (pixelCoord - position)) / (thickness*(1-spread) + pixelCoord.y * spread);
+    vec2 transformed_pygame_position = (rotate(angle*3.141592) * (pixelCoord - position)) / (thickness*(1-spread) + pixelCoord.y * spread);
 
     // Animate the ray according to the new transformed pygame_positions
     vec2 ray1 = vec2(transformed_pygame_position.x * ray1_density + sin(time * 0.1 * speed) * (ray1_density * 0.2) + seed, transformed_pygame_position.y);
@@ -98,7 +99,9 @@ void main()
     }
 
     // Fade out edges
-    rays *= smoothstep(0.0, falloff, 1 - pixelCoord.y / resolution.y);                // Bottom
+    rays *= smoothstep(0.0, falloff.y, 1 - pixelCoord.y / resolution.y);                // Bottom
+    rays *= smoothstep(0.0, falloff.x, pixelCoord.x / resolution.x);                // left, use when roateded
+
     rays *= smoothstep(0.0 + cutoff, edge_fade + cutoff, transformed_pygame_position.x); // Left
     rays *= smoothstep(0.0 + cutoff, edge_fade + cutoff, 1.0 - transformed_pygame_position.x); // Right
 

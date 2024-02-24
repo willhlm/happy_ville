@@ -176,20 +176,26 @@ class Falling_rock_source(Layered_objects):
             obj.add_internal(self.game_objects.all_bgs)
 
 class God_rays(Layered_objects):
-    def __init__(self, pos, game_objects, parallax, size, colour = (1.0, 0.9, 0.65, 0.6)):
+    def __init__(self, pos, game_objects, parallax, size, **properties):
         super().__init__(pos, game_objects, parallax)
-        self.colour = colour
         self.sprites = {'idle': [game_objects.game.display.make_layer(size).texture]}
         self.image = self.sprites['idle'][0]
         self.shader = game_objects.shaders['rays']
         self.shader['resolution'] = self.game_objects.game.window_size
         self.time = 0
+        self.colour = properties['values'].get('colour',(1.0, 0.9, 0.65, 0.6))#colour
+        self.angle = properties['values'].get('angle',-0.2)#radians
+        self.position = properties['values'].get('position',(0,0))#in pixels
+        self.falloff = properties['values'].get('falloff',(0,0.3))#between 0 and 1
 
     def update(self):
         self.group_distance()
         self.time += self.game_objects.game.dt * 0.1
 
     def draw_shader(self):
+        self.shader['angle'] = self.angle
+        self.shader['position'] = self.position
+        self.shader['falloff'] = self.falloff
         self.shader['time'] = self.time
         self.shader['size'] = self.image.size
         self.shader['color'] = self.colour
