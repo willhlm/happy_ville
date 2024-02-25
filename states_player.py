@@ -99,7 +99,7 @@ class Walk_main(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_run_pre')
+            self.enter_state('Jump_run_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -115,7 +115,7 @@ class Walk_main(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if abs(self.entity.dir[1])<0.8:
-                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
+                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
@@ -146,7 +146,7 @@ class Run_pre(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_run_pre')
+            self.enter_state('Jump_run_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -190,7 +190,7 @@ class Run_main(Player_states):
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='a':
-            self.enter_state('Jump_run_pre')
+            self.enter_state('Jump_run_main')
         elif input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
@@ -206,7 +206,7 @@ class Run_main(Player_states):
     def swing_sword(self):
         if not self.entity.sword_swinging:
             if abs(self.entity.dir[1])<0.8:
-                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
+                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
@@ -293,6 +293,7 @@ class Jump_stand_main(Jump_stand_pre):
         super().__init__(entity)
 
     def update(self):
+        print('fefe')
         if self.entity.velocity[1] > 0.7:#when you start falling
             self.enter_state('Fall_stand_pre')
         elif self.entity.acceleration[0] != 0:#if you start moving
@@ -343,7 +344,8 @@ class Jump_run_main(Jump_run_pre):
         super().__init__(entity)
 
     def update(self):
-        if self.entity.velocity[1] > 0:
+        print(self.entity.velocity[1])
+        if self.entity.velocity[1] > 0.7:
             self.enter_state('Fall_run_pre')
         elif self.entity.acceleration[0] == 0:
             self.enter_state('Jump_stand_main')
@@ -883,6 +885,10 @@ class Sword_stand1_main(Sword):
         self.entity.sword.dir[0] = self.entity.dir[0]
         self.entity.sword.currentstate.dir[0] = self.entity.dir[0]
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+
+    def update(self):
+        super().update()
+        self.entity.velocity[0] *= 0.8
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
