@@ -1351,6 +1351,34 @@
                          "width":576,
                          "x":4800,
                          "y":1824
+                        }, 
+                        {
+                         "gid":4115,
+                         "height":192,
+                         "id":1858,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"angle",
+                                 "type":"string",
+                                 "value":"86"
+                                }, 
+                                {
+                                 "name":"falloff",
+                                 "type":"string",
+                                 "value":"0.6,0.3"
+                                }, 
+                                {
+                                 "name":"position",
+                                 "type":"string",
+                                 "value":"0,200"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":3632,
+                         "y":2415
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1366,7 +1394,7 @@
          "y":0
         }],
  "nextlayerid":51,
- "nextobjectid":1856,
+ "nextobjectid":1859,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

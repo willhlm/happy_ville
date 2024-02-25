@@ -37,7 +37,7 @@ class Level():
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
         if level_name == 'light_forest_cave':
             self.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
-            self.game_objects.lights.add_light(self.game_objects.player, colour = (225/255,225/255,225/255,255/255))
+            self.game_objects.lights.add_light(self.game_objects.player, colour = (200/255,200/255,200/255,200/255))
         elif self.level_name == 'rhoutta_encounter_1':#if it is a new game file
             if self.spawn != '1': return
             new_state = states.New_game(self.game_objects.game)
@@ -252,6 +252,27 @@ class Level():
             #    else:
             #        entities_parallax.create_leaves(information,parallax,self.game_objects.all_bgs)
 
+            elif id  == 18:#god rays
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'angle':
+                        prop['angle'] = 3.141592*float(property['value'])/180
+                    elif property['name'] == 'falloff':
+                        falloff = property['value'].split(',')
+                        prop['falloff'] = [float(falloff[0]),float(falloff[1])]
+                    elif property['name'] == 'position':
+                        position = property['value'].split(',')
+                        prop['position'] = [float(position[0]),float(position[1])]
+                    elif property['name'] == 'colour':
+                         colour= list(pygame.Color(property['value']))
+                         prop['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
+
+                god_rays = entities_parallax.God_rays(object_position, self.game_objects, parallax, object_size, values = prop)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(god_rays)
+                else:
+                    self.game_objects.all_bgs.add(god_rays)
+
             elif id == 19:#trigger
                 for property in properties:
                     if property['name'] == 'event':
@@ -428,24 +449,8 @@ class Level():
                 self.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.game_objects.interactables.add(new_cocoon)
 
-            elif id == 9:#god rays
-                prop = {}
-                for property in properties:
-                    if property['name'] == 'angle':
-                        prop['angle'] = 3.141592*property['value']/180
-                    elif property['name'] == 'falloff':
-                        prop['falloff'] = property['value']
-                    elif property['name'] == 'position':
-                        prop['position'] = property['value']
-                    elif property['name'] == 'colour':
-                         colour= list(pygame.Color(property['value']))
-                         prop['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
-
-                god_rays = entities_parallax.God_rays(object_position, self.game_objects, parallax, object_size, values = prop)
-                if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(god_rays)
-                else:
-                    self.game_objects.all_bgs.add(god_rays)
+            elif id == 9:
+                pass
 
     def load_light_forest_cave_objects(self,data,parallax,offset):
         for obj in data['objects']:

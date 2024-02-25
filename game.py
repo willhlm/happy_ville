@@ -14,6 +14,7 @@ class Game():
 
         self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])
         self.screen = self.display.make_layer(self.window_size)
+        self.test = self.display.make_layer(self.window_size)
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -26,7 +27,7 @@ class Game():
         self.RENDER_HITBOX_FLAG = True
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP,pygame.JOYAXISMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
         pygame.event.set_blocked([pygame.TEXTINPUT])#for some reason, there is a text input here and there. So, blocking it
-
+        self.time = 0
     def event_loop(self):
         for event in pygame.event.get():
             if event.type==pygame.QUIT:
@@ -52,7 +53,11 @@ class Game():
 
             #render
             self.state_stack[-1].render()#render onto self.screeen
-            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
+            self.time+= self.dt
+            self.game_objects.shaders['grain']['time'] = self.time
+            self.display.render(self.screen.texture, self.test, shader = self.game_objects.shaders['grain'])#shader render
+
+            self.display.render(self.test.texture, self.display.screen, scale = self.scale)#shader render
 
             #update display
             pygame.display.flip()

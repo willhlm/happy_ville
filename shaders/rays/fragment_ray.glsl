@@ -11,7 +11,7 @@ uniform vec4 color;
 
 uniform float angle = -0.2;//input
 uniform vec2 position = vec2(0,0);//input
-uniform vec2 falloff = vec2(0,0.3); //input left fade (use when roated) and bottom fade
+uniform vec2 falloff = vec2(0,0.3); //input, left fade (use when roated) and bottom fade
 
 uniform float spread = 0.3;//
 uniform float cutoff = 0.1; // side somehow

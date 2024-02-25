@@ -25,8 +25,9 @@ class Lights():
             self.colour.append(light.colour)
 
     def list_points(self, light):
+        if not light.interact: return
         platforms = self.game_objects.collisions.light_collision(light)#collision -> collision occures at coordinates as pe tiled position
-        self.shaders['light']['num_rectangle'] = len(platforms)#update numbe rof rectanges
+        self.shaders['light']['num_rectangle'] = len(platforms)#update numbe rof rectanges -> works if it is only one source
         self.points = self.points + self.get_points(platforms)
 
     def get_points(self,platforms):
@@ -65,7 +66,7 @@ class Lights():
         self.game_objects.game.display.render(self.layer3.texture, self.game_objects.game.screen, shader = self.shaders['blend'])
 
 class Light():#light source
-    def __init__(self,game_objects, target, colour, radius):
+    def __init__(self, game_objects, target, colour, radius, interact = False):
         self.game_objects = game_objects
         self.init_radius = radius
         self.radius = radius
@@ -75,7 +76,8 @@ class Light():#light source
         self.hitbox = pygame.Rect(self.position[0]-self.radius,self.position[1]-self.radius,self.radius*2,2*self.radius)
         self.rect = self.hitbox.copy()
         self.time = 0
-        self.updates = [self.set_pos]#self.fade#can decide what to do by appending things here
+        self.updates = [self.set_pos]#self.fade, self.pulsating#can decide what to do by appending things here
+        self.interact = interact#if it should interact with platforms
 
     def fade(self, rate = 0.99):
         self.colour[-1] *= rate
@@ -88,6 +90,6 @@ class Light():#light source
         self.hitbox.center = self.target.hitbox.center
         self.position = [self.target.hitbox.center[0] - self.game_objects.camera.scroll[0],self.target.hitbox.center[1] - self.game_objects.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
 
-    def update(self):#for collision -> depends on type of light, if they e.g. move around
+    def update(self):#if they e.g. fade
         for update in self.updates:
             update()

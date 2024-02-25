@@ -99,7 +99,7 @@ class Reflection(Staticentity):
         #noise
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
-        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]#"standard"
+        self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y

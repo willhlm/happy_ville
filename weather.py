@@ -8,8 +8,8 @@ class Weather():
         self.wind = Wind(self)
         self.currentstate = states_weather.Idle(self)
 
-    def create_particles(self,type,parallax,group,number_particles = 20):#called from map loader
-        group.add(Screen_rain(self.game_objects,parallax,number_particles))
+    def create_particles(self,type,parallax,group,number_particles = 10):#called from map loader
+        group.add(Screen_circles(self.game_objects, parallax, number_particles))
 
     def update(self):
         self.currentstate.update()#bloew the wind from time to time
@@ -76,17 +76,15 @@ class Fog(pygame.sprite.Sprite):
         self.update_pos()
 
     def draw_shader(self):
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.01
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.005
         self.game_objects.shaders['noise_perlin']['u_resolution'] = (640,360)
         self.game_objects.shaders['noise_perlin']['scale'] = (10,10)
-        self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
+        self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]
 
         self.game_objects.game.display.render(self.image, self.empty, shader = self.game_objects.shaders['noise_perlin'])
         self.shader['noise'] = self.empty.texture
         self.shader['TIME'] = self.time*0.001
-        self.shader['scroll'] = self.game_objects.camera.scroll
-        #self.shader['parallax'] = self.parallax
-        #self.image = self.empty.texture
+        self.shader['scroll'] = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]
 
     def update_pos(self):#do not move the canvas
         self.true_pos = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]#(0,0)
@@ -171,7 +169,7 @@ class Screen_vertical_circles(Screen_particles):
         self.shader['colour'] = (255,255,255,255)
 
     def set_parameters(self):#parameters needed for the shader
-        self.canvas_size = 10*self.parallax[0]#size of particle
+        self.canvas_size = 5 * self.parallax[0]#size of particle
         self.centers, self.radius, self.phase, self.velocity = [], [], [], []#make a list of stuff keep info as "attributes"
         for i in range(0, self.number_particles):
             x = random.uniform(-self.canvas_size, self.game_objects.game.window_size[0] + self.canvas_size)
