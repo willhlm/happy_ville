@@ -6,7 +6,7 @@ uniform sampler2D imageTexture;// texture in location 0
 out vec4 COLOR;
 uniform vec2 SCREEN_UV = vec2 (640,360);
 uniform float grain_amount = 0.02; // Adjust the amount of grain
-uniform float grain_size = 1; // Adjust the size of the grain
+uniform float grain_size = 0.5; // Adjust the size of the grain
 uniform float time;
 
 void main() {
