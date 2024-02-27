@@ -949,6 +949,7 @@ class Sword_down_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime=10
+        self.entity.sword.currentstate.set_animation_name('slash_down')
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
         self.entity.sword.dir[1]=-1
 

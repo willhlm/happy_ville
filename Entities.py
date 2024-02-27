@@ -1498,10 +1498,13 @@ class Aila_sword(Sword):
 
     def update_hitbox(self):
         super().update_hitbox()
-        if self.dir[0] > 0:
-            self.rect.center = [self.hitbox.center[0] - 28, self.hitbox.center[1] - 14]
-        else:
-            self.rect.center = [self.hitbox.center[0] + 28, self.hitbox.center[1] - 14]
+        if self.state in ['slash_1', 'slash_2']:
+            if self.dir[0] > 0:
+                self.rect.center = [self.hitbox.center[0] - 28, self.hitbox.center[1] - 14]
+            else:
+                self.rect.center = [self.hitbox.center[0] + 28, self.hitbox.center[1] - 14]
+        elif self.state == 'slash_down':
+            self.rect.center = [self.hitbox.center[0] + 30, self.hitbox.center[1] - 14]
 
     def init(self):
         self.dmg = 1
