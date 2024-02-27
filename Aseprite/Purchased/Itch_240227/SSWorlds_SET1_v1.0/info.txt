@@ -1,0 +1,12 @@
+animated objects sprite sheet block size:
+
+tree_bright1 and dark - 256x320
+tree_bright2 and dark - 192x288
+tree_bright3 and dark - 128x192
+tree_bright4 and dark - 64x128
+
+grass - 32x32
+
+plant - 32x32
+
+water - 32x32

@@ -1,0 +1,85 @@
+15 different rock piles!
+
+
+Every rock pile comes in multiple colors and two different sizes!
+
+
+Colors included: AZURE, BEIGE, MOSSY, ORANGE, SILVER, WHITE
+
+Spritesheet is included as well.
+
+
+Rock pile sizes:
+
+Pile 1: 
+Big 62x34
+Small 41x20
+
+Pile 2: 
+Big 76x40
+Small 52x26
+
+Pile 3: 
+Big 50x39
+Small 32x25
+
+Pile 4: 
+Big 67x39
+Small 40x23
+
+Pile 5: 
+Big 52x30
+Small 37x21
+
+Pile 6: 
+Big 74x41
+Small 46x25
+
+Pile 7: 
+Big 70x38
+Small 39x21
+
+Pile 8: 
+Big 60x40
+Small 33x22
+
+Pile 9: 
+Big 50x29
+Small 35x20
+
+Pile 10: 
+Big 58x33
+Small 35x19
+
+Pile 11: 
+Big 47x29
+Small 34x20
+
+Pile 12: 
+Big 77x33
+Small 56x22
+
+
+Pile 13: 
+Big 42x25
+Small 34x21
+
+
+Pile 14: 
+Big 63x33
+Small 55x29
+
+Pile 15: 
+Big 53x27
+Small 37x21
+
+
+
+
+
+
+
+
+
+
+

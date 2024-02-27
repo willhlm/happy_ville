@@ -1,0 +1,18 @@
+Animated objects sprite sheet block size:
+
+NPC:
+
+Blacksmith (first 5 frames idle, next frames working) - 64x64
+Gravedigger (first 6 frames idle, next frames working) - 64x64
+Magic_Vendor - 32x64
+Meat_Vendor (first 5 frames idle, next frames working) - 64x64
+Tavern_Bartender (first 7 frames idle1, next frames idle2) - 32x64
+Tavern_Guest1,2,3 - 32x64
+Tavern_Musician - 32x64
+Traveling_Merchant - 64x64
+Vendor - 32x64
+
+Animated objects:
+
+Light1 - 32x32
+Light2 - 32x64

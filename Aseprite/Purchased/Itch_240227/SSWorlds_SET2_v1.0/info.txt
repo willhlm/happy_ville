@@ -1,0 +1,5 @@
+animated objects sprite sheet block size:
+
+grass - 32x32
+
+waterfall (first 6 frames upper waterfall next closing waterfall) - 32x32
