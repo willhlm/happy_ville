@@ -2225,7 +2225,7 @@ class Boss_HP(Omamori):
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = game_objects.object_pool.objects['Water_running_particles'].sprites
+        self.sprites = Water_running_particles.sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -2233,15 +2233,13 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
     def reset_timer(self):
         self.kill()
 
-    @classmethod#called from object pool
-    def pool(cls, game_objects):#all things that should be saved in object pool
-        cls.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/water/', game_objects)
-        return cls
+    def pool(game_objects):#all things that should be saved in object pool
+        Water_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/water/', game_objects)
 
 class Grass_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = game_objects.object_pool.objects['Grass_running_particles'].sprites
+        self.sprites = Grass_running_particles.sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -2250,15 +2248,13 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
     def reset_timer(self):
         self.kill()
 
-    @classmethod#called from object pool
-    def pool(cls, game_objects):#all things that should be saved in object pool
-        cls.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/grass/', game_objects)
-        return cls
+    def pool(game_objects):#all things that should be saved in object pool
+        Grass_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/grass/', game_objects)
 
 class Dust_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = game_objects.object_pool.objects['Dust_running_particles'].sprites
+        self.sprites = Dust_running_particles.sprites
         self.currentstate = states_basic.Death(self)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -2267,10 +2263,8 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
     def reset_timer(self):
         self.kill()
 
-    @classmethod#called from object pool
-    def pool(cls, game_objects):#all things that should be saved in object pool
-        cls.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/dust/', game_objects)
-        return cls
+    def pool(game_objects):#all things that should be saved in object pool
+        Dust_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/dust/', game_objects)
 
 class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def __init__(self,pos,game_objects):

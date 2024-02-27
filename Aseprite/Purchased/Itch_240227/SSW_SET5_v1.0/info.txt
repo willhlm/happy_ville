@@ -1,0 +1,6 @@
+animated objects sprite sheet block size:
+
+grass - 32x32
+light1 - 32x32
+light2 - 64x32
+swordlight - 32x32

@@ -1,0 +1,18 @@
+Idle (Blink)
+Look (Intro)
+Look (Blink)
+Look (Back)
+Run
+Wall Slide
+Dash
+Wall Grab
+Jump
+Fall
+Roll
+Recover Balance
+Attack 1
+Attack 2
+Attack 3
+Turn
+Transform (Before)
+Transform (After)

@@ -1,0 +1,9 @@
+animated objects sprite sheet block size:
+
+An_liane - 32x64
+An_liane2 - 32x96
+tree1 - 32x64
+tree2 - 64x64
+tree3 - 64x96
+tree4 - 64x96
+tree5 - 64x96

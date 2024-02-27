@@ -96,7 +96,7 @@ class Collision_oneway_up(Platform):
         else:#going up
             pass
 
-class Collision_right_angle(Platform):
+class Collision_right_angle(Platform):#ramp
     def __init__(self, pos, points, go_through = True):
         self.define_values(pos, points)
         super().__init__([self.new_pos[0],self.new_pos[1]-self.size[1]],self.size)
@@ -208,7 +208,7 @@ class Collision_right_angle(Platform):
             entity.down_collision(self.target)
             entity.update_rect_y()
 
-class Collision_dmg(Platform):
+class Collision_dmg(Platform):#"spikes"
     def __init__(self,pos,size):
         super().__init__(pos,size)
         self.dmg = 1
