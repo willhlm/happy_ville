@@ -6,7 +6,7 @@ uniform sampler2D imageTexture;// texture in location 0
 out vec4 COLOR;
 
 uniform float vignette_intensity = 1;
-uniform float vignette_opacity = 0.15;
+uniform float vignette_opacity = 0.1;
 uniform vec4 vignette_rgb = vec4(0.0, 0.0, 0.0, 1);
 
 float vignette(vec2 uv){
