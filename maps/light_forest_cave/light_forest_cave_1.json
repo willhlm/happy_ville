@@ -128,8 +128,8 @@
                  "y":0
                 }],
          "name":"bg7",
-         "offsetx":-1000,
-         "offsety":-1000,
+         "offsetx":-1072,
+         "offsety":-944,
          "opacity":1,
          "parallaxx":0.4,
          "parallaxy":0.4,
@@ -489,7 +489,19 @@
                  "draworder":"topdown",
                  "id":22,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":39201,
+                         "height":48,
+                         "id":1866,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":4112,
+                         "y":1680
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1379,6 +1391,85 @@
                          "width":160,
                          "x":3632,
                          "y":2415
+                        }, 
+                        {
+                         "gid":4122,
+                         "height":16,
+                         "id":1859,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffaf64"
+                                }, 
+                                {
+                                 "name":"flicker",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"100"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4128,
+                         "y":1680
+                        }, 
+                        {
+                         "gid":4122,
+                         "height":16,
+                         "id":1864,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"flicker",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"50"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4128,
+                         "y":1680
+                        }, 
+                        {
+                         "gid":4122,
+                         "height":16,
+                         "id":1865,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffaf64"
+                                }, 
+                                {
+                                 "name":"flicker",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"radius",
+                                 "type":"string",
+                                 "value":"200"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4128,
+                         "y":1680
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1394,7 +1485,7 @@
          "y":0
         }],
  "nextlayerid":51,
- "nextobjectid":1859,
+ "nextobjectid":1867,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1485,6 +1576,10 @@
         {
          "firstgid":39192,
          "source":"objects\/objects.tsx"
+        }, 
+        {
+         "firstgid":39196,
+         "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
  "type":"map",

@@ -1,4 +1,4 @@
-import pygame, math
+import pygame, math, random
 
 class Lights():
     def __init__(self, game_objects):
@@ -39,8 +39,8 @@ class Lights():
     def clear_lights(self):
         self.lights_sources = []
 
-    def add_light(self, target, colour = [1,1,1,1], radius = 200):
-        self.lights_sources.append(Light(self.game_objects, target, colour, radius))
+    def add_light(self, target, **properties):
+        self.lights_sources.append(Light(self.game_objects, target, **properties))
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
     def remove_light(self, light):
@@ -48,10 +48,6 @@ class Lights():
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
     def draw(self):
-        self.layer1.clear(0,0,0,1)
-        self.layer2.clear(0,0,0,1)
-        self.layer3.clear(0,0,0,1)
-
         self.shaders['light']['rectangleCorners'] = self.points
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
@@ -66,18 +62,29 @@ class Lights():
         self.game_objects.game.display.render(self.layer3.texture, self.game_objects.game.screen, shader = self.shaders['blend'])
 
 class Light():#light source
-    def __init__(self, game_objects, target, colour, radius, interact = False):
+    def __init__(self, game_objects, target, **properties):
         self.game_objects = game_objects
-        self.init_radius = radius
-        self.radius = radius
-        self.colour = colour
+        self.init_radius = properties.get('radius',150)#colour
+        self.radius = properties.get('radius',150)#colour
+        self.colour = properties.get('colour',[1,1,1,1])#colour
+        self.interact = properties.get('interact',False)#colour#if it should interact with platforms
+
         self.target = target
         self.position = target.hitbox.center#the blit position
         self.hitbox = pygame.Rect(self.position[0]-self.radius,self.position[1]-self.radius,self.radius*2,2*self.radius)
         self.rect = self.hitbox.copy()
         self.time = 0
+
         self.updates = [self.set_pos]#self.fade, self.pulsating#can decide what to do by appending things here
-        self.interact = interact#if it should interact with platforms
+        update_functions = {'flicker': self.flicker, 'fade': self.fade, 'pulsating': self.pulsating}
+        for prop, func in update_functions.items():
+            if properties.get(prop, False):
+                self.updates.append(func)
+
+    def flicker(self):
+        flickerRange= 0.1        
+        self.colour[-1] += random.uniform(-flickerRange, flickerRange)
+        self.colour[-1] = max(0, min(1, self.colour[-1]))#clamp it between 0 and 1
 
     def fade(self, rate = 0.99):
         self.colour[-1] *= rate
@@ -88,7 +95,7 @@ class Light():#light source
 
     def set_pos(self):#I think all should do this
         self.hitbox.center = self.target.hitbox.center
-        self.position = [self.target.hitbox.center[0] - self.game_objects.camera.scroll[0],self.target.hitbox.center[1] - self.game_objects.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
+        self.position = [self.hitbox.center[0] - self.game_objects.camera.scroll[0],self.hitbox.center[1] - self.game_objects.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
 
     def update(self):#if they e.g. fade
         for update in self.updates:

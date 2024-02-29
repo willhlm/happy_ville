@@ -37,7 +37,7 @@ class Level():
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
         if level_name == 'light_forest_cave':
             self.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
-            self.game_objects.lights.add_light(self.game_objects.player, colour = (200/255,200/255,200/255,200/255))
+            self.game_objects.lights.add_light(self.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
         elif self.level_name == 'rhoutta_encounter_1':#if it is a new game file
             if self.spawn != '1': return
             new_state = states.New_game(self.game_objects.game)
@@ -224,14 +224,16 @@ class Level():
                 new_camera_stop = Entities.Camera_Stop(self.game_objects, object_size, object_position, values, camera_offset)
                 self.game_objects.camera_blocks.add(new_camera_stop)
 
-            elif id == 15:#bg_particles -> circles, rain etc
+            elif id == 15:#bg_particles -> circles, rain, fog etc
                 for property in properties:
                     if property['name'] == 'particle':
                         particle_type = property['value']
+
+                new_shader_screen = getattr(weather, particle_type)
                 if self.layer == 'fg':
-                    self.game_objects.weather.create_particles(particle_type,parallax,self.game_objects.all_fgs)
+                    self.game_objects.all_fgs.add(new_shader_screen(self.game_objects, parallax, 20))
                 else:
-                    self.game_objects.weather.create_particles(particle_type,parallax,self.game_objects.all_bgs)
+                    self.game_objects.all_bgs.add(new_shader_screen(self.game_objects, parallax, 20))
 
             elif id == 16:#scren shade
                 for property in properties:
@@ -267,7 +269,7 @@ class Level():
                          colour= list(pygame.Color(property['value']))
                          prop['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
 
-                god_rays = entities_parallax.God_rays(object_position, self.game_objects, parallax, object_size, values = prop)
+                god_rays = entities_parallax.God_rays(object_position, self.game_objects, parallax, object_size, **prop)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(god_rays)
                 else:
@@ -309,6 +311,30 @@ class Level():
                         if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
                             new_interactable = getattr(Entities, interactable)(object_position,self.game_objects)
                             self.game_objects.interactables.add(new_interactable)
+
+            elif id  == 25:#light sourde
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'radius':
+                        prop['radius'] = float(property['value'])
+                    elif property['name'] == 'interact':
+                        prop['interact'] = property['value']
+                    elif property['name'] == 'colour':
+                         colour= list(pygame.Color(property['value']))
+                         prop['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
+                    elif property['name'] == 'flicker':
+                        prop['flicker'] = property['value']
+                    elif property['name'] == 'fade':
+                        prop['fade'] = property['value']
+                    elif property['name'] == 'pulsting':
+                        prop['pulsting'] = property['value']
+
+                ligth_source = entities_parallax.Light_source(object_position, self.game_objects, parallax)
+                self.game_objects.lights.add_light(ligth_source, **prop)
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(ligth_source)
+                else:
+                    self.game_objects.all_bgs.add(ligth_source)
 
             elif id == 28:#key items: soul_essence etc.
                 for property in properties:

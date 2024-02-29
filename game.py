@@ -39,7 +39,7 @@ class Game():
 
     def run(self):
         while True:
-            self.screen.clear(0,0,0)
+            self.screen.clear(0,0,0,0)
 
             #tick clock
             self.clock.tick(60)
@@ -53,6 +53,7 @@ class Game():
 
             #render
             self.state_stack[-1].render()#render onto self.screeen
+
             self.display.render(self.test.texture, self.screen, shader = self.game_objects.shaders['vignette'])#shader render
             self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
 

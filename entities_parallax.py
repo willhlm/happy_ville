@@ -183,10 +183,10 @@ class God_rays(Layered_objects):
         self.shader = game_objects.shaders['rays']
         self.shader['resolution'] = self.game_objects.game.window_size
         self.time = 0
-        self.colour = properties['values'].get('colour',(1.0, 0.9, 0.65, 0.6))#colour
-        self.angle = properties['values'].get('angle',-0.2)#radians
-        self.position = properties['values'].get('position',(0,0))#in pixels
-        self.falloff = properties['values'].get('falloff',(0,0.3))#between 0 and 1
+        self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
+        self.angle = properties.get('angle',-0.2)#radians
+        self.position = properties.get('position',(0,0))#in pixels
+        self.falloff = properties.get('falloff',(0,0.3))#between 0 and 1
 
     def update(self):
         self.group_distance()
@@ -199,6 +199,16 @@ class God_rays(Layered_objects):
         self.shader['time'] = self.time
         self.shader['size'] = self.image.size
         self.shader['color'] = self.colour
+
+class Light_source(Layered_objects):#works for parallax = 1. Not sure how we would liek to deal with light sources for other parallax
+    def __init__(self, pos, game_objects, parallax):
+        super().__init__(pos, game_objects, parallax)
+        self.rect = pygame.Rect(pos[0],pos[1],16,16)
+        self.hitbox = self.rect.copy()
+        self.true_pos = self.rect.topleft
+
+    def update(self):
+        self.group_distance()
 
 #thigns that move: rains, fog and wather stuff as well?
 class Dynamic_layered_objects(Layered_objects):
