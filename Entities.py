@@ -1341,10 +1341,8 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
     def update_hitbox(self):#make this a dictionary?
         if self.dir[1] > 0:#up
             self.hitbox.midbottom=self.entity.hitbox.midtop
-            self.dir[0] = 0#no side knock back when hit from below or above
         elif self.dir[1] < 0:#down
             self.hitbox.midtop=self.entity.hitbox.midbottom
-            self.dir[0] = 0 #no side knock back when hit from below or above
         elif self.dir[0] > 0:#right
             self.hitbox.midleft=self.entity.hitbox.midright
         elif self.dir[0] < 0:#left
@@ -1504,9 +1502,10 @@ class Aila_sword(Sword):
             else:
                 self.rect.center = [self.hitbox.center[0] + 28, self.hitbox.center[1] - 14]
         elif self.state == 'slash_down':
-            self.rect.center = [self.enityt.hitbox.center[0] + 30, self.hitbox.center[1] - 14]
-
-
+            if self.dir[0] > 0:
+                self.rect.center = [self.hitbox.center[0] + 45, self.hitbox.center[1] - 4]
+            else:
+                self.rect.center = [self.hitbox.center[0] + 36, self.hitbox.center[1] - 4]
 
     def init(self):
         self.dmg = 1

@@ -950,8 +950,10 @@ class Sword_down_main(Sword):
         super().__init__(entity)
         self.entity.sword.lifetime=10
         self.entity.sword.currentstate.set_animation_name('slash_down')
-        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+        self.entity.sword.currentstate.dir[0] = self.entity.dir[0]
+        self.entity.sword.dir[0]=self.entity.dir[0]
         self.entity.sword.dir[1]=-1
+        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
 
     def increase_phase(self):
         if self.entity.acceleration[0]==0:
