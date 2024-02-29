@@ -274,6 +274,10 @@ class Player(Character):
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
 
+    def update_hitbox(self):
+        super().update_hitbox()
+        self.sword.update_hitbox()
+
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
         self.ground = True#used for jumping
@@ -1342,7 +1346,7 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         if self.dir[1] > 0:#up
             self.hitbox.midbottom=self.entity.hitbox.midtop
         elif self.dir[1] < 0:#down
-            self.hitbox.midtop=self.entity.hitbox.midbottom
+            self.hitbox.midtop = self.entity.hitbox.midbottom
         elif self.dir[0] > 0:#right
             self.hitbox.midleft=self.entity.hitbox.midright
         elif self.dir[0] < 0:#left
@@ -1374,7 +1378,7 @@ class Melee(Projectiles):
 
     def update(self):
         super().update()
-        self.update_hitbox()
+        #self.update_hitbox()
 
     def countered(self,dir,pos):#called from sword collision_projectile, purple initinty stone
         return

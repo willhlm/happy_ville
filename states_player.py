@@ -293,7 +293,6 @@ class Jump_stand_main(Jump_stand_pre):
         super().__init__(entity)
 
     def update(self):
-        print('fefe')
         if self.entity.velocity[1] > 0.7:#when you start falling
             self.enter_state('Fall_stand_pre')
         elif self.entity.acceleration[0] != 0:#if you start moving
@@ -344,7 +343,6 @@ class Jump_run_main(Jump_run_pre):
         super().__init__(entity)
 
     def update(self):
-        print(self.entity.velocity[1])
         if self.entity.velocity[1] > 0.7:
             self.enter_state('Fall_run_pre')
         elif self.entity.acceleration[0] == 0:
@@ -948,7 +946,7 @@ class Sword_up_main(Sword):
 class Sword_down_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime=10
+        self.entity.sword.lifetime = 10
         self.entity.sword.currentstate.set_animation_name('slash_down')
         self.entity.sword.currentstate.dir[0] = self.entity.dir[0]
         self.entity.sword.dir[0]=self.entity.dir[0]
