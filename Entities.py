@@ -1504,7 +1504,9 @@ class Aila_sword(Sword):
             else:
                 self.rect.center = [self.hitbox.center[0] + 28, self.hitbox.center[1] - 14]
         elif self.state == 'slash_down':
-            self.rect.center = [self.hitbox.center[0] + 30, self.hitbox.center[1] - 14]
+            self.rect.center = [self.enityt.hitbox.center[0] + 30, self.hitbox.center[1] - 14]
+
+
 
     def init(self):
         self.dmg = 1

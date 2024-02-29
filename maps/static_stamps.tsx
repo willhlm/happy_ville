@@ -76,7 +76,7 @@
  <tile id="18">
   <properties>
    <property name="angle" value=""/>
-   <property name="colour" type="color" value=""/>
+   <property name="colour" value=""/>
    <property name="falloff" value=""/>
    <property name="position" value=""/>
   </properties>
@@ -113,10 +113,12 @@
  </tile>
  <tile id="25">
   <properties>
-   <property name="down" value=""/>
-   <property name="left" value=""/>
-   <property name="right" value=""/>
-   <property name="up" value=""/>
+   <property name="colour" type="color" value=""/>
+   <property name="fade" type="bool" value="false"/>
+   <property name="flicker" type="bool" value="false"/>
+   <property name="interact" type="bool" value="false"/>
+   <property name="pulsating" type="bool" value="false"/>
+   <property name="radius" value=""/>
   </properties>
  </tile>
  <tile id="28">
