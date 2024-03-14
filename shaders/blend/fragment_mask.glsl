@@ -11,8 +11,10 @@ out vec4 color;
 
 void main()
 {
-    vec4 lightval = texture(imageTexture,fragmentTexCoord);
-    vec4 background=texture(background,fragmentTexCoord);//screen
-    color.xyz =(lightval.xyz+ambient.xyz)*(background.xyz * ambient.w + 1 - ambient.w);//background.xyz when ambient = 1, 1 when ambient = 0
-    color.w = background.w*lightval.w;
+
+    vec4 lightval = texture(imageTexture,fragmentTexCoord);//light circle
+    vec4 background = texture(background,fragmentTexCoord);//screen
+
+    color.xyz = lightval.xyz * (background.xyz * ambient.w + 1 - ambient.w);//background.xyz when ambient = 1, 1 when ambient = 0
+    color.w = lightval.w * background.w;
 }

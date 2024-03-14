@@ -1,8 +1,9 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
+import states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
+import time
 
 class Staticentity(pygame.sprite.Sprite):#no hitbox but image
     def __init__(self, pos, game_objects, img = pygame.Surface((16,16),pygame.SRCALPHA,32)):
@@ -23,8 +24,9 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
             self.remove(self.group)#remove from group
             self.add(self.pause_group)#add to pause
 
-    def draw_shader(self):#called just before draw in group
-        pass
+    def draw(self):#called just before draw in group
+        pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
 class BG_Block(Staticentity):
     def __init__(self, pos, game_objects, img, parallax):
@@ -39,6 +41,10 @@ class BG_Block(Staticentity):
             layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
             self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
             self.image = layer.texture#get the texture of the layer
+
+    def draw(self):
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -55,7 +61,7 @@ class BG_Animated(BG_Block):
 
 class BG_Fade(BG_Block):
     def __init__(self,pos,game_objects, img,parallax,positions):
-        super().__init__(pos,game_objects,img,parallax)
+        super().__init__(pos, game_objects, img, parallax)
         self.shader_state = states_shader.Idle(self)
         self.make_hitbox(positions,pos)
 
@@ -71,16 +77,18 @@ class BG_Fade(BG_Block):
     def update(self):
         self.shader_state.update()
 
-    def draw_shader(self):#called before draw in group
+    def draw(self):#called before draw in group
         self.shader_state.draw()
+        super().draw()
 
     def player_collision(self,player):
         self.shader_state.handle_input('alpha')
 
-class Reflection(Staticentity):
-    def __init__(self,pos,size,dir,game_objects, offset = 10):
+class Reflection(Staticentity):#can be put in parallax layers
+    def __init__(self,pos,game_objects,parallax,size,dir, speed = 0, offset = 10):
         super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.game_objects = game_objects
+        self.parallax = parallax
         self.offset = offset
         self.squeeze = 1#the water flickers if it is not 1
         self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, size[0], size[1]/self.squeeze)
@@ -91,30 +99,42 @@ class Reflection(Staticentity):
         self.game_objects.shaders['noise_perlin']['u_resolution'] = game_objects.game.window_size
         #self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
         self.time = 0
+        self.water_speed = 0
+        self.blur_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.colour = (0.39, 0.78, 1, 1)
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
 
     def draw(self):
-        #noise
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
-        self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
-        self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
-        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+            #noise
+            self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+            self.game_objects.shaders['noise_perlin']['scroll'] = [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
+            self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
+            self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y
-        self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+            self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y
+            self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        #water
-        self.game_objects.shaders['water']['noise_texture'] = self.noise_layer.texture
-        self.game_objects.shaders['water']['noise_texture2'] = self.water_noise_layer.texture
-        self.game_objects.shaders['water']['TIME'] = self.time
-        self.game_objects.shaders['water']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
+            #water
+            self.game_objects.shaders['water_perspective']['noise_texture'] = self.noise_layer.texture
+            self.game_objects.shaders['water_perspective']['noise_texture2'] = self.water_noise_layer.texture
+            self.game_objects.shaders['water_perspective']['TIME'] = self.time
 
-        #final rendering
-        self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.game_objects.camera.scroll[1]]# the part to cut
-        blit_pos = [self.rect.topleft[0] - self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera.scroll[1]]
-        self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water'])
+            self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
+            self.game_objects.shaders['water_perspective']['water_speed'] = self.water_speed
+            self.game_objects.shaders['water_perspective']['water_albedo'] = self.colour
+
+            self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]# the part to cut
+            blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.true_scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.true_scroll[1]]
+
+            #final rendering -> tmporary fix
+            if self.parallax[0] == 1:#don't blur if there is no parallax
+                self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water_perspective'])
+            else:
+                self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
+                self.game_objects.game.display.render(self.noise_layer.texture, self.blur_layer, shader = self.game_objects.shaders['water'])
+                self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -184,7 +204,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
-        self.velocity[1] = 1/self.game_objects.game.dt
+        self.velocity[1] = 1.2/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -204,7 +224,7 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def update_vel(self):
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1],self.max_vel[1])#set a y max speed#
+        self.velocity[1] = min(self.velocity[1],self.max_vel[1]/self.game_objects.game.dt)#set a y max speed#
 
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
@@ -228,9 +248,9 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0]*30
         self.velocity[1] = -dir[1]*10
 
-    def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20):
+    def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20,state = 'Idle'):
         for i in range(0,number_particles):
-            obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance,lifetime,vel,dir,scale,colour)
+            obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance,lifetime,vel,dir,scale,colour,state)
             self.game_objects.cosmetics.add(obj1)
 
     def update_timers(self):
@@ -327,8 +347,10 @@ class Player(Character):
         self.shader_state.update()
         self.omamoris.update()
 
-    def draw_shader(self):#called before draw in group
+    def draw(self):#called in group
         self.shader_state.draw()
+        pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
 class Migawari_entity(Character):#player double ganger
     def __init__(self,pos,game_objects):
@@ -879,6 +901,30 @@ class Aslat(NPC):
                 new_game_state.enter_state()
                 self.game_objects.player.states['Wall_glide'] = True
 
+class Guide(NPC):
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.shader_state = states_shader_guide.Idle(self)
+        self.layer1 = self.game_objects.game.display.make_layer(self.image.size)#make a layer ("surface")
+
+    def update(self):
+        super().update()
+        self.shader_state.update()#goes between idle and teleport
+
+    def buisness(self):#enters after conversation
+        self.shader_state = states_shader_guide.Teleport(self)
+        for i in range(0,10):#should maybe be the number of abilites Aila can aquire?
+            particle = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=0,lifetime = -1,vel={'linear':[7,15]},dir='isotropic',scale=5,colour=[100,200,255,255],state = 'Circle_converge',gradient = 1)
+            light = self.game_objects.lights.add_light(particle, colour = [100/255,200/255,255/255,255/255], radius = 20)
+            particle.light = light#add light reference
+            self.game_objects.cosmetics.add(particle)
+
+    def give_light(self):#called when teleport shader is finished
+        self.game_objects.lights.add_light(self.game_objects.player, colour = [200/255,200/255,200/255,200/255])
+
+    def draw(self):#called in group
+        self.shader_state.draw()
+
 class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1157,8 +1203,9 @@ class Dash_effect(Staticentity):
         self.alpha *= 0.95
         self.destroy()
 
-    def draw_shader(self):
+    def draw(self):
         self.shader['alpha'] = self.alpha
+        super().draw()
 
     def destroy(self):
         if self.alpha < 5:
@@ -1223,8 +1270,10 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
         self.true_pos = [self.parallax[0]*self.game_objects.camera.scroll[0], self.parallax[1]*self.game_objects.camera.scroll[1]]#this is [0,0]
         self.shader_state.update()
 
-    def draw_shader(self):
+    def draw(self):
         self.shader_state.draw()
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -1342,17 +1391,6 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         for timer in self.timers:
             timer.update()
 
-    def update_hitbox(self):#make this a dictionary?
-        if self.dir[1] > 0:#up
-            self.hitbox.midbottom=self.entity.hitbox.midtop
-        elif self.dir[1] < 0:#down
-            self.hitbox.midtop = self.entity.hitbox.midbottom
-        elif self.dir[0] > 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-        elif self.dir[0] < 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-
     def collision_projectile(self,eprojectile):#projecticle proectile collision
         pass
 
@@ -1375,10 +1413,13 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
 class Melee(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
+        self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
-    def update(self):
-        super().update()
-        #self.update_hitbox()
+    def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
+        rounded_dir = (math.ceil(self.dir[0]), math.ceil(self.dir[1]))#analogue controls may have none integer values
+        hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
+        setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
+        self.rect.center = self.hitbox.center#match the positions of hitboxes
 
     def countered(self,dir,pos):#called from sword collision_projectile, purple initinty stone
         return
@@ -1482,34 +1523,25 @@ class Sword(Melee):
 class Aila_sword(Sword):
     def __init__(self,entity):
         super().__init__(entity)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)
+        self.image = self.sprites['slash_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.currentstate = states_sword.Slash_1(self)
+
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
         self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
         self.stones = {'red':Red_infinity_stone([0,0],entity.game_objects, self),'green':Green_infinity_stone([0,0],entity.game_objects, self),'blue':Blue_infinity_stone([0,0],entity.game_objects, self),'orange':Orange_infinity_stone([0,0],entity.game_objects, self),'purple':Purple_infinity_stone([0,0],entity.game_objects, self)}#the ones aila has picked up
         self.swing = 0#a flag to check which swing we are at (0 or 1)
-        self.load_sprites()
 
-    def load_sprites(self):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)
-        self.image = self.sprites['slash_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.state = 'slash_1'
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.center = (100,0)
-        self.true_pos = [100,100]
-        #self.rect = pygame.Rect(self.entity.rect.x,self.entity.rect.y - 32,128,64)
+    def destroy(self):
+        if self.lifetime < 0:
+            self.currentstate.increase_phase()
+            self.kill()
 
-    def update_hitbox(self):
-        super().update_hitbox()
-        if self.state in ['slash_1', 'slash_2']:
-            if self.dir[0] > 0:
-                self.rect.center = [self.hitbox.center[0] - 28, self.hitbox.center[1] - 14]
-            else:
-                self.rect.center = [self.hitbox.center[0] + 28, self.hitbox.center[1] - 14]
-        elif self.state == 'slash_down':
-            if self.dir[0] > 0:
-                self.rect.center = [self.hitbox.center[0] + 45, self.hitbox.center[1] - 4]
-            else:
-                self.rect.center = [self.hitbox.center[0] + 36, self.hitbox.center[1] - 4]
+    def update_hitbox(self):#called from aila's update_hitbox, every frame
+        super().update_hitbox()#follows the hitbox of aila depending on the direction
+        self.currentstate.update_hitbox()
 
     def init(self):
         self.dmg = 1
@@ -1546,7 +1578,7 @@ class Aila_sword(Sword):
         angle = random.randint(-180, 180)#the ejection anglex
         color = [255,255,255,255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel={'linear':[7,14]},dir=angle,scale=1,colour=color)
+            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel={'linear':[7,14]},dir=angle,scale=1,colour=color,state = 'Idle')
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
@@ -2903,16 +2935,25 @@ class Light_crystal(Interactable):
             timer.update()
 
 class Fireplace(Interactable):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/fireplace/',game_objects)
+    def __init__(self, pos, game_objects, on = False):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/fireplace/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
+        self.currentstate = states_fireplace.Idle(self)
+        self.light_sources = []#save light references to turn be able to removr them
+        if on:
+            self.interact()
 
     def interact(self):#when player press t/y
         self.currentstate.handle_input('Interact')#goes to interacted after transform
+
+    def make_light(self):
+        self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],flicker=True,radius = 100))
+        self.light_sources.append(self.game_objects.lights.add_light(self,radius = 50))
+        self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],radius = 100))
 
 class Lighitning_barrier(Interactable):#traps
     def __init__(self,pos,game_objects,size=[16,16]):

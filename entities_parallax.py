@@ -33,6 +33,10 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
                 self.game_objects.game.display.render(self.sprites[state][frame],empty_layer,shader = shader)
                 self.sprites[state][frame] = empty_layer.texture
 
+    def draw(self):
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+
 class Trees(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
@@ -175,7 +179,7 @@ class Falling_rock_source(Layered_objects):
             self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
             obj.add_internal(self.game_objects.all_bgs)
 
-class God_rays(Layered_objects):
+class God_rays(Layered_objects):#should this be here or in enteties
     def __init__(self, pos, game_objects, parallax, size, **properties):
         super().__init__(pos, game_objects, parallax)
         self.sprites = {'idle': [game_objects.game.display.make_layer(size).texture]}
@@ -192,25 +196,26 @@ class God_rays(Layered_objects):
         self.group_distance()
         self.time += self.game_objects.game.dt * 0.1
 
-    def draw_shader(self):
+    def draw(self):
         self.shader['angle'] = self.angle
         self.shader['position'] = self.position
         self.shader['falloff'] = self.falloff
         self.shader['time'] = self.time
         self.shader['size'] = self.image.size
         self.shader['color'] = self.colour
+        super().draw()
 
 class Light_source(Layered_objects):#works for parallax = 1. Not sure how we would liek to deal with light sources for other parallax
     def __init__(self, pos, game_objects, parallax):
         super().__init__(pos, game_objects, parallax)
         self.rect = pygame.Rect(pos[0],pos[1],16,16)
+        self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
-        self.true_pos = self.rect.topleft
 
     def update(self):
         self.group_distance()
 
-#thigns that move: rains, fog and wather stuff as well?
+#thigns that move in parallax
 class Dynamic_layered_objects(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
@@ -278,8 +283,9 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
 
         self.shader =  game_objects.shaders['colour']
 
-    def draw_shader(self):
+    def draw(self):
         self.shader['colour'] = self.colour
+        super().draw()
 
     def pool(game_objects):#save the texture in memory for later use
         Leaves.sprites = Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type

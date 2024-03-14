@@ -30,7 +30,7 @@ class Idle(Shader_states):
         elif input == 'alpha':
             self.enter_state('Alpha')
 
-class Hurt(Shader_states):#turn white
+class Hurt(Shader_states):#turn white -> enteties use it
     def __init__(self,entity):
         super().__init__(entity)
         self.duration = C.hurt_animation_length#hurt animation duration
@@ -49,7 +49,7 @@ class Hurt(Shader_states):#turn white
         if input == 'Invincibile':
             self.next_animation = 'Invincibile'
 
-class Invincibile(Shader_states):#blink white
+class Invincibile(Shader_states):#blink white -> enteyties use it
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['invincible']
@@ -93,3 +93,46 @@ class Alpha(Shader_states):#fade screen uses it
 
     def draw(self):
         self.entity.shader['alpha'] = self.alpha
+
+class Teleport(Shader_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.time = 0
+        self.entity.shader = entity.game_objects.shaders['teleport']#apply teleport first and then bloom
+
+    def update(self):
+        self.time += 0.01
+        if self.time >= 1:
+            self.entity.kill()
+
+    def draw(self):
+        self.entity.shader['progress'] = self.time
+
+class Glow(Shader_states):#ting with a colour and apply bloom
+    def __init__(self,entity, colour = [100,200,255,100]):
+        super().__init__(entity)
+        self.colour = colour
+        self.entity.shader = self.entity.game_objects.shaders['bloom']
+        self.layer1 = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#!! need to move it somewehre in memory
+
+    def draw(self):
+        self.entity.game_objects.shaders['tint']['colour'] = self.colour
+        self.entity.game_objects.game.display.render(self.entity.image, self.layer1, shader = self.entity.game_objects.shaders['tint'])#shader render
+        self.entity.image = self.layer1.texture
+
+class Shining(Shader_states):#called for aila when particle hit when guide dissolves
+    def __init__(self,entity, colour = [0.39, 0.78, 1,1]):
+        super().__init__(entity)
+        self.colour = colour
+        self.entity.shader = self.entity.game_objects.shaders['shining']
+        self.layer1 = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#make a layer ("surface")
+        self.time = 0
+        self.speed = 0.6
+
+    def update(self):
+        self.time += self.entity.game_objects.game.dt*0.01
+
+    def draw(self):
+        self.entity.shader['TIME'] = self.time
+        self.entity.shader['tint'] = self.colour
+        self.entity.shader['speed'] = self.speed

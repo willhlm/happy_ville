@@ -16,6 +16,7 @@ class Level():
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
         self.level_name = map_name.lower()
         self.spawn = spawn
+        self.game_objects.lights.new_map()#set ambient default light and clear light sources
         self.check_pause_sound()#pause the sound if we change area
         self.load_map_data()#load the map data
         self.init_state_file()#need to be before load groups
@@ -43,6 +44,8 @@ class Level():
             new_state = states.New_game(self.game_objects.game)
             new_state.enter_state()
             self.game_objects.camera.true_scroll = [self.game_objects.player.true_pos[0] - self.game_objects.camera.center[0], self.game_objects.player.true_pos[1] - self.game_objects.camera.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
+        elif self.level_name == 'rhoutta_encounter_2':
+            self.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
 
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
@@ -100,15 +103,15 @@ class Level():
             self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_front_objects)#object infron of layers
 
-    def load_objects(self,data,parallax,offset,method):
+    def load_objects(self, data, parallax, offset, method):
         for object in method.keys():#load each object in group
-            if data.get(object[object.rfind('_')+1:],False):
-                if object[object.rfind('_')+1:] == 'back' or object[object.rfind('_')+1:] == 'front':#map specifics
-                    if object[:object.rfind('_')] != self.level_name[:self.level_name.rfind('_')]: continue#check if it macthes the map
-                    key = self.level_name[:self.level_name.rfind('_')+1] + object[object.rfind('_')+1:]#make sure to only load the rellavant map
-                else:#statics and interactables
-                    key = object
-                method[key](data[object[object.rfind('_')+1:]],parallax,offset)
+            if not data.get(object[object.rfind('_')+1:], False): continue#if false, go to next
+            if object[object.rfind('_')+1:] == 'back' or object[object.rfind('_')+1:] == 'front':#map specifics
+                if object[:object.rfind('_')] != self.level_name[:self.level_name.rfind('_')]: continue#check if it macthes the map
+                key = self.level_name[:self.level_name.rfind('_')+1] + object[object.rfind('_')+1:]#make sure to only load the rellavant map
+            else:#statics and interactables
+                key = object
+            method[key](data[object[object.rfind('_')+1:]],parallax,offset)
 
     def load_statics(self,data,parallax,offset):#load statics and collision
         chest_int = 1
@@ -144,6 +147,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'class':
                         npc_name = property['value']
+
                 new_npc = getattr(Entities, npc_name)
                 self.game_objects.npcs.add(new_npc(object_position,self.game_objects))
 
@@ -287,8 +291,16 @@ class Level():
                     if property['name'] == 'direction':
                         dir = property['value']
                 dir = 'up'
-                reflection = Entities.Reflection(object_position, object_size, dir, self.game_objects)
-                self.game_objects.reflections.add(reflection)
+                reflection = Entities.Reflection(object_position, self.game_objects, parallax, object_size, dir)
+
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(reflection)
+                else:
+                    if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
+                        self.game_objects.cosmetics.add(reflection)
+                    else:
+                        self.game_objects.all_bgs.add(reflection)
+
 
             elif id == 23:#shade trigger
                 for property in properties:
@@ -385,8 +397,15 @@ class Level():
                 chest_int += 1
 
             elif id == 5:#fireplace
-                new_interacable = Entities.Fireplace(object_position,self.game_objects)
-                self.game_objects.interactables.add(new_interacable)
+                type = 'Fire'#default
+                on = False
+                for property in properties:
+                    if property['name'] == 'type':
+                        type = property['value']
+                    if property['name'] == 'on':
+                        on = property['value']
+                new_interacable = getattr(Entities, type+'place')
+                self.game_objects.interactables.add(new_interacable(object_position, self.game_objects, on))
 
             elif id == 6:#roadsign
                 values={}

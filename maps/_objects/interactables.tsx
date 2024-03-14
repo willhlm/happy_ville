@@ -15,6 +15,10 @@
   <image width="160" height="137" source="../../Sprites/animations/Chest/idle/chest2.png"/>
  </tile>
  <tile id="5">
+  <properties>
+   <property name="on" type="bool" value="false"/>
+   <property name="type" value=""/>
+  </properties>
   <image width="48" height="48" source="../../Sprites/animations/fireplace/idle/firepit1.png"/>
  </tile>
  <tile id="6">

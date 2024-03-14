@@ -102,14 +102,3 @@ class Interact(Basic_states):
 class Interacted(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-
-    def handle_input(self,input):#fire place
-        if input == 'Interact':
-            self.enter_state('Pre_idle')
-
-class Pre_idle(Basic_states):#fire palce
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def increase_phase(self):
-        self.enter_state('Idle')

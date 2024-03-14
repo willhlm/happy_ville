@@ -1,32 +1,32 @@
-import pygame, math, random
+import pygame, math, random, states_particles
 
 class Particles(pygame.sprite.Sprite):
-    def __init__(self, pos, game_objects, distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255]):
+    def __init__(self, pos, game_objects, distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255], state = 'Idle'):
         super().__init__()
         self.game_objects = game_objects
         angle = self.define_angle(dir)
         self.angle = -(2*math.pi*angle)/360
         self.lifetime = lifetime
+        self.spawn_point = [pos[0],pos[1]]
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
 
         motion = list(vel.keys())[0]#linear moetion or wave motion
         self.update_velocity = {'linear':self.linear,'wave':self.wave}[motion]
-        amp = random.randint(vel[motion][0], vel[motion][1])
+        amp = random.uniform(min(vel[motion][0],vel[motion][1]), max(vel[motion][0],vel[motion][1]))
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.colour = colour
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
-        self.dir = [-1,0]#gruop draw need it
+        self.state = getattr(states_particles, state)(self)
 
     def update(self):
         self.update_pos()
         self.lifetime -= self.game_objects.game.dt
-        self.update_velocity()
-        self.fading()
-        self.destroy()
+        self.state.update()
 
     def update_pos(self):
         self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
         self.rect.center = self.true_pos
+        self.hitbox.center = self.true_pos
 
     def wave(self):
         self.velocity  = [0.5*math.sin(self.lifetime*0.1 + self.angle + self.phase),-1]
@@ -58,42 +58,92 @@ class Particles(pygame.sprite.Sprite):
             angle=random.randint(dir-spawn_angle, dir+spawn_angle)#the ejection anglex
         return angle
 
+    def draw(self):
+        pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+
 class Circle(Particles):
-    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour):
-        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
+    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour,state, gradient = 0):
+        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour,state)
         self.radius = random.randint(max(scale-1,1), round(scale+1))
         self.fade_scale = 0.1#how fast alpha should do down
         self.image = Circle.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = self.true_pos
+        self.hitbox = self.rect.copy()
 
         self.shader = game_objects.shaders['circle']#draws a circle
         self.shader['size'] = self.image.size
-        self.shader['gradient'] = 0#one means gradient, 0 is without
+        self.shader['gradient'] = gradient#one means gradient, 0 is without
 
-    def draw_shader(self):#his called just before the draw
+    def draw(self):#his called just before the draw
         self.shader['color'] = self.colour
         self.shader['radius'] = self.radius
+        super().draw()
 
     def pool(game_objects):#save the stuff in memory for later use
         Circle.image = game_objects.game.display.make_layer((50,50)).texture
 
+class Goop(Particles):#circles that "distorts" due to noise
+    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour,state,gradient=0):
+        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour,state)
+        self.empty = Goop.image2
+        self.noise_layer = Goop.image3
+        self.circle = Goop.image4
+        self.fade_scale = 0
+
+        self.game_objects.shaders['circle']['color'] = [1,1,1,1]
+        self.game_objects.shaders['circle']['radius'] = 6
+        self.game_objects.shaders['circle']['size'] = [50,50]
+        self.game_objects.shaders['circle']['gradient'] = 0#one means gradient, 0 is without
+        self.game_objects.game.display.render(self.empty.texture, self.circle, shader=self.game_objects.shaders['circle'])#make perlin noise texture
+
+        self.image = self.circle.texture
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.center = self.true_pos
+        self.hitbox = self.rect.copy()
+
+        self.shader = self.game_objects.shaders['goop']
+        self.time = 0
+
+    def update(self):
+        super().update()
+        self.time += 0.01*self.game_objects.game.dt
+
+    def draw(self):#his called just before the draw
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.image.size
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
+        self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
+        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        self.game_objects.shaders['goop']['TIME'] = self.time
+        self.game_objects.shaders['goop']['flowMap'] = self.noise_layer.texture
+        super().draw()
+
+    def pool(game_objects):#save the stuff in memory for later use
+        Goop.image2 = game_objects.game.display.make_layer((50,50))
+        Goop.image3 = game_objects.game.display.make_layer((50,50))
+        Goop.image4 = game_objects.game.display.make_layer((50,50))
+
 class Spark(Particles):#a general one
-    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale,colour):
-        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour)
+    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale,colour,state):
+        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour,state)
         self.fade_scale = 0.4
 
         self.image = Spark.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = self.true_pos
+        self.hitbox = self.rect.copy()
 
         self.shader = game_objects.shaders['spark']
         self.shader['size'] = self.image.size
         self.shader['scale'] = scale
 
-    def draw_shader(self):#called from group draw
+    def draw(self):#called from group draw
         self.shader['colour'] = self.colour
         self.shader['velocity'] =self.velocity
+        super().draw()
 
     def pool(game_objects):#save the stuff in memory for later use
         Spark.image = game_objects.game.display.make_layer((50,50)).texture
