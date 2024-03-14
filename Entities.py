@@ -1540,6 +1540,13 @@ class Aila_sword(Sword):
             self.kill()
 
     def update_hitbox(self):#called from aila's update_hitbox, every frame
+        if isinstance(self.currentstate, states_sword.Slash_1) or isinstance(self.currentstate, states_sword.Slash_2):
+            print('heeej')
+            self.hitbox[2] = 45
+            self.hitbox[3] = 29
+        else:
+            self.hitbox[2] = 40
+            self.hitbox[3] = 35
         super().update_hitbox()#follows the hitbox of aila depending on the direction
         self.currentstate.update_hitbox()
 

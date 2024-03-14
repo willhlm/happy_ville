@@ -28,7 +28,7 @@ class Slash_1(Basic_states):
         self.sign = sign(self.entity.dir[0])
 
     def update_hitbox(self):
-        self.entity.rect.center = [self.entity.hitbox.center[0] - self.sign * 28, self.entity.hitbox.center[1] - 14]
+        self.entity.rect.center = [self.entity.hitbox.center[0] - self.sign * 35, self.entity.hitbox.center[1] - 14]
 
 class Slash_2(Slash_1):
     def __init__(self,entity):
