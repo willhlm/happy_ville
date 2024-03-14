@@ -14,7 +14,6 @@ class Game():
 
         self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])
         self.screen = self.display.make_layer(self.window_size)
-        self.test = self.display.make_layer(self.window_size)
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -39,10 +38,10 @@ class Game():
 
     def run(self):
         while True:
-            self.screen.clear(0,0,0,0)
+            self.screen.clear(0, 0, 0, 0)
 
             #tick clock
-            self.clock.tick(60)
+            self.clock.tick(120)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
 
             #handle event
@@ -53,8 +52,6 @@ class Game():
 
             #render
             self.state_stack[-1].render()#render onto self.screeen
-
-            self.display.render(self.test.texture, self.screen, shader = self.game_objects.shaders['vignette'])#shader render
             self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
 
             #update display
@@ -64,7 +61,7 @@ class Game():
         if not scale:#if None
             scale_w = pygame.display.Info().current_w/self.window_size[0]
             scale_h = pygame.display.Info().current_h/self.window_size[1]
-            scale = min(scale_w,scale_h)
+            scale = min(scale_w, scale_h)
         return scale
 
 if __name__ == '__main__':

@@ -76,6 +76,10 @@ class Cutscenes(Camera):
         if self.duration < 0:
             self.shaking = False
 
+    def update_stop(self):
+        for stop in self.game_objects.camera_blocks:
+            stop.update()
+
     def exit_state(self):#called from cutscenes
         self.set_camera('Camera')
 
@@ -100,15 +104,16 @@ class Cultist_encounter(Cutscenes):
 class New_game(Cutscenes):#initialised in New_game state
     def __init__(self, game_objects, scroll):
         super().__init__(game_objects, scroll)
-        self.center[1] = 1000
         self.timer = 5000
+        self.update_stop()
+        self.center = [self.game_objects.camera.center[0],1000]#[176,230]
 
     def update(self):
         self.timer -= self.game_objects.game.dt
         if self.timer < 0:
             self.exit_state()
         self.center[1] -= 2*self.game_objects.game.dt
-        self.center[1] = max(self.game_objects.map.PLAYER_CENTER[1],self.center[1])
+        self.center[1] = max(230,self.center[1])
         super().update()
 
 class Title_screen(Cutscenes):

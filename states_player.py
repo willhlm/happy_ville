@@ -69,7 +69,7 @@ class Idle_main(Player_states):
 
     def swing_sword(self):
         if not self.entity.sword_swinging:
-            if self.entity.dir[1]==0:
+            if self.entity.dir[1] == 0:
                 state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
@@ -878,11 +878,8 @@ class Sword_stand1_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
-        self.entity.sword.currentstate.set_animation_name('slash_1')
-        self.entity.sword.dir[1] = 0
-        self.entity.sword.dir[0] = self.entity.dir[0]
-        self.entity.sword.currentstate.dir[0] = self.entity.dir[0]
-        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+        self.entity.sword.currentstate.enter_state('Slash_1')
+        self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def update(self):
         super().update()
@@ -897,14 +894,14 @@ class Sword_stand1_main(Sword):
 class Sword_stand2_main(Sword_stand1_main):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.currentstate.set_animation_name('slash_2')
+        self.entity.sword.currentstate.enter_state('Slash_2')
 
 class Sword_run1_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.dir[1]=0
+        self.entity.sword.currentstate.enter_state('Slash_1')
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
@@ -915,13 +912,14 @@ class Sword_run1_main(Sword):
 class Sword_run2_main(Sword_run1_main):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.sword.currentstate.enter_state('Slash_2')
 
 class Air_sword1_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime=10#swrod hitbox duration
-        self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.dir[1]=0
+        self.entity.sword.currentstate.enter_state('Slash_1')
+        self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
     def increase_phase(self):
         if self.entity.acceleration[0]==0:
@@ -932,13 +930,14 @@ class Air_sword1_main(Sword):
 class Air_sword2_main(Air_sword1_main):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.sword.currentstate.enter_state('Slash_2')
 
 class Sword_up_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
+        self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.dir[1]=1
 
     def increase_phase(self):
         self.enter_state('Idle_main')
@@ -947,10 +946,7 @@ class Sword_down_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime = 10
-        self.entity.sword.currentstate.set_animation_name('slash_down')
-        self.entity.sword.currentstate.dir[0] = self.entity.dir[0]
-        self.entity.sword.dir[0]=self.entity.dir[0]
-        self.entity.sword.dir[1]=-1
+        self.entity.sword.currentstate.enter_state('Slash_down')
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
 
     def increase_phase(self):

@@ -46,7 +46,7 @@ class RenderEngine:
             pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
 
         # Configure pygame display
-        pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF , vsync = 1) #| pygame.FULLSCREEN #|pygame.SCALED
+        pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF , vsync = 0) #| pygame.FULLSCREEN #|pygame.SCALED
 
         # Create an OpenGL context
         self._ctx = moderngl.create_context()

@@ -272,8 +272,8 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
             entity.update_rect_y()
 
     def draw(self):
-        self.game_objects.game.screen.blit(self.image, (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
-
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#int seem nicer than round
+        
 class Rhoutta_encounter_1(Collision_time):
     def __init__(self,game_objects,pos,size,run_particle,go_through=True):
         super().__init__(game_objects,pos,size,run_particle,go_through)

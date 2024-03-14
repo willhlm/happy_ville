@@ -15,6 +15,10 @@ class Lights():
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.update()
 
+    def new_map(self):#called when loading a new map from map loader
+        self.clear_lights()
+        self.ambient = (0,0,0,0)
+
     def update(self):
         self.points, self.positions, self.radius, self.colour = [], [], [], []
         for light in self.lights_sources:
@@ -40,14 +44,20 @@ class Lights():
         self.lights_sources = []
 
     def add_light(self, target, **properties):
-        self.lights_sources.append(Light(self.game_objects, target, **properties))
+        light = Light(self.game_objects, target, **properties)
+        self.lights_sources.append(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)
+        return light
 
     def remove_light(self, light):
         self.lights_sources.remove(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
     def draw(self):
+        self.layer1.clear(0,0,0,0)#needed
+        self.layer2.clear(0,0,0,0)#needed
+        self.layer3.clear(0,0,0,0)#needed
+
         self.shaders['light']['rectangleCorners'] = self.points
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
@@ -70,6 +80,7 @@ class Light():#light source
         self.interact = properties.get('interact',False)#colour#if it should interact with platforms
 
         self.target = target
+
         self.position = target.hitbox.center#the blit position
         self.hitbox = pygame.Rect(self.position[0]-self.radius,self.position[1]-self.radius,self.radius*2,2*self.radius)
         self.rect = self.hitbox.copy()
@@ -81,9 +92,13 @@ class Light():#light source
             if properties.get(prop, False):
                 self.updates.append(func)
 
+    def expand(self):
+        self.radius += self.game_objects.game.dt*100
+        self.radius = min(self.radius,300)
+
     def flicker(self):
-        flickerRange= 0.1        
-        self.colour[-1] += random.uniform(-flickerRange, flickerRange)
+        flickerrange = 0.1
+        self.colour[-1] += random.uniform(-flickerrange, flickerrange)
         self.colour[-1] = max(0, min(1, self.colour[-1]))#clamp it between 0 and 1
 
     def fade(self, rate = 0.99):
@@ -92,6 +107,11 @@ class Light():#light source
     def pulsating(self):#
         self.time += self.game_objects.game.dt*0.01
         self.radius = 0.5 * self.init_radius * math.sin(self.time) + self.init_radius * 0.5
+
+    def lifetime(self):
+        if self.colour[-1] < 0.01:
+            self.game_objects.lights.remove_light(self)
+            self.target.state.handle_input('light_gone')
 
     def set_pos(self):#I think all should do this
         self.hitbox.center = self.target.hitbox.center

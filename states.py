@@ -6,6 +6,7 @@ import constants as C
 import animation
 import UI_select_menu, UI_facilities
 import Entities
+import particles
 
 class Game_State():
     def __init__(self,game):
@@ -103,7 +104,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_cave_1','1')
+            self.game.game_objects.load_map(self,'village_ola_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -631,44 +632,66 @@ class Conversation(Gameplay):
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
         self.text_window_size = (352, 96)
-        self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),60]
+        self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
         self.background = self.game.display.make_layer(self.text_window_size)#make a layer ("surface")
+        self.conv_screen = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
+
         self.clean_slate()
         self.conv = self.npc.dialogue.get_conversation()
+        self.alpha = 10#alpha of the conversation screen
+        self.sign = 1#fade in and back
 
     def clean_slate(self):
         self.letter_frame = 0
         self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
         self.game.display.render(self.text_window, self.background)#shader render
-        self.game.display.render(self.npc.portrait, self.background, position = (0,10))#shader render
 
     def update(self):
         super().update()
         self.letter_frame += self.print_frame_rate*self.game.dt
+        self.alpha += self.sign * self.game.dt*5
+        self.alpha = min(self.alpha,230)
+        if self.alpha < 10:
+            self.exit_state()
 
     def render(self):
         super().render()
+        self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
+
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
-        self.game.display.render(text, self.background, position = (64,8))#shader render
-        self.game.display.render(self.background.texture, self.game.screen, position = self.blit_pos)#shader render
+        self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+        self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)#shader render
+        self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
+        self.game.display.render(self.npc.portrait, self.conv_screen, position = (50,100))#shader render
+
+        self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
+        self.game.display.render(self.conv_screen.texture,self.game.screen,shader = self.game.game_objects.shaders['alpha'])#shader render
 
     def handle_events(self, input):
         if input[0]:
             if input[-1] == 'start':
-                self.exit_state()
+                self.fade_back()
 
             elif input[-1] == 'y':
                 if self.letter_frame < len(self.conv):
                     self.letter_frame = 10000
+
                 else:#check if we have a series of conversations or not
-                    self.clean_slate()
                     self.npc.dialogue.increase_conv_index()
-                    self.conv = self.npc.dialogue.get_conversation()
-                    if not self.conv:
-                        self.exit_state()
+                    conv = self.npc.dialogue.get_conversation()
+                    if not conv:
+                        self.fade_back()
+                    else:
+                        self.clean_slate()
+                        self.conv = conv
+
+    def fade_back(self):
+        self.sign = -1
 
     def exit_state(self):
         super().exit_state()
+        self.conv_screen.release()
+        self.background.release()
         self.npc.buisness()
 
 class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
@@ -766,7 +789,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
             elif input[-1] == 'a':
                 self.page = 1
 
-#cutscenes
+#encountters and corresponding cutscenes
 class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
     def __init__(self,game):
         super().__init__(game)
@@ -802,7 +825,7 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
     def __init__(self,game):
         super().__init__(game)
         self.game.game_objects.camera.set_camera('New_game')#when starting a new game, should be a cutscene
-        self.camera_stops = []
+        self.camera_stops = []#temporary remove the came stops
         for camera_stop in self.game.game_objects.camera_blocks:
             self.camera_stops.append(camera_stop)
         self.game.game_objects.camera_blocks.empty()
@@ -986,7 +1009,6 @@ class Death(Cutscene_engine):#when aila dies
     def cinematic(self):
         pass
 
-#encountters and corresponding cutscenes
 class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)

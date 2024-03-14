@@ -89,6 +89,7 @@
  <tile id="20">
   <properties>
    <property name="direction" value=""/>
+   <property name="speed" value=""/>
   </properties>
  </tile>
  <tile id="21">
@@ -113,7 +114,7 @@
  </tile>
  <tile id="25">
   <properties>
-   <property name="colour" type="color" value=""/>
+   <property name="colour" value=""/>
    <property name="fade" type="bool" value="false"/>
    <property name="flicker" type="bool" value="false"/>
    <property name="interact" type="bool" value="false"/>

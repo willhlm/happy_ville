@@ -15,6 +15,7 @@ import groups
 import object_pool
 import controller
 import lights
+import shader_draw
 
 from time import perf_counter
 
@@ -35,29 +36,29 @@ class Game_Objects():
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.object_pool = object_pool.Object_pool(self)
         self.lights = lights.Lights(self)
+        self.shader_draw = shader_draw.Shader_draw(self, 'vignette')
 
     def create_groups(self):#define all sprite groups
-        self.enemies = groups.Group(self)#groups.Shader_group()
-        self.npcs = groups.Group(self)#groups.Shader_group()
-        self.platforms = groups.Specialdraw_Group()
-        self.platforms_ramps = groups.Specialdraw_Group()
-        self.all_bgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
-        self.all_fgs = groups.LayeredUpdates(self)#groups.Shader_layered_group()#
-        self.bg_interact = groups.Group(self)#small grass stuff so that interactables blends with BG
-        self.bg_fade = groups.Group(self)#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
-        self.eprojectiles = groups.Group(self)#groups.Shader_group()
-        self.fprojectiles = groups.Group(self)#groups.Shader_group()
-        self.loot = groups.Group(self)#groups.Shader_group()
+        self.enemies = groups.Group()#groups.Shader_group()
+        self.npcs = groups.Group()#groups.Shader_group()
+        self.platforms = groups.Group()
+        self.platforms_ramps = groups.Group()
+        self.all_bgs = groups.LayeredUpdates()#groups.Shader_layered_group()#
+        self.all_fgs = groups.LayeredUpdates()#groups.Shader_layered_group()#
+        self.bg_interact = groups.Group()#small grass stuff so that interactables blends with BG
+        self.bg_fade = groups.Group()#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
+        self.eprojectiles = groups.Group()#groups.Shader_group()
+        self.fprojectiles = groups.Group()#groups.Shader_group()
+        self.loot = groups.Group()#groups.Shader_group()
         self.entity_pause = groups.PauseGroup() #all Entities that are far away
-        self.cosmetics = groups.Group(self)#groups.Shader_group()#things we just want to blit
-        self.camera_blocks = groups.Group(self)#pygame.sprite.Group()
-        self.interactables = groups.Group(self)#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
-        self.reflections = groups.Specialdraw_Group()
+        self.cosmetics = groups.Group()#groups.Shader_group()#things we just want to blit
+        self.camera_blocks = groups.Group()#pygame.sprite.Group()
+        self.interactables = groups.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
         self.layer_pause = groups.PauseLayer()
 
         #initiate player
         self.player = Entities.Player([0,0],self)
-        self.players = groups.Group_player(self)#blits on float positions
+        self.players = groups.Group()#blits on float positions
         self.players.add(self.player)
 
     def load_map(self, previous_state, map_name, spawn = '1',fade = True):#fade out before loading the map
@@ -98,7 +99,6 @@ class Game_Objects():
         self.all_fgs.empty()
         self.camera_blocks.empty()
         self.bg_interact.empty()
-        self.reflections.empty()
         self.cosmetics.empty()
         self.layer_pause.empty()
 
@@ -138,9 +138,9 @@ class Game_Objects():
         self.loot.update()
         self.cosmetics.update()
         self.interactables.update()
-        self.reflections.update()
         self.weather.update()
         self.lights.update()
+        self.shader_draw.update()#housld be last
 
     def draw(self):
         self.all_bgs.draw()
@@ -154,11 +154,11 @@ class Game_Objects():
         self.eprojectiles.draw()
         self.loot.draw()
         self.platforms.draw()
-        self.cosmetics.draw()
-        self.reflections.draw()#do not need to send screen. Should be before fgs
+        self.cosmetics.draw()#Should be before fgs
         self.all_fgs.draw()
         #self.camera_blocks.draw()
-        self.lights.draw()#should be last
+        self.lights.draw()#should be second to last
+        self.shader_draw.draw()#housld be last
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
@@ -172,6 +172,9 @@ class Game_Objects():
             for projectile in self.eprojectiles.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), (int(projectile.hitbox[0]-self.camera.scroll[0]),int(projectile.hitbox[1]-self.camera.scroll[1]),projectile.hitbox[2],projectile.hitbox[3]),1)#draw hitbox
             for enemy in self.enemies.sprites():#go through the group
+                pygame.draw.rect(image, (0,0,255), [enemy.hitbox[0]-self.camera.scroll[0],enemy.hitbox[1]-self.camera.scroll[1],enemy.hitbox[2],enemy.hitbox[3]],2)#draw hitbox
+                pygame.draw.rect(image, (255,0,255), [enemy.rect[0]-self.camera.scroll[0],enemy.rect[1]-self.camera.scroll[1],enemy.rect[2],enemy.rect[3]],2)#draw hitbox
+            for enemy in self.npcs.sprites():#go through the group
                 pygame.draw.rect(image, (0,0,255), [enemy.hitbox[0]-self.camera.scroll[0],enemy.hitbox[1]-self.camera.scroll[1],enemy.hitbox[2],enemy.hitbox[3]],2)#draw hitbox
                 pygame.draw.rect(image, (255,0,255), [enemy.rect[0]-self.camera.scroll[0],enemy.rect[1]-self.camera.scroll[1],enemy.rect[2],enemy.rect[3]],2)#draw hitbox
             for cos in self.interactables.sprites():#go through the group
@@ -188,9 +191,18 @@ class Game_Objects():
                 pygame.draw.rect(image, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
             for light in self.lights.lights_sources:
                 pygame.draw.rect(image, (255,100,100), (int(light.hitbox[0]-self.camera.scroll[0]),int(light.hitbox[1]-self.camera.scroll[1]),light.hitbox[2],light.hitbox[3]),1)#draw hitbox
-            for reflect in self.reflections:
-                pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
-                pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+            #for reflect in self.reflections:
+            #    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+            #    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+            for reflect in self.all_bgs:
+                if type(reflect).__name__ == 'Reflection':
+                    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-reflect.parallax[0]*self.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+
+            for reflect in self.cosmetics:
+                if type(reflect).__name__ == 'Reflection':
+                    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-reflect.parallax[0]*self.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
 
             tex = self.game.display.surface_to_texture(image)

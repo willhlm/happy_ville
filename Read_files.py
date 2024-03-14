@@ -151,7 +151,7 @@ class Alphabet():
         self.char_size = (4,6)
         self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_']
         self.character_lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-        self.text_bg_dict = generic_sheet_reader("Sprites/utils/text_bg4.png",16,16,3,3)
+        self.text_bg_dict = generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3)
         sheet = generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))
 
         self.characters={}
@@ -182,7 +182,7 @@ class Alphabet():
                 pos = (x*self.char_size[0],y*self.char_size[1])
                 if not inverse_color:
                     text_surface.blit(self.characters[c],pos)
-                else:
+                else:#make it white
                     text_surface.blit(self.characters[c],pos)
                 x += 1
                 if x_max * y + x > limit: return self.game_objects.game.display.surface_to_texture(text_surface) #spot printing at limit
