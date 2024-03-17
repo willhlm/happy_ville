@@ -2,6 +2,7 @@
 
 in vec2 fragmentTexCoord;
 out vec4 colour;
+uniform sampler2D imageTexture;// texture in location 0
 
 uniform vec4 water_albedo = vec4(0.26, 0.23, 0.73, 1.0);
 uniform float water_opacity = 0.35;
@@ -11,11 +12,12 @@ float water_texture_limit = 0.45;
 uniform int wave_multiplyer = 6;
 uniform bool water_texture_on = true;
 uniform float reflection_X_offset = 0.0;
-uniform float reflection_Y_offset = 0.0;
+uniform float reflection_Y_offset = 0.43;
 uniform sampler2D noise_texture;
 uniform sampler2D noise_texture2;
 uniform float TIME;
 uniform vec2 u_resolution = vec2(640, 360);
+uniform vec2 scroll;
 
 uniform sampler2D SCREEN_TEXTURE;
 
@@ -39,8 +41,12 @@ void main() {
         COLOR.xyz = vec3(1.0) * water_texture_value;
     }
 
+    vec2 textureSize_var = vec2(textureSize(imageTexture, 0).xy);
+    float scale = textureSize_var.y/textureSize_var.x;
     // Reflect screen texture
-    vec4 current_texture = texture(SCREEN_TEXTURE, vec2(normalizedTexCoord.x + noise + reflection_X_offset, -normalizedTexCoord.y + reflection_Y_offset));
+    vec2 offset2 =  scroll - u_resolution*floor(scroll/u_resolution);
+
+    vec4 current_texture = texture(SCREEN_TEXTURE, vec2((textureSize_var.x/u_resolution.x)*normalizedTexCoord.x + noise + offset2.x + reflection_X_offset, -normalizedTexCoord.y*(textureSize_var.y/u_resolution.y) + reflection_Y_offset));
 
     // Mix the water and screen texture
     COLOR = mix(COLOR, current_texture, 0.5);

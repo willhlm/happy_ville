@@ -14,6 +14,7 @@ class Shader_draw():#Shaders applied to whole screen, Can do multiple ones
 
     def draw(self):
         shaders_keys = list(self.shaders.keys())
+        #layer = Shader_draw.layer
         for index in range(len(shaders_keys) - 1, -1, -1):#reverse order
             shader_program = shaders_keys[index]
             self.shaders[shader_program].draw()

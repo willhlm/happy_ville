@@ -19,6 +19,7 @@ class Vignette(Shaders):
     def draw(self):
         self.game_objects.shaders['vignette']['colour'] = self.colour
         self.game_objects.game.display.render(self.game_objects.shader_draw.layer.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['vignette'])#shader render
+        #return self.game_objects.game.screen#the result
 
 class Bloom(Shaders):
     def __init__(self, game_objects, **kwarg):
@@ -40,3 +41,4 @@ class Bloom(Shaders):
 
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.shader_draw.layer, shader = self.game_objects.shaders['bloom'])#shader render
         self.game_objects.game.display.render(self.game_objects.shader_draw.layer.texture, self.game_objects.game.screen)#shader render
+        #return self.game_objects.shader_draw.layer#the result

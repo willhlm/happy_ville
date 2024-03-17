@@ -67,14 +67,14 @@ class Circle_converge_2(Basic_states):
             self.entity.kill()
 
     def update_velocity(self):
-        self.sign = [sign(self.entity.true_pos[0] - self.entity.game_objects.player.hitbox.center[0]),sign(self.entity.true_pos[1] - self.entity.game_objects.player.hitbox.center[1])]
-
         x = self.entity.true_pos[0] - self.entity.game_objects.player.hitbox.center[0]
         y = self.entity.true_pos[1] - self.entity.game_objects.player.hitbox.center[1]
 
+        self.sign = [sign(x),sign(y)]
+
         angle = math.atan(y/x)
-        self.entity.velocity[0] -= 0.1*self.sign[0]*abs(math.cos(angle))*self.entity.game_objects.game.dt
-        self.entity.velocity[1] -= 0.1*self.sign[1]*abs(math.sin(angle))*self.entity.game_objects.game.dt
+        self.entity.velocity[0] = -self.sign[0]*abs(math.cos(angle))*self.entity.game_objects.game.dt * min(max(abs(x),2),20)
+        self.entity.velocity[1] = -self.sign[1]*abs(math.sin(angle))*self.entity.game_objects.game.dt * min(max(abs(y),2),20)
 
     def handle_input(self,input):
         if input == 'light_gone':#called from lights when lifetime < 0

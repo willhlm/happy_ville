@@ -84,8 +84,36 @@ class BG_Fade(BG_Block):
     def player_collision(self,player):
         self.shader_state.handle_input('alpha')
 
-class Reflection(Staticentity):#can be put in parallax layers
-    def __init__(self,pos,game_objects,parallax,size,dir, speed = 0, offset = 10):
+class Lighitning_barrier(Staticentity):#a shader to make lighning barrier
+    def __init__(self,pos,game_objects,parallax,size):
+        super().__init__(pos, game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
+        self.game_objects = game_objects
+        self.parallax = parallax
+
+        self.image = game_objects.game.display.make_layer(size)
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],16,self.rect[3])
+        self.time = 0
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.01
+
+    def draw(self):
+        self.game_objects.shaders['lightning']['TIME'] = self.time
+        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['lightning'])
+
+    def player_collision(self):#player collision
+        self.game_objects.player.take_dmg(1)
+        self.game_objects.player.currentstate.handle_input('interrupt')#interupts dash
+        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
+        if sign>0:
+            self.game_objects.player.knock_back([1,0])
+        else:
+            self.game_objects.player.knock_back([-1,0])
+
+class Reflection(Staticentity):#for making a "plane" water
+    def __init__(self,pos,game_objects,parallax,size,dir,texture_parallax = 1 ,speed = 0, offset = 10):
         super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.game_objects = game_objects
         self.parallax = parallax
@@ -98,8 +126,10 @@ class Reflection(Staticentity):#can be put in parallax layers
         self.water_noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.game_objects.shaders['noise_perlin']['u_resolution'] = game_objects.game.window_size
         #self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
+        self.texture_parallax = texture_parallax#0 means no parallax on the texture
+
         self.time = 0
-        self.water_speed = 0
+        self.water_speed = speed
         self.blur_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.colour = (0.39, 0.78, 1, 1)
 
@@ -107,34 +137,35 @@ class Reflection(Staticentity):#can be put in parallax layers
         self.time += self.game_objects.game.dt * 0.01
 
     def draw(self):
-            #noise
-            self.game_objects.shaders['noise_perlin']['u_time'] = self.time
-            self.game_objects.shaders['noise_perlin']['scroll'] = [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
-            self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
-            self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+        #noise
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.game_objects.shaders['noise_perlin']['scroll'] = [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
+        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-            self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y
-            self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+        self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y
+        self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-            #water
-            self.game_objects.shaders['water_perspective']['noise_texture'] = self.noise_layer.texture
-            self.game_objects.shaders['water_perspective']['noise_texture2'] = self.water_noise_layer.texture
-            self.game_objects.shaders['water_perspective']['TIME'] = self.time
+        #water
+        self.game_objects.shaders['water_perspective']['noise_texture'] = self.noise_layer.texture
+        self.game_objects.shaders['water_perspective']['noise_texture2'] = self.water_noise_layer.texture
+        self.game_objects.shaders['water_perspective']['TIME'] = self.time
+        self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
+        self.game_objects.shaders['water_perspective']['water_speed'] = self.water_speed
+        self.game_objects.shaders['water_perspective']['water_albedo'] = self.colour
+        self.game_objects.shaders['water_perspective']['texture_parallax'] =self.texture_parallax
 
-            self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
-            self.game_objects.shaders['water_perspective']['water_speed'] = self.water_speed
-            self.game_objects.shaders['water_perspective']['water_albedo'] = self.colour
+        self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]# the part to cut
+        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.shaders['water_perspective']['section'] = [self.reflect_rect[0],self.reflect_rect[1],self.reflect_rect[2],self.reflect_rect[3]]
 
-            self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]# the part to cut
-            blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.true_scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.true_scroll[1]]
-
-            #final rendering -> tmporary fix
-            if self.parallax[0] == 1:#don't blur if there is no parallax
-                self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water_perspective'])
-            else:
-                self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
-                self.game_objects.game.display.render(self.noise_layer.texture, self.blur_layer, shader = self.game_objects.shaders['water'])
-                self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
+        #final rendering -> tmporary fix
+        if self.parallax[0] == 1:#don't blur if there is no parallax
+            self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water_perspective'])
+        else:
+            self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
+            self.game_objects.game.display.render(self.noise_layer.texture, self.blur_layer, shader = self.game_objects.shaders['water_perspective'])
+            self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
 
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -2954,29 +2985,6 @@ class Fireplace(Interactable):
         self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],flicker=True,radius = 100))
         self.light_sources.append(self.game_objects.lights.add_light(self,radius = 50))
         self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],radius = 100))
-
-class Lighitning_barrier(Interactable):#traps
-    def __init__(self,pos,game_objects,size=[16,16]):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/lighitning_barrier/',game_objects)
-        if size != [16,16]:
-            self.scale(size)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,self.rect[3])
-
-    def player_collision(self):#player collision
-        self.game_objects.player.take_dmg(1)
-        self.game_objects.player.currentstate.handle_input('interrupt')#interupts dash
-        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-        if sign>0:
-            self.game_objects.player.knock_back([1,0])
-        else:
-            self.game_objects.player.knock_back([-1,0])
-
-    def scale(self,size):
-        for index,spirte in enumerate(self.sprites['idle']):
-            self.sprites['idle'][index] = pygame.transform.scale(spirte,size)
 
 class Spirit_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):
