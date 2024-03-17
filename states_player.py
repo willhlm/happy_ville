@@ -936,8 +936,8 @@ class Sword_up_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
+        self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.dir[1]=1
 
     def increase_phase(self):
         self.enter_state('Idle_main')
