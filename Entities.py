@@ -84,13 +84,13 @@ class BG_Fade(BG_Block):
     def player_collision(self,player):
         self.shader_state.handle_input('alpha')
 
-class Lighitning_barrier(Staticentity):#a shader to make lighning barrier
+class Lighitning(Staticentity):#a shader to make lighning barrier
     def __init__(self,pos,game_objects,parallax,size):
         super().__init__(pos, game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
         self.game_objects = game_objects
         self.parallax = parallax
 
-        self.image = game_objects.game.display.make_layer(size)
+        self.image = game_objects.game.display.make_layer(size).texture
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,self.rect[3])
         self.time = 0
@@ -101,7 +101,7 @@ class Lighitning_barrier(Staticentity):#a shader to make lighning barrier
     def draw(self):
         self.game_objects.shaders['lightning']['TIME'] = self.time
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['lightning'])
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['lightning'])
 
     def player_collision(self):#player collision
         self.game_objects.player.take_dmg(1)
@@ -111,6 +111,27 @@ class Lighitning_barrier(Staticentity):#a shader to make lighning barrier
             self.game_objects.player.knock_back([1,0])
         else:
             self.game_objects.player.knock_back([-1,0])
+
+class Sky(Staticentity):#for making a "plane" water
+    def __init__(self,pos,game_objects,parallax,size):
+        super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
+        self.game_objects = game_objects
+        self.parallax = parallax
+
+        self.empty = game_objects.game.display.make_layer(size)
+        self.empty2 = game_objects.game.display.make_layer(size)
+
+        self.time = 0
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.01
+
+    def draw(self):
+        self.game_objects.shaders['sky']['TIME'] = self.time
+        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.game.display.render(self.empty.texture, self.empty2,shader = self.game_objects.shaders['sky'])
+
+        self.game_objects.game.display.render(self.empty2.texture, self.game_objects.game.screen, position = blit_pos, flip = [False,True],shader = self.game_objects.shaders['pixelate'])
 
 class Reflection(Staticentity):#for making a "plane" water
     def __init__(self,pos,game_objects,parallax,size,dir,texture_parallax = 1 ,speed = 0, offset = 10):
@@ -1571,13 +1592,6 @@ class Aila_sword(Sword):
             self.kill()
 
     def update_hitbox(self):#called from aila's update_hitbox, every frame
-        if isinstance(self.currentstate, states_sword.Slash_1) or isinstance(self.currentstate, states_sword.Slash_2):
-            print('heeej')
-            self.hitbox[2] = 45
-            self.hitbox[3] = 29
-        else:
-            self.hitbox[2] = 40
-            self.hitbox[3] = 35
         super().update_hitbox()#follows the hitbox of aila depending on the direction
         self.currentstate.update_hitbox()
 

@@ -348,6 +348,18 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(ligth_source)
 
+            elif id == 27:#reflection object
+                reflection = Entities.Sky(object_position, self.game_objects, parallax, object_size)
+
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(reflection)
+                else:
+                    if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
+                        self.game_objects.cosmetics.add(reflection)
+                    else:
+                        self.game_objects.all_bgs.add(reflection)
+
+
             elif id == 28:#key items: soul_essence etc.
                 for property in properties:
                     if property['name'] == 'name':

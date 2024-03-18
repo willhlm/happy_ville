@@ -140,22 +140,19 @@ class Shining(Shader_states):#called for aila when particle hit when guide disso
 class Dissolve(Shader_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['_dissolve']
+        self.entity.shader = self.entity.game_objects.shaders['dissolve']
+        self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
         self.time = 0
-        self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)
-        self.empty_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)
 
     def update(self):
-        self.time += 0
+        self.time += self.entity.game_objects.game.dt*0.01
 
     def draw(self):
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
         self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.entity.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
-        self.entity.game_objects.shaders['noise_perlin']['scale'] = [100,100]#"standard"
-        self.entity.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
+        self.entity.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
+        self.entity.game_objects.game.display.render(self.entity.image, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        self.entity.game_objects.shaders['_dissolve']['dissolve_texture'] = self.noise_layer.texture
-
-        pos = (round(self.entity.true_pos[0]-self.entity.game_objects.camera.true_scroll[0]),round(self.entity.true_pos[1]-self.entity.game_objects.camera.true_scroll[1]))
-        self.entity.game_objects.game.display.render(self.entity.image, self.entity.game_objects.game.screen, position = pos, flip = bool(max(self.entity.dir[0],0)),shader = self.entity.game_objects.shaders['_dissolve'])#shader render
+        self.entity.game_objects.shaders['dissolve']['dissolve_texture'] = self.noise_layer.texture
+        self.entity.game_objects.shaders['dissolve']['dissolve_value'] = max(1 - self.time,0)

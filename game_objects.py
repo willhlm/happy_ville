@@ -149,12 +149,13 @@ class Game_Objects():
 
         self.enemies.draw()
         self.npcs.draw()
-        self.players.draw()
+
         self.fprojectiles.draw()
         self.eprojectiles.draw()
         self.loot.draw()
         self.platforms.draw()
         self.cosmetics.draw()#Should be before fgs
+        self.players.draw()        
         self.all_fgs.draw()
         #self.camera_blocks.draw()
         self.lights.draw()#should be second to last
