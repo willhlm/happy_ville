@@ -1,5 +1,7 @@
 #version 330 core
 
+//https://godotshaders.com/shader/cloudy-skies/
+
 in vec2 fragmentTexCoord;  // Texture coordinates
 out vec4 COLOR;
 

@@ -66,7 +66,7 @@ class BG_Fade(BG_Block):
         self.make_hitbox(positions,pos)
 
     def make_hitbox(self,positions,offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
-        x,y=[],[]
+        x,y = [],[]
         for pos in positions:
             x.append(pos[0]+offset_position[0])
             y.append(pos[1]+offset_position[1])
@@ -120,6 +120,36 @@ class Sky(Staticentity):#for making a "plane" water
 
         self.empty = game_objects.game.display.make_layer(size)
         self.empty2 = game_objects.game.display.make_layer(size)
+        self.noise_layer = game_objects.game.display.make_layer(size)
+        self.size = size
+        self.time = 0
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.01
+
+    def draw(self):
+        #noise
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
+        self.game_objects.shaders['noise_perlin']['u_time'] =self.time*0.1
+        self.game_objects.shaders['noise_perlin']['scroll'] =[0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
+        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        self.game_objects.shaders['cloud']['TIME'] = self.time
+        self.game_objects.shaders['cloud']['noise_texture'] = self.noise_layer.texture
+        self.game_objects.shaders['cloud']['scroll'] = [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
+
+        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
+
+class Sky2(Staticentity):#for making a "plane" water
+    def __init__(self,pos,game_objects,parallax,size):
+        super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
+        self.game_objects = game_objects
+        self.parallax = parallax
+
+        self.empty = game_objects.game.display.make_layer(size)
+        self.empty2 = game_objects.game.display.make_layer(size)
 
         self.time = 0
 
@@ -145,7 +175,6 @@ class Reflection(Staticentity):#for making a "plane" water
         self.empty = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.water_noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
-        self.game_objects.shaders['noise_perlin']['u_resolution'] = game_objects.game.window_size
         #self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
         self.texture_parallax = texture_parallax#0 means no parallax on the texture
 
@@ -159,6 +188,7 @@ class Reflection(Staticentity):#for making a "plane" water
 
     def draw(self):
         #noise
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.game_objects.shaders['noise_perlin']['scroll'] = [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
