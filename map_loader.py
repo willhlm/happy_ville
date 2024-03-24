@@ -120,7 +120,7 @@ class Level():
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
-            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1] - object_size[1]]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1] - object_size[1]]#topleft
             properties = obj.get('properties',[])
 
             if 'polygon' in obj.keys():#check for polygon type first
@@ -678,3 +678,12 @@ class Level():
                 for gate in self.references['gate']:
                     if lever.ID_key == gate.ID_key:
                         lever.add_gate(gate)
+
+class Bioms():
+    def __init__(self, game_objects):
+        self.game_objects = game_objects    
+
+class Light_forest(Bioms):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)    
+

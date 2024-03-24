@@ -3,14 +3,12 @@ import Read_files, particles, animation, sound, dialogue, states
 import states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bluebird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bluebird, AI_enemy, AI_reindeer
 import constants as C
-import time
 
-class Staticentity(pygame.sprite.Sprite):#no hitbox but image
-    def __init__(self, pos, game_objects, img = pygame.Surface((16,16),pygame.SRCALPHA,32)):
+class Staticentity(pygame.sprite.Sprite):#all enteties
+    def __init__(self, pos, game_objects):
         super().__init__()
         self.game_objects = game_objects
-        self.image = game_objects.game.display.surface_to_texture(img.convert_alpha())
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], 16,16)
         self.true_pos = list(self.rect.topleft)
 
         self.bounds = [-200, 800, -100, 350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
@@ -28,10 +26,16 @@ class Staticentity(pygame.sprite.Sprite):#no hitbox but image
         pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
+    def empty(self):
+        self.image.release()
+
 class BG_Block(Staticentity):
     def __init__(self, pos, game_objects, img, parallax):
-        super().__init__(pos, game_objects, img)
+        super().__init__(pos, game_objects)
         self.parallax = parallax
+        self.image = game_objects.game.display.surface_to_texture(img.convert_alpha())#need to save in memoery
+        self.rect[2] = self.image.width
+        self.rect[3] = self.image.height
         self.blur()#blur only during init
 
     def blur(self):
@@ -45,6 +49,9 @@ class BG_Block(Staticentity):
     def draw(self):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+
+    def empty(self):
+        self.image.release()
 
 class BG_Animated(BG_Block):
     def __init__(self,game_objects,pos,sprite_folder_path,parallax=(1,1)):
@@ -92,7 +99,7 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
 
         self.image = game_objects.game.display.make_layer(size).texture
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,self.rect[3])
+        self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])
         self.time = 0
 
     def update(self):
@@ -112,9 +119,12 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
         else:
             self.game_objects.player.knock_back([-1,0])
 
+    def player_noncollision(self):
+        pass
+
 class Sky(Staticentity):#for making a "plane" water
-    def __init__(self,pos,game_objects,parallax,size):
-        super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
+    def __init__(self, pos, game_objects, parallax, size):
+        super().__init__(pos,game_objects)
         self.game_objects = game_objects
         self.parallax = parallax
 
@@ -142,30 +152,9 @@ class Sky(Staticentity):#for making a "plane" water
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
 
-class Sky2(Staticentity):#for making a "plane" water
-    def __init__(self,pos,game_objects,parallax,size):
-        super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
-        self.game_objects = game_objects
-        self.parallax = parallax
-
-        self.empty = game_objects.game.display.make_layer(size)
-        self.empty2 = game_objects.game.display.make_layer(size)
-
-        self.time = 0
-
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.01
-
-    def draw(self):
-        self.game_objects.shaders['sky']['TIME'] = self.time
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.game.display.render(self.empty.texture, self.empty2,shader = self.game_objects.shaders['sky'])
-
-        self.game_objects.game.display.render(self.empty2.texture, self.game_objects.game.screen, position = blit_pos, flip = [False,True],shader = self.game_objects.shaders['pixelate'])
-
 class Reflection(Staticentity):#for making a "plane" water
     def __init__(self,pos,game_objects,parallax,size,dir,texture_parallax = 1 ,speed = 0, offset = 10):
-        super().__init__(pos,game_objects,pygame.Surface(size, pygame.SRCALPHA, 32))
+        super().__init__(pos,game_objects)
         self.game_objects = game_objects
         self.parallax = parallax
         self.offset = offset
@@ -952,7 +941,7 @@ class NPC(Character):
     def load_sprites(self):
         self.sprites = Read_files.load_sprites_dict("Sprites/Enteties/NPC/" + self.name + "/animation/", self.game_objects)
         img = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
-        self.portrait = self.game_objects.game.display.surface_to_texture(img)
+        self.portrait = self.game_objects.game.display.surface_to_texture(img)#need to save in memoery
 
     def update(self):
         super().update()
@@ -1216,9 +1205,11 @@ class Rhoutta_encounter(Boss):
 #stuff
 class Camera_Stop(Staticentity):
     def __init__(self, game_objects, size, pos, dir, offset):
-        super().__init__(pos, game_objects, pygame.Surface(size))
+        super().__init__(pos, game_objects)
         self.hitbox = self.rect.inflate(0,0)
         self.size = size
+        self.rect[2] = size[0]
+        self.rect[3] = size[1]
         self.offset = int(offset)#number of tiles in the "negative direction" in which the stop should apply
         self.currentstate = getattr(states_camerastop, 'Idle_' + dir)(self)
 
@@ -1238,35 +1229,6 @@ class Spawner(Staticentity):#an entity spawner
             pos=[self.rect.x+offset,self.rect.y]
             obj=getattr(sys.modules[__name__], self.entity)(pos,self.game_objects)
             self.game_objects.enemies.add(obj)
-
-class Light_glow(Staticentity):#a light glow anound an entity.
-    def __init__(self, entity, radius = 200,layers = 40):
-        super().__init__(entity.rect.center,entity.game_objects)
-        self.entity = entity
-        self.radius = radius
-        self.layers = layers
-        self.make_glow()
-        self.alpha = 255
-        self.image = self.entity.game_objects.game.display.surface_to_texture(self.image)
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.center = entity.rect.center
-
-    def update(self):
-        self.rect.center = self.entity.rect.center
-
-    def diminish(self):#slowly reduce the light
-        self.image.set_alpha(int(self.alpha))
-        self.alpha -= self.entity.game_objects.game.dt * self.slow_motion
-
-    def make_glow(self):#init
-        self.image = pygame.Surface((self.radius * 2, self.radius * 2),pygame.SRCALPHA,32).convert_alpha()
-        surface = self.image.copy()
-
-        constant = self.radius/self.layers
-        for i in range(self.layers):
-            temp = surface.copy()
-            pygame.draw.circle(temp,(80,80,80,1),temp.get_rect().center,i*constant+1)
-            self.image.blit(temp,[0,0],special_flags = pygame.BLEND_RGBA_ADD)
 
 class Dash_effect(Staticentity):
     def __init__(self, entity, alpha = 255):
@@ -1338,13 +1300,13 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
-        super().__init__([0,0],game_objects, pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32))
+        super().__init__([0,0],game_objects)
         if parallax[0] == 1: self.colour = (colour.g,colour.b,colour.a,0)
         else: self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
 
         self.shader_state = states_shader.Idle(self)
 
-        layer1 = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
+        layer1 = self.game_objects.game.display.make_layer(game_objects.game.window_size)#make an empty later
         layer1.clear(self.colour)
         self.image = layer1.texture#get the texture of the layer
 
@@ -2148,8 +2110,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.velocity = [random.uniform(0, 3),-4]
-        self.light = Light_glow(self,radius = 50, layers = 40)
-        self.game_objects.cosmetics.add(self.light)
+        #add light?
         self.twinkle()
 
     def twinkle(self, num = 3):
@@ -2417,8 +2378,8 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/GFX/spawneffect/',game_objects)
-        self.currentstate = states_basic.Once(self)#
-        self.image = self.sprites['once'][0]
+        self.currentstate = states_basic.Death(self)#
+        self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.finish = False#needed for the cutscene
 
@@ -2575,10 +2536,13 @@ class Path_col(Interactable):
         self.sprites = {'idle': [self.image]}
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
+        self.hitbox = self.rect.copy()
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
+
+    def draw(self):
+        pass
 
     def update(self):
         self.group_distance()
@@ -2604,6 +2568,9 @@ class Path_inter(Interactable):
         self.destination = destination
         self.destionation_area = destination[:destination.rfind('_')]
         self.spawn = spawn
+
+    def draw(self):
+        pass
 
     def update(self):
         self.group_distance()
@@ -2647,6 +2614,9 @@ class State_trigger(Interactable):
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
         self.event = event
+
+    def draw(self):
+        pass
 
     def update(self):
         pass

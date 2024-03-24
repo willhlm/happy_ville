@@ -104,7 +104,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'spirit_world_1','1')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -408,6 +408,17 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.background = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
         self.background.clear(50,50,50,100)
 
+    def initiate_buttons(self):
+        y_pos = 140
+        self.button_surfaces = {}
+        self.button_rects = {}
+        for b in self.buttons:
+            text = (self.game.game_objects.font.render(text = b))
+            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.button_surfaces[b] = text
+            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
+            y_pos += 20
+
     def update(self):
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
         self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
@@ -428,6 +439,13 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
 
         self.game.display.render(self.background.texture, self.game.screen)#shader render
 
+    def release_texture(self):
+        self.title.release()
+        self.bg.release()
+        self.background.release()
+        for key in self.button_surfaces.keys():
+            self.button_surfaces[key].release()
+
     def handle_events(self, event):
         if event[0]:
             if event[-1] == 'up':
@@ -443,16 +461,9 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             elif event[-1] == 'start':
                 self.exit_state()
 
-    def initiate_buttons(self):
-        y_pos = 140
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b))
-            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
-            y_pos += 20
+    def exit_state(self):
+        super().exit_state()
+        self.release_texture()
 
     def change_state(self):
         if self.current_button == 0:
@@ -1089,13 +1100,13 @@ class Cultist_encounter_gameplay(Gameplay):#initialised in the cutscene:if playe
 class Rhoutta_encounter_gameplay(Gameplay):#called from trigger before first rhoutta: shuold spawn lightning and a gap spawns, or something
     def __init__(self,game):
         super().__init__(game)
-        spawn_pos = (self.game.game_objects.camera.scroll[0] + 250,self.game.game_objects.camera.scroll[1]+200)
-        gate = Entities.Lighitning_barrier(spawn_pos,self.game.game_objects)
+        spawn_pos = (1520-40,416-336)#topleft position in tiled - 40 to spawn it behind aila
+        lightning = Entities.Lighitning(spawn_pos,self.game.game_objects, parallax = [1,1], size = [64,336])
         effect = Entities.Spawneffect(spawn_pos,self.game.game_objects)
-        effect.rect.midbottom = gate.rect.midbottom
+        effect.rect.midbottom = lightning.rect.midbottom
+        self.game.game_objects.interactables.add(lightning)
         self.game.game_objects.cosmetics.add(effect)
-        self.game.game_objects.interactables.add(gate)
-        self.game.game_objects.weather.lightning()
+        self.game.game_objects.weather.flash()
 
     def handle_input(self,input):
         if input == 'dmg':

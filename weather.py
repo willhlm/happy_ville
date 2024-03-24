@@ -5,38 +5,52 @@ from Entities import Animatedentity
 class Weather():
     def __init__(self,game_objects):
         self.game_objects = game_objects
-        self.wind = Wind(self)
         self.currentstate = states_weather.Idle(self)
+        self.wind = Wind(self)
 
     def update(self):
         self.currentstate.update()#bloew the wind from time to time
 
-    def lightning(self):
-        self.game_objects.cosmetics.add(Lightning(self.game_objects))
+    def flash(self):
+        self.game_objects.cosmetics.add(Flash(self.game_objects))
 
-    def blow(self,dir = [-1,0]):#called from currentstate
-        self.wind.blow(dir)
+    def blow(self):#called from currentstate
         self.game_objects.cosmetics.add(self.wind)
 
-class Wind(pygame.sprite.Sprite):
-    def __init__(self,weather):
+class Screen_shader(pygame.sprite.Sprite):#make a layer on screen, then use shaders to generate stuff. Better performance
+    def __init__(self, game_objects, parallax):
         super().__init__()
+        self.game_objects = game_objects
+        self.parallax = parallax
+        self.time = 0
+
+    @classmethod
+    def set_size(cls):
+        return 0
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+
+    def draw(self):
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, shader = self.shader)#shader render
+
+    @classmethod
+    def pool(cls, game_objects):
+        size = cls.set_size()
+        width = int(game_objects.game.window_size[0] + 2*size)#size of the canvas
+        height = int(game_objects.game.window_size[1] + 2*size)#size of the canvas
+        cls.image = game_objects.game.display.make_layer((width, height))
+
+class Wind(Screen_shader):#make a wind shader
+    def __init__(self, weather,parallax = [1,1], **kwarg):
+        super().__init__(weather.game_objects,parallax)
         self.weather = weather
-        img = pygame.Surface([weather.game_objects.game.window_size[0],weather.game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
-        self.rect = img.get_rect()
-        self.image = weather.game_objects.game.display.surface_to_texture(img)
         self.sprites = {'idle':[self.image]}
-        self.velocity = [0,0]
-        self.lifetime = 300
-        self.true_pos = [0,0]
+        self.lifetime = kwarg.get('lifetime',300)
         self.shader = None
-        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.velocity = [0,0]
 
-    def draw(self):#called from group
-        pos = (int(self.rect[0]-self.weather.game_objects.camera.scroll[0]),int(self.rect[1]-self.weather.game_objects.camera.scroll[1]))
-        self.weather.game_objects.game.display.render(self.image, self.weather.game_objects.game.screen, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
-
-    def blow(self,dir):#called when weather is initiated
+    def blow(self,dir):#called when weather starts blowing
         self.velocity = dir
 
     def update(self):
@@ -46,78 +60,35 @@ class Wind(pygame.sprite.Sprite):
 
     def finish(self):
         self.weather.currentstate.handle_input('Finish')
-        self.velocity = [0,0]
         self.lifetime = 300
         self.kill()
 
-    def update_pos(self):#not used
-        self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]
-        self.rect.topleft = self.true_pos
-
-class Lightning(pygame.sprite.Sprite):#white colour fades out and then in
-    def __init__(self, game_objects):
-        super().__init__()
-        self.game_objects = game_objects
-        self.image = pygame.Surface([game_objects.game.window_size[0],game_objects.game.window_size[1]], pygame.SRCALPHA, 32).convert_alpha()
-        self.image.fill((255,255,255,255))
-        self.rect = self.image.get_rect()
-        self.rect.topleft = [game_objects.camera.scroll[0], game_objects.camera.scroll[1]]
-        self.count = 0
+class Flash(Screen_shader):#white colour fades out and then in
+    def __init__(self, game_objects, parallax = 0):
+        super().__init__(game_objects, parallax)
         self.fade_length = 20
-        self.image.set_alpha(int(255/self.fade_length))
+        self.image.clear(255,255,255,int(255/self.fade_length))
+        self.shader = None
 
-    def draw(self):#called from group
-        pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+    def update_image(self):#called from group
+        alpha = int((self.fade_length - self.time)*(255/self.fade_length))
+        self.image.clear(255,255,255,alpha)
 
     def update(self):
-        self.update_img()
-        self.update_pos()
-        self.count += self.game_objects.game.dt
-        if self.count > self.fade_length:
+        super().update()
+        self.update_image()
+        if self.time > self.fade_length:
             self.kill()
-
-    def update_pos(self):
-        self.rect.topleft = [self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]
-
-    def update_img(self):
-        self.image.set_alpha(int((self.fade_length - self.count)*(255/self.fade_length)))
-
-class Screen_shader(pygame.sprite.Sprite):#make a layer on screen, then use shaders to generate stuff. Better performance
-    def __init__(self, game_objects, parallax):
-        super().__init__()
-        self.game_objects = game_objects
-        self.parallax = parallax
-
-        size = self.set_size()
-        width = int(self.game_objects.game.window_size[0] + 2*size)#size of the canvas
-        height = int(self.game_objects.game.window_size[1] + 2*size)#size of the canvas
-
-        self.image = self.game_objects.game.display.make_layer((width, height)).texture
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.true_pos = list(self.rect.topleft)
-        self.time = 0
-
-    def set_size(self):
-        return 0
-
-    def update(self):
-        self.time += self.game_objects.game.dt
-        self.update_pos()
-
-    def update_pos(self):#do not move the canvas
-        self.true_pos = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]#(0,0)
-        self.rect.topleft = self.true_pos.copy()
-
-    def draw(self):
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
 class Fog(Screen_shader):
     def __init__(self, game_objects, parallax, num):
         super().__init__(game_objects, parallax)
-        self.noise_layer = self.game_objects.game.display.make_layer((self.game_objects.game.window_size[0], self.game_objects.game.window_size[1]))
         self.shader = game_objects.shaders['fog']
+
+    @classmethod
+    def pool(cls, game_objects):
+        super().pool(game_objects)
+        cls.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
 
     def draw(self):#called before draw in group
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.005
@@ -125,7 +96,7 @@ class Fog(Screen_shader):
         self.game_objects.shaders['noise_perlin']['scale'] = (10,10)
         self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]
 
-        self.game_objects.game.display.render(self.image, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])
+        self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])
         self.shader['noise'] = self.noise_layer.texture
         self.shader['TIME'] = self.time*0.001
         self.shader['scroll'] = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]
@@ -137,9 +108,9 @@ class Particles_shader(Screen_shader):#particles. Better performance
         self.number_particles = number_particles#max 20, hard coded in shader
         self.set_parameters()
 
-    def set_size(self):#size of particle
-        self.canvas_size = 5 * self.parallax[0]
-        return self.canvas_size
+    @classmethod
+    def set_size(cls):#size of particle
+        return 5
 
     def set_parameters(self):#set stuff specific for the particles
         pass
@@ -167,13 +138,14 @@ class Vertical_circles(Particles_shader):
     def __init__(self, game_objects, parallax, number_particles):
         super().__init__(game_objects, parallax, number_particles)
         self.shader = self.game_objects.shaders['screen_circles']
-        self.shader['size'] = self.image.size
+        self.shader['size'] = self.image.texture.size
         self.shader['gradient'] = 1
         self.shader['number_particles'] = self.number_particles
         self.shader['colour'] = (255,255,255,255)
 
     def set_parameters(self):#parameters needed for the shader
         self.centers, self.radius, self.phase, self.velocity = [], [], [], []#make a list of stuff keep info as "attributes"
+        self.canvas_size = 5 * self.parallax[0]
         for i in range(0, self.number_particles):
             x = random.uniform(-self.canvas_size, self.game_objects.game.window_size[0] + self.canvas_size)
             y = random.uniform(-self.canvas_size, self.game_objects.game.window_size[1] + self.canvas_size)
@@ -226,7 +198,7 @@ class Rain(Particles_shader):
     def __init__(self, game_objects, parallax, number_particles):
         super().__init__(game_objects, parallax, number_particles)
         self.shader = self.game_objects.shaders['screen_rectangle']
-        self.shader['size'] = self.image.size
+        self.shader['size'] = self.image.texture.size
         self.shader['number_particles'] = self.number_particles
         self.shader['angle'] = 0#rotation angle of the rectangle
         colours=[(10,191,255,255),(152,245,255,255),(61,89,171,255),(100,149,237,255)]
@@ -260,7 +232,7 @@ class Snow(Rain):
     def draw(self):
         self.shader['centers'] = self.centers
         super().draw()
-        
+
     def update_vel(self, i):#how it should move
         self.velocity[i]  = [0.5*math.cos(self.time*0.01), 1]
 

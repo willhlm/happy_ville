@@ -20,7 +20,7 @@ class Basic_states():
 class Idle_right(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
+        self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
 
     def update(self):
         distance = [self.entity.rect.left - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
@@ -44,7 +44,7 @@ class Stop_right(Basic_states):
 class Idle_left(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
+        self.entity.game_objects.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
 
     def update(self):
         distance = [self.entity.rect.right - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
@@ -68,7 +68,7 @@ class Stop_left(Basic_states):
 class Idle_bottom(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
+        self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
 
     def update(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
@@ -109,7 +109,7 @@ class Stop_bottom(Basic_states):
 class Idle_top(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
+        self.entity.game_objects.camera.center[1] = self.entity.game_objects.map.PLAYER_CENTER[1] - self.entity.game_objects.player.rect[3]*0.5
 
     def update(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.bottom - self.entity.game_objects.player.hitbox.centery]

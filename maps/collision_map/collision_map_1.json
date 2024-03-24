@@ -22,7 +22,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -50,7 +50,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -73,24 +73,6 @@
                          "width":240,
                          "x":240,
                          "y":256
-                        }, 
-                        {
-                         "gid":104,
-                         "height":16,
-                         "id":1373,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"particle",
-                                 "type":"string",
-                                 "value":"Vertical_circles"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":400,
-                         "y":176
                         }, 
                         {
                          "gid":89,
@@ -123,7 +105,7 @@
                  "name":"bg1_1",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":100,
                  "x":0,
                  "y":0

@@ -155,7 +155,7 @@ class Game_Objects():
         self.loot.draw()
         self.platforms.draw()
         self.cosmetics.draw()#Should be before fgs
-        self.players.draw()        
+        self.players.draw()
         self.all_fgs.draw()
         #self.camera_blocks.draw()
         self.lights.draw()#should be second to last
