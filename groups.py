@@ -8,6 +8,11 @@ class Group(pygame.sprite.Group):#the rest
         for spr in self.sprites():
             spr.draw()#has to be just before the draw
 
+    def empty(self):
+        for spr in self.sprites():
+            spr.release_texture()#has to be just before the draw        
+        super().empty()
+
 class LayeredUpdates(pygame.sprite.LayeredUpdates):
     def __init__(self):
         super().__init__()
@@ -16,6 +21,11 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):
         for spr in self.sprites():
             spr.draw()#has to be just before the draw
 
+    def empty(self):
+        for spr in self.sprites():
+            spr.release_texture()#has to be just before the draw        
+        super().empty()
+
 class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries
     def __init__(self):
         super().__init__()
@@ -23,6 +33,11 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
     def update(self):
         for s in self.sprites():
             self.group_distance(s)
+
+    def empty(self):
+        for spr in self.sprites():
+            spr.release_texture()#has to be just before the draw        
+        super().empty()
 
     @staticmethod
     def group_distance(s):
@@ -47,6 +62,11 @@ class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside
     def update(self):
         for s in self.sprites():
             self.group_distance(s)
+
+    def empty(self):
+        for spr in self.sprites():
+            spr.release_texture()#has to be just before the draw        
+        super().empty()
 
     @staticmethod
     def group_distance(s):

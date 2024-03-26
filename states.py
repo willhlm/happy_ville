@@ -55,7 +55,7 @@ class Title_Menu(Game_State):
 
     def define_BG(self):
         size = (90,100)
-        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        bg = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
         pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
 
@@ -378,9 +378,9 @@ class Gameplay(Game_State):
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-    def handle_input(self,input):
+    def handle_input(self,input,**kwarg):
         if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game, duration = 20)
+            new_game_state = Pause_gameplay(self.game, kwarg.get('duration', 20))
             new_game_state.enter_state()
         elif input == 'death':#normal death
             self.game.game_objects.player.death()
@@ -845,15 +845,14 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
         pass
 
     def update(self):
-        super().update()
+        super().update()        
         self.timer += self.game.dt
-        if self.timer>500:
+        if self.timer > 500:
             self.exit_state()
 
     def exit_state(self):
         for camera_stop in self.camera_stops:
             self.game.game_objects.camera_blocks.add(camera_stop)
-
         self.game.game_objects.camera.exit_state()
         super().exit_state()
 

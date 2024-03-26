@@ -68,7 +68,7 @@ class Game_Objects():
         else:
             self.load_map2(map_name, spawn, fade)
 
-    def load_map2(self, map_name, spawn = '1',fade = True):#called from fadeout
+    def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout
         self.clean_groups()
         t1_start = perf_counter()
         self.map.load_map(map_name,spawn)
@@ -82,7 +82,7 @@ class Game_Objects():
     def load_bg_music(self):#called from fade
         if not self.map.area_change: return
         try:
-            self.sound.load_bg_sound(self.map.area_name)
+            self.sound.load_bg_sound(self.map.biome_name)
             self.sound.play_bg_sound()
         except FileNotFoundError:
             print("No BG music found")
@@ -102,7 +102,7 @@ class Game_Objects():
         self.cosmetics.empty()
         self.layer_pause.empty()
 
-    def collide_all(self):
+    def collide_all(self):        
         self.platform_collision()
 
         self.collisions.player_collision(self.loot)
@@ -197,14 +197,14 @@ class Game_Objects():
             #    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
             for reflect in self.all_bgs:
                 if type(reflect).__name__ == 'Reflection':
-                    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
-                    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-reflect.parallax[0]*self.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+                    pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                    pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             for reflect in self.cosmetics:
                 if type(reflect).__name__ == 'Reflection':
-                    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
-                    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-reflect.parallax[0]*self.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
-
+                    pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                    pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+                    
 
             tex = self.game.display.surface_to_texture(image)
             self.game.display.render(tex, self.game.screen)#shader render

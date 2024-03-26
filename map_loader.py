@@ -1,4 +1,4 @@
-import pygame, csv, math
+import pygame, csv, math, sys
 import Entities, Read_files, weather, entities_parallax, states, platforms
 import constants as C
 
@@ -8,49 +8,42 @@ class Level():
         self.PLAYER_CENTER = C.player_center
         self.TILE_SIZE = C.tile_size
         self.level_name = ''
-        self.area_name = ''
+        self.biome_name = ''
         self.area_change = True#a flag to chenge if we change area
+        self.biome = Biome(self)
 
     def load_map(self,map_name,spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
-        self.level_name = map_name.lower()
-        self.spawn = spawn
-        self.game_objects.lights.new_map()#set ambient default light and clear light sources
-        self.check_pause_sound()#pause the sound if we change area
+        self.level_name = map_name.lower()        
+        self.spawn = spawn         
+        self.game_objects.lights.new_map()#set ambient default light and clear light sources                   
+        self.check_biome()#pause the sound if we change area
         self.load_map_data()#load the map data
-        self.init_state_file()#need to be before load groups
-        self.load_groups()
-        self.map_specifics()#append any light effects depending on map
+        self.init_state_file()#need to be before load groups        
+        self.load_groups()        
+        self.set_camera()
         self.orginise_references()
 
-    def check_pause_sound(self):
-        self.area_change = self.level_name[:self.level_name.rfind('_')] != self.area_name
-        if self.area_change:
-            self.game_objects.sound.pause_bg_sound()
+    def set_camera(self):
+        self.game_objects.camera.reset_player_center()##need to be after load_group -> normal position      
+        self.biome.set_camera()#need to be after load_group  -> biome specific camera             
+
+    def check_biome(self):
+        self.area_change = self.level_name[:self.level_name.rfind('_')] != self.biome_name        
+        if self.area_change:#new biome
+            self.biome.clear_biome()            
+            self.biome_name = self.level_name[:self.level_name.rfind('_')]
+            self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize())(self)#make a class based on the name of the newstate: need to import sys           
+        else:#just a new room
+            self.biome.new_room()
 
     def init_state_file(self):
-        if not self.game_objects.world_state.state.get(self.level_name, False):#if it is the first time loading the map
+        if not self.game_objects.world_state.state.get(self.level_name, False):#if it is the first time loading the room
             self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
-
-    def map_specifics(self):
-        self.game_objects.camera.reset_player_center()
-        level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
-        if level_name == 'light_forest_cave':
-            self.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
-            self.game_objects.lights.add_light(self.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
-        elif self.level_name == 'rhoutta_encounter_1':#if it is a new game file
-            if self.spawn != '1': return
-            new_state = states.New_game(self.game_objects.game)
-            new_state.enter_state()
-            self.game_objects.camera.true_scroll = [self.game_objects.player.true_pos[0] - self.game_objects.camera.center[0], self.game_objects.player.true_pos[1] - self.game_objects.camera.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
-        elif self.level_name == 'rhoutta_encounter_2':
-            self.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
-
+ 
     def load_map_data(self):
-        level_name = self.level_name[:self.level_name.rfind('_')]#get the name up to last _
-        self.area_name = level_name
-
+        level_name = self.level_name[:self.level_name.rfind('_')]
         map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
         self.map_data = Read_files.format_tiled_json_group(map_data)
 
@@ -88,8 +81,6 @@ class Level():
 
     def load_groups(self):
         self.spritesheet_dict = self.read_all_spritesheets()#read the bg spritesheats, outside the loop
-        load_front_objects = {'rhoutta_encounter_front':self.load_rhoutta_encounter_objects,'light_forest_front':self.load_light_forest_objects,'light_forest_cave_front':self.load_light_forest_cave_objects,'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
-        load_back_objects = {'rhoutta_encounter_back':self.load_rhoutta_encounter_objects,'light_forest_back':self.load_light_forest_objects,'light_forest_cave_back':self.load_light_forest_cave_objects}#the keys are the naes of the object in tiled
         self.game_objects.all_bgs.reference = {}#to store the reference positions of each static bg layer or other information
 
         for group in self.map_data['groups']:
@@ -99,19 +90,19 @@ class Level():
             if 'bg' in group: self.layer = 'bg'
             elif 'fg' in group: self.layer = 'fg'
 
-            self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_back_objects)#objects behind layers
-            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
-            self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,load_front_objects)#object infron of layers
+            self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'back')#objects behind layers
+            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)                        
+            self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'front')#object infron of layers
 
-    def load_objects(self, data, parallax, offset, method):
-        for object in method.keys():#load each object in group
-            if not data.get(object[object.rfind('_')+1:], False): continue#if false, go to next
-            if object[object.rfind('_')+1:] == 'back' or object[object.rfind('_')+1:] == 'front':#map specifics
-                if object[:object.rfind('_')] != self.level_name[:self.level_name.rfind('_')]: continue#check if it macthes the map
-                key = self.level_name[:self.level_name.rfind('_')+1] + object[object.rfind('_')+1:]#make sure to only load the rellavant map
-            else:#statics and interactables
-                key = object
-            method[key](data[object[object.rfind('_')+1:]],parallax,offset)
+    def load_objects(self, data, parallax, offset, position):
+        for object in data.keys():
+            if object == 'statics' or object == 'interactables':
+                if position == 'back': return#only load statics and interactables in the front
+                load_objects = {'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
+                load_objects[object](data[object], parallax, offset)    
+            else:#front and back objects                
+                if object == position:#load it at back or front
+                    self.biome.load_objects(data[object], parallax, offset)
 
     def load_statics(self,data,parallax,offset):#load statics and collision
         chest_int = 1
@@ -461,111 +452,6 @@ class Level():
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 
-    def load_light_forest_objects(self,data,parallax,offset):#load objects back of layers
-        for obj in data['objects']:
-            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
-            object_size = [int(obj['width']),int(obj['height'])]
-            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['objects_firstgid']
-
-            if id == 2:#light forest tree tree
-                new_tree = entities_parallax.Light_forest_tree1(object_position,self.game_objects,parallax)
-                if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(new_tree)
-                else:
-                    self.game_objects.all_bgs.add(new_tree)
-
-            elif id == 3:#light forest tree tree
-                new_tree = entities_parallax.Light_forest_tree2(object_position,self.game_objects,parallax)
-                if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(new_tree)
-                else:
-                    self.game_objects.all_bgs.add(new_tree)
-
-            elif id == 4:#light forest breakable collisio block
-                new_plarform = platforms.Breakable_block_1(object_position,self.game_objects)
-                if self.layer == 'fg':
-                    self.game_objects.platforms.add(new_plarform)
-                else:
-                    self.game_objects.platforms.add(new_plarform)
-
-            elif id == 5:#cocoon
-                if parallax == [1,1]:#if BG1 layer
-                    new_cocoon = Entities.Cocoon(object_position, self.game_objects)
-                    self.game_objects.interactables.add(new_cocoon)
-                else:#if in parallax layers
-                    new_cocoon = entities_parallax.Cocoon(object_position, self.game_objects, parallax)
-                    if self.layer == 'fg':
-                        self.game_objects.all_fgs.add(new_cocoon)
-                    else:
-                        self.game_objects.all_bgs.add(new_cocoon)
-
-            elif id == 8:#cocoon
-                new_cocoon = Entities.Cocoon_boss(object_position, self.game_objects)
-                self.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
-                self.game_objects.interactables.add(new_cocoon)
-
-            elif id == 9:
-                pass
-
-    def load_light_forest_cave_objects(self,data,parallax,offset):
-        for obj in data['objects']:
-            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
-            object_size = [int(obj['width']),int(obj['height'])]
-            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['objects_firstgid']
-
-            if id == 0:#cave grass
-                if parallax == [1,1]:#if BG1 layer
-                    new_grass = Entities.Cave_grass(object_position, self.game_objects)
-                    self.game_objects.interactables.add(new_grass)
-                else:#if in parallax layers
-                    new_grass = entities_parallax.Cave_grass(object_position, self.game_objects, parallax)
-                    if self.layer == 'fg':
-                        self.game_objects.all_fgs.add(new_grass)
-                    else:
-                        self.game_objects.all_bgs.add(new_grass)
-
-            elif id == 1:#ljusmaksar
-                new_grass = entities_parallax.Ljusmaskar(object_position, self.game_objects, parallax)
-                if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(new_grass)
-                else:
-                    self.game_objects.all_bgs.add(new_grass)
-
-            elif id == 2:#droplet
-                new_drop = entities_parallax.Droplet_source(object_position, self.game_objects, parallax)
-                if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(new_drop)
-                else:
-                    self.game_objects.all_bgs.add(new_drop)
-
-            elif id == 3:#falling rock trap
-                new_rock = entities_parallax.Falling_rock_source(object_position, self.game_objects, parallax)
-                if self.layer == 'fg':
-                    self.game_objects.all_fgs.add(new_rock)
-                else:
-                    self.game_objects.all_bgs.add(new_rock)
-
-    def load_rhoutta_encounter_objects(self,data,parallax,offset):
-        for obj in data['objects']:
-            new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
-            object_size = [int(obj['width']),int(obj['height'])]
-            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['objects_firstgid']
-
-            if id == 2:#time collision
-                types = 'dust'
-                for property in properties:
-                    if property['name'] == 'particles':
-                        types = property['value']
-
-                new_platofrm = platforms.Rhoutta_encounter_1( self.game_objects, object_position,object_size,types)
-                self.game_objects.platforms.add(new_platofrm)
-
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects
         return round(1/parallax[0])
@@ -649,7 +535,7 @@ class Level():
                 for fade in blit_fade_surfaces.keys():
                     if 'fade' in fade:#is needed
                         bg = Entities.BG_Fade(pos, self.game_objects, blit_fade_surfaces[fade],parallax,blit_fade_pos[fade])
-                        if self.layer == 'bg':self.game_objects.all_bgs.add(bg)#bg
+                        if self.layer == 'bg': self.game_objects.all_bgs.add(bg)#bg
                         else: self.game_objects.all_fgs.add(bg)
                         self.game_objects.bg_fade.add(bg)
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
@@ -679,11 +565,189 @@ class Level():
                     if lever.ID_key == gate.ID_key:
                         lever.add_gate(gate)
 
-class Bioms():
-    def __init__(self, game_objects):
-        self.game_objects = game_objects    
+class Biome():
+    def __init__(self, level):
+        self.level = level    
 
-class Light_forest(Bioms):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)    
+    def load_objects(self):
+        pass
 
+    def set_camera(self):
+        pass               
+
+    def new_room(self):#called wgen a new room is loaded
+        pass
+
+    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
+        self.level.game_objects.sound.pause_bg_sound()      
+        self.release_textures()
+
+    def release_textures(self):
+        pass
+
+class Light_forest(Biome):
+    def __init__(self, level):
+        super().__init__(level) 
+
+    def load_objects(self, data, parallax, offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 2:#light forest tree tree
+                new_tree = entities_parallax.Light_forest_tree1(object_position,self.level.game_objects,parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.level.game_objects.all_bgs.add(new_tree)
+
+            elif id == 3:#light forest tree tree
+                new_tree = entities_parallax.Light_forest_tree2(object_position,self.level.game_objects,parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.level.game_objects.all_bgs.add(new_tree)
+
+            elif id == 4:#light forest breakable collisio block
+                new_plarform = platforms.Breakable_block_1(object_position,self.level.game_objects)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.platforms.add(new_plarform)
+                else:
+                    self.level.game_objects.platforms.add(new_plarform)
+
+            elif id == 5:#cocoon
+                if parallax == [1,1]:#if BG1 layer
+                    new_cocoon = Entities.Cocoon(object_position, self.level.game_objects)
+                    self.level.game_objects.interactables.add(new_cocoon)
+                else:#if in parallax layers
+                    new_cocoon = entities_parallax.Cocoon(object_position, self.level.game_objects, parallax)
+                    if self.level.layer == 'fg':
+                        self.level.game_objects.all_fgs.add(new_cocoon)
+                    else:
+                        self.level.game_objects.all_bgs.add(new_cocoon)
+
+            elif id == 8:#cocoon
+                new_cocoon = Entities.Cocoon_boss(object_position, self.game_objects)
+                self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
+                self.level.game_objects.interactables.add(new_cocoon)
+
+            elif id == 9:
+                pass
+
+class Rhoutta_encounter(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+
+    def new_room(self):        
+        if self.level.level_name == 'rhoutta_encounter_2':
+            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230        
+
+    def set_camera(self):
+        if self.level.level_name == 'rhoutta_encounter_1' and self.level.spawn == '1':#if it a new game
+            new_state = states.New_game(self.level.game_objects.game)
+            new_state.enter_state()            
+        
+    def load_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 2:#time collision
+                types = 'dust'
+                for property in properties:
+                    if property['name'] == 'particles':
+                        types = property['value']
+
+                new_platofrm = platforms.Rhoutta_encounter_1( self.level.game_objects, object_position,object_size,types)
+                self.level.game_objects.platforms.add(new_platofrm)
+
+class Light_forest_cave(Biome):
+    def __init__(self, level):
+        super().__init__(level)       
+        self.new_room()
+    
+    def new_room(self):
+       self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
+       self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+ 
+    def load_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['objects_firstgid']
+
+            if id == 0:#cave grass
+                if parallax == [1,1]:#if BG1 layer
+                    new_grass = Entities.Cave_grass(object_position, self.level.game_objects)
+                    self.level.game_objects.interactables.add(new_grass)
+                else:#if in parallax layers
+                    new_grass = entities_parallax.Cave_grass(object_position, self.level.game_objects, parallax)
+                    if self.level.layer == 'fg':
+                        self.level.game_objects.all_fgs.add(new_grass)
+                    else:
+                        self.level.game_objects.all_bgs.add(new_grass)
+
+            elif id == 1:#ljusmaksar
+                new_grass = entities_parallax.Ljusmaskar(object_position, self.level.game_objects, parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_grass)
+                else:
+                    self.level.game_objects.all_bgs.add(new_grass)
+
+            elif id == 2:#droplet
+                new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_drop)
+                else:
+                    self.level.game_objects.all_bgs.add(new_drop)
+
+            elif id == 3:#falling rock trap
+                new_rock = entities_parallax.Falling_rock_source(object_position, self.level.game_objects, parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_rock)
+                else:
+                    self.level.game_objects.all_bgs.add(new_rock)        
+
+class Light_forest_mountain(Biome):  
+    def __init__(self, level):
+        super().__init__(level)  
+
+class Village(Biome):  
+    def __init__(self, level):
+        super().__init__(level)   
+
+class Village_ola(Biome):  
+    def __init__(self, level):
+        super().__init__(level)   
+
+class Village_cave(Biome):  
+    def __init__(self, level):
+        super().__init__(level)   
+
+class Wakeup_forest(Biome):  
+    def __init__(self, level):
+        super().__init__(level) 
+
+class Forest_path(Biome):        
+    def __init__(self, level):
+        super().__init__(level)   
+
+class Spirit_world(Biome):        
+    def __init__(self, level):
+        super().__init__(level)   
+
+class cultist_hideout(Biome):        
+    def __init__(self, level):
+        super().__init__(level)           
+
+class collision_map(Biome):        
+    def __init__(self, level):
+        super().__init__(level)             

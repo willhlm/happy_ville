@@ -3,9 +3,9 @@ import Entities, states_time_collision, animation, Read_files, states_basic, sta
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
-    def __init__(self,pos,size = (16,16)):
+    def __init__(self, pos, size = (16,16)):
         super().__init__()
-        self.rect = pygame.Rect(pos,size)
+        self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
         self.hitbox = self.rect.inflate(0,0)
@@ -23,6 +23,9 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         pass
 
     def take_dmg(self,projectile,dmg):#called from projectile
+        pass
+
+    def release_texture(self):
         pass
 
 class Collision_block(Platform):
@@ -74,6 +77,11 @@ class Gate(Platform):#a gate that is owned by the lever
 
     def draw(self):
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
+
+    def release_texture(self):#called when .kill() and empty group
+        for state in self.sprites.keys():
+            for frame in range(0,len(self.sprites[state])):
+                self.sprites[state][frame].release()   
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust', go_through = True):
@@ -273,7 +281,12 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
 
     def draw(self):
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#int seem nicer than round
-        
+
+    def release_texture(self):#called when .kill() and empty group
+        for state in self.sprites.keys():
+            for frame in range(0,len(self.sprites[state])):
+                self.sprites[state][frame].release()   
+
 class Rhoutta_encounter_1(Collision_time):
     def __init__(self,game_objects,pos,size,run_particle,go_through=True):
         super().__init__(game_objects,pos,size,run_particle,go_through)
@@ -319,6 +332,11 @@ class Breakable_block(Collision_block):#breakable collision blocks
 
     def draw(self):
         self.game_objects.game.screen.blit(self.image, (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
+
+    def release_texture(self):#called when .kill() and empty group
+        for state in self.sprites.keys():
+            for frame in range(0,len(self.sprites[state])):
+                self.sprites[state][frame].release()   
 
 class Breakable_block_1(Breakable_block):
     def __init__(self, pos, game_objects,run_particle='dust'):

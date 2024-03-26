@@ -11,46 +11,30 @@ class Enemy_states(Entity_States):
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-
-    def handle_input(self,input):
-        if input=='Walk':
-             self.enter_state('Walk')
-        elif input=='Fly':
-             self.enter_state('Fly')
-        elif input=='Eat':
-             self.enter_state('Eat')
+        self.entity.acceleration[0]=0
 
 class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-
-    def handle_input(self,input):
-        if input=='Idle':
-             self.enter_state('Idle')
-        elif input=='Fly':
-             self.enter_state('Fly')
-        elif input=='Eat':
-             self.enter_state('Eat')
+        self.entity.acceleration[0]=0.5
 
 class Eat(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-
-    def handle_input(self,input):
-        if input=='Fly':
-             self.enter_state('Fly')
+        self.entity.acceleration[0]=0
 
     def increase_phase(self):
+        self.entity.AI.finish_animation()
         self.enter_state('Idle')
 
 class Fly(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.acceleration=[0,0]
-        self.entity.friction=[0,0]
-        self.lifetime=200
-        rand=random.randint(2,7)
-        sign=random.choice([-1,1])
+        self.entity.acceleration = [0,0]
+        self.entity.friction = [0,0]
+        self.lifetime = 200
+        rand = random.randint(2,7)
+        sign = random.choice([-1,1])
         self.dir[0]=sign
         self.entity.velocity=[sign*rand,-rand]
 
@@ -62,6 +46,7 @@ class Fly(Enemy_states):
 class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.acceleration = [0,0]
 
     def increase_phase(self):
         self.entity.dead()

@@ -21,7 +21,7 @@ class Idle(Shader_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['idle']
-
+ 
     def handle_input(self,input):
         if input == 'Hurt':
             self.enter_state('Hurt')

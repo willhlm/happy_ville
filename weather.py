@@ -3,7 +3,7 @@ import Read_files, states_weather
 from Entities import Animatedentity
 
 class Weather():
-    def __init__(self,game_objects):
+    def __init__(self, game_objects):
         self.game_objects = game_objects
         self.currentstate = states_weather.Idle(self)
         self.wind = Wind(self)

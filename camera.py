@@ -27,10 +27,9 @@ class Camera():
         for stop in self.game_objects.camera_blocks:#apply cameras stopp
             stop.update()
             stop.currentstate.init_pos()
-
-        #if self.center[1] == self.original_center[1]: offset_y = 0#if there was no cameras stop
-        #else: offset_y = 0#if there was a camera stop
-
+        self.set_camera_position()
+        
+    def set_camera_position(self):
         self.true_scroll = [self.game_objects.player.true_pos[0] - self.center[0], self.game_objects.player.true_pos[1] - self.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
 class Camera_shake(Camera):
@@ -103,15 +102,12 @@ class Cultist_encounter(Cutscenes):
 
 class New_game(Cutscenes):#initialised in New_game state
     def __init__(self, game_objects, scroll):
-        super().__init__(game_objects, scroll)
-        self.timer = 5000
+        super().__init__(game_objects, scroll)        
         self.update_stop()
-        self.center = [self.game_objects.camera.center[0],1000]#[176,230]
+        self.center = [self.game_objects.camera.center[0],1000]#[176,230]        
+        self.set_camera_position()
 
-    def update(self):
-        self.timer -= self.game_objects.game.dt
-        if self.timer < 0:
-            self.exit_state()
+    def update(self):        
         self.center[1] -= 2*self.game_objects.game.dt
         self.center[1] = max(230,self.center[1])
         super().update()
