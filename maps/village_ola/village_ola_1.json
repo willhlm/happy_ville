@@ -918,6 +918,114 @@
                          "width":16,
                          "x":592,
                          "y":464
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":111,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3600,
+                         "y":464
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":112,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3632,
+                         "y":464
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":113,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3584,
+                         "y":464
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":114,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2416,
+                         "y":480
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":115,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2448,
+                         "y":480
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":116,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2400,
+                         "y":480
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -955,7 +1063,7 @@
          "y":0
         }],
  "nextlayerid":56,
- "nextobjectid":111,
+ "nextobjectid":117,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -41,6 +41,9 @@ class Screen_shader(pygame.sprite.Sprite):#make a layer on screen, then use shad
         height = int(game_objects.game.window_size[1] + 2*size)#size of the canvas
         cls.image = game_objects.game.display.make_layer((width, height))
 
+    def release_texture(self):
+        pass
+
 class Wind(Screen_shader):#make a wind shader
     def __init__(self, weather,parallax = [1,1], **kwarg):
         super().__init__(weather.game_objects,parallax)

@@ -154,6 +154,11 @@ class Waterfall(Staticentity):#not woring yet
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.time = 0
 
+    def release_texture(self):
+        self.empty.release()
+        self.empty2.release()
+        self.noise_layer.release()
+
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
 
@@ -1366,6 +1371,9 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
         layer1 = self.game_objects.game.display.make_layer(game_objects.game.window_size)#make an empty later
         layer1.clear(self.colour)
         self.image = layer1.texture#get the texture of the layer
+
+    def release_texture(self):
+        self.image.release()
 
     def update(self):
         self.true_pos = [self.parallax[0]*self.game_objects.camera.scroll[0], self.parallax[1]*self.game_objects.camera.scroll[1]]#this is [0,0]

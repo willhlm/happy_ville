@@ -146,16 +146,15 @@ class Game_Objects():
         self.all_bgs.draw()
         self.interactables.draw()#should be before bg_interact
         self.bg_interact.draw()
-
+        
         self.enemies.draw()
         self.npcs.draw()
-
         self.fprojectiles.draw()
         self.eprojectiles.draw()
         self.loot.draw()
         self.platforms.draw()
-        self.cosmetics.draw()#Should be before fgs
         self.players.draw()
+        self.cosmetics.draw()#Should be before fgs
         self.all_fgs.draw()
         #self.camera_blocks.draw()
         self.lights.draw()#should be second to last
