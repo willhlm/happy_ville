@@ -18,9 +18,12 @@ uniform vec2 gap_stretch = vec2(0.8, 0.05);
 uniform vec2 refraction_stretch = vec2(2.0, 0.8);
 uniform float refraction_strength = 0.005;//flickers if this is too high
 
-uniform vec4 water_tint  = vec4(0.2, 0.6, 1.0, 0.4);
-uniform vec4 water_highlight= vec4(1.0, 1.0, 1.0, 0.3);
-uniform float speed = -1.0;
+uniform vec4 water_tint  = vec4(0.30, 0.45, 0.41, 0.8);
+uniform vec4 water_highlight= vec4(0.38, 0.572, 0.52, 0.8);
+uniform vec4 water_highlight2= vec4(0.53,0.70,0.682, 0.8);
+uniform vec4 water_highlight3= vec4(0.76,0.85,0.909, 0.8);
+
+uniform float speed = -2.0;
 uniform float flow_gaps = 0;
 uniform float highlight_width = 0.02;
 uniform vec2 u_resolution = vec2(640, 360);
@@ -46,24 +49,26 @@ void main()
 	vec4 color = vec4(1.0);
 	
 	// Define what values will be the water highlight color (the gap border)
-	float inner_edge = flow_gaps + highlight_width;
+	float inner_edge = 2 * (flow_gaps + highlight_width);
 	
 	// See if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
-	if (gap_mask.x < inner_edge)
-	{
-		color.rgb = mix(refraction.rgb, water_highlight.rgb, water_highlight.a);
-	}
-	else
-	{
-		color.rgb = mix(refraction.rgb, water_tint.rgb, water_tint.a);
-	}
-	
-	// If the value is below the gap threshhold make it transparent (a gap)
-	if (gap_mask.x < flow_gaps)
-	{
-		color.a = 0.0;
-	}
-
+    // Check if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
+    if (gap_mask.x < 0.2*inner_edge)
+    {
+        color.rgb = mix(refraction.rgb, water_highlight.rgb, water_highlight.a);
+    }
+    else if (gap_mask.x < 0.7 * inner_edge) // Example condition for using water_highlight2
+    {
+        color.rgb = mix(refraction.rgb, water_highlight2.rgb, water_highlight2.a);
+    }
+     else if (gap_mask.x < 0.8 * inner_edge) // Example condition for using water_highlight2
+    {
+        color.rgb = mix(refraction.rgb, water_highlight3.rgb, water_highlight3.a);
+    }
+    else
+    {
+        color.rgb = mix(refraction.rgb, water_tint.rgb, water_tint.a);
+    }
 	// Crate Edge Shape //
 	
 	// Set the shape for the top and bottom edges. Use water_mask as shape but with other values to flatten it out horizontally. 
@@ -80,5 +85,15 @@ void main()
 	color.a = mix(0.0, color.a, step(UV.y + water_edge.y * 0.1, 0.95));  //Bottom edge
 	color.a = mix(color.a, 0.0, step(UV.y - water_edge.y * 0.05, 0.05)); //Top edge
 	
+	// Calculate brightness adjustment based on y-coordinate    
+	// Apply brightness adjustment to the color
+	vec3 adjustedColor = color.rgb /pow(1-fragmentTexCoord.y,0.4);
+    
+	// Ensure the adjusted color components are within [0, 1]
+	adjustedColor = clamp(adjustedColor, 0.0, 1.0);
+    
+	// Assign the adjusted color to the final color
+	color.rgb = adjustedColor;
+
 	colour = color;
 }

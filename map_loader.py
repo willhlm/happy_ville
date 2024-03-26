@@ -374,6 +374,17 @@ class Level():
                 new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
                 self.game_objects.interactables.add(new_trap)
 
+            elif id == 34:#reflection object
+                reflection = Entities.Waterfall(object_position, self.game_objects, parallax, object_size)
+
+                if self.layer == 'fg':
+                    self.game_objects.all_fgs.add(reflection)
+                else:
+                    if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
+                        self.game_objects.cosmetics.add(reflection)
+                    else:
+                        self.game_objects.all_bgs.add(reflection)
+
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
         for obj in data['objects']:

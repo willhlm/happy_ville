@@ -141,7 +141,7 @@ class Sky(Staticentity):#for making a "plane" water
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
 
 class Waterfall(Staticentity):#not woring yet
-    def __init__(self,pos,game_objects,parallax,size,dir,texture_parallax = 1 ,speed = 0, offset = 10):
+    def __init__(self,pos,game_objects,parallax,size,texture_parallax = 1 ,speed = 0):
         super().__init__(pos,game_objects)
         self.game_objects = game_objects
         self.parallax = parallax                
@@ -160,9 +160,9 @@ class Waterfall(Staticentity):#not woring yet
     def draw(self):
         #noise        
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
         self.game_objects.shaders['noise_perlin']['scroll'] =[0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.shaders['noise_perlin']['scale'] = [50,50]#"standard"
+        self.game_objects.shaders['noise_perlin']['scale'] = [70,70]#"standard"
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #water
@@ -960,7 +960,6 @@ class Cultist_warrior(Enemy):
         super().dead()
         if self.gameplay_state: self.gameplay_state.incrase_kill()
 
-class John(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/john/',game_objects)
