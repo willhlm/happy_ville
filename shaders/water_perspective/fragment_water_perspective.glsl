@@ -45,5 +45,11 @@ void main() {
     COLOR = mix(COLOR, current_texture, 0.5);
     COLOR = mix(COLOR, water_albedo, water_opacity);
 
+    // Defining the transition range
+    float transitionRange = 0.1;
+
+    // Applying the alpha modification based on the noise with smooth transition
+    COLOR.a *= smoothstep(0.0, transitionRange,abs(1-normalizedTexCoord2.y));
+
     colour = COLOR;
 }

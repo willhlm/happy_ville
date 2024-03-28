@@ -95,14 +95,12 @@ class Collision_oneway_up(Platform):
     def collide_y(self,entity):
         if entity.velocity[1] < 0: return#going up
         if entity.go_through: return
-        offset = entity.velocity[1] + 1
+        offset = entity.velocity[1] + abs(entity.velocity[0])
         if entity.hitbox.bottom <= self.hitbox.top + offset:
             entity.down_collision(self.hitbox.top)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
-        else:#going up
-            pass
 
 class Collision_right_angle(Platform):#ramp
     def __init__(self, pos, points, go_through = True):
@@ -177,7 +175,14 @@ class Collision_right_angle(Platform):#ramp
                 else:
                     self.orientation = 2
 
-    def collide(self,entity):#called through update
+    def get_target(self,entity):
+        if self.orientation ==1:
+            rel_x = self.hitbox.right - entity.hitbox.left
+        elif self.orientation == 0:
+            rel_x = self.hitbox.right - entity.hitbox.left
+        return -rel_x*self.ratio + self.hitbox.bottom
+
+    def collide(self,entity):#called in collisions
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
@@ -214,7 +219,7 @@ class Collision_right_angle(Platform):#ramp
         elif not entity.go_through:
             entity.velocity[1] = C.max_vel[1]#make aila sticj to ground to avoid falling animation
             entity.down_collision(self.target)
-            entity.update_rect_y()
+            entity.update_rect_y()           
 
 class Collision_dmg(Platform):#"spikes"
     def __init__(self,pos,size):

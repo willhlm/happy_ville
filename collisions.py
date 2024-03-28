@@ -12,7 +12,7 @@ class Collisions():
 
     def pass_through(self, entity):#called when pressing down
         hitbox = self.game_objects.player.hitbox.copy()
-        offset = 2/self.game_objects.game.dt#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
+        offset = 1/self.game_objects.game.dt#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
         hitbox.bottom += offset
 
         for ramp in self.game_objects.platforms_ramps.sprites():
@@ -30,7 +30,9 @@ class Collisions():
        #     self.game_objects.player.go_through = platform.go_through#a flag that determines if one can go through
 
         if ramp:
-            if ramp.target > self.game_objects.player.hitbox.bottom + offset: return #if from above, do nothing               
+            target = ramp.get_target(self.game_objects.player)#in case there are multiple enteties, need to calcuate the tyarget specifically for the playter
+            if target > hitbox.bottom + offset: 
+                return #if from above, do nothing        
             elif not self.game_objects.player.go_through:#enter only once
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)               
                 self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through

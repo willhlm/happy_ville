@@ -30,13 +30,13 @@ class Level():
         self.biome.set_camera()#need to be after load_group  -> biome specific camera             
 
     def check_biome(self):
-        self.area_change = self.level_name[:self.level_name.rfind('_')] != self.biome_name        
-        if self.area_change:#new biome
-            self.biome.clear_biome()            
+        self.area_change = self.level_name[:self.level_name.rfind('_')] != self.biome_name                
+        if self.area_change:#new biome                      
+            self.biome.clear_biome()          
             self.biome_name = self.level_name[:self.level_name.rfind('_')]
             self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize())(self)#make a class based on the name of the newstate: need to import sys           
-        else:#just a new room
-            self.biome.new_room()
+        room = self.level_name[self.level_name.rfind('_')+1:]            
+        self.biome.room(room)
 
     def init_state_file(self):
         if not self.game_objects.world_state.state.get(self.level_name, False):#if it is the first time loading the room
@@ -586,7 +586,7 @@ class Biome():
     def set_camera(self):
         pass               
 
-    def new_room(self):#called wgen a new room is loaded
+    def room(self, room):#called wgen a new room is loaded
         pass
 
     def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
@@ -600,6 +600,11 @@ class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level) 
 
+    def room(self, room):#called wgen a new room is loaded        
+        if room == '11':
+            self.level.game_objects.lights.ambient = (150/255,150/255,150/255,230/255)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+ 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
@@ -652,9 +657,11 @@ class Rhoutta_encounter(Biome):
     def __init__(self, level):
         super().__init__(level)
 
-    def new_room(self):        
-        if self.level.level_name == 'rhoutta_encounter_2':
-            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230        
+    def room(self, room):        
+        if room == '2':
+            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230      
+            if self.level.game_objects.world_state['guide']:#if guide interaction has happened
+                self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
     def set_camera(self):
         if self.level.level_name == 'rhoutta_encounter_1' and self.level.spawn == '1':#if it a new game
@@ -680,12 +687,12 @@ class Rhoutta_encounter(Biome):
 
 class Light_forest_cave(Biome):
     def __init__(self, level):
-        super().__init__(level)       
-        self.new_room()
-    
-    def new_room(self):
-       self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
-       self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+        super().__init__(level)    
+        self.room()
+
+    def room(self, room):    
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
  
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:

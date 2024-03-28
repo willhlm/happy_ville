@@ -82,7 +82,6 @@ class BG_Fade(BG_Block):
 class Lighitning(Staticentity):#a shader to make lighning barrier
     def __init__(self,pos,game_objects,parallax,size):
         super().__init__(pos, game_objects)
-        self.game_objects = game_objects
         self.parallax = parallax
 
         self.image = game_objects.game.display.make_layer(size).texture
@@ -113,7 +112,6 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
 class Sky(Staticentity):#for making a "plane" water
     def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos,game_objects)
-        self.game_objects = game_objects
         self.parallax = parallax
 
         self.empty = game_objects.game.display.make_layer(size)
@@ -140,54 +138,44 @@ class Sky(Staticentity):#for making a "plane" water
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
 
-class Waterfall(Staticentity):#not woring yet
-    def __init__(self,pos,game_objects,parallax,size,texture_parallax = 1 ,speed = 0):
+class Waterfall(Staticentity):#basically working
+    def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos,game_objects)
-        self.game_objects = game_objects
         self.parallax = parallax                
-        self.reflect_rect = pygame.Rect(self.rect.topleft[0], self.rect.topleft[1], size[0], size[1])
 
         self.size = size
         self.empty = game_objects.game.display.make_layer(size)
-        self.empty2 = game_objects.game.display.make_layer(size)
-
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.time = 0
 
     def release_texture(self):
         self.empty.release()
-        self.empty2.release()
         self.noise_layer.release()
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
 
     def draw(self):
-        #noise        
+        #noise             
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
         self.game_objects.shaders['noise_perlin']['scroll'] =[0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.shaders['noise_perlin']['scale'] = [70,70]#"standard"
+        self.game_objects.shaders['noise_perlin']['scale'] = [70,70]
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #water
         self.game_objects.shaders['waterfall']['refraction_map'] = self.noise_layer.texture
         self.game_objects.shaders['waterfall']['water_mask'] = self.noise_layer.texture
-        self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
+        self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
         self.game_objects.shaders['waterfall']['TIME'] = self.time
 
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
-        #self.game_objects.shaders['water_perspective']['section'] = [self.reflect_rect[0],self.reflect_rect[1],self.reflect_rect[2],self.reflect_rect[3]]
-        self.reflect_rect.topleft = blit_pos
-        self.game_objects.shaders['waterfall']['section'] = [self.reflect_rect[0],self.reflect_rect[1],self.reflect_rect[2],self.reflect_rect[3]]
-
-        #final rendering -> tmporary fix
-        self.game_objects.game.display.render(self.empty2.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
+        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]                
+        self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
+        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
 
 class Reflection(Staticentity):#water
     def __init__(self,pos,game_objects,parallax,size,dir,texture_parallax = 1 ,speed = 0, offset = 10):
         super().__init__(pos,game_objects)
-        self.game_objects = game_objects
         self.parallax = parallax
         self.offset = offset
         self.squeeze = 1#the water flickers if it is not 1
@@ -280,7 +268,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
-        self.go_through = False#a flag for entities to go through ramps from side or top
+        self.go_through = True#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
 
     def update_hitbox(self):
@@ -568,7 +556,7 @@ class Enemy(Character):
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
                 obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
-            self.inventory[key]=0
+            self.inventory[key] = 0
 
     def countered(self):#player shield
         self.velocity[0] = -30*self.dir[0]
@@ -1048,6 +1036,7 @@ class Guide(NPC):
 
     def give_light(self):#called when teleport shader is finished
         self.game_objects.lights.add_light(self.game_objects.player, colour = [200/255,200/255,200/255,200/255])
+        self.game_objects.world_state.update_event('guide')
 
     def draw(self):#called in group
         self.shader_state.draw()
@@ -1973,6 +1962,7 @@ class Loot(Platform_entity):#
         super().__init__(pos,game_objects)
         self.description = ''
         self.velocity = [0,0]
+        self.bounce_coefficient = 0.6
 
     def update_vel(self):#add gravity
         self.velocity[1] += 0.3*self.game_objects.game.dt*self.slow_motion
@@ -1991,10 +1981,16 @@ class Loot(Platform_entity):#
         pass
 
     #plotfprm collisions
+    def top_collision(self,hitbox):
+        self.hitbox.top = hitbox
+        self.collision_types['top'] = True        
+        self.velocity[1] = -self.velocity[1]
+
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
         self.velocity[0] = 0.5*self.velocity[0]
-        self.velocity[1] = -0.2*self.velocity[1]
+        self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
+        self.bounce_coefficient *= self.bounce_coefficient
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
@@ -2084,7 +2080,7 @@ class Enemy_drop(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.lifetime = 500
-        self.velocity = [random.uniform(-3, 3),-4]
+        self.velocity = [random.uniform(-3, 3),-7]
 
     def update(self):
         super().update()
@@ -2116,8 +2112,9 @@ class Amber_Droplet(Enemy_drop):
         self.sounds = Amber_Droplet.sounds
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.midbottom = pos
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(0,0,16,16)
+        self.hitbox.center = pos
+        self.rect.midbottom = self.hitbox.midbottom
         self.true_pos = list(self.rect.topleft)
         self.description = 'moneyy'
 
@@ -2139,8 +2136,9 @@ class Bone(Enemy_drop):
         self.sounds = Bone.sounds
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.midbottom = pos
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(0,0,16,16)
+        self.hitbox.center = pos
+        self.rect.midbottom = self.hitbox.midbottom
         self.true_pos = list(self.rect.topleft)
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
@@ -2166,8 +2164,9 @@ class Heal_item(Enemy_drop):
         self.sounds = Heal_item.sounds
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.midbottom = pos
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(0,0,16,16)
+        self.hitbox.center = pos
+        self.rect.midbottom = self.hitbox.midbottom
         self.true_pos = list(self.rect.topleft)
         self.description = 'Use it to heal'
 
@@ -2216,7 +2215,7 @@ class Tungsten(Interactable_item):#move omamori and infiinity stones to here a s
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/tungsten/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=self.rect.copy()
+        self.hitbox = self.rect.copy()
         self.description = 'A heavy rock'
 
     def pickup(self):
@@ -2681,6 +2680,9 @@ class Shade_trigger(Interactable):
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
+
+    def draw(self):
+        pass
 
     def release_texture(self):
         pass

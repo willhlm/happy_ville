@@ -75,6 +75,9 @@ class Light_forest_tree1(Trees):
         self.spawn_box = [position,size]
         self.create_leaves()
 
+    def release_texture(self):
+        pass
+
 class Light_forest_tree2(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
@@ -91,6 +94,9 @@ class Light_forest_tree2(Trees):
         self.spawn_box = [position,size]
         self.create_leaves()
 
+    def release_texture(self):
+        pass
+
 class Ljusmaskar(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
@@ -102,6 +108,9 @@ class Ljusmaskar(Layered_objects):
         self.true_pos = self.rect.topleft
 
     def group_distance(self):
+        pass
+
+    def release_texture(self):
         pass
 
 class Cave_grass(Layered_objects):
@@ -117,6 +126,9 @@ class Cave_grass(Layered_objects):
     def group_distance(self):
         pass
 
+    def release_texture(self):
+        pass
+
 class Cocoon(Layered_objects):#larv cocoon in light forest
     animations = {}
     def __init__(self, pos, game_objects,parallax):
@@ -126,6 +138,9 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
+
+    def release_texture(self):
+        pass
 
 class Droplet_source(Layered_objects):
     animations = {}
@@ -137,6 +152,9 @@ class Droplet_source(Layered_objects):
         self.rect.topleft = pos
         self.droplet = Droplet
         self.currentstate = states_droplet.Idle(self)
+
+    def release_texture(self):
+        pass
 
     def group_distance(self):
         pass
@@ -160,6 +178,9 @@ class Falling_rock_source(Layered_objects):
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.currentstate = states_droplet.Idle(self)
+
+    def release_texture(self):
+        pass
 
     def group_distance(self):
         pass
@@ -282,6 +303,9 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
 
         self.shader =  game_objects.shaders['colour']
+
+    def release_texture(self):
+        pass
 
     def draw(self):
         self.shader['colour'] = self.colour

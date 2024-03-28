@@ -11,7 +11,7 @@ class World_state():
         self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
 
     def define_events(self):#all events that should have a flag
-        self.events = {'reindeer':False,'aslat':False,'ape':False}
+        self.events = {'reindeer':False,'aslat':False,'ape':False,'guide':False}
 
     def update_event(self,event):#called when an event has happened and set it to True
         self.events[event] = True

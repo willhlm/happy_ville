@@ -386,12 +386,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_2"
+                                 "value":"light_forest_11"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"5"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
