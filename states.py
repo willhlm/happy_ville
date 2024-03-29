@@ -845,7 +845,7 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
         pass
 
     def update(self):
-        super().update()        
+        super().update()
         self.timer += self.game.dt
         if self.timer > 500:
             self.exit_state()
