@@ -54,21 +54,18 @@ class Lights():
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
     def draw(self):
-        self.layer1.clear(0,0,0,0)#needed
-        self.layer2.clear(0,0,0,0)#needed
-        self.layer3.clear(0,0,0,0)#needed
-
         self.shaders['light']['rectangleCorners'] = self.points
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
         self.shaders['light']['colour'] = self.colour
-        self.shaders['light']['background'] = self.ambient
+        self.shaders['light']['ambient'] = self.ambient
 
-        self.shaders['blend']['ambient'] = self.ambient
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture
 
+        self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])
         self.game_objects.game.display.render(self.layer2.texture, self.layer3, shader = self.shaders['blur'])
+        self.game_objects.game.display.use_alpha_blending(True)#turn it back on for rendering on screen
         self.game_objects.game.display.render(self.layer3.texture, self.game_objects.game.screen, shader = self.shaders['blend'])
 
 class Light():#light source

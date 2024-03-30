@@ -1,6 +1,5 @@
 from importlib import resources
 import numbers
-import platform
 
 import moderngl
 from moderngl import Texture, Context, NEAREST
@@ -12,6 +11,7 @@ from pygame_render.layer import Layer
 from pygame_render.shader import Shader
 from pygame_render.util import normalize_color_arguments, create_rotated_rect, to_dest_coords
 
+
 class RenderEngine:
     """
     A rendering engine for 2D graphics using Pygame and ModernGL.
@@ -21,37 +21,60 @@ class RenderEngine:
     for creating and managing rendering layers, as well as drawing operations using shaders.
     """
 
-    def __init__(self, screen_width: int, screen_height: int) -> None:
+    def __init__(self, screen_width: int, screen_height: int,
+                 fullscreen: int or bool = 0, resizable: int or bool = 0,
+                 noframe: int or bool = 0, scaled: int or bool = 0,
+                 depth: int = 0, display: int = 0, vsync: int = 0) -> None:
         """
         Initialize a rendering engine using Pygame and ModernGL.
 
         Parameters:
         - screen_width (int): The width of the rendering window.
         - screen_height (int): The height of the rendering window.
+        - fullscreen (int or bool, optional): Set to 1 or True to enable fullscreen mode, 0 or False to disable. Default is 0.
+        - resizable (int or bool, optional): Set to 1 or True to enable window resizing, 0 or False to disable. Default is 0.
+        - noframe (int or bool, optional): Set to 1 or True to remove window frame, 0 or False to keep the frame. Default is 0.
+        - scaled (int or bool, optional): Set to 1 or True to enable display scaling, 0 or False to disable. Default is 0.
+        - depth (int, optional): Depth of the rendering window. Default is 0.
+        - display (int, optional): The display index to use. Default is 0.
+        - vsync (int, optional): Set to 1 to enable vertical synchronization, 0 to disable. Default is 0.
 
         Raises:
         - AssertionError: If Pygame is not initialized. Call pygame.init() before using the rendering engine.
 
         Note: Make sure to call pygame.init() before creating an instance of RenderEngine.
         """
-        self._screen_res = (screen_width, screen_height)
 
         # Check that pygame has been initialized
         assert pygame.get_init(), 'Error: Pygame is not initialized. Please ensure you call pygame.init() before using the lighting engine.'
 
-        if platform.system() == 'Darwin' or platform.system() == 'Linux':#mac or linux
-            # Set OpenGL version to 3.3 core
-            pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
-            pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
-            pygame.display.gl_set_attribute(pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
+        # Set OpenGL version to 3.3 core
+        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
+        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
+        pygame.display.gl_set_attribute(
+            pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
 
         # Configure pygame display
-        pygame.display.set_mode(self._screen_res, pygame.HWSURFACE | pygame.OPENGL | pygame.DOUBLEBUF , vsync = 0) #| pygame.FULLSCREEN #|pygame.SCALED
+        self._screen_res = (screen_width, screen_height)
+        flags = pygame.OPENGL | pygame.DOUBLEBUF
+        if fullscreen:
+            flags |= pygame.FULLSCREEN
+        if resizable:
+            flags |= pygame.RESIZABLE
+        if noframe:
+            flags |= pygame.NOFRAME
+        if scaled:
+            flags |= pygame.SCALED
+        pygame.display.set_mode(
+            self._screen_res, flags, depth=depth, display=display, vsync=vsync)
 
         # Create an OpenGL context
         self._ctx = moderngl.create_context()
+
+        # Configure alpha blending
         self._ctx.enable(moderngl.BLEND)
-        self._ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA,moderngl.ONE, moderngl.ONE_MINUS_SRC_ALPHA)
+        self._ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA,
+                                moderngl.ONE, moderngl.ONE_MINUS_SRC_ALPHA)
         self._ctx.blend_equation = moderngl.FUNC_ADD
 
         # Create screen layer
@@ -59,11 +82,14 @@ class RenderEngine:
         self._ctx.screen
 
         # Read draw shader source files
-        vertex_src = resources.read_text('pygame_render', 'vertex.glsl')
-        fragment_src_draw = resources.read_text('pygame_render', 'fragment_draw.glsl')
+        vertex_src = resources.read_text(
+            'pygame_render', 'vertex.glsl')
+        fragment_src_draw = resources.read_text(
+            'pygame_render', 'fragment_draw.glsl')
 
         # Create draw shader program
-        prog_draw = self._ctx.program(vertex_shader=vertex_src,fragment_shader=fragment_src_draw)
+        prog_draw = self._ctx.program(vertex_shader=vertex_src,
+                                      fragment_shader=fragment_src_draw)
         self._shader_draw = Shader(prog_draw)
 
     @property
@@ -75,6 +101,18 @@ class RenderEngine:
     def ctx(self) -> Context:
         """Get the ModernGL rendering context."""
         return self._ctx
+
+    def use_alpha_blending(self, enabled: bool) -> None:
+        """
+        Enable or disable alpha blending.
+
+        Args:
+            enabled (bool): True to enable, False to disable premultiplied alpha blending.
+        """
+        if enabled:
+            self._ctx.enable(moderngl.BLEND)
+        else:
+            self._ctx.disable(moderngl.BLEND)
 
     def surface_to_texture(self, sfc: pygame.Surface) -> moderngl.Texture:
         """
@@ -307,3 +345,25 @@ class RenderEngine:
         # Free vertex data
         vbo.release()
         vao.release()
+
+    def release_opengl_resources(self):
+        """
+        Manually release OpenGL resources managed by the RenderEngine.
+
+        Note: 
+        - Once this method is called, the engine is no longer usable. 
+        - This method is automatically called by the garbage collector, 
+          so there is no need to do it manually.
+        """
+        self._shader_draw.release()
+        self._screen.framebuffer.release()
+        self._ctx.release()
+
+        self._shader_draw = None
+        self._screen = None
+        self._ctx = None
+
+    def __del__(self):
+        # Check if ctx is None to avoid double-freeing
+        if self._ctx != None:
+            self.release_opengl_resources()

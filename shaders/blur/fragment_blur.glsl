@@ -34,13 +34,16 @@ void main()
             float w = weights[x+int(blurRadius)]*weights[y+int(blurRadius)];            
 
             //blurredColor += texture(imageTexture,fragmentTexCoord+offset)*w;
+            vec4 image = texture(imageTexture,fragmentTexCoord+offset);
              
-            blurredColor.rgb += texture(imageTexture,fragmentTexCoord+offset).rgb * w * texture(imageTexture,fragmentTexCoord+offset).a;
-            blurredColor.a += texture(imageTexture,fragmentTexCoord+offset).a * w;
-
+            blurredColor.rgb += image.rgb * w * image.a;
+            blurredColor.a += w * image.a;
         }
     }
+
+    if (blurredColor.w != 0){
     blurredColor.xyz /= blurredColor.w;
+    }
 
     color = vec4(blurredColor.xyz,blurredColor.w);
 }

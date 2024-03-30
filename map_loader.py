@@ -596,9 +596,9 @@ class Light_forest(Biome):
 
     def room(self, room):#called wgen a new room is loaded        
         if room == '11':
-            self.level.game_objects.lights.ambient = (150/255,150/255,150/255,230/255)
-            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
- 
+            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)  
+
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]

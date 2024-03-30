@@ -18,7 +18,7 @@ class Vignette(Shaders):
 
     def draw(self):
         self.game_objects.shaders['vignette']['colour'] = self.colour
-        self.game_objects.game.display.render(self.game_objects.shader_draw.layer.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['vignette'])#shader render
+        self.game_objects.game.display.render(self.game_objects.screen_shader.layer.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['vignette'])#shader render
         #return self.game_objects.game.screen#the result
 
 class Chromatic_aberration(Shaders):
@@ -29,12 +29,12 @@ class Chromatic_aberration(Shaders):
     def update(self):
         self.duration -= self.game_objects.game.dt
         if self.duration < 0:
-            self.game_objects.shader_draw.remove_shader('chromatic_aberration')
+            self.game_objects.screen_shader.remove_shader('chromatic_aberration')
 
     def draw(self):        
-        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.shader_draw.layer, shader = self.game_objects.shaders['chromatic_aberration'])#shader render
-        self.game_objects.game.display.render(self.game_objects.shader_draw.layer.texture, self.game_objects.game.screen)#shader render
-        self.game_objects.shader_draw.layer.clear(0,0,0,0)#need it so that it doesn't leave a "stain" in the screen
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.screen_shader.layer, shader = self.game_objects.shaders['chromatic_aberration'])#shader render
+        self.game_objects.game.display.render(self.game_objects.screen_shader.layer.texture, self.game_objects.game.screen)#shader render
+        self.game_objects.screen_shader.layer.clear(0,0,0,0)#need it so that it doesn't leave a "stain" in the screen
 
 class Bloom(Shaders):
     def __init__(self, game_objects, **kwarg):
@@ -54,15 +54,15 @@ class Bloom(Shaders):
         self.game_objects.shaders['bloom']['targetColor'] = self.targetColor
         self.game_objects.shaders['bloom']['colorRange'] = self.colorRange
 
-        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.shader_draw.layer, shader = self.game_objects.shaders['bloom'])#shader render
-        self.game_objects.game.display.render(self.game_objects.shader_draw.layer.texture, self.game_objects.game.screen)#shader render
-        #return self.game_objects.shader_draw.layer#the result
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.screen_shader.layer, shader = self.game_objects.shaders['bloom'])#shader render
+        self.game_objects.game.display.render(self.game_objects.screen_shader.layer.texture, self.game_objects.game.screen)#shader render
+        #return self.game_objects.screen_shader.layer#the result
 
 class White_balance(Shaders):
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)        
 
     def draw(self):
-        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.shader_draw.layer, shader = self.game_objects.shaders['white_balance'])#shader render
-        self.game_objects.game.display.render(self.game_objects.shader_draw.layer.texture, self.game_objects.game.screen)#shader render
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.screen_shader.layer, shader = self.game_objects.shaders['white_balance'])#shader render
+        self.game_objects.game.display.render(self.game_objects.screen_shader.layer.texture, self.game_objects.game.screen)#shader render
             

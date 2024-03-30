@@ -5,8 +5,8 @@ import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_my
 import constants as C
 
 def sign(number):
-    if number < 0: return -1         
-    return 1
+    if number == 0: return 0         
+    return round(number/abs(number))
 
 class Staticentity(pygame.sprite.Sprite):#all enteties
     def __init__(self, pos, game_objects):
@@ -47,8 +47,10 @@ class BG_Block(Staticentity):
         if self.parallax[0] != 1:#don't blur if there is no parallax
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = 1/self.parallax[0]#set the blur redius
+            self.game_objects.game.display.use_alpha_blending(False)
             layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
             self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
+            self.game_objects.game.display.use_alpha_blending(True)
             self.image = layer.texture#get the texture of the layer
 
     def draw(self):        
@@ -475,7 +477,7 @@ class Player(Character):
             self.hurt_particles(lifetime=40,vel={'linear':[3,8]},colour=[0,0,0,255],scale=3,number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg',duration = 20)#makes the game freez for few frames
-            self.game_objects.shader_draw.append_shader('chromatic_aberration',duration = 20)        
+            self.game_objects.screen_shader.append_shader('chromatic_aberration',duration = 20)        
         else:#if health < 0
             self.game_objects.game.state_stack[-1].handle_input('death')#depending on gameplay state, different death stuff should happen
 
@@ -565,7 +567,7 @@ class Enemy(Character):
         self.original_pos = pos
 
         self.currentstate = states_enemy.Idle(self)
-        self.AI = AI_enemy.Peace(self)
+        self.AI = AI_enemy.AI(self)
 
         self.inventory = {'Amber_Droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -610,10 +612,10 @@ class Enemy(Character):
     def health_bar(self):#called from omamori Boss_HP
         pass
 
-    def chase(self):#called from AI: when chaising
+    def chase(self, position = 0):#called from AI: when chaising
         self.velocity[0] += self.dir[0]*0.5
 
-    def patrol(self,position = 0):#called from AI: when patroling
+    def patrol(self, position = 0):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
 
 class Flying_enemy(Enemy):
@@ -818,6 +820,7 @@ class Larv_simple(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.attack_distance = [0,0]
 
 class Bird(Enemy):
     def __init__(self, pos, game_objects):
