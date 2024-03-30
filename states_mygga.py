@@ -50,9 +50,9 @@ class Pre_explode(Enemy_states):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
-        player_distance = [self.entity.AI.black_board['target'].rect.centerx-self.entity.rect.centerx,self.entity.AI.black_board['target'].rect.centery-self.entity.rect.centery]#check plater distance
-        self.entity.AI.black_board['player_distance'] = player_distance
-
+        #player_distance = [self.entity.AI.black_board['target'].rect.centerx - self.entity.rect.centerx,self.entity.AI.black_board['target'].rect.centery-self.entity.rect.centery]#check plater distance
+       # self.entity.AI.black_board['player_distance'] = player_distance
+        player_distance = self.entity.AI.player_distance
         if abs(player_distance[0]) < 50 and abs(player_distance[1]) < 50:
             self.enter_state('Death')
         else:

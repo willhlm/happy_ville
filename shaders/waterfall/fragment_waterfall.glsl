@@ -59,6 +59,7 @@ void main()
 	float inner_edge = 1 * (flow_gaps + highlight_width);
 	
 	// See if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
+
     // Check if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
 	if (gap_mask.x < 0.2*inner_edge)
     {
@@ -97,8 +98,6 @@ void main()
         
 	// Assign the adjusted color to the final color
 	color.rgb =  clamp(adjustedColor, 0.0, 1.0);
-
-
 
 	colour =  color;
 }

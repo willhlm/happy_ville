@@ -8,7 +8,7 @@ class Basic_states(Entity_States):
     def enter_state(self,newstate,**kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
 
-    def increase_phase(self):#called when animation is finished
+    def increase_phase(self):#called when animation is finished in reset_timer
         pass
 
     def handle_input(self,input):
@@ -77,7 +77,7 @@ class Invisible(Basic_states):
         if random.randint(0,500) == 1:
             self.enter_state('Idle')
 
-class Opening(Basic_states):
+class Opening(Basic_states):#chest
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -85,7 +85,7 @@ class Opening(Basic_states):
         self.entity.loots()
         self.enter_state('Interacted')
 
-class Transform(Basic_states):
+class Transform(Basic_states):#runestone
     def __init__(self,entity):
         super().__init__(entity)
 

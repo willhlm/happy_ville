@@ -38,7 +38,7 @@ class Game():
 
     def run(self):
         while True:
-            self.screen.clear(0, 0, 0, 0)
+            self.screen.clear(0, 0, 0, 0)                        
 
             #tick clock
             self.clock.tick(120)

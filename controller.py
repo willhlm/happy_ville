@@ -129,15 +129,15 @@ class Controller():
                 if abs(event.value) < 0.2:
                     self.value['l_stick'][0] = 0
 
-            if event.axis==self.analogs['lv']:#left vertical
-                self.value['l_stick'][1] = event.value
-                if abs(event.value) < 0.2:
-                    self.value['l_stick'][1] = 0
-
             if event.axis==self.analogs['rh']:#right horizontal
                 self.value['r_stick'][0] = event.value
                 if abs(event.value) < 0.2:
                     self.value['r_stick'][0] = 0
+
+            if event.axis==self.analogs['lv']:#left vertical
+                self.value['l_stick'][1] = event.value
+                if abs(event.value) < 0.2:
+                    self.value['l_stick'][1] = 0
 
             if event.axis==self.analogs['rv']:#right vertical
                 self.value['r_stick'][1] = event.value

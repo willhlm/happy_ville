@@ -31,9 +31,10 @@ class Chromatic_aberration(Shaders):
         if self.duration < 0:
             self.game_objects.shader_draw.remove_shader('chromatic_aberration')
 
-    def draw(self):
+    def draw(self):        
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.game_objects.shader_draw.layer, shader = self.game_objects.shaders['chromatic_aberration'])#shader render
         self.game_objects.game.display.render(self.game_objects.shader_draw.layer.texture, self.game_objects.game.screen)#shader render
+        self.game_objects.shader_draw.layer.clear(0,0,0,0)#need it so that it doesn't leave a "stain" in the screen
 
 class Bloom(Shaders):
     def __init__(self, game_objects, **kwarg):

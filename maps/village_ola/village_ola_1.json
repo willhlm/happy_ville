@@ -397,24 +397,6 @@
                          "y":432
                         }, 
                         {
-                         "gid":21,
-                         "height":80,
-                         "id":15,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"up"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":4672,
-                         "x":96,
-                         "y":592
-                        }, 
-                        {
                          "gid":11,
                          "height":144,
                          "id":34,
@@ -1054,6 +1036,35 @@
                  "width":300,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":56,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":21,
+                         "height":80,
+                         "id":117,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"up"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":4672,
+                         "x":112,
+                         "y":592
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"fg1",
          "opacity":1,
@@ -1062,8 +1073,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":56,
- "nextobjectid":117,
+ "nextlayerid":57,
+ "nextobjectid":118,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
