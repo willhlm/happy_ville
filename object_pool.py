@@ -9,6 +9,8 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         ,'Circle':particles.Circle.pool(game_objects), 'Leaves':entities_parallax.Leaves.pool(game_objects),'Spark':particles.Spark.pool(game_objects),
         'Slash':Entities.Slash.pool(game_objects), 'Screen_shader':screen_shader.Screen_shader.pool(game_objects),'Goop':particles.Goop.pool(game_objects)}
 
+        Entities.Slime.pool(game_objects)
+
         weather.Fog.pool(game_objects)
         weather.Circles.pool(game_objects)
         weather.Vertical_circles.pool(game_objects)

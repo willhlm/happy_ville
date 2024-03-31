@@ -17,7 +17,7 @@ class AI():
         self.children.pop()
 
     def handle_input(self, input):
-        pass
+        self.children[-1].handle_input(input)
 
     def deactivate(self):#used for cutscene or when they die
         self.append_child(Idle())
@@ -35,22 +35,26 @@ class Patrol():
         self.time = 0
 
     def update(self):
-        self.time += self.parent.entity.game_objects.game.dt        
+        self.time += self.parent.entity.game_objects.game.dt                
+        if self.check_sight(): return#do not continue if this happens
+        if self.check_ground(): return#do not continue if this happens
+        if self.check_wall(): return#do not continue if this happens
         self.parent.entity.patrol([0,0])
-        self.check_sight()
-        self.check_ground()
-        self.check_wall()
         self.exit()
 
     def check_sight(self):
         if abs(self.parent.player_distance[0]) < self.parent.entity.aggro_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.aggro_distance[1]:
             self.parent.append_child(Chase(self.parent, give_up = 300))
+            return True
+        return False
 
     def check_wall(self):
         if self.parent.entity.collision_types['left'] or self.parent.entity.collision_types['right']:            
             self.parent.append_child(Wait(self.parent, duration = 200))
             self.parent.append_child(Turn_around(self.parent))    
             self.parent.append_child(Wait(self.parent, duration = 100))
+            return True
+        return False
             
     def check_ground(self):
         point = [self.parent.entity.hitbox.midbottom[0] + self.parent.entity.dir[0]*self.parent.entity.hitbox[3],self.parent.entity.hitbox.midbottom[1] + 8]
@@ -59,13 +63,15 @@ class Patrol():
             self.parent.append_child(Wait(self.parent, duration = 200))
             self.parent.append_child(Turn_around(self.parent))    
             self.parent.append_child(Wait(self.parent, duration = 100))
+            return True
+        return False
 
     def exit(self):
         if self.time > 200:
             child = random.choice(['Wait','Turn_around'])#choose between turnaround and wait            
             child_node = getattr(sys.modules[__name__], child)(self.parent)#make a class based on the name of the newstate: need to import sys
             self.parent.append_child(child_node)
-            self.init_time = 0
+            self.time = 0
 
 class Wait():#the entity should just stay and do nothing for a while
     def __init__(self,parent,**kwarg):
@@ -92,9 +98,10 @@ class Chase():
         self.timers = []
 
     def update(self):
-        self.look_player()#make the direction along the player. only chase when looking at player      
         self.check_sight()
-        self.attack()#are we withtin attack distance?
+        if self.look_player(): return#make the direction along the player. If this happens, do not continue in update            
+        if self.attack(): return#are we withtin attack distance? If this happens, do not continue in update
+        self.parent.entity.chase([0,0]) 
         self.update_timers()
 
     def check_sight(self):
@@ -107,14 +114,16 @@ class Chase():
         if self.parent.player_distance[0] > 0 and self.parent.entity.dir[0] == -1 or self.parent.player_distance[0] < 0 and self.parent.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
             self.parent.append_child(Wait(self.parent, duration = 200))
             self.parent.append_child(Turn_around(self.parent))    
-            self.parent.append_child(Wait(self.parent, duration = 100))    
-        else:#only chase when you are looking at the player
-            self.parent.entity.chase([0,0])        
+            self.parent.append_child(Wait(self.parent, duration = 100))  
+            return True
+        return False  
 
     def attack(self):
         if abs(self.parent.player_distance[0]) < self.parent.entity.attack_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.attack_distance[1]:
             self.parent.append_child(Wait(self.parent, duration = 250))        
             self.parent.append_child(Attack(self.parent))
+            return True
+        return False
 
     def update_timers(self):
         for timer in self.timers:
@@ -124,7 +133,6 @@ class Attack():
     def __init__(self,parent,**kwarg):
         self.parent = parent
         self.parent.entity.currentstate.handle_input('Attack')
-        self.parent.entity.velocity = [0,0]
 
     def update(self):
         pass

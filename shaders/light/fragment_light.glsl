@@ -48,7 +48,7 @@ bool isOcluded(vec2 p, vec2 q, vec2 lightPos, float lightRadius) {
 }
 
 void main() {
-    vec4 backgroundColor = ambient; //shoudl it be the screen?
+    vec4 backgroundColor = ambient;
 
     for (int l = 0; l < num_lights; l++) { // number of light sources
         vec2 lightPos = lightPositions[l];
@@ -91,10 +91,11 @@ void main() {
             float lightIntensity = max(1.0 - distanceToLight / lightRadius,0);
 
             // add light together
-            float fade = 1;//smoothstep(0.0, 0.2, lightIntensity);
+            float fade = smoothstep(0.0, 0.2, lightIntensity);
             backgroundColor += vec4(colour[l].xyz * lightIntensity * fade * colour[l].w , lightIntensity * fade* colour[l].w);
         }
     }
+     backgroundColor.xyz /= mix(backgroundColor.w,1,ambient.w);
     
     // smooth transition for the combined light intensities
     color = vec4(backgroundColor.xyz, backgroundColor.w);

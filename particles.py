@@ -1,21 +1,27 @@
 import pygame, math, random, states_particles
 
 class Particles(pygame.sprite.Sprite):
-    def __init__(self, pos, game_objects, distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255], state = 'Idle'):
+    def __init__(self, pos, game_objects, **kwarg):
         super().__init__()
         self.game_objects = game_objects
-        angle = self.define_angle(dir)
-        self.angle = -(2*math.pi*angle)/360
-        self.lifetime = lifetime
         self.spawn_point = [pos[0],pos[1]]
-        self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
 
+        self.lifetime = kwarg.get('lifetime', 60)
+        self.colour = kwarg.get('colour', [255,255,255,255])
+        dir = kwarg.get('dir', 'isotropic') 
+        angle = self.define_angle(dir)
+
+        distance = kwarg.get('distance', 400)
+        vel = kwarg.get('vel', {'linear':[7,13]})
+        
+        self.angle = -(2*math.pi*angle)/360
+        self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
         motion = list(vel.keys())[0]#linear moetion or wave motion
         self.update_velocity = {'linear':self.linear,'wave':self.wave}[motion]
         amp = random.uniform(min(vel[motion][0],vel[motion][1]), max(vel[motion][0],vel[motion][1]))
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
-        self.colour = colour
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
+        state = kwarg.get('state', 'Idle')
         self.state = getattr(states_particles, state)(self)
 
     def update(self):
@@ -63,8 +69,9 @@ class Particles(pygame.sprite.Sprite):
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
 class Circle(Particles):
-    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour,state, gradient = 0):
-        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour,state)
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+        scale = kwarg.get('scale',1)
         self.radius = random.randint(max(scale-1,1), round(scale+1))
         self.fade_scale = 0.1#how fast alpha should do down
         self.image = Circle.image
@@ -74,7 +81,7 @@ class Circle(Particles):
 
         self.shader = game_objects.shaders['circle']#draws a circle
         self.shader['size'] = self.image.size
-        self.shader['gradient'] = gradient#one means gradient, 0 is without
+        self.shader['gradient'] = kwarg.get('gradient', 0)#one means gradient, 0 is without
 
     def draw(self):#his called just before the draw
         self.shader['color'] = self.colour
@@ -85,17 +92,17 @@ class Circle(Particles):
         Circle.image = game_objects.game.display.make_layer((50,50)).texture
 
 class Goop(Particles):#circles that "distorts" due to noise
-    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale, colour,state,gradient=0):
-        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour,state)
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
         self.empty = Goop.image2
         self.noise_layer = Goop.image3
         self.circle = Goop.image4
         self.fade_scale = 0
 
-        self.game_objects.shaders['circle']['color'] = [1,1,1,1]
+        self.game_objects.shaders['circle']['color'] = kwarg.get('colour',[1,1,1,1])
         self.game_objects.shaders['circle']['radius'] = 6
         self.game_objects.shaders['circle']['size'] = [50,50]
-        self.game_objects.shaders['circle']['gradient'] = 0#one means gradient, 0 is without
+        self.game_objects.shaders['circle']['gradient'] = kwarg.get('gradient',0)#one means gradient, 0 is without
         self.game_objects.game.display.render(self.empty.texture, self.circle, shader=self.game_objects.shaders['circle'])#make perlin noise texture
 
         self.image = self.circle.texture
@@ -127,8 +134,8 @@ class Goop(Particles):#circles that "distorts" due to noise
         Goop.image4 = game_objects.game.display.make_layer((50,50))
 
 class Spark(Particles):#a general one
-    def __init__(self,pos,game_objects,distance,lifetime,vel,dir,scale,colour,state):
-        super().__init__(pos,game_objects,distance,lifetime,vel,dir,scale,colour,state)
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
         self.fade_scale = 0.4
 
         self.image = Spark.image
@@ -138,7 +145,7 @@ class Spark(Particles):#a general one
 
         self.shader = game_objects.shaders['spark']
         self.shader['size'] = self.image.size
-        self.shader['scale'] = scale
+        self.shader['scale'] = kwarg.get('scale', 1)
 
     def draw(self):#called from group draw
         self.shader['colour'] = self.colour

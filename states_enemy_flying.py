@@ -11,7 +11,6 @@ class Enemy_states(Entity_States):
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        #self.stay_still()
 
     def update(self):
         if abs(self.entity.velocity[0]) > 0.01:
@@ -20,7 +19,7 @@ class Idle(Enemy_states):
     def handle_input(self,input):
         if input=='Walk':
              self.enter_state('Walk')
-        elif input == 'explode':
+        elif input == 'attack':
             self.enter_state('Pre_explode')
 
 class Walk(Enemy_states):
@@ -39,7 +38,7 @@ class Walk(Enemy_states):
     def handle_input(self,input):
         if input=='Idle':
              self.enter_state('Idle')
-        elif input == 'explode':
+        elif input == 'attack':
             self.enter_state('Pre_explode')
 
 class Pre_explode(Enemy_states):
@@ -50,8 +49,6 @@ class Pre_explode(Enemy_states):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
-        #player_distance = [self.entity.AI.black_board['target'].rect.centerx - self.entity.rect.centerx,self.entity.AI.black_board['target'].rect.centery-self.entity.rect.centery]#check plater distance
-       # self.entity.AI.black_board['player_distance'] = player_distance
         player_distance = self.entity.AI.player_distance
         if abs(player_distance[0]) < 50 and abs(player_distance[1]) < 50:
             self.enter_state('Death')
@@ -76,7 +73,7 @@ class De_explode(Enemy_states):
 class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.suicide()
+        self.entity.killed()
 
     def update(self):
         self.entity.velocity = [0,0]

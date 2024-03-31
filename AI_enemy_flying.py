@@ -51,7 +51,7 @@ class Patrol(AI):#patrol in a circle aorund the original position
         self.look_target()
 
     def look_target(self):
-        if self.entity.hitbox.centerx - self.target_position[0] > 0:
+        if self.entity.rect.centerx - self.target_position[0] > 0:
             self.entity.dir[0] = -1
         else:
             self.entity.dir[0] = 1
@@ -98,7 +98,7 @@ class Chase(AI):
 class Attack(AI):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
-        self.entity.currentstate.enter_state('Pre_explode')
+        self.entity.currentstate.handle_input('attack')
 
     def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
         if input == 'De_explode':

@@ -29,7 +29,7 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
         shader['blurRadius'] = 1/self.parallax[0]
         for state in self.sprites.keys():
             for frame, image in enumerate(self.sprites[state]):
-                empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)
+                empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)#need to be inside the loop to make new layers for each frame
                 self.game_objects.game.display.render(self.sprites[state][frame],empty_layer,shader = shader)
                 self.sprites[state][frame] = empty_layer.texture
 
@@ -175,6 +175,7 @@ class Falling_rock_source(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
         self.init_sprites('Sprites/animations/falling_rock/source/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.currentstate = states_droplet.Idle(self)

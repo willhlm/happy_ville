@@ -594,7 +594,7 @@ class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level) 
 
-    def room(self, room):#called wgen a new room is loaded        
+    def room(self, room):#called wgen a new room is loaded  
         if room == '11':
             self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
             self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)  
@@ -640,7 +640,7 @@ class Light_forest(Biome):
                         self.level.game_objects.all_bgs.add(new_cocoon)
 
             elif id == 8:#cocoon
-                new_cocoon = Entities.Cocoon_boss(object_position, self.game_objects)
+                new_cocoon = Entities.Cocoon_boss(object_position, self.level.game_objects)
                 self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.level.game_objects.interactables.add(new_cocoon)
 
@@ -694,7 +694,7 @@ class Light_forest_cave(Biome):
             object_size = [int(obj['width']),int(obj['height'])]
             object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['objects_firstgid']
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
 
             if id == 0:#cave grass
                 if parallax == [1,1]:#if BG1 layer

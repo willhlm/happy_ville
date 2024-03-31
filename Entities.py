@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
-import states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bird, AI_enemy, AI_reindeer
+import states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
 import constants as C
 
 def sign(number):
@@ -413,7 +413,7 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20,state = 'Idle'):
         for i in range(0,number_particles):
-            obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance,lifetime,vel,dir,scale,colour,state)
+            obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance = distance,lifetime = lifetime,vel = vel,dir = dir,scale = scale,colour = colour,state = state)
             self.game_objects.cosmetics.add(obj1)
 
     def update_timers(self):
@@ -625,6 +625,8 @@ class Flying_enemy(Enemy):
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
         self.dir[1] = 1
+        self.AI = AI_enemy_flying.Patrol(self)
+        self.currentstate = states_enemy_flying.Idle(self)
 
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
@@ -639,7 +641,6 @@ class Flying_enemy(Enemy):
 
     def patrol(self, position):#called from AI: when patroling
         self.velocity[0] += 0.001*(position[0]-self.rect.centerx)
-        self.velocity[0] = sign(self.velocity[0])*min(abs(self.velocity[0]),1)#limit the max abs velocity to 1
         self.velocity[1] += 0.001*(position[1]-self.rect.centery)
 
     def update_rect_y(self):
@@ -650,33 +651,33 @@ class Flying_enemy(Enemy):
         self.rect.center = self.hitbox.center
         self.true_pos[0] = self.rect.left
 
+    def killed(self):#called when death animation starts playing
+        pass
+
 class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.currentstate = states_mygga.Idle(self)
-        self.health = 3
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.health = 2
+        self.aggro_distance = [-1,-1]
 
 class Exploding_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.currentstate = states_mygga.Idle(self)
-        self.AI = AI_exploding_mygga.Patrol(self)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 4
         self.attack_distance = [20,20]
         self.aggro_distance = [150,100]
-        self.size = [64,64]#hurtbox size for hurt box        
 
-    def suicide(self):
-        self.projectiles.add(Hurt_box(self,lifetime = 50))
-        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
+    def killed(self):
+        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30))
+        self.game_objects.camera.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
 class Packun(Enemy):
     def __init__(self,pos,game_objects):
@@ -699,23 +700,30 @@ class Packun(Enemy):
 class Sandrew(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/sandrew/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/sandrew/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.currentstate = states_sandrew.Idle(self)
         self.health = 3
-        self.attack_distance = [250,50]
-        self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.attack_distance = [200,25]
+        self.aggro_distance = [250,25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/slime/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = Slime.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
+        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
+        self.health = 2
+
+    def relseas_textures(self):
+        pass
+
+    def pool(game_objects):#spawned in mid game by sline giant
+        Slime.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/slime/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
 
 class Slime_giant(Enemy):
     def __init__(self,pos,game_objects):
@@ -724,9 +732,10 @@ class Slime_giant(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],48,48)
-        self.number = random.randint(1, 6)#number of minions
+        self.number = random.randint(2, 6)#number of minions
+        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
 
-    def loot(self):#spawn minions
+    def loots(self):#spawn minions
         pos = [self.hitbox.centerx,self.hitbox.centery-10]
         for i in range(0,self.number):
             obj = Slime(pos,self.game_objects)
@@ -933,7 +942,7 @@ class Skeleton_warrior(Enemy):#change design
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.attack_distance = 100
+        self.attack_distance = [100,10]
         self.attack = Sword
         self.health = 3
 
@@ -1572,12 +1581,12 @@ class Melee(Projectiles):
         self.kill()
 
 class Hurt_box(Melee):#a hitbox that spawns
-    def __init__(self,entity, lifetime = 100):
+    def __init__(self,entity, size = [64,64], lifetime = 100):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/hurt_box/',entity.game_objects)#invisible
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(entity.rect.x,entity.rect.y,self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,entity.size[0],entity.size[1])
+        self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,size[0],size[1])
         self.lifetime = lifetime
         self.dmg = entity.dmg
 
@@ -1647,14 +1656,11 @@ class Sword(Melee):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir[0])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
-        if self.dir[0]>0:
-            self.clash_particles(self.rect.midright)
-        else:
-            self.clash_particles(self.rect.midleft)
+        self.clash_particles(collision_enemy.hitbox.center)
 
     def sword_jump(self):
         if self.dir[1] == -1:
-            self.entity.velocity[1] = -11
+            self.entity.velocity[1] = -8
 
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
@@ -1682,7 +1688,7 @@ class Aila_sword(Sword):
     def destroy(self):
         if self.lifetime < 0:
             self.currentstate.increase_phase()
-            self.kill()
+            self.kill()#removes from projectiles
 
     def update_hitbox(self):#called from aila's update_hitbox, every frame
         super().update_hitbox()#follows the hitbox of aila depending on the direction
@@ -1714,8 +1720,15 @@ class Aila_sword(Sword):
             eprojectile.currentstate.handle_input('Death')
 
     def collision_enemy(self,collision_enemy):
-        super().collision_enemy(collision_enemy)
+        self.sword_jump()
+        if collision_enemy.invincibile: return
+        collision_enemy.take_dmg(self.dmg)
+        collision_enemy.knock_back(self.dir)
+        collision_enemy.hurt_particles(dir = self.dir[0])        
+        self.clash_particles(collision_enemy.hitbox.center)
+
         self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
+        collision_enemy.currentstate.handle_input('sword')
         for stone in self.equip:
             self.stones[stone].collision()#call collision specific for stone
 
@@ -2035,9 +2048,9 @@ class Loot(Platform_entity):#
 
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
-        self.velocity[0] = 0.5*self.velocity[0]
+        self.velocity[0] = 0.5 * self.velocity[0]
         self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
-        self.bounce_coefficient *= self.bounce_coefficient
+        self.bounce_coefficient *= self.bounce_coefficient        
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
@@ -2048,7 +2061,8 @@ class Loot(Platform_entity):#
         self.velocity[0] = -self.velocity[0]
 
     def limit_y(self):
-        pass
+        if self.bounce_coefficient < 0.1:#to avoid falling through one way collisiosn
+            self.velocity[1] = max(self.velocity[1],0.6)        
 
 class Heart_container(Loot):
     def __init__(self,pos,game_objects):
@@ -3147,9 +3161,9 @@ class Fireplace(Interactable):
         self.currentstate.handle_input('Interact')#goes to interacted after transform
 
     def make_light(self):
-        self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],flicker=True,radius = 100))
-        self.light_sources.append(self.game_objects.lights.add_light(self,radius = 50))
-        self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],radius = 100))
+        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [255/255,175/255,100/255,255/255],flicker=True,radius = 100))
+        self.light_sources.append(self.game_objects.lights.add_light(self, radius = 50))
+        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [255/255,175/255,100/255,255/255],radius = 100))
 
 class Spirit_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):
