@@ -1,8 +1,12 @@
 import pygame, random, sys, math, numpy as np
 import Read_files, particles, animation, sound, dialogue, states
-import states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_mygga, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_exploding_mygga, AI_bird, AI_enemy, AI_reindeer
+import states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
 import constants as C
+
+def sign(number):
+    if number == 0: return 0
+    return round(number/abs(number))
 
 class Staticentity(pygame.sprite.Sprite):#all enteties
     def __init__(self, pos, game_objects):
@@ -43,24 +47,26 @@ class BG_Block(Staticentity):
         if self.parallax[0] != 1:#don't blur if there is no parallax
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = 1/self.parallax[0]#set the blur redius
+            self.game_objects.game.display.use_alpha_blending(False)
             layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
             self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
+            self.game_objects.game.display.use_alpha_blending(True)
             self.image = layer.texture#get the texture of the layer
 
     def draw(self):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos)#shader render
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
     def release_texture(self):#called when .kill() and when emptying the group
         self.image.release()
 
 class BG_Fade(BG_Block):
-    def __init__(self,pos,game_objects, img,parallax,positions):
+    def __init__(self,pos, game_objects, img, parallax, positions):
         super().__init__(pos, game_objects, img, parallax)
         self.shader_state = states_shader.Idle(self)
         self.make_hitbox(positions,pos)
 
-    def make_hitbox(self,positions,offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
+    def make_hitbox(self, positions, offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
         x,y = [],[]
         for pos in positions:
             x.append(pos[0]+offset_position[0])
@@ -79,6 +85,7 @@ class BG_Fade(BG_Block):
     def player_collision(self,player):
         self.shader_state.handle_input('alpha')
 
+#shaders -> should this be here or in enteties_parallx?
 class Lighitning(Staticentity):#a shader to make lighning barrier
     def __init__(self,pos,game_objects,parallax,size):
         super().__init__(pos, game_objects)
@@ -88,6 +95,9 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])
         self.time = 0
+
+    def release_texture(self):
+        self.image.release()
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
@@ -100,16 +110,13 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
     def player_collision(self):#player collision
         self.game_objects.player.take_dmg(1)
         self.game_objects.player.currentstate.handle_input('interrupt')#interupts dash
-        sign=(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-        if sign>0:
-            self.game_objects.player.knock_back([1,0])
-        else:
-            self.game_objects.player.knock_back([-1,0])
+        pm_one = sign(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
+        self.game_objects.player.knock_back([pm_one,0])
 
     def player_noncollision(self):
         pass
 
-class Sky(Staticentity):#for making a "plane" water
+class Sky(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos,game_objects)
         self.parallax = parallax
@@ -119,6 +126,11 @@ class Sky(Staticentity):#for making a "plane" water
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.size = size
         self.time = 0
+
+    def release_texture(self):
+        self.empty.release()
+        self.empty2.release()
+        self.noise_layer.release()
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
@@ -138,19 +150,21 @@ class Sky(Staticentity):#for making a "plane" water
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
 
-class Waterfall(Staticentity):#basically working
+class Waterfall(Staticentity):#working
     def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos,game_objects)
         self.parallax = parallax
 
         self.size = size
         self.empty = game_objects.game.display.make_layer(size)
+        self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.time = 0
 
     def release_texture(self):
         self.empty.release()
         self.noise_layer.release()
+        self.screen_copy.release()
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
@@ -159,14 +173,16 @@ class Waterfall(Staticentity):#basically working
         #noise
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
-        self.game_objects.shaders['noise_perlin']['scroll'] =[0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.shaders['noise_perlin']['scale'] = [70,70]
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy)#make a copy of the screen
 
         #water
         self.game_objects.shaders['waterfall']['refraction_map'] = self.noise_layer.texture
         self.game_objects.shaders['waterfall']['water_mask'] = self.noise_layer.texture
-        self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
+        self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
         self.game_objects.shaders['waterfall']['TIME'] = self.time
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
@@ -233,6 +249,37 @@ class Reflection(Staticentity):#water
             self.game_objects.game.display.render(self.noise_layer.texture, self.blur_layer, shader = self.game_objects.shaders['water_perspective'])
             self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
 
+class God_rays(Staticentity):
+    def __init__(self, pos, game_objects, parallax, size, **properties):
+        super().__init__(pos, game_objects)
+        self.parallax = parallax
+        self.image = game_objects.game.display.make_layer(size).texture
+        self.shader = game_objects.shaders['rays']
+        self.shader['resolution'] = self.game_objects.game.window_size
+        self.time = 0
+        self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
+        self.angle = properties.get('angle',-0.2)#radians
+        self.position = properties.get('position',(0,0))#in pixels
+        self.falloff = properties.get('falloff',(0,0.3))#between 0 and 1
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.1
+
+    def draw(self):
+        self.shader['angle'] = self.angle
+        self.shader['position'] = self.position
+        self.shader['falloff'] = self.falloff
+        self.shader['time'] = self.time
+        self.shader['size'] = self.image.size
+        self.shader['color'] = self.colour
+
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+
+#normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -366,7 +413,7 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20,state = 'Idle'):
         for i in range(0,number_particles):
-            obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance,lifetime,vel,dir,scale,colour,state)
+            obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance = distance,lifetime = lifetime,vel = vel,dir = dir,scale = scale,colour = colour,state = state)
             self.game_objects.cosmetics.add(obj1)
 
     def update_timers(self):
@@ -430,7 +477,7 @@ class Player(Character):
             self.hurt_particles(lifetime=40,vel={'linear':[3,8]},colour=[0,0,0,255],scale=3,number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg',duration = 20)#makes the game freez for few frames
-            self.game_objects.shader_draw.append_shader('chromatic_aberration',duration = 20)
+            self.game_objects.screen_shader.append_shader('chromatic_aberration',duration = 20)
         else:#if health < 0
             self.game_objects.game.state_stack[-1].handle_input('death')#depending on gameplay state, different death stuff should happen
 
@@ -520,7 +567,7 @@ class Enemy(Character):
         self.original_pos = pos
 
         self.currentstate = states_enemy.Idle(self)
-        AI_enemy.build_tree(self)#self.AI = AI_enemy.Peace(self)
+        self.AI = AI_enemy.AI(self)
 
         self.inventory = {'Amber_Droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -543,8 +590,8 @@ class Enemy(Character):
         if not self.aggro: return
         if player.invincibile: return
         player.take_dmg(1)
-        sign = math.copysign(1,(player.hitbox.center[0]-self.hitbox.center[0]))
-        player.knock_back([sign,0])
+        pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
+        player.knock_back([pm_one,0])
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -565,10 +612,10 @@ class Enemy(Character):
     def health_bar(self):#called from omamori Boss_HP
         pass
 
-    def chase(self):#called from AI: when chaising
+    def chase(self, position = 0):#called from AI: when chaising
         self.velocity[0] += self.dir[0]*0.5
 
-    def patrol(self,position = 0):#called from AI: when patroling
+    def patrol(self, position = 0):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
 
 class Flying_enemy(Enemy):
@@ -578,6 +625,8 @@ class Flying_enemy(Enemy):
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
         self.dir[1] = 1
+        self.AI = AI_enemy_flying.Patrol(self)
+        self.currentstate = states_enemy_flying.Idle(self)
 
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
@@ -586,13 +635,12 @@ class Flying_enemy(Enemy):
         self.velocity[0] = dir[0]*30
         self.velocity[1] = -dir[1]*30
 
-    def chase(self):#called from AI: when chaising
-        self.velocity[0] += (self.AI.black_board['player_distance'][0] - 30)*0.002#self.dir[0]*0.3
-        self.velocity[1] += (self.AI.black_board['player_distance'][1] - 30)*0.002
+    def chase(self, target_distance):#called from AI: when chaising
+        self.velocity[0] += (target_distance[0])*0.002 + self.dir[0]*0.1
+        self.velocity[1] += (target_distance[1])*0.002 + sign(target_distance[1])*0.1
 
-    def patrol(self,position):#called from AI: when patroling
-        self.velocity[0] += 0.001*(position[0]-self.rect.centerx)+0.02*self.dir[0]
-        self.velocity[0] = math.copysign(1,self.velocity[0])*min(abs(self.velocity[0]),1)#limit the max abs velocity to 1
+    def patrol(self, position):#called from AI: when patroling
+        self.velocity[0] += 0.001*(position[0]-self.rect.centerx)
         self.velocity[1] += 0.001*(position[1]-self.rect.centery)
 
     def update_rect_y(self):
@@ -603,33 +651,33 @@ class Flying_enemy(Enemy):
         self.rect.center = self.hitbox.center
         self.true_pos[0] = self.rect.left
 
+    def killed(self):#called when death animation starts playing
+        pass
+
 class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.currentstate = states_mygga.Idle(self)
-        self.health = 3
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.health = 2
+        self.aggro_distance = [-1,-1]
 
 class Exploding_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.currentstate = states_mygga.Idle(self)
-        AI_exploding_mygga.build_tree(self)#AI_exploding_mygga.Peace(self)#
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 4
         self.attack_distance = [20,20]
         self.aggro_distance = [150,100]
-        self.size = [64,64]#hurtbox size for hurt box
 
-    def suicide(self):
-        self.projectiles.add(Hurt_box(self,lifetime = 50))
-        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
+    def killed(self):
+        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30))
+        self.game_objects.camera.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
 class Packun(Enemy):
     def __init__(self,pos,game_objects):
@@ -652,23 +700,30 @@ class Packun(Enemy):
 class Sandrew(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/sandrew/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/sandrew/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.currentstate = states_sandrew.Idle(self)
         self.health = 3
-        self.attack_distance = [250,50]
-        self.aggro_distance = [250,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.attack_distance = [200,25]
+        self.aggro_distance = [250,25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/slime/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = Slime.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,16)
-        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
+        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
+        self.health = 2
+
+    def relseas_textures(self):
+        pass
+
+    def pool(game_objects):#spawned in mid game by sline giant
+        Slime.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/slime/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
 
 class Slime_giant(Enemy):
     def __init__(self,pos,game_objects):
@@ -677,9 +732,10 @@ class Slime_giant(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],48,48)
-        self.number = random.randint(1, 6)#number of minions
+        self.number = random.randint(2, 6)#number of minions
+        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
 
-    def loot(self):#spawn minions
+    def loots(self):#spawn minions
         pos = [self.hitbox.centerx,self.hitbox.centery-10]
         for i in range(0,self.number):
             obj = Slime(pos,self.game_objects)
@@ -752,7 +808,6 @@ class Larv_poison(Enemy):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
         self.attack=Poisonblobb
-        self.attack_distance=150
 
 class Maggot(Enemy):
     def __init__(self,pos,game_objects):
@@ -774,6 +829,7 @@ class Larv_simple(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.attack_distance = [0,0]
 
 class Bird(Enemy):
     def __init__(self, pos, game_objects):
@@ -886,7 +942,7 @@ class Skeleton_warrior(Enemy):#change design
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.attack_distance = 100
+        self.attack_distance = [100,10]
         self.attack = Sword
         self.health = 3
 
@@ -1525,12 +1581,12 @@ class Melee(Projectiles):
         self.kill()
 
 class Hurt_box(Melee):#a hitbox that spawns
-    def __init__(self,entity, lifetime = 100):
+    def __init__(self,entity, size = [64,64], lifetime = 100):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/hurt_box/',entity.game_objects)#invisible
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(entity.rect.x,entity.rect.y,self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,entity.size[0],entity.size[1])
+        self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,size[0],size[1])
         self.lifetime = lifetime
         self.dmg = entity.dmg
 
@@ -1600,14 +1656,11 @@ class Sword(Melee):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir[0])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
-        if self.dir[0]>0:
-            self.clash_particles(self.rect.midright)
-        else:
-            self.clash_particles(self.rect.midleft)
+        self.clash_particles(collision_enemy.hitbox.center)
 
     def sword_jump(self):
         if self.dir[1] == -1:
-            self.entity.velocity[1] = -11
+            self.entity.velocity[1] = -8
 
     def clash_particles(self,pos,number_particles=12):
         angle=random.randint(-180, 180)#the ejection anglex
@@ -1635,7 +1688,7 @@ class Aila_sword(Sword):
     def destroy(self):
         if self.lifetime < 0:
             self.currentstate.increase_phase()
-            self.kill()
+            self.kill()#removes from projectiles
 
     def update_hitbox(self):#called from aila's update_hitbox, every frame
         super().update_hitbox()#follows the hitbox of aila depending on the direction
@@ -1667,8 +1720,15 @@ class Aila_sword(Sword):
             eprojectile.currentstate.handle_input('Death')
 
     def collision_enemy(self,collision_enemy):
-        super().collision_enemy(collision_enemy)
+        self.sword_jump()
+        if collision_enemy.invincibile: return
+        collision_enemy.take_dmg(self.dmg)
+        collision_enemy.knock_back(self.dir)
+        collision_enemy.hurt_particles(dir = self.dir[0])
+        self.clash_particles(collision_enemy.hitbox.center)
+
         self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
+        collision_enemy.currentstate.handle_input('sword')
         for stone in self.equip:
             self.stones[stone].collision()#call collision specific for stone
 
@@ -1988,7 +2048,7 @@ class Loot(Platform_entity):#
 
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
-        self.velocity[0] = 0.5*self.velocity[0]
+        self.velocity[0] = 0.5 * self.velocity[0]
         self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
         self.bounce_coefficient *= self.bounce_coefficient
 
@@ -2001,7 +2061,8 @@ class Loot(Platform_entity):#
         self.velocity[0] = -self.velocity[0]
 
     def limit_y(self):
-        pass
+        if self.bounce_coefficient < 0.1:#to avoid falling through one way collisiosn
+            self.velocity[1] = max(self.velocity[1],0.6)
 
 class Heart_container(Loot):
     def __init__(self,pos,game_objects):
@@ -2840,7 +2901,6 @@ class Runestones(Interactable):
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.true_pos = self.rect.topleft
         self.hitbox.midbottom = self.rect.midbottom
-
         if state != "idle":
             self.currentstate = states_basic.Interacted(self)
 
@@ -2851,6 +2911,7 @@ class Runestones(Interactable):
         self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
 
     def reset_timer(self):#when animation finished
+        super().reset_timer()
         self.game_objects.player.currentstate.handle_input('Pray_post')
 
 class Uber_runestone(Interactable):
@@ -2902,9 +2963,6 @@ class Chest(Interactable):
                 obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop, self.game_objects)#make a class based on the name of the key: need to import sys
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
-
-    def reset_timer(self):#when animation is finished
-        self.currentstate.handle_input('Idle')
 
     def take_dmg(self,projectile):
         if self.invincibile: return
@@ -3103,9 +3161,9 @@ class Fireplace(Interactable):
         self.currentstate.handle_input('Interact')#goes to interacted after transform
 
     def make_light(self):
-        self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],flicker=True,radius = 100))
-        self.light_sources.append(self.game_objects.lights.add_light(self,radius = 50))
-        self.light_sources.append(self.game_objects.lights.add_light(self,colour = [255/255,175/255,100/255,255/255],radius = 100))
+        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [255/255,175/255,100/255,255/255],flicker=True,radius = 100))
+        self.light_sources.append(self.game_objects.lights.add_light(self, radius = 50))
+        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [255/255,175/255,100/255,255/255],radius = 100))
 
 class Spirit_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):

@@ -29,7 +29,7 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
         shader['blurRadius'] = 1/self.parallax[0]
         for state in self.sprites.keys():
             for frame, image in enumerate(self.sprites[state]):
-                empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)
+                empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)#need to be inside the loop to make new layers for each frame
                 self.game_objects.game.display.render(self.sprites[state][frame],empty_layer,shader = shader)
                 self.sprites[state][frame] = empty_layer.texture
 
@@ -175,6 +175,7 @@ class Falling_rock_source(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
         self.init_sprites('Sprites/animations/falling_rock/source/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.currentstate = states_droplet.Idle(self)
@@ -199,32 +200,6 @@ class Falling_rock_source(Layered_objects):
             self.game_objects.all_bgs._spritelayers[obj] = 0
             self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
             obj.add_internal(self.game_objects.all_bgs)
-
-class God_rays(Layered_objects):#should this be here or in enteties
-    def __init__(self, pos, game_objects, parallax, size, **properties):
-        super().__init__(pos, game_objects, parallax)
-        self.sprites = {'idle': [game_objects.game.display.make_layer(size).texture]}
-        self.image = self.sprites['idle'][0]
-        self.shader = game_objects.shaders['rays']
-        self.shader['resolution'] = self.game_objects.game.window_size
-        self.time = 0
-        self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
-        self.angle = properties.get('angle',-0.2)#radians
-        self.position = properties.get('position',(0,0))#in pixels
-        self.falloff = properties.get('falloff',(0,0.3))#between 0 and 1
-
-    def update(self):
-        self.group_distance()
-        self.time += self.game_objects.game.dt * 0.1
-
-    def draw(self):
-        self.shader['angle'] = self.angle
-        self.shader['position'] = self.position
-        self.shader['falloff'] = self.falloff
-        self.shader['time'] = self.time
-        self.shader['size'] = self.image.size
-        self.shader['color'] = self.colour
-        super().draw()
 
 class Light_source(Layered_objects):#works for parallax = 1. Not sure how we would liek to deal with light sources for other parallax
     def __init__(self, pos, game_objects, parallax):

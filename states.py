@@ -55,7 +55,7 @@ class Title_Menu(Game_State):
 
     def define_BG(self):
         size = (90,100)
-        bg = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        bg = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()
         pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
 

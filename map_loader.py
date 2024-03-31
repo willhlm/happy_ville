@@ -264,7 +264,7 @@ class Level():
                          colour= list(pygame.Color(property['value']))
                          prop['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
 
-                god_rays = entities_parallax.God_rays(object_position, self.game_objects, parallax, object_size, **prop)
+                god_rays = Entities.God_rays(object_position, self.game_objects, parallax, object_size, **prop)
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(god_rays)
                 else:
@@ -286,11 +286,8 @@ class Level():
 
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(reflection)
-                else:
-                    if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
-                        self.game_objects.cosmetics.add(reflection)
-                    else:
-                        self.game_objects.all_bgs.add(reflection)
+                else:                 
+                    self.game_objects.all_bgs.add(reflection)
 
 
             elif id == 23:#shade trigger
@@ -298,7 +295,7 @@ class Level():
                     if property['name'] == 'colour':
                         colour = property['value']
 
-                new_interacable = Entities.Shade_trigger(object_position,self.game_objects,object_size,pygame.Color(colour))
+                new_interacable = Entities.Shade_trigger(object_position, self.game_objects, object_size, pygame.Color(colour))
                 self.references['shade_trigger'] = new_interacable
                 self.game_objects.interactables.add(new_interacable)
 
@@ -345,10 +342,10 @@ class Level():
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(reflection)
                 else:
-                    if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
-                        self.game_objects.cosmetics.add(reflection)
-                    else:
-                        self.game_objects.all_bgs.add(reflection)
+                    #if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
+                     #   self.game_objects.cosmetics.add(reflection)
+                    #else:
+                    self.game_objects.all_bgs.add(reflection)
 
 
             elif id == 28:#key items: soul_essence etc.
@@ -380,10 +377,7 @@ class Level():
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(reflection)
                 else:
-                    if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
-                        self.game_objects.cosmetics.add(reflection)
-                    else:
-                        self.game_objects.all_bgs.add(reflection)
+                    self.game_objects.all_bgs.add(reflection)
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
@@ -600,11 +594,11 @@ class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level) 
 
-    def room(self, room):#called wgen a new room is loaded        
+    def room(self, room):#called wgen a new room is loaded  
         if room == '11':
-            self.level.game_objects.lights.ambient = (150/255,150/255,150/255,230/255)
-            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
- 
+            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)  
+
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
@@ -646,7 +640,7 @@ class Light_forest(Biome):
                         self.level.game_objects.all_bgs.add(new_cocoon)
 
             elif id == 8:#cocoon
-                new_cocoon = Entities.Cocoon_boss(object_position, self.game_objects)
+                new_cocoon = Entities.Cocoon_boss(object_position, self.level.game_objects)
                 self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.level.game_objects.interactables.add(new_cocoon)
 
@@ -690,8 +684,8 @@ class Light_forest_cave(Biome):
         super().__init__(level)    
         self.room()
 
-    def room(self, room):    
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+    def room(self, room = 1):    
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
         self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
  
     def load_objects(self,data,parallax,offset):
@@ -700,7 +694,7 @@ class Light_forest_cave(Biome):
             object_size = [int(obj['width']),int(obj['height'])]
             object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
             properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['objects_firstgid']
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
 
             if id == 0:#cave grass
                 if parallax == [1,1]:#if BG1 layer

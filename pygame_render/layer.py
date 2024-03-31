@@ -6,7 +6,7 @@ class Layer:
     """
     A rendering layer consisting of a texture and a framebuffer.
 
-    Note: A Layer object cannot be instantiated directly.
+    Note: A Layer object cannot be instantiated directly. 
     Use RenderEngine.make_layer to create one.
     """
 
@@ -14,7 +14,7 @@ class Layer:
         """
         Initialize a Layer with a given texture and framebuffer.
 
-        Note: A Layer object cannot be instantiated directly.
+        Note: A Layer object cannot be instantiated directly. 
         Use RenderEngine.make_layer to create one.
         """
 

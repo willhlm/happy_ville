@@ -9,7 +9,7 @@ uniform vec2 resolution;
 uniform vec2 lightPositions[20]; // Assuming up to 20 light sources
 uniform float lightRadii[20];     // Corresponding radius for each light source
 uniform vec4 colour[20];
-uniform vec4 background;//texture(imageTexture, fragmentTexCoord); // Get background color
+uniform vec4 ambient;//texture(imageTexture, fragmentTexCoord); // Get background color
 
 uniform vec2 rectangleCorners[80]; // x/4 is the number of rectangles
 uniform int num_rectangle;
@@ -48,7 +48,8 @@ bool isOcluded(vec2 p, vec2 q, vec2 lightPos, float lightRadius) {
 }
 
 void main() {
-    vec4 backgroundColor = background;
+    vec4 backgroundColor = ambient;
+
     for (int l = 0; l < num_lights; l++) { // number of light sources
         vec2 lightPos = lightPositions[l];
         float lightRadius = lightRadii[l];
@@ -87,15 +88,15 @@ void main() {
 
         if (!occluded) {
             // light intensity
-            float lightIntensity = 1.0 - distanceToLight / lightRadius;
-
-            vec4 norm_colour = colour[l]/1;//normalise
+            float lightIntensity = max(1.0 - distanceToLight / lightRadius,0);
 
             // add light together
             float fade = smoothstep(0.0, 0.2, lightIntensity);
-            backgroundColor += vec4(norm_colour.xyz * lightIntensity * fade*norm_colour.w, norm_colour.w*lightIntensity * fade);
+            backgroundColor += vec4(colour[l].xyz * lightIntensity * fade * colour[l].w , lightIntensity * fade* colour[l].w);
         }
     }
+     backgroundColor.xyz /= mix(backgroundColor.w,1,ambient.w);
+    
     // smooth transition for the combined light intensities
     color = vec4(backgroundColor.xyz, backgroundColor.w);
 }

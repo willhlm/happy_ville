@@ -20,7 +20,11 @@ class Facility_states():
         pass
 
     def exit_state(self):
+        self.release_texture()
         self.game_state.exit_state()
+
+    def release_texture(self):
+        pass    
 
 #fast travel
 class Fast_travel_unlock(Facility_states):
@@ -538,13 +542,13 @@ class Vendor(Facility_states):#called from Astrid
         self.init()
         self.letter_frame = 0
         self.pointer_index = [0,0]
-        self.pointer = entities_UI.Menu_Box()
+        self.pointer = entities_UI.Menu_Box(self.game_objects)
         self.item_index = [0,0]#pointer of item
 
     def init(self):
         self.init_canvas()
 
-    def init_canvas(self):
+    def init_canvas(self):     
         self.bg1 = self.game_objects.font.fill_text_bg([300,200])
 
         self.items = []
@@ -560,16 +564,20 @@ class Vendor(Facility_states):#called from Astrid
         self.items.append(getattr(sys.modules[Entities.__name__], 'Bone')([0,0],self.game_objects))
 
         self.display_number = min(3,len(self.items))#number of items to list
-        self.sale_items=self.items[0:self.display_number+1]
+        self.positions = []#positions to render the itms
+        for i in range(0,self.display_number):            
+           self.positions.append([240,80+20*i])    
+
+        self.sale_items =self.items[0:self.display_number+1]#gets udated when you press the up down keys
 
         self.buy_sur = self.game_objects.font.render(text = 'Buy')
-        self.cancel_sur= self.game_objects.font.render(text = 'Cancel')
+        self.cancel_sur = self.game_objects.font.render(text = 'Cancel')
 
     def set_response(self,text):
         self.respond = self.game_objects.font.render(text = text)
 
     def blit_response(self):
-        self.game_objects.game.screen.blit(self.respond,(190,150))
+        self.game.display.render(self.respond, self.game_objects.game.screen, position = (190,150))#shader render
 
     def update(self):
         self.letter_frame += 1
@@ -582,39 +590,40 @@ class Vendor(Facility_states):#called from Astrid
         self.blit_pointer()
 
     def blit_BG(self):
-        width=self.bg1.get_width()
-        self.game_objects.game.screen.blit(self.bg1,((self.game_objects.game.WINDOW_SIZE[0]-width)/2,20))
+        self.game_objects.game.display.render(self.bg1, self.game_objects.game.screen, position =((self.game_objects.game.window_size[0]-self.bg1.width)*0.5,20))#shader render
 
     def blit_money(self):#blit how much gold we have in inventory
         money = self.game_objects.player.inventory['Amber_Droplet']
         count_text = self.game_objects.font.render(text = str(money))
-        self.game_objects.game.screen.blit(count_text,(200,50))
+        self.game_objects.game.display.render(count_text, self.game_objects.game.screen, position = (200,50))#shader render
+
         self.amber.animation.update()
-        self.game_objects.game.screen.blit(self.amber.image,(190,50))
+        self.game_objects.game.display.render(self.amber.image, self.game_objects.game.screen, position =(190,50))#shader render
 
     def blit_description(self):
         conv=self.items[self.item_index[1]].description
         text = self.game_objects.font.render((272,80), conv, int(self.letter_frame//2))
-        self.game_objects.game.screen.blit(text,(190,100))
+        self.game_objects.game.display.render(text, self.game_objects.game.screen, position =(190,100))#shader render
 
     def blit_items(self):
         for index, item in enumerate(self.sale_items):
             if index < self.display_number:
                 item.animation.update()
-                self.game_objects.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,80+20*index))
+                self.game_objects.game.display.render(item.image, self.game_objects.game.screen, position = (240,80+20*index))#shader render
+
                 #blit cost
                 item_name=str(type(item).__name__)
-                cost=self.npc.inventory[item_name]
+                cost = self.npc.inventory[item_name]
                 cost_text = self.game_objects.font.render(text = str(cost))
-                self.game_objects.game.screen.blit(cost_text,(260,80+20*index))
+                self.game_objects.game.display.render(cost_text, self.game_objects.game.screen, position = (260,80+20*index))#shader render                
 
             else:#the last index
                 item.animation.update()
-                item.image.set_alpha(100)
-                self.game_objects.game.screen.blit(pygame.transform.scale(item.image,(10,10)),(240,140))
+                #item.image.set_alpha(100)
+                self.game_objects.game.display.render(item.image, self.game_objects.game.screen, position =(240,140))#shader render                
 
     def blit_pointer(self):
-        self.game_objects.game.screen.blit(self.pointer.img,(220+20*self.pointer_index[0],60+20*self.pointer_index[1]))#pointer
+        self.game_objects.game.display.render(self.pointer.image, self.game_objects.game.screen, position =(220+20*self.pointer_index[0],60+20*self.pointer_index[1]))#shader render
 
     def handle_events(self, input):
         if input[0]:#press
@@ -625,8 +634,8 @@ class Vendor(Facility_states):#called from Astrid
                 self.item_index[1] += 1
                 self.item_index[1] = min(self.item_index[1],len(self.items)-1)
 
-                if self.pointer_index[1]==2:
-                    self.sale_items=self.items[self.item_index[1]-self.display_number+1:self.item_index[1]+self.display_number-1]
+                if self.pointer_index[1] == 2:
+                    self.sale_items = self.items[self.item_index[1]-self.display_number+1:self.item_index[1]+self.display_number-1]
                     if self.item_index[1]==len(self.items)-1:
                         return
 
@@ -639,7 +648,7 @@ class Vendor(Facility_states):#called from Astrid
                 self.item_index[1] = max(self.item_index[1],0)
 
                 if self.pointer_index[1]==0:
-                    self.sale_items=self.items[self.item_index[1]:self.item_index[1]+self.display_number+1]
+                    self.sale_items = self.items[self.item_index[1]:self.item_index[1]+self.display_number+1]
                     if self.item_index[1]==0:
                         return
 

@@ -15,7 +15,7 @@ import groups
 import object_pool
 import controller
 import lights
-import shader_draw
+import screen_shader
 
 from time import perf_counter
 
@@ -36,7 +36,7 @@ class Game_Objects():
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.object_pool = object_pool.Object_pool(self)
         self.lights = lights.Lights(self)
-        self.shader_draw = shader_draw.Shader_draw(self, 'vignette')
+        self.screen_shader = screen_shader.Screen_shader(self, 'vignette')
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#groups.Shader_group()
@@ -101,6 +101,7 @@ class Game_Objects():
         self.bg_interact.empty()
         self.cosmetics.empty()
         self.layer_pause.empty()
+        self.bg_fade.empty()
 
     def collide_all(self):        
         self.platform_collision()
@@ -140,7 +141,7 @@ class Game_Objects():
         self.interactables.update()
         self.weather.update()
         self.lights.update()
-        self.shader_draw.update()#housld be last
+        self.screen_shader.update()#housld be last
 
     def draw(self):
         self.all_bgs.draw()
@@ -158,7 +159,7 @@ class Game_Objects():
         self.all_fgs.draw()
         #self.camera_blocks.draw()
         self.lights.draw()#should be second to last
-        self.shader_draw.draw()#housld be last
+        self.screen_shader.draw()#housld be last
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:

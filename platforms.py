@@ -176,8 +176,8 @@ class Collision_right_angle(Platform):#ramp
                     self.orientation = 2
 
     def get_target(self,entity):
-        if self.orientation ==1:
-            rel_x = self.hitbox.right - entity.hitbox.left
+        if self.orientation == 1:
+            rel_x = entity.hitbox.right - self.hitbox.left
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
         return -rel_x*self.ratio + self.hitbox.bottom

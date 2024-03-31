@@ -11,7 +11,10 @@ class Enemy_states(Entity_States):
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
+
+    def update(self):
+        if abs(self.entity.velocity[0]) > 0.2:
+            self.enter_state('Walk')
 
     def handle_input(self,input):
         if input=='Walk':
@@ -24,7 +27,10 @@ class Idle(Enemy_states):
 class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.walk()
+
+    def update(self):
+        if abs(self.entity.velocity[0]) <= 0.2:
+            self.enter_state('Idle')
 
     def handle_input(self,input):
         if input=='Idle':
@@ -37,8 +43,6 @@ class Walk(Enemy_states):
 class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
-        self.entity.AI.deactivate()
 
     def increase_phase(self):
         self.entity.dead()
@@ -46,7 +50,6 @@ class Death(Enemy_states):
 class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def increase_phase(self):
         self.enter_state('Idle')
@@ -65,7 +68,7 @@ class Stun(Enemy_states):
 class Attack_pre(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
+        self.entity.velocity = [0,0]
 
     def increase_phase(self):
         self.enter_state('Attack_main')
@@ -75,7 +78,16 @@ class Attack_main(Enemy_states):
         super().__init__(entity)
 
     def update(self):
-        self.entity.velocity[0] += self.entity.dir[0]*2
+        self.entity.velocity[0] += self.entity.dir[0] * 2
+
+    def handle_input(self, input):
+        if input == 'Wall':
+            self.entity.velocity[0] = -5 * self.dir[0] * self.entity.velocity[0]
+            self.increase_phase()
+            self.entity.game_objects.camera.camera_shake(duration = 15)
+        elif input == 'sword':#if aila hits            
+            self.entity.velocity[0] *= 3            
+            self.entity.dir[0] *= -1
 
     def increase_phase(self):
         self.enter_state('Attack_post')
@@ -86,4 +98,4 @@ class Attack_post(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
-        self.entity.AI.handle_input('Attack')
+        self.entity.AI.handle_input('Finish_attack')
