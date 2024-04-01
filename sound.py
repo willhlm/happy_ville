@@ -12,16 +12,18 @@ class Sound():#class for organising sound and music playback
             self.channels.append(pygame.mixer.Channel(i))
             if i < self.reserved_channels:
                 pygame.mixer.set_reserved(i)
-        self.channels[0].set_volume(0.1)
+        self.channels[0].set_volume(1)
 
     def play_bg_sound(self):
+        self.channels[0].set_volume(1)
         self.channels[0].play(self.bg, loops = -1, fade_ms = 300)
 
     def pause_bg_sound(self):
         self.channels[0].fadeout(700)
 
     def load_bg_sound(self, name):
-        self.bg = pygame.mixer.Sound("Audio/maps/" + name + "/default.wav")
+        self.bg = pygame.mixer.Sound("Audio/maps/" + name + "/default.mp3")
+        self.bg.set_volume(1)
 
     @staticmethod
     def play_sfx(sfx):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
@@ -40,5 +42,5 @@ class Sound():#class for organising sound and music playback
 
     def load_sound(self, name):
         pass
-        
+
     #list general sounds that  can always be loaded and played
