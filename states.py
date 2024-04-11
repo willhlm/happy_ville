@@ -104,7 +104,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'village_ola_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -726,18 +726,18 @@ class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
 class Facilities(Gameplay):#fast_travel (menu and unlock), ability upgrade (spurit and movement), bank, soul essence, vendor, smith
     def __init__(self, game,type,*arg):#args could be npc or travel point etc
         super().__init__(game)
-        self.state = getattr(UI_facilities, type)(self,*arg)#make it a list and therevy a stack?
+        self.state = [getattr(UI_facilities, type)(self,*arg)]
 
     def update(self):
         super().update()
-        self.state.update()
+        self.state[-1].update()
 
     def render(self):
         super().render()
-        self.state.render()
+        self.state[-1].render()
 
     def handle_events(self,input):
-        self.state.handle_events(input)
+        self.state[-1].handle_events(input)
 
 class Cutscenes(Gameplay):#basically, this class is not needed but would be nice to have the cutscene classes in a seperate file
     def __init__(self, game,scene):
@@ -799,6 +799,44 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
                 self.page = 1
             elif input[-1] == 'a':
                 self.page = 1
+
+class Portal(Gameplay):#portal/challengerooms
+    def __init__(self,game, portal):
+        super().__init__(game)
+        self.portal = portal
+
+    def render(self):#need different rendering to apply shaders in the order we want
+        self.draw_groups()
+        self.game.game_objects.UI['gameplay'].render()
+
+    def update(self):
+        super().update()
+        self.portal.update()
+
+    def draw_groups(self):
+        self.portal.empty_layer.clear(0,0,0,0)
+        self.portal.bg_grey_layer.clear(0,0,0,0)
+
+        self.game.game_objects.all_bgs.draw(self.portal.bg_distort_layer)
+        self.game.game_objects.interactables.draw(self.portal.bg_distort_layer)#should be before bg_interact
+        self.game.game_objects.bg_interact.draw(self.portal.bg_distort_layer)
+        #we want the stuff above to be distored and grey (also parallax = 1?)
+        
+        self.game.game_objects.enemies.draw(self.portal.bg_grey_layer)
+        self.game.game_objects.npcs.draw(self.portal.bg_grey_layer)
+        self.game.game_objects.fprojectiles.draw(self.portal.bg_grey_layer)
+        self.game.game_objects.eprojectiles.draw(self.portal.bg_grey_layer)
+        self.game.game_objects.loot.draw(self.portal.bg_grey_layer)
+        self.game.game_objects.platforms.draw(self.portal.bg_grey_layer)
+        self.game.game_objects.players.draw(self.portal.bg_grey_layer)
+        self.game.game_objects.cosmetics.draw(self.portal.bg_grey_layer)#Should be before fgs
+        #we want this one to be spirit colourm no distotion
+
+        self.portal.draw2()
+
+        self.game.game_objects.all_fgs.draw(self.game.screen)
+        self.game.game_objects.lights.draw(self.game.screen)#should be second to last
+        self.game.game_objects.shader_render.draw(self.game.screen)#housld be last        
 
 #encountters and corresponding cutscenes
 class Cutscene_engine(Gameplay):#cut scenens that is based on game engien

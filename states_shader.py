@@ -108,7 +108,7 @@ class Teleport(Shader_states):
     def draw(self):
         self.entity.shader['progress'] = self.time
 
-class Glow(Shader_states):#ting with a colour and apply bloom
+class Glow(Shader_states):#tint with a colour and apply bloom
     def __init__(self,entity, colour = [100,200,255,100]):
         super().__init__(entity)
         self.colour = colour
@@ -137,22 +137,33 @@ class Shining(Shader_states):#called for aila when particle hit when guide disso
         self.entity.shader['tint'] = self.colour
         self.entity.shader['speed'] = self.speed
 
-class Dissolve(Shader_states):
-    def __init__(self,entity):
+class Dissolve(Shader_states):#disolve and bloom
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['dissolve']
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        self.entity.shader = self.entity.game_objects.shaders['bloom']
+
         self.time = 0
+        self.colour = kwarg.get('colour', [1,0,0,1])        
+        self.size = kwarg.get('size', 0.1)        
 
     def update(self):
         self.time += self.entity.game_objects.game.dt*0.01
 
     def draw(self):
+        self.empty.clear(0,0,0,0)
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
         self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.entity.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
         self.entity.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
-        self.entity.game_objects.game.display.render(self.entity.image, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
+        self.entity.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.entity.game_objects.shaders['dissolve']['dissolve_texture'] = self.noise_layer.texture
         self.entity.game_objects.shaders['dissolve']['dissolve_value'] = max(1 - self.time,0)
+        self.entity.game_objects.shaders['dissolve']['burn_color'] = self.colour
+        self.entity.game_objects.shaders['dissolve']['burn_size'] = self.size
+        self.entity.game_objects.game.display.render(self.entity.image, self.empty, shader = self.entity.game_objects.shaders['dissolve'])#shader render
+        self.entity.image = self.empty.texture
+
+        self.entity.game_objects.shaders['bloom']['targetColor'] = self.colour[0:3]        

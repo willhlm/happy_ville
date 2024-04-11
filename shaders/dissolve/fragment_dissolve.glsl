@@ -9,8 +9,8 @@ out vec4 COLOR;
 
 uniform sampler2D dissolve_texture;
 uniform float dissolve_value = 0.5;//progress
-uniform float burn_size = 0.04;
-uniform vec4 burn_color = vec4(1,0,0,1);
+uniform float burn_size = 0.1;
+uniform vec4 burn_color = vec4(0.6,0.5,0.9,1);
 
 void main() {
     vec4 main_texture = texture(imageTexture, fragmentTexCoord);

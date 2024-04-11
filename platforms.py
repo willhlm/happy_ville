@@ -19,7 +19,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def collide_y(self,entity):
         pass
 
-    def draw(self):#conly certain platforms will require draw
+    def draw(self, target):#conly certain platforms will require draw
         pass
 
     def take_dmg(self,projectile,dmg):#called from projectile
@@ -75,8 +75,8 @@ class Gate(Platform):#a gate that is owned by the lever
             entity.left_collision(self.hitbox.right)
         entity.update_rect_x()
 
-    def draw(self):
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
 
     def release_texture(self):#called when .kill() and empty group
         for state in self.sprites.keys():
@@ -284,8 +284,8 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
             entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
 
-    def draw(self):
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#int seem nicer than round
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image, target, position = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#int seem nicer than round
 
     def release_texture(self):#called when .kill() and empty group
         for state in self.sprites.keys():
@@ -335,7 +335,7 @@ class Breakable_block(Collision_block):#breakable collision blocks
         for timer in self.timers:
             timer.update()
 
-    def draw(self):
+    def draw(self, target):
         self.game_objects.game.screen.blit(self.image, (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
 
     def release_texture(self):#called when .kill() and empty group

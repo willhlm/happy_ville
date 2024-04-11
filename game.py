@@ -10,7 +10,7 @@ class Game():
         #initiate all screens
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size()#get the scale according to your display size
-        window_size_scaled = tuple([int(x*self.scale) for x in self.window_size])
+        window_size_scaled = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
 
         self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1])
         self.screen = self.display.make_layer(self.window_size)

@@ -3,12 +3,12 @@ import Read_files
 import entities_UI
 
 class UI_loader():#for map, omamori, ability, journal etc
-    def __init__(self,game_objects,type):
+    def __init__(self, game_objects, type):
         self.game_objects = game_objects
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/' + type + '/BG.png').convert_alpha())
-        self.source = {'map':'map_UI','omamori':'omamori_UI','journal':'journal_UI','fast_travel':'fast_travel_UI','ability_spirit_upgrade':'ability_spirit_upgrade_UI','ability_movement_upgrade':'ability_movement_upgrade_UI','inventory':'inventory_UI'}[type]#the name of the tmx file with the objects
+        self.source = {'map':'map_UI','omamori':'omamori_UI','journal':'journal_UI','fast_travel':'fast_travel_UI','ability_spirit_upgrade':'ability_spirit_upgrade_UI','ability_movement_upgrade':'ability_movement_upgrade_UI','inventory':'inventory_UI', 'vendor':'vendor_UI'}[type]#the name of the tmx file with the objects
         self.load_UI_data(type)
-        self.load_data = {'map':self.load_map_data,'omamori':self.load_omamori_data,'journal':self.load_journal_data,'fast_travel':self.load_fast_travel_data,'ability_spirit_upgrade':self.load_ability_spirit_upgrade_data,'ability_movement_upgrade':self.load_ability_movement_upgrade_data,'inventory':self.load_inventory_data}[type]()
+        self.load_data = {'map':self.load_map_data,'omamori':self.load_omamori_data,'journal':self.load_journal_data,'fast_travel':self.load_fast_travel_data,'ability_spirit_upgrade':self.load_ability_spirit_upgrade_data,'ability_movement_upgrade':self.load_ability_movement_upgrade_data,'inventory':self.load_inventory_data,'vendor':self.load_vendor_data}[type]()
 
     def load_UI_data(self,type):
         map_data = Read_files.read_json("UI/%s/%s.json" % (type,type))
@@ -17,6 +17,27 @@ class UI_loader():#for map, omamori, ability, journal etc
             if 'source' in tileset.keys():
                 if self.source in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
+
+    def load_vendor_data(self):
+        self.objects = []   
+        self.next_items = []     
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#amber position
+                new_item = entities_UI.Item(topleft_object_position,self.game_objects)#shuold change from Item to a UI amber
+                self.amber = new_item
+            elif id == 1:#sell item position
+                new_item = entities_UI.Item(topleft_object_position,self.game_objects)
+                self.objects.append(new_item)
+            elif id == 2:#the description box posiiton
+                self.description = {'position': topleft_object_position, 'size' : object_size} 
+            elif id == 3:#the items showing what's next
+                new_item = entities_UI.Item(topleft_object_position,self.game_objects)
+                self.next_items.append(new_item)
 
     def load_map_data(self):
         self.objects = []

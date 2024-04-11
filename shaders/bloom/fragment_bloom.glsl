@@ -11,7 +11,7 @@ uniform float bloomThreshold = 0.7; // Adjust bloom threshold
 uniform float bloomIntensity = 2; // Increase bloom intensity
 uniform vec3 bloomTint = vec3(1.0, 1.0, 1.0); // Tint color for bloom -> if we want to tint it to a specific colour
 uniform vec3 targetColor = vec3(0.39, 0.78, 1); // Target color for bloom
-uniform float colorRange = 0.2; // Range around the target color for bloom: 1 means all colours
+uniform float colorRange = 0.4; // Range around the target color for bloom: 1 means all colours
 
 vec3 GetBloomPixel(sampler2D tex, vec2 uv, vec2 texPixelSize) {
     vec2 uv2 = floor(uv / texPixelSize) * texPixelSize;

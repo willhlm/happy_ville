@@ -22,14 +22,11 @@ class Idle(Shader_states):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['idle']
 
-    def draw(self):
-        pos = (int(self.entity.rect[0]-self.entity.game_objects.camera.scroll[0]),int(self.entity.rect[1]-self.entity.game_objects.camera.scroll[1]))
-        self.entity.game_objects.game.display.render(self.entity.image, self.entity.game_objects.game.screen, position = pos, flip = bool(max(self.entity.dir[0],0)), shader = self.entity.shader)#shader render
-
 class Teleport(Shader_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.time = 0
+        self.entity.shader = self.entity.game_objects.shaders['bloom']
 
     def update(self):
         self.time += 0.005*self.entity.game_objects.game.dt
@@ -41,14 +38,13 @@ class Teleport(Shader_states):
 
         self.entity.game_objects.shaders['teleport']['progress'] = self.time
         self.entity.game_objects.game.display.render(self.entity.image, self.entity.layer1, shader = self.entity.game_objects.shaders['teleport'])#shader render
-
-        pos = (int(self.entity.rect[0]-self.entity.game_objects.camera.scroll[0]),int(self.entity.rect[1]-self.entity.game_objects.camera.scroll[1]))
-        self.entity.game_objects.game.display.render(self.entity.layer1.texture, self.entity.game_objects.game.screen, position = pos, flip = bool(max(self.entity.dir[0],0)), shader = self.entity.game_objects.shaders['bloom'])#shader render
+        self.entity.image = self.entity.layer1.texture
 
 class Transparent(Shader_states):#guide NPC uses it
     def __init__(self,entity):
         super().__init__(entity)
         self.time = 80#put a number so that it matches the animations
+        self.entity.shader = self.entity.game_objects.shaders['alpha']
 
     def update(self):
         self.time -= self.entity.game_objects.game.dt
@@ -58,5 +54,3 @@ class Transparent(Shader_states):#guide NPC uses it
 
     def draw(self):
         self.entity.game_objects.shaders['alpha']['alpha'] = 0
-        pos = (int(self.entity.rect[0]-self.entity.game_objects.camera.scroll[0]),int(self.entity.rect[1]-self.entity.game_objects.camera.scroll[1]))
-        self.entity.game_objects.game.display.render(self.entity.layer1.texture, self.entity.game_objects.game.screen, position = pos, flip = bool(max(self.entity.dir[0],0)), shader = self.entity.game_objects.shaders['alpha'])#shader render

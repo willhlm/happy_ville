@@ -457,6 +457,13 @@ class Level():
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 
+            elif id == 12:#challenge monument
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID = property['value']
+                gate = Entities.Challenge_monument(object_position, self.game_objects, ID)
+                self.game_objects.interactables.add(gate)
+
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects
         return round(1/parallax[0])
@@ -654,7 +661,7 @@ class Rhoutta_encounter(Biome):
     def room(self, room):        
         if room == '2':
             self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230      
-            if self.level.game_objects.world_state['guide']:#if guide interaction has happened
+            if self.level.game_objects.world_state.events['guide']:#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
     def set_camera(self):

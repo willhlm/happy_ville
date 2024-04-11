@@ -4,9 +4,9 @@ class Group(pygame.sprite.Group):#the rest
     def __init__(self):
         super().__init__()
 
-    def draw(self):
+    def draw(self, target):
         for spr in self.sprites():
-            spr.draw()#has to be just before the draw
+            spr.draw(target)#has to be just before the draw
 
     def empty(self):
         for spr in self.sprites():
@@ -17,9 +17,9 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):
     def __init__(self):
         super().__init__()
 
-    def draw(self):
+    def draw(self, target):
         for spr in self.sprites():
-            spr.draw()#has to be just before the draw
+            spr.draw(target)#has to be just before the draw
 
     def empty(self):
         for spr in self.sprites():

@@ -57,8 +57,8 @@ class Circle_converge_2(Basic_states):
     def check_collision(self):
         distance = ((self.entity.true_pos[0] - self.entity.game_objects.player.hitbox.center[0])**2+(self.entity.true_pos[1] - self.entity.game_objects.player.hitbox.center[1])**2)**0.5
         if distance < 5:#light up the room brifly -> make also aila glow blue maybe
-            if not self.entity.game_objects.shader_draw.shaders.get('bloom',False):#do not append several if already exist
-                self.entity.game_objects.shader_draw.append_shader('bloom', targetColor = [0.39, 0.78, 1], colorRange = 0.2)#append a bloom shader to screen -> should each particle add this?
+            if not self.entity.game_objects.shader_render.shaders.get('bloom',False):#do not append several if already exist
+                self.entity.game_objects.shader_render.append_shader('bloom', targetColor = [0.39, 0.78, 1], colorRange = 0.2)#append a bloom shader to screen -> should each particle add this?
                 self.entity.game_objects.player.shader_state.enter_state('Shining')
             self.entity.light.colour = [1,1,1,1]#change the colour of the light
             self.entity.light.updates.append(self.entity.light.expand)
@@ -78,6 +78,6 @@ class Circle_converge_2(Basic_states):
 
     def handle_input(self,input):
         if input == 'light_gone':#called from lights when lifetime < 0
-            if self.entity.game_objects.shader_draw.shaders.get('bloom',False):#do not append several if already exist
-                self.entity.game_objects.shader_draw.remove_shader('bloom')
+            if self.entity.game_objects.shader_render.shaders.get('bloom',False):#do not append several if already exist
+                self.entity.game_objects.shader_render.remove_shader('bloom')
                 self.entity.game_objects.player.shader_state.enter_state('Idle')

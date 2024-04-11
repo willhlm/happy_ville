@@ -68,6 +68,24 @@ class Infinity_stone(Animatedentity):
         self.rect.topleft = pos
         self.description = ''
 
+class Amber_Droplet(Animatedentity):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/amber_droplet/',game_objects)#for inventory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.description = 'moneyyyyy'
+
+class Bone(Animatedentity):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/bone/',game_objects)#for inventory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.description = 'boner'
+
 #momamori inventory
 class Omamori(Animatedentity):#this will save the positions needed to the UI
     def __init__(self,pos,game_objects):

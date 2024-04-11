@@ -53,7 +53,7 @@
          "parallaxx":0.1,
          "parallaxy":0.1,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -108,7 +108,7 @@
          "parallaxx":0.2,
          "parallaxy":0.2,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -163,7 +163,7 @@
          "parallaxx":0.3,
          "parallaxy":0.3,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -242,7 +242,7 @@
          "parallaxx":0.4,
          "parallaxy":0.4,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -256,7 +256,7 @@
                  "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
-                 "visible":false,
+                 "visible":true,
                  "x":0,
                  "y":0
                 }, 
@@ -267,7 +267,7 @@
                  "name":"bg6_3",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":500,
                  "x":0,
                  "y":0
@@ -279,7 +279,7 @@
                  "name":"bg6_2",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":500,
                  "x":0,
                  "y":0
@@ -291,7 +291,7 @@
                  "name":"bg6_1",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":false,
+                 "visible":true,
                  "width":500,
                  "x":0,
                  "y":0
@@ -300,25 +300,7 @@
                  "draworder":"topdown",
                  "id":76,
                  "name":"statics",
-                 "objects":[
-                        {
-                         "gid":17,
-                         "height":16,
-                         "id":593,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1616,
-                         "y":576
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -332,7 +314,7 @@
          "parallaxx":0.5,
          "parallaxy":0.5,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -392,24 +374,6 @@
                  "name":"statics",
                  "objects":[
                         {
-                         "gid":17,
-                         "height":16,
-                         "id":591,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1856,
-                         "y":528
-                        }, 
-                        {
                          "gid":16,
                          "height":16,
                          "id":1025,
@@ -458,7 +422,7 @@
          "parallaxx":0.6,
          "parallaxy":0.6,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -518,24 +482,6 @@
                  "name":"statics",
                  "objects":[
                         {
-                         "gid":17,
-                         "height":16,
-                         "id":304,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2448,
-                         "y":608
-                        }, 
-                        {
                          "gid":16,
                          "height":16,
                          "id":1024,
@@ -582,7 +528,7 @@
          "parallaxx":0.7,
          "parallaxy":0.7,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -714,24 +660,6 @@
                  "name":"statics",
                  "objects":[
                         {
-                         "gid":17,
-                         "height":16,
-                         "id":303,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2800,
-                         "y":720
-                        }, 
-                        {
                          "gid":16,
                          "height":16,
                          "id":1023,
@@ -778,7 +706,7 @@
          "parallaxx":0.8,
          "parallaxy":0.8,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -898,24 +826,6 @@
                  "name":"statics",
                  "objects":[
                         {
-                         "gid":17,
-                         "height":16,
-                         "id":302,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3184,
-                         "y":800
-                        }, 
-                        {
                          "gid":16,
                          "height":16,
                          "id":1022,
@@ -962,7 +872,7 @@
          "parallaxx":0.9,
          "parallaxy":0.9,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -988,7 +898,7 @@
                         }],
                  "opacity":1,
                  "type":"objectgroup",
-                 "visible":true,
+                 "visible":false,
                  "x":0,
                  "y":0
                 }, 
@@ -999,7 +909,7 @@
                  "name":"bg1_3",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":500,
                  "x":0,
                  "y":0
@@ -1011,7 +921,7 @@
                  "name":"bg1_2",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":500,
                  "x":0,
                  "y":0
@@ -1023,7 +933,7 @@
                  "name":"bg1_1",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":500,
                  "x":0,
                  "y":0
@@ -1035,7 +945,7 @@
                  "name":"bg_interact_1",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":500,
                  "x":0,
                  "y":0
@@ -1047,7 +957,7 @@
                  "name":"bg_fade_1",
                  "opacity":1,
                  "type":"tilelayer",
-                 "visible":true,
+                 "visible":false,
                  "width":500,
                  "x":0,
                  "y":0
@@ -1107,7 +1017,7 @@
                         }],
                  "opacity":1,
                  "type":"objectgroup",
-                 "visible":true,
+                 "visible":false,
                  "x":0,
                  "y":0
                 }, 
@@ -1892,24 +1802,6 @@
                          "y":832
                         }, 
                         {
-                         "gid":17,
-                         "height":16,
-                         "id":695,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"colour",
-                                 "type":"color",
-                                 "value":"#ffffffff"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3456,
-                         "y":864
-                        }, 
-                        {
                          "gid":12,
                          "height":16,
                          "id":697,
@@ -2092,14 +1984,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Larv_simple"
+                                 "value":"Froggy"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3184,
-                         "y":848
+                         "x":4144,
+                         "y":880
                         }, 
                         {
                          "gid":3,
@@ -2116,8 +2008,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":4336,
-                         "y":848
+                         "x":4624,
+                         "y":768
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2175,7 +2067,7 @@
          "offsety":300,
          "opacity":1,
          "type":"group",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }],

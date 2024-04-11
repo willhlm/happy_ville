@@ -15,7 +15,7 @@ import groups
 import object_pool
 import controller
 import lights
-import screen_shader
+import shader_render
 
 from time import perf_counter
 
@@ -36,7 +36,7 @@ class Game_Objects():
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.object_pool = object_pool.Object_pool(self)
         self.lights = lights.Lights(self)
-        self.screen_shader = screen_shader.Screen_shader(self, 'vignette')
+        self.shader_render = shader_render.Screen_shader(self, 'vignette')        
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#groups.Shader_group()
@@ -141,25 +141,25 @@ class Game_Objects():
         self.interactables.update()
         self.weather.update()
         self.lights.update()
-        self.screen_shader.update()#housld be last
+        self.shader_render.update()#housld be last
 
-    def draw(self):
-        self.all_bgs.draw()
-        self.interactables.draw()#should be before bg_interact
-        self.bg_interact.draw()
+    def draw(self):#need to send in screen becasue, sometimes, we want it rednered on a different layer for shaders stuff
+        self.all_bgs.draw(self.game.screen)
+        self.interactables.draw(self.game.screen)#should be before bg_interact
+        self.bg_interact.draw(self.game.screen)
         
-        self.enemies.draw()
-        self.npcs.draw()
-        self.fprojectiles.draw()
-        self.eprojectiles.draw()
-        self.loot.draw()
-        self.platforms.draw()
-        self.players.draw()
-        self.cosmetics.draw()#Should be before fgs
-        self.all_fgs.draw()
+        self.enemies.draw(self.game.screen)
+        self.npcs.draw(self.game.screen)
+        self.fprojectiles.draw(self.game.screen)
+        self.eprojectiles.draw(self.game.screen)
+        self.loot.draw(self.game.screen)
+        self.platforms.draw(self.game.screen)
+        self.players.draw(self.game.screen)
+        self.cosmetics.draw(self.game.screen)#Should be before fgs
+        self.all_fgs.draw(self.game.screen)
         #self.camera_blocks.draw()
-        self.lights.draw()#should be second to last
-        self.screen_shader.draw()#housld be last
+        self.lights.draw(self.game.screen)#should be second to last
+        self.shader_render.draw(self.game.screen)#housld be last
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:

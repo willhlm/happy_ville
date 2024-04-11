@@ -1,4 +1,4 @@
-import Entities, particles, entities_parallax, screen_shader, weather
+import Entities, particles, entities_parallax, weather
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self,game_objects):
@@ -7,7 +7,10 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         'Heal_item':Entities.Heal_item.pool(game_objects),'Water_running_particles':Entities.Water_running_particles.pool(game_objects),
         'Grass_running_particles':Entities.Grass_running_particles.pool(game_objects),'Dust_running_particles':Entities.Dust_running_particles.pool(game_objects)
         ,'Circle':particles.Circle.pool(game_objects), 'Leaves':entities_parallax.Leaves.pool(game_objects),'Spark':particles.Spark.pool(game_objects),
-        'Slash':Entities.Slash.pool(game_objects), 'Screen_shader':screen_shader.Screen_shader.pool(game_objects),'Goop':particles.Goop.pool(game_objects)}
+        'Slash':Entities.Slash.pool(game_objects), 'Goop':particles.Goop.pool(game_objects)}
+
+        #screen_shader.Screen_shader.pool(game_objects)
+        Entities.Conversation_bubbles.pool(game_objects)
 
         Entities.Slime.pool(game_objects)
 
