@@ -1,11 +1,11 @@
-import pygame, random, sys, math
+import pygame, random, sys, math, numpy as np
 import Read_files, particles, animation, sound, dialogue, states
 import states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
 import constants as C
 
 def sign(number):
-    if number == 0: return 0         
+    if number == 0: return 0
     return round(number/abs(number))
 
 class Staticentity(pygame.sprite.Sprite):#all enteties
@@ -32,7 +32,7 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
 
     def kill(self):
         self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
-        super().kill()                        
+        super().kill()
 
 class BG_Block(Staticentity):
     def __init__(self, pos, game_objects, img, parallax):
@@ -248,7 +248,7 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
     def player_collision(self):#player collision
         self.game_objects.player.take_dmg(1)
         self.game_objects.player.currentstate.handle_input('interrupt')#interupts dash
-        pm_one = sign(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])        
+        pm_one = sign(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
         self.game_objects.player.knock_back([pm_one,0])
 
     def player_noncollision(self):
@@ -291,7 +291,7 @@ class Sky(Staticentity):
 class Waterfall(Staticentity):#working
     def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos,game_objects)
-        self.parallax = parallax                
+        self.parallax = parallax
 
         self.size = size
         self.empty = game_objects.game.display.make_layer(size)
@@ -323,7 +323,7 @@ class Waterfall(Staticentity):#working
         self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
         self.game_objects.shaders['waterfall']['TIME'] = self.time
 
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]                
+        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
 
@@ -434,7 +434,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def release_texture(self):#called when .kill() and empty group
         for state in self.sprites.keys():
             for frame in range(0,len(self.sprites[state])):
-                self.sprites[state][frame].release()           
+                self.sprites[state][frame].release()
 
 class BG_Animated(Animatedentity):
     def __init__(self, game_objects, pos, sprite_folder_path, parallax = (1,1)):
@@ -536,7 +536,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
             #self.shader_state.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=5)#makes the game freez for few frames            
+            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=5)#makes the game freez for few frames
             self.game_objects.camera.camera_shake(3,10)
         else:#if dead
             self.aggro = False
@@ -1527,7 +1527,7 @@ class Dash_effect(Staticentity):
             self.kill()
 
     def release_texture(self):#don't release it becase it seems like it is conencted in memoery to player
-        pass     
+        pass
 
 class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the appropriate directions
     def __init__(self,entity):
@@ -1736,8 +1736,8 @@ class Melee(Projectiles):
         super().__init__(entity)
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
-    def update_hitbox(self):#can not call in update becasue aila moves after the update call (because of the collision)
-        rounded_dir = (math.ceil(self.dir[0]), math.ceil(self.dir[1]))#analogue controls may have none integer values
+    def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
+        rounded_dir = (np.sign(self.dir[0]), np.sign(self.dir[1]))#analogue controls may have none integer values
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
@@ -1891,7 +1891,7 @@ class Aila_sword(Sword):
         if collision_enemy.invincibile: return
         collision_enemy.take_dmg(self.dmg)
         collision_enemy.knock_back(self.dir)
-        collision_enemy.hurt_particles(dir = self.dir[0])        
+        collision_enemy.hurt_particles(dir = self.dir[0])
         self.clash_particles(collision_enemy.hitbox.center)
 
         self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
@@ -2210,14 +2210,14 @@ class Loot(Platform_entity):#
     #plotfprm collisions
     def top_collision(self,hitbox):
         self.hitbox.top = hitbox
-        self.collision_types['top'] = True        
+        self.collision_types['top'] = True
         self.velocity[1] = -self.velocity[1]
 
     def down_collision(self,hitbox):
         super().down_collision(hitbox)
         self.velocity[0] = 0.5 * self.velocity[0]
         self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
-        self.bounce_coefficient *= self.bounce_coefficient        
+        self.bounce_coefficient *= self.bounce_coefficient
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
@@ -2229,7 +2229,7 @@ class Loot(Platform_entity):#
 
     def limit_y(self):
         if self.bounce_coefficient < 0.1:#to avoid falling through one way collisiosn
-            self.velocity[1] = max(self.velocity[1],0.6)        
+            self.velocity[1] = max(self.velocity[1],0.6)
 
 class Heart_container(Loot):
     def __init__(self,pos,game_objects):
@@ -2355,7 +2355,7 @@ class Amber_Droplet(Enemy_drop):
         Amber_Droplet.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/amber_droplet/')
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass       
+        pass
 
 class Bone(Enemy_drop):
     def __init__(self,pos,game_objects):
@@ -2383,7 +2383,7 @@ class Bone(Enemy_drop):
         Bone.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/bone/')
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass       
+        pass
 
 class Heal_item(Enemy_drop):
     def __init__(self,pos,game_objects):
@@ -2408,7 +2408,7 @@ class Heal_item(Enemy_drop):
         Heal_item.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/heal_item/')
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass       
+        pass
 
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects):
@@ -2624,7 +2624,7 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
         Water_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/water/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass       
+        pass
 
 class Grass_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
@@ -2642,7 +2642,7 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
         Grass_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/grass/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass       
+        pass
 
 class Dust_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
@@ -2660,7 +2660,7 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
         Dust_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/dust/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass       
+        pass
 
 class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def __init__(self,pos,game_objects):
@@ -2717,7 +2717,7 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
         self.kill()
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass       
+        pass
 
 class Rune_symbol(Animatedentity):#the stuff that will be blitted on uberrunestone
     def __init__(self,pos,game_objects,ID_key):
