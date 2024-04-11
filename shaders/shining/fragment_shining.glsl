@@ -21,10 +21,10 @@ void main() {
 	vec4 colour = texture(imageTexture, fragmentTexCoord);
 	float target = abs(sin(TIME * PI * speed) * (1. + span));
 	//if(colour.a > 0.) {
-		float lum = luminance(colour);
-		float diff = abs(lum - target);
-		float mx = clamp(1. - diff / span, 0., 1.);
-		colour = mix(colour, tint, mx)*colour.a;
+	float lum = luminance(colour);
+	float diff = abs(lum - target);
+	float mx = clamp(1. - diff / span, 0., 1.);
+	colour = mix(colour, tint, mx)*colour.a;
 	//}
 
 	COLOR = colour;

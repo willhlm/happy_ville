@@ -180,18 +180,21 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.game_objects.shaders['noise_perlin']['scroll'] = [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        #distortion
+        #distortion on bg
+        self.game_objects.shaders['distort']['shine'] = False
         self.game_objects.shaders['distort']['TIME'] = self.time
         self.game_objects.shaders['distort']['u_resolution'] = self.game_objects.game.window_size
         self.game_objects.shaders['distort']['noise'] = self.noise_layer.texture
         self.game_objects.shaders['distort']['center'] = [self.rect.center[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.center[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.shaders['distort']['radius'] = self.radius
+        self.game_objects.shaders['distort']['tint'] = [1,1,1]
         self.game_objects.game.display.render(self.bg_distort_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['distort'])#make a copy of the screen
 
-        #final
+        #distortion on enteties
+        self.game_objects.shaders['distort']['tint'] = [0.39, 0.78, 1]
+        self.game_objects.shaders['distort']['shine'] = True
         self.game_objects.game.display.render(self.bg_grey_layer.texture, self.empty_layer, shader=self.game_objects.shaders['distort'])#make them grey
-        self.game_objects.shaders['tint']['colour'] = [0.39*255, 0.78*255, 1*255,100]
-        self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['tint'])#make them grey
+        self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['bloom'])#make them grey
 
     def draw(self, target):  
         #noise
