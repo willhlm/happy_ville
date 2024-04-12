@@ -141,17 +141,21 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.bg_grey_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#entetirs  
 
         self.rect = pygame.Rect(pos[0],pos[1], self.empty_layer.texture.width, self.empty_layer.texture.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
+        self.hitbox = pygame.Rect(self.rect.centerx,self.rect.centery, 32, 32)
         self.time = 0
         self.radius = 0
         self.thickness = 0
         self.ID = ID#shoudl identify which kind of portal
         game_objects.interactables.add(Place_holder_interacatble(self, game_objects))#add a dummy interactable to the group, since portal cannot be in inetracatles
-
+        game_objects.render_state.handle_input('portal', portal = self)     
+    
     def release_texture(self):
+        self.game_objects.render_state.handle_input('idle')#go back to normal rendering
         self.empty_layer.release()
         self.noise_layer.release()
         self.screen_copy.release()
+        self.bg_grey_layer.release()
+        self.bg_distort_layer.release()          
 
     def interact(self):#when player press T at place holder interactavle
         self.currentstate.handle_input('grow')
@@ -160,7 +164,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.currentstate.update()#handles the radius and thickness of portal
         self.time += self.game_objects.game.dt * 0.01
 
-    def draw2(self):
+    def draw(self, target):
         #noise
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
@@ -195,37 +199,6 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.game_objects.shaders['distort']['shine'] = True
         self.game_objects.game.display.render(self.bg_grey_layer.texture, self.empty_layer, shader=self.game_objects.shaders['distort'])#make them grey
         self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['bloom'])#make them grey
-
-    def draw(self, target):  
-        #noise
-        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
-        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
-        self.game_objects.shaders['noise_perlin']['scale'] = [5,5]
-        self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
-
-        #portal
-        self.game_objects.shaders['portal']['TIME'] = self.time*0.1
-        self.game_objects.shaders['portal']['noise'] = self.noise_layer.texture
-        self.game_objects.shaders['portal']['radius'] = self.radius
-        self.game_objects.shaders['portal']['thickness'] = self.thickness
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['portal'])
-        
-        #noise with scroll
-        self.game_objects.shaders['noise_perlin']['scroll'] = [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
-
-        #distortion
-        self.game_objects.shaders['distort']['TIME'] = self.time
-        self.game_objects.shaders['distort']['u_resolution'] = self.game_objects.game.window_size
-        self.game_objects.shaders['distort']['noise'] = self.noise_layer.texture
-        self.game_objects.shaders['distort']['center'] = [self.rect.center[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.center[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.shaders['distort']['radius'] = self.radius
-        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy, shader=self.game_objects.shaders['distort'])#make a copy of the screen
-
-        #fianl
-        self.game_objects.game.display.render(self.screen_copy.texture, self.game_objects.game.screen)
 
 class Lighitning(Staticentity):#a shader to make lighning barrier
     def __init__(self,pos,game_objects,parallax,size):
@@ -1151,12 +1124,12 @@ class Cultist_rogue(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 10
+        self.health = 3
         self.attack_distance = [80,10]
         self.attack = Sword
         self.currentstate = states_rogue_cultist.Idle(self)
         self.gameplay_state = gameplay_state
-
+        
     def dead(self):#called when death animation is finished
         super().dead()
         if self.gameplay_state: self.gameplay_state.incrase_kill()
@@ -1176,15 +1149,6 @@ class Cultist_warrior(Enemy):
     def dead(self):#called when death animation is finished
         super().dead()
         if self.gameplay_state: self.gameplay_state.incrase_kill()
-
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/john/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.attack_distance = 80
-        self.attack = Sword
 
 class NPC(Character):
     def __init__(self,pos,game_objects):
@@ -2843,7 +2807,7 @@ class Place_holder_interacatble(Interactable):
     def __init__(self,entity,game_objects):
         super().__init__(entity.rect.center,game_objects)
         self.entity = entity
-        self.hitbox = self.rect
+        self.hitbox = entity.hitbox
 
     def update(self):
         pass
@@ -2858,19 +2822,20 @@ class Place_holder_interacatble(Interactable):
         pass
 
 class Challenge_monument(Interactable):
-    def __init__(self, pos, game_objects, ID):
+    def __init__(self, pos, game_objects, ID, interacted = False):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenge_monument/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.ID = ID
+        self.interacted = interacted
 
     def interact(self):#when player press T
+        if self.interacted: return
         pos = [self.rect.topleft[0]-30,self.rect.topleft[1]-200]      
-        portal = Portal(pos,self.game_objects, self.ID)
-        new_state = states.Portal(self.game_objects.game, portal)
-        new_state.enter_state()        
+        self.game_objects.special_shaders.add(Portal(pos, self.game_objects, self.ID))
+        self.interacted = True
 
 class Bridge(Interactable):
     def __init__(self, pos,game_objects):

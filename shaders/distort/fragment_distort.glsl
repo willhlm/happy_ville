@@ -44,7 +44,7 @@ void main() {
     float luminance = dot(img_color.rgb, vec3(0.299, 0.587, 0.114));
     img_color.rgb = vec3(luminance)*tint;
 
-    if (shine){
+    if (shine){//same code as shining shader. Need to put it here if we want shining only when inside the portal
         float target = abs(sin(TIME * PI * speed_shine) * (1. + span));
         //if(colour.a > 0.) {
         float lum = shining(img_color.rgb);

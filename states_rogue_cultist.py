@@ -8,12 +8,11 @@ class Enemy_states(Entity_States):
         self.phase=self.phases[0]
 
     def enter_state(self,newstate):
-        self.entity.currentstate=getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
 class Idle(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def update(self):
         if abs(self.entity.velocity[0]) > 0.2:
@@ -42,7 +41,6 @@ class Walk(Enemy_states):
 class Death(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def increase_phase(self):
         self.entity.dead()
@@ -50,7 +48,6 @@ class Death(Enemy_states):
 class Hurt(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def increase_phase(self):
         self.enter_state('Idle')
@@ -58,7 +55,6 @@ class Hurt(Enemy_states):
 class Stun(Enemy_states):
     def __init__(self,entity,duration):
         super().__init__(entity)
-        self.stay_still()
         self.lifetime=duration
 
     def update(self):
@@ -84,7 +80,7 @@ class Attack_main(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
-        self.entity.AI.handle_input('Attack')
+        self.entity.AI.handle_input('Finish_attack')
 
 class Ambush_pre(Attack_pre):
     def __init__(self,entity):

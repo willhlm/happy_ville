@@ -16,6 +16,7 @@ import object_pool
 import controller
 import lights
 import shader_render
+import states_game_objects#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
 
 from time import perf_counter
 
@@ -36,12 +37,14 @@ class Game_Objects():
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.object_pool = object_pool.Object_pool(self)
         self.lights = lights.Lights(self)
-        self.shader_render = shader_render.Screen_shader(self, 'vignette')        
+        self.shader_render = shader_render.Screen_shader(self, 'vignette')     
+        self.render_state = states_game_objects.Idle(self)   
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#groups.Shader_group()
         self.npcs = groups.Group()#groups.Shader_group()
         self.platforms = groups.Group()
+        self.special_shaders = groups.Group()#portal use it
         self.platforms_ramps = groups.Group()
         self.all_bgs = groups.LayeredUpdates()#groups.Shader_layered_group()#
         self.all_fgs = groups.LayeredUpdates()#groups.Shader_layered_group()#
@@ -102,6 +105,7 @@ class Game_Objects():
         self.cosmetics.empty()
         self.layer_pause.empty()
         self.bg_fade.empty()
+        self.special_shaders.empty()
 
     def collide_all(self):        
         self.platform_collision()
@@ -140,26 +144,12 @@ class Game_Objects():
         self.cosmetics.update()
         self.interactables.update()
         self.weather.update()
+        self.special_shaders.update()#portal use it
         self.lights.update()
         self.shader_render.update()#housld be last
 
     def draw(self):#need to send in screen becasue, sometimes, we want it rednered on a different layer for shaders stuff
-        self.all_bgs.draw(self.game.screen)
-        self.interactables.draw(self.game.screen)#should be before bg_interact
-        self.bg_interact.draw(self.game.screen)
-        
-        self.enemies.draw(self.game.screen)
-        self.npcs.draw(self.game.screen)
-        self.fprojectiles.draw(self.game.screen)
-        self.eprojectiles.draw(self.game.screen)
-        self.loot.draw(self.game.screen)
-        self.platforms.draw(self.game.screen)
-        self.players.draw(self.game.screen)
-        self.cosmetics.draw(self.game.screen)#Should be before fgs
-        self.all_fgs.draw(self.game.screen)
-        #self.camera_blocks.draw()
-        self.lights.draw(self.game.screen)#should be second to last
-        self.shader_render.draw(self.game.screen)#housld be last
+        self.render_state.render()
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:

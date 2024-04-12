@@ -7,6 +7,7 @@ import animation
 import UI_select_menu, UI_facilities
 import Entities
 import particles
+import challange_rooms
 
 class Game_State():
     def __init__(self,game):
@@ -708,7 +709,7 @@ class Conversation(Gameplay):
 class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
     def __init__(self, game):
         super().__init__(game)
-        self.screen = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
+        self.screen = self.game.display.make_layer(self.game.window_size)#make a layer ("surface") -> need to save in memory somwehere
         self.shader = game.game_objects.shaders['alpha']
         self.state = getattr(UI_select_menu, 'Inventory')(self)#should it alway go to inventory be default?
 
@@ -739,7 +740,24 @@ class Facilities(Gameplay):#fast_travel (menu and unlock), ability upgrade (spur
     def handle_events(self,input):
         self.state[-1].handle_events(input)
 
-class Cutscenes(Gameplay):#basically, this class is not needed but would be nice to have the cutscene classes in a seperate file
+class Challenge_rooms(Gameplay):#challaenge rooms: called from states_portal after growing
+    def __init__(self, game, portal, type):
+        super().__init__(game)
+        self.state = getattr(challange_rooms, type)(self, portal)
+
+    def update(self):
+        super().update()
+        self.state.update()
+
+    def render(self):
+        super().render()
+        self.state.render()
+
+    def handle_events(self,input):
+        super().handle_events(input)
+        self.state.handle_events(input)
+
+class Cutscenes(Gameplay):
     def __init__(self, game,scene):
         super().__init__(game)
         self.current_scene = getattr(cutscene, scene)(self)#make an object based on string
@@ -799,45 +817,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
                 self.page = 1
             elif input[-1] == 'a':
                 self.page = 1
-
-class Portal(Gameplay):#portal/challengerooms
-    def __init__(self,game, portal):
-        super().__init__(game)
-        self.portal = portal
-
-    def render(self):#need different rendering to apply shaders in the order we want
-        self.draw_groups()
-        self.game.game_objects.UI['gameplay'].render()
-
-    def update(self):
-        super().update()
-        self.portal.update()
-
-    def draw_groups(self):
-        self.portal.empty_layer.clear(0,0,0,0)
-        self.portal.bg_grey_layer.clear(0,0,0,0)
-
-        self.game.game_objects.all_bgs.draw(self.portal.bg_distort_layer)
-        self.game.game_objects.interactables.draw(self.portal.bg_distort_layer)#should be before bg_interact
-        self.game.game_objects.bg_interact.draw(self.portal.bg_distort_layer)
-        #we want the stuff above to be distored and grey (also parallax = 1?)
-        
-        self.game.game_objects.enemies.draw(self.portal.bg_grey_layer)
-        self.game.game_objects.npcs.draw(self.portal.bg_grey_layer)
-        self.game.game_objects.fprojectiles.draw(self.portal.bg_grey_layer)
-        self.game.game_objects.eprojectiles.draw(self.portal.bg_grey_layer)
-        self.game.game_objects.loot.draw(self.portal.bg_grey_layer)
-        self.game.game_objects.platforms.draw(self.portal.bg_grey_layer)
-        self.game.game_objects.players.draw(self.portal.bg_grey_layer)
-        self.game.game_objects.cosmetics.draw(self.portal.bg_grey_layer)#Should be before fgs
-        #we want this one to be spirit colourm no distotion
-
-        self.portal.draw2()
-
-        self.game.game_objects.all_fgs.draw(self.game.screen)
-        self.game.game_objects.lights.draw(self.game.screen)#should be second to last
-        self.game.game_objects.shader_render.draw(self.game.screen)#housld be last        
-
+  
 #encountters and corresponding cutscenes
 class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
     def __init__(self,game):
@@ -1089,10 +1069,10 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
                 self.stage = 1
 
         elif self.stage == 1:
-            if self.timer>200:
+            if self.timer > 200:
                 spawn_pos = self.game.game_objects.player.rect.topright
                 self.gameplay.entity2.AI.deactivate()
-                self.gameplay.entity2.dir[0]=-1
+                self.gameplay.entity2.dir[0] = -1
                 self.gameplay.entity2.currentstate.enter_state('Ambush_pre')
 
                 self.game.game_objects.enemies.add(self.gameplay.entity2)
@@ -1123,12 +1103,12 @@ class Cultist_encounter_gameplay(Gameplay):#initialised in the cutscene:if playe
         self.kill += 1
         if self.kill == 2:#both cultist have died
             self.game.game_objects.world_state.cutscenes_complete[type(self).__name__.replace('_gameplay','')] = True
-            self.gate.currentstate.handle_input('Transform')
-            self.exit_state()#if there was a gate, we can open it
+            self.gate.currentstate.handle_input('Transform')#open gate
+            self.exit_state()
 
-    def handle_input(self,input):
+    def handle_input(self, input):
         if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game,duration=11)
+            new_game_state = Pause_gameplay(self.game, duration = 11)
             new_game_state.enter_state()
         elif input == 'death':#if aila dies during the fight, this is called
             self.game.game_objects.player.reset_movement()

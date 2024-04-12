@@ -64,9 +64,9 @@ class Particles(pygame.sprite.Sprite):
             angle=random.randint(dir-spawn_angle, dir+spawn_angle)#the ejection anglex
         return angle
 
-    def draw(self):
+    def draw(self, target):
         pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
 
 class Circle(Particles):
     def __init__(self, pos, game_objects, **kwarg):
@@ -83,10 +83,10 @@ class Circle(Particles):
         self.shader['size'] = self.image.size
         self.shader['gradient'] = kwarg.get('gradient', 0)#one means gradient, 0 is without
 
-    def draw(self):#his called just before the draw
+    def draw(self, target):#his called just before the draw
         self.shader['color'] = self.colour
         self.shader['radius'] = self.radius
-        super().draw()
+        super().draw(target)
 
     def pool(game_objects):#save the stuff in memory for later use
         Circle.image = game_objects.game.display.make_layer((50,50)).texture
@@ -117,7 +117,7 @@ class Goop(Particles):#circles that "distorts" due to noise
         super().update()
         self.time += 0.01*self.game_objects.game.dt
 
-    def draw(self):#his called just before the draw
+    def draw(self, target):#his called just before the draw
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.image.size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
@@ -126,7 +126,7 @@ class Goop(Particles):#circles that "distorts" due to noise
 
         self.game_objects.shaders['goop']['TIME'] = self.time
         self.game_objects.shaders['goop']['flowMap'] = self.noise_layer.texture
-        super().draw()
+        super().draw(target)
 
     def pool(game_objects):#save the stuff in memory for later use
         Goop.image2 = game_objects.game.display.make_layer((50,50))
@@ -147,10 +147,10 @@ class Spark(Particles):#a general one
         self.shader['size'] = self.image.size
         self.shader['scale'] = kwarg.get('scale', 1)
 
-    def draw(self):#called from group draw
+    def draw(self, target):#called from group draw
         self.shader['colour'] = self.colour
         self.shader['velocity'] =self.velocity
-        super().draw()
+        super().draw(target)
 
     def pool(game_objects):#save the stuff in memory for later use
         Spark.image = game_objects.game.display.make_layer((50,50)).texture
