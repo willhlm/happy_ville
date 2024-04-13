@@ -26,13 +26,15 @@ class Sound():#class for organising sound and music playback
         self.bg.set_volume(1)
 
     @staticmethod
-    def play_sfx(sfx):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
+    def play_sfx(sfx, loop = 0, vol = 0.2):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
         channel = pygame.mixer.find_channel()
         try:
-            channel.set_volume(0.2)
-            channel.play(sfx)
+            channel.set_volume(vol)
+            channel.play(sfx, loops = loop)
         except:
             print("No available channels")
+
+        return channel
 
     def play_sound(self, sfx):
         pass
