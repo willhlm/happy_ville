@@ -1118,18 +1118,18 @@ class Skeleton_archer(Enemy):#change design
         pass
 
 class Cultist_rogue(Enemy):
-    def __init__(self,pos,game_objects, gameplay_state = None):
+    def __init__(self, pos, game_objects, gameplay_state = None):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/cultist_rogue/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 40, 40)
         self.health = 3
         self.attack_distance = [80,10]
         self.attack = Sword
         self.currentstate = states_rogue_cultist.Idle(self)
         self.gameplay_state = gameplay_state
-        
+
     def dead(self):#called when death animation is finished
         super().dead()
         if self.gameplay_state: self.gameplay_state.incrase_kill()

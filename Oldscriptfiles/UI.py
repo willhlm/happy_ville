@@ -6,7 +6,6 @@ import Level
 import BG
 #import states
 
-#TODO:
 #Add camera blocks to chunkloading, so they dont they check outside of reasonable range,
 
 class Game_UI():

@@ -25,7 +25,7 @@ class Room_0(Challange_rooms):
         super().__init__(game_state, portal)
         self.number = 1
         for number in range(0,self.number):
-            pos = [600 +  random.randint(-100, 100),300 +  random.randint(-100, 100)]
+            pos = [600 +  random.randint(-100, 100), 300 +  random.randint(-100, 100)]
             enemy = Entities.Cultist_rogue(pos, self.game_objects, self)
             self.game_objects.enemies.add(enemy)
 
