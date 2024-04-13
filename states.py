@@ -163,7 +163,7 @@ class Load_Menu(Game_State):
             self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
-#        self.arrow.draw(self.game.screen)
+        #self.arrow.draw(self.game.screen)
 
     def handle_events(self, event):
         if event[0]:

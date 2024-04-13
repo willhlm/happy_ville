@@ -31,8 +31,8 @@ class Screen_shader(pygame.sprite.Sprite):#make a layer on screen, then use shad
     def update(self):
         self.time += self.game_objects.game.dt
 
-    def draw(self):
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, shader = self.shader)#shader render
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image.texture, target, shader = self.shader)#shader render
 
     @classmethod
     def pool(cls, game_objects):
@@ -93,7 +93,7 @@ class Fog(Screen_shader):
         super().pool(game_objects)
         cls.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
 
-    def draw(self):#called before draw in group
+    def draw(self, target):#called before draw in group
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.005
         self.game_objects.shaders['noise_perlin']['u_resolution'] = (640,360)
         self.game_objects.shaders['noise_perlin']['scale'] = (10,10)
@@ -103,7 +103,7 @@ class Fog(Screen_shader):
         self.shader['noise'] = self.noise_layer.texture
         self.shader['TIME'] = self.time*0.001
         self.shader['scroll'] = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]
-        super().draw()
+        super().draw(target)
 
 class Particles_shader(Screen_shader):#particles. Better performance
     def __init__(self, game_objects, parallax, number_particles):
@@ -157,12 +157,12 @@ class Vertical_circles(Particles_shader):
             self.phase.append(random.uniform(-math.pi,math.pi))
             self.velocity.append([0,0])
 
-    def draw(self):
+    def draw(self, target):
         self.shader['parallax'] = self.parallax
         self.shader['centers'] = self.centers
         self.shader['radius'] = self.radius
         self.shader['scroll'] = self.game_objects.camera.scroll
-        super().draw()
+        super().draw(target)
 
     def update_vel(self, i):#how it should move
         self.velocity[i]  = [0.5*math.sin(self.time*0.01 + self.phase[i]),-0.5]
@@ -217,11 +217,11 @@ class Rain(Particles_shader):
             self.centers.append([x,y])
             self.velocity.append([0,0])
 
-    def draw(self):
+    def draw(self, target):
         self.shader['parallax'] = self.parallax
         self.shader['centers'] = self.centers
         self.shader['scroll'] = self.game_objects.camera.scroll
-        super().draw()
+        super().draw(target)
 
     def update_vel(self, i):#how it should move
         self.velocity[i]  = [-1, 5]
@@ -232,9 +232,9 @@ class Snow(Rain):
         self.shader['colour'] = (255,255,255,255)
         self.shader['scale'] = (self.parallax[0]*2,self.parallax[0]*0.33)#to make it square
 
-    def draw(self):
+    def draw(self, target):
         self.shader['centers'] = self.centers
-        super().draw()
+        super().draw(target)
 
     def update_vel(self, i):#how it should move
         self.velocity[i]  = [0.5*math.cos(self.time*0.01), 1]

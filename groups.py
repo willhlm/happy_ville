@@ -19,6 +19,7 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):#layered rendering
 
     def draw(self, target):
         for spr in self.sprites():
+            print(spr)
             spr.draw(target)
 
     def empty(self):
