@@ -33,9 +33,9 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
                 self.game_objects.game.display.render(self.sprites[state][frame],empty_layer,shader = shader)
                 self.sprites[state][frame] = empty_layer.texture
 
-    def draw(self):
+    def draw(self, target):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
 
 class Trees(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
@@ -211,7 +211,7 @@ class Light_source(Layered_objects):#works for parallax = 1. Not sure how we wou
     def update(self):
         self.group_distance()
 
-    def draw(self):
+    def draw(self, target):
         pass   
 
     def release_texture(self):
@@ -288,9 +288,9 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
     def release_texture(self):
         pass
 
-    def draw(self):
+    def draw(self, target):
         self.shader['colour'] = self.colour
-        super().draw()
+        super().draw(target)
 
     def pool(game_objects):#save the texture in memory for later use
         Leaves.sprites = Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
