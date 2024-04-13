@@ -15,33 +15,33 @@ class Level():
     def load_map(self,map_name,spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
-        self.level_name = map_name.lower()        
-        self.spawn = spawn         
-        self.game_objects.lights.new_map()#set ambient default light and clear light sources                   
+        self.level_name = map_name.lower()
+        self.spawn = spawn
+        self.game_objects.lights.new_map()#set ambient default light and clear light sources
         self.check_biome()#pause the sound if we change area
         self.load_map_data()#load the map data
-        self.init_state_file()#need to be before load groups        
-        self.load_groups()        
+        self.init_state_file()#need to be before load groups
+        self.load_groups()
         self.set_camera()
         self.orginise_references()
 
     def set_camera(self):
-        self.game_objects.camera.reset_player_center()##need to be after load_group -> normal position      
-        self.biome.set_camera()#need to be after load_group  -> biome specific camera             
+        self.game_objects.camera.reset_player_center()##need to be after load_group -> normal position
+        self.biome.set_camera()#need to be after load_group  -> biome specific camera
 
     def check_biome(self):
-        self.area_change = self.level_name[:self.level_name.rfind('_')] != self.biome_name                
-        if self.area_change:#new biome                      
-            self.biome.clear_biome()          
+        self.area_change = self.level_name[:self.level_name.rfind('_')] != self.biome_name
+        if self.area_change:#new biome
+            self.biome.clear_biome()
             self.biome_name = self.level_name[:self.level_name.rfind('_')]
-            self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize())(self)#make a class based on the name of the newstate: need to import sys           
-        room = self.level_name[self.level_name.rfind('_')+1:]            
+            self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize())(self)#make a class based on the name of the newstate: need to import sys
+        room = self.level_name[self.level_name.rfind('_')+1:]
         self.biome.room(room)
 
     def init_state_file(self):
         if not self.game_objects.world_state.state.get(self.level_name, False):#if it is the first time loading the room
             self.game_objects.world_state.init_state_file(self.level_name,self.map_data)
- 
+
     def load_map_data(self):
         level_name = self.level_name[:self.level_name.rfind('_')]
         map_data = Read_files.read_json("maps/%s/%s.json" % (level_name,self.level_name))
@@ -91,7 +91,7 @@ class Level():
             elif 'fg' in group: self.layer = 'fg'
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'back')#objects behind layers
-            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)                        
+            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'front')#object infron of layers
 
     def load_objects(self, data, parallax, offset, position):
@@ -99,8 +99,8 @@ class Level():
             if object == 'statics' or object == 'interactables':
                 if position == 'back': return#only load statics and interactables in the front
                 load_objects = {'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
-                load_objects[object](data[object], parallax, offset)    
-            else:#front and back objects                
+                load_objects[object](data[object], parallax, offset)
+            else:#front and back objects
                 if object == position:#load it at back or front
                     self.biome.load_objects(data[object], parallax, offset)
 
@@ -286,7 +286,7 @@ class Level():
 
                 if self.layer == 'fg':
                     self.game_objects.all_fgs.add(reflection)
-                else:                 
+                else:
                     self.game_objects.all_bgs.add(reflection)
 
 
@@ -579,19 +579,19 @@ class Level():
 
 class Biome():
     def __init__(self, level):
-        self.level = level    
+        self.level = level
 
     def load_objects(self):
         pass
 
     def set_camera(self):
-        pass               
+        pass
 
     def room(self, room):#called wgen a new room is loaded
         pass
 
-    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
-        self.level.game_objects.sound.pause_bg_sound()      
+    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
+        self.level.game_objects.sound.pause_bg_sound()
         self.release_textures()
 
     def release_textures(self):
@@ -599,12 +599,12 @@ class Biome():
 
 class Light_forest(Biome):
     def __init__(self, level):
-        super().__init__(level) 
+        super().__init__(level)
 
-    def room(self, room):#called wgen a new room is loaded  
+    def room(self, room):#called wgen a new room is loaded
         if room == '11':
             self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
-            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)  
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
@@ -658,17 +658,17 @@ class Rhoutta_encounter(Biome):
     def __init__(self, level):
         super().__init__(level)
 
-    def room(self, room):        
+    def room(self, room):
         if room == '2':
-            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230      
+            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
             if self.level.game_objects.world_state.events['guide']:#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
     def set_camera(self):
         if self.level.level_name == 'rhoutta_encounter_1' and self.level.spawn == '1':#if it a new game
             new_state = states.New_game(self.level.game_objects.game)
-            new_state.enter_state()            
-        
+            new_state.enter_state()
+
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
@@ -688,13 +688,13 @@ class Rhoutta_encounter(Biome):
 
 class Light_forest_cave(Biome):
     def __init__(self, level):
-        super().__init__(level)    
+        super().__init__(level)
         self.room()
 
-    def room(self, room = 1):    
+    def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
         self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
- 
+
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
@@ -733,40 +733,44 @@ class Light_forest_cave(Biome):
                 if self.level.layer == 'fg':
                     self.level.game_objects.all_fgs.add(new_rock)
                 else:
-                    self.level.game_objects.all_bgs.add(new_rock)        
+                    self.level.game_objects.all_bgs.add(new_rock)
 
-class Light_forest_mountain(Biome):  
+class Light_forest_mountain(Biome):
     def __init__(self, level):
-        super().__init__(level)  
+        super().__init__(level)
 
-class Village(Biome):  
+class Village(Biome):
     def __init__(self, level):
-        super().__init__(level)   
+        super().__init__(level)
 
-class Village_ola(Biome):  
+class Village_ola(Biome):
     def __init__(self, level):
-        super().__init__(level)   
+        super().__init__(level)
 
-class Village_cave(Biome):  
+class Village_ola2(Biome):  
     def __init__(self, level):
-        super().__init__(level)   
+        super().__init__(level)
 
-class Wakeup_forest(Biome):  
+class Village_cave(Biome):
     def __init__(self, level):
-        super().__init__(level) 
+        super().__init__(level)
 
-class Forest_path(Biome):        
+class Wakeup_forest(Biome):
     def __init__(self, level):
-        super().__init__(level)   
+        super().__init__(level)
 
-class Spirit_world(Biome):        
+class Forest_path(Biome):
     def __init__(self, level):
-        super().__init__(level)   
+        super().__init__(level)
 
-class cultist_hideout(Biome):        
+class Spirit_world(Biome):
     def __init__(self, level):
-        super().__init__(level)           
+        super().__init__(level)
 
-class collision_map(Biome):        
+class cultist_hideout(Biome):
     def __init__(self, level):
-        super().__init__(level)             
+        super().__init__(level)
+
+class collision_map(Biome):
+    def __init__(self, level):
+        super().__init__(level)
