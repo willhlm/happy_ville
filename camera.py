@@ -39,7 +39,8 @@ class Camera_shake(Camera):
         self.duration = duration
 
     def camera_shake(self,amp=3,duration=100):
-        pass
+        self.amp = amp
+        self.duration = duration
 
     def update(self):
         super().update()

@@ -10,22 +10,7 @@ class Idle(Basic_states):
         super().__init__(game_objects)
 
     def render(self):
-        self.game_objects.all_bgs.draw(self.game_objects.game.screen)
-        self.game_objects.interactables.draw(self.game_objects.game.screen)#should be before bg_interact
-        self.game_objects.bg_interact.draw(self.game_objects.game.screen)
-        
-        self.game_objects.enemies.draw(self.game_objects.game.screen)
-        self.game_objects.npcs.draw(self.game_objects.game.screen)
-        self.game_objects.fprojectiles.draw(self.game_objects.game.screen)
-        self.game_objects.eprojectiles.draw(self.game_objects.game.screen)
-        self.game_objects.loot.draw(self.game_objects.game.screen)
-        self.game_objects.platforms.draw(self.game_objects.game.screen)
-        self.game_objects.players.draw(self.game_objects.game.screen)
-        self.game_objects.cosmetics.draw(self.game_objects.game.screen)#Should be before fgs
-        self.game_objects.all_fgs.draw(self.game_objects.game.screen)
-        #self.camera_blocks.draw()
-        self.game_objects.lights.draw(self.game_objects.game.screen)#should be second to last
-        self.game_objects.shader_render.draw(self.game_objects.game.screen)#housld be last
+        self.game_objects.draw()
 
     def handle_input(self, input, **kwarg):
         if input == 'portal':

@@ -332,7 +332,7 @@ class Option_Menu(Game_State):
 
 class Gameplay(Game_State):
     def __init__(self,game):
-        super().__init__(game)
+        super().__init__(game)        
 
     def update(self):
         self.game.game_objects.update()
@@ -340,7 +340,7 @@ class Gameplay(Game_State):
         self.game.game_objects.UI['gameplay'].update()
 
     def render(self):
-        self.game.game_objects.draw()
+        self.game.game_objects.render_state.render()#handles normal and portal rendering        
         self.game.game_objects.UI['gameplay'].render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
@@ -368,8 +368,8 @@ class Gameplay(Game_State):
             elif input[-1] == 'select':
                 new_state = Select_menu(self.game)
                 new_state.enter_state()
-
-            elif input[-1] == 'down':
+            
+            elif input[2]['l_stick'][1] > 0.5:
                 self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
             else:

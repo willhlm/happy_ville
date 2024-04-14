@@ -1,4 +1,4 @@
-import pygame, random, sys, math, numpy as np
+import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
 import states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
@@ -860,7 +860,7 @@ class Slime(Enemy):
         self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
         self.health = 2
 
-    def relseas_textures(self):
+    def release_texture(self):
         pass
 
     def pool(game_objects):#spawned in mid game by sline giant
@@ -1704,7 +1704,7 @@ class Melee(Projectiles):
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
     def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
-        rounded_dir = (np.sign(self.dir[0]), np.sign(self.dir[1]))#analogue controls may have none integer values
+        rounded_dir = (sign(self.dir[0]), sign(self.dir[1]))#analogue controls may have none integer values
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
