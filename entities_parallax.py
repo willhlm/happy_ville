@@ -28,10 +28,10 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
         shader = self.game_objects.shaders['blur']
         shader['blurRadius'] = 1/self.parallax[0]
         for state in self.sprites.keys():
-            for frame, image in enumerate(self.sprites[state]):
+            for frame, image in enumerate(self.sprites[state]):                
                 empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)#need to be inside the loop to make new layers for each frame
-                self.game_objects.game.display.render(self.sprites[state][frame],empty_layer,shader = shader)
-                self.sprites[state][frame] = empty_layer.texture
+                self.game_objects.game.display.render(self.sprites[state][frame], empty_layer, shader = shader)
+                self.sprites[state][frame] = empty_layer.texture    
 
     def draw(self, target):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))

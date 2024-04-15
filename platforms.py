@@ -180,6 +180,7 @@ class Collision_right_angle(Platform):#ramp
             rel_x = entity.hitbox.right - self.hitbox.left
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
+        else: return 0
         return -rel_x*self.ratio + self.hitbox.bottom
 
     def collide(self,entity):#called in collisions

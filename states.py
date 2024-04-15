@@ -105,7 +105,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'village_ola_1','1')
+            self.game.game_objects.load_map(self, 'light_forest_1', '1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -369,7 +369,7 @@ class Gameplay(Game_State):
                 new_state = Select_menu(self.game)
                 new_state.enter_state()
             
-            elif input[2]['l_stick'][1] > 0.5:
+            elif input[-1] == 'down':
                 self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
             else:
@@ -579,13 +579,21 @@ class Ability_menu(Gameplay):#when pressing tab
                 self.exit_state()
 
 class Fadein(Gameplay):
-    def __init__(self,game):
+    def __init__(self, game):
         super().__init__(game)
         self.count = 0
         self.fade_length = 20
-
+        self.init()        
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
         self.fade_surface.clear(0,0,0,255)
+
+    def init(self):
+        self.aila_state = 'Idle_main'
+        for state in self.game.state_stack:
+            if 'Death' == type(state).__name__:
+                self.aila_state = 'Invisible_main'
+                self.game.game_objects.player.currentstate.enter_state('Invisible_main')
+                break        
 
     def update(self):
         self.game.game_objects.update()
@@ -599,7 +607,7 @@ class Fadein(Gameplay):
     def exit(self):
         self.game.game_objects.load_bg_music()
         self.game.game_objects.player.reset_movement()
-        self.game.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
+        self.game.game_objects.player.currentstate.enter_state(self.aila_state)
         self.exit_state()
 
     def render(self):
@@ -620,6 +628,9 @@ class Fadeout(Fadein):
         self.map_name = map_name
         self.spawn = spawn
         self.fade = fade
+
+    def init(self):
+        pass
 
     def update(self):
         self.previous_state.update()
@@ -772,42 +783,46 @@ class Cutscenes(Gameplay):
         self.current_scene.handle_events(input)
 
 class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item
-    def __init__(self, game,img,text=''):
+    def __init__(self, game, img, text = ''):
         super().__init__(game)
         self.page = 0
-        self.render_fade=[self.render_in,self.render_out]
+        self.render_fade = [self.render_in, self.render_out]
 
-        self.img = img
+        self.image = game.display.make_layer(img.size)#TODO
+        self.game.display.render(img, self.image)#make a copy of the image   
         self.text = self.game.game_objects.font.render((140,80), text)
-        self.text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
 
         self.game.game_objects.player.reset_movement()
 
-        self.surface = pygame.Surface((int(self.game.window_size[0]), int(self.game.window_size[1])), pygame.SRCALPHA, 32).convert_alpha()
-        self.surface.fill((0,0,0))
-
-        self.fade = 0
-        self.surface.set_alpha(self.fade)
+        self.surface = game.display.make_layer(game.window_size)#TODO
+        self.fade = [0,0]
 
     def render(self):
         super().render()
-        self.surface.set_alpha(int(self.fade))
         self.render_fade[self.page]()
-        self.surface.blit(self.img,(200, 200))#blit directly on screen to avoid alpha change on this
-        self.surface.blit(self.text,(420,150))
-        self.game.screen.blit(self.surface,(0, 0))
+
+        self.game.game_objects.shaders['alpha']['alpha'] = self.fade[1]
+        self.game.game_objects.shaders['colour']['colour'] = (255,255,255,self.fade[1])
+
+        self.surface.clear(40, 40, 40, self.fade[0])
+
+        self.game.display.render(self.surface.texture, self.game.screen)        
+        self.game.display.render(self.image.texture, self.game.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
+        self.game.display.render(self.text, self.game.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])        
 
     def render_in(self):
-        self.fade += 1
-        self.fade = min(self.fade,150)
-        self.img.set_alpha((255-150)+int(self.fade))
+        self.fade[0] += 1
+        self.fade[1] += 1
+        self.fade[0] = min(self.fade[0],150)
+        self.fade[1] = min(self.fade[1],255)
 
     def render_out(self):
-        self.fade -= 1
-        self.fade = max(self.fade,0)
-        self.img.set_alpha(int(self.fade))
+        self.fade[0] -= 1
+        self.fade[1] -= 1
+        self.fade[0] = max(self.fade[0],0)
+        self.fade[1] = max(self.fade[1],0)
 
-        if self.fade == 0:
+        if self.fade[0] == 0:
             self.game.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
             self.exit_state()
 
@@ -825,23 +840,25 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
         self.timer = 0
         self.pos = [-self.game.window_size[1],self.game.window_size[1]]
         self.const = [0.8,0.8]#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
+        self.rect1 = game.display.make_layer(self.game.window_size)#TODO
+        self.rect2 = game.display.make_layer(self.game.window_size)#TODO
+
+        self.rect2.clear(0,0,0,255)
+        self.rect1.clear(0,0,0,255)
 
     def render(self):
         super().render()
         self.cinematic()
 
     def cinematic(self):#black box stuff
-        self.pos[0]+=self.game.dt#the upper balck box
-        self.pos[1]-=self.game.dt#the lower balck box
+        self.pos[0] += self.game.dt#the upper balck box
+        self.pos[1] -= self.game.dt#the lower balck box
 
-        self.pos[0]=min(-self.game.window_size[1]*self.const[0],self.pos[0])
-        self.pos[1]=max(self.game.window_size[1]*self.const[1],self.pos[1])
+        self.pos[0] = min(-self.game.window_size[1]*self.const[0], self.pos[0])
+        self.pos[1] = max(self.game.window_size[1]*self.const[1], self.pos[1])
 
-        rect1=(0, int(self.pos[0]), self.game.window_size[0], self.game.window_size[1])
-        pygame.draw.rect(self.game.screen, (0, 0, 0), rect1)
-
-        rect2=(0, int(self.pos[1]), self.game.window_size[0], self.game.window_size[1])
-        pygame.draw.rect(self.game.screen, (0, 0, 0), rect2)
+        self.game.display.render(self.rect1.texture, self.game.screen, position = [0,self.pos[0]])        
+        self.game.display.render(self.rect2.texture, self.game.screen, position = [0,self.pos[1]])
 
     def handle_events(self,input):
         if input[0]:#press
@@ -998,13 +1015,14 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
             self.parent_class.game.game_objects.players.draw(self.parent_class.game.game_objects.game.screen)
 
 class Death(Cutscene_engine):#when aila dies
-    def __init__(self,objects):
-        super().__init__(objects)
+    def __init__(self,game):
+        super().__init__(game)
         self.stage = 0
 
     def update(self):
         super().update()
-        self.timer += self.parent_class.game.dt
+        if self.game.state_stack[-1] != self: return
+        self.timer += self.game.dt
         if self.stage == 0:
 
             if self.timer > 120:
@@ -1012,24 +1030,22 @@ class Death(Cutscene_engine):#when aila dies
 
         elif self.stage == 1:
                 #spawn effect
-                pos=(0,0)#
-                offset=100#depends on the effect animation
-                self.spawneffect = Entities.Spawneffect(pos,self.parent_class.game.game_objects)
-                self.spawneffect.rect.midbottom=self.parent_class.game.game_objects.player.rect.midbottom
+                pos = (0,0)#
+                offset = 100#depends on the effect animation
+                self.spawneffect = Entities.Spawneffect(pos,self.game.game_objects)
+                self.spawneffect.rect.midbottom=self.game.game_objects.player.rect.midbottom
                 self.spawneffect.rect.bottom += offset
-                self.parent_class.game.game_objects.cosmetics.add(self.spawneffect)
+                self.game.game_objects.cosmetics.add(self.spawneffect)
                 self.stage = 2
 
         elif self.stage == 2:
             if self.spawneffect.finish:#when the cosmetic effetc finishes
-                self.parent_class.game.game_objects.player.currentstate.enter_state('Spawn_main')
+                self.game.game_objects.player.currentstate.enter_state('Spawn_main')
                 self.exit_state()
 
     def state1(self):
-        self.parent_class.game.game_objects.load_map(self.parent_class.game.game_objects.player.spawn_point[-1]['map'],self.parent_class.game.game_objects.player.spawn_point[-1]['point'])
-        self.parent_class.game.game_objects.player.currentstate.enter_state('Invisible_main')
+        self.game.game_objects.load_map(self,self.game.game_objects.player.spawn_point[-1]['map'], self.game.game_objects.player.spawn_point[-1]['point'])
         self.stage = 1
-        self.timer = 0
 
     def handle_events(self,input):
         pass
@@ -1167,12 +1183,12 @@ class Butterfly_encounter_gameplay(Gameplay):#if aggro path is chosen: and shoul
     def __init__(self,game):
         super().__init__(game)
         spawn_pos = self.game.game_objects.map.references['cocoon_boss'].rect.topleft
-        self.game.game_objects.weather.lightning()
+        self.game.game_objects.weather.flash()
         self.butterfly = Entities.Butterfly(spawn_pos, self.game.game_objects)
         self.game.game_objects.enemies.add(self.butterfly)
         self.game.game_objects.map.references['cocoon_boss'].currentstate.handle_input('Hurt')
         spawn_pos = [2576,1320]
-        self.gate = Entities.Lighitning_barrier(spawn_pos,self.game.game_objects)
+        self.gate = Entities.Lighitning(spawn_pos,self.game.game_objects,[1,1],[32,96])
         self.game.game_objects.interactables.add(self.gate)
         self.butterfly.AI.activate()
 
@@ -1181,7 +1197,9 @@ class Butterfly_encounter_gameplay(Gameplay):#if aggro path is chosen: and shoul
         self.gate.currentstate.handle_input('Transform')#if there was a gate, we can open it
         self.exit_state()
 
-    def handle_input(self,input):
+    def handle_input(self,input, duration = 11):
         if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game,duration=11)
+            new_game_state = Pause_gameplay(self.game,duration=duration)
             new_game_state.enter_state()
+        elif input == 'death':#normal death
+            self.game.game_objects.player.death()                    

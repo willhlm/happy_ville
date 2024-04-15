@@ -658,7 +658,8 @@ class Death_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.game_objects.cosmetics.add(Entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
-        self.entity.velocity[1]=-3
+        self.entity.velocity[1] = -3
+        self.entity.acceleration[0] = 0#don't move
         if self.entity.velocity[0]<0:
             self.dir[0]=1
         else:
@@ -695,9 +696,6 @@ class Death_charge(Player_states):
     def handle_press_input(self,input):#all states should inehrent this function
         pass
 
-    def handle_release_input(self,input):#all states should inehrent this function
-        pass
-
     def handle_input(self,input):
         if input == 'Ground':#if hit ground
             self.enter_state('Death_main')
@@ -713,9 +711,6 @@ class Death_main(Player_states):
         pass
 
     def handle_press_input(self,input):#all states should inehrent this function
-        pass
-
-    def handle_release_input(self,input):#all states should inehrent this function
         pass
 
     def increase_phase(self):
@@ -735,16 +730,12 @@ class Death_post(Player_states):
     def handle_press_input(self,input):#all states should inehrent this function
         pass
 
-    def handle_release_input(self,input):#all states should inehrent this function
-        pass
-
     def increase_phase(self):
         pass
 
 class Invisible_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def handle_press_input(self,input):#all states should inehrent this function
         pass
@@ -940,7 +931,10 @@ class Sword_up_main(Sword):
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def increase_phase(self):
-        self.enter_state('Idle_main')
+        if self.entity.acceleration[0] == 0:
+            self.enter_state('Idle_main')
+        else:
+            self.enter_state('Run_main')
 
 class Sword_down_main(Sword):
     def __init__(self,entity):

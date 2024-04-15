@@ -129,19 +129,19 @@ class Conversation_bubbles(Staticentity):
 
 #shaders -> should this be here or in enteties_parallx?
 class Portal(Staticentity):#portal to make a small spirit world with challenge rooms
-    def __init__(self,pos,game_objects, ID):
+    def __init__(self, pos, game_objects, ID):
         super().__init__(pos, game_objects)
         self.currentstate = states_portal.Spawn(self)
 
-        self.empty_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)
+        self.empty_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#TODO
         self.noise_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)
         self.screen_copy = game_objects.game.display.make_layer(self.game_objects.game.window_size)
 
         self.bg_distort_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#bg
         self.bg_grey_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#entetirs  
 
-        self.rect = pygame.Rect(pos[0],pos[1], self.empty_layer.texture.width, self.empty_layer.texture.height)
-        self.hitbox = pygame.Rect(self.rect.centerx,self.rect.centery, 32, 32)
+        self.rect = pygame.Rect(pos[0], pos[1], self.empty_layer.texture.width, self.empty_layer.texture.height)
+        self.hitbox = pygame.Rect(self.rect.centerx, self.rect.centery, 32, 32)
         self.time = 0
         self.radius = 0
         self.thickness = 0
@@ -169,7 +169,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
-        self.game_objects.shaders['noise_perlin']['scale'] = [5,5]
+        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
         self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #portal
@@ -201,7 +201,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['bloom'])#make them grey
 
 class Lighitning(Staticentity):#a shader to make lighning barrier
-    def __init__(self,pos,game_objects,parallax,size):
+    def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos, game_objects)
         self.parallax = parallax
 
@@ -229,6 +229,46 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
 
     def player_noncollision(self):
         pass
+
+class Bubbles(Staticentity):#a shader to make bubble barrier
+    def __init__(self, pos, game_objects, parallax, size):
+        super().__init__(pos, game_objects)
+        self.parallax = parallax
+
+        self.image = game_objects.game.display.make_layer(size).texture
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])
+        self.time = 0
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.01
+
+    def draw(self, target):
+        self.game_objects.shaders['bubbles']['TIME'] = self.time
+        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['bubbles'])
+
+class Beam(Staticentity):
+    def __init__(self, pos, game_objects, paralax, size):
+        super().__init__(pos, game_objects)
+        self.image = game_objects.game.display.make_layer(size).texture
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])
+        self.time = 0
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.1
+
+    def draw(self, target):
+        self.game_objects.shaders['beam']['TIME'] = self.time
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['beam'])#shader render
 
 class Sky(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
@@ -264,7 +304,7 @@ class Sky(Staticentity):
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
 
-class Waterfall(Staticentity):#working
+class Waterfall(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos,game_objects)
         self.parallax = parallax
@@ -522,7 +562,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
-        self.velocity[0] = dir[0]*30
+        self.velocity[0] = dir[0]*30*(1 - abs(dir[1]))
         self.velocity[1] = -dir[1]*10
 
     def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20,state = 'Idle'):
@@ -546,7 +586,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 5
+        self.health = 3
         self.spirit = 2
         self.projectiles = game_objects.fprojectiles
         self.sword = Aila_sword(self)
@@ -588,7 +628,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white
             self.shader_state.handle_input('Invincibile')#blink a bit
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.hurt_particles(lifetime=40, vel = {'linear':[3,8]}, colour=[0,0,0,255], scale=3, number_particles=60)
+            self.hurt_particles(lifetime = 40, vel = {'linear':[3,8]}, colour=[0,0,0,255], scale=3, number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 20)#makes the game freez for few frames
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)        
@@ -746,7 +786,7 @@ class Flying_enemy(Enemy):
         self.hitbox.center = self.rect.center
 
     def knock_back(self,dir):
-        self.velocity[0] = dir[0]*30
+        self.velocity[0] = dir[0]*30*(1 - abs(dir[1]))
         self.velocity[1] = -dir[1]*30
 
     def chase(self, target_distance):#called from AI: when chaising
@@ -930,17 +970,6 @@ class Vatt(Enemy):
                 enemy.aggro = True
                 enemy.currentstate.handle_input('Transform')
 
-class Flowy(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/flowy/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 1
-        self.spirit=10
-
 class Larv_poison(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1086,19 +1115,6 @@ class Skeleton_warrior(Enemy):#change design
         self.attack_distance = [100,10]
         self.attack = Sword
         self.health = 3
-
-    def knock_back(self,dir):
-        pass
-
-class Liemannen(Enemy):#change design
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/liemannen/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.attack_distance = 100
-        self.attack = Sword
 
     def knock_back(self,dir):
         pass
@@ -1331,10 +1347,11 @@ class Butterfly(Flying_enemy):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/butterfly/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = pygame.Rect(pos,self.image.size)
         self.hitbox = self.rect.copy()
         self.AI = AI_butterfly.Idle(self)
         self.currentstate = states_butterfly.Idle(self)
+        self.health =20
 
     def group_distance(self):
         pass
@@ -1861,7 +1878,7 @@ class Aila_sword(Sword):
         collision_enemy.hurt_particles(dir = self.dir[0])
         self.clash_particles(collision_enemy.hitbox.center)
 
-        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
+        #self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         collision_enemy.currentstate.handle_input('sword')
         for stone in self.equip:
             self.stones[stone].collision()#call collision specific for stone
@@ -2233,7 +2250,7 @@ class Spirit_container(Loot):
         self.kill()
 
 class Soul_essence(Loot):
-    def __init__(self,pos,game_objects,ID_key = None):
+    def __init__(self, pos, game_objects, ID_key = None):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/soul_essence/',game_objects)
         self.image = self.sprites['idle'][0]
@@ -2275,7 +2292,7 @@ class Enemy_drop(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.lifetime = 500
-        self.velocity = [random.uniform(-3, 3),-7]
+        self.velocity = [random.uniform(-3, 3),-3]
 
     def update(self):
         super().update()
@@ -2381,7 +2398,8 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.velocity = [random.uniform(0, 3),-4]
-        #add light?
+        self.hitbox = pygame.Rect(pos,(16,16))
+        self.light = game_objects.lights.add_light(self, radius = 50)    
         self.twinkle()
 
     def twinkle(self, num = 3):
@@ -2394,7 +2412,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
     def interact(self):#when player press T
         self.game_objects.player.currentstate.enter_state('Pray_pre')
         self.pickup()
-        new_game_state = states.Blit_image_text(self.game_objects.game,self.sprites['idle'][0],self.description)
+        new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
         self.kill()
 
@@ -2402,7 +2420,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         super().kill()
         for twinkle in self.twinkles:
             twinkle.kill()
-        self.light.kill()
+        self.game_objects.lights.remove_light(self.light)
 
 class Tungsten(Interactable_item):#move omamori and infiinity stones to here a swell
     def __init__(self,pos, game_objects):
@@ -2633,11 +2651,11 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/soul/', game_objects)
-        self.currentstate = states_basic.Once(self)
+        self.currentstate = states_basic.Once(self,next_state = 'Idle',animation_name='idle')
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.timer=0
-        self.velocity=[0,0]
+        self.timer = 0
+        self.velocity = [0,0]
 
     def update(self):
         super().update()
@@ -2650,8 +2668,10 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
 
     def update_pos(self):
         self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]
+        self.rect.topleft = self.true_pos
 
     def reset_timer(self):
+        super().reset_timer()
         self.currentstate.handle_input('Idle')
 
 class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns

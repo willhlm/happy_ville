@@ -27,6 +27,7 @@ class Game_Objects():
         self.shaders = Read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller('playstation')
         self.sound = sound.Sound()
+        self.lights = lights.Lights(self)
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
         self.collisions = collisions.Collisions(self)
@@ -36,7 +37,6 @@ class Game_Objects():
         self.UI = {'gameplay':UI.Gameplay_UI(self)}
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.object_pool = object_pool.Object_pool(self)
-        self.lights = lights.Lights(self)
         self.shader_render = shader_render.Screen_shader(self, 'vignette')     
         self.render_state = states_gameplay.Idle(self)
 
@@ -66,7 +66,7 @@ class Game_Objects():
 
     def load_map(self, previous_state, map_name, spawn = '1',fade = True):#fade out before loading the map
         if fade:#for cutscenes
-            new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn,fade)#it will call load_map2 after loading
+            new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn, fade)#it will call load_map2 after loading
             new_game_state.enter_state()
         else:
             self.load_map2(map_name, spawn, fade)
