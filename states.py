@@ -8,6 +8,7 @@ import UI_select_menu, UI_facilities
 import Entities
 import particles
 import challange_rooms
+import platforms
 
 class Game_State():
     def __init__(self,game):
@@ -16,7 +17,7 @@ class Game_State():
     def update(self):
         pass
 
-    def render(self,display):
+    def render(self):
         pass
 
     def handle_events(self,event):
@@ -105,7 +106,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self, 'light_forest_1', '1')
+            self.game.game_objects.load_map(self, 'village_ola_1', '1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -297,6 +298,9 @@ class Option_Menu(Game_State):
             self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
+        self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
+        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
+
         #self.arrow.draw(self.game.screen)
 
     def handle_events(self, event):
@@ -436,7 +440,8 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             self.game.display.render(self.button_surfaces[b], self.background, position = self.button_rects[b].topleft)#shader render
 
         #blit arrow
-        self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft)
+        self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
+        self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
 
         self.game.display.render(self.background.texture, self.game.screen)#shader render
 
@@ -508,12 +513,14 @@ class Slow_motion_gameplay(Gameplay):
         self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].init(self.slow_rate)
         self.duration = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].duration
 
-        self.bar = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites.sprite_dict['bar'][0].copy()
-        self.meter = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites.sprite_dict['meter'][0].copy()
-        self.width = self.meter.get_width()
+        self.bar = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites['bar'][0]
+        self.meter = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites['meter'][0]
+        self.width = self.meter.width
 
         self.pos = [self.game.window_size[0]*0.5 - self.width*0.5,3]
-        self.rate =self.meter.get_width()/self.duration
+        self.rate =self.width/self.duration
+
+        self.surface = self.game.display.make_layer(self.game.window_size)
 
     def update(self):
         self.game.dt *= self.slow_rate#slow motion
@@ -523,11 +530,11 @@ class Slow_motion_gameplay(Gameplay):
 
     def render(self):
         super().render()
-        self.game.screen.fill((20,20,20), special_flags = pygame.BLEND_RGB_ADD)
+        self.surface.clear(20,20,20,100)
+        self.game.display.render(self.surface.texture,self.game.screen)
+
         self.width -= self.game.dt*self.rate
         self.width = max(self.width,0)
-        self.game.screen.blit(pygame.transform.scale(self.meter,[self.width,self.meter.get_height()]),self.pos)
-        self.game.screen.blit(self.bar, self.pos)
 
     def exit(self):
         if self.duration < 0:
@@ -537,17 +544,12 @@ class Slow_motion_gameplay(Gameplay):
 class Ability_menu(Gameplay):#when pressing tab
     def __init__(self, game):
         super().__init__(game)
-        self.abilities=list(self.game.game_objects.player.abilities.spirit_abilities.keys())
+        self.abilities = list(self.game.game_objects.player.abilities.spirit_abilities.keys())
         self.index = self.abilities.index(self.game.game_objects.player.abilities.equip)
 
-        hud2=pygame.image.load("Sprites/Attack/HUD/abilityHUD2.png").convert_alpha()
-        hud3=pygame.image.load("Sprites/Attack/HUD/abilityHUD3.png").convert_alpha()
-        hud4=pygame.image.load("Sprites/Attack/HUD/abilityHUD4.png").convert_alpha()
-        hud5=pygame.image.load("Sprites/Attack/HUD/abilityHUD5.png").convert_alpha()
-        hud6=pygame.image.load("Sprites/Attack/HUD/abilityHUD6.png").convert_alpha()
-
-        self.hud=[hud2,hud3,hud4,hud5,hud6]
+        self.sprites = Read_files.load_sprites_list('Sprites/UI/ability_HUD',game.game_objects)#TODO
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
+        self.surface = self.game.display.make_layer(self.game.window_size)#TODO
 
     def update(self):
         self.game.dt *= 0.5#slow motion
@@ -555,13 +557,16 @@ class Ability_menu(Gameplay):#when pressing tab
 
     def render(self):
         super().render()
-        self.game.screen.fill((20,20,20),special_flags=pygame.BLEND_RGB_ADD)
+        self.surface.clear(20,20,20,100)
 
-        hud=self.hud[self.index]
+        self.game.display.render(self.surface.texture, self.game.screen)
+
+        hud=self.sprites[self.index]
         for index,ability in enumerate(self.abilities):
-            hud.blit(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites.sprite_dict['active_1'][0],self.coordinates[index])
+            pos = [self.coordinates[index][0] + 250, self.coordinates[index][1] + 100]
+            self.game.display.render(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites['active_1'][0], self.game.screen,position =pos)
 
-        self.game.screen.blit(hud,(250,100))
+        self.game.display.render(hud, self.game.screen,position = (250,100))
 
     def handle_events(self, input):
         if input[0]:#press
@@ -905,13 +910,13 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
 
     def render(self):
         super().render()
-        if self.timer>400:
-            self.game.screen.blit(self.title_name,(190,150))
+        if self.timer>250:
+            self.game.display.render(self.title_name,self.game.screen,position = (190,150))
 
-        if self.timer>800:
-            self.game.screen.blit(self.text1,(190,170))
+        if self.timer>500:
+            self.game.display.render(self.text1,self.game.screen,position = (190,170))
 
-        if self.timer >1000:
+        if self.timer >700:
             self.game.game_objects.player.acceleration[0] *= 2#bacl to normal speed
             self.exit_state()
 
@@ -922,66 +927,77 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
         self.game.game_objects.player.currentstate.handle_movement(input)
 
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
-    def __init__(self,objects):
-        super().__init__(objects)
-        spawn_pos=(700,130)
-        self.entity=Entities.Reindeer(spawn_pos, self.parent_class.game.game_objects)
-        self.parent_class.game.game_objects.enemies.add(self.entity)
-        self.parent_class.game.game_objects.camera.set_camera('Deer_encounter')
-        self.parent_class.game.game_objects.player.currentstate.enter_state('Walk')#should only enter these states once
+    def __init__(self,game):
+        super().__init__(game)
+        spawn_pos=(2920,900)
+        self.entity = Entities.Reindeer(spawn_pos, self.game.game_objects)
+        self.entity.AI.deactivate()
 
-    def update(self):#write how you want the player/group to act
-        self.timer+=self.parent_class.game.dt
-        if self.timer<50:
-            self.parent_class.game.game_objects.player.velocity[0]=4
-        elif self.timer==50:
-            self.parent_class.game.game_objects.player.currentstate.enter_state('Idle')#should only enter these states once
-            self.entity.currentstate.enter_state('Walk')
-        elif self.timer>50:
-            self.parent_class.game.game_objects.player.velocity[0]=0
-            self.entity.velocity[0]=5
+        self.game.game_objects.enemies.add(self.entity)
+        self.game.game_objects.camera.set_camera('Deer_encounter')
+        self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
+        self.stage = 0
+
+    def update(self):#write how you want things to act
+        super().update()
+        self.timer+=self.game.dt
+        if self.stage == 0:
+
+            if self.timer < 50:
+                self.game.game_objects.player.velocity[0]=4
+
+            elif self.timer>50:
+                self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
+                self.game.game_objects.player.acceleration[0] = 0
+                self.stage  = 1
+                self.entity.dir[0] *= -1
+
+        elif self.stage ==1:
+            if self.timer > 100:                
+                self.entity.velocity[0] = 5
 
         if self.timer>200:
             self.exit_state()
 
     def exit_state(self):
-        self.parent_class.game.game_objects.camera.exit_state()
+        self.game.game_objects.camera.exit_state()
         self.entity.kill()
         super().exit_state()
 
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
-        pos = (self.parent_class.game.game_objects.camera.scroll[0] + 900,self.parent_class.game.game_objects.camera.scroll[1] + 100)
-        self.entity = Entities.Reindeer(pos, self.parent_class.game.game_objects)#make the boss
-        self.parent_class.game.game_objects.enemies.add(self.entity)
+        pos = (self.game.game_objects.camera.scroll[0] + 900,self.game.game_objects.camera.scroll[1] + 100)
+        self.entity = Entities.Reindeer(pos, self.game.game_objects)#make the boss
+        self.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
-        self.parent_class.game.game_objects.camera.set_camera('Deer_encounter')
+        self.game.game_objects.camera.set_camera('Deer_encounter')
         self.entity.AI.deactivate()
         self.stage = 0
-        self.parent_class.game.game_objects.player.currentstate.enter_state('Walk_main')
-        self.parent_class.game.game_objects.player.currentstate.walk()#to force tha walk animation
+        self.game.game_objects.player.currentstate.enter_state('Walk_main')
+        self.game.game_objects.player.currentstate.walk()#to force tha walk animation
 
     def update(self):#write how you want the player/group to act
-        self.timer += self.parent_class.game.dt
+        super().update()
+        self.timer += self.game.dt
         if self.stage == 0:
-            self.parent_class.game.game_objects.player.velocity[0]  = 4
+            self.game.game_objects.player.velocity[0]  = 4
 
             if self.timer >120:
                 self.stage=1
-                self.parent_class.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                self.parent_class.game.game_objects.player.acceleration[0] = 0
+                self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
+                self.game.game_objects.player.acceleration[0] = 0
 
         elif self.stage==1:
             if self.timer>200:
                 self.entity.currentstate.enter_state('Transform')
-                self.parent_class.game.game_objects.player.velocity[0] = -20
-                self.parent_class.game.game_objects.camera.camera_shake(amp=3,duration=100)#amplitude, duration
+                self.game.game_objects.player.velocity[0] = -20
+                self.game.game_objects.camera.camera_shake(amp=3,duration=100)#amplitude, duration
                 self.stage=2
 
         elif self.stage==2:
             if self.timer > 400:
-                self.parent_class.game.game_objects.camera.exit_state()#exsiting deer encounter camera
+                self.game.game_objects.camera.exit_state()#exsiting deer encounter camera
                 self.entity.AI.activate()
                 self.exit_state()
 
@@ -989,30 +1005,31 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
     def __init__(self,objects):
         super().__init__(objects)
         self.step1 = False
-        self.const = 0.5#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
-        self.parent_class.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
+        self.const = [0.5,0.5]#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
+        self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
 
     def update(self):
-        self.timer+=self.parent_class.game.dt
+        super().update()
+        self.timer+=self.game.dt
         if self.timer < 75:
-            self.parent_class.game.game_objects.player.velocity[1] = -2
+            self.game.game_objects.player.velocity[1] = -2
         elif self.timer > 75:
-            self.parent_class.game.game_objects.player.velocity[1] = -1#compensates for gravity, levitates
+            self.game.game_objects.player.velocity[1] = -1#compensates for gravity, levitates
             self.step1 = True
 
         if self.timer > 250:
-            self.parent_class.game.game_objects.player.velocity[1] = 2#go down again
-            if self.parent_class.game.game_objects.player.collision_types['bottom']:
+            self.game.game_objects.player.velocity[1] = 2#go down again
+            if self.game.game_objects.player.collision_types['bottom']:
                 self.exit_state()
 
     def render(self):
         super().render()
         if self.step1:
-            particle = getattr(particles, 'Spark')(self.parent_class.game.game_objects.player.rect.center,self.parent_class.game.game_objects,distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255])
-            self.parent_class.game.game_objects.cosmetics.add(particle)
+            particle = getattr(particles, 'Spark')(self.game.game_objects.player.rect.center, self.game.game_objects, distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255])
+            self.game.game_objects.cosmetics.add(particle)
 
-            self.parent_class.game.game_objects.cosmetics.draw(self.parent_class.game.game_objects.game.screen)
-            self.parent_class.game.game_objects.players.draw(self.parent_class.game.game_objects.game.screen)
+            self.game.game_objects.cosmetics.draw(self.game.game_objects.game.screen)
+            self.game.game_objects.players.draw(self.game.game_objects.game.screen)
 
 class Death(Cutscene_engine):#when aila dies
     def __init__(self,game):
@@ -1063,7 +1080,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.gameplay.entity1.AI.deactivate()
         self.game.game_objects.enemies.add(self.gameplay.entity1)
 
-        self.game.game_objects.interactables.add(self.gameplay.gate)
+        self.game.game_objects.platforms.add(self.gameplay.gate)
 
         self.game.game_objects.camera.set_camera('Cultist_encounter')
         self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
@@ -1079,7 +1096,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
 
             elif self.timer > 50:
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                #self.parent_class.game.game_objects.player.velocity[0]=0
+                #self.game.game_objects.player.velocity[0]=0
                 self.game.game_objects.player.acceleration[0]=0
 
                 self.stage = 1
@@ -1109,10 +1126,12 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
 class Cultist_encounter_gameplay(Gameplay):#initialised in the cutscene:if player dies, the plater is not respawned but transffered to cultist hideout
     def __init__(self,game):
         super().__init__(game)
-        spawn_pos = (self.game.game_objects.camera.scroll[0] - 150,self.game.game_objects.camera.scroll[1] + 100)
-        self.entity1 = Entities.Cultist_warrior(spawn_pos, self.game.game_objects, self)#added to group in cutscene
-        self.entity2 = Entities.Cultist_rogue(spawn_pos, self.game.game_objects, self)#added to group in cutscene
-        self.gate = Entities.Gate((self.game.game_objects.camera.scroll[0] - 250,self.game.game_objects.camera.scroll[1] + 100),self.game.game_objects)#added to group in cutscene
+        spawn_pos1 = (self.game.game_objects.camera.scroll[0] - 300,self.game.game_objects.camera.scroll[1] + 100)
+        spawn_pos2 = (self.game.game_objects.camera.scroll[0] + 50,self.game.game_objects.camera.scroll[1] + 100)
+        self.entity1 = Entities.Cultist_warrior(spawn_pos1, self.game.game_objects, self)#added to group in cutscene
+        self.entity1.dir[0] *= -1
+        self.entity2 = Entities.Cultist_rogue(spawn_pos2, self.game.game_objects, self)#added to group in cutscene
+        self.gate = platforms.Gate((self.game.game_objects.camera.scroll[0] - 250,self.game.game_objects.camera.scroll[1] + 100),self.game.game_objects)#added to group in cutscene
         self.kill = 0#when the enteties have died, this will tick up
 
     def incrase_kill(self):#called when entity1 and 2 are killed
@@ -1141,9 +1160,9 @@ class Rhoutta_encounter_gameplay(Gameplay):#called from trigger before first rho
         self.game.game_objects.cosmetics.add(effect)
         self.game.game_objects.weather.flash()
 
-    def handle_input(self,input):
+    def handle_input(self,input, duration):
         if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game,duration=11)
+            new_game_state = Pause_gameplay(self.game,duration=duration)
             new_game_state.enter_state()
 
 class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger

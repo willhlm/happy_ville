@@ -1,11 +1,20 @@
 import random
 import Entities
+import platforms
 
 class Challange_rooms():
     def __init__(self, game_state, portal):
         self.game_state = game_state
         self.game_objects = game_state.game.game_objects
         self.portal = portal
+        self.put_gate()
+
+    def put_gate(self):        
+        pos = [self.portal.rect.topleft,self.portal.rect.topright]
+        self.gates = []
+        for num in range(0,2):
+            self.gates.append(platforms.Bubble_gate(pos[num],self.game_objects,[100,340]))
+            self.game_objects.platforms.add(self.gates[-1])        
 
     def update(self):
         pass

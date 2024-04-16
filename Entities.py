@@ -230,27 +230,6 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
     def player_noncollision(self):
         pass
 
-class Bubbles(Staticentity):#a shader to make bubble barrier
-    def __init__(self, pos, game_objects, parallax, size):
-        super().__init__(pos, game_objects)
-        self.parallax = parallax
-
-        self.image = game_objects.game.display.make_layer(size).texture
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])
-        self.time = 0
-
-    def release_texture(self):
-        self.image.release()
-
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.01
-
-    def draw(self, target):
-        self.game_objects.shaders['bubbles']['TIME'] = self.time
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['bubbles'])
-
 class Beam(Staticentity):
     def __init__(self, pos, game_objects, paralax, size):
         super().__init__(pos, game_objects)
@@ -557,7 +536,6 @@ class Character(Platform_entity):#enemy, NPC,player
         else:#if dead
             self.aggro = False
             self.invincibile = True
-            self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
             self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
@@ -608,7 +586,7 @@ class Player(Character):
         self.omamoris = Omamoris(self)#
 
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self,C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
-        self.reset_movement()
+        self.reset_movement()    
 
     def update_hitbox(self):
         super().update_hitbox()
@@ -648,7 +626,6 @@ class Player(Character):
         self.game_objects.UI['gameplay'].update_spirits()#update UI
 
     def death(self):#"normal" gameplay states calls this
-        self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
         self.currentstate.enter_state('Death_pre')#overrite any state and go to deat
 
     def dead(self):#called when death animation is finished
@@ -1222,7 +1199,7 @@ class Guide(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
         self.shader_state = states_shader_guide.Idle(self)
-        self.layer1 = self.game_objects.game.display.make_layer(self.image.size)#make a layer ("surface")
+        self.layer1 = self.game_objects.game.display.make_layer(self.image.size)#make a layer ("surface")TODO
 
     def update(self):
         super().update()
@@ -1242,8 +1219,8 @@ class Guide(NPC):
 
     def draw(self, target):#called in group
         self.shader_state.draw()
-        pos = (int(self.entity.rect[0]-self.entity.game_objects.camera.scroll[0]),int(self.entity.rect[1]-self.entity.game_objects.camera.scroll[1]))
-        self.entity.game_objects.game.display.render(self.entity.image, target, position = pos, flip = bool(max(self.entity.dir[0],0)), shader = self.entity.shader)#shader render
+        pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
 class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
@@ -1304,9 +1281,9 @@ class Boss(Enemy):
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
         self.game_objects.world_state.update_event(str(type(self).__name__).lower())
-        new_game_state = states.New_ability(self.game_objects.game,self.abillity)
+        new_game_state = states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites[self.ability][0],self.ability)
         new_game_state.enter_state()
-        new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
+        new_game_state = states.Defeated_boss(self.game_objects.game)
         new_game_state.enter_state()
 
     def health_bar(self):#called from omamori Boss_HP
@@ -1314,14 +1291,14 @@ class Boss(Enemy):
         self.game_objects.cosmetics.add(self.health_bar)
 
     def give_abillity(self):
-        self.game_objects.player.abilities.Player_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
+        self.game_objects.player.abilities.spirit_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)(self.game_objects.player)
 
     def knock_back(self,dir):
         pass
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
-        self.health_bar.resize()
+        #self.health_bar.resize()
 
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
@@ -1334,10 +1311,10 @@ class Reindeer(Boss):
         self.currentstate = states_reindeer.Idle(self)
         AI_reindeer.build_tree(self)
 
-        self.abillity = 'dash_1main'#the stae of image that will be blitted to show which ability that was gained
+        self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
         self.attack = Sword
         self.special_attack = Horn_vines
-        self.attack_distance = 50
+        self.attack_distance = [50,10]
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
@@ -1352,6 +1329,9 @@ class Butterfly(Flying_enemy):
         self.AI = AI_butterfly.Idle(self)
         self.currentstate = states_butterfly.Idle(self)
         self.health =20
+
+    def knock_back(self,dir):
+        pass
 
     def group_distance(self):
         pass
@@ -1903,7 +1883,14 @@ class Aila_sword(Sword):
 class Ranged(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
+        self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
         self.velocity = [0,0]
+
+    def update_hitbox(self):
+        rounded_dir = (sign(self.entity.dir[0]), sign(self.entity.dir[1]))#analogue controls may have none integer values
+        hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
+        setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
+        self.rect.center = self.hitbox.center#match the positions of hitboxes            
 
     def update(self):
         super().update()
@@ -1924,6 +1911,9 @@ class Thunder(Ranged):
         self.dmg = 1
         self.level = 1#upgrade pointer
 
+    def release_texture(self):
+        pass
+
     def initiate(self,enemy_rect):
         self.rect.midbottom = enemy_rect.midbottom
         self.hitbox = self.rect.copy()
@@ -1934,7 +1924,7 @@ class Thunder(Ranged):
         self.dmg = 0
         collision_enemy.velocity = [0,0]#slow him down
 
-    def reset_timer(self):
+    def reset_timer(self):        
         self.dmg = 1
         self.kill()
 
@@ -2054,12 +2044,9 @@ class Force(Ranged):
 
     def initiate(self):
         self.lifetime = 30
-        if self.entity.dir[1] == 0:
-            self.dir = self.entity.dir.copy()
-        else:
-            self.dir = [0,self.entity.dir[1]]
-        self.velocity=[self.dir[0]*10,-self.dir[1]*10]
-        self.update_hitbox()
+        self.dir = self.entity.dir.copy()
+        self.update_hitbox()    
+        self.velocity = [sign(self.dir[0]) * (abs(self.dir[0]) - abs(self.dir[1]))*10, -self.dir[1] * 10]        
 
     def collision_plat(self,platform):
         self.animation.reset_timer()
@@ -2073,6 +2060,9 @@ class Force(Ranged):
 
         collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
         collision_enemy.velocity[1]=-6
+
+    def release_texture(self):
+        pass
 
 class Arrow(Ranged):
     def __init__(self,entity):
@@ -2112,6 +2102,9 @@ class Arrow(Ranged):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
+    def release_texture(self):
+        pass
+
 class Migawari():
     def __init__(self,entity):
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/migawari/',entity.game_objects)
@@ -2138,9 +2131,12 @@ class Migawari():
         if self.level == 2:
             self.health = 2
 
+    def release_texture(self):
+        pass
+
 class Slow_motion():
     def __init__(self,entity):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/slow_motion/',entity.game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/slow_motion/UI/',entity.game_objects)
         self.entity = entity
         self.game_objects = entity.game_objects#animation need dt
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
@@ -2165,6 +2161,9 @@ class Slow_motion():
         self.level += 1
 
     def reset_timer(self):
+        pass
+
+    def release_texture(self):
         pass
 
 #things player can pickup
@@ -2721,7 +2720,7 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/thunder_aura/',game_objects)
-        self.currentstate = states_basic.Once(self)#
+        self.currentstate = states_basic.Once(self,next_state = 'Idle',animation_name='idle')#
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
@@ -2737,6 +2736,7 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
         self.hitbox[3]=min(self.hitbox[3],self.rect[3])
 
     def reset_timer(self):#called when animation is finished
+        super().reset_timer()
         self.currentstate.handle_input('Idle')
 
 class Pray_effect(Animatedentity):#the thing when aila pray
@@ -3047,11 +3047,11 @@ class Cocoon(Interactable):#larv cocoon in light forest
         self.timer_jobs['invincibility'].activate()
 
         if self.health > 0:
-            self.currentstate.handle_input('Once', animation_name = 'hurt',next_state = 'Idle')
+            self.currentstate.handle_input('Once', animation_name = 'hurt', next_state = 'Idle')
             #self.shader_state.handle_input('Hurt')#turn white
         else:#death
             self.invincibile = True
-            self.currentstate.handle_input('Once', animation_name = 'interact',next_state = 'Interacted')
+            self.currentstate.handle_input('Once', animation_name = 'interact', next_state = 'Interacted')
             self.game_objects.enemies.add(Maggot(self.rect.center,self.game_objects))
 
     def update_timers(self):

@@ -12,7 +12,7 @@ uniform vec2 size = vec2(2);
 uniform float radius = 0.05; //0.01
 uniform float speed = 0.7;
 uniform float ySpread = 1.6;
-uniform int numBlocks = 140;
+uniform int numBlocks = 70;
 uniform float basePulse = 0.33;
 uniform vec4 color1 = vec4(0.0, 0.3, 0.6, 1);
 uniform vec4 color2 = vec4(0.0, 0.3, 0.6, 1);
@@ -56,7 +56,7 @@ void main()
 
         vec2 pos = vec2(0.6 * aspect * (rand(tick) - 0.5), ySpread * (0.5 - fract(tickTime))); // Modified line
 
-        // vec2 size = 1.8*z*vec2(0.04, 0.04 + 0.1*rand(tick+0.2));
+        //vec2 size = 1.8*z*vec2(0.04, 0.04 + 0.1*rand(tick+0.2));
         float b = box(uv - pos, size, radius);
         float dust = z * smoothstep(0.22, 0.0, b) * pulse * 0.5;
         float block = 0.2 * z * smoothstep(0.002, 0.0, b);

@@ -33,7 +33,7 @@ class Stop_right(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
         self.entity.game_objects.camera.center[0] = self.entity.game_objects.game.window_size[0] - (self.entity.rect.left - self.entity.game_objects.player.hitbox.centerx) - self.entity.game_objects.player.rect[2]*0.5
-
+       
     def update(self):
         distance = [self.entity.rect.left - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
         if abs(distance[1]) < self.entity.size[1]*0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x

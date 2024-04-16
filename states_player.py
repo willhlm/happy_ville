@@ -968,12 +968,12 @@ class Plant_bone_main(Player_states):
 class Abillitites(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
         self.dir = self.entity.dir.copy()#animation direction
 
 class Thunder_pre(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.acceleration[0] = 0
         self.init()
 
     def init(self):
@@ -1007,13 +1007,12 @@ class Thunder_charge(Thunder_pre):
             self.enter_state('Thunder_main')
 
     def attack(self):
-        self.entity.thunder_aura.currentstate.handle_input('Death')
+        self.entity.thunder_aura.currentstate.enter_state('Death')
 
         collision_ene = self.entity.game_objects.collisions.thunder_attack(self.entity.thunder_aura)
-        if collision_ene:
-            for enemy in collision_ene:
-                self.entity.abilities.spirit_abilities['Thunder'].initiate(enemy.rect)
-                self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Thunder'])#add attack to group
+        for enemy in collision_ene:
+            self.entity.abilities.spirit_abilities['Thunder'].initiate(enemy.rect)
+            self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Thunder'])#add attack to group
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass

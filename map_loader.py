@@ -453,7 +453,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                gate = platforms.Gate(object_position,self.game_objects,ID)
+                gate = platforms.Gate(object_position,self.game_objects, ID)
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 
