@@ -230,6 +230,31 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
     def player_noncollision(self):
         pass
 
+class Bubble_gate(Staticentity):#a shader to make bubble barrier
+    def __init__(self, pos, game_objects, size):
+        super().__init__(pos, game_objects)
+        self.image = self.game_objects.game.display.make_layer(size).texture#TODO
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])        
+        self.time = 0
+
+    def player_noncollision(self):
+        pass
+
+    def player_collision(self):
+        self.game_objects.player.velocity[0] += (self.game_objects.player.hitbox.centerx - self.hitbox.centerx)*0.02
+
+    def update(self):
+        self.time += self.game_objects.game.dt*0.01
+
+    def draw(self, target):
+        self.game_objects.shaders['bubbles']['TIME'] = self.time
+        pos =  (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.game_objects.shaders['bubbles'])#int seem nicer than round
+
+    def release_texture(self):#called when .kill() and empty group
+        self.image.release_texture()
+
 class Beam(Staticentity):
     def __init__(self, pos, game_objects, paralax, size):
         super().__init__(pos, game_objects)
@@ -531,9 +556,10 @@ class Character(Platform_entity):#enemy, NPC,player
             self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
             #self.shader_state.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=5)#makes the game freez for few frames
+            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=15)#makes the game freez for few frames
             self.game_objects.camera.camera_shake(3,10)
         else:#if dead
+            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=15)#makes the game freez for few frames
             self.aggro = False
             self.invincibile = True
             self.AI.deactivate()

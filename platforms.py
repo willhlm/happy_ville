@@ -83,39 +83,6 @@ class Gate(Platform):#a gate that is owned by the lever
             for frame in range(0,len(self.sprites[state])):
                 self.sprites[state][frame].release()   
 
-class Bubble_gate(Platform):#a shader to make bubble barrier
-    def __init__(self, pos, game_objects, size):
-        super().__init__(pos, size)
-        self.game_objects = game_objects
-        self.image = self.game_objects.game.display.make_layer(size)#TODO
-        self.time = 0
-
-    def collide_x(self,entity):
-        if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self.hitbox.left)
-        else:#going to the leftx
-            entity.left_collision(self.hitbox.right)
-        entity.update_rect_x()
-
-    def collide_y(self,entity):
-        if entity.velocity[1] >= 0:#going down
-            entity.down_collision(self.hitbox.top)
-            entity.limit_y()
-        else:#going up
-            entity.top_collision(self.hitbox.bottom)
-        entity.update_rect_y()
-
-    def update(self):
-        self.time += self.game_objects.game.dt*0.01
-
-    def draw(self, target):
-        self.game_objects.shaders['bubbles']['TIME'] = self.time
-        pos =  (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['bubbles'])#int seem nicer than round
-
-    def release_texture(self):#called when .kill() and empty group
-        self.image.release_texture()
-
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust', go_through = True):
         super().__init__(pos,size)

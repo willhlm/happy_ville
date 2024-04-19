@@ -13,8 +13,8 @@ class Challange_rooms():
         pos = [self.portal.rect.topleft,self.portal.rect.topright]
         self.gates = []
         for num in range(0,2):
-            self.gates.append(platforms.Bubble_gate(pos[num],self.game_objects,[100,340]))
-            self.game_objects.platforms.add(self.gates[-1])        
+            self.gates.append(Entities.Bubble_gate(pos[num],self.game_objects,[100,340]))
+            self.game_objects.interactables.add(self.gates[-1])        
 
     def update(self):
         pass

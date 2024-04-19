@@ -6,12 +6,12 @@ in vec2 fragmentTexCoord;
 uniform sampler2D imageTexture;
 uniform vec2 resolution;
 
-uniform vec2 lightPositions[20]; // Assuming up to 20 light sources
-uniform float lightRadii[20];     // Corresponding radius for each light source
-uniform vec4 colour[20];
+uniform vec2 lightPositions[2]; // Assuming up to 20 light sources
+uniform float lightRadii[2];     // Corresponding radius for each light source
+uniform vec4 colour[2];
 uniform vec4 ambient;//texture(imageTexture, fragmentTexCoord); // Get background color
 
-uniform vec2 rectangleCorners[80]; // x/4 is the number of rectangles
+uniform vec2 rectangleCorners[8]; // x/4 is the number of rectangles
 uniform int num_rectangle;
 uniform int num_lights;
 
