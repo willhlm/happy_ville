@@ -54,6 +54,7 @@ class Lights():
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
     def draw(self, target):
+        return
         self.shaders['light']['rectangleCorners'] = self.points
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
