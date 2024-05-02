@@ -81,7 +81,7 @@ class Gate(Platform):#a gate that is owned by the lever
     def release_texture(self):#called when .kill() and empty group
         for state in self.sprites.keys():
             for frame in range(0,len(self.sprites[state])):
-                self.sprites[state][frame].release()   
+                self.sprites[state][frame].release()
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust', go_through = True):
@@ -217,9 +217,9 @@ class Collision_right_angle(Platform):#ramp
         elif other_side > 0 or benethe > 0:
             entity.go_through = True
         elif not entity.go_through:
-            entity.velocity[1] = C.max_vel[1]#make aila sticj to ground to avoid falling animation
+            entity.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation
             entity.down_collision(self.target)
-            entity.update_rect_y()           
+            entity.update_rect_y()
 
 class Collision_dmg(Platform):#"spikes"
     def __init__(self,pos,size):
@@ -290,7 +290,7 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
     def release_texture(self):#called when .kill() and empty group
         for state in self.sprites.keys():
             for frame in range(0,len(self.sprites[state])):
-                self.sprites[state][frame].release()   
+                self.sprites[state][frame].release()
 
 class Rhoutta_encounter_1(Collision_time):
     def __init__(self,game_objects,pos,size,run_particle,go_through=True):
@@ -341,7 +341,7 @@ class Breakable_block(Collision_block):#breakable collision blocks
     def release_texture(self):#called when .kill() and empty group
         for state in self.sprites.keys():
             for frame in range(0,len(self.sprites[state])):
-                self.sprites[state][frame].release()   
+                self.sprites[state][frame].release()
 
 class Breakable_block_1(Breakable_block):
     def __init__(self, pos, game_objects,run_particle='dust'):

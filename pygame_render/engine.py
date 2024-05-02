@@ -49,10 +49,10 @@ class RenderEngine:
         assert pygame.get_init(), 'Error: Pygame is not initialized. Please ensure you call pygame.init() before using the lighting engine.'
 
         # Set OpenGL version to 3.3 core
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
-        pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
-        pygame.display.gl_set_attribute(
-            pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
+        #pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MAJOR_VERSION, 3)
+        #pygame.display.gl_set_attribute(pygame.GL_CONTEXT_MINOR_VERSION, 3)
+        #pygame.display.gl_set_attribute(
+        #    pygame.GL_CONTEXT_PROFILE_MASK, pygame.GL_CONTEXT_PROFILE_CORE)
 
         # Configure pygame display
         self._screen_res = (screen_width, screen_height)
@@ -350,9 +350,9 @@ class RenderEngine:
         """
         Manually release OpenGL resources managed by the RenderEngine.
 
-        Note: 
-        - Once this method is called, the engine is no longer usable. 
-        - This method is automatically called by the garbage collector, 
+        Note:
+        - Once this method is called, the engine is no longer usable.
+        - This method is automatically called by the garbage collector,
           so there is no need to do it manually.
         """
         self._shader_draw.release()
