@@ -11,7 +11,6 @@ class Reindeer_states(Entity_States):
 class Idle(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
 
     def update(self):
         if abs(self.entity.velocity[0]) > 0.01:
@@ -173,7 +172,6 @@ class Fall_post(Reindeer_states):
 class Stun(Reindeer_states):
     def __init__(self,entity,duration):
         super().__init__(entity)
-        self.stay_still()
         self.lifetime=duration
 
     def update(self):
@@ -185,7 +183,6 @@ class Attack_pre(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.dir=self.entity.dir.copy()#animation direction
-        self.stay_still()
 
     def increase_phase(self):
          self.enter_state('Attack_main')
@@ -205,7 +202,6 @@ class Attack_main(Reindeer_states):
 class Dash_pre(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
         self.dir=self.entity.dir.copy()
 
     def increase_phase(self):
@@ -214,7 +210,6 @@ class Dash_pre(Reindeer_states):
 class Dash_main(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
         self.dir=self.entity.dir.copy()
         self.entity.velocity[0] = 30*self.dir[0]
 
@@ -229,7 +224,6 @@ class Dash_main(Reindeer_states):
 class Dash_post(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.stay_still()
         self.dir=self.entity.dir.copy()
 
     def increase_phase(self):

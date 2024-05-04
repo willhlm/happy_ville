@@ -68,6 +68,9 @@ class Particles(pygame.sprite.Sprite):
         pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
 
+    def release_texture(self):
+        pass
+
 class Circle(Particles):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)

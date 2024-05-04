@@ -17,7 +17,7 @@ class Camera():
         self.scroll[1] = int(self.scroll[1])
 
     def set_camera(self, camera):
-        self.game_objects.camera = getattr(sys.modules[__name__], camera)(self.game_objects,self.true_scroll)
+        self.game_objects.camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll)
 
     def camera_shake(self,amp = 3, duration = 100):
         self.game_objects.camera = Camera_shake(self.game_objects, self.true_scroll, amp, duration)
@@ -33,16 +33,17 @@ class Camera():
         self.true_scroll = [self.game_objects.player.true_pos[0] - self.center[0], self.game_objects.player.true_pos[1] - self.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
 class Camera_shake(Camera):
-    def __init__(self, game_objects,scroll, amp,duration):
-        super().__init__(game_objects,scroll)
+    def __init__(self, game_objects, scroll, amp, duration):
+        super().__init__(game_objects, scroll)
+        self.amp = amp
+        self.duration = duration        
+
+    def camera_shake(self,amp = 3,duration = 100):
         self.amp = amp
         self.duration = duration
 
-    def camera_shake(self,amp=3,duration=100):
-        pass
-
     def update(self):
-        super().update()
+        super().update()        
         self.scroll[0] += random.randint(-self.amp,self.amp)
         self.scroll[1] += random.randint(-self.amp,self.amp)
         self.duration -= self.game_objects.game.dt

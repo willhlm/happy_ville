@@ -31,6 +31,8 @@ void main() {
     float distanceFromCenter = length(offset);
     
     // Calculate the step function for the distance comparison 
+
+    //float withinThreshold = 1 - step(radius * 0.5, distanceFromCenter);
     float withinThreshold = 1 - smoothstep(radius * 0.5, radius * 0.5 + radius*0.5, distanceFromCenter);
     
     // Apply distortion only if within the threshold distance

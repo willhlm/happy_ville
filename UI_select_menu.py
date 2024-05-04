@@ -47,7 +47,7 @@ class Inventory(Select_menu):
         convs = ['select','exit','Map','Omamori']
         self.texts = []
         for conv in convs:
-            self.texts.append(self.game_objects.font.render((32,32), conv, len(conv), inverse_color = True))
+            self.texts.append(self.game_objects.font.render((32,32), conv, len(conv)))
             #self.texts[-1].fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
 
     def define_blit_positions(self):#set positions

@@ -22,6 +22,9 @@ class AI():
     def deactivate(self):#used for cutscene or when they die
         self.append_child(Idle())
 
+    def activate(self):#assumes that the last in list is idle         
+        self.children.pop()
+
 class Idle():
     def __init__(self, **kwarg):
         pass

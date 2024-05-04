@@ -1,4 +1,4 @@
-import pygame, csv, math, sys
+import pygame, math, sys
 import Entities, Read_files, weather, entities_parallax, states, platforms
 import constants as C
 
@@ -34,7 +34,7 @@ class Level():
         if self.area_change:#new biome
             self.biome.clear_biome()
             self.biome_name = self.level_name[:self.level_name.rfind('_')]
-            self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize())(self)#make a class based on the name of the newstate: need to import sys
+            self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize(), Biome)(self)#returns Biome (default) if there is no biome class
         room = self.level_name[self.level_name.rfind('_')+1:]
         self.biome.room(room)
 
@@ -97,7 +97,7 @@ class Level():
     def load_objects(self, data, parallax, offset, position):
         for object in data.keys():
             if object == 'statics' or object == 'interactables':
-                if position == 'back': return#only load statics and interactables in the front
+                if position == 'back': continue#only load statics and interactables in the front
                 load_objects = {'interactables':self.load_interactables_objects,'statics':self.load_statics}#the keys are the naes of the object in tiled
                 load_objects[object](data[object], parallax, offset)
             else:#front and back objects
@@ -453,7 +453,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'ID':
                         ID = property['value']
-                gate = platforms.Gate(object_position,self.game_objects,ID)
+                gate = platforms.Gate(object_position,self.game_objects, ID)
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 
@@ -602,9 +602,9 @@ class Light_forest(Biome):
         super().__init__(level)
 
     def room(self, room):#called wgen a new room is loaded
-        if room == '11':
+        if room in ['11', '8', '7', '6', '5']:
             self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
-            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
@@ -734,43 +734,3 @@ class Light_forest_cave(Biome):
                     self.level.game_objects.all_fgs.add(new_rock)
                 else:
                     self.level.game_objects.all_bgs.add(new_rock)
-
-class Light_forest_mountain(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class Village(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class Village_ola(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class Village_ola2(Biome):  
-    def __init__(self, level):
-        super().__init__(level)
-
-class Village_cave(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class Wakeup_forest(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class Forest_path(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class Spirit_world(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class cultist_hideout(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-class collision_map(Biome):
-    def __init__(self, level):
-        super().__init__(level)

@@ -33,7 +33,7 @@ class Birth(Basic_states):
 class Idle2(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.state_name = 'idle'
+        self.entity.state = 'idle'
 
 class Hurt(Basic_states):
     def __init__(self,entity):

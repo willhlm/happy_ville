@@ -1,4 +1,4 @@
-import pygame, json
+import pygame, json, math
 from os.path import join
 
 class Controller():
@@ -126,27 +126,34 @@ class Controller():
 
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value['l_stick'][0] = event.value
-                if abs(event.value) < 0.2:
-                    self.value['l_stick'][0] = 0
+
+            if event.axis==self.analogs['lv']:#left vertical
+                self.value['l_stick'][1] = event.value 
+
+            self.controller_angle('l_stick')       
 
             if event.axis==self.analogs['rh']:#right horizontal
                 self.value['r_stick'][0] = event.value
-                if abs(event.value) < 0.2:
-                    self.value['r_stick'][0] = 0
-
-            if event.axis==self.analogs['lv']:#left vertical
-                self.value['l_stick'][1] = event.value
-                if abs(event.value) < 0.2:
-                    self.value['l_stick'][1] = 0
 
             if event.axis==self.analogs['rv']:#right vertical
                 self.value['r_stick'][1] = event.value
-                if abs(event.value) < 0.2:
-                    self.value['r_stick'][1] = 0
+            
+            self.controller_angle('r_stick')       
 
         if event.type == pygame.JOYHATMOTION:
             self.keydown = True
             self.value['d_pad'] = [event.value[0],event.value[1]]
 
     def output(self):
-        return [self.keydown,self.keyup,self.value,self.key]
+        return [self.keydown, self.keyup, self.value, self.key]
+
+    def controller_angle(self,stick):#limit the inputs depending on the angle
+        x, y = self.value[stick]        
+        angle = 180 * math.atan(y/x)/3.141592
+        
+        if y > 0:#pointing vertical
+            if angle > 80:
+                self.value[stick][0] = 0
+        else:#poiting horizongal
+            if angle < 10:
+                self.value[stick][1] = 0

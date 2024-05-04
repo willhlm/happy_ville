@@ -6,15 +6,15 @@ class Cutscene_file():#cutscneens that will run based on file. The name of the f
     def __init__(self,parent_class):
         self.parent_class = parent_class
         self.game_objects = parent_class.game.game_objects
-        self.animation=animation.Simple_animation(self)
-        self.sprites = Read_files.load_sprites('cutscene/'+type(self).__name__.lower())
-        self.image=self.sprites[0]
+        self.animation=animation.Animation(self)
+        self.sprites = {'idle': Read_files.load_sprites_list('cutscene/'+type(self).__name__.lower(),parent_class.game.game_objects)}
+        self.image=self.sprites['idle'][0]
 
     def update(self):
         self.animation.update()
 
     def render(self):
-        self.parent_class.game.screen.blit(self.image,(0, 0))
+        self.parent_class.game.display.render(self.image,self.parent_class.game.screen)
 
     def reset_timer(self):#called when cutscene is finshed
         pass

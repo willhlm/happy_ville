@@ -1,4 +1,4 @@
-import pygame, random, sys, math, numpy as np
+import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states
 import states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
@@ -129,19 +129,19 @@ class Conversation_bubbles(Staticentity):
 
 #shaders -> should this be here or in enteties_parallx?
 class Portal(Staticentity):#portal to make a small spirit world with challenge rooms
-    def __init__(self,pos,game_objects, ID):
+    def __init__(self, pos, game_objects, ID):
         super().__init__(pos, game_objects)
         self.currentstate = states_portal.Spawn(self)
 
-        self.empty_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)
+        self.empty_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#TODO
         self.noise_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)
         self.screen_copy = game_objects.game.display.make_layer(self.game_objects.game.window_size)
 
         self.bg_distort_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#bg
         self.bg_grey_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#entetirs
 
-        self.rect = pygame.Rect(pos[0],pos[1], self.empty_layer.texture.width, self.empty_layer.texture.height)
-        self.hitbox = pygame.Rect(self.rect.centerx,self.rect.centery, 32, 32)
+        self.rect = pygame.Rect(pos[0], pos[1], self.empty_layer.texture.width, self.empty_layer.texture.height)
+        self.hitbox = pygame.Rect(self.rect.centerx, self.rect.centery, 32, 32)
         self.time = 0
         self.radius = 0
         self.thickness = 0
@@ -169,7 +169,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
-        self.game_objects.shaders['noise_perlin']['scale'] = [5,5]
+        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
         self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #portal
@@ -201,7 +201,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['bloom'])#make them grey
 
 class Lighitning(Staticentity):#a shader to make lighning barrier
-    def __init__(self,pos,game_objects,parallax,size):
+    def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos, game_objects)
         self.parallax = parallax
 
@@ -229,6 +229,50 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
 
     def player_noncollision(self):
         pass
+
+class Bubble_gate(Staticentity):#a shader to make bubble barrier
+    def __init__(self, pos, game_objects, size):
+        super().__init__(pos, game_objects)
+        self.image = self.game_objects.game.display.make_layer(size).texture#TODO
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])
+        self.time = 0
+
+    def player_noncollision(self):
+        pass
+
+    def player_collision(self):
+        self.game_objects.player.velocity[0] += (self.game_objects.player.hitbox.centerx - self.hitbox.centerx)*0.02
+
+    def update(self):
+        self.time += self.game_objects.game.dt*0.01
+
+    def draw(self, target):
+        self.game_objects.shaders['bubbles']['TIME'] = self.time
+        pos =  (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.game_objects.shaders['bubbles'])#int seem nicer than round
+
+    def release_texture(self):#called when .kill() and empty group
+        self.image.release_texture()
+
+class Beam(Staticentity):
+    def __init__(self, pos, game_objects, paralax, size):
+        super().__init__(pos, game_objects)
+        self.image = game_objects.game.display.make_layer(size).texture
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],self.image.width*0.8,self.rect[3])
+        self.time = 0
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.1
+
+    def draw(self, target):
+        self.game_objects.shaders['beam']['TIME'] = self.time
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['beam'])#shader render
 
 class Sky(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
@@ -264,7 +308,7 @@ class Sky(Staticentity):
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
 
-class Waterfall(Staticentity):#working
+class Waterfall(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
         super().__init__(pos,game_objects)
         self.parallax = parallax
@@ -512,17 +556,17 @@ class Character(Platform_entity):#enemy, NPC,player
             self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
             #self.shader_state.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=5)#makes the game freez for few frames
+            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=15)#makes the game freez for few frames
             self.game_objects.camera.camera_shake(3,10)
         else:#if dead
+            self.game_objects.game.state_stack[-1].handle_input('dmg',duration=15)#makes the game freez for few frames
             self.aggro = False
             self.invincibile = True
-            self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
             self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self,dir):
-        self.velocity[0] = dir[0]*30
+        self.velocity[0] = dir[0]*30*(1 - abs(dir[1]))
         self.velocity[1] = -dir[1]*10
 
     def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20,state = 'Idle'):
@@ -547,7 +591,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 5
+        self.health = 3
         self.spirit = 2
         self.projectiles = game_objects.fprojectiles
         self.sword = Aila_sword(self)
@@ -589,7 +633,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white
             self.shader_state.handle_input('Invincibile')#blink a bit
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.hurt_particles(lifetime=40, vel = {'linear':[3,8]}, colour=[0,0,0,255], scale=3, number_particles=60)
+            self.hurt_particles(lifetime = 40, vel = {'linear':[3,8]}, colour=[0,0,0,255], scale=3, number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 20)#makes the game freez for few frames
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
@@ -609,7 +653,6 @@ class Player(Character):
         self.game_objects.UI['gameplay'].update_spirits()#update UI
 
     def death(self):#"normal" gameplay states calls this
-        self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
         self.currentstate.enter_state('Death_pre')#overrite any state and go to deat
 
     def dead(self):#called when death animation is finished
@@ -747,7 +790,7 @@ class Flying_enemy(Enemy):
         self.hitbox.center = self.rect.center
 
     def knock_back(self,dir):
-        self.velocity[0] = dir[0]*30
+        self.velocity[0] = dir[0]*30*(1 - abs(dir[1]))
         self.velocity[1] = -dir[1]*30
 
     def chase(self, target_distance):#called from AI: when chaising
@@ -861,7 +904,7 @@ class Slime(Enemy):
         self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
         self.health = 2
 
-    def relseas_textures(self):
+    def release_texture(self):
         pass
 
     def pool(game_objects):#spawned in mid game by sline giant
@@ -930,17 +973,6 @@ class Vatt(Enemy):
             if type(enemy).__name__=='Vatt':
                 enemy.aggro = True
                 enemy.currentstate.handle_input('Transform')
-
-class Flowy(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/flowy/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,40)
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
-        self.health = 1
-        self.spirit=10
 
 class Larv_poison(Enemy):
     def __init__(self,pos,game_objects):
@@ -1091,19 +1123,6 @@ class Skeleton_warrior(Enemy):#change design
     def knock_back(self,dir):
         pass
 
-class Liemannen(Enemy):#change design
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/liemannen/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.attack_distance = 100
-        self.attack = Sword
-
-    def knock_back(self,dir):
-        pass
-
 class Skeleton_archer(Enemy):#change design
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1207,7 +1226,7 @@ class Guide(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
         self.shader_state = states_shader_guide.Idle(self)
-        self.layer1 = self.game_objects.game.display.make_layer(self.image.size)#make a layer ("surface")
+        self.layer1 = self.game_objects.game.display.make_layer(self.image.size)#make a layer ("surface")TODO
 
     def update(self):
         super().update()
@@ -1227,8 +1246,8 @@ class Guide(NPC):
 
     def draw(self, target):#called in group
         self.shader_state.draw()
-        pos = (int(self.entity.rect[0]-self.entity.game_objects.camera.scroll[0]),int(self.entity.rect[1]-self.entity.game_objects.camera.scroll[1]))
-        self.entity.game_objects.game.display.render(self.entity.image, target, position = pos, flip = bool(max(self.entity.dir[0],0)), shader = self.entity.shader)#shader render
+        pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
 class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
@@ -1289,9 +1308,9 @@ class Boss(Enemy):
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
         self.game_objects.world_state.update_event(str(type(self).__name__).lower())
-        new_game_state = states.New_ability(self.game_objects.game,self.abillity)
+        new_game_state = states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites[self.ability][0],self.ability)
         new_game_state.enter_state()
-        new_game_state = states.Cutscenes(self.game_objects.game,'Defeated_boss')
+        new_game_state = states.Defeated_boss(self.game_objects.game)
         new_game_state.enter_state()
 
     def health_bar(self):#called from omamori Boss_HP
@@ -1299,14 +1318,14 @@ class Boss(Enemy):
         self.game_objects.cosmetics.add(self.health_bar)
 
     def give_abillity(self):
-        self.game_objects.player.abilities.Player_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)
+        self.game_objects.player.abilities.spirit_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)(self.game_objects.player)
 
     def knock_back(self,dir):
         pass
 
     def take_dmg(self,dmg):
         super().take_dmg(dmg)
-        self.health_bar.resize()
+        #self.health_bar.resize()
 
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
@@ -1319,10 +1338,10 @@ class Reindeer(Boss):
         self.currentstate = states_reindeer.Idle(self)
         AI_reindeer.build_tree(self)
 
-        self.abillity = 'dash_1main'#the stae of image that will be blitted to show which ability that was gained
+        self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
         self.attack = Sword
         self.special_attack = Horn_vines
-        self.attack_distance = 50
+        self.attack_distance = [50,10]
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
@@ -1332,10 +1351,14 @@ class Butterfly(Flying_enemy):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/butterfly/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = self.image.get_rect(topleft=pos)
+        self.rect = pygame.Rect(pos,self.image.size)
         self.hitbox = self.rect.copy()
         self.AI = AI_butterfly.Idle(self)
         self.currentstate = states_butterfly.Idle(self)
+        self.health =20
+
+    def knock_back(self,dir):
+        pass
 
     def group_distance(self):
         pass
@@ -1705,7 +1728,7 @@ class Melee(Projectiles):
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
     def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
-        rounded_dir = (np.sign(self.dir[0]), np.sign(self.dir[1]))#analogue controls may have none integer values
+        rounded_dir = (sign(self.dir[0]), sign(self.dir[1]))#analogue controls may have none integer values
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
@@ -1862,7 +1885,7 @@ class Aila_sword(Sword):
         collision_enemy.hurt_particles(dir = self.dir[0])
         self.clash_particles(collision_enemy.hitbox.center)
 
-        self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
+        #self.game_objects.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         collision_enemy.currentstate.handle_input('sword')
         for stone in self.equip:
             self.stones[stone].collision()#call collision specific for stone
@@ -1887,7 +1910,14 @@ class Aila_sword(Sword):
 class Ranged(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
+        self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
         self.velocity = [0,0]
+
+    def update_hitbox(self):
+        rounded_dir = (sign(self.entity.dir[0]), sign(self.entity.dir[1]))#analogue controls may have none integer values
+        hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
+        setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
+        self.rect.center = self.hitbox.center#match the positions of hitboxes
 
     def update(self):
         super().update()
@@ -1901,12 +1931,16 @@ class Thunder(Ranged):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Thunder/',entity.game_objects)
+        print(self.sprites)
         self.currentstate = states_basic.Death(self)#
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.dmg = 1
         self.level = 1#upgrade pointer
+
+    def release_texture(self):
+        pass
 
     def initiate(self,enemy_rect):
         self.rect.midbottom = enemy_rect.midbottom
@@ -2038,12 +2072,9 @@ class Force(Ranged):
 
     def initiate(self):
         self.lifetime = 30
-        if self.entity.dir[1] == 0:
-            self.dir = self.entity.dir.copy()
-        else:
-            self.dir = [0,self.entity.dir[1]]
-        self.velocity=[self.dir[0]*10,-self.dir[1]*10]
+        self.dir = self.entity.dir.copy()
         self.update_hitbox()
+        self.velocity = [sign(self.dir[0]) * (abs(self.dir[0]) - abs(self.dir[1]))*10, -self.dir[1] * 10]
 
     def collision_plat(self,platform):
         self.animation.reset_timer()
@@ -2057,6 +2088,9 @@ class Force(Ranged):
 
         collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
         collision_enemy.velocity[1]=-6
+
+    def release_texture(self):
+        pass
 
 class Arrow(Ranged):
     def __init__(self,entity):
@@ -2096,6 +2130,9 @@ class Arrow(Ranged):
 
         self.rect.center = (x, y)  # Put the new rect's center at old center.
 
+    def release_texture(self):
+        pass
+
 class Migawari():
     def __init__(self,entity):
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/migawari/',entity.game_objects)
@@ -2121,6 +2158,9 @@ class Migawari():
         self.level += 1
         if self.level == 2:
             self.health = 2
+
+    def release_texture(self):
+        pass
 
 class Slow_motion():
     def __init__(self,entity):
@@ -2149,6 +2189,9 @@ class Slow_motion():
         self.level += 1
 
     def reset_timer(self):
+        pass
+
+    def release_texture(self):
         pass
 
 #things player can pickup
@@ -2234,7 +2277,7 @@ class Spirit_container(Loot):
         self.kill()
 
 class Soul_essence(Loot):
-    def __init__(self,pos,game_objects,ID_key = None):
+    def __init__(self, pos, game_objects, ID_key = None):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/soul_essence/',game_objects)
         self.image = self.sprites['idle'][0]
@@ -2276,7 +2319,7 @@ class Enemy_drop(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.lifetime = 500
-        self.velocity = [random.uniform(-3, 3),-7]
+        self.velocity = [random.uniform(-3, 3),-3]
 
     def update(self):
         super().update()
@@ -2382,7 +2425,8 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.velocity = [random.uniform(0, 3),-4]
-        #add light?
+        self.hitbox = pygame.Rect(pos,(16,16))
+        self.light = game_objects.lights.add_light(self, radius = 50)
         self.twinkle()
 
     def twinkle(self, num = 3):
@@ -2395,7 +2439,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
     def interact(self):#when player press T
         self.game_objects.player.currentstate.enter_state('Pray_pre')
         self.pickup()
-        new_game_state = states.Blit_image_text(self.game_objects.game,self.sprites['idle'][0],self.description)
+        new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
         self.kill()
 
@@ -2403,7 +2447,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         super().kill()
         for twinkle in self.twinkles:
             twinkle.kill()
-        self.light.kill()
+        self.game_objects.lights.remove_light(self.light)
 
 class Tungsten(Interactable_item):#move omamori and infiinity stones to here a swell
     def __init__(self,pos, game_objects):
@@ -2634,11 +2678,11 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/soul/', game_objects)
-        self.currentstate = states_basic.Once(self)
+        self.currentstate = states_basic.Once(self,next_state = 'Idle',animation_name='idle')
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.timer=0
-        self.velocity=[0,0]
+        self.timer = 0
+        self.velocity = [0,0]
 
     def update(self):
         super().update()
@@ -2651,8 +2695,10 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
 
     def update_pos(self):
         self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]
+        self.rect.topleft = self.true_pos
 
     def reset_timer(self):
+        super().reset_timer()
         self.currentstate.handle_input('Idle')
 
 class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
@@ -2702,7 +2748,7 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/thunder_aura/',game_objects)
-        self.currentstate = states_basic.Once(self)#
+        self.currentstate = states_basic.Once(self,next_state = 'Idle',animation_name='idle')#
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
@@ -2718,6 +2764,7 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
         self.hitbox[3]=min(self.hitbox[3],self.rect[3])
 
     def reset_timer(self):#called when animation is finished
+        super().reset_timer()
         self.currentstate.handle_input('Idle')
 
 class Pray_effect(Animatedentity):#the thing when aila pray
@@ -3028,11 +3075,11 @@ class Cocoon(Interactable):#larv cocoon in light forest
         self.timer_jobs['invincibility'].activate()
 
         if self.health > 0:
-            self.currentstate.handle_input('Once', animation_name = 'hurt',next_state = 'Idle')
+            self.currentstate.handle_input('Once', animation_name = 'hurt', next_state = 'Idle')
             #self.shader_state.handle_input('Hurt')#turn white
         else:#death
             self.invincibile = True
-            self.currentstate.handle_input('Once', animation_name = 'interact',next_state = 'Interacted')
+            self.currentstate.handle_input('Once', animation_name = 'interact', next_state = 'Interacted')
             self.game_objects.enemies.add(Maggot(self.rect.center,self.game_objects))
 
     def update_timers(self):

@@ -15,13 +15,13 @@ class Collisions():
         offset = 1/self.game_objects.game.dt#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
         hitbox.bottom += offset
 
+        ramp = None
         for ramp in self.game_objects.platforms_ramps.sprites():
             if hitbox.colliderect(ramp.hitbox): break                               
-            ramp = None
- 
-        for platform in self.game_objects.platforms.sprites():
-            if hitbox.colliderect(platform.hitbox): break
-            platform = None
+            
+       # for platform in self.game_objects.platforms.sprites():
+        #    if hitbox.colliderect(platform.hitbox): break
+         #   platform = None
 
    #     if platform:
     #        if ramp:

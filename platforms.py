@@ -8,7 +8,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
-        self.hitbox = self.rect.inflate(0,0)
+        self.hitbox = self.rect.copy()
 
     def reset_timer(self):#aniamtion need it
         self.currentstate.increase_phase()
@@ -51,7 +51,7 @@ class Collision_block(Platform):
         entity.update_rect_y()
 
 class Gate(Platform):#a gate that is owned by the lever
-    def __init__(self, pos, game_objects, ID_key):
+    def __init__(self, pos, game_objects, ID_key = None):
         super().__init__(pos)
         self.game_objects = game_objects
         self.dir = [1,0]
@@ -180,6 +180,7 @@ class Collision_right_angle(Platform):#ramp
             rel_x = entity.hitbox.right - self.hitbox.left
         elif self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
+        else: return 0
         return -rel_x*self.ratio + self.hitbox.bottom
 
     def collide(self,entity):#called in collisions

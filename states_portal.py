@@ -20,7 +20,7 @@ class Spawn(Basic_states):
     def update(self):
         self.entity.radius += self.entity.game_objects.game.dt*0.001    
         self.entity.thickness += 2*self.entity.game_objects.game.dt*0.001   
-        self.entity.thickness = min(self.entity.thickness,0.2)              
+        self.entity.thickness = min(self.entity.thickness,0.1)              
         if self.entity.radius >= 0.1:
             self.enter_state('Idle')
         self.entity.radius = min(self.entity.radius,0.1)              
