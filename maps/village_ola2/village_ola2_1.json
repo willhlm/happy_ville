@@ -1904,6 +1904,29 @@
                  "visible":true,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":62,
+                 "name":"interactables",
+                 "objects":[
+                        {
+                         "gid":60579,
+                         "height":48,
+                         "id":142,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":591,
+                         "y":495
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg1",
          "opacity":1,
@@ -2002,8 +2025,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":62,
- "nextobjectid":142,
+ "nextlayerid":63,
+ "nextobjectid":143,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
@@ -2285,6 +2308,10 @@
          "tilecount":324,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":60574,
+         "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
  "type":"map",

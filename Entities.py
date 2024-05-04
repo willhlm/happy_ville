@@ -1931,7 +1931,6 @@ class Thunder(Ranged):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Thunder/',entity.game_objects)
-        print(self.sprites)
         self.currentstate = states_basic.Death(self)#
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
