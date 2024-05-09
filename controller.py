@@ -70,7 +70,7 @@ class Controller():
 
     def keybord(self,event):
         if event.type == pygame.KEYDOWN:
-            self.keydown=True
+            self.keydown = True
             self.key = self.keyboard_map.get(event.key, '')
 
             if self.key=='right':
@@ -83,7 +83,7 @@ class Controller():
                 self.value['l_stick'][1]=1
 
         elif event.type == pygame.KEYUP:#lift bottom
-            self.keyup=True
+            self.keyup = True
             self.key = self.keyboard_map.get(event.key, '')
 
             if self.key=='right':

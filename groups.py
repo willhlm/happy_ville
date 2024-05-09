@@ -8,7 +8,7 @@ class Group(pygame.sprite.Group):#normal
         for spr in self.sprites():
             spr.draw(target)
 
-    def empty(self):
+    def empty(self):    
         for spr in self.sprites():
             spr.release_texture()   
         super().empty()
