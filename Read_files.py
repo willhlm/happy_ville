@@ -95,11 +95,13 @@ def load_sounds_dict(base_path):#returns a dict with "stae" as key, the sound fi
 
 def load_sounds_list(path_to_folder):
     #use this to load multiple sprites in a path_to_folder
+    list_of_sounds = []
     for f in listdir(path_to_folder):
         if not isfile(join(path_to_folder, f)): continue#skip the folders
         if '.DS_Store' in join(path_to_folder, f): continue#skip this file
         if '.gitkeep' in join(path_to_folder, f): continue#skip this file
-        return load_single_sfx(join(path_to_folder, f))
+        list_of_sounds.append(load_single_sfx(join(path_to_folder, f)))
+    return list_of_sounds
 
 def load_single_sfx(path):
     return pygame.mixer.Sound(path)

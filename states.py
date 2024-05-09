@@ -106,7 +106,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self, 'village_ola2_1', '1')
+            self.game.game_objects.load_map(self,'village_ola2_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -336,7 +336,7 @@ class Option_Menu(Game_State):
 
 class Gameplay(Game_State):
     def __init__(self,game):
-        super().__init__(game)        
+        super().__init__(game)
 
     def update(self):
         self.game.game_objects.update()
@@ -344,7 +344,7 @@ class Gameplay(Game_State):
         self.game.game_objects.UI['gameplay'].update()
 
     def render(self):
-        self.game.game_objects.render_state.render()#handles normal and portal rendering        
+        self.game.game_objects.render_state.render()#handles normal and portal rendering
         self.game.game_objects.UI['gameplay'].render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
@@ -372,7 +372,7 @@ class Gameplay(Game_State):
             elif input[-1] == 'select':
                 new_state = Select_menu(self.game)
                 new_state.enter_state()
-            
+
             elif input[-1] == 'down':
                 self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
@@ -550,6 +550,7 @@ class Ability_menu(Gameplay):#when pressing tab
         self.sprites = Read_files.load_sprites_list('Sprites/UI/ability_HUD/',game.game_objects)#TODO
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
         self.surface = self.game.display.make_layer(self.game.window_size)#TODO
+        print(self.sprites)
 
     def update(self):
         self.game.dt *= 0.5#slow motion
@@ -588,7 +589,7 @@ class Fadein(Gameplay):
         super().__init__(game)
         self.count = 0
         self.fade_length = 20
-        self.init()        
+        self.init()
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
         self.fade_surface.clear(0,0,0,255)
 
@@ -598,7 +599,7 @@ class Fadein(Gameplay):
             if 'Death' == type(state).__name__:
                 self.aila_state = 'Invisible_main'
                 self.game.game_objects.player.currentstate.enter_state('Invisible_main')
-                break        
+                break
 
     def update(self):
         self.game.game_objects.update()
@@ -794,7 +795,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
         self.render_fade = [self.render_in, self.render_out]
 
         self.image = game.display.make_layer(img.size)#TODO
-        self.game.display.render(img, self.image)#make a copy of the image   
+        self.game.display.render(img, self.image)#make a copy of the image
         self.text = self.game.game_objects.font.render((140,80), text)
 
         self.game.game_objects.player.reset_movement()
@@ -811,9 +812,9 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
 
         self.surface.clear(40, 40, 40, self.fade[0])
 
-        self.game.display.render(self.surface.texture, self.game.screen)        
+        self.game.display.render(self.surface.texture, self.game.screen)
         self.game.display.render(self.image.texture, self.game.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
-        self.game.display.render(self.text, self.game.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])        
+        self.game.display.render(self.text, self.game.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])
 
     def render_in(self):
         self.fade[0] += 1
@@ -837,7 +838,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
                 self.page = 1
             elif input[-1] == 'a':
                 self.page = 1
-  
+
 #encountters and corresponding cutscenes
 class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
     def __init__(self,game):
@@ -862,7 +863,7 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
         self.pos[0] = min(-self.game.window_size[1]*self.const[0], self.pos[0])
         self.pos[1] = max(self.game.window_size[1]*self.const[1], self.pos[1])
 
-        self.game.display.render(self.rect1.texture, self.game.screen, position = [0,self.pos[0]])        
+        self.game.display.render(self.rect1.texture, self.game.screen, position = [0,self.pos[0]])
         self.game.display.render(self.rect2.texture, self.game.screen, position = [0,self.pos[1]])
 
     def handle_events(self,input):
@@ -953,7 +954,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
                 self.entity.dir[0] *= -1
 
         elif self.stage ==1:
-            if self.timer > 100:                
+            if self.timer > 100:
                 self.entity.velocity[0] = 5
 
         if self.timer>200:
@@ -1221,4 +1222,4 @@ class Butterfly_encounter_gameplay(Gameplay):#if aggro path is chosen: and shoul
             new_game_state = Pause_gameplay(self.game,duration=duration)
             new_game_state.enter_state()
         elif input == 'death':#normal death
-            self.game.game_objects.player.death()                    
+            self.game.game_objects.player.death()

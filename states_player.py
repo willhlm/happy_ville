@@ -1,4 +1,4 @@
-import sound, Entities, sys
+import sound, Entities, sys, random
 from states_entity import Entity_States
 import constants as C
 
@@ -172,15 +172,26 @@ class Run_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.particle_timer = 0
+        self.sfx_loop_time = 36
+        self.sfx_timer = 1
 
     def update(self):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
+
+        self.sfx_timer -= 1
+        if self.sfx_timer == 0:
+            self.entity.game_objects.sound.play_sfx(self.entity.sounds['run'][0], vol = 0.8)
+            self.sfx_timer = self.sfx_loop_time
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_run_pre')
+
+    def enter_state(self, new_state):
+        #self.sfx_channel.stop()
+        super().enter_state(new_state)
+
 
     def running_particles(self):
         particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)

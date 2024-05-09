@@ -212,10 +212,10 @@ class Light_source(Layered_objects):#works for parallax = 1. Not sure how we wou
         self.group_distance()
 
     def draw(self, target):
-        pass   
+        pass
 
     def release_texture(self):
-        pass        
+        pass
 
 #thigns that move in parallax
 class Dynamic_layered_objects(Layered_objects):
