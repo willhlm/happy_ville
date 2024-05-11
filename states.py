@@ -106,8 +106,9 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            self.game.game_objects.load_map(self,'light_forest_cave_1','1')
+            self.game.game_objects.load_map(self,'village_ola2_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_11','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -383,6 +384,9 @@ class Gameplay(Game_State):
                 #self.game.game_objects.player.omamoris.handle_input(input)
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
+
+        elif input[2]['l_stick'][1] > 0.85:
+            self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
     def handle_input(self,input,**kwarg):
         if input == 'dmg':

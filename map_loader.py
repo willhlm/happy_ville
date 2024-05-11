@@ -693,7 +693,7 @@ class Light_forest_cave(Biome):
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
-        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)
+        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,255/255)
 
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:

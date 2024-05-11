@@ -123,37 +123,49 @@ class Controller():
             self.key=self.buttons[str(event.button)]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
-
+            print(event)
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value['l_stick'][0] = event.value
+                if abs(event.value) < 0.1:
+                    self.value['l_stick'][0] = 0
 
             if event.axis==self.analogs['lv']:#left vertical
-                self.value['l_stick'][1] = event.value 
+                self.value['l_stick'][1] = event.value
+                #if abs(event.value) < 0.1:
+                #    self.value['l_stick'][1] = 0
 
-            self.controller_angle('l_stick')       
+            self.controller_angle('l_stick')
 
             if event.axis==self.analogs['rh']:#right horizontal
                 self.value['r_stick'][0] = event.value
 
             if event.axis==self.analogs['rv']:#right vertical
                 self.value['r_stick'][1] = event.value
-            
-            self.controller_angle('r_stick')       
+
+            #self.controller_angle('r_stick')
 
         if event.type == pygame.JOYHATMOTION:
             self.keydown = True
             self.value['d_pad'] = [event.value[0],event.value[1]]
 
     def output(self):
+        #print(self.value)
         return [self.keydown, self.keyup, self.value, self.key]
 
     def controller_angle(self,stick):#limit the inputs depending on the angle
-        x, y = self.value[stick]        
-        angle = 180 * math.atan(y/x)/3.141592
-        
-        if y > 0:#pointing vertical
-            if angle > 80:
-                self.value[stick][0] = 0
-        else:#poiting horizongal
-            if angle < 10:
+
+        x, y = self.value[stick]
+        if abs(x) > 1:
+            x = math.copysign(1, x)
+        if abs(y) > 1:
+            y = math.copysign(1, y)
+
+
+        #print(x,y)
+        if x == 0:
+            return
+        else:
+            angle = 180 * math.atan(abs(y)/abs(x))/3.141592
+            #print(angle)
+            if angle < 45:
                 self.value[stick][1] = 0
