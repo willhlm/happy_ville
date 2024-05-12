@@ -96,6 +96,9 @@ class Omamori(Animatedentity):#this will save the positions needed to the UI
         self.rect.topleft = pos
         self.description = ''
 
+    def render_UI(self, target):
+        pass
+
 #ability spirit upgrade UI
 class Abilities(Animatedentity):
     def __init__(self,pos,game_objects):
@@ -210,7 +213,6 @@ class Menu_Arrow():
     def __init__(self,game_objects):
         img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
         self.rect = img.get_rect()
-        img.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         self.image = game_objects.game.display.surface_to_texture(img)
 
     #note: sets pos to input, doesn't update with an increment of pos like other entities

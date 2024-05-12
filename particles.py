@@ -1,4 +1,5 @@
-import pygame, math, random, states_particles
+import pygame, math, random
+import states_particles, animation, Read_files
 
 class Particles(pygame.sprite.Sprite):
     def __init__(self, pos, game_objects, **kwarg):
@@ -17,17 +18,17 @@ class Particles(pygame.sprite.Sprite):
         self.angle = -(2*math.pi*angle)/360
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
         motion = list(vel.keys())[0]#linear moetion or wave motion
-        self.update_velocity = {'linear':self.linear,'wave':self.wave}[motion]
+        self.set_velocity = {'linear':self.linear,'wave':self.wave}[motion]
         amp = random.uniform(min(vel[motion][0],vel[motion][1]), max(vel[motion][0],vel[motion][1]))
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
         state = kwarg.get('state', 'Idle')
-        self.state = getattr(states_particles, state)(self)
+        self.currentstate = getattr(states_particles, state)(self)
 
     def update(self):
         self.update_pos()
         self.lifetime -= self.game_objects.game.dt
-        self.state.update()
+        self.currentstate.update()
 
     def update_pos(self):
         self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
@@ -71,6 +72,7 @@ class Particles(pygame.sprite.Sprite):
     def release_texture(self):
         pass
 
+#shader particles: use a shader to draw them
 class Circle(Particles):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
@@ -157,3 +159,84 @@ class Spark(Particles):#a general one
 
     def pool(game_objects):#save the stuff in memory for later use
         Spark.image = game_objects.game.display.make_layer((50,50)).texture
+
+#texture particles: use a texture as a reference
+class Floaty_particles(Particles):#particles with a texture
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+        self.animation = animation.Animation(self, framerate = 0.7)
+        self.sprites = Floaty_particles.sprites
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.rect.center = self.true_pos
+        self.hitbox = self.rect.copy()
+        self.shader = self.game_objects.shaders['particles_configure']
+
+        random_value = random.uniform(0.7,1)   
+        self.colour1 = (0,0.5*random_value,1*random_value,1)#main colour
+        self.colour2 = (1,1,1,1)#seond
+        self.colour3 = (1,0,0,1)#third9
+
+    def update(self):        
+        self.animation.update()
+        self.update_pos()
+        self.update_velocity()
+
+    def update_uniforms(self):
+        self.shader['colour1'] = self.colour1
+        self.shader['colour2'] = self.colour2
+        self.shader['colour3'] = self.colour3
+        self.shader['normalised_frame'] = self.animation.frame/len(self.sprites['idle'])
+
+    def draw(self, target):#his called just before the draw
+        self.update_uniforms()
+        super().draw(target)
+
+    def reset_timer(self):#when animation is finished
+        self.kill() 
+
+    def update_velocity(self):  
+        self.velocity[1] -= self.game_objects.game.dt*0.01
+
+    def pool(game_objects):#save the stuff in memory for later use
+        Floaty_particles.sprites = Read_files.load_sprites_dict('Sprites/GFX/particles/floaty/', game_objects)
+
+class Offset(Particles):#not implemented fully -> need angular motion
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+        self.sprites = Offset.sprites
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.rect.center = self.true_pos
+        self.hitbox = self.rect.copy()
+        self.shader = self.game_objects.shaders['particles_configure']        
+
+        random_value = random.uniform(0.7,1)   
+        self.colour1 = (0,0.5*random_value,1*random_value,1)#main colour
+        self.colour2 = (1,1,1,1)#seond
+        self.colour3 = (1,0,0,1)#third9
+
+        self.time = 0
+
+    def update(self):        
+        self.update_pos()
+        self.update_velocity()
+        self.destroy()
+        self.time += self.game_objects.game.dt
+        self.lifetime -= self.game_objects.game.dt
+
+    def update_uniforms(self):
+        self.shader['colour1'] = self.colour1
+        self.shader['colour2'] = self.colour2
+        self.shader['colour3'] = self.colour3
+        self.shader['normalised_frame'] = self.animation.frame/len(self.sprites['idle'])
+
+    def draw(self, target):#his called just before the draw
+        self.update_uniforms()
+        super().draw(target)    
+
+    def update_velocity(self):  
+        self.velocity  = [math.sin(self.time*0.1),math.sin(self.time*0.1)-0.5]
+
+    def pool(game_objects):#save the stuff in memory for later use
+        Offset.sprites = Read_files.load_sprites_dict('Sprites/GFX/particles/offset/', game_objects)

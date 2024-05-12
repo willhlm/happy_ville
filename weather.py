@@ -189,6 +189,11 @@ class Ominous_circles(Vertical_circles):
         super().__init__(game_objects, parallax, number_particles)
         self.shader['colour'] = (100, 30, 30, 255)
 
+class  Moss_circles(Vertical_circles):
+    def __init__(self, game_objects, parallax, number_particles):
+        super().__init__(game_objects, parallax, number_particles)
+        self.shader['colour'] = (30, 100, 30, 255)
+
 class Fireflies(Vertical_circles):
     def __init__(self, game_objects, parallax, number_particles):
         super().__init__(game_objects, parallax, number_particles)

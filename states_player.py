@@ -568,7 +568,7 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
 
     def exit(self):
         if self.dash_length < 0:
@@ -865,7 +865,7 @@ class Sword(Player_states):#main phases shold inheret this
         self.entity.timer_jobs['sword'].activate()
         self.dir = self.entity.dir.copy()#animation direction
         self.entity.sword.dir = self.dir.copy()#sword direction
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 1)
         self.slash()
 
     def slash(self):#if we have green infinity stone

@@ -95,7 +95,6 @@ class Inventory(Select_menu):
             item.animation.update()
             self.game_objects.game.display.render(item.image, self.game_state.screen, position = item.rect.topleft)#shader render
             number = self.game_objects.font.render(text = str(item.number))
-            #number.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.game_objects.game.display.render(number, self.game_state.screen, position = item.rect.center)#shader render
             number.release()
 
@@ -113,14 +112,16 @@ class Inventory(Select_menu):
         self.conv = self.items[self.state.state_name][self.item_index[0]].description
         text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
         #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.game.display.render(text, self.game_state.screen, position = (420,150))#shader render
+        self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+        self.game_objects.game.display.render(text, self.game_state.screen, position = (420,150),shader = self.game_objects.shaders['colour'])#shader render
         text.release()
 
     def blit_bottons(self):
         for index, button in enumerate(self.iventory_UI.buttons.keys()):
             self.iventory_UI.buttons[button].update()
             self.game_objects.game.display.render(self.iventory_UI.buttons[button].image, self.game_state.screen, position = self.iventory_UI.buttons[button].rect.topleft)#shader render
-            self.game_objects.game.display.render(self.texts[index], self.game_state.screen, position = self.iventory_UI.buttons[button].rect.center)#shader render
+            self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+            self.game_objects.game.display.render(self.texts[index], self.game_state.screen, position = self.iventory_UI.buttons[button].rect.center,shader = self.game_objects.shaders['colour'])#shader render
 
     def handle_events(self,input):
         if input[0]:#press
@@ -158,20 +159,19 @@ class Omamori(Select_menu):
 
     def define_blit_positions(self):
         for index, key in enumerate(self.game_objects.player.omamoris.equipped):#the equiped ones
-            pos = self.omamori_UI.equipped[index].rect.center
+            pos = self.omamori_UI.equipped[index].rect.topleft
             self.game_objects.player.omamoris.equipped[key].set_pos(pos)
 
         omamori_dict = self.omamori_UI.inventory#copy all empty ones and then overwrite with the rellavant ones in inventory
         for index, key in enumerate(self.game_objects.player.omamoris.inventory):#the ones in inventory
-            pos = self.omamori_UI.inventory[key].rect.center
+            pos = self.omamori_UI.inventory[key].rect.topleft
             self.game_objects.player.omamoris.inventory[key].set_pos(pos)
             omamori_dict[key] = self.game_objects.player.omamoris.inventory[key]
         self.omamori_list = list(omamori_dict.values())
 
-    def define_pointer(self,size = [16,16]):#called everytime we move from one area to another
-        size = self.omamori_list[0].rect.size
-        self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(self.pointer,[200,50,50,255],(size[0]*0.5-8,size[1]*0.5+8,16,16),width=1,border_radius=5)
+    def define_pointer(self,size = [32,32]):#called everytime we move from one area to another
+        self.pointer = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
         self.pointer = self.game_objects.game.display.surface_to_texture(self.pointer)
 
     def render(self):
@@ -187,14 +187,15 @@ class Omamori(Select_menu):
 
     def blit_omamori_menu(self):
         for omamori in (list(self.game_objects.player.omamoris.equipped.values()) + self.omamori_list):#equipped ones
-            omamori.animation.update()
+            omamori.animation.update()#update the image
+            omamori.render_UI(self.game_state.screen)
             self.game_objects.game.display.render(omamori.image, self.game_state.screen, position = omamori.rect.topleft)
 
     def blit_description(self):
         self.conv = self.omamori_list[self.omamori_index].description
         text = self.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
-        #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.game.display.render(text, self.game_state.screen, position = (380,120))
+        self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+        self.game_objects.game.display.render(text, self.game_state.screen, position = (380,120), shader = self.game_objects.shaders['colour'])
         text.release()
 
     def blit_pointer(self):
@@ -238,7 +239,7 @@ class Omamori(Select_menu):
         self.game_objects.player.omamoris.equip_omamori(name)
 
         for index, omamori in enumerate(self.game_objects.player.omamoris.equipped.values()):#update the positions of the equiped ones
-            pos = self.omamori_UI.equipped[index].rect.center
+            pos = self.omamori_UI.equipped[index].rect.topleft
             omamori.set_pos(pos)
 
 class Journal(Select_menu):

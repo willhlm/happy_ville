@@ -651,8 +651,20 @@ class Light_forest(Biome):
                 self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.level.game_objects.interactables.add(new_cocoon)
 
-            elif id == 9:
-                pass
+            elif id == 9:#vines
+                new_viens = entities_parallax.Vines(object_position, self.level.game_objects, parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_viens)
+                else:
+                    self.level.game_objects.all_bgs.add(new_viens)                
+                
+            elif id == 10:#smalltree 1
+                new_viens = entities_parallax.Small_tree1(object_position, self.level.game_objects, parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_viens)
+                else:
+                    self.level.game_objects.all_bgs.add(new_viens)   
+
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):

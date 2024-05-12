@@ -1,6 +1,6 @@
 #version 330 core
 
-precision highp float;
+//precision highp float;
 
 in vec2 fragmentTexCoord;
 uniform sampler2D imageTexture;
@@ -14,6 +14,10 @@ uniform vec4 ambient;//texture(imageTexture, fragmentTexCoord); // Get backgroun
 uniform vec2 rectangleCorners[80]; // x/4 is the number of rectangles
 uniform int num_rectangle;
 uniform int num_lights;
+
+uniform float angleStart[20];   // Start angle of the cone for each light source
+uniform float angleEnd[20];     // End angle of the cone for each light source
+uniform float min_radius[20];     // End angle of the cone for each light source
 
 out vec4 color;
 
@@ -53,10 +57,20 @@ void main() {
     for (int l = 0; l < num_lights; l++) { // number of light sources
         vec2 lightPos = lightPositions[l];
         float lightRadius = lightRadii[l];
+        
+        float start = radians(angleStart[l]); // Define your start angle
+        float end = radians(angleEnd[l]); // Define your end angle
+
+        // Skip if fragment is outside the cone region
+        vec2 toLight = normalize(lightPos - fragmentTexCoord * resolution);
+        float angleToLight = atan(toLight.y, toLight.x)+3.141592;
+        if (angleToLight < start || angleToLight > end) {
+            continue;
+        }
 
         // Skip if fragment is too far away from light source
         float distanceToLight = calculateDistance(fragmentTexCoord * resolution, lightPos);
-        if (distanceToLight >= lightRadius) {
+        if (distanceToLight >= lightRadius || distanceToLight < min_radius[l]) {
             continue;
         }
 

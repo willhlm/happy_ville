@@ -20,13 +20,16 @@ class Lights():
         self.ambient = (0,0,0,0)
 
     def update(self):
-        self.points, self.positions, self.radius, self.colour = [], [], [], []
+        self.points, self.positions, self.radius, self.colour, self.start_angle, self.end_angle, self.min_radius = [], [], [], [], [], [], []
         for light in self.lights_sources:
             light.update()
             self.list_points(light)#sort the collisions points into a ligst
             self.positions.append((light.position[0],self.game_objects.game.window_size[1] - light.position[1]))#get te positions of the lights
             self.radius.append(light.radius)
             self.colour.append(light.colour)
+            self.start_angle.append(light.start_angle)
+            self.end_angle.append(light.end_angle)
+            self.min_radius.append(light.min_radius)
 
     def list_points(self, light):
         if not light.interact: return
@@ -46,12 +49,14 @@ class Lights():
     def add_light(self, target, **properties):
         light = Light(self.game_objects, target, **properties)
         self.lights_sources.append(light)
-        self.shaders['light']['num_lights'] = len(self.lights_sources)
+        self.shaders['light']['num_lights'] = len(self.lights_sources)    
+        self.shaders['light']['num_rectangle'] = 0#temp fix
         return light
 
     def remove_light(self, light):
         self.lights_sources.remove(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)
+        self.shaders['light']['num_rectangle'] = 0#temp fix
 
     def draw(self, target):
         self.shaders['light']['rectangleCorners'] = self.points
@@ -59,6 +64,9 @@ class Lights():
         self.shaders['light']['lightRadii'] = self.radius
         self.shaders['light']['colour'] = self.colour
         self.shaders['light']['ambient'] = self.ambient
+        self.shaders['light']['angleStart'] = self.start_angle
+        self.shaders['light']['angleEnd'] = self.end_angle
+        self.shaders['light']['min_radius'] = self.min_radius
 
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture
 
@@ -75,6 +83,9 @@ class Light():#light source
         self.radius = properties.get('radius',150)#colour
         self.colour = properties.get('colour',[1,1,1,1])#colour
         self.interact = properties.get('interact',False)#colour#if it should interact with platforms
+        self.start_angle = properties.get('start_angle',0)
+        self.end_angle = properties.get('end_angle', 360)
+        self.min_radius = properties.get('min_radius',0)
 
         self.target = target
 

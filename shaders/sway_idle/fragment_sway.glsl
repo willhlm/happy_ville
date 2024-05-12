@@ -5,10 +5,10 @@ uniform sampler2D imageTexture;// texture in location 0
 uniform float TIME;
 out vec4 COLOR;
 
-uniform float x_intensity = 3.0;
+uniform float x_intensity = 100.0;
 uniform float y_intensity = 0.5;
 uniform float offset = 0.0;
-uniform float speed = 2.0;
+uniform float speed = 0.05;
 uniform float wave_frequency  = 20;
 uniform float wave_length = 200.0;
 
@@ -35,7 +35,7 @@ void main() {
 	vec2 new_uv1 = vec2(new_x, new_y);
 	vec4 new_texture = texture(imageTexture, new_uv1);
 	
-	if(new_texture.rgb != vec3(1,1,1)){
+	//if(new_texture.rgb != vec3(1,1,1)){
 		COLOR.rgba = new_texture.rgba;
-	}
+	//}
 }

@@ -20,6 +20,7 @@ class Basic_states():
 class Idle(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
+        self.next_state = kwarg.get('next_state')
 
     def update(self):
         target = self.entity.game_objects.map.PLAYER_CENTER[1]
@@ -28,7 +29,10 @@ class Idle(Basic_states):
             self.entity.game_objects.camera.center[1] = max(target, self.entity.game_objects.camera.center[1])
         else:#camera is above
             self.entity.game_objects.camera.center[1] += self.entity.game_objects.game.dt
-            self.entity.game_objects.camera.center[1] = min(target, self.entity.game_objects.camera.center[1])              
+            self.entity.game_objects.camera.center[1] = min(target, self.entity.game_objects.camera.center[1])  
+
+        if self.entity.game_objects.camera.center[1] == target:
+            self.enter_state(self.next_state)         
 
 class Idle_right(Basic_states):
     def __init__(self,entity,**kwarg):
@@ -85,14 +89,6 @@ class Idle_bottom(Basic_states):
 
     def update(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]                                   
-
-        target = self.entity.game_objects.map.PLAYER_CENTER[1]
-        if self.entity.game_objects.camera.center[1]-target > 0:#camera is below
-            self.entity.game_objects.camera.center[1] -= self.entity.game_objects.game.dt
-            self.entity.game_objects.camera.center[1] = max(target, self.entity.game_objects.camera.center[1])
-        else:#camera is above
-            self.entity.game_objects.camera.center[1] += self.entity.game_objects.game.dt
-            self.entity.game_objects.camera.center[1] = min(target, self.entity.game_objects.camera.center[1])           
         if distance[1] < -self.entity.offset*16: return
 
         if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:#if on screen on y and coser than half screen on x
@@ -126,7 +122,7 @@ class Stop_bottom(Basic_states):
             #self.center[1] -= self.sign*3#self.sign*(abs(self.entity.game_objects.camera.center[1]-target))*0.1
             self.entity.game_objects.camera.center[1] = self.sign*max(self.sign*target,self.sign*self.center[1])#when sign is negative, it works as min
         else:
-            self.enter_state('Idle_bottom')
+            self.enter_state('Idle',next_state='Idle_bottom')
 
 class Idle_top(Basic_states):
     def __init__(self,entity,**kwarg):

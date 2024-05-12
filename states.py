@@ -84,7 +84,6 @@ class Title_Menu(Game_State):
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
 
     def handle_events(self, event):
-        #print(event)
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -106,7 +105,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'village_ola2_1','1')
+            self.game.game_objects.load_map(self,'light_forest_6','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -204,7 +203,7 @@ class Start_Option_Menu(Game_State):
         self.game_objects = game.game_objects
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
-        self.sprites = {'idle': Read_files.load_sprites_list('Sprites/UI/load_screen/new_game')}
+        self.sprites = {'idle': Read_files.load_sprites_list('Sprites/UI/load_screen/new_game',self.game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
 
@@ -352,7 +351,8 @@ class Gameplay(Game_State):
     def blit_fps(self):
         fps_string = str(int(self.game.clock.get_fps()))
         image = self.game.game_objects.font.render((30,12),'fps ' + fps_string)
-        self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-40,20))#shader render
+        self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+        self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-40,20),shader = self.game.game_objects.shaders['colour'])#shader render
         image.release()
 
     def handle_events(self, input):
@@ -726,7 +726,7 @@ class Conversation(Gameplay):
 class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
     def __init__(self, game):
         super().__init__(game)
-        self.screen = self.game.display.make_layer(self.game.window_size)#make a layer ("surface") -> need to save in memory somwehere
+        self.screen = self.game.display.make_layer(self.game.window_size)#TODO
         self.shader = game.game_objects.shaders['alpha']
         self.state = getattr(UI_select_menu, 'Inventory')(self)#should it alway go to inventory be default?
 

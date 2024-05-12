@@ -59,6 +59,7 @@ class Trees(Layered_objects):
         self.game_objects.all_bgs._spritelist.insert(self.index,obj)
         obj.add_internal(self.game_objects.all_bgs)
 
+#light forest
 class Light_forest_tree1(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
@@ -97,6 +98,73 @@ class Light_forest_tree2(Trees):
     def release_texture(self):
         pass
 
+class Cocoon(Layered_objects):#larv cocoon in light forest
+    animations = {}
+    def __init__(self, pos, game_objects,parallax):
+        super().__init__(pos, game_objects,parallax)
+        self.init_sprites('Sprites/animations/cocoon/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+
+    def release_texture(self):
+        pass
+
+class Vines(Layered_objects):
+    animations = {}
+    def __init__(self, pos, game_objects,parallax):
+        super().__init__(pos, game_objects,parallax)
+        self.init_sprites('Sprites/animations/vines/light_forest/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+        self.shader = game_objects.shaders['sway_wind']
+        self.time = 0
+        self.offset = random.uniform(0,10)
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+        self.group_distance()
+
+    def draw(self,target):
+        self.shader['TIME'] = self.time
+        self.shader['offset'] = self.offset
+        self.shader['upsidedown'] = 1
+        super().draw(target)
+
+    def release_texture(self):
+        pass
+
+class Small_tree1(Layered_objects):
+    animations = {}
+    def __init__(self, pos, game_objects,parallax):
+        super().__init__(pos, game_objects,parallax)
+        self.init_sprites('Sprites/animations/bushes/small_tree1/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+        self.time = 0
+
+        self.shader = game_objects.shaders['sway_wind']
+        self.offset = random.uniform(0,10)
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+        self.group_distance()
+
+    def draw(self,target):
+        self.shader['TIME'] = self.time
+        self.shader['offset'] = self.offset
+        self.shader['upsidedown'] = 0
+        super().draw(target)
+
+    def release_texture(self):
+        pass        
+
+#lightf orest cave
 class Ljusmaskar(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
@@ -125,19 +193,6 @@ class Cave_grass(Layered_objects):
 
     def group_distance(self):
         pass
-
-    def release_texture(self):
-        pass
-
-class Cocoon(Layered_objects):#larv cocoon in light forest
-    animations = {}
-    def __init__(self, pos, game_objects,parallax):
-        super().__init__(pos, game_objects,parallax)
-        self.init_sprites('Sprites/animations/cocoon/')#blur or lead from memory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.true_pos = self.rect.topleft
 
     def release_texture(self):
         pass

@@ -19,11 +19,11 @@ uniform vec2 refraction_stretch = vec2(2.0, 0.8);
 uniform float refraction_strength = 0.02;
 
 uniform vec4 water_tint  = vec4(0.30, 0.45, 0.41, 0.8);
-uniform vec4 water_highlight= vec4(0.38, 0.572, 0.52, 0.8);
+uniform vec4 water_highlight1= vec4(0.38, 0.572, 0.52, 0.8);
 uniform vec4 water_highlight2= vec4(0.53,0.70,0.682, 0.8);
 uniform vec4 water_highlight3= vec4(0.76,0.85,0.909, 0.8);
 
-uniform float speed = -2.0;
+uniform float speed = -1;
 uniform float flow_gaps = 0;
 uniform float highlight_width = 0.1;
 uniform vec2 u_resolution = vec2(640, 360);
@@ -48,22 +48,21 @@ void main()
 	//can remove the flixking by removing + refraction_offset * refraction_strength * zoom
 	
 	// Use the grayscale value of the color to adjust the speed
-	float adjustedSpeed = 0.1*speed/(gap_mask.x); // Adjust the speed based on the grayscale value
+	float adjustedSpeed = 0.5/(pow(gap_mask.x,0.2)); // Adjust the speed based on the grayscale value
 	// Apply the adjusted speed to the gap_mask offset
-	gap_mask = texture(water_mask, vec2(UV.x, UV.y + -TIME * adjustedSpeed) * scale * gap_stretch).xy;
+	gap_mask = texture(water_mask, vec2(UV.x, UV.y + TIME * adjustedSpeed) * scale * gap_stretch).xy;
 	
+
 	// Create holes and apply colors and textures //	
 	vec4 color = vec4(1,1,1,1);
 	
 	// Define what values will be the water highlight color (the gap border)
 	float inner_edge = 1 * (flow_gaps + highlight_width);
 	
-	// See if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
-
     // Check if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
 	if (gap_mask.x < 0.2*inner_edge)
     {
-        color.rgb = mix(refraction.rgb, water_highlight.rgb, water_highlight.a);
+        color.rgb = mix(refraction.rgb, water_highlight1.rgb, water_highlight1.a);
     }
     else if (gap_mask.x < 0.7*inner_edge ) // Example condition for using water_highlight2
     {
@@ -90,8 +89,8 @@ void main()
 	color.a = mix(0.0, color.a, step(UV.x + vertical_edge_mask.x * 0.2, 0.92)); // Right edge
 	color.a = mix(color.a, 0.0, step(UV.x - vertical_edge_mask.x * 0.2, 0.08)); // Left edge
 	
-	color.a = mix(0.0, color.a, step(UV.y + water_edge.y * 0.1, 0.95));  //Bottom edge
-	color.a = mix(color.a, 0.0, step(UV.y - water_edge.y * 0.05, 0.05)); //Top edge
+	color.a = mix(0.0, color.a, step(UV.y + water_edge.y * 0.03, 0.95));  //top edge
+	color.a = mix(color.a, 0.0, step(UV.y - water_edge.y * 0.05, 0.05)); // ottom edge
 	
 	// Calculate brightness adjustment based on y-coordinate    
 	vec3 adjustedColor = color.rgb /pow(1-fragmentTexCoord.y,0.4);
