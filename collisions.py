@@ -17,19 +17,9 @@ class Collisions():
 
         ramp = None
         for ramps in self.game_objects.platforms_ramps.sprites():
-            if hitbox.colliderect(ramps.hitbox):
+            if hitbox.colliderect(ramps.hitbox): 
                 ramp = ramps
-                break                               
-
-       # for platform in self.game_objects.platforms.sprites():
-        #    if hitbox.colliderect(platform.hitbox): break
-         #   platform = None
-
-   #     if platform:
-    #        if ramp:
-     #           if self.game_objects.player.hitbox.bottom < platform.hitbox.top:
-      #              self.game_objects.player.velocity[1] = 1/self.game_objects.game.dt#so that it looks more natural (cannot be 0, needs to be finite)
-       #     self.game_objects.player.go_through = platform.go_through#a flag that determines if one can go through
+                break
 
         if ramp:
             target = ramp.get_target(self.game_objects.player)#in case there are multiple enteties, need to calcuate the tyarget specifically for the playter

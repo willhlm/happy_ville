@@ -253,7 +253,7 @@ class Bubble_gate(Staticentity):#a shader to make bubble barrier
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.game_objects.shaders['bubbles'])#int seem nicer than round
 
     def release_texture(self):#called when .kill() and empty group
-        self.image.release_texture()
+        self.image.release()
 
 class Beam(Staticentity):
     def __init__(self, pos, game_objects, paralax, size):
@@ -667,7 +667,7 @@ class Player(Character):
         super().update()
         self.shader_state.update()
         self.omamoris.update()
-
+        
     def draw(self, target):#called in group
         self.shader_state.draw()
         pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]))
