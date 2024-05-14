@@ -7,8 +7,11 @@ class Camera():
         self.scroll = self.true_scroll.copy()
         self.center = [game_objects.map.PLAYER_CENTER[0]-game_objects.player.rect[2]*0.5,game_objects.map.PLAYER_CENTER[1]-game_objects.player.rect[3]*0.5]
         self.original_center = self.center.copy()
+        self.stop_handeler = Stop_handeler(self)
 
     def update(self):
+        self.stop_handeler.update()#centeralised sometimes the camera, if there is no more camera stops left
+
         self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
         self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
         self.scroll = self.true_scroll.copy()
@@ -52,6 +55,59 @@ class Camera_shake(Camera):
     def exit_state(self):#go back to the cameera
         if self.duration < 0:
             self.set_camera('Camera')
+
+class Stop_handeler():#depending on active camera stops, the re centeralisation can be called
+    def __init__(self, camera):
+        self.camera = camera
+        self.stops = {'bottom':0,'top':0,'left':0,'right':0,'center':0}#counds number of active stops, setted in camera stop states
+        self.updates = []
+
+    def update(self):#called from camera, in case the camera needs to be re centeralised
+        for update in self.updates:
+            update()
+
+    def add_stop(self,stop):#called from camera stop states
+        self.stops[stop] += 1
+
+        if stop == 'bottom' or stop == 'top':
+            if self.recenteralise_vertical in self.updates:
+              self.updates.remove(self.recenteralise_vertical)
+   
+        elif stop =='right' or stop =='left':
+            if self.recenteralise_horizontal in self.updates:
+                self.updates.remove(self.recenteralise_horizontal)
+     
+    def remove_stop(self,stop):#called from camera stop states
+        self.stops[stop] -= 1
+
+        if self.stops['bottom'] == 0 and self.stops['top'] == 0:
+            self.updates.append(self.recenteralise_vertical)
+        elif self.stops['left'] == 0 and self.stops['right'] == 0:
+            self.updates.append(self.recenteralise_horizontal)
+
+    def recenteralise_horizontal(self):
+        target = self.camera.game_objects.map.PLAYER_CENTER[0]
+        if self.camera.center[0]-target > 0:#camera is below
+            self.camera.center[0] -= self.camera.game_objects.game.dt*2
+            self.camera.center[0] = max(target, self.camera.center[0])
+        else:#camera is above
+            self.camera.center[0] += self.camera.game_objects.game.dt*2
+            self.camera.center[0] = min(target, self.camera.center[0])  
+
+        if self.camera.center[0] == target:#if finished
+            self.updates.remove(self.recenteralise_horizontal)   
+
+    def recenteralise_vertical(self):                
+        target = self.camera.game_objects.map.PLAYER_CENTER[1]
+        if self.camera.center[1]-target > 0:#camera is below
+            self.camera.center[1] -= self.camera.game_objects.game.dt*2
+            self.camera.center[1] = max(target, self.camera.center[1])
+        else:#camera is above
+            self.camera.center[1] += self.camera.game_objects.game.dt*2
+            self.camera.center[1] = min(target, self.camera.center[1])  
+
+        if self.camera.center[1] == target:#if finished
+            self.updates.remove(self.recenteralise_vertical)   
 
 #cutscene cameras
 class Cutscenes(Camera):
