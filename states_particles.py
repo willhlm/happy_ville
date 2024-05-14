@@ -22,7 +22,7 @@ class Idle(Basic_states):#the normal particles
         super().__init__(entity)
 
     def update(self):
-        self.entity.update_velocity()
+        self.entity.set_velocity()
         self.entity.fading()
         self.entity.destroy()
 

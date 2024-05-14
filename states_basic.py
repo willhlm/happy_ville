@@ -11,7 +11,7 @@ class Basic_states(Entity_States):
     def increase_phase(self):#called when animation is finished in reset_timer
         pass
 
-    def handle_input(self,input):
+    def handle_input(self,input,**kwarg):
         pass
 
 class Idle(Basic_states):

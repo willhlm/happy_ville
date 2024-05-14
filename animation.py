@@ -1,11 +1,11 @@
 import constants as C
 
 class Animation():
-    def __init__(self, entity):
+    def __init__(self, entity, **kwarg):
         self.entity = entity
         self.entity.slow_motion = 1#this value can be changed for player so that it counterasct teh slow motinos
         self.entity.state = 'idle'#default animation state
-        self.framerate = C.animation_framerate
+        self.framerate = kwarg.get('framerate', C.animation_framerate)
         self.frame = 0
 
     def reset_timer(self):

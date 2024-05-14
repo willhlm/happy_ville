@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import Read_files, particles, animation, sound, dialogue, states
+import Read_files, particles, animation, sound, dialogue, states, groups
 import states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
 import constants as C
@@ -332,7 +332,7 @@ class Waterfall(Staticentity):
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
         self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.game_objects.shaders['noise_perlin']['scale'] = [70,70]
+        self.game_objects.shaders['noise_perlin']['scale'] = [70,20]
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy)#make a copy of the screen
@@ -570,7 +570,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[1] = -dir[1]*10
 
     def hurt_particles(self,distance=0,lifetime=40,vel={'linear':[7,15]},type='Circle',dir='isotropic',scale=3,colour=[255,255,255,255],number_particles=20,state = 'Idle'):
-        for i in range(0,number_particles):
+        for i in range(0,number_particles):            
             obj1 = getattr(particles, type)(self.hitbox.center,self.game_objects,distance = distance,lifetime = lifetime,vel = vel,dir = dir,scale = scale,colour = colour,state = state)
             self.game_objects.cosmetics.add(obj1)
 
@@ -582,7 +582,6 @@ class Player(Character):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/aila/')
-        print(self.sounds)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/aila/', game_objects)
         self.image = self.sprites['idle_main'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -591,7 +590,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 3
+        self.health = 7
         self.spirit = 2
         self.projectiles = game_objects.fprojectiles
         self.sword = Aila_sword(self)
@@ -633,7 +632,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white
             self.shader_state.handle_input('Invincibile')#blink a bit
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.hurt_particles(lifetime = 40, vel = {'linear':[3,8]}, colour=[0,0,0,255], scale=3, number_particles=60)
+            self.hurt_particles(lifetime = 40, vel = {'linear':[1,2]}, colour=[0,0,0,255], scale=3, number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 20)#makes the game freez for few frames
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
@@ -661,13 +660,13 @@ class Player(Character):
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0,C.acceleration[1]]
-        self.friction = C.friction_player.copy()
+        self.friction = C.friction_player.copy()        
 
     def update(self):
         super().update()
         self.shader_state.update()
         self.omamoris.update()
-        
+
     def draw(self, target):#called in group
         self.shader_state.draw()
         pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]))
@@ -1658,7 +1657,7 @@ class Omamoris():#omamori handler
         self.equipped = {}#equiped omamoris
         self.inventory = {'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)}#omamoris in inventory.
         self.number = 3#number of omamori we can equip
-        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)
+        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)        
 
     def update(self):
         for omamori in self.equipped.values():
@@ -2335,7 +2334,7 @@ class Enemy_drop(Loot):
 
     def player_collision(self,player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return
-        self.game_objects.sound.play_sfx(self.sounds['death'])#should be in states
+        self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
         obj = (self.__class__.__name__)#get the string in question
         try:
             self.game_objects.player.inventory[obj] += 1
@@ -2565,6 +2564,16 @@ class Omamori(Interactable_item):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.description = ''#for inventory
+        self.ui_group = groups.Group()       
+
+    def render_UI(self, target):#called from oamori menu    
+        if self.state != 'equip': return
+        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,1]}, dir = 'isotropic')        
+        self.ui_group.add(obj1)     
+        for spr in self.ui_group.sprites():
+            spr.update()#the position
+            spr.update_uniforms()#the unforms for the draw
+            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft,shader = spr.shader)         
 
     def pickup(self):
         self.game_objects.player.omamoris.inventory[type(self).__name__] = self
@@ -2582,11 +2591,11 @@ class Omamori(Interactable_item):
         pass
 
     def set_pos(self,pos):#for inventory
-        self.rect.center = pos
+        self.rect.topleft = pos
 
 class Half_dmg(Omamori):
     def __init__(self,pos, game_objects, entity):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/double_jump/',game_objects)#for inventory
+        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/half_dmg/',game_objects)#for inventory
         super().__init__(pos, game_objects, entity)
         self.description = 'Take half dmg'
 

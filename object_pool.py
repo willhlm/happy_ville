@@ -16,6 +16,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         particles.Circle.pool(game_objects)
         particles.Spark.pool(game_objects)
         particles.Goop.pool(game_objects)
+        particles.Floaty_particles.pool(game_objects)
 
         #screen_shader.Screen_shader.pool(game_objects)
         Entities.Conversation_bubbles.pool(game_objects)

@@ -67,7 +67,10 @@ class UI_loader():#for map, omamori, ability, journal etc
             id = obj['gid'] - self.map_data['UI_firstgid']
 
             if id == 0:#inventory
-                name = properties[0]['value']#the name of omamori
+                if properties:                    
+                    name = properties[0]['value']#the name of omamori
+                else:
+                    name = '0'
                 new_omamori = entities_UI.Omamori(topleft_object_position,self.game_objects)
                 self.inventory[name] = new_omamori
             elif id == 1:#equipeed
