@@ -8,9 +8,9 @@ uniform float TIME;
 
 // Wind settings.
 uniform float speed = 0.01;
-uniform float minStrength = 0.05;
-uniform float maxStrength = 0.01;
-uniform float strengthScale = 20.0;
+uniform float minStrength = 0.01;
+uniform float maxStrength = 0.05;
+uniform float strengthScale = 13.0;
 uniform float interval = 3.5;
 uniform float detail = 1.0;
 uniform float distortion = 0.5;

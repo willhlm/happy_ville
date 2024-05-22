@@ -156,7 +156,7 @@ class Alphabet():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.char_size = (4,6)
-        self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_']
+        self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_','[',']']
         self.character_lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
         self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
         sheet = generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))

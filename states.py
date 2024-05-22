@@ -733,18 +733,18 @@ class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
         super().__init__(game)
         self.screen = self.game.display.make_layer(self.game.window_size)#TODO
         self.shader = game.game_objects.shaders['alpha']
-        self.state = getattr(UI_select_menu, 'Inventory')(self)#should it alway go to inventory be default?
+        self.state = [getattr(UI_select_menu, 'Inventory')(self)]#should it alway go to inventory be default?
 
     def update(self):
         super().update()
-        self.state.update()
+        self.state[-1].update()
 
     def render(self):
         super().render()
-        self.state.render()
+        self.state[-1].render()
 
     def handle_events(self,input):
-        self.state.handle_events(input)
+        self.state[-1].handle_events(input)
 
 class Facilities(Gameplay):#fast_travel (menu and unlock), ability upgrade (spurit and movement), bank, soul essence, vendor, smith
     def __init__(self, game,type,*arg):#args could be npc or travel point etc

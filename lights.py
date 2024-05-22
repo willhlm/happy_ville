@@ -20,7 +20,7 @@ class Lights():
         self.ambient = (0,0,0,0)
 
     def update(self):
-        self.points, self.positions, self.radius, self.colour, self.start_angle, self.end_angle, self.min_radius = [], [], [], [], [], [], []
+        self.num_rectangle, self.points, self.positions, self.radius, self.colour, self.start_angle, self.end_angle, self.min_radius = [], [], [], [], [], [], [], []
         for light in self.lights_sources:
             light.update()
             self.list_points(light)#sort the collisions points into a ligst
@@ -32,10 +32,12 @@ class Lights():
             self.min_radius.append(light.min_radius)
 
     def list_points(self, light):
-        if not light.interact: return
-        platforms = self.game_objects.collisions.light_collision(light)#collision -> collision occures at coordinates as pe tiled position
-        self.shaders['light']['num_rectangle'] = len(platforms)#update numbe rof rectanges -> works if it is only one source
-        self.points = self.points + self.get_points(platforms)
+        if not light.interact: 
+            self.num_rectangle.append(0)
+        else:
+            platforms = self.game_objects.collisions.light_collision(light)#collision -> collision occures at coordinates as pe tiled position
+            self.num_rectangle.append(len(platforms))        
+            self.points = self.points + self.get_points(platforms)
 
     def get_points(self,platforms):
         l = []
@@ -50,13 +52,11 @@ class Lights():
         light = Light(self.game_objects, target, **properties)
         self.lights_sources.append(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)    
-        self.shaders['light']['num_rectangle'] = 0#temp fix
         return light
 
     def remove_light(self, light):
         self.lights_sources.remove(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)
-        self.shaders['light']['num_rectangle'] = 0#temp fix
 
     def draw(self, target):
         self.shaders['light']['rectangleCorners'] = self.points
@@ -67,6 +67,7 @@ class Lights():
         self.shaders['light']['angleStart'] = self.start_angle
         self.shaders['light']['angleEnd'] = self.end_angle
         self.shaders['light']['min_radius'] = self.min_radius
+        self.shaders['light']['num_rectangle'] = self.num_rectangle
 
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture
 

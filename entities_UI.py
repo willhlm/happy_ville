@@ -99,6 +99,17 @@ class Omamori(Animatedentity):#this will save the positions needed to the UI
     def render_UI(self, target):
         pass
 
+class Necklace(Animatedentity):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/necklace/',game_objects)#for inventory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
+    
+    def set_level(self,level):
+        self.currentstate.set_animation_name('level_'+str(level))
+
 #ability spirit upgrade UI
 class Abilities(Animatedentity):
     def __init__(self,pos,game_objects):
