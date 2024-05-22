@@ -1,7 +1,6 @@
-import pygame
+import pygame, sys
 import states
 import game_objects
-import sys
 import constants as C
 from pygame_render import RenderEngine
 
@@ -43,7 +42,6 @@ class Game():
             #tick clock
             self.clock.tick(120)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-
             #handle event
             self.event_loop()
 

@@ -60,7 +60,7 @@ class UI_loader():#for map, omamori, ability, journal etc
     def load_omamori_data(self):
         self.equipped = []
         self.inventory = {}
-        for obj in self.map_data['elements']:
+        for index, obj in enumerate(self.map_data['elements']):
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
             properties = obj.get('properties',[])
@@ -70,12 +70,16 @@ class UI_loader():#for map, omamori, ability, journal etc
                 if properties:                    
                     name = properties[0]['value']#the name of omamori
                 else:
-                    name = '0'
+                    name = str(index)
                 new_omamori = entities_UI.Omamori(topleft_object_position,self.game_objects)
                 self.inventory[name] = new_omamori
             elif id == 1:#equipeed
                 new_omamori = entities_UI.Omamori(topleft_object_position,self.game_objects)
                 self.equipped.append(new_omamori)
+            elif id == 2:#necklace
+                self.necklace = entities_UI.Necklace(topleft_object_position,self.game_objects)
+        
+        self.equipped.sort(key = lambda x: x.rect.centery)#sort the order according to left to right        
 
     def load_journal_data(self):
         self.name_pos = []

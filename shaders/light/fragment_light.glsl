@@ -12,7 +12,7 @@ uniform vec4 colour[20];
 uniform vec4 ambient;//texture(imageTexture, fragmentTexCoord); // Get background color
 
 uniform vec2 rectangleCorners[80]; // x/4 is the number of rectangles
-uniform int num_rectangle;
+uniform int num_rectangle[20];//number of rectangles for each light source
 uniform int num_lights;
 
 uniform float angleStart[20];   // Start angle of the cone for each light source
@@ -76,7 +76,7 @@ void main() {
 
         bool occluded = false;
 
-        for (int r = 0; r < num_rectangle; r++) { // number of rectangles
+        for (int r = 0; r < num_rectangle[l]; r++) { // number of rectangles
             vec2[] points = vec2[](
                 vec2(rectangleCorners[r * 4].x, resolution.y - rectangleCorners[r * 4].y),
                 vec2(rectangleCorners[r * 4 + 1].x, resolution.y - rectangleCorners[r * 4 + 1].y),

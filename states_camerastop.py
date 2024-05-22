@@ -132,7 +132,7 @@ class Stop_top(Basic_states):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.bottom - self.entity.game_objects.player.hitbox.centery] 
 
         if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:#if on screen on y and coser than half screen on x
-            target = self.entity.game_objects.player.hitbox.centery - self.entity.rect.bottom #- self.entity.game_objects.player.rect[3]*0.5
+            target = self.entity.game_objects.player.hitbox.centery - self.entity.rect.bottom - self.entity.game_objects.player.rect[3]*0.5
             #self.true_center[1] -= (self.entity.game_objects.camera.center[1] - target)*0.03
             self.entity.game_objects.camera.center[1] = target                    
         else:

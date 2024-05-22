@@ -86,7 +86,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
             self.updates.append(self.recenteralise_horizontal)
 
     def recenteralise_horizontal(self):
-        target = self.camera.game_objects.map.PLAYER_CENTER[0]
+        target = self.camera.original_center[0]
         if self.camera.center[0]-target > 0:#camera is below
             self.camera.center[0] -= self.camera.game_objects.game.dt*2
             self.camera.center[0] = max(target, self.camera.center[0])
@@ -98,7 +98,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
             self.updates.remove(self.recenteralise_horizontal)   
 
     def recenteralise_vertical(self):                
-        target = self.camera.game_objects.map.PLAYER_CENTER[1]
+        target = self.camera.original_center[1]
         if self.camera.center[1]-target > 0:#camera is below
             self.camera.center[1] -= self.camera.game_objects.game.dt*2
             self.camera.center[1] = max(target, self.camera.center[1])

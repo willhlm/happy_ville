@@ -864,9 +864,9 @@ class Froggy(Enemy):
         super().draw(target)
 
 class Packun(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/packun/')
+    def __init__(self,pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/packun/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -875,7 +875,7 @@ class Packun(Enemy):
         self.attack = Projectile_1
         self.attack_distance = [250,50]
 
-    def chase(self):#called from AI
+    def chase(self, position):#called from AI
         pass
 
     def patrol(self,position):
@@ -1651,34 +1651,74 @@ class Double_jump(Movement_abilities):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Omamoris():#omamori handler
+class Omamoris():#omamori handler -> "neckalce"
     def __init__(self,entity):
         self.entity = entity
-        self.equipped = {}#equiped omamoris
+        self.equipped = {'0':[],'1':[],'2':[]}#equiped omamoris
         self.inventory = {'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)}#omamoris in inventory.
-        self.number = 3#number of omamori we can equip
         entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)        
+        self.level = 1#can be leveld up at black smith
+
+    def level_up(self):#shuold be called from black smith. bot implement yet
+        self.level += 1
 
     def update(self):
-        for omamori in self.equipped.values():
-            omamori.update()
+        for omamoris in self.equipped.values():
+            for omamori in omamoris:
+                omamori.update()
 
     def handle_input(self,input):
-        for omamori in self.equipped.values():
-            omamori.handle_input(input)
+        for omamoris in self.equipped.values():
+            for omamori in omamoris:
+                omamori.handle_input(input)        
 
-    def equip_omamori(self,omamori_string):
-        if not self.equipped.get(omamori_string,False):#if it is not equipped
-            if len(self.equipped) < self.number:#maximum number of omamoris to equip
-                new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0],self.entity.game_objects, self.entity)#make a class based on the name of the newstate: need to import sys
-                self.equipped[omamori_string] = new_omamori
+    def equip_omamori(self, omamori_string, list_of_places):
+        new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0], self.entity.game_objects, self.entity)
+        
+        if self.inventory[omamori_string].state != 'equip':#alrady equipd?
+            number_equipped = len(self.equipped['0']) + len(self.equipped['1']) + len(self.equipped['2'])
+            if number_equipped >= 7: return [False, 'no avilable slots']
+
+            if new_omamori.level == 2:
+                if self.level == 0: return [False, 'no avilable slots']
+                if len(self.equipped['2']) != 0: return [False, 'no avilable slots']
+
                 self.inventory[omamori_string].currentstate.set_animation_name('equip')
                 new_omamori.attach()
-        else:##if equiped -> remove
-            self.inventory[omamori_string].currentstate.set_animation_name('idle')
-            self.equipped[omamori_string].detach()#call the detach function of omamori
-            del self.equipped[omamori_string]
+                new_omamori.set_pos(list_of_places[-1].rect.topleft)
+                self.equipped['2'].append(new_omamori)
 
+            elif new_omamori.level == 1:
+                if len(self.equipped['1']) + len(self.equipped['2']) >= self.level: return [False, 'no avilable slots']                  
+               
+                self.inventory[omamori_string].currentstate.set_animation_name('equip')
+                new_omamori.attach()                    
+                new_omamori.set_pos(list_of_places[7 - self.level + len(self.equipped['1'])].rect.topleft)
+                if 7 - self.level + len(self.equipped['1']) == 6:
+                    self.equipped['2'].append(new_omamori)
+                else:
+                    self.equipped['1'].append(new_omamori)
+
+            elif new_omamori.level == 0:
+                self.inventory[omamori_string].currentstate.set_animation_name('equip')
+                new_omamori.attach()
+                new_omamori.set_pos(list_of_places[len(self.equipped['0'])].rect.topleft)
+                self.equipped['0'].append(new_omamori)
+
+        else:  # If already equipped, remove the omamori
+            self.inventory[omamori_string].currentstate.set_animation_name('idle')
+            self.inventory[omamori_string].ui_group.empty()
+
+            for key in self.equipped.keys():
+                for omamori in self.equipped[key]:
+                    if type(omamori).__name__ != omamori_string: continue                        
+                    omamori.detach()
+                    self.equipped[key].remove(omamori)
+                    break
+
+        return [True]
+
+                    
 #projectiles
 class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
     def __init__(self,entity):
@@ -1869,7 +1909,7 @@ class Aila_sword(Sword):
         eprojectile.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
 
         if 'purple' in self.equip:#if the purpuple stone is equped
-            eprojectile.countered(self.dir,self.rect.center)
+            eprojectile.countered(self.dir, self.rect.center)
             self.sword_jump()
         else:
             eprojectile.velocity = [0,0]
@@ -2004,7 +2044,7 @@ class Projectile_1(Ranged):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',entity.game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.update_hitbox()
 
@@ -2016,12 +2056,12 @@ class Projectile_1(Ranged):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-    def countered(self,dir,pos):#called from sword collsion with purple infinity stone
+    def countered(self, dir, pos):#called from sword collsion with purple infinity stone
         dy = self.rect.centery - pos[1]
         dx = self.rect.centerx - pos[0]
-
-        self.velocity[0] = -dir[1]*self.velocity[0]*dx*0.05 + dir[0]*(10 - abs(dx)*0.1)
-        self.velocity[1] = -dir[1]*10 + self.velocity[1]*abs(dy) + dir[0]*dy*0.2
+        
+        self.velocity[0] = 300/dx
+        self.velocity[1] = 0
 
 class Falling_rock(Ranged):#things that can be placed in cave, the source makes this and can hurt player
     def __init__(self,entity):
@@ -2564,9 +2604,10 @@ class Omamori(Interactable_item):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.description = ''#for inventory
-        self.ui_group = groups.Group()       
+        self.ui_group = groups.Group()#for the particle stuff in UI
+        self.level = 0
 
-    def render_UI(self, target):#called from oamori menu    
+    def render_UI(self, target):#called from oamori menu        
         if self.state != 'equip': return
         obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,1]}, dir = 'isotropic')        
         self.ui_group.add(obj1)     
@@ -2597,7 +2638,8 @@ class Half_dmg(Omamori):
     def __init__(self,pos, game_objects, entity):
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/half_dmg/',game_objects)#for inventory
         super().__init__(pos, game_objects, entity)
-        self.description = 'Take half dmg'
+        self.level = 1
+        self.description = 'Take half dmg ' + '[' + str(self.level) + ']'
 
     def attach(self):
         super().attach()
@@ -2605,13 +2647,13 @@ class Half_dmg(Omamori):
 
     def detach(self):
         super().detach()
-        self.entity.dmg_scale = 1
+        self.entity.dmg_scale = 1                    
 
 class Loot_magnet(Omamori):
     def __init__(self,pos, game_objects, entity):
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/loot_magnet/',game_objects)#for inventory
         super().__init__(pos, game_objects, entity)
-        self.description = 'Attracts loot'
+        self.description = 'Attracts loot ' + '[' + str(self.level) + ']'
 
     def update(self):
         for loot in self.entity.game_objects.loot.sprites():
@@ -2621,7 +2663,8 @@ class Boss_HP(Omamori):
     def __init__(self,pos, game_objects, entity):
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/boss_HP/',game_objects)#for inventor
         super().__init__(pos, game_objects,entity)
-        self.description = 'Visible boss HP'
+        self.level=2
+        self.description = 'Visible boss HP ' + '[' + str(self.level) + ']'
 
     def attach(self):
         super().attach()
