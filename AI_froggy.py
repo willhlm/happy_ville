@@ -40,7 +40,7 @@ class Patrol():
 
     def check_sight(self):
         if abs(self.parent.player_distance[0]) < self.parent.entity.attack_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.attack_distance[1]:
-            self.parent.append_child(Fade(self.parent))
+            self.parent.append_child(Init_Fade_animation(self.parent))
             self.parent.append_child(Wait(self.parent,duration = 40))            
             self.parent.append_child(Fly(self.parent))
             self.parent.append_child(Wait(self.parent,duration = 40))
@@ -72,7 +72,6 @@ class Taunt():
         elif abs(self.parent.player_distance[0]) > self.parent.entity.aggro_distance[0] or abs(self.parent.player_distance[1]) > self.parent.entity.aggro_distance[1]:#player is far away                        
             self.parent.entity.currentstate.handle_input('idle')
             self.parent.pop_child()            
-
 
 class Init_Fade_animation():
     def __init__(self,parent,**kwarg):

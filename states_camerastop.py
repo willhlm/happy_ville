@@ -15,24 +15,7 @@ class Basic_states():
         pass
 
     def increase_phase(self):
-        pass
-
-class Idle(Basic_states):
-    def __init__(self,entity,**kwarg):
-        super().__init__(entity)
-        self.next_state = kwarg.get('next_state')
-
-    def update(self):
-        target = self.entity.game_objects.map.PLAYER_CENTER[1]
-        if self.entity.game_objects.camera.center[1]-target > 0:#camera is below
-            self.entity.game_objects.camera.center[1] -= self.entity.game_objects.game.dt
-            self.entity.game_objects.camera.center[1] = max(target, self.entity.game_objects.camera.center[1])
-        else:#camera is above
-            self.entity.game_objects.camera.center[1] += self.entity.game_objects.game.dt
-            self.entity.game_objects.camera.center[1] = min(target, self.entity.game_objects.camera.center[1])  
-
-        if self.entity.game_objects.camera.center[1] == target:
-            self.enter_state(self.next_state)         
+        pass     
 
 class Idle_right(Basic_states):
     def __init__(self,entity,**kwarg):
@@ -99,6 +82,7 @@ class Stop_bottom(Basic_states):
         super().__init__(entity)
         self.determine_sign()
         self.true_center = self.center.copy()
+        self.entity.game_objects.camera.stop_handeler.add_stop('bottom')
 
     def init_pos(self):#called from map loader
         self.entity.game_objects.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
@@ -122,7 +106,8 @@ class Stop_bottom(Basic_states):
             #self.center[1] -= self.sign*3#self.sign*(abs(self.entity.game_objects.camera.center[1]-target))*0.1
             self.entity.game_objects.camera.center[1] = self.sign*max(self.sign*target,self.sign*self.center[1])#when sign is negative, it works as min
         else:
-            self.enter_state('Idle',next_state='Idle_bottom')
+            self.entity.game_objects.camera.stop_handeler.remove_stop('bottom')
+            self.enter_state('Idle_bottom')
 
 class Idle_top(Basic_states):
     def __init__(self,entity,**kwarg):
@@ -141,6 +126,7 @@ class Stop_top(Basic_states):
         super().__init__(entity)
         self.true_center = self.center.copy()        
         #self.entity.game_objects.camera.center[1] = self.entity.game_objects.player.hitbox.centery - self.entity.rect.bottom - self.entity.game_objects.player.rect[3]*0.5
+        self.entity.game_objects.camera.stop_handeler.add_stop('top')
 
     def update(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.bottom - self.entity.game_objects.player.hitbox.centery] 
@@ -150,6 +136,7 @@ class Stop_top(Basic_states):
             #self.true_center[1] -= (self.entity.game_objects.camera.center[1] - target)*0.03
             self.entity.game_objects.camera.center[1] = target                    
         else:
+            self.entity.game_objects.camera.stop_handeler.remove_stop('top')
             self.enter_state('Idle_top')
 
 class Idle_center(Basic_states):

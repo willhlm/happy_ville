@@ -632,7 +632,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white
             self.shader_state.handle_input('Invincibile')#blink a bit
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.hurt_particles(lifetime = 40, vel = {'linear':[1,2]}, colour=[0,0,0,255], scale=3, number_particles=60)
+            self.hurt_particles(lifetime = 40, vel = {'linear':[4,7]}, colour=[0,0,0,255], scale=3, number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 20)#makes the game freez for few frames
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
@@ -819,7 +819,7 @@ class Mygga(Flying_enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 2
-        self.aggro_distance = [-1,-1]
+        self.aggro_distance = [100,20]
 
 class Exploding_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
@@ -900,7 +900,7 @@ class Slime(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
-        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
+        self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
         self.health = 2
 
     def release_texture(self):
@@ -917,7 +917,7 @@ class Slime_giant(Enemy):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],48,48)
         self.number = random.randint(2, 6)#number of minions
-        self.aggro_distance = [-1,-1]#at which distance to the player when you should be aggro -> negative means no
+        self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
 
     def loots(self):#spawn minions
         pos = [self.hitbox.centerx,self.hitbox.centery-10]

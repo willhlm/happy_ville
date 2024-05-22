@@ -175,7 +175,7 @@ class Circles(Vertical_circles):
         super().__init__(game_objects, parallax, number_particles)
 
     def update_vel(self, i):#how it should move
-        pass
+        self.velocity[i]  = [0.5*math.sin(self.time*0.01 + self.phase[i]),0.5*math.cos(self.time*0.001 + self.phase[i])]
 
     def update_size(self,i):
         super().update_size(i)

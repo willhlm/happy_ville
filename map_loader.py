@@ -656,14 +656,14 @@ class Light_forest(Biome):
                 if self.level.layer == 'fg':
                     self.level.game_objects.all_fgs.add(new_viens)
                 else:
-                    self.level.game_objects.all_bgs.add(new_viens)                
-                
+                    self.level.game_objects.all_bgs.add(new_viens)
+
             elif id == 10:#smalltree 1
                 new_viens = entities_parallax.Small_tree1(object_position, self.level.game_objects, parallax)
                 if self.level.layer == 'fg':
                     self.level.game_objects.all_fgs.add(new_viens)
                 else:
-                    self.level.game_objects.all_bgs.add(new_viens)   
+                    self.level.game_objects.all_bgs.add(new_viens)
 
 
 class Rhoutta_encounter(Biome):
