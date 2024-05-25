@@ -1,10 +1,12 @@
 import pygame
 pygame.mixer.init()#this one is needed to avoid a delay when playing the sounds
+import Read_files
 
 class Sound():#class for organising sound and music playback
-    def __init__(self):#channels 0 - 4 is dedicated to
+    def __init__(self):#channels 0 - 4 is dedicated to        
         self.reserved_channels = 4
         self.initiate_channels(8)
+        self.volume = game_settings = Read_files.read_json('game_settings.json')['sounds']     
 
     def initiate_channels(self, quantity):#note channel 0 should be used for level bg music
         self.channels = []
@@ -18,6 +20,24 @@ class Sound():#class for organising sound and music playback
         self.channels[0].set_volume(1)
         self.channels[0].play(self.bg, loops = -1, fade_ms = 300)
 
+    def intensity_music(self, int):
+        self.volume['music'] += int
+        self.volume['music'] = min(self.volume['music'],10)
+        self.volume['music'] = max(self.volume['music'],0)        
+        self.channels[0].set_volume(self.volume['music'] * 0.1)   
+
+    def intensity_SFX(self, int):
+        self.volume['SFX'] += int
+        self.volume['SFX'] = min(self.volume['SFX'],10)
+        self.volume['SFX'] = max(self.volume['SFX'],0)        
+
+    def intensity_overall(self, int):
+        self.volume['overall'] += int
+        self.volume['overall'] = min(self.volume['overall'],10)
+        self.volume['overall'] = max(self.volume['overall'],0)          
+        self.intensity_SFX(int)
+        self.intensity_music(int)
+
     def pause_bg_sound(self):
         self.channels[0].fadeout(700)
 
@@ -25,11 +45,10 @@ class Sound():#class for organising sound and music playback
         self.bg = pygame.mixer.Sound("Audio/maps/" + name + "/default.mp3")
         self.bg.set_volume(1)
 
-    @staticmethod
-    def play_sfx(sfx, loop = 0, vol = 0.2):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
+    def play_sfx(self, sfx, loop = 0, vol = 0.2):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
         channel = pygame.mixer.find_channel()
         try:
-            channel.set_volume(vol)
+            channel.set_volume(vol * self.volume['SFX'] * 0.1)
             channel.play(sfx, loops = loop)
         except:
             print("No available channels")

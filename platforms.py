@@ -109,6 +109,9 @@ class Collision_right_angle(Platform):#ramp
         self.ratio = self.size[1]/self.size[0]
         self.go_through = go_through
         self.target = 0
+        norm = (self.size[0]**2 + self.size[1]**2)**0.5
+        self.tanget = [self.size[0]/norm, self.size[1]/norm]#normalise it
+
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
     #0 = tilting to the right, flatside down
@@ -175,7 +178,7 @@ class Collision_right_angle(Platform):#ramp
                 else:
                     self.orientation = 2
 
-    def get_target(self,entity):
+    def get_target(self,entity):#called when oresing down
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
         elif self.orientation == 0:
@@ -183,16 +186,16 @@ class Collision_right_angle(Platform):#ramp
         else: return 0
         return -rel_x*self.ratio + self.hitbox.bottom
 
-    def collide(self,entity):#called in collisions
-        if self.orientation == 1:
-            rel_x = entity.hitbox.right - self.hitbox.left
-            other_side = entity.hitbox.right - self.hitbox.right
-            benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom
-            self.shift_up(other_side,entity,benethe)
-        elif self.orientation == 0:
+    def collide(self, entity):#called in collisions
+        if self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
+            benethe = entity.hitbox.bottom - self.hitbox.bottom
+            self.target = -rel_x*self.ratio + self.hitbox.bottom
+            self.shift_up(other_side,entity,benethe)    
+        elif self.orientation == 1:
+            rel_x = entity.hitbox.right - self.hitbox.left
+            other_side = entity.hitbox.right - self.hitbox.right
             benethe = entity.hitbox.bottom - self.hitbox.bottom
             self.target = -rel_x*self.ratio + self.hitbox.bottom
             self.shift_up(other_side,entity,benethe)
@@ -212,12 +215,12 @@ class Collision_right_angle(Platform):#ramp
             entity.velocity[0] = 0#need to have a value to avoid "dragin in air" while running
             entity.update_rect_y()
 
-    def shift_up(self,other_side,entity,benethe):
+    def shift_up(self,other_side,entity,benethe):        
         if self.target > entity.hitbox.bottom:
-            entity.go_through = False
+            entity.go_through = False        
         elif other_side > 0 or benethe > 0:
-            entity.go_through = True
-        elif not entity.go_through:
+            entity.go_through = True            
+        if not entity.go_through:
             entity.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation
             entity.down_collision(self.target)
             entity.update_rect_y()
