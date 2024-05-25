@@ -473,7 +473,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
-        self.go_through = True#a flag for entities to go through ramps from side or top
+        self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
 
     def update_hitbox(self):

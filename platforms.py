@@ -94,7 +94,6 @@ class Collision_oneway_up(Platform):
 
     def collide_y(self,entity):
         if entity.velocity[1] < 0: return#going up
-        if entity.go_through: return
         offset = entity.velocity[1] + abs(entity.velocity[0])
         if entity.hitbox.bottom <= self.hitbox.top + offset:
             entity.down_collision(self.hitbox.top)
@@ -109,9 +108,6 @@ class Collision_right_angle(Platform):#ramp
         self.ratio = self.size[1]/self.size[0]
         self.go_through = go_through
         self.target = 0
-        norm = (self.size[0]**2 + self.size[1]**2)**0.5
-        self.tanget = [self.size[0]/norm, self.size[1]/norm]#normalise it
-
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
     #0 = tilting to the right, flatside down
@@ -217,13 +213,13 @@ class Collision_right_angle(Platform):#ramp
 
     def shift_up(self,other_side,entity,benethe):        
         if self.target > entity.hitbox.bottom:
-            entity.go_through = False        
+            entity.go_through['ramp'] = False        
         elif other_side > 0 or benethe > 0:
-            entity.go_through = True            
-        if not entity.go_through:
+            entity.go_through['ramp'] = True       
+        elif not entity.go_through['ramp']:
             entity.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation
             entity.down_collision(self.target)
-            entity.update_rect_y()
+            entity.update_rect_y()                 
 
 class Collision_dmg(Platform):#"spikes"
     def __init__(self,pos,size):
@@ -279,7 +275,6 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
 
     def collide_y(self,entity):
         if entity.velocity[1] < 0: return#going up
-        if entity.go_through: return
         offset = entity.velocity[1] + 1
         if entity.hitbox.bottom <= self.hitbox.top + offset:
             self.timer_jobs['timer_disappear'].activate()
