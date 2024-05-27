@@ -17,7 +17,7 @@ class Camera():
         self.scroll = self.true_scroll.copy()
 
         self.scroll[0] = int(self.scroll[0])
-        self.scroll[1] = int(self.scroll[1])     
+        self.scroll[1] = int(self.scroll[1])
 
     def set_camera(self, camera):
         self.game_objects.camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll)
@@ -31,7 +31,7 @@ class Camera():
             stop.update()
             stop.currentstate.init_pos()
         self.set_camera_position()
-        
+
     def set_camera_position(self):
         self.true_scroll = [self.game_objects.player.true_pos[0] - self.center[0], self.game_objects.player.true_pos[1] - self.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
@@ -39,14 +39,14 @@ class Camera_shake(Camera):
     def __init__(self, game_objects, scroll, amp, duration):
         super().__init__(game_objects, scroll)
         self.amp = amp
-        self.duration = duration        
+        self.duration = duration
 
     def camera_shake(self,amp = 3,duration = 100):
         self.amp = amp
         self.duration = duration
 
     def update(self):
-        super().update()        
+        super().update()
         self.scroll[0] += random.randint(-self.amp,self.amp)
         self.scroll[1] += random.randint(-self.amp,self.amp)
         self.duration -= self.game_objects.game.dt
@@ -66,17 +66,18 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
         for update in self.updates:
             update()
 
+
     def add_stop(self,stop):#called from camera stop states
         self.stops[stop] += 1
 
         if stop == 'bottom' or stop == 'top':
             if self.recenteralise_vertical in self.updates:
               self.updates.remove(self.recenteralise_vertical)
-   
+
         elif stop =='right' or stop =='left':
             if self.recenteralise_horizontal in self.updates:
                 self.updates.remove(self.recenteralise_horizontal)
-     
+
     def remove_stop(self,stop):#called from camera stop states
         self.stops[stop] -= 1
 
@@ -92,22 +93,22 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
             self.camera.center[0] = max(target, self.camera.center[0])
         else:#camera is above
             self.camera.center[0] += self.camera.game_objects.game.dt*2
-            self.camera.center[0] = min(target, self.camera.center[0])  
+            self.camera.center[0] = min(target, self.camera.center[0])
 
         if self.camera.center[0] == target:#if finished
-            self.updates.remove(self.recenteralise_horizontal)   
+            self.updates.remove(self.recenteralise_horizontal)
 
-    def recenteralise_vertical(self):                
+    def recenteralise_vertical(self):
         target = self.camera.original_center[1]
         if self.camera.center[1]-target > 0:#camera is below
             self.camera.center[1] -= self.camera.game_objects.game.dt*2
             self.camera.center[1] = max(target, self.camera.center[1])
         else:#camera is above
             self.camera.center[1] += self.camera.game_objects.game.dt*2
-            self.camera.center[1] = min(target, self.camera.center[1])  
+            self.camera.center[1] = min(target, self.camera.center[1])
 
         if self.camera.center[1] == target:#if finished
-            self.updates.remove(self.recenteralise_vertical)   
+            self.updates.remove(self.recenteralise_vertical)
 
 #cutscene cameras
 class Cutscenes(Camera):
@@ -159,12 +160,12 @@ class Cultist_encounter(Cutscenes):
 
 class New_game(Cutscenes):#initialised in New_game state
     def __init__(self, game_objects, scroll):
-        super().__init__(game_objects, scroll)        
+        super().__init__(game_objects, scroll)
         self.update_stop()
-        self.center = [self.game_objects.camera.center[0],1000]#[176,230]        
+        self.center = [self.game_objects.camera.center[0],1000]#[176,230]
         self.set_camera_position()
 
-    def update(self):        
+    def update(self):
         self.center[1] -= 2*self.game_objects.game.dt
         self.center[1] = max(230,self.center[1])
         super().update()
