@@ -42,7 +42,7 @@ class Collision_block(Platform):
         entity.update_rect_x()
 
     def collide_y(self,entity):
-        if entity.velocity[1] >= 0:#going down
+        if entity.velocity[1] > 0:#going down   
             entity.down_collision(self.hitbox.top)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
@@ -188,13 +188,13 @@ class Collision_right_angle(Platform):#ramp
             other_side = self.hitbox.left - entity.hitbox.left
             benethe = entity.hitbox.bottom - self.hitbox.bottom
             self.target = -rel_x*self.ratio + self.hitbox.bottom
-            self.shift_up(other_side,entity,benethe)    
+            self.shift_up(other_side, entity, benethe)    
         elif self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
             benethe = entity.hitbox.bottom - self.hitbox.bottom
             self.target = -rel_x*self.ratio + self.hitbox.bottom
-            self.shift_up(other_side,entity,benethe)
+            self.shift_up(other_side, entity, benethe)
         elif self.orientation == 2:
             rel_x = self.hitbox.right - entity.hitbox.left
             self.target = rel_x*self.ratio + self.hitbox.top
@@ -216,7 +216,7 @@ class Collision_right_angle(Platform):#ramp
             entity.go_through['ramp'] = False        
         elif other_side > 0 or benethe > 0:
             entity.go_through['ramp'] = True       
-        elif not entity.go_through['ramp']:
+        elif not entity.go_through['ramp']:          
             entity.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation
             entity.down_collision(self.target)
             entity.update_rect_y()                 

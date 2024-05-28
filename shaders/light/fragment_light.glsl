@@ -102,15 +102,15 @@ void main() {
 
         if (!occluded) {
             // light intensity
-            float lightIntensity = max(1.0 - distanceToLight / lightRadius,0);
+            float lightIntensity = max(1.0 - pow(distanceToLight / lightRadius, 2),0);
 
             // add light together
-            float fade = smoothstep(0.0, 0.2, lightIntensity);
-            backgroundColor += vec4(colour[l].xyz * lightIntensity * fade * colour[l].w , lightIntensity * fade* colour[l].w);
+            float fade = smoothstep(0.0, 1, lightIntensity);
+            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w , lightIntensity * fade* colour[l].w);
         }
     }
-     backgroundColor.xyz /= mix(backgroundColor.w,1,ambient.w);
-    
+     backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0
+        
     // smooth transition for the combined light intensities
     color = vec4(backgroundColor.xyz, backgroundColor.w);
 }

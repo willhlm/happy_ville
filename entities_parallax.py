@@ -37,6 +37,9 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
 
+    def release_texture(self):
+        pass
+
 class Trees(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
@@ -76,9 +79,6 @@ class Light_forest_tree1(Trees):
         self.spawn_box = [position,size]
         self.create_leaves()
 
-    def release_texture(self):
-        pass
-
 class Light_forest_tree2(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
@@ -95,9 +95,6 @@ class Light_forest_tree2(Trees):
         self.spawn_box = [position,size]
         self.create_leaves()
 
-    def release_texture(self):
-        pass
-
 class Cocoon(Layered_objects):#larv cocoon in light forest
     animations = {}
     def __init__(self, pos, game_objects,parallax):
@@ -107,9 +104,6 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
-
-    def release_texture(self):
-        pass
 
 class Vines(Layered_objects):
     animations = {}
@@ -134,9 +128,6 @@ class Vines(Layered_objects):
         self.shader['upsidedown'] = 1
         super().draw(target)
 
-    def release_texture(self):
-        pass
-
 class Small_tree1(Layered_objects):
     animations = {}
     def __init__(self, pos, game_objects,parallax):
@@ -159,10 +150,7 @@ class Small_tree1(Layered_objects):
         self.shader['TIME'] = self.time
         self.shader['offset'] = self.offset
         self.shader['upsidedown'] = 0
-        super().draw(target)
-
-    def release_texture(self):
-        pass        
+        super().draw(target)   
 
 #lightf orest cave
 class Ljusmaskar(Layered_objects):
@@ -175,12 +163,6 @@ class Ljusmaskar(Layered_objects):
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
 
-    def group_distance(self):
-        pass
-
-    def release_texture(self):
-        pass
-
 class Cave_grass(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax):
@@ -189,13 +171,7 @@ class Cave_grass(Layered_objects):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
-        self.true_pos = self.rect.topleft
-
-    def group_distance(self):
-        pass
-
-    def release_texture(self):
-        pass
+        self.true_pos = self.rect.topleft 
 
 class Droplet_source(Layered_objects):
     animations = {}
@@ -207,12 +183,6 @@ class Droplet_source(Layered_objects):
         self.rect.topleft = pos
         self.droplet = Droplet
         self.currentstate = states_droplet.Idle(self)
-
-    def release_texture(self):
-        pass
-
-    def group_distance(self):
-        pass
 
     def drop(self):#called from states
         sprites = self.game_objects.all_bgs.sprites()
@@ -234,12 +204,6 @@ class Falling_rock_source(Layered_objects):
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.currentstate = states_droplet.Idle(self)
-
-    def release_texture(self):
-        pass
-
-    def group_distance(self):
-        pass
 
     def drop(self):#called from states
         if self.parallax == [1,1]:
@@ -269,9 +233,6 @@ class Light_source(Layered_objects):#works for parallax = 1. Not sure how we wou
     def draw(self, target):
         pass
 
-    def release_texture(self):
-        pass
-
 #thigns that move in parallax
 class Dynamic_layered_objects(Layered_objects):
     def __init__(self,pos,game_objects,parallax):
@@ -298,7 +259,7 @@ class Dynamic_layered_objects(Layered_objects):
 class Droplet(Dynamic_layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
+        self.sprites = Droplet.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -306,16 +267,20 @@ class Droplet(Dynamic_layered_objects):
 
     def update(self):
         super().update()
-        self.update_vel()
+        self.update_vel()        
         self.destroy()
 
     def destroy(self):
+        self.lifetime -= self.game_objects.game.dt
         if self.lifetime < 0:
             self.kill()
 
     def update_vel(self):
         self.velocity[1] += 1
         self.velocity[1] = min(7,self.velocity[1])
+
+    def pool(game_objects):
+        Droplet.sprites = Read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
 
 class Leaves(Dynamic_layered_objects):#leaves from trees
     def __init__(self, pos, game_objects, parallax, size, kill = False):
@@ -339,9 +304,6 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.trans_prob = 100#the higher the number, the lwoer the probabillity for the leaf to flip (probabilty = 1/trans_prob). 0 is 0 %
 
         self.shader =  game_objects.shaders['colour']
-
-    def release_texture(self):
-        pass
 
     def draw(self, target):
         self.shader['colour'] = self.colour
@@ -375,7 +337,7 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
 class Falling_rock(Dynamic_layered_objects):
     def __init__(self,pos,game_objects,parallax):
         super().__init__(pos,game_objects,parallax)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)
+        self.sprites = Falling_rock.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -387,9 +349,13 @@ class Falling_rock(Dynamic_layered_objects):
         self.destroy()
 
     def destroy(self):
+        self.lifetime -= self.game_objects.game.dt
         if self.lifetime < 0:
             self.kill()
 
     def update_vel(self):
         self.velocity[1] += 1
         self.velocity[1] = min(7,self.velocity[1])
+
+    def pool(game_objects):#save the texture in memory for later use
+        Falling_rock.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)

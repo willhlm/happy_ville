@@ -69,9 +69,9 @@ class Lights():
         self.shaders['light']['min_radius'] = self.min_radius
         self.shaders['light']['num_rectangle'] = self.num_rectangle
 
-        self.shaders['blend']['background'] = self.game_objects.game.screen.texture
+        self.shaders['blend']['background'] = self.game_objects.game.screen.texture        
 
-        self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline
+        self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])
         self.game_objects.game.display.render(self.layer2.texture, self.layer3, shader = self.shaders['blur'])
         self.game_objects.game.display.use_alpha_blending(True)#turn it back on for rendering on screen

@@ -10,10 +10,10 @@ class Game():
         #initiate all screens
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size()#get the scale according to your display size
-        window_size_scaled = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
+        display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = Read_files.read_json('game_settings.json')['display']
 
-        self.display = RenderEngine(window_size_scaled[0],window_size_scaled[1], fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])
+        self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])
         self.screen = self.display.make_layer(self.window_size)
 
         #initiate game related values

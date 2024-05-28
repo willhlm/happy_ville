@@ -105,7 +105,7 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'light_forest_cave_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -245,10 +245,12 @@ class Option_Menu(Game_State):
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
-                self.current_button =  max(self.current_button, 0)
+                if self.current_button < 0:
+                    self.current_button = len(self.buttons) - 1
             elif event[-1] == 'down':
                 self.current_button += 1
-                self.current_button = min(self.current_button, len(self.buttons) - 1)
+                if self.current_button >= len(self.buttons):
+                    self.current_button = 0
             elif event[-1] == 'start':
                 self.exit_state()
             elif event[-1] in ('return', 'a'):

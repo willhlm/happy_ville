@@ -41,9 +41,7 @@ void main()
         }
     }
 
-    if (blurredColor.w != 0){
-    blurredColor.xyz /= blurredColor.w;
-    }
+    blurredColor.xyz /= max(blurredColor.w, 1e-6);//prevent division by 0
 
     color = vec4(blurredColor.xyz,blurredColor.w);
 }

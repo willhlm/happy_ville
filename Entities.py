@@ -317,7 +317,7 @@ class Waterfall(Staticentity):
         self.empty = game_objects.game.display.make_layer(size)
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
-        self.time = 0
+        self.time = 5#offset the time
 
     def release_texture(self):
         self.empty.release()
