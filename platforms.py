@@ -94,7 +94,6 @@ class Collision_oneway_up(Platform):
 
     def collide_y(self,entity):
         if entity.velocity[1] < 0: return#going up
-        if entity.go_through: return
         offset = entity.velocity[1] + abs(entity.velocity[0])
         if entity.hitbox.bottom <= self.hitbox.top + offset:
             entity.down_collision(self.hitbox.top)
@@ -175,7 +174,7 @@ class Collision_right_angle(Platform):#ramp
                 else:
                     self.orientation = 2
 
-    def get_target(self,entity):
+    def get_target(self,entity):#called when oresing down
         if self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
         elif self.orientation == 0:
@@ -183,16 +182,16 @@ class Collision_right_angle(Platform):#ramp
         else: return 0
         return -rel_x*self.ratio + self.hitbox.bottom
 
-    def collide(self,entity):#called in collisions
-        if self.orientation == 1:
-            rel_x = entity.hitbox.right - self.hitbox.left
-            other_side = entity.hitbox.right - self.hitbox.right
-            benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom
-            self.shift_up(other_side,entity,benethe)
-        elif self.orientation == 0:
+    def collide(self, entity):#called in collisions
+        if self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
+            benethe = entity.hitbox.bottom - self.hitbox.bottom
+            self.target = -rel_x*self.ratio + self.hitbox.bottom
+            self.shift_up(other_side,entity,benethe)    
+        elif self.orientation == 1:
+            rel_x = entity.hitbox.right - self.hitbox.left
+            other_side = entity.hitbox.right - self.hitbox.right
             benethe = entity.hitbox.bottom - self.hitbox.bottom
             self.target = -rel_x*self.ratio + self.hitbox.bottom
             self.shift_up(other_side,entity,benethe)
@@ -212,15 +211,15 @@ class Collision_right_angle(Platform):#ramp
             entity.velocity[0] = 0#need to have a value to avoid "dragin in air" while running
             entity.update_rect_y()
 
-    def shift_up(self,other_side,entity,benethe):
+    def shift_up(self,other_side,entity,benethe):        
         if self.target > entity.hitbox.bottom:
-            entity.go_through = False
+            entity.go_through['ramp'] = False        
         elif other_side > 0 or benethe > 0:
-            entity.go_through = True
-        elif not entity.go_through:
+            entity.go_through['ramp'] = True       
+        elif not entity.go_through['ramp']:
             entity.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation
             entity.down_collision(self.target)
-            entity.update_rect_y()
+            entity.update_rect_y()                 
 
 class Collision_dmg(Platform):#"spikes"
     def __init__(self,pos,size):
@@ -276,7 +275,6 @@ class Collision_time(Collision_oneway_up):#collision block that dissapears if ai
 
     def collide_y(self,entity):
         if entity.velocity[1] < 0: return#going up
-        if entity.go_through: return
         offset = entity.velocity[1] + 1
         if entity.hitbox.bottom <= self.hitbox.top + offset:
             self.timer_jobs['timer_disappear'].activate()

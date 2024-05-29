@@ -17,7 +17,7 @@ class Collisions():
 
         ramp = None
         for ramps in self.game_objects.platforms_ramps.sprites():
-            if hitbox.colliderect(ramps.hitbox): 
+            if hitbox.colliderect(ramps.hitbox):
                 ramp = ramps
                 break
 
@@ -25,9 +25,9 @@ class Collisions():
             target = ramp.get_target(self.game_objects.player)#in case there are multiple enteties, need to calcuate the tyarget specifically for the playter
             if target > hitbox.bottom + offset:
                 return #if from above, do nothing
-            elif not self.game_objects.player.go_through:#enter only once
+            elif not self.game_objects.player.go_through['ramp']:#enter only once
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
-                self.game_objects.player.go_through = ramp.go_through#a flag that determines if one can go through
+                self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
     def interactables_collision(self):#interactables
         for interactable in self.game_objects.interactables.sprites():
@@ -111,7 +111,7 @@ class Collisions():
             if ramp:
                 ramp.collide(entity)
             else:
-                entity.go_through = False
+                entity.go_through['ramp'] = False
 
     #make the hitbox collide instead of rect
     @staticmethod

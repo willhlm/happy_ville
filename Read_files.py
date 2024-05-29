@@ -22,8 +22,10 @@ def read_json(path):
         text = json.load(f)
     return text
 
-def write_json():
-    pass
+def write_json(dict, name):
+    jsonStr=json.dumps(dict, default=default)
+    with open(name, "w") as outfile:
+        outfile.write(jsonStr)
 
 def get_folder(file_path):#used when reading sprites for map loader
     for n in range(len(file_path)):
