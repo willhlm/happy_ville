@@ -5,7 +5,7 @@ import constants as C
 class Level():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.PLAYER_CENTER = C.player_center
+        self.PLAYER_CENTER = [game_objects.game.window_size[0] * 0.5, game_objects.game.window_size[1] * 0.5]
         self.TILE_SIZE = C.tile_size
         self.level_name = ''
         self.biome_name = ''
@@ -664,7 +664,6 @@ class Light_forest(Biome):
                     self.level.game_objects.all_fgs.add(new_viens)
                 else:
                     self.level.game_objects.all_bgs.add(new_viens)
-
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):

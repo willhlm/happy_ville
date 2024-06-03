@@ -23,7 +23,7 @@ uniform vec4 water_highlight1= vec4(0.38, 0.572, 0.52, 0.8);
 uniform vec4 water_highlight2= vec4(0.53,0.70,0.682, 0.8);
 uniform vec4 water_highlight3= vec4(0.76,0.85,0.909, 0.8);
 
-uniform float speed = -1;
+uniform float speed = -3;
 uniform float flow_gaps = 0;
 uniform float highlight_width = 0.1;
 uniform vec2 u_resolution = vec2(640, 360);

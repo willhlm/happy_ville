@@ -1504,8 +1504,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":4752,
-                         "y":576
+                         "x":4751,
+                         "y":575
                         }, 
                         {
                          "gid":1,
@@ -2118,6 +2118,52 @@
                          "width":16,
                          "x":4371,
                          "y":444
+                        }, 
+                        {
+                         "gid":10,
+                         "height":56,
+                         "id":158,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"image",
+                                 "type":"string",
+                                 "value":"None"
+                                }, 
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"village_ola2_13"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":31,
+                         "x":656,
+                         "y":485
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":159,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"13"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":651,
+                         "y":437
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2234,7 +2280,7 @@
          "y":0
         }],
  "nextlayerid":64,
- "nextobjectid":158,
+ "nextobjectid":160,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
