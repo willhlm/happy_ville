@@ -55,6 +55,8 @@ class Game_Objects():
         self.loot = groups.Group()#groups.Shader_group()
         self.entity_pause = groups.PauseGroup() #all Entities that are far away
         self.cosmetics = groups.Group()#groups.Shader_group()#things we just want to blit
+        self.cosmetics2 = groups.Group()#groups.Shader_group()#things we just want to blit before player layer
+
         self.camera_blocks = groups.Group()#pygame.sprite.Group()
         self.interactables = groups.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
         self.layer_pause = groups.PauseLayer()
@@ -103,6 +105,7 @@ class Game_Objects():
         self.camera_blocks.empty()
         self.bg_interact.empty()
         self.cosmetics.empty()
+        self.cosmetics2.empty()
         self.layer_pause.empty()
         self.bg_fade.empty()
         self.special_shaders.empty()
@@ -142,6 +145,7 @@ class Game_Objects():
         self.eprojectiles.update()
         self.loot.update()
         self.cosmetics.update()
+        self.cosmetics2.update()
         self.interactables.update()
         self.weather.update()
         self.special_shaders.update()#portal use it
@@ -152,6 +156,7 @@ class Game_Objects():
         self.all_bgs.draw(self.game.screen)
         self.interactables.draw(self.game.screen)#should be before bg_interact
         self.bg_interact.draw(self.game.screen)
+        self.cosmetics2.draw(self.game.screen)#Should be before enteties
         
         self.enemies.draw(self.game.screen)
         self.npcs.draw(self.game.screen)

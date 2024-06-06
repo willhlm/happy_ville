@@ -196,7 +196,7 @@ class Floaty_particles(Particles):#particles with a texture
         self.kill() 
 
     def update_velocity(self):  
-        self.velocity[1] -= self.game_objects.game.dt*0.01
+        self.velocity[1] += self.game_objects.game.dt*0.01
 
     def pool(game_objects):#save the stuff in memory for later use
         Floaty_particles.sprites = Read_files.load_sprites_dict('Sprites/GFX/particles/floaty/', game_objects)

@@ -107,9 +107,10 @@ class Collisions():
             for static_entity_y in static_entity_y:
                 static_entity_y.collide_y(entity)
 
-            ramp = pygame.sprite.spritecollideany(entity,self.game_objects.platforms_ramps,Collisions.collided)
-            if ramp:
-                ramp.collide(entity)
+            ramps = pygame.sprite.spritecollide(entity,self.game_objects.platforms_ramps,False,Collisions.collided)
+            if ramps:
+                for ramp in ramps:
+                    ramp.collide(entity)
             else:
                 entity.go_through['ramp'] = False
 

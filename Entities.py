@@ -811,6 +811,23 @@ class Flying_enemy(Enemy):
     def killed(self):#called when death animation starts playing
         pass
 
+class Flower_butterfly(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/flower_butterfly/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.health = 1
+        self.aggro_distance = [0,0]
+        self.game_objects.lights.add_light(self, colour = [77/255,168/255,177/255,200/255], interact = False)
+        self.aggro = False
+
+    def update(self):
+        super().update()
+        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,-1]}, dir = 'isotropic')        
+        self.game_objects.cosmetics2.add(obj1)             
+
 class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)

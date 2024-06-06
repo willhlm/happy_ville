@@ -105,8 +105,8 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'village_ola2_13','1')
-            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
+            #self.game.game_objects.load_map(self,'village_ola2_13','1')
+            self.game.game_objects.load_map(self,'light_forest_cave_1','1')
             #self.game.game_objects.load_map(self,'light_forest_6','1')
 
         elif self.current_button == 1:
