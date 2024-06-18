@@ -2256,6 +2256,52 @@
                          "width":16,
                          "x":1960,
                          "y":308
+                        }, 
+                        {
+                         "gid":10,
+                         "height":51,
+                         "id":165,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"image",
+                                 "type":"string",
+                                 "value":"None"
+                                }, 
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"village_ola2_16"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":31,
+                         "x":2208,
+                         "y":350
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":166,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"16"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2206,
+                         "y":303
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2372,7 +2418,7 @@
          "y":0
         }],
  "nextlayerid":64,
- "nextobjectid":165,
+ "nextobjectid":167,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
