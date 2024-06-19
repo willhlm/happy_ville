@@ -700,10 +700,9 @@ class Rhoutta_encounter(Biome):
 class Light_forest_cave(Biome):
     def __init__(self, level):
         super().__init__(level)
-        self.room()
 
     def room(self, room = 1):
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], interact = False)
         self.level.game_objects.lights.ambient = (30/255,30/255,30/255,255/255)
 
     def load_objects(self,data,parallax,offset):
@@ -745,3 +744,14 @@ class Light_forest_cave(Biome):
                     self.level.game_objects.all_fgs.add(new_rock)
                 else:
                     self.level.game_objects.all_bgs.add(new_rock)
+
+            elif id == 4:#vines
+                new_vine = entities_parallax.Vines_1(object_position, self.level.game_objects, parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_vine)
+                else:
+                    self.level.game_objects.all_bgs.add(new_vine)
+
+            elif id == 5:#bubble source
+                bubble_source = Entities.Bubble_source(object_position, self.level.game_objects, platforms.Bubble)
+                self.level.game_objects.interactables.add(bubble_source)

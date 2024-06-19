@@ -22,6 +22,7 @@ class Particles(pygame.sprite.Sprite):
         amp = random.uniform(min(vel[motion][0],vel[motion][1]), max(vel[motion][0],vel[motion][1]))
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
+        
         state = kwarg.get('state', 'Idle')
         self.currentstate = getattr(states_particles, state)(self)
 

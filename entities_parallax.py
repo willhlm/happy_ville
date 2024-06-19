@@ -105,18 +105,18 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
 
-class Vines(Layered_objects):
+class Vines(Layered_objects):#light forest
     animations = {}
-    def __init__(self, pos, game_objects,parallax):
-        super().__init__(pos, game_objects,parallax)
+    def __init__(self, pos, game_objects, parallax):
+        super().__init__(pos, game_objects, parallax)
         self.init_sprites('Sprites/animations/vines/light_forest/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = self.rect.topleft
         self.shader = game_objects.shaders['sway_wind']
         self.time = 0
         self.offset = random.uniform(0,10)
+        self.upsidedown = 1
 
     def update(self):
         self.time += self.game_objects.game.dt
@@ -125,7 +125,30 @@ class Vines(Layered_objects):
     def draw(self,target):
         self.shader['TIME'] = self.time
         self.shader['offset'] = self.offset
-        self.shader['upsidedown'] = 1
+        self.shader['upsidedown'] = self.upsidedown
+        super().draw(target)
+
+class Vines_1(Layered_objects):#light forest cave
+    animations = {}
+    def __init__(self, pos, game_objects, parallax):
+        super().__init__(pos, game_objects, parallax)
+        self.init_sprites('Sprites/animations/vines/light_forest_cave/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.true_pos = self.rect.topleft
+        self.shader = game_objects.shaders['sway_wind']
+        self.time = 0
+        self.offset = random.uniform(0,10)
+        self.upsidedown = 1
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+        self.group_distance()
+
+    def draw(self,target):
+        self.shader['TIME'] = self.time
+        self.shader['offset'] = self.offset
+        self.shader['upsidedown'] = self.upsidedown
         super().draw(target)
 
 class Small_tree1(Layered_objects):

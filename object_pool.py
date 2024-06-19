@@ -1,4 +1,4 @@
-import Entities, particles, entities_parallax, weather
+import Entities, particles, entities_parallax, weather, platforms
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self,game_objects):        
@@ -30,3 +30,5 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         weather.Rain.pool(game_objects)
         weather.Fireflies.pool(game_objects)
         weather.Flash.pool(game_objects)
+
+        platforms.Bubble.pool(game_objects)

@@ -2937,6 +2937,26 @@ class Place_holder_interacatble(Interactable):
     def release_texture(self):
         pass
 
+class Bubble_source(Interactable):
+    def __init__(self, pos, game_objects, bubble):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.center = pos
+        self.hitbox = self.rect.copy()
+        self.bubble = bubble
+        self.bounds = [-800, 800, -800, 800]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.time = 0
+
+    def update(self):
+        super().update()
+        self.time += 1
+        if self.time > 100:
+            bubble = self.bubble(self.rect.midtop, self.game_objects)
+            self.game_objects.platforms.add(bubble)        
+            self.time =0 
+
 class Challenge_monument(Interactable):
     def __init__(self, pos, game_objects, ID, interacted = False):
         super().__init__(pos, game_objects)
@@ -3570,7 +3590,7 @@ class Jump_timer(Timer):#can be combined with shroomjump?
         if self in self.entity.timers: return#do not append if the timer is already inside
         self.lifetime = self.duration
         self.entity.timers.append(self)
-        self.entity.velocity[1] = C.jump_vel_player
+        self.entity.velocity[1] = C.jump_vel_player#it is negative
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
