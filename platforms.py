@@ -7,7 +7,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         super().__init__()
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
-        self.true_pos = self.rect.topleft
+        self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
 
     def reset_timer(self):#aniamtion need it
@@ -187,13 +187,13 @@ class Collision_right_angle(Platform):#ramp
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
             benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom
+            self.target = -rel_x*self.ratio + self.hitbox.bottom 
             self.shift_up(other_side, entity, benethe)    
         elif self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
             benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom
+            self.target = -rel_x*self.ratio + self.hitbox.bottom 
             self.shift_up(other_side, entity, benethe)
         elif self.orientation == 2:
             rel_x = self.hitbox.right - entity.hitbox.left
@@ -211,7 +211,7 @@ class Collision_right_angle(Platform):#ramp
             entity.velocity[0] = 0#need to have a value to avoid "dragin in air" while running
             entity.update_rect_y()
 
-    def shift_up(self,other_side,entity,benethe):        
+    def shift_up(self, other_side, entity, benethe):        
         if self.target > entity.hitbox.bottom:
             entity.go_through['ramp'] = False        
         elif other_side > 0 or benethe > 0:
@@ -300,7 +300,7 @@ class Rhoutta_encounter_1(Collision_timer):
         self.hitbox = self.rect.inflate(0,0)
         self.currentstate.handle_input('Transition_2')
 
-class Bubble(Collision_timer):
+class Bubble(Collision_timer):#shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos,game_objects):
         super().__init__(game_objects,pos, size = [32,32],run_particle='dust')
         self.sprites = Bubble.sprites
@@ -308,12 +308,36 @@ class Bubble(Collision_timer):
         self.velocity = [0,0]
         self.timer_jobs = {'timer_disappear':Platform_timer_1(self,120)}#these timers are activated when promt and a job is appeneded to self.timer.
 
+    def update_true_pos_x(self):
+        self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
+        self.rect.left = int(self.true_pos[0])#should be int
+        self.hitbox.left = self.rect.left                
+
+    def update_true_pos_y(self):
+        self.true_pos[1] += self.game_objects.game.dt*self.velocity[1]
+        self.rect.top = int(self.true_pos[1])#should be int
+        self.hitbox.top = self.rect.top          
+
     def update(self):
         super().update()
         self.update_vel()
 
+    def collide__entity_x(self,entity):            
+        if self.velocity[0] > 0:#going to the right
+            entity.left_collision(self.hitbox.left)
+        else:#going to the leftx
+            entity.right_collision(self.hitbox.right)
+        entity.update_rect_x()
+
+    def collide_entity_y(self,entity):                      
+        if self.velocity[1] < 0:#going up              
+            entity.down_collision(self.hitbox.top)
+        else:#going up
+            entity.top_collision(self.hitbox.bottom)
+        entity.update_rect_y()
+
     def collide_x(self,entity):
-        if entity.velocity[0] > 0:#going to the right
+        if entity.velocity[0] > self.velocity[0]:#going to the right
             entity.right_collision(self.hitbox.left)
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
@@ -330,10 +354,7 @@ class Bubble(Collision_timer):
         entity.update_rect_y()
 
     def update_vel(self):#need to update the player position if it is colliding, I guess? or update after collision?
-        self.velocity[1] -= self.game_objects.game.dt*0.01
-        self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1]+self.velocity[1]] 
-        self.rect.topleft = self.true_pos
-        self.hitbox.topleft = self.true_pos        
+        self.velocity[1] -= self.game_objects.game.dt*0.01         
 
     def deactivate(self):#called when first timer runs out
         self.kill()

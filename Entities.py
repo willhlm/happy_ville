@@ -2954,7 +2954,9 @@ class Bubble_source(Interactable):
         self.time += 1
         if self.time > 100:
             bubble = self.bubble(self.rect.midtop, self.game_objects)
+            self.game_objects.dynamic_platforms.add(bubble)      
             self.game_objects.platforms.add(bubble)        
+
             self.time =0 
 
 class Challenge_monument(Interactable):

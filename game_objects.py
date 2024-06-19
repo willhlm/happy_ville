@@ -44,6 +44,7 @@ class Game_Objects():
         self.enemies = groups.Group()#groups.Shader_group()
         self.npcs = groups.Group()#groups.Shader_group()
         self.platforms = groups.Group()
+        self.dynamic_platforms = groups.Group()#movinbg platforms
         self.special_shaders = groups.Group()#portal use it
         self.platforms_ramps = groups.Group()
         self.all_bgs = groups.LayeredUpdates()#groups.Shader_layered_group()#
@@ -123,6 +124,8 @@ class Game_Objects():
         self.collisions.projectile_collision(self.eprojectiles,self.players)
 
     def platform_collision(self):
+        self.collisions.dynamic_platform_collision(self.players)
+
         self.collisions.platform_collision(self.players)
         self.collisions.platform_collision(self.enemies)
         self.collisions.platform_collision(self.npcs)
