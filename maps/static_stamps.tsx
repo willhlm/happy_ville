@@ -54,7 +54,7 @@
  </tile>
  <tile id="13">
   <properties>
-   <property name="sprite" value=""/>
+   <property name="position" value=""/>
   </properties>
  </tile>
  <tile id="14">
@@ -76,7 +76,7 @@
  <tile id="18">
   <properties>
    <property name="angle" value=""/>
-   <property name="colour" type="color" value=""/>
+   <property name="colour" value=""/>
    <property name="falloff" value=""/>
    <property name="position" value=""/>
   </properties>

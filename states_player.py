@@ -697,9 +697,14 @@ class Death_pre(Player_states):
 class Death_charge(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.time = 100
 
     def update(self):
+        self.time -= self.entity.game_objects.game.dt
         self.entity.invincibile = True
+        if self.time < 0:
+            self.entity.dead()
+            self.enter_state('Death_post')
 
     def handle_movement(self,input):
         pass
@@ -756,6 +761,22 @@ class Invisible_main(Player_states):
 
     def handle_movement(self,input):
         pass
+
+class Stand_up_main(Player_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_press_input(self,input):#all states should inehrent this function
+        pass
+
+    def handle_release_input(self,input):#all states should inehrent this function
+        pass
+
+    def handle_movement(self,input):
+        pass
+
+    def increase_phase(self):
+        self.enter_state('Idle_main')       
 
 class Pray_pre(Player_states):
     def __init__(self,entity):

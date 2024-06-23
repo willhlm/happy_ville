@@ -29,7 +29,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         pass
 
 class Collision_block(Platform):
-    def __init__(self, pos, size, run_particle):
+    def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos, size)
         self.run_particles = {'dust':Entities.Dust_running_particles,'water':Entities.Water_running_particles,'grass':Entities.Grass_running_particles}[run_particle]
         self.go_through = False
@@ -246,6 +246,7 @@ class Collision_dmg(Platform):#"spikes"
         entity.take_dmg(self.dmg)
         entity.update_rect_y()
 
+#timer based
 class Collision_timer(Collision_block):#collision block that dissapears if aila stands on it
     def __init__(self,game_objects, pos, size, run_particle):
         super().__init__(pos, size, run_particle)
@@ -300,75 +301,48 @@ class Rhoutta_encounter_1(Collision_timer):
         self.hitbox = self.rect.inflate(0,0)
         self.currentstate.handle_input('Transition_2')
 
-class Bubble(Collision_timer):#shoudl be added to platforms and dynamic_platforms groups
-    def __init__(self, pos,game_objects):
-        super().__init__(game_objects,pos, size = [32,32],run_particle='dust')
-        self.sprites = Bubble.sprites
+class Bubble_static(Collision_timer):#static bubble
+    def __init__(self, pos, game_objects, **prop):
+        super().__init__(game_objects, pos, size = [32,32])
+        self.sprites = Bubble_static.sprites
         self.image = self.sprites['idle'][0]
-        self.velocity = [0,0]
-        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,120)}#these timers are activated when promt and a job is appeneded to self.timer.
-
-    def update_true_pos_x(self):
-        self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
-        self.rect.left = int(self.true_pos[0])#should be int
-        self.hitbox.left = self.rect.left                
-
-    def update_true_pos_y(self):
-        self.true_pos[1] += self.game_objects.game.dt*self.velocity[1]
-        self.rect.top = int(self.true_pos[1])#should be int
-        self.hitbox.top = self.rect.top          
-
-    def update(self):
-        super().update()
-        self.update_vel()
-
-    def collide__entity_x(self,entity):            
-        if self.velocity[0] > 0:#going to the right
-            entity.left_collision(self.hitbox.left)
-        else:#going to the leftx
-            entity.right_collision(self.hitbox.right)
-        entity.update_rect_x()
-
-    def collide_entity_y(self,entity):                      
-        if self.velocity[1] < 0:#going up              
-            entity.down_collision(self.hitbox.top)
-        else:#going up
-            entity.top_collision(self.hitbox.bottom)
-        entity.update_rect_y()
+        lifetime = prop.get('lifetime', 100)
+        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime), 'timer_appear':Platform_timer_2(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.      
 
     def collide_x(self,entity):
-        if entity.velocity[0] > self.velocity[0]:#going to the right
+        if entity.velocity[0] > 0:#going to the right
             entity.right_collision(self.hitbox.left)
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
         entity.update_rect_x()
 
     def collide_y(self,entity):                    
-        if entity.velocity[1] > self.velocity[1]:#going down   
-            self.timer_jobs['timer_disappear'].activate()
+        if entity.velocity[1] > 0:#going down   
+            self.timer_jobs['timer_disappear'].activate()            
             entity.down_collision(self.hitbox.top)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self.hitbox.bottom)
-        entity.update_rect_y()
+        entity.update_rect_y()     
 
-    def update_vel(self):#need to update the player position if it is colliding, I guess? or update after collision?
-        self.velocity[1] -= self.game_objects.game.dt*0.01         
-
-    def deactivate(self):#called when first timer runs out
-        self.kill()
+    def deactivate(self):#called when first timer runs out          
+        self.hitbox = [self.hitbox[0],self.hitbox[1],0,0]
+        self.timer_jobs['timer_appear'].activate()
+        self.currentstate.handle_input('Transition_1')
 
     def activate(self):
-        pass
+        self.hitbox = self.rect.inflate(0,0)
+        self.currentstate.handle_input('Transition_2')
 
     def release_texture(self):#called when .kill() and empty group
         pass
 
     def pool(game_objects):#all things that should be saved in object pool
-        Bubble.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
+        Bubble_static.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
 
-class Breakable_block(Collision_block):#breakable collision blocks
+#breakable
+class Collision_breakable(Collision_block):#breakable collision blocks
     def __init__(self, pos, run_particle):
         super().__init__(pos, size = [16,16],run_particle='dust')
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
@@ -413,7 +387,7 @@ class Breakable_block(Collision_block):#breakable collision blocks
             for frame in range(0,len(self.sprites[state])):
                 self.sprites[state][frame].release()
 
-class Breakable_block_1(Breakable_block):
+class Breakable_block_1(Collision_breakable):
     def __init__(self, pos, game_objects,run_particle='dust'):
         super().__init__(pos, run_particle)
         self.game_objects = game_objects
@@ -422,6 +396,95 @@ class Breakable_block_1(Breakable_block):
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.hitbox = self.rect.copy()
+
+#dynamics ones
+class Collision_dynamic(Collision_block):
+    def __init__(self, pos, size):
+        super().__init__(pos, size)
+        self.velocity = [0,0]
+
+    def update_true_pos_x(self):
+        self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
+        self.rect.left = int(self.true_pos[0])#should be int
+        self.hitbox.left = self.rect.left                
+
+    def update_true_pos_y(self):
+        self.true_pos[1] += self.game_objects.game.dt*self.velocity[1]
+        self.rect.top = int(self.true_pos[1])#should be int
+        self.hitbox.top = self.rect.top   
+
+    def collide_x(self,entity):
+        if entity.velocity[0] > self.velocity[0]:#going to the right
+            entity.right_collision(self.hitbox.left)
+        else:#going to the leftx
+            entity.left_collision(self.hitbox.right)
+        entity.update_rect_x()
+
+    def collide__entity_x(self,entity):            
+        if self.velocity[0] > 0:#going to the right
+            entity.left_collision(self.hitbox.left)
+        else:#going to the leftx
+            entity.right_collision(self.hitbox.right)
+        entity.update_rect_x()
+
+    def collide_entity_y(self,entity):                      
+        if self.velocity[1] < 0:#going up              
+            entity.down_collision(self.hitbox.top)
+        else:#going up
+            entity.top_collision(self.hitbox.bottom)
+        entity.update_rect_y()
+
+    def update(self):
+        super().update()
+        self.update_vel()
+
+    def collide_y(self,entity):                    
+        if entity.velocity[1] > self.velocity[1]:#going down               
+            entity.down_collision(self.hitbox.top)
+            entity.limit_y()
+            entity.running_particles = self.run_particles#save the particles to make
+        else:#going up
+            entity.top_collision(self.hitbox.bottom)
+        entity.update_rect_y()
+
+class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
+    def __init__(self, pos, game_objects, **prop):
+        super().__init__(pos, size = [32,32])
+        self.game_objects = game_objects
+        self.sprites = Bubble.sprites
+        self.timers = []
+        self.image = self.sprites['idle'][0]
+        lifetime = prop.get('lifetime', 300)
+        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.      
+        self.timer_jobs['timer_disappear'].activate()
+        #TODO horitoxntal or veritcal moment
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.animation = animation.Animation(self)
+        self.currentstate = states_time_collision.Idle(self)#
+
+    def update(self):
+        super().update()
+        self.animation.update()
+        self.update_timers()
+
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image, target, position = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#int seem nicer than round
+
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()        
+
+    def update_vel(self):
+        self.velocity[1] -= self.game_objects.game.dt*0.01   
+
+    def pool(game_objects):#all things that should be saved in object pool
+        Bubble.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)    
+
+    def activate(self):
+        pass
+
+    def deactivate(self):#called when first timer runs out         
+        self.kill()
 
 #timer:
 class Platform_timer_1(Entities.Timer):

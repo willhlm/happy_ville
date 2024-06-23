@@ -590,13 +590,13 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 7
+        self.health = 8
         self.spirit = 2
         self.projectiles = game_objects.fprojectiles
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = {'Idle':True,'Walk':True,'Run':True,'Pray':True,'Jump_run':True,
+        self.states = {'Idle':True,'Walk':True,'Run':True,'Pray':True,'Stand_up':True,'Jump_run':True,
                      'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
@@ -607,7 +607,7 @@ class Player(Character):
         self.currentstate = states_player.Idle_main(self)
         self.shader_state = states_shader.Idle(self)
 
-        self.spawn_point = [{'map':'light_forest_1', 'point':'1'}]#a list of max len 2. First elemnt is updated by sejt interaction. Can append positino for bone, which will pop after use
+        self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
 
@@ -659,7 +659,7 @@ class Player(Character):
         new_game_state.enter_state()
 
     def reset_movement(self):#called when loading new map or entering conversations
-        self.acceleration =  [0,C.acceleration[1]]
+        self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()        
 
     def update(self):
@@ -1537,40 +1537,43 @@ class Dash_effect(Staticentity):
         pass
 
 class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the appropriate directions
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity.rect.center,entity.game_objects)
         self.game_objects = entity.game_objects
-        self.image = pygame.Surface((400,400), pygame.SRCALPHA, 32).convert_alpha()
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.image = self.game_objects.game.display.make_layer(entity.game_objects.game.window_size)#TODO        
+        self.rect = pygame.Rect(0, 0, self.image.texture.width, self.image.texture.height)
         self.rect.center = [entity.game_objects.game.window_size[0]*0.5,entity.game_objects.game.window_size[0]*0.5-100]
-        self.image.fill((0,0,0))
+        self.image.clear(0,0,0,255)
 
-        dir = {'left':[self.image.get_width()*0.25,150],'up':[self.image.get_width()*0.5,50],'right':[self.image.get_width()*0.75,150],'down':[self.image.get_width()*0.5,300]}
+        dir = {'left':[self.image.texture.width*0.25,150],'up':[self.image.texture.width*0.5,50],'right':[self.image.texture.width*0.75,150],'down':[self.image.texture.width*0.5,300]}
         for key in entity.directions.keys():
-            text = entity.game_objects.font.render(text = entity.directions[key])
-            text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.image.blit(text,dir[key])
+            text = self.game_objects.font.render((30,12), entity.directions[key])
+            self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+            self.game_objects.game.display.render(text, self.image, position = dir[key],shader = self.game_objects.shaders['colour'])#shader render
+            text.release()
 
-        self.render_fade=[self.render_in,self.render_out]
+        self.render_fade = [self.render_in, self.render_out]
         self.init()
 
     def init(self):
         self.fade = 0
-        self.image.set_alpha(self.fade)
         self.page = 0
 
     def update(self):
         self.render_fade[self.page]()
 
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['alpha'])#shader render
+
     def render_in(self):
         self.fade += self.game_objects.game.dt
         self.fade = min(self.fade,200)
-        self.image.set_alpha(int(self.fade))
+        self.game_objects.shaders['alpha']['alpha'] = self.fade
 
     def render_out(self):
         self.fade -= self.game_objects.game.dt
         self.fade = max(self.fade,0)
-        self.image.set_alpha(int(self.fade))
+        self.game_objects.shaders['alpha']['alpha'] = self.fade
 
         if self.fade < 10:
             self.init()
@@ -1578,6 +1581,9 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 
     def finish(self):#called when fading out should start
         self.page = 1
+
+    def release_texture(self):
+        pass
 
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
@@ -1734,8 +1740,7 @@ class Omamoris():#omamori handler -> "neckalce"
                     break
 
         return [True]
-
-                    
+                            
 #projectiles
 class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
     def __init__(self,entity):
@@ -2439,9 +2444,7 @@ class Bone(Enemy_drop):
     def use_item(self):
         if self.game_objects.player.inventory['Bone'] <= 0: return#if we don't have bones
         self.game_objects.player.inventory['Bone'] -= 1
-        if len(self.game_objects.player.spawn_point) == 2:#if there is already a bone planted somewhere
-            self.game_objects.player.spawn_point.pop()
-        self.game_objects.player.spawn_point.append({'map':self.game_objects.map.level_name, 'point':self.game_objects.camera.scroll})
+        self.game_objects.player.spawn_point['bone'] = {'map':self.game_objects.map.level_name, 'point':self.game_objects.camera.scroll}
         self.game_objects.player.currentstate.enter_state('Plant_bone_main')
 
     def pool(game_objects):#all things that should be saved in object pool
@@ -2938,7 +2941,7 @@ class Place_holder_interacatble(Interactable):
         pass
 
 class Bubble_source(Interactable):
-    def __init__(self, pos, game_objects, bubble):
+    def __init__(self, pos, game_objects, bubble, **prop):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
         self.image = self.sprites['idle'][0]
@@ -2946,6 +2949,7 @@ class Bubble_source(Interactable):
         self.rect.center = pos
         self.hitbox = self.rect.copy()
         self.bubble = bubble
+        self.prop = prop
         self.bounds = [-800, 800, -800, 800]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
         self.time = 0
 
@@ -2953,10 +2957,9 @@ class Bubble_source(Interactable):
         super().update()
         self.time += 1
         if self.time > 100:
-            bubble = self.bubble(self.rect.midtop, self.game_objects)
+            bubble = self.bubble(self.rect.midtop, self.game_objects, **self.prop)
             self.game_objects.dynamic_platforms.add(bubble)      
             self.game_objects.platforms.add(bubble)        
-
             self.time =0 
 
 class Challenge_monument(Interactable):
@@ -2984,6 +2987,58 @@ class Bridge(Interactable):
         self.hitbox = self.rect.copy()
         platform = Collision_block(pos,(self.image.get_width(),32))
         self.game_objects.platforms.add(platform)
+
+class Safe_spawn(Interactable):#area which gives the coordinates which will make aila respawn at after falling into a hole
+    def __init__(self, pos, game_objects, size, position):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos, size)
+        self.rect.topleft = pos
+        self.hitbox = self.rect.copy()
+        self.position = position
+
+    def release_texture(self):
+        pass
+
+    def draw(self, target):
+        pass
+
+    def update(self):
+        self.group_distance()
+
+    def player_collision(self):
+        self.game_objects.player.spawn_point['safe_spawn'] = self.position
+
+class Hole(Interactable):#area which will make aila spawn to safe_point if collided
+    def __init__(self, pos, game_objects, size):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos, size)
+        self.rect.topleft = pos
+        self.hitbox = self.rect.copy()        
+        self.bounds = [-800, 800, -800, 800]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
+        self.interacted = False
+
+    def release_texture(self):
+        pass
+
+    def draw(self, target):
+        pass
+
+    def update(self):
+        self.group_distance()
+
+    def player_collision(self):
+        if self.interacted: return#enter only once
+        if self.game_objects.player.health > 1:#if about to die, don't transport to safe point
+            new_state = states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
+            new_state.enter_state()        
+            self.game_objects.player.currentstate.enter_state('Invisible_main')            
+        self.game_objects.player.take_dmg(1)              
+        self.game_objects.player.velocity = [0,0]        
+        self.game_objects.player.acceleration = [0,0]          
+        self.interacted = True
+
+    def player_noncollision(self):#when player doesn't collide
+        self.interacted = False
 
 class Path_col(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn):
@@ -3471,6 +3526,15 @@ class Fireplace(Interactable):
         self.light_sources.append(self.game_objects.lights.add_light(self, radius = 50))
         self.light_sources.append(self.game_objects.lights.add_light(self, colour = [255/255,175/255,100/255,255/255],radius = 100))
 
+class Spikes(Interactable):#traps
+    def __init__(self,pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/spikes/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],self.rect[2],16)
+        self.dmg = 1
+
 class Spirit_spikes(Interactable):#traps
     def __init__(self,pos,game_objects,size):
         super().__init__(pos,game_objects)
@@ -3592,7 +3656,7 @@ class Jump_timer(Timer):#can be combined with shroomjump?
         if self in self.entity.timers: return#do not append if the timer is already inside
         self.lifetime = self.duration
         self.entity.timers.append(self)
-        self.entity.velocity[1] = C.jump_vel_player#it is negative
+        self.entity.velocity[1] = C.jump_vel_player#it is negative        
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once

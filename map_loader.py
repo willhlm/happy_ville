@@ -202,11 +202,19 @@ class Level():
                 new_block = platforms.Collision_oneway_up(object_position,object_size,types)
                 self.game_objects.platforms.add(new_block)
 
-            elif id == 13:#breakable collision block
+            elif id == 12:#hole, if aila collides, aila will move to safe_spawn position
+                new_block = Entities.Hole(object_position, self.game_objects, object_size)
+                self.game_objects.interactables.add(new_block)
+
+            elif id == 13:#spawn position
+                spawn_pos = [object_position[0] + object_size[0]*0.5, object_position[1] + object_size[1]*0.5]
                 for property in properties:
-                    if property['name'] == 'sprite':
-                        types = property['value']
-                new_block = Entities.Collision_breakable(object_position,self.game_objects,types)
+                    if property['name'] == 'position':
+                        pos = property['value']                        
+                        string_list = pos.split(",")
+                        spawn_pos = [int(item) for item in string_list]
+
+                new_block = Entities.Safe_spawn(object_position, self.game_objects, object_size, spawn_pos)
                 self.game_objects.interactables.add(new_block)
 
             elif id == 14:#camera stop
@@ -601,11 +609,6 @@ class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
 
-    def room(self, room):#called wgen a new room is loaded
-        if room in ['11', '8', '7', '6', '5']:
-            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
-            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
-
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
@@ -635,7 +638,24 @@ class Light_forest(Biome):
                 else:
                     self.level.game_objects.platforms.add(new_plarform)
 
-            elif id == 5:#cocoon
+class Light_forest_semi_cave(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+
+    def room(self, room):#called wgen a new room is loaded
+        if room in ['11', '8', '7', '6', '5']:
+            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
+
+    def load_objects(self, data, parallax, offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 5:#cocoon
                 if parallax == [1,1]:#if BG1 layer
                     new_cocoon = Entities.Cocoon(object_position, self.level.game_objects)
                     self.level.game_objects.interactables.add(new_cocoon)
@@ -753,5 +773,25 @@ class Light_forest_cave(Biome):
                     self.level.game_objects.all_bgs.add(new_vine)
 
             elif id == 5:#bubble source
-                bubble_source = Entities.Bubble_source(object_position, self.level.game_objects, platforms.Bubble)
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'lifetime':
+                        prop['lifetime'] = property['value']
+                    elif property['name'] == 'state':
+                        state = property['value']#horizontal or vertical movement #TODO
+
+                bubble_source = Entities.Bubble_source(object_position, self.level.game_objects, platforms.Bubble, **prop)
                 self.level.game_objects.interactables.add(bubble_source)
+
+            elif id == 6:#spieks
+                spikes = Entities.Spikes(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(spikes)
+
+            elif id == 7:#bubble
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'lifetime':
+                        prop['lifetime'] = property['value']
+
+                new_bubble = platforms.Bubble_static(object_position, self.level.game_objects, **prop)
+                self.level.game_objects.platforms.add(new_bubble)                      

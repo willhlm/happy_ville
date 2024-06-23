@@ -184,7 +184,7 @@ class Load_Menu(Game_State):
 
                 new_state = Gameplay(self.game)
                 new_state.enter_state()
-                map=self.game.game_objects.player.spawn_point['map']
+                map = self.game.game_objects.player.spawn_point['map']
                 point=self.game.game_objects.player.spawn_point['point']
                 self.game.game_objects.load_map(self,map,point)
 
@@ -484,7 +484,7 @@ class Gameplay(Game_State):
         if input == 'dmg':
             new_game_state = Pause_gameplay(self.game, kwarg.get('duration', 20))
             new_game_state.enter_state()
-        elif input == 'death':#normal death
+        elif input == 'death':#normal death            
             self.game.game_objects.player.death()
         elif input == 'butterfly':#the cacoon was hit
             new_state = Butterfly_encounter_gameplay(self.game)
@@ -687,7 +687,7 @@ class Fadein(Gameplay):
         self.count = 0
         self.fade_length = 20
         self.init()
-        self.fade_surface = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
+        self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.fade_surface.clear(0,0,0,255)
 
     def init(self):
@@ -749,6 +749,56 @@ class Fadeout(Fadein):
         self.previous_state.render()
         self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
+
+class Safe_spawn_1(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)  
+        self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO        
+        self.count = 0
+        self.fade_length = 60
+        self.fade_surface.clear(0,0,0,int(255/self.fade_length))             
+
+    def update(self):
+        super().update()
+        self.count += self.game.dt
+        if self.count > self.fade_length:
+            self.exit_state()
+            new_state = Safe_spawn_2(self.game)
+            new_state.enter_state()
+
+    def render(self):
+        super().render()#gameplay render
+        self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
+        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
+
+    def handle_events(self, input):
+        pass
+
+class Safe_spawn_2(Gameplay):
+    def __init__(self, game):
+        super().__init__(game)  
+        self.game.game_objects.player.reset_movement()        
+        self.count = 0
+        self.fade_length = 20
+        self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
+        self.fade_surface.clear(0,0,0,255)       
+        self.game.game_objects.player.set_pos(self.game.game_objects.player.spawn_point['safe_spawn'])           
+        self.game.game_objects.player.currentstate.enter_state('Stand_up_main')
+
+    def update(self):
+        super().update()
+        self.count += self.game.dt
+        if self.count > self.fade_length*2:
+            self.exit_state()
+
+    def render(self):
+        super().render()#gameplay render
+        alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
+        self.fade_surface.clear(0,0,0,alpha)
+        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
+
+    def handle_events(self, input):
+        pass
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -1159,7 +1209,14 @@ class Death(Cutscene_engine):#when aila dies
                 self.exit_state()
 
     def state1(self):
-        self.game.game_objects.load_map(self,self.game.game_objects.player.spawn_point[-1]['map'], self.game.game_objects.player.spawn_point[-1]['point'])
+        if self.game.game_objects.player.spawn_point.get('bone', False):#respawn by bone
+            map = self.game.game_objects.player.spawn_point['bone']['map']
+            point = self.game.game_objects.player.spawn_point['bone']['point']
+            del self.game.game_objects.player.spawn_point['bone']
+        else:#normal resawn
+            map = self.game.game_objects.player.spawn_point['map']
+            point =  self.game.game_objects.player.spawn_point['point']
+        self.game.game_objects.load_map(self, map, point)
         self.stage = 1
 
     def handle_events(self,input):

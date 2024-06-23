@@ -32,3 +32,4 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         weather.Flash.pool(game_objects)
 
         platforms.Bubble.pool(game_objects)
+        platforms.Bubble_static.pool(game_objects)

@@ -467,7 +467,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_11"
+                                 "value":"light_forest_semi_cave_11"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -508,7 +508,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_8"
+                                 "value":"light_forest_semi_cave_8"
                                 }, 
                                 {
                                  "name":"spawn",
