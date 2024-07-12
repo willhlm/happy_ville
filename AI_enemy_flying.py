@@ -14,6 +14,9 @@ class AI():
     def deactivate(self):
         self.enter_AI('Idle') 
 
+    def handle_input(self, input):#input is hurt when taking dmg
+        pass
+
 class Idle(AI):#do nothing
     def __init__(self, entity):
         super().__init__(entity)   
@@ -31,7 +34,7 @@ class Patrol(AI):#patrol in a circle aorund the original position
 
     def check_sight(self):
         if abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
-            self.enter_AI('Wait', next_AI = 'Chase')
+            self.enter_AI('Wait', time = 10, next_AI = 'Chase')
 
     def check_position(self):
         if abs(self.target_position[0]-self.entity.rect.centerx) < 10 and abs(self.target_position[1]-self.entity.rect.centery) < 10:#5*self.init_time > 2*math.pi
@@ -56,6 +59,10 @@ class Patrol(AI):#patrol in a circle aorund the original position
         else:
             self.entity.dir[0] = 1
 
+    def handle_input(self, input):#input is hurt when taking dmg
+        if input == 'Hurt':
+            self.enter_AI('Chase')
+
 class Wait(AI):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
@@ -67,10 +74,14 @@ class Wait(AI):
         if self.time < 0:
             self.enter_AI(self.next_AI)
 
+    def handle_input(self, input):#input is hurt when taking dmg
+        if input == 'Hurt':
+            self.enter_AI('Chase')
+
 class Chase(AI):            
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
-        self.giveup = kwarg.get('giveup',300) 
+        self.giveup = kwarg.get('giveup', 300) 
         self.time = self.giveup   
 
     def update(self):   
@@ -83,7 +94,7 @@ class Chase(AI):
         if abs(self.player_distance[0]) > self.entity.aggro_distance[0] or abs(self.player_distance[1]) > self.entity.aggro_distance[1]:#player far away     
             self.time -= self.entity.game_objects.game.dt  
             if self.time < 0:
-                self.enter_AI('Wait',next_AI = 'Patrol', time = 100)    
+                self.enter_AI('Wait',next_AI = 'Patrol', time = 20)    
         elif abs(self.player_distance[0]) < self.entity.attack_distance[0] and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close 
             self.enter_AI('Attack')
         else:#player close, reset timer

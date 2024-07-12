@@ -482,7 +482,7 @@ class Level():
         'Each group needs at least one tile layer (but can be emppty).'
         'The groups should contain "fg", "bg" in their name.'
         'The tile layer in groups can be called whatever.'
-        'recommended convention: bg_#, bg_interact_# or bg_fade_# for the layers. It doesnt have to be called bg but needs _fade_# and _interact_# for the spaceial ones'
+        'recommended convention: bg_#, bg_interact_# or bg_fade_# for the layers  (normal, stiff infront of interactables, e.g. grass, and stuff that fades upon collision with player). It doesnt have to be called bg but needs _fade_# and _interact_# for the spaceial ones'
         'The main group needs to be called "bg1"'#world state file reads it
         'The objects need to be called statics, interactables, front or back.'
         'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
@@ -541,11 +541,6 @@ class Level():
                 blit_fade_surfaces[layer].blit(blit_surfaces[layer], (0,0))
             else:#statics
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
-
-        #blur_value = self.blur_value(parallax)
-        #for layer in blit_compress_surfaces.keys():
-            #if parallax[0] == 1: break
-            #blit_compress_surfaces[layer] = pygame.transform.gaussian_blur(blit_compress_surfaces[layer], blur_value,repeat_edge_pixels=True)#box_blur
 
         #add the bg, fg, fade, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():
@@ -637,6 +632,21 @@ class Light_forest(Biome):
                     self.level.game_objects.platforms.add(new_plarform)
                 else:
                     self.level.game_objects.platforms.add(new_plarform)
+
+            elif id == 5:#grind
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'frequency':
+                        kwarg['frequency'] = property['value']                
+                    elif property['name'] == 'direction':
+                        kwarg['direction'] = property['value']   
+                    elif property['name'] == 'distance':
+                        kwarg['distance'] = property['value']                           
+                    elif property['name'] == 'speed':
+                        kwarg['speed'] = property['value']  
+
+                new_grind = Entities.Grind(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.interactables.add(new_grind)
 
 class Light_forest_semi_cave(Biome):
     def __init__(self, level):

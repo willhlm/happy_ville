@@ -4,16 +4,15 @@ import Read_files
 
 class Sound():#class for organising sound and music playback
     def __init__(self):#channels 0 - 4 is dedicated to        
-        self.reserved_channels = 4
-        self.initiate_channels(8)
-        self.volume = game_settings = Read_files.read_json('game_settings.json')['sounds']     
+        pygame.mixer.set_num_channels(20)#create X channels, #number of sounds we will simultanioulsy play       
+        self.initiate_channels(reserved_channels = 4 )#need to be smaller than numver of channels
+        self.volume = Read_files.read_json('game_settings.json')['sounds']     
 
-    def initiate_channels(self, quantity):#note channel 0 should be used for level bg music
-        self.channels = []
-        for i in range(quantity):
+    def initiate_channels(self, reserved_channels = 4):#note channel 0 should be used for level bg music        
+        self.channels = []#the reserved channels
+        for i in range(reserved_channels):            
             self.channels.append(pygame.mixer.Channel(i))
-            if i < self.reserved_channels:
-                pygame.mixer.set_reserved(i)
+            pygame.mixer.set_reserved(i)
         self.channels[0].set_volume(1)
 
     def play_bg_sound(self):
@@ -46,12 +45,10 @@ class Sound():#class for organising sound and music playback
         self.bg.set_volume(1)
 
     def play_sfx(self, sfx, loop = 0, vol = 0.2):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
-        channel = pygame.mixer.find_channel()
-        try:
-            channel.set_volume(vol * self.volume['SFX'] * 0.1)
-            channel.play(sfx, loops = loop)
-        except:
-            print("No available channels")
+        channel = pygame.mixer.find_channel(True)#force it to always find a channel. If no available, it will take the channel that has been alive the longest time
+        
+        channel.set_volume(vol * self.volume['SFX'] * 0.1)#the 0.1 normalise it to 1
+        channel.play(sfx, loops = loop)
 
         return channel
 
@@ -63,5 +60,3 @@ class Sound():#class for organising sound and music playback
 
     def load_sound(self, name):
         pass
-
-    #list general sounds that  can always be loaded and played

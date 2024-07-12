@@ -262,12 +262,14 @@ class Run_post(Player_states):
     def increase_phase(self):
         self.enter_state('Idle_main')
 
-class Jump_stand_pre(Player_states):
+class Jump_stand_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
     def update(self):
-        if self.entity.acceleration[0] != 0:#if you start moving
+        if self.entity.velocity[1] > 0.7:#when you start falling
+            self.enter_state('Fall_stand_pre')
+        elif self.entity.acceleration[0] != 0:#if you start moving
             self.enter_state('Jump_run_main')
 
     def handle_press_input(self,input):
@@ -297,27 +299,16 @@ class Jump_stand_pre(Player_states):
                 self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_state('Jump_stand_main')
-
-class Jump_stand_main(Jump_stand_pre):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        if self.entity.velocity[1] > 0.7:#when you start falling
-            self.enter_state('Fall_stand_pre')
-        elif self.entity.acceleration[0] != 0:#if you start moving
-            self.enter_state('Jump_run_main')
-
-    def increase_phase(self):#called when an animation is finihed for that state
         pass
 
-class Jump_run_pre(Player_states):
+class Jump_run_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
     def update(self):
-        if self.entity.acceleration[0] == 0:
+        if self.entity.velocity[1] > 0.7:
+            self.enter_state('Fall_run_pre')
+        elif self.entity.acceleration[0] == 0:
             self.enter_state('Jump_stand_main')
 
     def handle_press_input(self,input):
@@ -345,19 +336,6 @@ class Jump_run_pre(Player_states):
                 state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_state('Jump_run_main')
-
-class Jump_run_main(Jump_run_pre):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        if self.entity.velocity[1] > 0.7:
-            self.enter_state('Fall_run_pre')
-        elif self.entity.acceleration[0] == 0:
-            self.enter_state('Jump_stand_main')
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -401,7 +379,7 @@ class Fall_run_pre(Player_states):
 
     def update(self):
         if self.entity.acceleration[0] == 0:
-            self.enter_state('Fall_stand_main')
+            self.enter_state('Fall_stand_pre')#TODO, it should start at a specific animation frame, depending on the current one
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
@@ -438,6 +416,10 @@ class Fall_run_main(Fall_run_pre):
     def __init__(self,entity):
         super().__init__(entity)
 
+    def update(self):
+        if self.entity.acceleration[0] == 0:
+            self.enter_state('Fall_stand_main')
+
     def init(self):
         pass
 
@@ -455,7 +437,7 @@ class Fall_stand_pre(Player_states):
 
     def update(self):
         if self.entity.acceleration[0] != 0:
-            self.enter_state('Fall_run_main')
+            self.enter_state('Fall_run_pre')#TODO, it should start at a specific animation frame, depending on the current one
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
@@ -489,6 +471,10 @@ class Fall_stand_pre(Player_states):
 class Fall_stand_main(Fall_stand_pre):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def update(self):
+        if self.entity.acceleration[0] != 0:
+            self.enter_state('Fall_run_main')
 
     def init(self):
         pass

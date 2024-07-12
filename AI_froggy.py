@@ -41,9 +41,9 @@ class Patrol():
     def check_sight(self):
         if abs(self.parent.player_distance[0]) < self.parent.entity.attack_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.attack_distance[1]:
             self.parent.append_child(Init_Fade_animation(self.parent))
-            self.parent.append_child(Wait(self.parent,duration = 40))            
+            self.parent.append_child(Wait(self.parent, duration = 40))            
             self.parent.append_child(Fly(self.parent))
-            self.parent.append_child(Wait(self.parent,duration = 40))
+            self.parent.append_child(Wait(self.parent, duration = 40))
             self.parent.append_child(Fly(self.parent))             
         elif abs(self.parent.player_distance[0]) < self.parent.entity.aggro_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.aggro_distance[1]:
             self.parent.append_child(Taunt(self.parent))     
@@ -101,7 +101,7 @@ class Fly():
         else:
             self.parent.entity.dir[0] = -1
 
-        self.parent.entity.velocity[0] += -self.parent.entity.dir[0]*2
+        self.parent.entity.velocity[0] += -self.parent.entity.dir[0]*4
 
     def handle_input(self, input):
         if input == 'landed':
