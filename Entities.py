@@ -38,27 +38,36 @@ class BG_Block(Staticentity):
     def __init__(self, pos, game_objects, img, parallax):
         super().__init__(pos, game_objects)
         self.parallax = parallax
-        self.image = game_objects.game.display.surface_to_texture(img.convert_alpha())#need to save in memoery
-        self.rect[2] = self.image.width
-        self.rect[3] = self.image.height
-        self.blur()#blur only during init
+        self.layers = None  # Initialize layer to None
+        self.blur(img)  # Blur only during init
 
-    def blur(self):
-        if self.parallax[0] != 1:#don't blur if there is no parallax
+    def blur(self, img):
+        base_image = self.game_objects.game.display.surface_to_texture(img.convert_alpha())  # Need to save in memory
+        self.rect[2] = base_image.width
+        self.rect[3] = base_image.height
+
+        if self.parallax[0] != 1:  # Don't blur if there is no parallax
             shader = self.game_objects.shaders['blur']
-            shader['blurRadius'] = 1/self.parallax[0]#set the blur redius
+            shader['blurRadius'] = 1 / self.parallax[0]  # Set the blur radius
             self.game_objects.game.display.use_alpha_blending(False)
-            layer = self.game_objects.game.display.make_layer(self.image.size)#make an empty later
-            self.game_objects.game.display.render(self.image, layer, shader = shader)#render the image onto the later
+            
+            # Make an empty layer
+            self.layers = self.game_objects.game.display.make_layer(base_image.size)
+            self.game_objects.game.display.render(base_image, self.layers, shader=shader)  # Render the image onto the layer
             self.game_objects.game.display.use_alpha_blending(True)
-            self.image = layer.texture#get the texture of the layer
+            self.image = self.layers.texture  # Get the texture of the layer
+            base_image.release()
+        else:
+            self.image = base_image
 
     def draw(self, target):
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position=pos, shader=self.shader)  # Shader render
 
-    def release_texture(self):#called when .kill() and when emptying the group
+    def release_texture(self):  # Called when .kill() and when emptying the group
         self.image.release()
+        if self.layers:  # Release layer if it exists
+            self.layers.release()
 
 class BG_Fade(BG_Block):
     def __init__(self,pos, game_objects, img, parallax, positions):
@@ -559,9 +568,11 @@ class Character(Platform_entity):#enemy, NPC,player
             self.shader_state.handle_input('Hurt')#turn white
             self.AI.handle_input('Hurt')
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 10)#makes the game freez for few frames            
+            #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 10)#makes the game freez for few frames            
+            self.game_objects.camera.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
         else:#if dead
-            self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 30)#makes the game freez for few frames
+            self.game_objects.camera.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
+            #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 30)#makes the game freez for few frames
             self.aggro = False
             self.invincibile = True
             self.AI.deactivate()
