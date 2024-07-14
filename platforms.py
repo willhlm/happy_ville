@@ -248,7 +248,7 @@ class Collision_dmg(Platform):#"spikes"
 
 #timer based
 class Collision_timer(Collision_block):#collision block that dissapears if aila stands on it
-    def __init__(self,game_objects, pos, size, run_particle):
+    def __init__(self,game_objects, pos, size, run_particle = 'dust'):
         super().__init__(pos, size, run_particle)
         self.game_objects = game_objects
         self.timers = []

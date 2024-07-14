@@ -538,7 +538,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_6"
+                                 "value":"light_forest_5"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -686,7 +686,7 @@
                          "visible":true,
                          "width":16,
                          "x":3616,
-                         "y":560
+                         "y":624
                         }, 
                         {
                          "gid":15,
