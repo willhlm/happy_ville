@@ -94,7 +94,7 @@ class Collision_oneway_up(Platform):
 
     def collide_y(self,entity):
         if entity.velocity[1] < 0: return#going up
-        offset = entity.velocity[1] + abs(entity.velocity[0])
+        offset = entity.velocity[1] + abs(entity.velocity[0]) + 1
         if entity.hitbox.bottom <= self.hitbox.top + offset:
             entity.down_collision(self.hitbox.top)
             entity.limit_y()

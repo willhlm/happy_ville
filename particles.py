@@ -12,8 +12,8 @@ class Particles(pygame.sprite.Sprite):
         dir = kwarg.get('dir', 'isotropic') 
         angle = self.define_angle(dir)
 
-        distance = kwarg.get('distance', 400)
-        vel = kwarg.get('vel', {'linear':[7,13]})
+        distance = kwarg.get('distance', 0)
+        vel = kwarg.get('vel', {'linear':[7,15]})
         
         self.angle = -(2*math.pi*angle)/360
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
@@ -52,18 +52,24 @@ class Particles(pygame.sprite.Sprite):
             self.kill()
 
     def define_angle(self,dir):#is there a better way?
-        if dir=='isotropic':
+        if dir == 'isotropic':
             angle=random.randint(-180, 180)#the ejection anglex
-        elif dir == -1:#rigth hit
+        elif dir[1] == -1:#hit from down hit
+            spawn_angle = 30
+            angle = random.randint(90-spawn_angle, 90+spawn_angle)#the ejection anglex       
+        elif dir[1] == 1:#hit from above hit
+            spawn_angle = 30
+            angle=random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex     
+        elif dir[0] == -1:#rigth hit
             spawn_angle = 30
             angle=random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
-        elif dir == 1:#left hit
+        elif dir[0] == 1:#left hit
             spawn_angle = 30
-            angle=random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex
+            angle=random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex                           
         else:#integer
-            dir += 180*random.randint(0,1)
+            dir[0] += 180*random.randint(0,1)
             spawn_angle = 10
-            angle=random.randint(dir-spawn_angle, dir+spawn_angle)#the ejection anglex
+            angle=random.randint(dir[0]-spawn_angle, dir[0]+spawn_angle)#the ejection anglex
         return angle
 
     def draw(self, target):
@@ -77,7 +83,7 @@ class Particles(pygame.sprite.Sprite):
 class Circle(Particles):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        scale = kwarg.get('scale',1)
+        scale = kwarg.get('scale',3)
         self.radius = random.randint(max(scale-1,1), round(scale+1))
         self.fade_scale = 0.1#how fast alpha should do down
         self.image = Circle.image

@@ -22,8 +22,8 @@ class Camera():
     def set_camera(self, camera):
         self.game_objects.camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll)
 
-    def camera_shake(self,amp = 3, duration = 100):
-        self.game_objects.camera = Camera_shake(self.game_objects, self.true_scroll, amp, duration)
+    def camera_shake(self, **kwarg):
+        self.game_objects.camera = Camera_shake(self.game_objects, self.true_scroll, **kwarg)
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
@@ -37,19 +37,22 @@ class Camera():
         self.true_scroll = [self.game_objects.player.true_pos[0] - self.center[0], self.game_objects.player.true_pos[1] - self.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
 class Camera_shake(Camera):
-    def __init__(self, game_objects, scroll, amp, duration):
+    def __init__(self, game_objects, scroll, **kwarg):
         super().__init__(game_objects, scroll)
-        self.amp = amp
-        self.duration = duration
+        self.amp = kwarg.get('amplitude', 3)
+        self.duration = kwarg.get('duration', 100)
+        self.scale = kwarg.get('scale', 0.9)
 
-    def camera_shake(self,amp = 3,duration = 100):
-        self.amp = amp
-        self.duration = duration
+    def camera_shake(self, **kwarg):
+        self.amp = kwarg.get('amplitude', 3)
+        self.duration = kwarg.get('duration', 100)   
+        self.scale = kwarg.get('scale', 0.9)             
 
     def update(self):
         super().update()
-        self.scroll[0] += random.randint(-self.amp,self.amp)
-        self.scroll[1] += random.randint(-self.amp,self.amp)
+        self.amp = self.scale * self.amp
+        self.scroll[0] += random.uniform(-self.amp,self.amp)
+        self.scroll[1] += random.uniform(-self.amp,self.amp)
         self.duration -= self.game_objects.game.dt
         self.exit_state()
 
@@ -69,7 +72,6 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
     def update(self):#called from camera, in case the camera needs to be re centeralised
         for update in self.updates:
             update()
-
 
     def add_stop(self,stop):#called from camera stop states
         self.stops[stop] += 1

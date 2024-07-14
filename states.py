@@ -105,9 +105,9 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            self.game.game_objects.load_map(self,'light_forest_cave_7','1')
-            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'village_ola2_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_cave_7','1')
+            #self.game.game_objects.load_map(self,'light_forest_6','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -482,7 +482,7 @@ class Gameplay(Game_State):
 
     def handle_input(self,input,**kwarg):
         if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game, kwarg.get('duration', 20))
+            new_game_state = Pause_gameplay(self.game, **kwarg)
             new_game_state.enter_state()
         elif input == 'death':#normal death
             self.game.game_objects.player.death()
@@ -583,25 +583,21 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             pygame.quit()
             sys.exit()
 
-class Pause_gameplay(Gameplay):#a pause screen with shake. = when aila takes dmg
-    def __init__(self,game, duration=12, amplitude = 20):
+class Pause_gameplay(Gameplay):#a pause screen with optional shake. = when enteties takes dmg
+    def __init__(self,game, **kwarg):
         super().__init__(game)
-        self.duration = duration
-        self.amp = amplitude
-        self.game.state_stack[-1].render()#make sure that everything is plotted before making a screen copy
+        self.duration = kwarg.get('duration', 12)
+        amp = kwarg.get('amplitude', 0)
+        scale = kwarg.get('scale', 0.9)
+        self.game.game_objects.camera.camera_shake(amplitude = amp, duration = self.duration, scale = scale)
 
     def update(self):
-        #self.game.game_objects.cosmetics.update()
+        self.game.game_objects.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
+        self.game.game_objects.camera.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
+
         self.duration -= self.game.dt
-        self.amp = 0.9*self.amp
         if self.duration < 0:
             self.exit_state()
-
-    def render(self):
-        super().render()
-        #self.game.game_objects.cosmetics.draw()
-        pos = (random.uniform(-self.amp,self.amp), random.uniform(-self.amp,self.amp))
-        self.game.display.render(self.game.screen.texture, self.game.screen, position = pos)#shader render
 
 class Slow_motion_gameplay(Gameplay):
     def __init__(self, game):
