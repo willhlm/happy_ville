@@ -106,8 +106,8 @@ class Title_Menu(Game_State):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'light_forest_cave_7','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -484,7 +484,7 @@ class Gameplay(Game_State):
         if input == 'dmg':
             new_game_state = Pause_gameplay(self.game, kwarg.get('duration', 20))
             new_game_state.enter_state()
-        elif input == 'death':#normal death            
+        elif input == 'death':#normal death
             self.game.game_objects.player.death()
         elif input == 'butterfly':#the cacoon was hit
             new_state = Butterfly_encounter_gameplay(self.game)
@@ -752,11 +752,11 @@ class Fadeout(Fadein):
 
 class Safe_spawn_1(Gameplay):
     def __init__(self, game):
-        super().__init__(game)  
-        self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO        
+        super().__init__(game)
+        self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.count = 0
         self.fade_length = 60
-        self.fade_surface.clear(0,0,0,int(255/self.fade_length))             
+        self.fade_surface.clear(0,0,0,int(255/self.fade_length))
 
     def update(self):
         super().update()
@@ -776,13 +776,13 @@ class Safe_spawn_1(Gameplay):
 
 class Safe_spawn_2(Gameplay):
     def __init__(self, game):
-        super().__init__(game)  
-        self.game.game_objects.player.reset_movement()        
+        super().__init__(game)
+        self.game.game_objects.player.reset_movement()
         self.count = 0
         self.fade_length = 20
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
-        self.fade_surface.clear(0,0,0,255)       
-        self.game.game_objects.player.set_pos(self.game.game_objects.player.spawn_point['safe_spawn'])           
+        self.fade_surface.clear(0,0,0,255)
+        self.game.game_objects.player.set_pos(self.game.game_objects.player.spawn_point['safe_spawn'])
         self.game.game_objects.player.currentstate.enter_state('Stand_up_main')
 
     def update(self):
