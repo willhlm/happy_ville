@@ -29,6 +29,9 @@ class Game_State():
     def exit_state(self):
         self.game.state_stack.pop()
 
+    def release_texture(self):
+        pass
+
 class Title_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
@@ -105,10 +108,10 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_17','1')
+            self.game.game_objects.load_map(self,'village_ola2_5','1')
             #self.game.game_objects.load_map(self,'light_forest_cave_7','1')
-            #self.game.game_objects.load_map(self,'light_forest_6','1')
-            self.game.game_objects.load_map(self,'collision_map_4','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -429,7 +432,7 @@ class Option_Menu_display(Game_State):
             pass
 
 class Gameplay(Game_State):
-    def __init__(self,game):
+    def __init__(self, game):
         super().__init__(game)
 
     def update(self):
@@ -492,11 +495,10 @@ class Gameplay(Game_State):
             new_state.enter_state()
 
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
-    def __init__(self,game):
+    def __init__(self, game):
         super().__init__(game)
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
-        #self.title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
         #create buttons
         self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
         self.current_button = 0
@@ -547,6 +549,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.title.release()
         self.bg.release()
         self.background.release()
+        self.arrow.image.release()
         for key in self.button_surfaces.keys():
             self.button_surfaces[key].release()
 
@@ -577,7 +580,9 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             new_state = Option_Menu(self.game)
             new_state.enter_state()
 
-        elif self.current_button == 2:
+        elif self.current_button == 2:#exit to main menu
+            for state in self.game.state_stack[1:]:#except the first one
+                state.release_texture()
             self.game.state_stack = [self.game.state_stack[0]]
 
         elif self.current_button == 3:
@@ -708,6 +713,7 @@ class Fadein(Gameplay):
         self.game.game_objects.load_bg_music()
         self.game.game_objects.player.reset_movement()
         self.game.game_objects.player.currentstate.enter_state(self.aila_state)
+        self.fade_surface.release()
         self.exit_state()
 
     def render(self):
@@ -739,6 +745,7 @@ class Fadeout(Fadein):
             self.exit()
 
     def exit(self):
+        self.fade_surface.release()
         self.exit_state()#has to be before loadmap
         self.game.game_objects.load_map2(self.map_name, self.spawn, self.fade)
 

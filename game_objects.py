@@ -67,7 +67,7 @@ class Game_Objects():
         self.players = groups.Group()#blits on float positions
         self.players.add(self.player)
 
-    def load_map(self, previous_state, map_name, spawn = '1',fade = True):#fade out before loading the map
+    def load_map(self, previous_state, map_name, spawn = '1', fade = True):#fade out before loading the map
         if fade:#for cutscenes
             new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn, fade)#it will call load_map2 after loading
             new_game_state.enter_state()
@@ -76,8 +76,8 @@ class Game_Objects():
 
     def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout
         self.clean_groups()
-        t1_start = perf_counter()
-        self.map.load_map(map_name,spawn)
+        t1_start = perf_counter()  
+        self.map.load_map(map_name,spawn)#memory leak somwehre here
         t1_stop = perf_counter()
         print(t1_stop-t1_start)
 

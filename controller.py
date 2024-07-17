@@ -29,7 +29,7 @@ class Controller():
         #self.methods.append(self.joystick)
         file = 'keys_' + self.controller_type[-1] + '.json'
         with open(join(file),'r+') as file:
-            mapping=json.load(file)
+            mapping = json.load(file)
             self.buttons = mapping['buttons']
             self.analogs = mapping['analogs']
 
@@ -149,19 +149,15 @@ class Controller():
             self.value['d_pad'] = [event.value[0],event.value[1]]
 
     def output(self):
-        #print(self.value)
         return [self.keydown, self.keyup, self.value, self.key]
 
     def controller_angle(self,stick):#limit the inputs depending on the angle
-
         x, y = self.value[stick]
         if abs(x) > 1:
             x = math.copysign(1, x)
         if abs(y) > 1:
             y = math.copysign(1, y)
 
-
-        #print(x,y)
         if x == 0:
             return
         else:

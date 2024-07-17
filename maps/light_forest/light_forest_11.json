@@ -560,7 +560,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":496,
+                         "x":416,
                          "y":896
                         }, 
                         {
@@ -583,7 +583,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":512,
+                         "x":432,
                          "y":896
                         }, 
                         {
@@ -601,7 +601,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":560,
+                         "x":480,
                          "y":848
                         }, 
                         {
@@ -636,7 +636,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_10"
+                                 "value":"light_forest_17"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -965,7 +965,7 @@
          "y":0
         }],
  "nextlayerid":111,
- "nextobjectid":843,
+ "nextobjectid":845,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
