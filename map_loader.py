@@ -12,7 +12,7 @@ class Level():
         self.area_change = True#a flag to chenge if we change area
         self.biome = Biome(self)
 
-    def load_map(self,map_name,spawn):
+    def load_map(self,map_name,spawn):        
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
         self.level_name = map_name.lower()
@@ -20,8 +20,8 @@ class Level():
         self.game_objects.lights.new_map()#set ambient default light and clear light sources
         self.check_biome()#pause the sound if we change area
         self.load_map_data()#load the map data
-        self.init_state_file()#need to be before load groups
-        self.load_groups()
+        self.init_state_file()#need to be before load groups        
+        self.load_groups()#memory leak here somwerhe
         self.set_camera()
         self.orginise_references()
 
@@ -35,7 +35,7 @@ class Level():
             self.biome.clear_biome()
             self.biome_name = self.level_name[:self.level_name.rfind('_')]
             self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize(), Biome)(self)#returns Biome (default) if there is no biome class
-        room = self.level_name[self.level_name.rfind('_')+1:]
+        room = self.level_name[self.level_name.rfind('_') + 1 :]
         self.biome.room(room)
 
     def init_state_file(self):
@@ -91,7 +91,7 @@ class Level():
             elif 'fg' in group: self.layer = 'fg'
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'back')#objects behind layers
-            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
+            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)#memory leak somerhe
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'front')#object infron of layers
 
     def load_objects(self, data, parallax, offset, position):
@@ -476,7 +476,7 @@ class Level():
     def blur_value(parallax):#called from load_layers and load_back/front_objects
         return round(1/parallax[0])
 
-    def load_layers(self,data, parallax, offset):
+    def load_layers(self, data, parallax, offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
         'The offset and parallax should be specified for group, which affects all in that group. Individual tile layers can be specified as well.'
         'Each group needs at least one tile layer (but can be emppty).'
@@ -486,7 +486,7 @@ class Level():
         'The main group needs to be called "bg1"'#world state file reads it
         'The objects need to be called statics, interactables, front or back.'
         'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
-
+        
         #make empty surfaces
         key = list(data.keys())[0]
         cols = data[key]['width']#number of columns
@@ -497,7 +497,7 @@ class Level():
         animation_list = {}#a place holder for animation objects
         blit_fade_surfaces = {}#fade surfaces that goes away upon collision
         blit_fade_pos = {}#fade surfaces that goes away upon collision
-
+        
         for tile_layer in data.keys():#make a blank surface
             animation_list[tile_layer] = []
             if 'animated' in tile_layer: continue
@@ -505,7 +505,7 @@ class Level():
             blit_compress_surfaces[tile_layer[0:tile_layer.rfind('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
             blit_fade_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
             blit_fade_pos[tile_layer] = []
-
+        
         #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
         for tile_layer in data.keys():
@@ -541,7 +541,7 @@ class Level():
                 blit_fade_surfaces[layer].blit(blit_surfaces[layer], (0,0))
             else:#statics
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
-
+        
         #add the bg, fg, fade, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():
             pos = (-math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0],-math.ceil((1-parallax[1])*new_map_diff[1])+ offset[1])
@@ -553,16 +553,17 @@ class Level():
                         if self.layer == 'bg': self.game_objects.all_bgs.add(bg)#bg
                         else: self.game_objects.all_fgs.add(bg)
                         self.game_objects.bg_fade.add(bg)
+
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
                 self.game_objects.bg_interact.add(Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
-
+           
             elif self.layer == 'bg':#bg
-                bg = Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax)#pos,img,parallax
+                bg = Entities.BG_Block(pos,self.game_objects, blit_compress_surfaces[tile_layer], parallax)
                 self.game_objects.all_bgs.add(bg)
-                self.game_objects.all_bgs.reference[tuple(parallax)] = bg
+                self.game_objects.all_bgs.reference[tuple(parallax)] = bg                
             elif self.layer == 'fg':#fg
                 self.game_objects.all_fgs.add(Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax))#pos,img,parallax
-
+            
             if animation_entities.get(tile_layer,False):#add animations
                 for bg_animation in animation_entities[tile_layer]:
                     if 'fg' in tile_layer:

@@ -24,7 +24,7 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):#layered rendering
     def empty(self):
         for spr in self.sprites():
             spr.release_texture()       
-        super().empty()
+        super().empty()        
 
 class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are outside the boundaries
     def __init__(self):

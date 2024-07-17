@@ -49,7 +49,7 @@ class Patrol(Idle):
         if self.check_sight(): return#do not continue if this happens
         if self.check_ground(): return#do not continue if this happens
         if self.check_wall(): return#do not continue if this happens
-        self.parent.entity.patrol()
+        self.parent.entity.patrol([0,0])
         self.exit()
 
     def check_sight(self):

@@ -8,7 +8,7 @@ class Particles(pygame.sprite.Sprite):
         self.spawn_point = [pos[0],pos[1]]
 
         self.lifetime = kwarg.get('lifetime', 60)
-        self.colour = kwarg.get('colour', [255,255,255,255])
+        self.colour = kwarg.get('colour', [255, 255, 255, 255])
         dir = kwarg.get('dir', 'isotropic') 
         angle = self.define_angle(dir)
 
@@ -44,7 +44,7 @@ class Particles(pygame.sprite.Sprite):
         self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
 
     def fading(self):
-        self.colour[-1] -= self.fade_scale*self.game_objects.game.dt
+        self.colour[-1] -= self.fade_scale * self.game_objects.game.dt
         self.colour[-1] = max(self.colour[-1],0)
 
     def destroy(self):
@@ -85,7 +85,7 @@ class Circle(Particles):
         super().__init__(pos, game_objects, **kwarg)
         scale = kwarg.get('scale',3)
         self.radius = random.randint(max(scale-1,1), round(scale+1))
-        self.fade_scale = 0.1#how fast alpha should do down
+        self.fade_scale = 2#how fast alpha should do down in self.fading()
         self.image = Circle.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = self.true_pos
@@ -148,7 +148,7 @@ class Goop(Particles):#circles that "distorts" due to noise
 class Spark(Particles):#a general one
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.fade_scale = 0.4
+        self.fade_scale = 1
 
         self.image = Spark.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)

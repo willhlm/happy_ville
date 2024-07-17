@@ -39,10 +39,10 @@ class BG_Block(Staticentity):
         super().__init__(pos, game_objects)
         self.parallax = parallax
         self.layers = None  # Initialize layer to None
-        self.blur(img)  # Blur only during init
+        self.blur(img)  # Blur only during init: memory leak here      
 
-    def blur(self, img):
-        base_image = self.game_objects.game.display.surface_to_texture(img.convert_alpha())  # Need to save in memory
+    def blur(self, img):        
+        base_image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
         self.rect[2] = base_image.width
         self.rect[3] = base_image.height
 
@@ -60,11 +60,11 @@ class BG_Block(Staticentity):
         else:
             self.image = base_image
 
-    def draw(self, target):
+    def draw(self, target):   
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position=pos, shader=self.shader)  # Shader render
 
-    def release_texture(self):  # Called when .kill() and when emptying the group
+    def release_texture(self):  # Called when .kill() and when emptying the group        
         self.image.release()
         if self.layers:  # Release layer if it exists
             self.layers.release()
@@ -876,7 +876,7 @@ class Froggy(Enemy):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.health = 1
-        self.aggro_distance = [300,50]
+        self.aggro = 0
         self.attack_distance = [150,50]
 
         self.currentstate = states_froggy.Idle(self)
@@ -1882,7 +1882,7 @@ class Sword(Melee):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir)
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
-        self.clash_particles(collision_enemy.hitbox.center, lifetime=20, dir = random.randint(-180, 180))
+        self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
 
     def sword_jump(self):
         if self.dir[1] == -1:
@@ -3610,6 +3610,10 @@ class Grind(Interactable):
 
     def player_collision(self):#player collision
         self.game_objects.player.take_dmg(1)      
+
+    def take_dmg(self, projectile):#when player hits with e.g. sword
+        if hasattr(projectile, 'sword_jump'):#if it has the attribute
+            projectile.sword_jump()    
 
 class Lever(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
