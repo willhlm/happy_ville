@@ -9,11 +9,12 @@ class World_state():
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
         self.define_events()
         self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
+        self.quests = {}#true means completed, false means still active
 
     def define_events(self):#all events that should have a flag
         self.events = {'reindeer':False,'aslat':False,'ape':False,'guide':False}
 
-    def update_event(self,event):#called when an event has happened and set it to True
+    def update_event(self, event):#called when an event has happened and set it to True
         self.events[event] = True
 
     def increase_progress(self):#called when e.g. a boss dies. It is the happinies degree of the world

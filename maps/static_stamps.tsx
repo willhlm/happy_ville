@@ -27,6 +27,12 @@
    <property name="numer" value=""/>
   </properties>
  </tile>
+ <tile id="5">
+  <properties>
+   <property name="item" value=""/>
+   <property name="quest" value=""/>
+  </properties>
+ </tile>
  <tile id="7">
   <properties>
    <property name="particles" value=""/>

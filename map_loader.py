@@ -159,6 +159,17 @@ class Level():
                 new_spawn = Entities.Spawner(object_position,self.game_objects,values)
                 self.game_objects.cosmetics.add(new_spawn)
 
+            elif id == 5:#items         
+                kwarg = {}       
+                for property in properties:
+                    if property['name'] == 'item':
+                        loot = property['value']
+                    elif property['name'] == 'quest':                                              
+                        kwarg['quest'] = property['value']
+
+                new_loot = getattr(Entities, loot)(object_position, self.game_objects, **kwarg)                
+                self.game_objects.loot.add(new_loot)
+
             elif id == 7:#normal collision blocks
                 types = 'dust'
                 for property in properties:

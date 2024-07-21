@@ -17,6 +17,7 @@ import controller
 import lights
 import shader_render
 import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
+import quests
 
 from time import perf_counter
 
@@ -26,6 +27,7 @@ class Game_Objects():
         self.font = Read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
         self.shaders = Read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller('playstation')
+        self.object_pool = object_pool.Object_pool(self)
         self.sound = sound.Sound()
         self.lights = lights.Lights(self)
         self.create_groups()
@@ -36,9 +38,9 @@ class Game_Objects():
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = {'gameplay':UI.Gameplay_UI(self)}
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
-        self.object_pool = object_pool.Object_pool(self)
         self.shader_render = shader_render.Screen_shader(self, 'vignette')     
         self.render_state = states_gameplay.Idle(self)
+        self.quests = quests.Quest(self)
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#groups.Shader_group()
@@ -57,6 +59,7 @@ class Game_Objects():
         self.entity_pause = groups.PauseGroup() #all Entities that are far away
         self.cosmetics = groups.Group()#groups.Shader_group()#things we just want to blit
         self.cosmetics2 = groups.Group()#groups.Shader_group()#things we just want to blit before player layer
+        self.cosmetics_no_clear = groups.Group()# a group that will not be cleared when chaging map
 
         self.camera_blocks = groups.Group()#pygame.sprite.Group()
         self.interactables = groups.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
@@ -93,7 +96,7 @@ class Game_Objects():
         except FileNotFoundError:
             print("No BG music found")
 
-    def clean_groups(self):
+    def clean_groups(self):#called wgen changing map
         self.npcs.empty()
         self.enemies.empty()
         self.interactables.empty()
@@ -148,6 +151,7 @@ class Game_Objects():
         self.eprojectiles.update()
         self.loot.update()
         self.cosmetics.update()
+        self.cosmetics_no_clear.update()
         self.cosmetics2.update()
         self.interactables.update()
         self.weather.update()
@@ -169,6 +173,7 @@ class Game_Objects():
         self.platforms.draw(self.game.screen)
         self.players.draw(self.game.screen)
         self.cosmetics.draw(self.game.screen)#Should be before fgs
+        self.cosmetics_no_clear.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
         #self.camera_blocks.draw()
         self.lights.draw(self.game.screen)#should be second to last

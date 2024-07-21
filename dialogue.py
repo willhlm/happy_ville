@@ -23,8 +23,15 @@ class Dialogue():#handles dialoage and what to say
         value = random.randint(0,options)
         return self.dialoages['comment'][event][str(value)]        
 
-    def get_conversation(self):
-        #decide priority
+    def get_conversation(self):#quest stuff first, then priority evens, and then normal events followed by notmal conversation
+        #decide priority        
+        for event in self.entity.quest:#check events according yo priority
+            if self.entity.game_objects.world_state.quests.get(event, False):#if the priority event has occured
+                if self.finish(event):
+                    self.entity.quest.remove(event)
+                    return None
+                return self.dialoages['conversation'][event][str(self.conv_index)]
+
         for event in self.entity.priority:#check events according yo priority
             if self.entity.game_objects.world_state.events[event]:#if the priority event has occured
                 if self.finish(event):

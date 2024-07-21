@@ -1,9 +1,15 @@
 {
 
+    "lumberjack_omamori" : {
+        "0" : "What do you got there?",
+        "1" : "Here, let me fix that for you."
+    },    
+
   "state_1" : {
       "0" : "You want some Wood little girl?",
       "1" : "Here, lick this!"
   },
+  
     "state_2" : {
         "0" : "yolo.",
         "1" : "Wood please"

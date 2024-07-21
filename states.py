@@ -109,7 +109,7 @@ class Title_Menu(Game_State):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'light_forest_cave_1','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -752,7 +752,7 @@ class Fadeout(Fadein):
         self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
-class Safe_spawn_1(Gameplay):
+class Safe_spawn_1(Gameplay):#fade
     def __init__(self, game):
         super().__init__(game)
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
@@ -776,7 +776,7 @@ class Safe_spawn_1(Gameplay):
     def handle_events(self, input):
         pass
 
-class Safe_spawn_2(Gameplay):
+class Safe_spawn_2(Gameplay):#fade
     def __init__(self, game):
         super().__init__(game)
         self.game.game_objects.player.reset_movement()

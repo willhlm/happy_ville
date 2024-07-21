@@ -771,7 +771,7 @@ class Pray_pre(Player_states):
         effect = Entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
         self.entity.acceleration[0] = 0
 
     def handle_press_input(self,input):#all states should inehrent this function

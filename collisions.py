@@ -87,7 +87,7 @@ class Collisions():
         elif interactable:
             interactable.interact()
         if loot:
-            loot.interact()
+            loot.interact(self.game_objects.player)
 
     #collision of player, enemy and loot: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one
