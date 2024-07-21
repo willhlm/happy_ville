@@ -109,7 +109,7 @@ class Title_Menu(Game_State):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            self.game.game_objects.load_map(self,'light_forest_cave_1','1')
+            self.game.game_objects.load_map(self,'light_forest_17','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -578,9 +578,9 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             new_state = Option_Menu(self.game)
             new_state.enter_state()
 
-        elif self.current_button == 2:#exit to main menu            
+        elif self.current_button == 2:#exit to main menu
             for state in self.game.state_stack[1:]:#except the first one
-                state.release_texture()      
+                state.release_texture()
             self.game.state_stack = [self.game.state_stack[0]]
 
         elif self.current_button == 3:
