@@ -36,6 +36,9 @@ class Camera():
     def set_camera_position(self):
         self.true_scroll = [self.game_objects.player.true_pos[0] - self.center[0], self.game_objects.player.true_pos[1] - self.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
+    def zoom(self, scale = 1, center = (0.5, 0.5), rate = 1):
+        self.game_objects.shader_render.append_shader('zoom', scale = scale, center = center, rate = rate)
+
 class Camera_shake(Camera):
     def __init__(self, game_objects, scroll, **kwarg):
         super().__init__(game_objects, scroll)
@@ -76,11 +79,11 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
     def add_stop(self,stop):#called from camera stop states
         self.stops[stop] += 1
 
-        if stop == 'bottom' or stop == 'top':
+        if stop == 'bottom' or stop == 'top' or stop == 'center':
             if self.recenteralise_vertical in self.updates:
               self.updates.remove(self.recenteralise_vertical)
 
-        elif stop =='right' or stop =='left':
+        elif stop =='right' or stop =='left' or stop == 'center':
             if self.recenteralise_horizontal in self.updates:
                 self.updates.remove(self.recenteralise_horizontal)
 

@@ -219,7 +219,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":39202,
+                         "gid":39203,
                          "height":80,
                          "id":1834,
                          "name":"",
@@ -298,7 +298,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_2"
+                                 "value":"light_forest_cave_7"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -321,7 +321,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_7"
+                                 "value":"light_forest_cave_4"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1089,7 +1089,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":39199,
+         "firstgid":39200,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

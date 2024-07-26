@@ -484,6 +484,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
+        self.running_particles = Dust_running_particles#default particles while runing
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -2374,7 +2375,7 @@ class Spirit_container(Loot):
         #a cutscene?
         self.kill()
 
-class Soul_essence(Loot):
+class Soul_essence(Loot):#genkidama
     def __init__(self, pos, game_objects, ID_key = None):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/soul_essence/',game_objects)
@@ -3269,10 +3270,9 @@ class Cave_grass(Interactable_bushes):
         super().take_dmg(projectile)
         self.release_particles(3)
 
-    def release_particles(self,number_particles=12):#should release particles when hurt and death
-        color = [255,255,255,255]
-        for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=30,lifetime=300,vel={'wave':[3,14]},dir='isotropic',scale=2,colour=color)
+    def release_particles(self, number_particles = 12):#should release particles when hurt and death
+        for i in range(0, number_particles):
+            obj1 = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects, distance=30, lifetime=300, vel = {'wave': [3, 14]}, scale=2, fade_scale = 1.5)
             self.game_objects.cosmetics.add(obj1)
 
 class Cocoon(Interactable):#larv cocoon in light forest
