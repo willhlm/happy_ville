@@ -144,5 +144,25 @@ class Idle_center(Basic_states):
         super().__init__(entity)
 
     def update(self):
-        self.entity.game_objects.camera.center[0] = self.entity.game_objects.player.hitbox.centerx - (self.entity.rect.centerx - self.entity.game_objects.game.window_size[0]*0.5)
-        self.entity.game_objects.camera.center[1] = self.entity.game_objects.player.hitbox.centery - (self.entity.rect.centery - self.entity.game_objects.game.window_size[1]*0.5)
+        distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
+
+        if abs(distance[0]) < 10:
+            self.enter_state('Stop_center')        
+
+class Stop_center(Basic_states):
+    def __init__(self,entity,**kwarg):
+        super().__init__(entity)
+        self.entity.game_objects.camera.stop_handeler.add_stop('center')
+
+    def update(self):
+        distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
+        if abs(distance[0]) > self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x
+            self.entity.game_objects.camera.stop_handeler.remove_stop('center')
+            self.enter_state('Idle_center')
+        else:
+            self.entity.game_objects.camera.center[0] = self.entity.game_objects.player.hitbox.centerx - (48 + self.entity.rect.centerx - self.entity.game_objects.game.window_size[0]*0.5)
+
+            #self.entity.game_objects.camera.center[1] = self.entity.game_objects.player.hitbox.centery - (self.entity.rect.centery - self.entity.game_objects.game.window_size[1]*0.5)
+
+            
+        

@@ -85,7 +85,7 @@ class Circle(Particles):
         super().__init__(pos, game_objects, **kwarg)
         scale = kwarg.get('scale',3)
         self.radius = random.randint(max(scale-1,1), round(scale+1))
-        self.fade_scale = 2#how fast alpha should do down in self.fading()
+        self.fade_scale =  kwarg.get('fade_scale',2)#how fast alpha should do down in self.fading()
         self.image = Circle.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = self.true_pos

@@ -744,7 +744,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":224,
+                         "height":384,
                          "id":807,
                          "name":"",
                          "rotation":0,
@@ -752,7 +752,7 @@
                          "visible":true,
                          "width":352,
                          "x":1600,
-                         "y":1280
+                         "y":1440
                         }, 
                         {
                          "gid":8,
@@ -923,30 +923,6 @@
                          "y":1360
                         }, 
                         {
-                         "height":0,
-                         "id":822,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":112,
-                                 "y":160
-                                }, 
-                                {
-                                 "x":112,
-                                 "y":0
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":1600,
-                         "y":1280
-                        }, 
-                        {
                          "gid":13,
                          "height":16,
                          "id":823,
@@ -996,7 +972,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":528,
+                         "width":736,
                          "x":928,
                          "y":1456
                         }, 
@@ -1189,6 +1165,59 @@
                          "width":144,
                          "x":1664,
                          "y":1056
+                        }, 
+                        {
+                         "gid":11,
+                         "height":192,
+                         "id":840,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"light_forest_cave_9"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1568,
+                         "y":1456
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":841,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"2"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1504,
+                         "y":1328
+                        }, 
+                        {
+                         "gid":8,
+                         "height":48,
+                         "id":842,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":288,
+                         "x":1504,
+                         "y":1488
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1241,7 +1270,7 @@
          "y":0
         }],
  "nextlayerid":103,
- "nextobjectid":840,
+ "nextobjectid":843,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

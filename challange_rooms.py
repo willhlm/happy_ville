@@ -10,7 +10,7 @@ class Challange_rooms():
         self.put_gate()
 
     def put_gate(self):        
-        pos = [self.portal.rect.topleft,self.portal.rect.topright]
+        pos = [self.portal.rect.topleft, self.portal.rect.topright]
         self.gates = []
         for num in range(0,2):
             self.gates.append(Entities.Bubble_gate(pos[num],self.game_objects,[100,340]))

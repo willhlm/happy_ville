@@ -111,6 +111,26 @@ class Speed_lines(Shaders):
             
         return self.renderer.game_objects.game.screen
 
+class Zoom(Shaders):
+    def __init__(self, renderer, **kwarg):
+        super().__init__(renderer)  
+        self.scale = kwarg.get('scale', 1)  
+        self.center = kwarg.get('center', (0.5, 0.5))  
+        self.rate = kwarg.get('rate', 1)  
+
+    def set_uniforms(self):
+        self.renderer.game_objects.shaders['zoom']['zoom_amount'] = self.scale
+        self.renderer.game_objects.shaders['zoom']['zoom_center'] = self.center
+
+    def update(self):
+        self.scale *= self.rate
+
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):  
+        self.set_uniforms()
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['zoom'])#makes a zoomed copy of the screen
+        self.renderer.game_objects.game.display.render(self.renderer.layer.texture, self.renderer.game_objects.game.screen, flip = [False, True])#shader render
+        return self.renderer.game_objects.game.screen            
+
 #not used below
 class Idle(Shaders):#enteties use it
     def __init__(self, renderer, **kwarg):
