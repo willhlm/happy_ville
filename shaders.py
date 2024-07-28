@@ -111,20 +111,33 @@ class Speed_lines(Shaders):
             
         return self.renderer.game_objects.game.screen
 
-class Zoom(Shaders):
+class Zoom(Shaders):#only in?
     def __init__(self, renderer, **kwarg):
         super().__init__(renderer)  
-        self.scale = kwarg.get('scale', 1)  
+        self.zoom = 1#zoom scale
         self.center = kwarg.get('center', (0.5, 0.5))  
         self.rate = kwarg.get('rate', 1)  
-
-    def set_uniforms(self):
-        self.renderer.game_objects.shaders['zoom']['zoom_amount'] = self.scale
-        self.renderer.game_objects.shaders['zoom']['zoom_center'] = self.center
+        self.scale = kwarg.get('scale', 0.5)  
+        self.method = 'zoom_in'
+        self.methods = {'zoom_out': self.zoom_out, 'zoom_in': self.zoom_in}
 
     def update(self):
-        self.scale *= self.rate
+        self.methods[self.method]()
 
+    def zoom_in(self):
+        self.zoom *= self.rate
+        self.zoom = max(self.zoom, self.scale)
+
+    def zoom_out(self):    
+        self.zoom /= self.rate
+        self.zoom = min(self.zoom, 1)         
+        if abs(self.zoom - 1) < 0.05:
+            self.renderer.remove_shader('zoom')
+
+    def set_uniforms(self):
+        self.renderer.game_objects.shaders['zoom']['zoom_amount'] = self.zoom       
+        self.renderer.game_objects.shaders['zoom']['zoom_center'] = self.center
+        
     def draw(self, base_texture, pos = [0,0], flip = [False, False]):  
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['zoom'])#makes a zoomed copy of the screen

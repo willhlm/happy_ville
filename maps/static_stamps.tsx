@@ -100,7 +100,9 @@
  </tile>
  <tile id="21">
   <properties>
-   <property name="particles" value=""/>
+   <property name="center" value=""/>
+   <property name="rate" value=""/>
+   <property name="scale" value=""/>
   </properties>
  </tile>
  <tile id="22">
@@ -120,7 +122,7 @@
  </tile>
  <tile id="25">
   <properties>
-   <property name="colour" type="color" value=""/>
+   <property name="colour" value=""/>
    <property name="fade" type="bool" value="false"/>
    <property name="flicker" type="bool" value="false"/>
    <property name="interact" type="bool" value="false"/>

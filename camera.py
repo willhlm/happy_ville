@@ -39,6 +39,9 @@ class Camera():
     def zoom(self, scale = 1, center = (0.5, 0.5), rate = 1):
         self.game_objects.shader_render.append_shader('zoom', scale = scale, center = center, rate = rate)
 
+    def exit_state(self):
+        pass
+
 class Camera_shake(Camera):
     def __init__(self, game_objects, scroll, **kwarg):
         super().__init__(game_objects, scroll)
@@ -62,6 +65,19 @@ class Camera_shake(Camera):
     def exit_state(self):#go back to the cameera
         if self.duration < 0:
             self.set_camera('Camera')
+
+class No_camera(Camera):
+    def __init__(self, game_objects, scroll, **kwarg):
+        super().__init__(game_objects, scroll)   
+
+    def camera_shake(self, **kwarg):
+        pass          
+
+    def update(self):
+        pass
+
+    def exit_state(self):#go back to the cameera
+        self.set_camera('Camera')         
 
 class Stop_handeler():#depending on active camera stops, the re centeralisation can be called
     def __init__(self, camera):

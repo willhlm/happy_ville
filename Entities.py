@@ -154,7 +154,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.time = 0
         self.radius = 0
         self.thickness = 0
-        self.ID = ID#shoudl identify which kind of portal
+        self.ID = ID#shoudl identify which kind of challenge room to create
         game_objects.interactables.add(Place_holder_interacatble(self, game_objects))#add a dummy interactable to the group, since portal cannot be in inetracatles
         game_objects.render_state.handle_input('portal', portal = self)
 
@@ -610,6 +610,7 @@ class Player(Character):
         self.max_spirit = 5
         self.health = 8
         self.spirit = 2
+
         self.projectiles = game_objects.fprojectiles
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
@@ -1223,6 +1224,9 @@ class NPC(Character):
     def update(self):
         super().update()
         #self.group_distance()
+
+    def render_potrait(self, terget):
+        self.game_objects.game.display.render(self.portrait, terget, position = (50,100))#shader render        
 
     def interact(self):#when plater press t
         new_state = states.Conversation(self.game_objects.game, self)
@@ -3042,19 +3046,27 @@ class Bubble_source(Interactable):
 class Challenge_monument(Interactable):
     def __init__(self, pos, game_objects, ID, interacted = False):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenge_monument/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenge_monument/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.ID = ID
         self.interacted = interacted
+        self.dialogue = dialogue.Dialogue_interactable(self, 'room_' + ID)#handles dialoage and what to say
 
-    def interact(self):#when player press T
+    def render_potrait(self,target):
+        pass
+
+    def interact(self):#when plater press t
         if self.interacted: return
-        pos = [self.rect.topleft[0]-30,self.rect.topleft[1]-200]
-        self.game_objects.special_shaders.add(Portal(pos, self.game_objects, self.ID))
-        self.interacted = True
+        new_state = states.Conversation(self.game_objects.game, self)
+        new_state.enter_state()
+        self.interacted = True  
 
+    def buisness(self):#enters after conversation        
+        pos = [self.rect.topleft[0]-30,self.rect.topleft[1]-200]#position of the portal
+        self.game_objects.special_shaders.add(Portal(pos, self.game_objects, self.ID))
+                     
 class Bridge(Interactable):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
@@ -3117,6 +3129,34 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
 
     def player_noncollision(self):#when player doesn't collide
         self.interacted = False
+
+class Zoom_col(Interactable):
+    def __init__(self, pos, game_objects, size, **kwarg):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos,size)
+        self.hitbox = self.rect.copy()
+        self.rate = kwarg.get('rate', 1)
+        self.scale = kwarg.get('scale', 1)
+        self.center = kwarg.get('center', (0.5, 0.5))
+
+    def release_texture(self):
+        pass
+
+    def draw(self, target):
+        pass
+
+    def update(self):
+        self.group_distance()
+
+    def player_collision(self):
+        if self.interacted: return
+        self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)
+        self.interacted = True#sets to false when player gos away
+
+    def player_noncollision(self):#when player doesn't collide: for grass
+        self.interacted = False 
+        if self.game_objects.shader_render.shaders.get('zoom', False):
+            self.game_objects.shader_render.shaders['zoom'].method = 'zoom_out'
 
 class Path_col(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn):

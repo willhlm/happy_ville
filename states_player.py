@@ -6,12 +6,12 @@ class Player_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def enter_state(self,newstate):
+    def enter_state(self, newstate, **kwarg):
         state = newstate[:newstate.rfind('_')]#get the name up to last _ (remove pre, main, post)
         if self.entity.states[state]:
-             self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
+             self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
 
-    def handle_press_input(self,input):#all states should inehrent this function, if it should be able to jump
+    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         if input[-1] == 'a':
             self.entity.timer_jobs['shroomjump'].activate()
             self.entity.timer_jobs['jump'].activate()
@@ -371,7 +371,7 @@ class Double_jump_main(Double_jump_pre):
 class Fall_run_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.init()
+        self.init()        
 
     def init(self):
         self.entity.timer_jobs['ground'].activate()
@@ -461,7 +461,7 @@ class Fall_stand_pre(Player_states):
             elif self.entity.dir[1]==-1:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
+                state = 'Air_sword' + str(int(self.entity.sword.swing) + 1) + '_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
 
@@ -924,9 +924,9 @@ class Sword_run2_main(Sword_run1_main):
         self.entity.sword.currentstate.enter_state('Slash_2')
 
 class Air_sword1_main(Sword):
-    def __init__(self,entity):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.lifetime=10#swrod hitbox duration
+        self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 

@@ -108,7 +108,6 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_1','1')
             self.game.game_objects.load_map(self,'village_ola2_5','1')
 
         elif self.current_button == 1:
@@ -840,7 +839,7 @@ class Conversation(Gameplay):
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)#shader render
         self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
-        self.game.display.render(self.npc.portrait, self.conv_screen, position = (50,100))#shader render
+        self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
 
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
         self.game.display.render(self.conv_screen.texture,self.game.screen,shader = self.game.game_objects.shaders['alpha'])#shader render
@@ -907,9 +906,9 @@ class Facilities(Gameplay):#fast_travel (menu and unlock), ability upgrade (spur
         self.state[-1].handle_events(input)
 
 class Challenge_rooms(Gameplay):#challaenge rooms: called from states_portal after growing
-    def __init__(self, game, portal, type):
+    def __init__(self, game, type, **kwarg):
         super().__init__(game)
-        self.state = getattr(challange_rooms, type)(self, portal)
+        self.state = getattr(challange_rooms, type)(self, **kwarg)
 
     def update(self):
         super().update()

@@ -308,6 +308,19 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(reflection)
 
+            elif id == 21:#camera zoom
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'center':
+                        input_string = property['value']   
+                        kwarg['center'] = [float(i) for i in input_string.split(',')]             
+                    elif property['name'] == 'rate':
+                        kwarg['rate'] = float(property['value'])
+                    elif property['name'] == 'scale':
+                        kwarg['scale'] = float(property['value'])   
+
+                new_zoom = Entities.Zoom_col(object_position, self.game_objects, object_size, **kwarg)
+                self.game_objects.interactables.add(new_zoom)
 
             elif id == 23:#shade trigger
                 for property in properties:
