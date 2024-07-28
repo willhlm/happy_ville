@@ -6,7 +6,7 @@ class Player_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def enter_state(self, newstate, **kwarg):
+    def enter_state(self,newstate, **kwarg):
         state = newstate[:newstate.rfind('_')]#get the name up to last _ (remove pre, main, post)
         if self.entity.states[state]:
              self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
@@ -15,7 +15,7 @@ class Player_states(Entity_States):
         if input[-1] == 'a':
             self.entity.timer_jobs['shroomjump'].activate()
             self.entity.timer_jobs['jump'].activate()
-            self.entity.timer_jobs['wall'].handle_input('a')               
+            self.entity.timer_jobs['wall'].handle_input('a')
 
     def handle_release_input(self,input):#all states should inehrent this function, if it should be able to jump
         if input[-1] == 'a':
@@ -263,8 +263,9 @@ class Run_post(Player_states):
         self.enter_state('Idle_main')
 
 class Jump_stand_main(Player_states):
-    def __init__(self,entity):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)
+        self.entity.animation.frame = kwarg.get('frame', 0)
 
     def update(self):
         if self.entity.velocity[1] > 0.7:#when you start falling
@@ -294,7 +295,7 @@ class Jump_stand_main(Player_states):
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
+                state='Sword_jump'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
 
@@ -302,8 +303,9 @@ class Jump_stand_main(Player_states):
         pass
 
 class Jump_run_main(Player_states):
-    def __init__(self,entity):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)
+        self.entity.animation.frame = kwarg.get('frame', 0)
 
     def update(self):
         if self.entity.velocity[1] > 0.7:
@@ -333,7 +335,7 @@ class Jump_run_main(Player_states):
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
+                state='Sword_jump'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
 
@@ -405,8 +407,7 @@ class Fall_run_pre(Player_states):
             elif self.entity.dir[1]<0:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state='Air_sword'+str(int(self.entity.sword.swing)+1)+'_main'
-                self.enter_state(state)
+                self.enter_state('Sword_fall_main', frame = self.entity.animation.frame)
                 self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
@@ -461,8 +462,7 @@ class Fall_stand_pre(Player_states):
             elif self.entity.dir[1]==-1:
                 self.enter_state('Sword_down_main')
             else:#right or left
-                state = 'Air_sword' + str(int(self.entity.sword.swing) + 1) + '_main'
-                self.enter_state(state)
+                self.enter_state('Sword_fall_main', frame = self.entity.animation.frame)
                 self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
@@ -762,7 +762,7 @@ class Stand_up_main(Player_states):
         pass
 
     def increase_phase(self):
-        self.enter_state('Idle_main')       
+        self.enter_state('Idle_main')
 
 class Pray_pre(Player_states):
     def __init__(self,entity):
@@ -879,9 +879,9 @@ class Sword(Player_states):#main phases shold inheret this
         for stone in self.entity.sword.equip:
             self.entity.sword.stones[stone].slash()#call collision specific for stone
 
-    def enter_state(self,input):
+    def enter_state(self, input, **kwarg):
         self.entity.animation.framerate = C.animation_framerate
-        super().enter_state(input)
+        super().enter_state(input, **kwarg)
 
 class Sword_stand1_main(Sword):
     def __init__(self,entity):
@@ -921,6 +921,52 @@ class Sword_run1_main(Sword):
 class Sword_run2_main(Sword_run1_main):
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.sword.currentstate.enter_state('Slash_2')
+
+class Sword_fall_main(Sword):
+    def __init__(self,entity, **kwarg):
+        super().__init__(entity)
+        self.entity.sword.lifetime=10#swrod hitbox duration
+        self.entity.sword.currentstate.enter_state('Slash_' + str(int(self.entity.sword.swing)+1))#slash 1 and 2
+        self.entity.state = 'fall_stand_main'#animation name
+        self.entity.animation.frame = kwarg.get('frame', 0)
+        self.entity.projectiles.add(self.entity.sword)#add sword to grou
+
+    def increase_phase(self):
+        if self.entity.acceleration[0]==0:
+            self.enter_state('Fall_stand_main')
+        else:
+            self.enter_state('Fall_run_main')
+
+    def handle_input(self,input):
+        if input == 'Ground':
+            if self.entity.acceleration[0] != 0:
+                self.enter_state('Run_main')
+            else:
+                self.enter_state('Idle_main')
+
+class Sword_jump1_main(Sword):
+    def __init__(self,entity, **kwarg):
+        super().__init__(entity)
+        self.entity.sword.lifetime = 10#swrod hitbox duration
+        self.entity.sword.currentstate.enter_state('Slash_1')
+        self.entity.state = 'jump_stand_main'
+        self.entity.animation.frame = kwarg.get('frame', 0)
+        self.entity.projectiles.add(self.entity.sword)#add sword to grou
+
+    def update(self):
+        if self.entity.velocity[1] > 0.7:#when you start falling
+            self.enter_state('Fall_stand_pre')
+
+    def increase_phase(self):
+        if self.entity.acceleration[0]==0:
+            self.enter_state('Jump_stand_main', frame = self.entity.animation.frame)
+        else:
+            self.enter_state('Jump_run_main', frame = self.entity.animation.frame)
+
+class Sword_jump2_main(Sword_jump1_main):
+    def __init__(self,entity, **kwarg):
+        super().__init__(entity, **kwarg)
         self.entity.sword.currentstate.enter_state('Slash_2')
 
 class Air_sword1_main(Sword):
