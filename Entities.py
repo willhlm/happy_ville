@@ -39,9 +39,9 @@ class BG_Block(Staticentity):
         super().__init__(pos, game_objects)
         self.parallax = parallax
         self.layers = None  # Initialize layer to None
-        self.blur(img)  # Blur only during init: memory leak here      
+        self.blur(img)  # Blur only during init: memory leak here
 
-    def blur(self, img):        
+    def blur(self, img):
         base_image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
         self.rect[2] = base_image.width
         self.rect[3] = base_image.height
@@ -50,7 +50,7 @@ class BG_Block(Staticentity):
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = 1 / self.parallax[0]  # Set the blur radius
             self.game_objects.game.display.use_alpha_blending(False)
-            
+
             # Make an empty layer
             self.layers = self.game_objects.game.display.make_layer(base_image.size)
             self.game_objects.game.display.render(base_image, self.layers, shader=shader)  # Render the image onto the layer
@@ -60,11 +60,11 @@ class BG_Block(Staticentity):
         else:
             self.image = base_image
 
-    def draw(self, target):   
+    def draw(self, target):
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position=pos, shader=self.shader)  # Shader render
 
-    def release_texture(self):  # Called when .kill() and when emptying the group        
+    def release_texture(self):  # Called when .kill() and when emptying the group
         self.image.release()
         if self.layers:  # Release layer if it exists
             self.layers.release()
@@ -569,7 +569,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.shader_state.handle_input('Hurt')#turn white
             self.AI.handle_input('Hurt')
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 10)#makes the game freez for few frames            
+            #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 10)#makes the game freez for few frames
             self.game_objects.camera.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
         else:#if dead
             self.game_objects.camera.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
@@ -584,7 +584,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[1] = -dir[1] * 10
 
     def hurt_particles(self, type='Circle', number_particles=20, **kwarg):
-        for i in range(0, number_particles):          
+        for i in range(0, number_particles):
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
 
@@ -621,8 +621,9 @@ class Player(Character):
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
-                     'Arrow':True,'Counter':True}
-        self.currentstate = states_player.Idle_main(self)        
+                     'Arrow':True,'Counter':True, 'Sword_fall1':True, 'Sword_fall2': True,
+                     'Sword_jump1':True, 'Sword_jump2':True}
+        self.currentstate = states_player.Idle_main(self)
 
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
@@ -677,7 +678,7 @@ class Player(Character):
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
-        self.friction = C.friction_player.copy()        
+        self.friction = C.friction_player.copy()
 
     def update(self):
         super().update()
@@ -841,8 +842,8 @@ class Flower_butterfly(Flying_enemy):
 
     def update(self):
         super().update()
-        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,-1]}, dir = 'isotropic')        
-        self.game_objects.cosmetics2.add(obj1)             
+        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,-1]}, dir = 'isotropic')
+        self.game_objects.cosmetics2.add(obj1)
 
 class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
@@ -1319,7 +1320,7 @@ class MrWood(NPC):#lumber jack
         self.event = []#normal events to say
         self.quest = ['lumberjack_omamori']#quest stuff to say
 
-    def interact(self):#when plater press t        
+    def interact(self):#when plater press t
         new_state = states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
         if self.game_objects.world_state.quests.get('lumberjack_omamori', False):#if the quest is running
@@ -1505,17 +1506,17 @@ class Timer_display(Staticentity):#to display a timer on screen
 
     def update(self):
         self.time -= self.game_objects.game.dt
-        if self.time < 0:            
+        if self.time < 0:
             self.entity.time_out()
             self.kill()
-    
+
     def draw(self, target):
         string = str(round(self.time / 60, 2))#seconds¨
         size = (50,12)
         image = self.game_objects.font.render(size, string + ' seconds')
         self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game_objects.game.display.render(image, target, position = [self.game_objects.game.window_size[0] * 0.5 - size[0], self.game_objects.game.window_size[1] * 0.2], scale = [3,3], shader = self.game_objects.shaders['colour'])#shader render
-        image.release()        
+        image.release()
 
     def release_texture(self):
         pass
@@ -1582,7 +1583,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
     def __init__(self, entity):
         super().__init__(entity.rect.center,entity.game_objects)
         self.game_objects = entity.game_objects
-        self.image = self.game_objects.game.display.make_layer(entity.game_objects.game.window_size)#TODO        
+        self.image = self.game_objects.game.display.make_layer(entity.game_objects.game.window_size)#TODO
         self.rect = pygame.Rect(0, 0, self.image.texture.width, self.image.texture.height)
         self.rect.center = [entity.game_objects.game.window_size[0]*0.5,entity.game_objects.game.window_size[0]*0.5-100]
         self.image.clear(0,0,0,255)
@@ -1721,7 +1722,7 @@ class Omamoris():#omamori handler -> "neckalce"
         self.entity = entity
         self.equipped = {'0':[],'1':[],'2':[]}#equiped omamoris
         self.inventory = {}#omamoris in inventory.: 'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)
-        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)        
+        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)
         self.level = 1#can be leveld up at black smith
 
     def level_up(self):#shuold be called from black smith. bot implement yet
@@ -1735,11 +1736,11 @@ class Omamoris():#omamori handler -> "neckalce"
     def handle_input(self,input):
         for omamoris in self.equipped.values():
             for omamori in omamoris:
-                omamori.handle_input(input)        
+                omamori.handle_input(input)
 
     def equip_omamori(self, omamori_string, list_of_places):
         new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0], self.entity.game_objects, entity = self.entity)
-        
+
         if self.inventory[omamori_string].state != 'equip':#if not alrady equiped
             number_equipped = len(self.equipped['0']) + len(self.equipped['1']) + len(self.equipped['2'])
             if number_equipped >= 7: return [False, 'no avilable slots']
@@ -1754,10 +1755,10 @@ class Omamoris():#omamori handler -> "neckalce"
                 self.equipped['2'].append(new_omamori)
 
             elif new_omamori.level == 1:
-                if len(self.equipped['1']) + len(self.equipped['2']) >= self.level: return [False, 'no avilable slots']                  
-               
+                if len(self.equipped['1']) + len(self.equipped['2']) >= self.level: return [False, 'no avilable slots']
+
                 self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()                    
+                new_omamori.attach()
                 new_omamori.set_pos(list_of_places[7 - self.level + len(self.equipped['1'])].rect.topleft)
                 if 7 - self.level + len(self.equipped['1']) == 6:
                     self.equipped['2'].append(new_omamori)
@@ -1776,13 +1777,13 @@ class Omamoris():#omamori handler -> "neckalce"
 
             for key in self.equipped.keys():
                 for omamori in self.equipped[key]:
-                    if type(omamori).__name__ != omamori_string: continue                        
+                    if type(omamori).__name__ != omamori_string: continue
                     omamori.detach()
                     self.equipped[key].remove(omamori)
                     break
 
         return [True]
-                            
+
 #projectiles
 class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
     def __init__(self,entity):
@@ -1900,14 +1901,14 @@ class Shield(Melee):
 
 class Sword(Melee):
     def __init__(self,entity):
-        super().__init__(entity)        
-        self.init()        
+        super().__init__(entity)
+        self.init()
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width*2,self.image.height*2)
         self.hitbox = self.rect.copy()
 
     def init(self):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/',entity.game_objects)  
-        self.image = self.sprites['idle'][0]              
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/',entity.game_objects)
+        self.image = self.sprites['idle'][0]
         self.dmg = self.entity.dmg
 
     def collision_enemy(self, collision_enemy):
@@ -1923,7 +1924,7 @@ class Sword(Melee):
         if self.dir[1] == -1:
             self.entity.velocity[1] = -8
 
-    def clash_particles(self, pos, number_particles = 12, **kwarg):        
+    def clash_particles(self, pos, number_particles = 12, **kwarg):
         for i in range(0, number_particles):
             obj1 = getattr(particles, 'Spark')(pos, self.game_objects, **kwarg)
             self.entity.game_objects.cosmetics.add(obj1)
@@ -1933,7 +1934,7 @@ class Sword(Melee):
 
 class Aila_sword(Sword):
     def __init__(self,entity):
-        super().__init__(entity)                
+        super().__init__(entity)
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_sword.Slash_1(self)
 
@@ -1942,9 +1943,9 @@ class Aila_sword(Sword):
         self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
         self.stones = {'red':Red_infinity_stone([0,0],entity.game_objects, entity = self),'green':Green_infinity_stone([0,0],entity.game_objects, entity = self),'blue':Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange':Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple':Purple_infinity_stone([0,0],entity.game_objects, entity = self)}#the ones aila has picked up
         self.swing = 0#a flag to check which swing we are at (0 or 1)
-    
+
     def init(self):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)        
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)
         self.image = self.sprites['slash_1'][0]
         self.dmg = 1
 
@@ -2120,7 +2121,7 @@ class Projectile_1(Ranged):
     def countered(self, dir, pos):#called from sword collsion with purple infinity stone
         dy = self.rect.centery - pos[1]
         dx = self.rect.centerx - pos[0]
-        
+
         self.velocity[0] = 300/dx
         self.velocity[1] = 0
 
@@ -2520,16 +2521,16 @@ class Heal_item(Enemy_drop):
 
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects)   
+        super().__init__(pos, game_objects)
         self.quest = kwarg.get('quest', None)#quests can be initated when they are picked up
         if not kwarg.get('entity', None):#if it is spawn in the wild
             self.spawn()
 
     def spawn(self):
-        self.hitbox = pygame.Rect(self.rect.topleft,(16,16))        
-        self.velocity = [random.uniform(0, 3), -4]            
+        self.hitbox = pygame.Rect(self.rect.topleft,(16,16))
+        self.velocity = [random.uniform(0, 3), -4]
         self.light = self.game_objects.lights.add_light(self, radius = 50)
-        self.twinkle()               
+        self.twinkle()
 
     def twinkle(self, num = 3):
         self.twinkles = []
@@ -2540,20 +2541,20 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
 
     def interact(self, player):#when player press T
         player.currentstate.enter_state('Pray_pre')
-        if self.quest: self.game_objects.quests.initiate_quest(self.quest)                    
+        if self.quest: self.game_objects.quests.initiate_quest(self.quest)
         self.pickup(player)#object specific
         new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
-        self.kill()     
+        self.kill()
 
     def kill(self):
         super().kill()
         for twinkle in self.twinkles:
             twinkle.kill()
-        self.game_objects.lights.remove_light(self.light)  
+        self.game_objects.lights.remove_light(self.light)
 
     def release_texture(self):#do not remove the textuer from memory when calling kill
-        pass       
+        pass
 
 class Tungsten(Interactable_item):#move omamori and infiinity stones to here a swell
     def __init__(self,pos, game_objects, **kwarg):
@@ -2574,7 +2575,7 @@ class Tungsten(Interactable_item):#move omamori and infiinity stones to here a s
 class Omamori(Interactable_item):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.entity = kwarg.get('entity', None)        
+        self.entity = kwarg.get('entity', None)
         self.description = ''#for inventory
         self.ui_group = groups.Group()#for the particle stuff in UI
         self.level = 0
@@ -2582,14 +2583,14 @@ class Omamori(Interactable_item):
     def equipped(self):#an updated that should be called when equppied
         pass
 
-    def render_UI(self, target):#called from oamori menu        
+    def render_UI(self, target):#called from oamori menu
         if self.state != 'equip': return
-        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,1]}, dir = 'isotropic')        
-        self.ui_group.add(obj1)     
+        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,1]}, dir = 'isotropic')
+        self.ui_group.add(obj1)
         for spr in self.ui_group.sprites():
             spr.update()#the position
             spr.update_uniforms()#the unforms for the draw
-            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)         
+            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)
 
     def pickup(self, player):
         player.omamoris.inventory[type(self).__name__] = self
@@ -2607,15 +2608,15 @@ class Omamori(Interactable_item):
         pass
 
     def set_pos(self,pos):#for inventory
-        self.rect.topleft = pos   
+        self.rect.topleft = pos
 
 class Half_dmg(Omamori):
-    def __init__(self,pos, game_objects, **kwarg):        
+    def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Half_dmg.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()              
+        self.hitbox = self.rect.copy()
         self.level = 1
         self.description = 'Take half dmg ' + '[' + str(self.level) + ']'
 
@@ -2625,10 +2626,10 @@ class Half_dmg(Omamori):
 
     def detach(self):
         super().detach()
-        self.entity.dmg_scale = 1                    
+        self.entity.dmg_scale = 1
 
     def pool(game_objects):
-        Half_dmg.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/half_dmg/',game_objects)#for inventory        
+        Half_dmg.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/half_dmg/',game_objects)#for inventory
 
 class Loot_magnet(Omamori):
     def __init__(self,pos, game_objects, **kwarg):
@@ -2636,7 +2637,7 @@ class Loot_magnet(Omamori):
         self.sprites = Loot_magnet.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()        
+        self.hitbox = self.rect.copy()
         self.description = 'Attracts loot ' + '[' + str(self.level) + ']'
 
     def equipped(self):#an updated that should be called when equppied
@@ -2644,15 +2645,15 @@ class Loot_magnet(Omamori):
             loot.attract(self.entity.rect.center)
 
     def pool(game_objects):
-        Loot_magnet.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/loot_magnet/',game_objects)#for inventory        
+        Loot_magnet.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/loot_magnet/',game_objects)#for inventory
 
 class Boss_HP(Omamori):
-    def __init__(self,pos, game_objects, **kwarg):        
+    def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Boss_HP.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()        
+        self.hitbox = self.rect.copy()
         self.level=2
         self.description = 'Visible boss HP ' + '[' + str(self.level) + ']'
 
@@ -2662,7 +2663,7 @@ class Boss_HP(Omamori):
             enemy.health_bar()#attached a healthbar on boss
 
     def pool(game_objects):
-        Boss_HP.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/boss_HP/',game_objects)#for inventor        
+        Boss_HP.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/boss_HP/',game_objects)#for inventor
 
 class Infinity_stones(Interactable_item):
     def __init__(self, pos, game_objects, **kwarg):
@@ -3035,9 +3036,9 @@ class Bubble_source(Interactable):
         self.time += 1
         if self.time > 100:
             bubble = self.bubble(self.rect.midtop, self.game_objects, **self.prop)
-            self.game_objects.dynamic_platforms.add(bubble)      
-            self.game_objects.platforms.add(bubble)        
-            self.time =0 
+            self.game_objects.dynamic_platforms.add(bubble)
+            self.game_objects.platforms.add(bubble)
+            self.time =0
 
 class Challenge_monument(Interactable):
     def __init__(self, pos, game_objects, ID, interacted = False):
@@ -3090,7 +3091,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
-        self.hitbox = self.rect.copy()        
+        self.hitbox = self.rect.copy()
         self.bounds = [-800, 800, -800, 800]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
         self.interacted = False
 
@@ -3104,15 +3105,15 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
         self.group_distance()
 
     def player_collision(self):#TODO when you are invinsible, have 1 health and collides, aila hoovers
-        if self.interacted: return#enter only once        
+        if self.interacted: return#enter only once
         if self.game_objects.player.health > 1:#if about to die, don't transport to safe point
             new_state = states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
-            new_state.enter_state()        
-            self.game_objects.player.currentstate.enter_state('Invisible_main')            
+            new_state.enter_state()
+            self.game_objects.player.currentstate.enter_state('Invisible_main')
         else: self.game_objects.player.invincibile = False
-        self.game_objects.player.take_dmg(1)              
-        self.game_objects.player.velocity = [0,0]        
-        self.game_objects.player.acceleration = [0,0]          
+        self.game_objects.player.take_dmg(1)
+        self.game_objects.player.velocity = [0,0]
+        self.game_objects.player.acceleration = [0,0]
         self.interacted = True
 
     def player_noncollision(self):#when player doesn't collide
@@ -3644,7 +3645,7 @@ class Lightning_spikes(Interactable):#traps
 
 class Grind(Interactable):
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects)    
+        super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/grind/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -3654,17 +3655,17 @@ class Grind(Interactable):
         self.frequency = int(kwarg.get('frequency', -1))#infinte -> idle - active
         direction = kwarg.get('direction', '0,0')#standing still
         string_list = direction.split(',')
-        self.direction = [int(num) for num in string_list]        
+        self.direction = [int(num) for num in string_list]
         self.distance = int(kwarg.get('distance', 1))#standing still
         self.speed = float(kwarg.get('speed', 1))
-        
+
         self.velocity = [0, 0]
-        self.time = 0       
-        self.original_pos = pos     
+        self.time = 0
+        self.original_pos = pos
 
     def update_vel(self):
         self.velocity[0] = self.direction[0] * self.distance * math.cos(self.speed * self.time)
-        self.velocity[1] = self.direction[1] * self.distance * math.sin(self.speed * self.time) 
+        self.velocity[1] = self.direction[1] * self.distance * math.sin(self.speed * self.time)
 
     def update(self):
         super().update()
@@ -3676,17 +3677,17 @@ class Grind(Interactable):
     def update_pos(self):
         self.true_pos = [self.original_pos[0] + self.velocity[0]*self.game_objects.game.dt,self.original_pos[1] + self.velocity[1]*self.game_objects.game.dt]
         self.rect.topleft = self.true_pos
-        self.hitbox.center = self.rect.center   
+        self.hitbox.center = self.rect.center
 
     def group_distance(self):
         pass
 
     def player_collision(self):#player collision
-        self.game_objects.player.take_dmg(1)      
+        self.game_objects.player.take_dmg(1)
 
     def take_dmg(self, projectile):#when player hits with e.g. sword
         if hasattr(projectile, 'sword_jump'):#if it has the attribute
-            projectile.sword_jump()    
+            projectile.sword_jump()
 
 class Lever(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
@@ -3787,7 +3788,7 @@ class Jump_timer(Timer):#can be combined with shroomjump?
         if self in self.entity.timers: return#do not append if the timer is already inside
         self.lifetime = self.duration
         self.entity.timers.append(self)
-        self.entity.velocity[1] = C.jump_vel_player#it is negative        
+        self.entity.velocity[1] = C.jump_vel_player#it is negative
 
     def update(self):#called everyframe after activation (activated after pressing jump)
         if self.entity.ground:#when landing on a plarform: enters once
