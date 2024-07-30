@@ -144,7 +144,7 @@ class Idle_center(Basic_states):
         super().__init__(entity)
 
     def update(self):
-        distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
+        distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx, self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
 
         if abs(distance[0]) < 10:
             self.enter_state('Stop_center')        

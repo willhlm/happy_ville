@@ -40,7 +40,7 @@ class Ball_room(Challange_rooms):#the room with ball in light forest cave
             if gate.ID_key == 'ball_room1':#these strings are specified in tiled
                 gate.currentstate.handle_input('Transform')       
                 self.gates['1'] = gate
-            elif gate.ID_key == 'ball_room2':#these strings are specified in tiled
+            elif gate.ID_key == 'ball_room':#these strings are specified in tiled
                 self.gates['2'] = gate#this one is already erect
             
     def time_out(self):#when timer runs out

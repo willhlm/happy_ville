@@ -42,10 +42,16 @@ class BG_Block(Staticentity):
         self.image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
         self.rect[2] = self.image.width
         self.rect[3] = self.image.height     
+
+        if self.parallax[0] == 0.2:
+            live_blur = True
+        else:
+            live_blur = False
         
         states = {False: 'Idle', True: 'Blur'}[live_blur]
         self.currentstate = getattr(states_blur, states)(self)
-        self.blur_radius = 1 / self.parallax[0]        
+        self.blur_radius = min(1 / self.parallax[0], 10)     
+     
         if not live_blur:             
             self.blur()#if we do not want live blur           
         else:#if live
@@ -63,7 +69,7 @@ class BG_Block(Staticentity):
             self.image = self.layers.texture  # Get the texture of the layer                
         
     def draw(self, target):    
-        self.currentstate.set_uniform()    
+        self.currentstate.set_uniform()  
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
 
@@ -3272,7 +3278,7 @@ class Zoom_col(Interactable):
         self.interacted = True#sets to false when player gos away
         for sprite in self.game_objects.all_bgs:
             if type(sprite).__name__ == 'BG_Block':
-                sprite.blur_radius = sprite.parallax[0]
+                sprite.blur_radius = sprite.parallax[0]                
 
     def player_noncollision(self):#when player doesn't collide: for grass
         self.interacted = False 
@@ -3281,7 +3287,7 @@ class Zoom_col(Interactable):
             for sprite in self.game_objects.all_bgs:
                 if type(sprite).__name__ == 'BG_Block':
                     if sprite.parallax[0] == 1: sprite.blur_radius = 0.2  
-                    else: sprite.blur_radius = 1/sprite.parallax[0]            
+                    else: sprite.blur_radius = min(1/sprite.parallax[0], 10) 
 
 class Path_col(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn):
