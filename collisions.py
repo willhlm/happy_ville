@@ -29,9 +29,9 @@ class Collisions():
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
                 self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
-    def interactables_collision(self):#interactables
+    def interactables_collision(self, enteties):#interactables
         for interactable in self.game_objects.interactables.sprites():
-            collision_entity = pygame.sprite.spritecollideany(interactable,self.game_objects.players,Collisions.collided)
+            collision_entity = pygame.sprite.spritecollideany(interactable, enteties, Collisions.collided)
             if collision_entity:
                 interactable.player_collision()
             else:
@@ -44,18 +44,18 @@ class Collisions():
         return pygame.sprite.spritecollide(light, self.game_objects.platforms, False, Collisions.collided)
 
     @staticmethod
-    def counter(fprojectiles,eprojectiles):
+    def counter(fprojectiles, eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group
             collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
             if collision_epro:
                 projectile.collision_projectile(collision_epro)
 
-    def projectile_collision(self,projectiles,enemies):
+    def projectile_collision(self, projectiles, enemies):
         for projectile in projectiles.sprites():#go through the group
             #projectile collision?
-            collision_plat = pygame.sprite.spritecollideany(projectile,self.game_objects.platforms,Collisions.collided)
-            collision_enemy = pygame.sprite.spritecollideany(projectile,enemies,Collisions.collided)
-            collision_inetractables = pygame.sprite.spritecollideany(projectile,self.game_objects.interactables,Collisions.collided)
+            #collision_plat = pygame.sprite.spritecollideany(projectile, self.game_objects.platforms,Collisions.collided)
+            collision_enemy = pygame.sprite.spritecollideany(projectile, enemies, Collisions.collided)
+            collision_inetractables = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables, Collisions.collided)
 
             #if hit chest, bushes
             if collision_inetractables:
@@ -66,11 +66,11 @@ class Collisions():
                 projectile.collision_enemy(collision_enemy)#go through the projecticle in case there are projectile that should do dmg to enemy
 
             #hit platform
-            if collision_plat:
-                projectile.collision_plat(collision_plat)#go through the projecticle in case there are projectile that should do dmg to platform
+            #if collision_plat:
+            #    projectile.collision_plat(collision_plat)#go through the projecticle in case there are projectile that should do dmg to platform
 
     #check for player collision
-    def player_collision(self,enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce
+    def player_collision(self, enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce
         for player in self.game_objects.players:#aila and eventual double gangler
             collision_enteties = pygame.sprite.spritecollide(player,enteties,dokill = False, collided = Collisions.collided)#check collision
             for collision_entetiy in collision_enteties:

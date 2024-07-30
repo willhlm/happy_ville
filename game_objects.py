@@ -120,7 +120,7 @@ class Game_Objects():
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
         self.collisions.player_collision(self.bg_fade)
-        self.collisions.interactables_collision()
+        self.collisions.interactables_collision(self.players)
 
         self.collisions.counter(self.fprojectiles, self.eprojectiles)
         self.collisions.projectile_collision(self.fprojectiles, self.enemies)
@@ -131,6 +131,8 @@ class Game_Objects():
 
         self.collisions.platform_collision(self.players)        
         self.collisions.platform_collision(self.enemies)
+        self.collisions.platform_collision(self.eprojectiles)
+        self.collisions.platform_collision(self.fprojectiles)
         self.collisions.platform_collision(self.npcs)
         self.collisions.platform_collision(self.loot)
 

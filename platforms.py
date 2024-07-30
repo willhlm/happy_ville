@@ -13,20 +13,20 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def reset_timer(self):#aniamtion need it
         self.currentstate.increase_phase()
 
-    def collide_x(self,entity):
+    def collide_x(self, entity):
         pass
 
-    def collide_y(self,entity):
+    def collide_y(self, entity):
         pass
 
     def draw(self, target):#conly certain platforms will require draw
         pass
 
-    def take_dmg(self,projectile,dmg):#called from projectile
-        pass
-
     def release_texture(self):
         pass
+
+    def take_dmg(self, projectile, dmg):#called from projectile
+        pass   
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
@@ -40,6 +40,7 @@ class Collision_block(Platform):
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
         entity.update_rect_x()
+        entity.collision_platform(self)
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down   
@@ -49,6 +50,7 @@ class Collision_block(Platform):
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()
+        entity.collision_platform(self)
 
 class Gate(Platform):#a gate that is owned by the lever
     def __init__(self, pos, game_objects, ID_key = None):
@@ -361,7 +363,7 @@ class Collision_breakable(Collision_block):#breakable collision blocks
     def dead(self):#called when death animatin finishes
         self.kill()
 
-    def take_dmg(self,projectile, dmg):
+    def take_dmg(self, projectile, dmg):
         if self.invincibile: return
         self.health -= dmg
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period

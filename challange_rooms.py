@@ -26,14 +26,23 @@ class Ball_room(Challange_rooms):#the room with ball in light forest cave
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state)
         self.monument = kwarg.get('monument' , None)
-        self.monument.spawn_balls(10)
+        self.monument.spawn_balls(5)
+
+        self.time = 300
+                
+        self.timer = Entities.Timer_display(self, self.time)
+        self.game_objects.cosmetics_no_clear.add(self.timer)       
+    
+    def time_out(self):#when timer runs out
+        self.game_objects.world_state.quests['ball_room'] = True     
+        self.timer.kill()
 
     def handle_input(self, input, **kwarg):
         if input == 'dmg':
             #fail TODO
             pass
         elif input == 'death':#normal death
-            self.game.game_objects.player.death()   
+            self.game_objects.player.death()   
 
 class Portal_rooms(Challange_rooms):#challanges with portals
     def __init__(self, game_state, **kwarg):

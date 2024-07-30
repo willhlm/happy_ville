@@ -515,6 +515,9 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.rect.top = int(self.true_pos[1])#should be int
         self.update_hitbox()
 
+    def collision_platform(self, platform):#called from collusion in clollision_block: projectile need it to give damage
+        pass
+
     #pltform collisions.
     def right_collision(self,hitbox):
         self.hitbox.right = hitbox
@@ -611,7 +614,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 8
+        self.health = 3
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -795,49 +798,6 @@ class Enemy(Character):
 
     def patrol(self, position = [0,0]):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
-
-class Bouncy_balls(Enemy):#for ball challange room
-    def __init__(self, pos, game_objects):
-        super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        self.hitbox = self.rect.copy()
-        self.dmg = 1
-
-        self.currentstate = states_basic.Idle(self)
-        self.AI = AI_enemy.AI(self)
-        self.AI.deactivate()
-
-        self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
-
-    def player_collision(self, player):#when the player collides with this object
-        player.take_dmg(1)
-
-    def update_vel(self):
-        pass
-
-    #platform stuff
-    def limit_y(self):        
-        pass
-
-    def top_collision(self,hitbox):
-        self.hitbox.top = hitbox
-        self.collision_types['top'] = True
-        self.velocity[1] = -self.velocity[1]
-
-    def right_collision(self,hitbox):
-        super().right_collision(hitbox)
-        self.velocity[0] = -self.velocity[0]
-
-    def left_collision(self,hitbox):
-        super().left_collision(hitbox)
-        self.velocity[0] = -self.velocity[0]
-
-    def down_collision(self,hitbox):
-        self.hitbox.bottom = hitbox
-        self.collision_types['bottom'] = True
-        self.velocity[1] *= -1
 
 class Flying_enemy(Enemy):
     def __init__(self,pos,game_objects):
@@ -1835,13 +1795,12 @@ class Omamoris():#omamori handler -> "neckalce"
         return [True]
 
 #projectiles
-class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
-    def __init__(self, entity):
-        super().__init__([0,0], entity.game_objects)
-        self.entity = entity
-        self.dir = entity.dir.copy()
+class Projectiles(Platform_entity):#projectiels: should it be platform enteties?
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.lifetime = kwarg.get('lifetime', 300)
 
     def update(self):
         super().update()
@@ -1857,28 +1816,87 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         for timer in self.timers:
             timer.update()
 
+    def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
+        collision_plat.take_dmg(self, self.dmg)            
+
     def collision_projectile(self, eprojectile):#projecticle proectile collision
         pass
 
-    def collision_enemy(self,collision_enemy):#projecticle enemy collision (inclusing player)
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         collision_enemy.take_dmg(self.dmg)
-
-    def collision_plat(self, collision_plat):#collision platform
-        collision_plat.take_dmg(self,self.dmg)
 
     def collision_inetractables(self,interactable):#collusion interactables
         pass
 
-    #called from upgrade menu
-    def upgrade_ability(self):
+    def countered(self,dir, pos):#called from sword collsion with purple infinity stone equipped
+        pass
+        
+    def upgrade_ability(self):#called from upgrade menu
         self.level += 1
 
-    def countered(self,dir, pos):#called from sword collsion with purple infinity stone
+    #pltform collisions.
+    def right_collision(self,hitbox):
         pass
 
+    def left_collision(self,hitbox):
+        pass
+
+    def down_collision(self,hitbox):
+        pass
+
+    def top_collision(self,hitbox):
+        pass
+
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
+        pass
+
+class Bouncy_balls(Projectiles):#for ball challange room
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        
+        self.dmg = 1
+        self.light = game_objects.lights.add_light(self)
+        self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
+
+    def release_texture(self):
+        super().release_texture()
+        self.game_objects.lights.remove_light(self.light)
+
+    #platform collisions
+    def limit_y(self):        
+        pass
+
+    def right_collision(self,hitbox):
+        self.hitbox.right = hitbox
+        self.collision_types['right'] = True
+        self.currentstate.handle_input('Wall')
+        self.velocity[0] = -self.velocity[0]
+
+    def left_collision(self,hitbox):
+        self.hitbox.left = hitbox
+        self.collision_types['left'] = True
+        self.currentstate.handle_input('Wall')
+        self.velocity[0] = -self.velocity[0]
+
+    def top_collision(self,hitbox):
+        self.hitbox.top = hitbox
+        self.collision_types['top'] = True
+        self.velocity[1] = -self.velocity[1]
+        
+    def down_collision(self,hitbox):
+        self.hitbox.bottom = hitbox
+        self.collision_types['bottom'] = True
+        self.velocity[1] *= -1
+
 class Melee(Projectiles):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def __init__(self, entity):
+        super().__init__([0,0], entity.game_objects)
+        self.entity = entity
+        self.dir = entity.dir.copy()        
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
     def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
@@ -1893,7 +1911,7 @@ class Melee(Projectiles):
         self.kill()
 
 class Hurt_box(Melee):#a hitbox that spawns
-    def __init__(self,entity, size = [64,64], lifetime = 100):
+    def __init__(self, entity, size = [64,64], lifetime = 100):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/hurt_box/',entity.game_objects)#invisible
         self.image = self.sprites['idle'][0]
@@ -1989,9 +2007,9 @@ class Sword(Melee):
         pass
 
 class Aila_sword(Sword):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.currentstate = states_sword.Slash_1(self)
 
         self.tungsten_cost = 1#the cost to level up to next level
@@ -2062,8 +2080,8 @@ class Aila_sword(Sword):
         self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
 class Ranged(Projectiles):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def __init__(self, entity):
+        super().__init__([0,0], entity.game_objects)
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
         self.velocity = [0,0]
 
@@ -2082,7 +2100,7 @@ class Ranged(Projectiles):
         self.hitbox.center = self.rect.center
 
 class Thunder(Ranged):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Thunder/',entity.game_objects)
         self.currentstate = states_basic.Death(self)#
@@ -2179,7 +2197,7 @@ class Projectile_1(Ranged):
         self.velocity[1] = 0
 
 class Falling_rock(Ranged):#things that can be placed in cave, the source makes this and can hurt player
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/',entity.game_objects)
         self.image = self.sprites['idle'][0]
@@ -3146,7 +3164,7 @@ class Challenge_ball(Challenges):#ball room
     def spawn_balls(self, number):#called from ball room state
         for i in range(0,number):
             new_ball = Bouncy_balls(self.rect.midtop, self.game_objects) 
-            self.game_objects.enemies.add(new_ball)
+            self.game_objects.eprojectiles.add(new_ball)
 
 class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):
