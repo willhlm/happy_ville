@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states, groups
-import states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -35,34 +35,37 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
         super().kill()
 
 class BG_Block(Staticentity):
-    def __init__(self, pos, game_objects, img, parallax):
+    def __init__(self, pos, game_objects, img, parallax, live_blur = False):
         super().__init__(pos, game_objects)
-        self.parallax = parallax
-        self.layers = None  # Initialize layer to None
-        self.blur(img)  # Blur only during init: memory leak here
+        self.parallax = parallax        
+        self.layers = None  # Initialize layer to None        
+        self.image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
+        self.rect[2] = self.image.width
+        self.rect[3] = self.image.height     
+        
+        states = {False: 'Idle', True: 'Blur'}[live_blur]
+        self.currentstate = getattr(states_blur, states)(self)
+        self.blur_radius = 1 / self.parallax[0]        
+        if not live_blur:             
+            self.blur()#if we do not want live blur           
+        else:#if live
+            if self.parallax[0] == 1: self.blur_radius = 0.2#a small value so you don't see blur                 
 
-    def blur(self, img):
-        base_image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
-        self.rect[2] = base_image.width
-        self.rect[3] = base_image.height
-
-        if self.parallax[0] != 1:  # Don't blur if there is no parallax
+    def blur(self):
+        if self.parallax[0] != 1:  # Don't blur if there is no parallax        
             shader = self.game_objects.shaders['blur']
-            shader['blurRadius'] = 1 / self.parallax[0]  # Set the blur radius
-            self.game_objects.game.display.use_alpha_blending(False)
-
-            # Make an empty layer
-            self.layers = self.game_objects.game.display.make_layer(base_image.size)
-            self.game_objects.game.display.render(base_image, self.layers, shader=shader)  # Render the image onto the layer
-            self.game_objects.game.display.use_alpha_blending(True)
-            self.image = self.layers.texture  # Get the texture of the layer
-            base_image.release()
-        else:
-            self.image = base_image
-
-    def draw(self, target):
+            shader['blurRadius'] = self.blur_radius  # Set the blur radius
+            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline        
+            self.layers = self.game_objects.game.display.make_layer(self.image.size)# Make an empty layer
+            self.game_objects.game.display.render( self.image, self.layers, shader=shader)  # Render the image onto the layer
+            self.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
+            self.image.release()
+            self.image = self.layers.texture  # Get the texture of the layer                
+        
+    def draw(self, target):    
+        self.currentstate.set_uniform()    
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position=pos, shader=self.shader)  # Shader render
+        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
 
     def release_texture(self):  # Called when .kill() and when emptying the group
         self.image.release()
@@ -579,7 +582,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
-    def knock_back(self,dir):
+    def knock_back(self, dir):
         self.velocity[0] = dir[0] * 30 * (1 - abs(dir[1]))
         self.velocity[1] = -dir[1] * 10
 
@@ -733,8 +736,8 @@ class Migawari_entity(Character):#player double ganger
             self.kill()
 
 class Enemy(Character):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.projectiles = game_objects.eprojectiles
         self.group = game_objects.enemies
         self.pause_group = game_objects.entity_pause
@@ -761,7 +764,7 @@ class Enemy(Character):
         self.AI.update()#tell what the entity should do
         self.group_distance()
 
-    def player_collision(self,player):#when player collides with enemy
+    def player_collision(self, player):#when player collides with enemy
         if not self.aggro: return
         if player.invincibile: return
         player.take_dmg(1)
@@ -780,7 +783,7 @@ class Enemy(Character):
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0
 
-    def countered(self):#player shield
+    def countered(self):#purple infifite stone
         self.velocity[0] = -30*self.dir[0]
         self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
 
@@ -792,6 +795,49 @@ class Enemy(Character):
 
     def patrol(self, position = [0,0]):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
+
+class Bouncy_balls(Enemy):#for ball challange room
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.dmg = 1
+
+        self.currentstate = states_basic.Idle(self)
+        self.AI = AI_enemy.AI(self)
+        self.AI.deactivate()
+
+        self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
+
+    def player_collision(self, player):#when the player collides with this object
+        player.take_dmg(1)
+
+    def update_vel(self):
+        pass
+
+    #platform stuff
+    def limit_y(self):        
+        pass
+
+    def top_collision(self,hitbox):
+        self.hitbox.top = hitbox
+        self.collision_types['top'] = True
+        self.velocity[1] = -self.velocity[1]
+
+    def right_collision(self,hitbox):
+        super().right_collision(hitbox)
+        self.velocity[0] = -self.velocity[0]
+
+    def left_collision(self,hitbox):
+        super().left_collision(hitbox)
+        self.velocity[0] = -self.velocity[0]
+
+    def down_collision(self,hitbox):
+        self.hitbox.bottom = hitbox
+        self.collision_types['bottom'] = True
+        self.velocity[1] *= -1
 
 class Flying_enemy(Enemy):
     def __init__(self,pos,game_objects):
@@ -1243,11 +1289,10 @@ class NPC(Character):
 class Aslat(NPC):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
-    #    self.true_pos = self.rect.topleft
 
     def buisness(self):#enters after conversation
-        if 'reindeer' not in self.priority:#if player has deafated the reindeer
-            if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet
+        if self.game_objects.world_state.state.get('reindeer', False):#if player has deafated the reindeer
+            if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet (so it only enters once)
                 new_game_state = states.Blit_image_text(self.game_objects.game,self.game.game_objects.player.sprites[Wall_glide][0].copy())
                 new_game_state.enter_state()
                 self.game_objects.player.states['Wall_glide'] = True
@@ -1504,8 +1549,9 @@ class Rhoutta_encounter(Boss):
 
 #stuff
 class Timer_display(Staticentity):#to display a timer on screen
-    def __init__(self, game_objects, time):
-        super().__init__([0,0], game_objects)
+    def __init__(self, entity, time):
+        super().__init__([0,0], entity.game_objects)
+        self.entity = entity
         self.time = time
 
     def update(self):
@@ -1790,8 +1836,8 @@ class Omamoris():#omamori handler -> "neckalce"
 
 #projectiles
 class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
-    def __init__(self,entity):
-        super().__init__([0,0],entity.game_objects)
+    def __init__(self, entity):
+        super().__init__([0,0], entity.game_objects)
         self.entity = entity
         self.dir = entity.dir.copy()
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
@@ -1811,13 +1857,13 @@ class Projectiles(Animatedentity):#projectiels: should it be platform enteties?
         for timer in self.timers:
             timer.update()
 
-    def collision_projectile(self,eprojectile):#projecticle proectile collision
+    def collision_projectile(self, eprojectile):#projecticle proectile collision
         pass
 
     def collision_enemy(self,collision_enemy):#projecticle enemy collision (inclusing player)
         collision_enemy.take_dmg(self.dmg)
 
-    def collision_plat(self,collision_plat):#collision platform
+    def collision_plat(self, collision_plat):#collision platform
         collision_plat.take_dmg(self,self.dmg)
 
     def collision_inetractables(self,interactable):#collusion interactables
@@ -1860,7 +1906,7 @@ class Hurt_box(Melee):#a hitbox that spawns
         pass
 
 class Explosion(Melee):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/explosion/',entity.game_objects)
         self.image = self.sprites['idle'][0]
@@ -1910,8 +1956,11 @@ class Sword(Melee):
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width*2,self.image.height*2)
         self.hitbox = self.rect.copy()
 
+    def pool(game_objects):
+        Sword.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/', game_objects)
+
     def init(self):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/',entity.game_objects)
+        self.sprites = Sword.sprites
         self.image = self.sprites['idle'][0]
         self.dmg = self.entity.dmg
 
@@ -1922,7 +1971,7 @@ class Sword(Melee):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir)
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
-        self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
+        self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = [random.randint(-180, 180),0])
 
     def sword_jump(self):
         if self.dir[1] == -1:
@@ -1936,6 +1985,9 @@ class Sword(Melee):
     def collision_inetractables(self,interactable):#called when projectile hits interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
 
+    def release_texture(self):
+        pass
+
 class Aila_sword(Sword):
     def __init__(self,entity):
         super().__init__(entity)
@@ -1944,7 +1996,7 @@ class Aila_sword(Sword):
 
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
-        self.equip = ['purple']#stone pointers, the ones attached to the sword, strings
+        self.equip = []#stone pointers, the ones attached to the sword, strings
         self.stones = {'red':Red_infinity_stone([0,0],entity.game_objects, entity = self),'green':Green_infinity_stone([0,0],entity.game_objects, entity = self),'blue':Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange':Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple':Purple_infinity_stone([0,0],entity.game_objects, entity = self)}#the ones aila has picked up
         self.swing = 0#a flag to check which swing we are at (0 or 1)
 
@@ -1970,11 +2022,11 @@ class Aila_sword(Sword):
     def remove_stone(self):#not impleented
         pass
 
-    def collision_projectile(self,eprojectile):#projecticle proectile collision
+    def collision_projectile(self, eprojectile):#projecticle proectile collision
         if eprojectile.invincibile: return
         eprojectile.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
 
-        if 'purple' in self.equip:#if the purpuple stone is equped
+        if 'purple' in self.equip:#if the purpuple stone is equped        
             eprojectile.countered(self.dir, self.rect.center)
             self.sword_jump()
         else:
@@ -1982,7 +2034,7 @@ class Aila_sword(Sword):
             eprojectile.dmg = 0
             eprojectile.currentstate.handle_input('Death')
 
-    def collision_enemy(self,collision_enemy):
+    def collision_enemy(self, collision_enemy):
         self.sword_jump()
         if collision_enemy.invincibile: return
         collision_enemy.take_dmg(self.dmg)
@@ -2008,9 +2060,6 @@ class Aila_sword(Sword):
         self.dmg *= 1.2
         self.level += 1
         self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
-
-    def release_texture(self):
-        pass
 
 class Ranged(Projectiles):
     def __init__(self,entity):
@@ -2300,10 +2349,9 @@ class Slow_motion():
 
 #things player can pickup
 class Loot(Platform_entity):#
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.description = ''
-        self.velocity = [0,0]
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.description = ''        
         self.bounce_coefficient = 0.6
 
     def update_vel(self):#add gravity
@@ -2358,8 +2406,8 @@ class Heart_container(Loot):
     def update_vel(self):
         self.velocity[1] = 3*self.game_objects.game.dt*self.slow_motion
 
-    def player_collision(self):
-        self.game_objects.player.max_health += 1
+    def player_collision(self, player):
+        player.max_health += 1
         #a cutscene?
         self.kill()
 
@@ -2376,7 +2424,7 @@ class Spirit_container(Loot):
         self.velocity[1]=3*self.game_objects.game.dt*self.slow_motion
 
     def player_collision(self,player):
-        self.game_objects.player.max_spirit += 1
+        player.max_spirit += 1
         #a cutscene?
         self.kill()
 
@@ -2390,10 +2438,10 @@ class Soul_essence(Loot):#genkidama
         self.description = 'An essence container'#for shops
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
-    def player_collision(self):
-        self.game_objects.player.inventory['Soul_essence'] += 1
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = 'gone'#write in the state file that this has been picked up
-        #make a cutscene?
+    def player_collision(self, player):
+        player.inventory['Soul_essence'] += 1
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = 'interacted'#write in the state file that this has been picked up
+        #make a cutscene?TODO
         self.kill()
 
     def update(self):
@@ -2412,8 +2460,8 @@ class Spiritorb(Loot):#the thing that gives spirit
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
 
-    def player_collision(self,player):
-        self.game_objects.player.add_spirit(1)
+    def player_collision(self, player):
+        player.add_spirit(1)
         self.kill()
 
     def update_vel(self):
@@ -2438,13 +2486,13 @@ class Enemy_drop(Loot):
         if self.lifetime < 0:#remove after a while
             self.kill()
 
-    def player_collision(self,player):#when the player collides with this object
-        if self.currentstate.__class__.__name__ == 'Death': return
+    def player_collision(self, player):#when the player collides with this object
+        if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
         obj = (self.__class__.__name__)#get the string in question
-        try:
-            self.game_objects.player.inventory[obj] += 1
-        except:
+        if player.inventory.get(obj, False):#not the first time
+          self.game_objects.player.inventory[obj] += 1
+        else: #first time
             self.game_objects.player.inventory[obj] = 1
         self.currentstate.handle_input('Death')
 
@@ -2545,7 +2593,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
 
     def interact(self, player):#when player press T
         player.currentstate.enter_state('Pray_pre')
-        if self.quest: self.game_objects.quests.initiate_quest(self.quest)
+        if self.quest: self.game_objects.quests.initiate_quest(self.quest, item = self)
         self.pickup(player)#object specific
         new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
@@ -2636,7 +2684,7 @@ class Half_dmg(Omamori):
         Half_dmg.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/half_dmg/',game_objects)#for inventory
 
 class Loot_magnet(Omamori):
-    def __init__(self,pos, game_objects, **kwarg):
+    def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Loot_magnet.sprites
         self.image = self.sprites['idle'][0]
@@ -3044,30 +3092,81 @@ class Bubble_source(Interactable):
             self.game_objects.platforms.add(bubble)
             self.time =0
 
-class Challenge_monument(Interactable):
-    def __init__(self, pos, game_objects, ID, interacted = False):
+class Challenges(Interactable):#monuments you interact to get quests or challenges
+    def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenge_monument/', game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()
-        self.ID = ID
-        self.interacted = interacted
-        self.dialogue = dialogue.Dialogue_interactable(self, 'room_' + ID)#handles dialoage and what to say
 
-    def render_potrait(self,target):
+    def draw(self, target):
+        self.shader_state.draw()        
+        super().draw(target)
+
+    def render_potrait(self, target):
         pass
 
     def interact(self):#when plater press t
         if self.interacted: return
         new_state = states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
+        self.shader_state.handle_input('tint')
         self.interacted = True  
 
-    def buisness(self):#enters after conversation        
+class Challenge_monument(Challenges):#the status spawning a portal - challange rooms
+    def __init__(self, pos, game_objects, ID):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenges/challenge_monument/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+
+        self.ID = ID        
+        self.interacted = self.game_objects.world_state.state[self.game_objects.map.level_name]['challenge_monument'].get(ID, False)
+        self.dialogue = dialogue.Dialogue_interactable(self, 'room_' + ID)#handles dialoage and what to say         
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self) 
+
+    def buisness(self):#enters after conversation                
         pos = [self.rect.topleft[0]-30,self.rect.topleft[1]-200]#position of the portal
         self.game_objects.special_shaders.add(Portal(pos, self.game_objects, self.ID))
-                     
+
+class Challenge_ball(Challenges):#ball room
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenges/ball_room/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+
+        self.interacted = self.game_objects.world_state.quests.get('ball_room', False)
+        self.dialogue = dialogue.Dialogue_interactable(self, 'ball_room')#handles dialoage and what to say         
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self) 
+
+    def buisness(self):#enters after conversation                
+        new_state = states.Challenge_rooms(self.game_objects.game, 'Ball_room', monument = self)
+        new_state.enter_state()       
+
+    def spawn_balls(self, number):#called from ball room state
+        for i in range(0,number):
+            new_ball = Bouncy_balls(self.rect.midtop, self.game_objects) 
+            self.game_objects.enemies.add(new_ball)
+
+class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest
+    def __init__(self, pos, game_objects, quest, item):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenges/stone_wood/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = self.rect.copy()
+
+        self.quest = quest
+        self.item = item
+
+        self.interacted = self.game_objects.world_state.quests.get(quest, False)
+        self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say         
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
+
+    def buisness(self):#enters after conversation        
+        item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, quest = self.quest)#make a class based on the name of the newstate: need to import sys
+        self.game_objects.loot.add(item)   
+
 class Bridge(Interactable):
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
@@ -3153,11 +3252,18 @@ class Zoom_col(Interactable):
         if self.interacted: return
         self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)
         self.interacted = True#sets to false when player gos away
+        for sprite in self.game_objects.all_bgs:
+            if type(sprite).__name__ == 'BG_Block':
+                sprite.blur_radius = sprite.parallax[0]
 
     def player_noncollision(self):#when player doesn't collide: for grass
         self.interacted = False 
         if self.game_objects.shader_render.shaders.get('zoom', False):
             self.game_objects.shader_render.shaders['zoom'].method = 'zoom_out'
+            for sprite in self.game_objects.all_bgs:
+                if type(sprite).__name__ == 'BG_Block':
+                    if sprite.parallax[0] == 1: sprite.blur_radius = 0.2  
+                    else: sprite.blur_radius = 1/sprite.parallax[0]            
 
 class Path_col(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn):
@@ -3380,14 +3486,14 @@ class Runestones(Interactable):
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.true_pos = self.rect.topleft
         self.hitbox.midbottom = self.rect.midbottom
-        if state != "idle":
+        if state:
             self.currentstate = states_basic.Interacted(self)
 
     def interact(self):
         if type(self.currentstate).__name__ == 'Interacted': return
         self.game_objects.player.currentstate.enter_state('Pray_pre')
         self.currentstate.handle_input('Transform')#goes to interacted after transform
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = True#write in the state dict that this has been picked up
 
     def reset_timer(self):#when animation finished
         super().reset_timer()
@@ -3416,8 +3522,8 @@ class Uber_runestone(Interactable):
             pass#do a cutscene?
 
 class Chest(Interactable):
-    def __init__(self,pos,game_objects,state,ID_key):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/Chest/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -3429,7 +3535,7 @@ class Chest(Interactable):
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
         self.hitbox.midbottom = self.rect.midbottom
 
-        if state != "idle":
+        if state:
             self.currentstate = states_basic.Interacted(self)
 
     def update(self):
@@ -3453,7 +3559,7 @@ class Chest(Interactable):
             self.currentstate.handle_input('Hurt')
         else:
             self.currentstate.handle_input('Opening')
-            self.game_objects.world_state.state[self.game_objects.map.level_name]['chest'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
+            self.game_objects.world_state.state[self.game_objects.map.level_name]['chest'][self.ID_key] = True#write in the state dict that this has been picked up
 
     def update_timers(self):
         for timer in self.timers:
@@ -3741,7 +3847,7 @@ class Lever(Interactable):
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
         self.hitbox.midbottom = self.rect.midbottom
 
-        if state != "idle":
+        if state:
             self.currentstate = states_basic.Interacted(self)
 
     def update(self):
@@ -3754,7 +3860,7 @@ class Lever(Interactable):
         projectile.clash_particles(self.hitbox.center)
 
         self.currentstate.handle_input('Transform')
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = 'interacted'#write in the state dict that this has been picked up
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = True#write in the state dict that this has been picked up
         self.gate.currentstate.handle_input('Transform')
 
     def update_timers(self):

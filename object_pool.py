@@ -15,6 +15,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Entities.Loot_magnet.pool(game_objects)
         Entities.Half_dmg.pool(game_objects)
         Entities.Boss_HP.pool(game_objects)
+        Entities.Sword.pool(game_objects)
 
         Entities.Tungsten.pool(game_objects)
 

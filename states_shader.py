@@ -22,13 +22,15 @@ class Idle(Shader_states):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['idle']
  
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'Hurt':
             self.enter_state('Hurt')
         elif input == 'mix_colour':
             self.enter_state('Mix_colour')
         elif input == 'alpha':
             self.enter_state('Alpha')
+        elif input == 'tint':
+            self.enter_state('Tint')            
 
 class Hurt(Shader_states):#turn white -> enteties use it
     def __init__(self,entity):
@@ -167,3 +169,12 @@ class Dissolve(Shader_states):#disolve and bloom
         self.entity.image = self.empty.texture
 
         self.entity.game_objects.shaders['bloom']['targetColor'] = self.colour[0:3]        
+
+class Tint(Shader_states):#challaenge momutment use it
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['tint']
+        self.colour = kwarg.get('colour', [0,0,0,100])        
+
+    def draw(self):
+        self.entity.shader['colour'] = self.colour

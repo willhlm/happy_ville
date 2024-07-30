@@ -175,7 +175,6 @@ class Hurt(Shaders):#turn white -> enteties use it
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip, shader = self.renderer.game_objects.shaders['colour'])#shader render
         return self.renderer.game_objects.game.screen.texture
 
-
 class Invincibile(Shaders):#blink white -> enteyties use it
     def __init__(self,entity):
         super().__init__(entity)

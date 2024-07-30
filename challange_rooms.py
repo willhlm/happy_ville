@@ -16,13 +16,24 @@ class Challange_rooms():
     def handle_events(self, input):
         pass 
 
+    def handle_input(self, input, **kwarg):
+        pass   
+
     def exit_state(self):
-        self.game_state.exit_state()        
+        self.game_state.exit_state()     
 
 class Ball_room(Challange_rooms):#the room with ball in light forest cave
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state)
-        pass
+        self.monument = kwarg.get('monument' , None)
+        self.monument.spawn_balls(10)
+
+    def handle_input(self, input, **kwarg):
+        if input == 'dmg':
+            #fail TODO
+            pass
+        elif input == 'death':#normal death
+            self.game.game_objects.player.death()   
 
 class Portal_rooms(Challange_rooms):#challanges with portals
     def __init__(self, game_state, **kwarg):
@@ -53,4 +64,5 @@ class Room_0(Portal_rooms):
     def incrase_kill(self):#called when entity1 and 2 are killed
         self.number -= 1
         if self.number == 0:#all enemies eleminated
+            self.game_objects.world_state.state[self.game_objects.map.level_name]['challenge_monument'][self.portal.ID] = True#completed
             self.exit_state()#if there was a gate, we can open it    

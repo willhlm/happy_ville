@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="202" tileheight="318" tilecount="4" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="202" tileheight="318" tilecount="5" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -19,5 +19,12 @@
    <property name="speed" value=""/>
   </properties>
   <image width="32" height="32" source="../../../Sprites/animations/traps/grind/idle/grind1.png"/>
+ </tile>
+ <tile id="6">
+  <properties>
+   <property name="item" value=""/>
+   <property name="quest" value=""/>
+  </properties>
+  <image width="128" height="128" source="../../../Sprites/animations/challenges/stone_wood/idle/Sprite-0001.png"/>
  </tile>
 </tileset>

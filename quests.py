@@ -13,11 +13,12 @@ class Quest():#quest handlere
             self.active_quests[quest].initiate_quest()
         
 class Lumberjack_omamori():#TODO need to make so that this omamori cannot be eqquiped while this quest is runing
-    def __init__(self, game_objects):
+    def __init__(self, game_objects, item):
         self.game_objects = game_objects
         self.description = 'bring back the omamori to lumberjack within a given time'        
         self.time = 9000#time to compplete
         self.initiate_quest()
+        self.omamori = item
 
     def time_out(self):#when time runs out   
         name = type(self.omamori).__name__
@@ -26,7 +27,7 @@ class Lumberjack_omamori():#TODO need to make so that this omamori cannot be eqq
 
     def initiate_quest(self):#called when omamori is picked up        
         self.game_objects.world_state.quests['lumberjack_omamori'] = True        
-        self.timer = Entities.Timer_display(self.game_objects, self.time)
+        self.timer = Entities.Timer_display(self, self.time)
         self.game_objects.cosmetics_no_clear.add(self.timer)        
         
     def complete(self):#called when talking to lumberjack within the timer limit        
