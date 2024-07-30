@@ -373,7 +373,7 @@ class Double_jump_main(Double_jump_pre):
 class Fall_run_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.init()        
+        self.init()
 
     def init(self):
         self.entity.timer_jobs['ground'].activate()
