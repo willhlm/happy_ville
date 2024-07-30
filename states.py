@@ -108,7 +108,8 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'light_forest_cave_10','1')            
+            self.game.game_objects.load_map(self,'light_forest_cave_10','1')
+            #self.game.game_objects.load_map(self,'Village_ola2_5','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
@@ -919,11 +920,11 @@ class Challenge_rooms(Gameplay):#challaenge rooms: called from states_portal aft
         self.state.render()
 
     def handle_events(self, input):
-        super().handle_events(input)            
+        super().handle_events(input)
         self.state.handle_events(input)
 
     def handle_input(self, input, **kwarg):
-        self.state.handle_input(input, **kwarg)        
+        self.state.handle_input(input, **kwarg)
 
 class Cutscenes(Gameplay):
     def __init__(self, game,scene):
