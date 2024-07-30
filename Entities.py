@@ -37,33 +37,35 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
 class BG_Block(Staticentity):
     def __init__(self, pos, game_objects, img, parallax, live_blur = False):
         super().__init__(pos, game_objects)
-        self.parallax = parallax        
-        self.layers = None  # Initialize layer to None        
+        self.parallax = parallax
+        self.layers = None  # Initialize layer to None
         self.image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
         self.rect[2] = self.image.width
-        self.rect[3] = self.image.height     
-        
+        self.rect[3] = self.image.height
+
+
         states = {False: 'Idle', True: 'Blur'}[live_blur]
         self.currentstate = getattr(states_blur, states)(self)
-        self.blur_radius = 1 / self.parallax[0]        
-        if not live_blur:             
-            self.blur()#if we do not want live blur           
+        self.blur_radius = min(1 / self.parallax[0], 10)
+
+        if not live_blur:
+            self.blur()#if we do not want live blur
         else:#if live
-            if self.parallax[0] == 1: self.blur_radius = 0.2#a small value so you don't see blur                 
+            if self.parallax[0] == 1: self.blur_radius = 0.2#a small value so you don't see blur
 
     def blur(self):
-        if self.parallax[0] != 1:  # Don't blur if there is no parallax        
+        if self.parallax[0] != 1:  # Don't blur if there is no parallax
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = self.blur_radius  # Set the blur radius
-            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline        
+            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
             self.layers = self.game_objects.game.display.make_layer(self.image.size)# Make an empty layer
             self.game_objects.game.display.render( self.image, self.layers, shader=shader)  # Render the image onto the layer
             self.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
             self.image.release()
-            self.image = self.layers.texture  # Get the texture of the layer                
-        
-    def draw(self, target):    
-        self.currentstate.set_uniform()    
+            self.image = self.layers.texture  # Get the texture of the layer
+
+    def draw(self, target):
+        self.currentstate.set_uniform()
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
 
@@ -1233,7 +1235,7 @@ class NPC(Character):
         #self.group_distance()
 
     def render_potrait(self, terget):
-        self.game_objects.game.display.render(self.portrait, terget, position = (50,100))#shader render        
+        self.game_objects.game.display.render(self.portrait, terget, position = (50,100))#shader render
 
     def interact(self):#when plater press t
         new_state = states.Conversation(self.game_objects.game, self)
@@ -1817,7 +1819,7 @@ class Projectiles(Platform_entity):#projectiels: should it be platform enteties?
             timer.update()
 
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
-        collision_plat.take_dmg(self, self.dmg)            
+        collision_plat.take_dmg(self, self.dmg)
 
     def collision_projectile(self, eprojectile):#projecticle proectile collision
         pass
@@ -1830,7 +1832,7 @@ class Projectiles(Platform_entity):#projectiels: should it be platform enteties?
 
     def countered(self,dir, pos):#called from sword collsion with purple infinity stone equipped
         pass
-        
+
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
 
@@ -1857,7 +1859,7 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
-        
+
         self.dmg = 1
         self.light = game_objects.lights.add_light(self)
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
@@ -1867,7 +1869,7 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.game_objects.lights.remove_light(self.light)
 
     #platform collisions
-    def limit_y(self):        
+    def limit_y(self):
         pass
 
     def right_collision(self,hitbox):
@@ -1886,7 +1888,7 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.hitbox.top = hitbox
         self.collision_types['top'] = True
         self.velocity[1] = -self.velocity[1]
-        
+
     def down_collision(self,hitbox):
         self.hitbox.bottom = hitbox
         self.collision_types['bottom'] = True
@@ -1896,7 +1898,7 @@ class Melee(Projectiles):
     def __init__(self, entity):
         super().__init__([0,0], entity.game_objects)
         self.entity = entity
-        self.dir = entity.dir.copy()        
+        self.dir = entity.dir.copy()
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
     def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
@@ -2044,7 +2046,7 @@ class Aila_sword(Sword):
         if eprojectile.invincibile: return
         eprojectile.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
 
-        if 'purple' in self.equip:#if the purpuple stone is equped        
+        if 'purple' in self.equip:#if the purpuple stone is equped
             eprojectile.countered(self.dir, self.rect.center)
             self.sword_jump()
         else:
@@ -2369,7 +2371,7 @@ class Slow_motion():
 class Loot(Platform_entity):#
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.description = ''        
+        self.description = ''
         self.bounce_coefficient = 0.6
 
     def update_vel(self):#add gravity
@@ -3115,7 +3117,7 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
         super().__init__(pos, game_objects)
 
     def draw(self, target):
-        self.shader_state.draw()        
+        self.shader_state.draw()
         super().draw(target)
 
     def render_potrait(self, target):
@@ -3126,7 +3128,7 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
         new_state = states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
         self.shader_state.handle_input('tint')
-        self.interacted = True  
+        self.interacted = True
 
 class Challenge_monument(Challenges):#the status spawning a portal - challange rooms
     def __init__(self, pos, game_objects, ID):
@@ -3136,12 +3138,12 @@ class Challenge_monument(Challenges):#the status spawning a portal - challange r
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.ID = ID        
+        self.ID = ID
         self.interacted = self.game_objects.world_state.state[self.game_objects.map.level_name]['challenge_monument'].get(ID, False)
-        self.dialogue = dialogue.Dialogue_interactable(self, 'room_' + ID)#handles dialoage and what to say         
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self) 
+        self.dialogue = dialogue.Dialogue_interactable(self, 'room_' + ID)#handles dialoage and what to say
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
 
-    def buisness(self):#enters after conversation                
+    def buisness(self):#enters after conversation
         pos = [self.rect.topleft[0]-30,self.rect.topleft[1]-200]#position of the portal
         self.game_objects.special_shaders.add(Portal(pos, self.game_objects, self.ID))
 
@@ -3154,16 +3156,16 @@ class Challenge_ball(Challenges):#ball room
         self.hitbox = self.rect.copy()
 
         self.interacted = self.game_objects.world_state.quests.get('ball_room', False)
-        self.dialogue = dialogue.Dialogue_interactable(self, 'ball_room')#handles dialoage and what to say         
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self) 
+        self.dialogue = dialogue.Dialogue_interactable(self, 'ball_room')#handles dialoage and what to say
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
 
-    def buisness(self):#enters after conversation                
+    def buisness(self):#enters after conversation
         new_state = states.Challenge_rooms(self.game_objects.game, 'Ball_room', monument = self)
-        new_state.enter_state()       
+        new_state.enter_state()
 
     def spawn_balls(self, number):#called from ball room state
         for i in range(0,number):
-            new_ball = Bouncy_balls(self.rect.midtop, self.game_objects) 
+            new_ball = Bouncy_balls(self.rect.midtop, self.game_objects)
             self.game_objects.eprojectiles.add(new_ball)
 
 class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest
@@ -3178,12 +3180,12 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
         self.item = item
 
         self.interacted = self.game_objects.world_state.quests.get(quest, False)
-        self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say         
+        self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say
         self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
 
-    def buisness(self):#enters after conversation        
+    def buisness(self):#enters after conversation
         item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, quest = self.quest)#make a class based on the name of the newstate: need to import sys
-        self.game_objects.loot.add(item)   
+        self.game_objects.loot.add(item)
 
 class Bridge(Interactable):
     def __init__(self, pos,game_objects):
@@ -3256,6 +3258,7 @@ class Zoom_col(Interactable):
         self.rate = kwarg.get('rate', 1)
         self.scale = kwarg.get('scale', 1)
         self.center = kwarg.get('center', (0.5, 0.5))
+        self.blur_timer = C.fps
 
     def release_texture(self):
         pass
@@ -3267,21 +3270,30 @@ class Zoom_col(Interactable):
         self.group_distance()
 
     def player_collision(self):
+        if self.blur_timer == 0:
+            for sprite in self.game_objects.all_bgs:
+                if type(sprite).__name__ == 'BG_Block':
+                    if sprite.parallax[0] > 0.8:
+                        sprite.blur_radius += (1.1/sprite.parallax[0] - sprite.blur_radius) * 0.06
+                        sprite.blur_radius = min(1.1/ sprite.parallax[0], sprite.blur_radius)
+                    else:
+                        sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
+                        sprite.blur_radius = max(sprite.blur_radius, 0.2)
+        else: self.blur_timer -= 1
         if self.interacted: return
         self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)
         self.interacted = True#sets to false when player gos away
-        for sprite in self.game_objects.all_bgs:
-            if type(sprite).__name__ == 'BG_Block':
-                sprite.blur_radius = sprite.parallax[0]
+
 
     def player_noncollision(self):#when player doesn't collide: for grass
-        self.interacted = False 
+        self.blur_timer = C.fps
+        self.interacted = False
         if self.game_objects.shader_render.shaders.get('zoom', False):
             self.game_objects.shader_render.shaders['zoom'].method = 'zoom_out'
             for sprite in self.game_objects.all_bgs:
                 if type(sprite).__name__ == 'BG_Block':
-                    if sprite.parallax[0] == 1: sprite.blur_radius = 0.2  
-                    else: sprite.blur_radius = 1/sprite.parallax[0]            
+                    if sprite.parallax[0] == 1: sprite.blur_radius = 0.2
+                    else: sprite.blur_radius = min(1/sprite.parallax[0], 10)
 
 class Path_col(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn):
@@ -3860,13 +3872,13 @@ class Lever(Interactable):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
-        
+
         self.ID_key = ID_key#an ID to match with the gate and an unique ID key to identify which item that the player is intracting within the world
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
-        
+
         if self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'].get(self.ID_key, False):
-            self.currentstate = states_lever.Down(self)            
+            self.currentstate = states_lever.Down(self)
         else:
             self.currentstate = states_lever.Idle(self)
             self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = False

@@ -711,7 +711,7 @@
                                 {
                                  "name":"scale",
                                  "type":"string",
-                                 "value":"0.8"
+                                 "value":"0.85"
                                 }],
                          "rotation":0,
                          "type":"",

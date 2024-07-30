@@ -50,7 +50,7 @@
    <property name="ID" value=""/>
    <property name="erect" type="bool" value="true"/>
   </properties>
-  <image width="32" height="144" source="../../Sprites/animations/gate/idle/vines6.png"/>
+  <image width="32" height="144" source="../../Sprites/animations/gate/erect/vines6.png"/>
  </tile>
  <tile id="12">
   <properties>
