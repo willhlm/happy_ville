@@ -217,7 +217,129 @@
                  "draworder":"topdown",
                  "id":21,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":43301,
+                         "height":32,
+                         "id":1915,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2496,
+                         "y":880
+                        }, 
+                        {
+                         "gid":43298,
+                         "height":32,
+                         "id":1925,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2544,
+                         "y":960
+                        }, 
+                        {
+                         "gid":43299,
+                         "height":144,
+                         "id":1926,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2640,
+                         "y":928
+                        }, 
+                        {
+                         "gid":43299,
+                         "height":144,
+                         "id":1927,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"ball_room1"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":false
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1408,
+                         "y":928
+                        }, 
+                        {
+                         "gid":43299,
+                         "height":144,
+                         "id":1928,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"ball_room2"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2064,
+                         "y":928
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":42,
+                 "name":"back",
+                 "objects":[
+                        {
+                         "gid":43310,
+                         "height":80,
+                         "id":1916,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":1712,
+                         "y":944
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -428,24 +550,6 @@
                          "y":800
                         }, 
                         {
-                         "gid":8198,
-                         "height":16,
-                         "id":1906,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"item",
-                                 "type":"string",
-                                 "value":"Soul_essence"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2496,
-                         "y":880
-                        }, 
-                        {
                          "gid":8203,
                          "height":128,
                          "id":1908,
@@ -568,6 +672,18 @@
                          "width":640,
                          "x":208,
                          "y":752
+                        }, 
+                        {
+                         "gid":8218,
+                         "height":16,
+                         "id":1917,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1728,
+                         "y":880
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -615,8 +731,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":42,
- "nextobjectid":1915,
+ "nextlayerid":43,
+ "nextobjectid":1929,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -716,6 +832,14 @@
          "tilecount":15960,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":43288,
+         "source":"..\/_objects\/interactables.tsx"
+        }, 
+        {
+         "firstgid":43302,
+         "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,
  "type":"map",

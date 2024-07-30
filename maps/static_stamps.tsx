@@ -82,7 +82,7 @@
  <tile id="18">
   <properties>
    <property name="angle" value=""/>
-   <property name="colour" value=""/>
+   <property name="colour" type="color" value="#99ffe6a6"/>
    <property name="falloff" value=""/>
    <property name="position" value=""/>
   </properties>
@@ -112,7 +112,7 @@
  </tile>
  <tile id="23">
   <properties>
-   <property name="colour" value=""/>
+   <property name="colour" type="color" value="#ffffffff"/>
   </properties>
  </tile>
  <tile id="24">
@@ -122,7 +122,7 @@
  </tile>
  <tile id="25">
   <properties>
-   <property name="colour" value=""/>
+   <property name="colour" type="color" value="#ffffffff"/>
    <property name="fade" type="bool" value="false"/>
    <property name="flicker" type="bool" value="false"/>
    <property name="interact" type="bool" value="false"/>

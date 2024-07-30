@@ -13,20 +13,20 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def reset_timer(self):#aniamtion need it
         self.currentstate.increase_phase()
 
-    def collide_x(self,entity):
+    def collide_x(self, entity):
         pass
 
-    def collide_y(self,entity):
+    def collide_y(self, entity):
         pass
 
     def draw(self, target):#conly certain platforms will require draw
         pass
 
-    def take_dmg(self,projectile,dmg):#called from projectile
-        pass
-
     def release_texture(self):
         pass
+
+    def take_dmg(self, projectile, dmg):#called from projectile
+        pass   
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
@@ -40,6 +40,7 @@ class Collision_block(Platform):
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
         entity.update_rect_x()
+        entity.collision_platform(self)
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down   
@@ -49,20 +50,21 @@ class Collision_block(Platform):
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()
+        entity.collision_platform(self)
 
 class Gate(Platform):#a gate that is owned by the lever
-    def __init__(self, pos, game_objects, ID_key = None):
+    def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos)
         self.game_objects = game_objects
         self.dir = [1,0]
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = (pos[0],pos[1])
-        self.hitbox = self.rect.copy()
-        self.ID_key = ID_key#an ID to match with the gate
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
+        state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   
+        self.image = self.sprites[state][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state                
+        self.ID_key = kwarg.get('ID', None)#an ID to match with the gate
+        
         self.animation = animation.Animation(self)
-        self.currentstate = states_gate.Idle(self)#
+        self.currentstate = {True: states_gate.Erect, False: states_gate.Down}[kwarg.get('erect', False)](self)
 
     def update(self):
         self.currentstate.update()
@@ -74,6 +76,7 @@ class Gate(Platform):#a gate that is owned by the lever
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
         entity.update_rect_x()
+        entity.collision_platform(self)
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
@@ -361,7 +364,7 @@ class Collision_breakable(Collision_block):#breakable collision blocks
     def dead(self):#called when death animatin finishes
         self.kill()
 
-    def take_dmg(self,projectile, dmg):
+    def take_dmg(self, projectile, dmg):
         if self.invincibile: return
         self.health -= dmg
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
