@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states, groups
-import states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -1641,7 +1641,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
         super().__init__([0,0],game_objects)
-        if parallax[0] == 1: self.colour = (colour.g,colour.b,colour.a,0)
+        if parallax[0] == 1: self.colour = (colour.g, colour.b, colour.a, 0)
         else: self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
 
         self.shader_state = states_shader.Idle(self)
@@ -3338,13 +3338,13 @@ class Path_inter(Interactable):
         self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
         self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
 
-class Shade_trigger(Interactable):
-    def __init__(self,pos,game_objects,size,colour):
-        super().__init__(pos,game_objects)
+class Shade_trigger(Interactable):#it changes the colourof shade screen to a new colour specified by self.new_colour
+    def __init__(self, pos, game_objects, size, colour):
+        super().__init__(pos, game_objects)
         self.new_colour = [colour.g,colour.b,colour.a]
         self.rect = pygame.Rect(pos,size)
         self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
+        self.hitbox = self.rect.copy()
 
     def draw(self, target):
         pass
@@ -3359,7 +3359,7 @@ class Shade_trigger(Interactable):
         for layer in self.layers:
             layer.shader_state.handle_input('mix_colour')
 
-    def player_noncollision(self):#when player doesn't collide: for grass
+    def player_noncollision(self):#when player doesn't collide
         for layer in self.layers:
             layer.shader_state.handle_input('idle')
 
@@ -3854,19 +3854,22 @@ class Grind(Interactable):
             projectile.sword_jump()
 
 class Lever(Interactable):
-    def __init__(self, pos, game_objects, state, ID_key):
+    def __init__(self, pos, game_objects, ID_key):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/lever/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/lever/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],26,16)
+        self.hitbox = self.rect.copy()
+        
         self.ID_key = ID_key#an ID to match with the gate and an unique ID key to identify which item that the player is intracting within the world
         self.timers = []
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
-        self.hitbox.midbottom = self.rect.midbottom
-
-        if state:
-            self.currentstate = states_basic.Interacted(self)
+        
+        if self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'].get(self.ID_key, False):
+            self.currentstate = states_lever.Down(self)            
+        else:
+            self.currentstate = states_lever.Idle(self)
+            self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = False
 
     def update(self):
         super().update()
@@ -3878,7 +3881,7 @@ class Lever(Interactable):
         projectile.clash_particles(self.hitbox.center)
 
         self.currentstate.handle_input('Transform')
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = True#write in the state dict that this has been picked up
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = not self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key]#write in the state dict that this has been picked up
         self.gate.currentstate.handle_input('Transform')
 
     def update_timers(self):
@@ -3887,8 +3890,10 @@ class Lever(Interactable):
 
     def add_gate(self, gate):#called from map loader
         self.gate = gate
-        if type(self.currentstate).__name__ == 'Interacted':
-            self.gate.currentstate.handle_input('Transform')
+        if type(self.currentstate).__name__ == 'Down':
+            self.gate.currentstate.enter_state('Down')
+        else:
+            self.gate.currentstate.enter_state('Erect')
 
 #timer toools: activate with the attrubute activate, which will run until the specified duration is run out
 class Timer():

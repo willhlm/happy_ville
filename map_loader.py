@@ -322,7 +322,7 @@ class Level():
                 new_zoom = Entities.Zoom_col(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.interactables.add(new_zoom)
 
-            elif id == 23:#shade trigger
+            elif id == 23:#shade trigger, to change the screen shade upon trigger
                 for property in properties:
                     if property['name'] == 'colour':
                         colour = property['value']
@@ -454,17 +454,19 @@ class Level():
             elif id == 10:#lever
                 for property in properties:
                     if property['name'] == 'ID':
-                        ID = property['value']
-                state = self.game_objects.world_state.state[self.level_name]['lever'].get(str(ID), False)
-                lever = Entities.Lever(object_position,self.game_objects, state, ID)
+                        ID = property['value']                
+                lever = Entities.Lever(object_position,self.game_objects, ID)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
 
             elif id == 11:#gate
+                kwarg = {}
                 for property in properties:
                     if property['name'] == 'ID':
-                        ID = property['value']
-                gate = platforms.Gate(object_position,self.game_objects, ID)
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'erect':
+                        kwarg['erect'] = property['value']                        
+                gate = platforms.Gate(object_position,self.game_objects, **kwarg)
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 

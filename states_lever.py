@@ -17,10 +17,9 @@ class Basic_states():
     def handle_input(self,input):
         pass
 
-class Erect(Basic_states):
+class Idle(Basic_states):
     def __init__(self,entity, **kwarg):
-        super().__init__(entity, **kwarg)
-        self.entity.hitbox = self.entity.rect.copy()
+        super().__init__(entity, **kwarg)        
 
     def handle_input(self,input):
         if input== 'Transform':
@@ -38,13 +37,11 @@ class Transform_up(Basic_states):
         super().__init__(entity, **kwarg)        
 
     def increase_phase(self):
-        self.enter_state('Erect')        
+        self.enter_state('Idle')        
 
 class Down(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)
-        self.entity.hitbox[2] = 0
-        self.entity.hitbox[3] = 0    
 
     def handle_input(self,input):
         if input== 'Transform':

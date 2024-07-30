@@ -48,6 +48,7 @@
  <tile id="11">
   <properties>
    <property name="ID" value=""/>
+   <property name="erect" type="bool" value="true"/>
   </properties>
   <image width="32" height="144" source="../../Sprites/animations/gate/idle/vines6.png"/>
  </tile>

@@ -53,18 +53,18 @@ class Collision_block(Platform):
         entity.collision_platform(self)
 
 class Gate(Platform):#a gate that is owned by the lever
-    def __init__(self, pos, game_objects, ID_key = None):
+    def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos)
         self.game_objects = game_objects
         self.dir = [1,0]
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = (pos[0],pos[1])
-        self.hitbox = self.rect.copy()
-        self.ID_key = ID_key#an ID to match with the gate
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
+        state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   
+        self.image = self.sprites[state][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state                
+        self.ID_key = kwarg.get('ID', None)#an ID to match with the gate
+        
         self.animation = animation.Animation(self)
-        self.currentstate = states_gate.Idle(self)#
+        self.currentstate = {True: states_gate.Erect, False: states_gate.Down}[kwarg.get('erect', False)](self)
 
     def update(self):
         self.currentstate.update()
@@ -76,6 +76,7 @@ class Gate(Platform):#a gate that is owned by the lever
         else:#going to the leftx
             entity.left_collision(self.hitbox.right)
         entity.update_rect_x()
+        entity.collision_platform(self)
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round

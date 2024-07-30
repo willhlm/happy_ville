@@ -229,6 +229,93 @@
                          "width":32,
                          "x":2496,
                          "y":880
+                        }, 
+                        {
+                         "gid":43298,
+                         "height":32,
+                         "id":1925,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2544,
+                         "y":960
+                        }, 
+                        {
+                         "gid":43299,
+                         "height":144,
+                         "id":1926,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2640,
+                         "y":928
+                        }, 
+                        {
+                         "gid":43299,
+                         "height":144,
+                         "id":1927,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"ball_room1"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":false
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1408,
+                         "y":928
+                        }, 
+                        {
+                         "gid":43299,
+                         "height":144,
+                         "id":1928,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"ball_room2"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2064,
+                         "y":928
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -645,7 +732,7 @@
          "y":0
         }],
  "nextlayerid":43,
- "nextobjectid":1921,
+ "nextobjectid":1929,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
