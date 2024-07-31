@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="static_stamps" tilewidth="16" tileheight="16" tilecount="35" columns="7">
+<tileset version="1.10" tiledversion="1.10.1" name="static_stamps" tilewidth="16" tileheight="16" tilecount="35" columns="7">
  <image source="static_stamps.png" width="112" height="80"/>
  <tile id="0">
   <properties>
@@ -25,12 +25,6 @@
   <properties>
    <property name="class" value=""/>
    <property name="numer" value=""/>
-  </properties>
- </tile>
- <tile id="5">
-  <properties>
-   <property name="item" value=""/>
-   <property name="quest" value=""/>
   </properties>
  </tile>
  <tile id="7">
@@ -82,7 +76,7 @@
  <tile id="18">
   <properties>
    <property name="angle" value=""/>
-   <property name="colour" type="color" value="#99ffe6a6"/>
+   <property name="colour" value=""/>
    <property name="falloff" value=""/>
    <property name="position" value=""/>
   </properties>
@@ -100,7 +94,7 @@
  </tile>
  <tile id="21">
   <properties>
-   <property name="center" value=""/>
+   <property name="offset" value=""/>
    <property name="rate" value=""/>
    <property name="scale" value=""/>
   </properties>
@@ -112,7 +106,7 @@
  </tile>
  <tile id="23">
   <properties>
-   <property name="colour" type="color" value="#ffffffff"/>
+   <property name="colour" value=""/>
   </properties>
  </tile>
  <tile id="24">
@@ -122,7 +116,7 @@
  </tile>
  <tile id="25">
   <properties>
-   <property name="colour" type="color" value="#ffffffff"/>
+   <property name="colour" value=""/>
    <property name="fade" type="bool" value="false"/>
    <property name="flicker" type="bool" value="false"/>
    <property name="interact" type="bool" value="false"/>

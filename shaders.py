@@ -3,16 +3,16 @@ import constants as C
 class Shaders():
     def __init__(self, renderer):
         self.renderer = renderer
-        
+
     def update(self):
         pass
 
     def set_uniforms(self):
-        pass 
-
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):       
         pass
-    
+
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        pass
+
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
         pass
 
@@ -27,7 +27,7 @@ class Vignette(Shaders):
     def set_uniforms(self):
         self.renderer.game_objects.shaders['vignette']['colour'] = self.colour
 
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):       
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, shader = self.renderer.game_objects.shaders['vignette'])#shader render
         return self.renderer.game_objects.game.screen.texture
@@ -42,12 +42,12 @@ class Chromatic_aberration(Shaders):
         if self.duration < 0:
             self.renderer.game_objects.shader_render.remove_shader('chromatic_aberration')
 
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):       
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['chromatic_aberration'])#shader render        
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['chromatic_aberration'])#shader render
         return  self.renderer.layer.texture
 
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)        
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
 
 class Bloom(Shaders):
     def __init__(self, renderer, **kwarg):
@@ -67,29 +67,29 @@ class Bloom(Shaders):
         self.renderer.game_objects.shaders['bloom']['targetColor'] = self.targetColor
         self.renderer.game_objects.shaders['bloom']['colorRange'] = self.colorRange
 
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):       
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['bloom'])#shader render
         return self.renderer.layer.texture
- 
+
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)        
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
 
 class White_balance(Shaders):
     def __init__(self, renderer, **kwarg):
-        super().__init__(renderer)        
+        super().__init__(renderer)
 
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):       
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['white_balance'])#shader render
         return self.renderer.layer.texture
 
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)        
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
 
 class Speed_lines(Shaders):
     def __init__(self, renderer, **kwarg):
-        super().__init__(renderer)    
-        self.time = 0    
+        super().__init__(renderer)
+        self.time = 0
 
     def update(self):
         self.time += self.renderer.game_objects.game.dt*0.1
@@ -100,49 +100,53 @@ class Speed_lines(Shaders):
         self.renderer.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.renderer.game_objects.shaders['noise_perlin']['scale'] = [70,200]
 
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):  
-        self.set_uniforms()     
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.set_uniforms()
         self.renderer.game_objects.game.display.render(self.renderer.layer.texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        self.renderer.game_objects.shaders['speed_lines']['TIME'] = self.time 
+        self.renderer.game_objects.shaders['speed_lines']['TIME'] = self.time
         self.renderer.game_objects.shaders['speed_lines']['noise'] = self.renderer.layer.texture
 
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, shader = self.renderer.game_objects.shaders['speed_lines'])#shader render
-            
+
         return self.renderer.game_objects.game.screen
 
 class Zoom(Shaders):#only in?
     def __init__(self, renderer, **kwarg):
-        super().__init__(renderer)  
+        super().__init__(renderer)
         self.zoom = 1#zoom scale
-        self.center = kwarg.get('center', (0.5, 0.5))  
-        self.rate = kwarg.get('rate', 1)  
-        self.scale = kwarg.get('scale', 0.5)  
+        self.center = kwarg.get('center', (0.5, 0.5))
+        self.rate = kwarg.get('rate', 1)
+        self.scale = kwarg.get('scale', 0.5)
         self.method = 'zoom_in'
         self.methods = {'zoom_out': self.zoom_out, 'zoom_in': self.zoom_in}
+        self.zoom_start_timer = C.fps
 
     def update(self):
         self.methods[self.method]()
 
     def zoom_in(self):
-        self.zoom *= self.rate
-        self.zoom = max(self.zoom, self.scale)
+        if self.zoom_start_timer == 0:
+            self.zoom -= (self.zoom - self.scale)*self.rate
+            self.zoom = max(self.zoom, self.scale)
+        else:
+            self.zoom_start_timer -= 1
 
-    def zoom_out(self):    
-        self.zoom /= self.rate
-        self.zoom = min(self.zoom, 1)         
-        if abs(self.zoom - 1) < 0.05:
+    def zoom_out(self):
+        self.zoom += (1 - self.zoom)*(2*self.rate)
+        self.zoom = min(self.zoom, 1)
+        if abs(self.zoom - 1) < 0.01:
             self.renderer.remove_shader('zoom')
 
     def set_uniforms(self):
-        self.renderer.game_objects.shaders['zoom']['zoom_amount'] = self.zoom       
+        self.renderer.game_objects.shaders['zoom']['zoom_amount'] = self.zoom
         self.renderer.game_objects.shaders['zoom']['zoom_center'] = self.center
-        
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):  
+
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['zoom'])#makes a zoomed copy of the screen
         self.renderer.game_objects.game.display.render(self.renderer.layer.texture, self.renderer.game_objects.game.screen, flip = [False, True])#shader render
-        return self.renderer.game_objects.game.screen            
+        return self.renderer.game_objects.game.screen
 
 #not used below
 class Idle(Shaders):#enteties use it
@@ -150,7 +154,7 @@ class Idle(Shaders):#enteties use it
         super().__init__(renderer)
 
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)        
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
 
     def draw(self, base_texture, pos = [0,0], flip = [False, False]):
         return base_texture
@@ -168,10 +172,10 @@ class Hurt(Shaders):#turn white -> enteties use it
     def update(self):
         self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
         if self.duration < 0:
-            self.entity.shader_render.append_shader(self.next_animation)   
+            self.entity.shader_render.append_shader(self.next_animation)
 
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):   
-        self.set_uniforms()    
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip, shader = self.renderer.game_objects.shaders['colour'])#shader render
         return self.renderer.game_objects.game.screen.texture
 
@@ -189,4 +193,4 @@ class Invincibile(Shaders):#blink white -> enteyties use it
             self.enter_state('Idle')
 
     def set_uniforms(self):
-        self.entity.shader['time']  = self.time#(colour,colour,colour)            
+        self.entity.shader['time']  = self.time#(colour,colour,colour)
