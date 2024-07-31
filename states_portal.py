@@ -1,4 +1,4 @@
-import sys, states
+import sys
 
 class Basic_states():
     def __init__(self, entity):
@@ -43,8 +43,7 @@ class Grow(Basic_states):
         self.entity.radius += self.entity.game_objects.game.dt*0.01    
         if self.entity.radius >= 1 - self.entity.thickness:
             self.enter_state('Idle')
-            new_state = states.Challenge_rooms(self.entity.game_objects.game, 'Room_' + str(self.entity.ID), portal = self.entity)
-            new_state.enter_state()
+            self.entity.state.initiate_room()
         self.entity.radius = min(self.entity.radius, 1 - self.entity.thickness)       
 
 class Shrink(Basic_states):#after beamting the challenge room

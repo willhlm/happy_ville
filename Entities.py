@@ -42,11 +42,6 @@ class BG_Block(Staticentity):
         self.image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
         self.rect[2] = self.image.width
         self.rect[3] = self.image.height     
-
-        if self.parallax[0] == 0.2:
-            live_blur = True
-        else:
-            live_blur = False
         
         states = {False: 'Idle', True: 'Blur'}[live_blur]
         self.currentstate = getattr(states_blur, states)(self)
@@ -147,7 +142,7 @@ class Conversation_bubbles(Staticentity):
 
 #shaders -> should this be here or in enteties_parallx?
 class Portal(Staticentity):#portal to make a small spirit world with challenge rooms
-    def __init__(self, pos, game_objects, ID):
+    def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.currentstate = states_portal.Spawn(self)
 
@@ -163,7 +158,9 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.time = 0
         self.radius = 0
         self.thickness = 0
-        self.ID = ID#shoudl identify which kind of challenge room to create
+
+        self.state = kwarg.get('state', None)
+
         game_objects.interactables.add(Place_holder_interacatble(self, game_objects))#add a dummy interactable to the group, since portal cannot be in inetracatles
         game_objects.render_state.handle_input('portal', portal = self)
 
@@ -1857,7 +1854,7 @@ class Projectiles(Platform_entity):#projectiels: should it be platform enteties?
         pass
 
 class Bouncy_balls(Projectiles):#for ball challange room
-    def __init__(self, pos, game_objects):
+    def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
         self.image = self.sprites['idle'][0]
@@ -1867,10 +1864,14 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.dmg = 1
         self.light = game_objects.lights.add_light(self)
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
+        
+        self.gameplay_state = kwarg.get('gameplay_state', None)
+        self.lifetime = kwarg.get('lifetime', 300)
 
-    def release_texture(self):
-        super().release_texture()
+    def kill(self):#when lifeitme runs out or hit by aila sword
+        super().kill()        
         self.game_objects.lights.remove_light(self.light)
+        if self.gameplay_state: self.gameplay_state.increase_kill()        
 
     #platform collisions
     def limit_y(self):        
@@ -3134,7 +3135,7 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
         self.shader_state.handle_input('tint')
         self.interacted = True  
 
-class Challenge_monument(Challenges):#the status spawning a portal - challange rooms
+class Challenge_monument(Challenges):#the status spawning a portal, balls etc - challange rooms
     def __init__(self, pos, game_objects, ID):
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenges/challenge_monument/', game_objects)
@@ -3144,33 +3145,17 @@ class Challenge_monument(Challenges):#the status spawning a portal - challange r
 
         self.ID = ID        
         self.interacted = self.game_objects.world_state.state[self.game_objects.map.level_name]['challenge_monument'].get(ID, False)
-        self.dialogue = dialogue.Dialogue_interactable(self, 'room_' + ID)#handles dialoage and what to say         
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self) 
+        self.dialogue = dialogue.Dialogue_interactable(self, ID)#handles dialoage and what to say         
+        
+        if self.interacted:
+            self.shader_state = states_shader.Tint(self)             
+        else:
+            game_objects.lights.add_light(self)
+            self.shader_state = states_shader.Idle(self)            
 
-    def buisness(self):#enters after conversation                
-        pos = [self.rect.topleft[0]-30,self.rect.topleft[1]-200]#position of the portal
-        self.game_objects.special_shaders.add(Portal(pos, self.game_objects, self.ID))
-
-class Challenge_ball(Challenges):#ball room
-    def __init__(self, pos, game_objects):
-        super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenges/ball_room/', game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        self.hitbox = self.rect.copy()
-
-        self.interacted = self.game_objects.world_state.quests.get('ball_room', False)
-        self.dialogue = dialogue.Dialogue_interactable(self, 'ball_room')#handles dialoage and what to say         
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self) 
-
-    def buisness(self):#enters after conversation                
-        new_state = states.Challenge_rooms(self.game_objects.game, 'Ball_room', monument = self)
-        new_state.enter_state()       
-
-    def spawn_balls(self, number):#called from ball room state
-        for i in range(0,number):
-            new_ball = Bouncy_balls(self.rect.midtop, self.game_objects) 
-            self.game_objects.eprojectiles.add(new_ball)
+    def buisness(self):#enters after conversation  
+        new_state = states.Challenge_rooms(self.game_objects.game, self.ID.capitalize(), position = self.rect.center)
+        new_state.enter_state()     
 
 class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):
@@ -3620,8 +3605,8 @@ class Savepoint(Interactable):#save point
     def interact(self):#when player press t/y
         if type(self.currentstate).__name__ == 'Outline':#single click
             self.game_objects.player.currentstate.enter_state('Pray_pre')
-            self.game_objects.player.spawn_point[0]['map'] = self.map
-            self.game_objects.player.spawn_point[0]['point'] = self.init_cord
+            self.game_objects.player.spawn_point['map'] = self.map
+            self.game_objects.player.spawn_point['point'] = self.init_cord
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
             self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
         else:#odoulbe click

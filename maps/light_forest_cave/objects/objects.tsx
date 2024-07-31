@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="80" tileheight="112" tilecount="9" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="80" tileheight="112" tilecount="8" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="80" height="64" source="../../../Sprites/animations/bushes/cave_grass/idle/idle01.png"/>
@@ -31,8 +31,5 @@
    <property name="lifetime" value=""/>
   </properties>
   <image width="32" height="32" source="../../../Sprites/block/collision_time/bubble/idle/idle.png"/>
- </tile>
- <tile id="8">
-  <image width="48" height="80" source="../../../Sprites/animations/challenges/ball_room/idle/idle.png"/>
  </tile>
 </tileset>

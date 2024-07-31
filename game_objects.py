@@ -113,6 +113,8 @@ class Game_Objects():
         self.layer_pause.empty()
         self.bg_fade.empty()
         self.special_shaders.empty()
+        self.eprojectiles.empty()
+        self.fprojectiles.empty()
 
     def collide_all(self):        
         self.platform_collision()
