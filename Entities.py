@@ -42,14 +42,14 @@ class BG_Block(Staticentity):
         self.image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
         self.rect[2] = self.image.width
         self.rect[3] = self.image.height     
-        
-        states = {False: 'Idle', True: 'Blur'}[live_blur]
-        self.currentstate = getattr(states_blur, states)(self)
-        self.blur_radius = min(1 / self.parallax[0], 10)
+               
+        self.blur_radius = min(1/self.parallax[0], 10)#set a limit to 10. Bigger may cause performance issue
 
         if not live_blur:
+            self.currentstate = states_blur.Idle(self)
             self.blur()#if we do not want live blur
         else:#if live
+            self.currentstate = states_blur.Blur(self)
             if self.parallax[0] == 1: self.blur_radius = 0.2#a small value so you don't see blur
 
     def blur(self):
@@ -64,7 +64,7 @@ class BG_Block(Staticentity):
             self.image = self.layers.texture  # Get the texture of the layer
 
     def draw(self, target):
-        self.currentstate.set_uniform()
+        self.currentstate.set_uniform()#sets the blur radius
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
 
@@ -154,6 +154,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.bg_grey_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#entetirs
 
         self.rect = pygame.Rect(pos[0], pos[1], self.empty_layer.texture.width, self.empty_layer.texture.height)
+        self.rect.center = pos
         self.hitbox = pygame.Rect(self.rect.centerx, self.rect.centery, 32, 32)
         self.time = 0
         self.radius = 0
@@ -1988,6 +1989,7 @@ class Sword(Melee):
         self.sprites = Sword.sprites
         self.image = self.sprites['idle'][0]
         self.dmg = self.entity.dmg
+        self.lifetime = 10
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
@@ -3259,7 +3261,8 @@ class Zoom_col(Interactable):
         self.group_distance()
 
     def player_collision(self):
-        if self.blur_timer == 0:
+        self.blur_timer -= self.game_objects.game.dt
+        if self.blur_timer <= 0:
             for sprite in self.game_objects.all_bgs:
                 if type(sprite).__name__ == 'BG_Block':
                     if sprite.parallax[0] > 0.8:
@@ -3268,11 +3271,11 @@ class Zoom_col(Interactable):
                     else:
                         sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
                         sprite.blur_radius = max(sprite.blur_radius, 0.2)
-        else: self.blur_timer -= 1
+                    sprite.blur_radius = min(sprite.parallax[0], 10)#limit the blur raidus for performance                        
+
         if self.interacted: return
         self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)
         self.interacted = True#sets to false when player gos away
-
 
     def player_noncollision(self):#when player doesn't collide: for grass
         self.blur_timer = C.fps
@@ -3282,7 +3285,7 @@ class Zoom_col(Interactable):
             for sprite in self.game_objects.all_bgs:
                 if type(sprite).__name__ == 'BG_Block':
                     if sprite.parallax[0] == 1: sprite.blur_radius = 0.2
-                    else: sprite.blur_radius = min(1/sprite.parallax[0], 10)
+                    else: sprite.blur_radius = min(1/sprite.parallax[0], 10)#limit the blur raidus for performance
 
 class Path_col(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn):

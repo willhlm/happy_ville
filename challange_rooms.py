@@ -77,7 +77,7 @@ class Portal_rooms(Challange_rooms):#challanges with portals
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state)
         pos = kwarg.get('position', [0,0])        
-        self.portal = Entities.Portal([pos[0] + 200, pos[1] - 50], self.game_objects, state = self)        
+        self.portal = Entities.Portal([pos[0] + 100, pos[1] - 20], self.game_objects, state = self)        
         self.game_objects.special_shaders.add(self.portal)        
         
     def initiate_room(self):#portal calls it after growing

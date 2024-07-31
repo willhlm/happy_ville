@@ -126,11 +126,10 @@ class Zoom(Shaders):#only in?
         self.methods[self.method]()
 
     def zoom_in(self):
-        if self.zoom_start_timer == 0:
+        self.zoom_start_timer -= self.renderer.game_objects.game.dt
+        if self.zoom_start_timer < 0:
             self.zoom -= (self.zoom - self.scale)*self.rate
             self.zoom = max(self.zoom, self.scale)
-        else:
-            self.zoom_start_timer -= 1
 
     def zoom_out(self):
         self.zoom += (1 - self.zoom)*(2*self.rate)

@@ -433,12 +433,12 @@
                                 {
                                  "name":"rate",
                                  "type":"string",
-                                 "value":"0.99"
+                                 "value":"0.03"
                                 }, 
                                 {
                                  "name":"scale",
                                  "type":"string",
-                                 "value":"0.5"
+                                 "value":"0.85"
                                 }],
                          "rotation":0,
                          "type":"",
