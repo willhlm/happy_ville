@@ -30,7 +30,7 @@ class Idle(Shader_states):
         elif input == 'alpha':
             self.enter_state('Alpha')
         elif input == 'tint':
-            self.enter_state('Tint')            
+            self.enter_state('Tint', **kwarg)            
 
 class Hurt(Shader_states):#turn white -> enteties use it
     def __init__(self,entity):
@@ -174,7 +174,11 @@ class Tint(Shader_states):#challaenge momutment use it
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['tint']
-        self.colour = kwarg.get('colour', [0,0,0,100])        
+        self.colour = kwarg.get('colour', [0,0,0,0])        
 
     def draw(self):
         self.entity.shader['colour'] = self.colour
+
+    def handle_input(self, input, **kwarg):
+        if input == 'idle':
+            self.enter_state('Idle')              

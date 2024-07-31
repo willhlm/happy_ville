@@ -1835,6 +1835,9 @@ class Projectiles(Platform_entity):#projectiels: should it be platform enteties?
     def countered(self,dir, pos):#called from sword collsion with purple infinity stone equipped
         pass
 
+    def aila_sword(self):#aila sword without purple stone     
+        pass
+
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
 
@@ -1872,6 +1875,11 @@ class Bouncy_balls(Projectiles):#for ball challange room
     def kill(self):#when lifeitme runs out or hit by aila sword
         super().kill()        
         self.game_objects.lights.remove_light(self.light)
+
+    def aila_sword(self):
+        self.velocity = [0,0]
+        self.dmg = 0
+        self.currentstate.handle_input('Death')        
         if self.gameplay_state: self.gameplay_state.increase_kill()        
 
     #platform collisions
@@ -2057,9 +2065,7 @@ class Aila_sword(Sword):
             eprojectile.countered(self.dir, self.rect.center)
             self.sword_jump()
         else:
-            eprojectile.velocity = [0,0]
-            eprojectile.dmg = 0
-            eprojectile.currentstate.handle_input('Death')
+            eprojectile.aila_sword()
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
@@ -3134,8 +3140,12 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
         if self.interacted: return
         new_state = states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
-        self.shader_state.handle_input('tint')
+        self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
+
+    def reset(self):#called when challange is failed
+        self.shader_state.handle_input('idle')
+        self.interacted = False        
 
 class Challenge_monument(Challenges):#the status spawning a portal, balls etc - challange rooms
     def __init__(self, pos, game_objects, ID):
@@ -3156,7 +3166,7 @@ class Challenge_monument(Challenges):#the status spawning a portal, balls etc - 
             self.shader_state = states_shader.Idle(self)            
 
     def buisness(self):#enters after conversation  
-        new_state = states.Challenge_rooms(self.game_objects.game, self.ID.capitalize(), position = self.rect.center)
+        new_state = states.Challenge_rooms(self.game_objects.game, self.ID.capitalize(), monument = self)
         new_state.enter_state()     
 
 class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest

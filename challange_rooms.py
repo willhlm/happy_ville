@@ -2,7 +2,7 @@ import random
 import Entities
 import platforms
 
-class Challange_rooms():
+class Challange_rooms():#shuld these really be states or just quests?...
     def __init__(self, game_state):
         self.game_state = game_state
         self.game_objects = game_state.game.game_objects
@@ -31,7 +31,8 @@ class Challange_rooms():
 class Ball_room(Challange_rooms):#the room with ball in light forest cave
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state)
-        pos = kwarg.get('position', [0,0]) 
+        self.monument = kwarg['monument']
+        pos = self.monument.rect.center
         self.number = 5#number of balls
         self.time = 600        
         self.spawn_balls(pos)
@@ -42,7 +43,7 @@ class Ball_room(Challange_rooms):#the room with ball in light forest cave
     
     def spawn_balls(self, pos):
         for i in range(0, self.number):
-            new_ball = Entities.Bouncy_balls(pos, self.game_objects, gameplay_state = self, lifetime = self.time)         
+            new_ball = Entities.Bouncy_balls((pos[0],pos[1] - 20), self.game_objects, gameplay_state = self, lifetime = self.time)         
             self.game_objects.eprojectiles.add(new_ball)   
 
     def time_out(self):#when timer runs out
@@ -60,6 +61,7 @@ class Ball_room(Challange_rooms):#the room with ball in light forest cave
     def failiure(self):
         self.timer.kill()
         self.gates['1'].currentstate.handle_input('Transform')   
+        self.monument.reset()
 
     def complete(self):
         self.timer.kill()
@@ -76,7 +78,8 @@ class Ball_room(Challange_rooms):#the room with ball in light forest cave
 class Portal_rooms(Challange_rooms):#challanges with portals
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state)
-        pos = kwarg.get('position', [0,0])        
+        self.monument = kwarg['monument']
+        pos = self.monument.rect.center                        
         self.portal = Entities.Portal([pos[0] + 100, pos[1] - 20], self.game_objects, state = self)        
         self.game_objects.special_shaders.add(self.portal)        
         
