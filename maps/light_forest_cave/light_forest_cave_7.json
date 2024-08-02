@@ -1446,13 +1446,13 @@
                         }, 
                         {
                          "gid":4104,
-                         "height":48,
+                         "height":80,
                          "id":1901,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":736,
+                         "width":928,
                          "x":3104,
                          "y":1456
                         }, 
@@ -1518,7 +1518,7 @@
                         }, 
                         {
                          "gid":4104,
-                         "height":144,
+                         "height":112,
                          "id":1908,
                          "name":"",
                          "rotation":0,
@@ -1526,7 +1526,7 @@
                          "visible":true,
                          "width":560,
                          "x":3472,
-                         "y":1408
+                         "y":1376
                         }, 
                         {
                          "gid":4108,
@@ -1645,7 +1645,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_2"
+                                 "value":"light_forest_cave_X"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1686,7 +1686,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_7"
+                                 "value":"light_forest_cave_X"
                                 }, 
                                 {
                                  "name":"spawn",

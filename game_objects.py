@@ -17,7 +17,7 @@ import controller
 import lights
 import shader_render
 import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
-import quests
+import quests_events
 
 from time import perf_counter
 
@@ -35,35 +35,36 @@ class Game_Objects():
         self.collisions = collisions.Collisions(self)
         self.map = map_loader.Level(self)
         self.camera = camera.Camera(self)
+        self.stop_handeler = camera.Stop_handeler(self)#is put here so that it only has to be loaded once        
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = {'gameplay':UI.Gameplay_UI(self)}
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.shader_render = shader_render.Screen_shader(self, 'vignette')     
         self.render_state = states_gameplay.Idle(self)
-        self.quests = quests.Quest(self)
+        self.quests_events = quests_events.Quests_events(self)
 
     def create_groups(self):#define all sprite groups
-        self.enemies = groups.Group()#groups.Shader_group()
-        self.npcs = groups.Group()#groups.Shader_group()
-        self.platforms = groups.Group()
+        self.enemies = groups.Group()#enemies
+        self.npcs = groups.Group()#npcs
+        self.platforms = groups.Group()#platforms
         self.dynamic_platforms = groups.Group()#movinbg platforms
-        self.special_shaders = groups.Group()#portal use it
-        self.platforms_ramps = groups.Group()
-        self.all_bgs = groups.LayeredUpdates()#groups.Shader_layered_group()#
-        self.all_fgs = groups.LayeredUpdates()#groups.Shader_layered_group()#
+        self.special_shaders = groups.Group()#portal use it for the drawing
+        self.platforms_ramps = groups.Group()#ramps
+        self.all_bgs = groups.LayeredUpdates()#bg from tiled
+        self.all_fgs = groups.LayeredUpdates()#fgs from tileed
         self.bg_interact = groups.Group()#small grass stuff so that interactables blends with BG
         self.bg_fade = groups.Group()#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
-        self.eprojectiles = groups.Group()#groups.Shader_group()
-        self.fprojectiles = groups.Group()#groups.Shader_group()
-        self.loot = groups.Group()#groups.Shader_group()
+        self.eprojectiles = groups.Group()#enemy projectiles
+        self.fprojectiles = groups.Group()#player prohectiles
+        self.loot = groups.Group()#enemy drops and things player cn pickup upon collision
         self.entity_pause = groups.PauseGroup() #all Entities that are far away
-        self.cosmetics = groups.Group()#groups.Shader_group()#things we just want to blit
+        self.cosmetics = groups.Group()#groups.Shader_group()#things we just want to blit after the player layer
         self.cosmetics2 = groups.Group()#groups.Shader_group()#things we just want to blit before player layer
-        self.cosmetics_no_clear = groups.Group()# a group that will not be cleared when chaging map
+        self.cosmetics_no_clear = groups.Group()# a group that will not be cleared when changing map
 
-        self.camera_blocks = groups.Group()#pygame.sprite.Group()
+        self.camera_blocks = groups.Group()#camera blocks
         self.interactables = groups.Group()#player collisions, when pressing T/Y and projectile collisions: chest, bushes, collision path, sign post, save point
-        self.layer_pause = groups.PauseLayer()
+        self.layer_pause = groups.PauseLayer()#like eneitty pause but for those at different parallax layers
 
         #initiate player
         self.player = Entities.Player([0,0],self)
@@ -80,7 +81,7 @@ class Game_Objects():
     def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout
         self.clean_groups()
         t1_start = perf_counter()  
-        self.map.load_map(map_name,spawn)#memory leak somwehre here
+        self.map.load_map(map_name, spawn)#memory leak somwehre here
         t1_stop = perf_counter()
         print(t1_stop-t1_start)
 

@@ -7,8 +7,6 @@ import animation
 import UI_select_menu, UI_facilities
 import Entities
 import particles
-import challange_rooms
-import platforms
 
 class Game_State():
     def __init__(self,game):
@@ -474,23 +472,13 @@ class Gameplay(Game_State):
 
             else:
                 self.game.game_objects.player.currentstate.handle_press_input(input)
-                self.game.game_objects.player.abilities.handle_input(input)#to change movement ability
+                self.game.game_objects.player.abilities.handle_input(input)#to change movement ability with d pad
                 #self.game.game_objects.player.omamoris.handle_input(input)
         elif input[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
         elif input[2]['l_stick'][1] > 0.85:
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
-
-    def handle_input(self,input,**kwarg):
-        if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game, **kwarg)
-            new_game_state.enter_state()
-        elif input == 'death':#normal death
-            self.game.game_objects.player.death()
-        elif input == 'butterfly':#the cacoon was hit
-            new_state = Butterfly_encounter_gameplay(self.game)
-            new_state.enter_state()
 
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self, game):
@@ -603,40 +591,48 @@ class Pause_gameplay(Gameplay):#a pause screen with optional shake. = when entet
         if self.duration < 0:
             self.exit_state()
 
-class Slow_motion_gameplay(Gameplay):
-    def __init__(self, game):
-        super().__init__(game)
-        self.slow_rate = 0.5#determines the rate of slow motion, between 0 and 1
-        self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].init(self.slow_rate)
-        self.duration = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].duration
+    def render(self):
+        self.game.state_stack[-2].render()
 
+class Slow_gameplay(Gameplay):#called from aila when heal < 0
+    def __init__(self, game, **kwarg):
+        super().__init__(game)
+        self.rate = kwarg.get('rate', 0.5)#determines the rate of slow motion, between 0 and 1
+        self.duration = kwarg.get('duration', 100)
+
+    def update(self):
+        self.duration -= self.game.dt        
+        self.game.dt *= self.rate#slow motion
+        super().update()        
+        self.exit()
+
+    def exit(self):
+        if self.duration < 0:
+            self.exit_state()
+
+class Slow_motion_gameplay(Slow_gameplay):#called from aila ability
+    def __init__(self, game, **kwarg):
+        super().__init__(game, **kwarg)
         self.bar = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites['bar'][0]
         self.meter = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites['meter'][0]
         self.width = self.meter.width
 
         self.pos = [self.game.window_size[0]*0.5 - self.width*0.5,3]
-        self.rate =self.width/self.duration
+        self.bar_rate =self.width/self.duration
 
-        self.surface = self.game.display.make_layer(self.game.window_size)
-
-    def update(self):
-        self.game.dt *= self.slow_rate#slow motion
-        super().update()
-        self.duration -= self.game.dt
-        self.exit()
+        self.surface = self.game.display.make_layer(self.game.window_size)#TODO
 
     def render(self):
         super().render()
         self.surface.clear(20,20,20,100)
-        self.game.display.render(self.surface.texture,self.game.screen)
+        self.game.display.render(self.surface.texture, self.game.screen)
 
-        self.width -= self.game.dt*self.rate
+        self.width -= self.game.dt*self.bar_rate
         self.width = max(self.width,0)
 
-    def exit(self):
-        if self.duration < 0:
-            self.game.game_objects.player.slow_motion = 1
-            self.exit_state()
+    def exit_state(self):
+        super().exit_state()
+        self.game.game_objects.player.slow_motion = 1
 
 class Ability_menu(Gameplay):#when pressing tab
     def __init__(self, game):
@@ -724,7 +720,7 @@ class Fadein(Gameplay):
         pass
 
 class Fadeout(Fadein):
-    def __init__(self,game,previous_state,map_name,spawn,fade):
+    def __init__(self,game, previous_state, map_name, spawn, fade):
         super().__init__(game)
         self.previous_state = previous_state
         self.fade_length = 60
@@ -905,26 +901,6 @@ class Facilities(Gameplay):#fast_travel (menu and unlock), ability upgrade (spur
 
     def handle_events(self,input):
         self.state[-1].handle_events(input)
-
-class Challenge_rooms(Gameplay):#challaenge rooms: called from states_portal after growing
-    def __init__(self, game, type, **kwarg):
-        super().__init__(game)
-        self.state = getattr(challange_rooms, type)(self, **kwarg)
-
-    def update(self):
-        super().update()
-        self.state.update()
-
-    def render(self):
-        super().render()
-        self.state.render()
-
-    def handle_events(self, input):
-        super().handle_events(input)
-        self.state.handle_events(input)
-
-    def handle_input(self, input, **kwarg):
-        self.state.handle_input(input, **kwarg)
 
 class Cutscenes(Gameplay):
     def __init__(self, game,scene):
@@ -1233,15 +1209,21 @@ class Death(Cutscene_engine):#when aila dies
 class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
-        self.gameplay = Cultist_encounter_gameplay(game)
-        self.gameplay.enter_state()
+        self.game.game_objects.player.death_state.handle_input('cultist_encounter')
+        self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
+        quest = self.game.game_objects.quests_events.active_quests['cultist_encounter']
+        
+        #should entity stuff be in quest insted?
+        spawn_pos1 = (self.game.game_objects.camera.scroll[0] - 300, self.game.game_objects.camera.scroll[1] + 100)
+        spawn_pos2 = (self.game.game_objects.camera.scroll[0] + 50, self.game.game_objects.camera.scroll[1] + 100)
+        self.entity1 = Entities.Cultist_warrior(spawn_pos1, self.game.game_objects, quest)#added to group in cutscene
+        self.entity1.dir[0] *= -1
+        self.entity1.AI.deactivate()
+        self.game.game_objects.enemies.add(self.entity1)
+        self.entity2 = Entities.Cultist_rogue(spawn_pos2, self.game.game_objects, quest)#added to group in cutscene        
+        ##
 
         self.stage = 0
-        self.gameplay.entity1.AI.deactivate()
-        self.game.game_objects.enemies.add(self.gameplay.entity1)
-
-        self.game.game_objects.platforms.add(self.gameplay.gate)
-
         self.game.game_objects.camera.set_camera('Cultist_encounter')
         self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
         self.game.game_objects.player.currentstate.walk()#to force tha walk animation
@@ -1262,55 +1244,28 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
                 self.stage = 1
 
         elif self.stage == 1:
-            if self.timer > 200:
+            if self.timer > 200:#sapawn cultist_rogue
                 spawn_pos = self.game.game_objects.player.rect.topright
-                self.gameplay.entity2.AI.deactivate()
-                self.gameplay.entity2.dir[0] = -1
-                self.gameplay.entity2.currentstate.enter_state('Ambush_pre')
-
-                self.game.game_objects.enemies.add(self.gameplay.entity2)
+                self.entity2.AI.deactivate()
+                self.entity2.dir[0] = -1
+                self.entity2.currentstate.enter_state('Ambush_pre')
+                self.game.game_objects.enemies.add(self.entity2)
 
                 self.stage=2
                 self.timer=0
 
-        elif self.stage==2:#sapawn cultist_rogue
+        elif self.stage==2:
             if self.timer>100:
                 self.exit_state()
 
     def exit_state(self):
-        self.gameplay.entity1.AI.activate()
-        self.gameplay.entity2.AI.activate()
+        self.entity1.AI.activate()
+        self.entity2.AI.activate()
         self.game.game_objects.camera.exit_state()
         super().exit_state()
 
-class Cultist_encounter_gameplay(Gameplay):#initialised in the cutscene:if player dies, the plater is not respawned but transffered to cultist hideout
-    def __init__(self,game):
-        super().__init__(game)
-        spawn_pos1 = (self.game.game_objects.camera.scroll[0] - 300,self.game.game_objects.camera.scroll[1] + 100)
-        spawn_pos2 = (self.game.game_objects.camera.scroll[0] + 50,self.game.game_objects.camera.scroll[1] + 100)
-        self.entity1 = Entities.Cultist_warrior(spawn_pos1, self.game.game_objects, self)#added to group in cutscene
-        self.entity1.dir[0] *= -1
-        self.entity2 = Entities.Cultist_rogue(spawn_pos2, self.game.game_objects, self)#added to group in cutscene
-        self.gate = platforms.Gate((self.game.game_objects.camera.scroll[0] - 250,self.game.game_objects.camera.scroll[1] + 100),self.game.game_objects)#added to group in cutscene
-        self.kill = 0#when the enteties have died, this will tick up
-
-    def incrase_kill(self):#called when entity1 and 2 are killed
-        self.kill += 1
-        if self.kill == 2:#both cultist have died
-            self.game.game_objects.world_state.cutscenes_complete[type(self).__name__.replace('_gameplay','')] = True
-            self.gate.currentstate.handle_input('Transform')#open gate
-            self.exit_state()
-
-    def handle_input(self, input):
-        if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game, duration = 11)
-            new_game_state.enter_state()
-        elif input == 'death':#if aila dies during the fight, this is called
-            self.game.game_objects.player.reset_movement()
-            self.game.game_objects.load_map(self,'cultist_hideout_1','2')
-
-class Rhoutta_encounter_gameplay(Gameplay):#called from trigger before first rhoutta: shuold spawn lightning and a gap spawns, or something
-    def __init__(self,game):
+class Rhoutta_encounter(Gameplay):#called from trigger before first rhoutta: shuold spawn lightning and a gap spawns, or something -> TODO make a cutsene
+    def __init__(self, game):
         super().__init__(game)
         spawn_pos = (1520-40,416-336)#topleft position in tiled - 40 to spawn it behind aila
         lightning = Entities.Lighitning(spawn_pos,self.game.game_objects, parallax = [1,1], size = [64,336])
@@ -1319,11 +1274,6 @@ class Rhoutta_encounter_gameplay(Gameplay):#called from trigger before first rho
         self.game.game_objects.interactables.add(lightning)
         self.game.game_objects.cosmetics.add(effect)
         self.game.game_objects.weather.flash()
-
-    def handle_input(self,input, duration):
-        if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game,duration=duration)
-            new_game_state.enter_state()
 
 class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
@@ -1354,31 +1304,5 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
         elif self.stage == 2:#spawn
             self.cocoon.particle_release()
             if self.timer > 400:
+                self.game_objects.quests_events.initiate_quest('butterfly_encounter')
                 self.exit_state()
-                new_state = Butterfly_encounter_gameplay(self.game)#it will make the gate
-                new_state.enter_state()
-
-class Butterfly_encounter_gameplay(Gameplay):#if aggro path is chosen: and should be called if cocoon gets hurt
-    def __init__(self,game):
-        super().__init__(game)
-        spawn_pos = self.game.game_objects.map.references['cocoon_boss'].rect.topleft
-        self.game.game_objects.weather.flash()
-        self.butterfly = Entities.Butterfly(spawn_pos, self.game.game_objects)
-        self.game.game_objects.enemies.add(self.butterfly)
-        self.game.game_objects.map.references['cocoon_boss'].currentstate.handle_input('Hurt')
-        spawn_pos = [2576,1320]
-        self.gate = Entities.Lighitning(spawn_pos,self.game.game_objects,[1,1],[32,96])
-        self.game.game_objects.interactables.add(self.gate)
-        self.butterfly.AI.activate()
-
-    def incrase_kill(self):#called when butterfly is dead
-        self.game.game_objects.world_state.cutscenes_complete[type(self).__name__.replace('_gameplay','')] = True
-        self.gate.currentstate.handle_input('Transform')#if there was a gate, we can open it
-        self.exit_state()
-
-    def handle_input(self,input, duration = 11):
-        if input == 'dmg':
-            new_game_state = Pause_gameplay(self.game,duration=duration)
-            new_game_state.enter_state()
-        elif input == 'death':#normal death
-            self.game.game_objects.player.death()

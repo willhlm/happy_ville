@@ -4,15 +4,12 @@ class World_state():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.state = Read_files.read_json("map_state.json")
-        self.cutscenes_complete = {}#when a cutscenne has been played, its name gets appended here
         self.statistics = {'kill': {},'ambers' : 0}#collects stuff aila has done        
         self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
-        self.events = {}#save events and put it to True when completed        
-        self.quests = {}#true means completed, false means still active
-
-    def update_event(self, event):#called when an event has happened and set it to True
-        self.events[event] = True
+        self.events = {}#save events and put it to True when completed -> events, such as boss defeat 
+        self.quests = {}#true means completed, false means still active -> tasks
+        self.cutscenes_complete = {}#when a cutscenne has been played, its name gets appended here
 
     def increase_progress(self):#called when e.g. a boss dies. It is the happinies degree of the world
         self.progress += 1
@@ -30,6 +27,6 @@ class World_state():
         if not self.travel_points.get(map, False):#if first time intercted with it            
             self.travel_points[map] = cord
 
-    def init_state_file(self, level_name):#make a state file if it is the first time loading this map
-        self.state[level_name] = {'chest': {},'lever': {},'soul_essence': {},'runestone': {}, 'challenge_monument': {}}#a place holder for things that should depend on map state
+    def init_state_file(self, level_name):#make a state file if it is the first time loading this map, state of different interactables
+        self.state[level_name] = {'chest': {},'lever': {},'soul_essence': {},'runestone': {}}#a place holder for things that should depend on map state
         self.state.pop('placeholder_level', 0)#removes the placeholder tag

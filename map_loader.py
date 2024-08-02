@@ -14,7 +14,6 @@ class Level():
 
     def load_map(self,map_name,spawn):        
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
-        self.game_objects.game.state_stack[-1].handle_input('exit')#remove any unnormal gameplay states, e.g. cultist encountr, pause gameplay etc
         self.level_name = map_name.lower()
         self.spawn = spawn
         self.game_objects.lights.new_map()#set ambient default light and clear light sources
@@ -293,7 +292,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'event':
                         value = property['value']
-                new_trigger = Entities.State_trigger(object_position,self.game_objects,object_size ,value)
+                new_trigger = Entities.State_trigger(object_position, self.game_objects, object_size ,value)
                 self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object

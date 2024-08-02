@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, sound, dialogue, states, groups
-import states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
 import constants as C
 
@@ -607,8 +607,8 @@ class Character(Platform_entity):#enemy, NPC,player
         super().draw(target)
 
 class Player(Character):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/aila/')
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/aila/', game_objects)
         self.image = self.sprites['idle_main'][0]
@@ -618,7 +618,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 3
+        self.health = 7
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -635,6 +635,7 @@ class Player(Character):
                      'Arrow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True}
         self.currentstate = states_player.Idle_main(self)
+        self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
@@ -663,10 +664,16 @@ class Player(Character):
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             self.hurt_particles(lifetime = 40, vel = {'linear':[4,7]}, colour=[0,0,0,255], scale=3, number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 20, amplitude = 10)#makes the game freez for few frames
+            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 20, amplitude = 10)#pause the game for a while with an optional shake
+            new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
-            self.game_objects.game.state_stack[-1].handle_input('death')#depending on gameplay state, different death stuff should happen
+            new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
+            new_game_state.enter_state() 
+
+            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
+            new_game_state.enter_state()        
+            self.death_state.die()#depending on gameplay state, different death stuff should happen            
 
     def heal(self, health = 1):
         self.health += health
@@ -679,9 +686,6 @@ class Player(Character):
     def add_spirit(self, spirit = 1):
         self.spirit += spirit
         self.game_objects.UI['gameplay'].update_spirits()#update UI
-
-    def death(self):#"normal" gameplay states calls this
-        self.currentstate.enter_state('Death_pre')#overrite any state and go to deat
 
     def dead(self):#called when death animation is finished
         new_game_state = states.Death(self.game_objects.game)
@@ -1197,7 +1201,7 @@ class Cultist_warrior(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
-        self.health = 10
+        self.health = 3
         self.attack_distance = [80,10]
         self.attack = Sword
         self.gameplay_state = gameplay_state
@@ -1337,7 +1341,7 @@ class MrWood(NPC):#lumber jack
         new_state = states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
         if self.game_objects.world_state.quests.get('lumberjack_omamori', False):#if the quest is running
-            self.game_objects.quests.active_quests['lumberjack_omamori'].complete()
+            self.game_objects.quests_events.active_quests['lumberjack_omamori'].complete()
 
 class byFane1(NPC):
     def __init__(self, pos,game_objects):
@@ -1397,7 +1401,7 @@ class Reindeer(Boss):
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
 class Butterfly(Flying_enemy):
-    def __init__(self,pos,game_objects):
+    def __init__(self, pos, game_objects, quest = None):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/butterfly/',game_objects)
         self.image = self.sprites['idle'][0]
@@ -1406,6 +1410,7 @@ class Butterfly(Flying_enemy):
         self.AI = AI_butterfly.Idle(self)
         self.currentstate = states_butterfly.Idle(self)
         self.health =20
+        self.quest = quest
 
     def knock_back(self,dir):
         pass
@@ -1414,7 +1419,7 @@ class Butterfly(Flying_enemy):
         pass
 
     def dead(self):#called when death animation is finished
-        self.game_objects.game.state_stack[-1].incrase_kill()
+        self.quest.incrase_kill()
         super().dead()
 
     def right_collision(self,hitbox):
@@ -1869,18 +1874,18 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.light = game_objects.lights.add_light(self)
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
         
-        self.gameplay_state = kwarg.get('gameplay_state', None)
+        self.quest = kwarg.get('quest', None)
         self.lifetime = kwarg.get('lifetime', 300)
 
     def kill(self):#when lifeitme runs out or hit by aila sword
         super().kill()        
         self.game_objects.lights.remove_light(self.light)
 
-    def aila_sword(self):
+    def aila_sword(self):#when hit by aila sword without purple stone
         self.velocity = [0,0]
         self.dmg = 0
         self.currentstate.handle_input('Death')        
-        if self.gameplay_state: self.gameplay_state.increase_kill()        
+        if self.quest: self.quest.increase_kill()        
 
     #platform collisions
     def limit_y(self):
@@ -2360,15 +2365,17 @@ class Slow_motion():
         self.level = 1#upgrade pointer
         self.duration = 200#slow motion duration, in time [whatever units]
 
-    def init(self,rate):#called from slow motion gameplay state
-        if self.level == 3:#counteract slowmotion for aila
-            self.entity.slow_motion = 1/rate
+    def init(self):#called from slow motion gameplay state
+        self.rate = 0.5#slow motion rate
+        if self.level == 3:
+            self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila            
             self.duration = 400#slow motion duration, in time [whatever units]
-        if self.level == 2:
+        elif self.level == 2:
             self.duration = 400#slow motion duration, in time [whatever units]
 
     def spawn(self):#called when using the ability from player states
-        new_state = states.Slow_motion_gameplay(self.game_objects.game)
+        self.init()
+        new_state = states.Slow_motion_gameplay(self.game_objects.game, rate = self.rate, duration = self.duration)
         new_state.enter_state()
 
     def upgrade_ability(self):#called from upgrade menu
@@ -2626,7 +2633,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
 
     def interact(self, player):#when player press T
         player.currentstate.enter_state('Pray_pre')
-        if self.quest: self.game_objects.quests.initiate_quest(self.quest, item = self)
+        if self.quest: self.game_objects.quests_events.initiate_quest(self.quest, item = self)
         self.pickup(player)#object specific
         new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
@@ -3156,18 +3163,17 @@ class Challenge_monument(Challenges):#the status spawning a portal, balls etc - 
         self.hitbox = self.rect.copy()
 
         self.ID = ID
-        self.interacted = self.game_objects.world_state.state[self.game_objects.map.level_name]['challenge_monument'].get(ID, False)
+        self.interacted = self.game_objects.world_state.quests.get(ID, False)        
         self.dialogue = dialogue.Dialogue_interactable(self, ID)#handles dialoage and what to say         
         
         if self.interacted:
-            self.shader_state = states_shader.Tint(self)             
+            self.shader_state = states_shader.Tint(self, colour = [0,0,0,100])             
         else:
             game_objects.lights.add_light(self)
             self.shader_state = states_shader.Idle(self)            
 
     def buisness(self):#enters after conversation  
-        new_state = states.Challenge_rooms(self.game_objects.game, self.ID.capitalize(), monument = self)
-        new_state.enter_state()     
+        self.game_objects.quests_events.initiate_quest(self.ID.capitalize(), monument = self) 
 
 class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):
@@ -3383,13 +3389,13 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
             layer.new_colour = self.new_colour + [layer.colour[-1]]
             layer.bounds = self.rect
 
-class State_trigger(Interactable):
-    def __init__(self,pos,game_objects,size,event):
-        super().__init__(pos,game_objects)
-        self.rect = pygame.Rect(pos,size)
+class State_trigger(Interactable):#TODO make it an event trigger -> cutscene (state) or event/quest
+    def __init__(self, pos, game_objects, size, event):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        self.event = event
+        self.event = event        
 
     def release_texture(self):
         pass
@@ -3401,13 +3407,13 @@ class State_trigger(Interactable):
         pass
         #self.group_distance()
 
-    def player_collision(self):
-        if self.game_objects.world_state.cutscenes_complete.get(self.event, False): return#if the cutscene has not been shown before. Shold we kill the object instead?
+    def player_collision(self):        
+        if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has not been shown before. Shold we kill the object instead?
         if self.event == 'Butterfly_encounter':
             if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggrp is not chosen
 
         new_game_state = getattr(states, self.event)(self.game_objects.game)
-        new_game_state.enter_state()
+        new_game_state.enter_state()        
         self.kill()#is this a pronlen in re spawn?
 
 class Interactable_bushes(Interactable):
@@ -3506,7 +3512,7 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
     def take_dmg(self,projectile):
         if self.invincibile: return
         self.invincibile = True
-        self.game_objects.game.state_stack[-1].handle_input('butterfly')
+        self.game_objects.quests_events.initiate_quest('butterfly_encounter')
 
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):

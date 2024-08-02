@@ -82,7 +82,7 @@ class Stop_bottom(Basic_states):
         super().__init__(entity)
         self.determine_sign()
         self.true_center = self.center.copy()
-        self.entity.game_objects.camera.stop_handeler.add_stop('bottom')
+        self.entity.game_objects.stop_handeler.add_stop('bottom')
 
     def init_pos(self):#called from map loader
         self.entity.game_objects.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
@@ -106,7 +106,7 @@ class Stop_bottom(Basic_states):
             #self.center[1] -= self.sign*3#self.sign*(abs(self.entity.game_objects.camera.center[1]-target))*0.1
             self.entity.game_objects.camera.center[1] = self.sign*max(self.sign*target,self.sign*self.center[1])#when sign is negative, it works as min
         else:
-            self.entity.game_objects.camera.stop_handeler.remove_stop('bottom')
+            self.entity.game_objects.stop_handeler.remove_stop('bottom')
             self.enter_state('Idle_bottom')
 
 class Idle_top(Basic_states):
@@ -146,22 +146,34 @@ class Idle_center(Basic_states):
     def update(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx, self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
 
-        if abs(distance[0]) < 10:
+        #if abs(distance[0]) < 10:
+        if abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5:
             self.enter_state('Stop_center')        
 
 class Stop_center(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
-        self.entity.game_objects.camera.stop_handeler.add_stop('center')
+        self.entity.game_objects.stop_handeler.add_stop('center')
 
-    def update(self):
+    def update(self):#TODO also vertical
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
-        if abs(distance[0]) > self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x
-            self.entity.game_objects.camera.stop_handeler.remove_stop('center')
+        if abs(distance[0]) > self.entity.game_objects.game.window_size[0]*0.5 or abs(distance[1]) > self.entity.game_objects.game.window_size[1]*0.5:#if on screen on y and coser than half screen on x
+            self.entity.game_objects.stop_handeler.remove_stop('center')
             self.enter_state('Idle_center')
-        else:
-            self.entity.game_objects.camera.center[0] = self.entity.game_objects.player.hitbox.centerx - (48 + self.entity.rect.centerx - self.entity.game_objects.game.window_size[0]*0.5)
+        else:           
+            target = self.entity.game_objects.player.hitbox.centerx - (self.entity.game_objects.player.rect[2]*0.5 + self.entity.rect.centerx - self.entity.game_objects.game.window_size[0]*0.5)
+                                
+            scale = 10#need to be high so that aila doesn't move ftaser than scroll                      
+            if distance[0] < 0:                
+                self.center[0] += self.entity.game_objects.game.dt * scale
+                self.entity.game_objects.camera.center[0] = min(target, self.center[0])
+                self.center[0] = min(self.entity.game_objects.camera.center[0], self.center[0])
+            else:                               
+                self.center[0] -= self.entity.game_objects.game.dt * scale
+                self.entity.game_objects.camera.center[0] = max(target, self.center[0])  
+                self.center[0] = max(self.entity.game_objects.camera.center[0], self.center[0])            
 
+           # self.entity.game_objects.camera.center[0] = target
             #self.entity.game_objects.camera.center[1] = self.entity.game_objects.player.hitbox.centery - (self.entity.rect.centery - self.entity.game_objects.game.window_size[1]*0.5)
 
             
