@@ -607,8 +607,8 @@ class Character(Platform_entity):#enemy, NPC,player
         super().draw(target)
 
 class Player(Character):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/aila/')
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/aila/', game_objects)
         self.image = self.sprites['idle_main'][0]
@@ -618,7 +618,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 5
-        self.health = 3
+        self.health = 7
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -664,9 +664,15 @@ class Player(Character):
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             self.hurt_particles(lifetime = 40, vel = {'linear':[4,7]}, colour=[0,0,0,255], scale=3, number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 20, amplitude = 10)#makes the game freez for few frames
+            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 20, amplitude = 10)#pause the game for a while with an optional shake
+            new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
+            new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
+            new_game_state.enter_state() 
+
+            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
+            new_game_state.enter_state()        
             self.death_state.die()#depending on gameplay state, different death stuff should happen            
 
     def heal(self, health = 1):
@@ -2359,15 +2365,17 @@ class Slow_motion():
         self.level = 1#upgrade pointer
         self.duration = 200#slow motion duration, in time [whatever units]
 
-    def init(self,rate):#called from slow motion gameplay state
-        if self.level == 3:#counteract slowmotion for aila
-            self.entity.slow_motion = 1/rate
+    def init(self):#called from slow motion gameplay state
+        self.rate = 0.5#slow motion rate
+        if self.level == 3:
+            self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila            
             self.duration = 400#slow motion duration, in time [whatever units]
-        if self.level == 2:
+        elif self.level == 2:
             self.duration = 400#slow motion duration, in time [whatever units]
 
     def spawn(self):#called when using the ability from player states
-        new_state = states.Slow_motion_gameplay(self.game_objects.game)
+        self.init()
+        new_state = states.Slow_motion_gameplay(self.game_objects.game, rate = self.rate, duration = self.duration)
         new_state.enter_state()
 
     def upgrade_ability(self):#called from upgrade menu

@@ -35,6 +35,7 @@ class Game_Objects():
         self.collisions = collisions.Collisions(self)
         self.map = map_loader.Level(self)
         self.camera = camera.Camera(self)
+        self.stop_handeler = camera.Stop_handeler(self)#is put here so that it only has to be loaded once        
         self.world_state = world_state.World_state(self)#save/handle all world state stuff here
         self.UI = {'gameplay':UI.Gameplay_UI(self)}
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game

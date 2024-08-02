@@ -1,5 +1,5 @@
 import sys, random
-import Entities
+import Entities, platforms
 
 class Quests_events():#quest and event handlere
     def __init__(self, game_objects):
@@ -54,6 +54,7 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
         self.kill = kwarg['kill']
+        self.gate = platforms.Gate((self.game.game_objects.camera.scroll[0] - 250,self.game.game_objects.camera.scroll[1] + 100), self.game.game_objects, erect = True)#added to group in cutscene
 
     def incrase_kill(self):#called when entity1 and 2 are killed
         self.kill -= 1
@@ -61,7 +62,7 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
             self.complete()
     
     def complete(self):
-        #lower the gate
+        self.gate.currentstate.handle_input('Transform')
         self.game_objects.player.death_state.handle_input('idle')
         self.game_objects.world_state.cutscenes_complete[type(self).__name__.lower()] = True
         self.game_objects.world_state.events[type(self).__name__.lower()] = True  

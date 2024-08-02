@@ -31,6 +31,7 @@ class Cultist_encounter(Basic_states):#if dying in cultist encounter
     def die(self):
         self.entity.game_objects.player.reset_movement()
         self.entity.game_objects.load_map(self.entity.game_objects.game.state_stack[-1], 'cultist_hideout_1','2')        
+        self.enter_state('Idle')#go back to normal
 
     def handle_input(self, input):
         if input == 'idle':
