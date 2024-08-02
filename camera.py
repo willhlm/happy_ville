@@ -5,7 +5,7 @@ class Camera():
         self.game_objects = game_objects
         self.true_scroll = scroll
         self.scroll = self.true_scroll.copy()
-        self.center = [game_objects.map.PLAYER_CENTER[0]-game_objects.player.rect[2]*0.5,game_objects.map.PLAYER_CENTER[1]-game_objects.player.rect[3]*0.5]
+        self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
         self.original_center = self.center.copy()
         self.stop_handeler = Stop_handeler(self)
 
@@ -145,10 +145,11 @@ class Cutscenes(Camera):
         super().update()
         self.shakeit()
 
-    def camera_shake(self,amp = 3, duration = 100):#if camera shake is called during a cutscene, set a flag so that it shakes
+    def camera_shake(self,**kwarg):#if camera shake is called during a cutscene, set a flag so that it shakes
         self.shaking = True
-        self.amp = amp
-        self.duration = duration
+        self.amp = kwarg.get('amplitude', 3)
+        self.duration = kwarg.get('duration', 100)
+        self.scale = kwarg.get('scale', 0.9)
 
     def shakeit(self):
         if not self.shaking: return

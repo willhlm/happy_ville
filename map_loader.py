@@ -293,7 +293,7 @@ class Level():
                 for property in properties:
                     if property['name'] == 'event':
                         value = property['value']
-                new_trigger = Entities.State_trigger(object_position,self.game_objects,object_size ,value)
+                new_trigger = Entities.State_trigger(object_position, self.game_objects, object_size ,value)
                 self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object

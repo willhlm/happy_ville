@@ -60,10 +60,10 @@ class Gate(Platform):#a gate that is owned by the lever
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
 
         self.ID_key = kwarg.get('ID', None)#an ID to match with the gate
-        if game_objects.world_state.state[game_objects.map.level_name]['challenge_monument'].get(self.ID_key, False):#if ballroom has been completed
+        if game_objects.world_state.quests.get(self.ID_key, False):#if ballroom has been completed
             state = 'down'
         else:                
-            state = {True: 'erect', False: 'down'}[kwarg.get('erect', 'down')]#a flag that can be specified in titled   
+            state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   
         self.image = self.sprites[state][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state                
                 
