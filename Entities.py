@@ -619,7 +619,7 @@ class Player(Character):
         self.max_health = 10
         self.max_spirit = 5
         self.health = 7
-        self.spirit = 2
+        self.spirit = 2        
 
         self.projectiles = game_objects.fprojectiles
         self.sword = Aila_sword(self)
@@ -630,7 +630,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Arrow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True}
@@ -640,8 +640,9 @@ class Player(Character):
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
+        self.flags = {'ground': True, 'sword_swinging': False}# a flag to check if on graon (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump':Jump_timer(self,C.jump_time_player),'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Ground_timer(self,C.ground_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump_buffer':Jump_buffer_timer(self,C.jump_buffer_timer_player),'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player),'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
 
     def update_hitbox(self):
@@ -650,7 +651,7 @@ class Player(Character):
 
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
-        self.ground = True#used for jumping
+        self.flags['ground'] = True#used for jumping
 
     def take_dmg(self,dmg = 1):
         if self.invincibile: return
@@ -697,7 +698,7 @@ class Player(Character):
 
     def update(self):
         super().update()
-        self.omamoris.update()
+        self.omamoris.update()   
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -3286,8 +3287,7 @@ class Zoom_col(Interactable):
                         sprite.blur_radius = min(1.1/ sprite.parallax[0], sprite.blur_radius)
                     else:
                         sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
-                        sprite.blur_radius = max(sprite.blur_radius, 0.2)
-                    sprite.blur_radius = min(sprite.parallax[0], 10)#limit the blur raidus for performance                        
+                        sprite.blur_radius = max(sprite.blur_radius, 0.2)                    
 
         if self.interacted: return
         self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)
@@ -3959,53 +3959,47 @@ class Invincibility_timer(Timer):
 class Sword_timer(Timer):
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
-        self.entity.sword_swinging = False#a flag to make sure you can only swing sword when this is False
 
     def activate(self):#called when sword is swang
         super().activate()
-        self.entity.sword_swinging = True
+        self.entity.flags['sword_swinging'] = True
 
     def deactivate(self):
         super().deactivate()
-        self.entity.sword_swinging = False
+        self.entity.flags['sword_swinging'] = False
 
-class Jump_timer(Timer):#can be combined with shroomjump?
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-
-    def activate(self):
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.lifetime = self.duration
-        self.entity.timers.append(self)
-        self.entity.velocity[1] = C.jump_vel_player#it is negative
+class Jump_buffer_timer(Timer):#can be combined with shroomjump?
+    def __init__(self, entity, duration):
+        super().__init__(entity, duration)#called from player states, when pressing jump
 
     def update(self):#called everyframe after activation (activated after pressing jump)
-        if self.entity.ground:#when landing on a plarform: enters once
-            self.entity.ground = False
+        if self.entity.flags['ground']:
+            self.entity.flags['ground'] = False
+            self.entity.velocity[1] = C.jump_vel_player#start jumping on this frame
+            self.entity.currentstate.handle_input('jump')#handle if we should go to jump state
             self.entity.timer_jobs['air'].activate()
             self.deactivate()
         super().update()#need to be after
 
 class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
+    def __init__(self, entity, duration):
+        super().__init__(entity, duration)
 
     def update(self):#called everyframe after activation (activated after jumping)
         self.entity.velocity[1] = C.jump_vel_player
         super().update()#need to be after
 
-class Ground_timer(Timer):#a timer to check how long time one has not been on ground
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-        self.entity.ground = True
+class Cayote_timer(Timer):#a timer to check how long time one has not been on ground
+    def __init__(self,entity, duration):
+        super().__init__(entity, duration)
 
     def activate(self):#called when entering fall run or fall stand
-        if self.entity.ground:#if we fall from a plotform
+        if self.entity.flags['ground']:#if we fall from a plotform
             super().activate()
 
     def deactivate(self):#called when timer runs out
         super().deactivate()
-        self.entity.ground = False
+        self.entity.flags['ground'] = False
 
 class Shroomjump_timer(Timer):
     def __init__(self,entity,duration):

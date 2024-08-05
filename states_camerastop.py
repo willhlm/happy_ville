@@ -126,7 +126,7 @@ class Stop_top(Basic_states):
         super().__init__(entity)
         self.true_center = self.center.copy()        
         #self.entity.game_objects.camera.center[1] = self.entity.game_objects.player.hitbox.centery - self.entity.rect.bottom - self.entity.game_objects.player.rect[3]*0.5
-        self.entity.game_objects.camera.stop_handeler.add_stop('top')
+        self.entity.game_objects.stop_handeler.add_stop('top')
 
     def update(self):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.bottom - self.entity.game_objects.player.hitbox.centery] 
@@ -136,7 +136,7 @@ class Stop_top(Basic_states):
             #self.true_center[1] -= (self.entity.game_objects.camera.center[1] - target)*0.03
             self.entity.game_objects.camera.center[1] = target                    
         else:
-            self.entity.game_objects.camera.stop_handeler.remove_stop('top')
+            self.entity.game_objects.stop_handeler.remove_stop('top')
             self.enter_state('Idle_top')
 
 class Idle_center(Basic_states):
