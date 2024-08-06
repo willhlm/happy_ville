@@ -601,9 +601,9 @@ class Slow_gameplay(Gameplay):#called from aila when heal < 0
         self.duration = kwarg.get('duration', 100)
 
     def update(self):
-        self.duration -= self.game.dt        
+        self.duration -= self.game.dt
         self.game.dt *= self.rate#slow motion
-        super().update()        
+        super().update()
         self.exit()
 
     def exit(self):
@@ -1212,7 +1212,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.game.game_objects.player.death_state.handle_input('cultist_encounter')
         self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
         quest = self.game.game_objects.quests_events.active_quests['cultist_encounter']
-        
+
         #should entity stuff be in quest insted?
         spawn_pos1 = (self.game.game_objects.camera.scroll[0] - 300, self.game.game_objects.camera.scroll[1] + 100)
         spawn_pos2 = (self.game.game_objects.camera.scroll[0] + 50, self.game.game_objects.camera.scroll[1] + 100)
@@ -1220,7 +1220,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.entity1.dir[0] *= -1
         self.entity1.AI.deactivate()
         self.game.game_objects.enemies.add(self.entity1)
-        self.entity2 = Entities.Cultist_rogue(spawn_pos2, self.game.game_objects, quest)#added to group in cutscene        
+        self.entity2 = Entities.Cultist_rogue(spawn_pos2, self.game.game_objects, quest)#added to group in cutscene
         ##
 
         self.stage = 0

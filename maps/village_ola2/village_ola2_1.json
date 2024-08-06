@@ -2836,6 +2836,19 @@
          "tilecount":770,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "columns":2,
+         "firstgid":61792,
+         "image":"objects\/thor_mtn1.png",
+         "imageheight":64,
+         "imagewidth":32,
+         "margin":0,
+         "name":"thor_mtn1",
+         "spacing":0,
+         "tilecount":8,
+         "tileheight":16,
+         "tilewidth":16
         }],
  "tilewidth":16,
  "type":"map",
