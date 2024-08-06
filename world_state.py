@@ -4,12 +4,12 @@ class World_state():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.state = Read_files.read_json("map_state.json")
-        self.statistics = {'kill': {},'ambers' : 0}#collects stuff aila has done        
+        self.statistics = {'kill': {}, 'amber_droplet' : 0, 'death': 0}#collects stuff aila has done, number of deaths       
         self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
         self.events = {}#save events and put it to True when completed -> events, such as boss defeat 
         self.quests = {}#true means completed, false means still active -> tasks
-        self.cutscenes_complete = {}#when a cutscenne has been played, its name gets appended here
+        self.cutscenes_complete = {}#when a cutscenne has been played, its name gets appended here        
 
     def increase_progress(self):#called when e.g. a boss dies. It is the happinies degree of the world
         self.progress += 1
@@ -20,8 +20,8 @@ class World_state():
         else:#first time killing it
             self.statistics['kill'][enemy] = 1
 
-    def update_money_statistcis(self):#called when amber is picked up
-        self.statistics['ambers'] += 1#increaase total money
+    def update_statistcis(self, key):#called when amber is picked up
+        self.statistics[key] += 1#increaase total money, deaths etc
 
     def save_travelpoint(self,map,cord):#called when inetracted with fast travel
         if not self.travel_points.get(map, False):#if first time intercted with it            

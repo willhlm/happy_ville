@@ -689,6 +689,7 @@ class Player(Character):
         self.game_objects.UI['gameplay'].update_spirits()#update UI
 
     def dead(self):#called when death animation is finished
+        self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
         new_game_state = states.Death(self.game_objects.game)
         new_game_state.enter_state()
 
@@ -1676,7 +1677,7 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
 class Player_abilities():
     def __init__(self,entity):
         self.entity = entity
-        self.spirit_abilities = {'Thunder':Thunder(entity),'Force':Force(entity),'Arrow':Arrow(entity),'Migawari':Migawari(entity),'Slow_motion':Slow_motion(entity)}#abilities aila has
+        self.spirit_abilities = {'Thunder':Thunder(entity),'Force':Force(entity),'Bow':Bow(entity),'Migawari':Migawari(entity),'Slow_motion':Slow_motion(entity)}#abilities aila has
         self.equip = 'Thunder'#spirit ability pointer
         self.movement_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
         self.movement_abilities = list(self.movement_dict.values())#make it a list
@@ -1805,7 +1806,7 @@ class Omamoris():#omamori handler -> "neckalce"
         return [True]
 
 #projectiles
-class Projectiles(Platform_entity):#projectiels: should it be platform enteties?
+class Projectiles(Platform_entity):#projectiels
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
@@ -1937,8 +1938,8 @@ class Hurt_box(Melee):#a hitbox that spawns
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/hurt_box/',entity.game_objects)#invisible
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(entity.rect.x,entity.rect.y,self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(entity.rect.x,entity.rect.y,size[0],size[1])
+        self.rect = pygame.Rect(entity.rect.x, entity.rect.y,self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(entity.rect.x, entity.rect.y,size[0],size[1])
         self.lifetime = lifetime
         self.dmg = entity.dmg
 
@@ -2098,29 +2099,9 @@ class Aila_sword(Sword):
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
         self.level += 1
-        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
+        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3   
 
-class Ranged(Projectiles):
-    def __init__(self, entity):
-        super().__init__([0,0], entity.game_objects)
-        self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
-        self.velocity = [0,0]
-
-    def update_hitbox(self):
-        rounded_dir = (sign(self.entity.dir[0]), sign(self.entity.dir[1]))#analogue controls may have none integer values
-        hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
-        setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
-        self.rect.center = self.hitbox.center#match the positions of hitboxes
-
-    def update(self):
-        super().update()
-        self.update_pos()
-
-    def update_pos(self):
-        self.rect.topleft = [self.rect.topleft[0] + self.slow_motion*self.game_objects.game.dt*self.velocity[0], self.rect.topleft[1] + self.slow_motion*self.game_objects.game.dt*self.velocity[1]]
-        self.hitbox.center = self.rect.center
-
-class Thunder(Ranged):
+class Thunder(Projectiles):
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Thunder/',entity.game_objects)
@@ -2148,7 +2129,7 @@ class Thunder(Ranged):
         self.dmg = 1
         self.kill()
 
-class Poisoncloud(Ranged):
+class Poisoncloud(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/poisoncloud/',entity.game_objects)
@@ -2169,7 +2150,7 @@ class Poisoncloud(Ranged):
     def countered(self,dir,pos):#shielded
         self.currentstate.handle_input('Death')
 
-class Poisonblobb(Ranged):
+class Poisonblobb(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/poisonblobb/',entity.game_objects)
@@ -2193,7 +2174,7 @@ class Poisonblobb(Ranged):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-class Projectile_1(Ranged):
+class Projectile_1(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',entity.game_objects)
@@ -2217,7 +2198,7 @@ class Projectile_1(Ranged):
         self.velocity[0] = 300/dx
         self.velocity[1] = 0
 
-class Falling_rock(Ranged):#things that can be placed in cave, the source makes this and can hurt player
+class Falling_rock(Projectiles):#things that can be placed in cave, the source makes this and can hurt player
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/',entity.game_objects)
@@ -2235,7 +2216,7 @@ class Falling_rock(Ranged):#things that can be placed in cave, the source makes 
         self.velocity[1] += 1
         self.velocity[1] = min(7,self.velocity[1])
 
-class Horn_vines(Ranged):
+class Horn_vines(Projectiles):
     def __init__(self, entity, pos):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/horn_vines/',entity.game_objects)
@@ -2252,7 +2233,7 @@ class Horn_vines(Ranged):
             self.entity.currentstate.handle_input('Horn_vines')
             self.kill()
 
-class Force(Ranged):
+class Force(Projectiles):
     def __init__(self,entity):
         super().__init__(entity)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/force/',entity.game_objects)
@@ -2284,43 +2265,30 @@ class Force(Ranged):
     def release_texture(self):
         pass
 
-class Arrow(Ranged):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/arrow/',entity.game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
+class Arrow(Projectiles):
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.image = Arrow.sprites['idle'][0]
+        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
         self.dmg = 1
-        self.level = 1#upgrade pointer
-
-    def initiate(self):#called when using the attack
         self.lifetime = 100
-        if self.entity.dir[1] == 0:
-            self.dir = self.entity.dir.copy()
-        else:
-            self.dir = [0,-self.entity.dir[1]]
-        self.velocity=[self.dir[0]*30,self.dir[1]*30]
-        self.update_hitbox()
+
+        self.dir = kwarg.get('dir', [1,0])
+        self.velocity=[self.dir[0] * 20, self.dir[1] * 20]
+        self.true_pos = list(self.entity.hitbox.topleft)
+
+    def pool(game_objects):
+        Arrow.sprites = Read_files.load_sprites_dict('Sprites/Attack/arrow/', game_objects)
 
     def collision_enemy(self,collision_enemy):
         collision_enemy.take_dmg(self.dmg)
-        self.velocity=[0,0]
+        self.velocity = [0,0]
         self.kill()
 
     def collision_plat(self,platform):
-        self.velocity=[0,0]
-        self.dmg=0
-
-    def rotate(self):#not in use
-        angle=self.dir[0]*max(-self.dir[0]*self.velocity[0]*self.velocity[1],-60)
-
-        self.image=pygame.transform.rotate(self.original_image,angle)#fig,angle,scale
-        x, y = self.rect.center  # Save its current center.
-        self.rect = pygame.Rect(x,y,self.image.width,self.image.height)  # Replace old rect with new rect.
-        self.hitbox=pygame.Rect(x,y,10,10)
-
-        self.rect.center = (x, y)  # Put the new rect's center at old center.
+        self.velocity = [0,0]
+        self.dmg = 0
 
     def release_texture(self):
         pass
@@ -2387,6 +2355,19 @@ class Slow_motion():
 
     def release_texture(self):
         pass
+
+class Bow():#connect to aila
+    def __init__(self, entity):
+        self.entity = entity
+        self.level = 1#upgrade pointer
+
+    def initiate(self):#called when using the attack
+        if self.entity.dir[1] == 0:#left or right
+            dir = self.entity.dir.copy()
+        else:#up or down
+            dir = [0,-self.entity.dir[1]]
+
+        self.entity.projecticle.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.game_objects), dir = dir)
 
 #things player can pickup
 class Loot(Platform_entity):#
@@ -2552,7 +2533,7 @@ class Amber_Droplet(Enemy_drop):
 
     def player_collision(self,player):#when the player collides with this object
         super().player_collision(player)
-        self.game_objects.world_state.update_money_statistcis()
+        self.game_objects.world_state.update_statistcis('amber_droplet')
 
     def pool(game_objects):#all things that should be saved in object pool
         Amber_Droplet.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/amber_droplet/',game_objects)

@@ -40,20 +40,18 @@ class Title_Menu(Game_State):
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
 
-        #create buttons
-        self.buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
+        #create buttons        
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
 
     def initiate_buttons(self):
+        buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
+        self.buttons = []
         y_pos = 200
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
+        for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
-            self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect(100,y_pos,self.button_surfaces[b].width,self.button_surfaces[b].height)
+            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [100,y_pos]))
             y_pos += 20
 
     def define_BG(self):
@@ -67,7 +65,7 @@ class Title_Menu(Game_State):
 
     def update(self):#update menu arrow position
         self.animation.update()
-        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
+        ref_pos = self.buttons[self.current_button].rect.topleft
         self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
 
     def render(self):
@@ -79,7 +77,7 @@ class Title_Menu(Game_State):
 
         #blit buttons
         for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
+            self.game.display.render(b.image, self.game.screen, position = b.rect.topleft)
 
         #blit arrow
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
@@ -95,6 +93,8 @@ class Title_Menu(Game_State):
                 if self.current_button >= len(self.buttons):
                     self.current_button = 0
             elif event[-1] in ('return', 'a'):
+                self.arrow.pressed()#if we want to make it e.g. glow or something
+                self.buttons[self.current_button].pressed()#if we want to make it e.g. glow or something
                 self.change_state()
             elif event[-1] == 'start':
                 pygame.quit()

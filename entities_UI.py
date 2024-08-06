@@ -221,7 +221,7 @@ class Movement_hud():#gameplay UI
 
 #utilities
 class Menu_Arrow():
-    def __init__(self,game_objects):
+    def __init__(self, game_objects):
         img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
         self.rect = img.get_rect()
         self.image = game_objects.game.display.surface_to_texture(img)
@@ -229,6 +229,9 @@ class Menu_Arrow():
     #note: sets pos to input, doesn't update with an increment of pos like other entities
     def update(self,pos):
         self.rect.topleft = pos
+
+    def pressed(self):
+        pass
 
 class Menu_Box():
     def __init__(self, game_objects):
@@ -241,6 +244,19 @@ class Menu_Box():
 
     def draw(self,screen):
         pass    
+
+class Button():
+    def __init__(self, game_objects, **kwarg):
+        self.position = kwarg.get('position', (0,0))
+        self.image = kwarg.get('image', None)
+        self.rect = pygame.Rect(self.position, [self.image.width, self.image.height])
+
+        #img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
+        #self.rect = img.get_rect(topleft = self.position)
+        #self.image = game_objects.game.display.surface_to_texture(img)
+
+    def pressed(self):
+        pass
 
 #controllers
 class Controllers():
