@@ -28,10 +28,10 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
         shader = self.game_objects.shaders['blur']
         shader['blurRadius'] = 1/self.parallax[0]
         for state in self.sprites.keys():
-            for frame, image in enumerate(self.sprites[state]):                
+            for frame, image in enumerate(self.sprites[state]):
                 empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)#need to be inside the loop to make new layers for each frame
                 self.game_objects.game.display.render(self.sprites[state][frame], empty_layer, shader = shader)
-                self.sprites[state][frame] = empty_layer.texture    
+                self.sprites[state][frame] = empty_layer.texture
 
     def draw(self, target):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
@@ -105,6 +105,16 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
 
+class Thor_mtn(Layered_objects):
+    animations = {}
+    def __init__(self, pos, game_objects,parallax):
+        super().__init__(pos, game_objects,parallax)
+        self.init_sprites('Sprites/animations/bg_animations/thor_mtn_village/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+
 class Vines(Layered_objects):#light forest
     animations = {}
     def __init__(self, pos, game_objects, parallax):
@@ -173,7 +183,7 @@ class Small_tree1(Layered_objects):
         self.shader['TIME'] = self.time
         self.shader['offset'] = self.offset
         self.shader['upsidedown'] = 0
-        super().draw(target)   
+        super().draw(target)
 
 #lightf orest cave
 class Ljusmaskar(Layered_objects):
@@ -194,7 +204,7 @@ class Cave_grass(Layered_objects):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
-        self.true_pos = self.rect.topleft 
+        self.true_pos = self.rect.topleft
 
 class Droplet_source(Layered_objects):
     animations = {}
@@ -290,7 +300,7 @@ class Droplet(Dynamic_layered_objects):
 
     def update(self):
         super().update()
-        self.update_vel()        
+        self.update_vel()
         self.destroy()
 
     def destroy(self):

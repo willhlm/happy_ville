@@ -12,14 +12,14 @@ class Level():
         self.area_change = True#a flag to chenge if we change area
         self.biome = Biome(self)
 
-    def load_map(self,map_name,spawn):        
+    def load_map(self,map_name,spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.level_name = map_name.lower()
         self.spawn = spawn
         self.game_objects.lights.new_map()#set ambient default light and clear light sources
         self.check_biome()#pause the sound if we change area
         self.load_map_data()#load the map data
-        self.init_state_file()#need to be before load groups        
+        self.init_state_file()#need to be before load groups
         self.load_groups()#memory leak here somwerhe
         self.set_camera()
         self.orginise_references()
@@ -158,15 +158,15 @@ class Level():
                 new_spawn = Entities.Spawner(object_position,self.game_objects,values)
                 self.game_objects.cosmetics.add(new_spawn)
 
-            elif id == 5:#items         
-                kwarg = {}       
+            elif id == 5:#items
+                kwarg = {}
                 for property in properties:
                     if property['name'] == 'item':
                         loot = property['value']
-                    elif property['name'] == 'quest':                                              
+                    elif property['name'] == 'quest':
                         kwarg['quest'] = property['value']
 
-                new_loot = getattr(Entities, loot)(object_position, self.game_objects, **kwarg)                
+                new_loot = getattr(Entities, loot)(object_position, self.game_objects, **kwarg)
                 self.game_objects.loot.add(new_loot)
 
             elif id == 7:#normal collision blocks
@@ -220,7 +220,7 @@ class Level():
                 spawn_pos = [object_position[0] + object_size[0]*0.5, object_position[1] + object_size[1]*0.5]
                 for property in properties:
                     if property['name'] == 'position':
-                        pos = property['value']                        
+                        pos = property['value']
                         string_list = pos.split(",")
                         spawn_pos = [int(item) for item in string_list]
 
@@ -311,12 +311,12 @@ class Level():
                 kwarg = {}
                 for property in properties:
                     if property['name'] == 'center':
-                        input_string = property['value']   
-                        kwarg['center'] = [float(i) for i in input_string.split(',')]             
+                        input_string = property['value']
+                        kwarg['center'] = [float(i) for i in input_string.split(',')]
                     elif property['name'] == 'rate':
                         kwarg['rate'] = float(property['value'])
                     elif property['name'] == 'scale':
-                        kwarg['scale'] = float(property['value'])   
+                        kwarg['scale'] = float(property['value'])
 
                 new_zoom = Entities.Zoom_col(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.interactables.add(new_zoom)
@@ -453,7 +453,7 @@ class Level():
             elif id == 10:#lever
                 for property in properties:
                     if property['name'] == 'ID':
-                        ID = property['value']                
+                        ID = property['value']
                 lever = Entities.Lever(object_position,self.game_objects, ID)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
@@ -464,7 +464,7 @@ class Level():
                     if property['name'] == 'ID':
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
-                        kwarg['erect'] = property['value']                        
+                        kwarg['erect'] = property['value']
                 gate = platforms.Gate(object_position,self.game_objects, **kwarg)
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
@@ -476,10 +476,10 @@ class Level():
                 gate = Entities.Challenge_monument(object_position, self.game_objects, ID)
                 self.game_objects.interactables.add(gate)
 
-            elif id == 13:#Soul_essence      
-                if not self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'].get(soul_essence_int, False):#if it has not been interacted with 
-                    new_loot = Entities.Soul_essence(object_position, self.game_objects, soul_essence_int)                
-                    self.game_objects.loot.add(new_loot)                
+            elif id == 13:#Soul_essence
+                if not self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'].get(soul_essence_int, False):#if it has not been interacted with
+                    new_loot = Entities.Soul_essence(object_position, self.game_objects, soul_essence_int)
+                    self.game_objects.loot.add(new_loot)
                 soul_essence_int += 1
 
     @staticmethod
@@ -496,7 +496,7 @@ class Level():
         'The main group needs to be called "bg1"'#world state file reads it
         'The objects need to be called statics, interactables, front or back.'
         'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
-        
+
         #make empty surfaces
         key = list(data.keys())[0]
         cols = data[key]['width']#number of columns
@@ -507,7 +507,7 @@ class Level():
         animation_list = {}#a place holder for animation objects
         blit_fade_surfaces = {}#fade surfaces that goes away upon collision
         blit_fade_pos = {}#fade surfaces that goes away upon collision
-        
+
         for tile_layer in data.keys():#make a blank surface
             animation_list[tile_layer] = []
             if 'animated' in tile_layer: continue
@@ -515,7 +515,7 @@ class Level():
             blit_compress_surfaces[tile_layer[0:tile_layer.rfind('_')]] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
             blit_fade_surfaces[tile_layer] = pygame.Surface((cols*self.TILE_SIZE,rows*self.TILE_SIZE), pygame.SRCALPHA, 32)#.convert_alpha()
             blit_fade_pos[tile_layer] = []
-        
+
         #blit the BG sprites to a surface, mapping tile set data to image data. make also the animated objects and save them in dict
         new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]#[-330,-215]
         for tile_layer in data.keys():
@@ -551,8 +551,8 @@ class Level():
                 blit_fade_surfaces[layer].blit(blit_surfaces[layer], (0,0))
             else:#statics
                 blit_compress_surfaces[bg].blit(blit_surfaces[layer], (0,0))
-        
-        #add the bg, fg, fade, animations and objects to the group        
+
+        #add the bg, fg, fade, animations and objects to the group
         for tile_layer in blit_compress_surfaces.keys():
             pos = (-math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0],-math.ceil((1-parallax[1])*new_map_diff[1])+ offset[1])
 
@@ -566,14 +566,14 @@ class Level():
 
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
                 self.game_objects.bg_interact.add(Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax, live_blur = self.biome.live_blur))#pos,img,parallax
-           
+
             elif self.layer == 'bg':#bg
                 bg = Entities.BG_Block(pos,self.game_objects, blit_compress_surfaces[tile_layer], parallax, live_blur = self.biome.live_blur)
                 self.game_objects.all_bgs.add(bg)
-                self.game_objects.all_bgs.reference[tuple(parallax)] = bg                
+                self.game_objects.all_bgs.reference[tuple(parallax)] = bg
             elif self.layer == 'fg':#fg
                 self.game_objects.all_fgs.add(Entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax, live_blur = self.biome.live_blur))#pos,img,parallax
-            
+
             if animation_entities.get(tile_layer,False):#add animations
                 for bg_animation in animation_entities[tile_layer]:
                     if 'fg' in tile_layer:
@@ -620,6 +620,21 @@ class Village_ola2(Biome):
         if room in ['5']:
             self.live_blur = True
 
+    def load_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 0:
+                new_tree = entities_parallax.Thor_mtn(object_position,self.level.game_objects,parallax)
+                if self.level.layer == 'fg':
+                    self.level.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.level.game_objects.all_bgs.add(new_tree)
+
 class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
@@ -657,13 +672,13 @@ class Light_forest(Biome):
                 kwarg = {}
                 for property in properties:
                     if property['name'] == 'frequency':
-                        kwarg['frequency'] = property['value']                
+                        kwarg['frequency'] = property['value']
                     elif property['name'] == 'direction':
-                        kwarg['direction'] = property['value']   
+                        kwarg['direction'] = property['value']
                     elif property['name'] == 'distance':
-                        kwarg['distance'] = property['value']                           
+                        kwarg['distance'] = property['value']
                     elif property['name'] == 'speed':
-                        kwarg['speed'] = property['value']  
+                        kwarg['speed'] = property['value']
 
                 new_grind = Entities.Grind(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_grind)
@@ -672,12 +687,12 @@ class Light_forest(Biome):
                 kwarg = {}
                 for property in properties:
                     if property['name'] == 'quest':
-                        kwarg['quest'] = property['value']                
+                        kwarg['quest'] = property['value']
                     elif property['name'] == 'item':
-                        kwarg['item'] = property['value']   
+                        kwarg['item'] = property['value']
 
                 new_stone_wood = Entities.Stone_wood(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_stone_wood)                
+                self.level.game_objects.interactables.add(new_stone_wood)
 
 class Light_forest_semi_cave(Biome):
     def __init__(self, level):
@@ -835,11 +850,11 @@ class Light_forest_cave(Biome):
                         prop['lifetime'] = property['value']
 
                 new_bubble = platforms.Bubble_static(object_position, self.level.game_objects, **prop)
-                self.level.game_objects.platforms.add(new_bubble)   
+                self.level.game_objects.platforms.add(new_bubble)
 
             elif id == 8:#ball challange
                 new_challange = Entities.Challenge_ball(object_position, self.level.game_objects)
-                self.level.game_objects.interactables.add(new_challange)                                      
+                self.level.game_objects.interactables.add(new_challange)
 
 class Forest_path(Biome):
     def __init__(self, level):
@@ -856,4 +871,4 @@ class Forest_path(Biome):
             if id == 'X':#bridge that is built when the reindeer dies
                 if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
                     new_interactable = getattr(Entities, 'Bridge')(object_position, self.game_objects)
-                    self.game_objects.interactables.add(new_interactable)                    
+                    self.game_objects.interactables.add(new_interactable)

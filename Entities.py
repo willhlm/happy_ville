@@ -41,8 +41,8 @@ class BG_Block(Staticentity):
         self.layers = None  # Initialize layer to None
         self.image = self.game_objects.game.display.surface_to_texture(img)  # Need to save in memory
         self.rect[2] = self.image.width
-        self.rect[3] = self.image.height     
-               
+        self.rect[3] = self.image.height
+
         self.blur_radius = min(1/self.parallax[0], 10)#set a limit to 10. Bigger may cause performance issue
 
         if not live_blur:
@@ -669,11 +669,11 @@ class Player(Character):
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
             new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
-            new_game_state.enter_state() 
+            new_game_state.enter_state()
 
             new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
-            new_game_state.enter_state()        
-            self.death_state.die()#depending on gameplay state, different death stuff should happen            
+            new_game_state.enter_state()
+            self.death_state.die()#depending on gameplay state, different death stuff should happen
 
     def heal(self, health = 1):
         self.health += health
@@ -1840,7 +1840,7 @@ class Projectiles(Platform_entity):#projectiels: should it be platform enteties?
     def countered(self,dir, pos):#called from sword collsion with purple infinity stone equipped
         pass
 
-    def aila_sword(self):#aila sword without purple stone     
+    def aila_sword(self):#aila sword without purple stone
         pass
 
     def upgrade_ability(self):#called from upgrade menu
@@ -1873,19 +1873,19 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.dmg = 1
         self.light = game_objects.lights.add_light(self)
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
-        
+
         self.quest = kwarg.get('quest', None)
         self.lifetime = kwarg.get('lifetime', 300)
 
     def kill(self):#when lifeitme runs out or hit by aila sword
-        super().kill()        
+        super().kill()
         self.game_objects.lights.remove_light(self.light)
 
     def aila_sword(self):#when hit by aila sword without purple stone
         self.velocity = [0,0]
         self.dmg = 0
-        self.currentstate.handle_input('Death')        
-        if self.quest: self.quest.increase_kill()        
+        self.currentstate.handle_input('Death')
+        if self.quest: self.quest.increase_kill()
 
     #platform collisions
     def limit_y(self):
@@ -2368,7 +2368,7 @@ class Slow_motion():
     def init(self):#called from slow motion gameplay state
         self.rate = 0.5#slow motion rate
         if self.level == 3:
-            self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila            
+            self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila
             self.duration = 400#slow motion duration, in time [whatever units]
         elif self.level == 2:
             self.duration = 400#slow motion duration, in time [whatever units]
@@ -3152,7 +3152,7 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
 
     def reset(self):#called when challange is failed
         self.shader_state.handle_input('idle')
-        self.interacted = False        
+        self.interacted = False
 
 class Challenge_monument(Challenges):#the status spawning a portal, balls etc - challange rooms
     def __init__(self, pos, game_objects, ID):
@@ -3163,17 +3163,17 @@ class Challenge_monument(Challenges):#the status spawning a portal, balls etc - 
         self.hitbox = self.rect.copy()
 
         self.ID = ID
-        self.interacted = self.game_objects.world_state.quests.get(ID, False)        
-        self.dialogue = dialogue.Dialogue_interactable(self, ID)#handles dialoage and what to say         
-        
+        self.interacted = self.game_objects.world_state.quests.get(ID, False)
+        self.dialogue = dialogue.Dialogue_interactable(self, ID)#handles dialoage and what to say
+
         if self.interacted:
-            self.shader_state = states_shader.Tint(self, colour = [0,0,0,100])             
+            self.shader_state = states_shader.Tint(self, colour = [0,0,0,100])
         else:
             game_objects.lights.add_light(self)
-            self.shader_state = states_shader.Idle(self)            
+            self.shader_state = states_shader.Idle(self)
 
-    def buisness(self):#enters after conversation  
-        self.game_objects.quests_events.initiate_quest(self.ID.capitalize(), monument = self) 
+    def buisness(self):#enters after conversation
+        self.game_objects.quests_events.initiate_quest(self.ID.capitalize(), monument = self)
 
 class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):
@@ -3287,7 +3287,6 @@ class Zoom_col(Interactable):
                     else:
                         sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
                         sprite.blur_radius = max(sprite.blur_radius, 0.2)
-                    sprite.blur_radius = min(sprite.parallax[0], 10)#limit the blur raidus for performance                        
 
         if self.interacted: return
         self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)
@@ -3395,7 +3394,7 @@ class State_trigger(Interactable):#TODO make it an event trigger -> cutscene (st
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
         self.hitbox = self.rect.inflate(0,0)
-        self.event = event        
+        self.event = event
 
     def release_texture(self):
         pass
@@ -3407,13 +3406,13 @@ class State_trigger(Interactable):#TODO make it an event trigger -> cutscene (st
         pass
         #self.group_distance()
 
-    def player_collision(self):        
+    def player_collision(self):
         if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has not been shown before. Shold we kill the object instead?
         if self.event == 'Butterfly_encounter':
             if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggrp is not chosen
 
         new_game_state = getattr(states, self.event)(self.game_objects.game)
-        new_game_state.enter_state()        
+        new_game_state.enter_state()
         self.kill()#is this a pronlen in re spawn?
 
 class Interactable_bushes(Interactable):
