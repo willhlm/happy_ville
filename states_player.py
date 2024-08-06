@@ -14,13 +14,13 @@ class Player_states(Entity_States):
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         if input[-1] == 'a':
             self.entity.timer_jobs['shroomjump'].activate()
-            self.entity.timer_jobs['jump'].activate()
+            self.entity.timer_jobs['jump_buffer'].activate()
             self.entity.timer_jobs['wall'].handle_input('a')
 
     def handle_release_input(self,input):#all states should inehrent this function, if it should be able to jump
         if input[-1] == 'a':
             self.entity.timer_jobs['air'].deactivate()
-            self.entity.timer_jobs['jump'].deactivate()
+            self.entity.timer_jobs['jump_buffer'].deactivate()
             if self.entity.velocity[1] < 0:#if going up
                 self.entity.velocity[1] = 0.5*self.entity.velocity[1]
 
@@ -51,9 +51,7 @@ class Idle_main(Player_states):
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
-        if input[-1]=='a':
-            self.enter_state('Jump_stand_main')
-        elif input[-1]=='lb':
+        if input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
@@ -62,13 +60,17 @@ class Idle_main(Player_states):
         elif input[-1] == 'rt':
             self.enter_state('Counter_pre')
 
+    def handle_input(self,input):#caööed from jump buffer timer
+        if input == 'jump':
+            self.enter_state('Jump_stand_main')
+
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0] != 0:
             self.enter_state('Run_pre')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if self.entity.dir[1] == 0:
                 state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
@@ -98,14 +100,16 @@ class Walk_main(Player_states):
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
-        if input[-1]=='a':
-            self.enter_state('Jump_run_main')
-        elif input[-1]=='lb':
+        if input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation. Should all have pre?
             self.do_ability()
+
+    def handle_input(self,input):#caööed from jump buffer timer
+        if input == 'jump':
+            self.enter_state('Jump_run_main')
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -113,7 +117,7 @@ class Walk_main(Player_states):
             self.enter_state('Idle_main')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if abs(self.entity.dir[1])<0.8:
                 state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
@@ -145,14 +149,16 @@ class Run_pre(Player_states):
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
-        if input[-1]=='a':
-            self.enter_state('Jump_run_main')
-        elif input[-1]=='lb':
+        if input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation
             self.do_ability()
+
+    def handle_input(self,input):#caööed from jump buffer timer
+        if input == 'jump':
+            self.enter_state('Jump_run_main')
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -160,7 +166,7 @@ class Run_pre(Player_states):
             self.enter_state('Run_post')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if abs(self.entity.dir[1])<0.8:
                 state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
@@ -192,7 +198,6 @@ class Run_main(Player_states):
         #self.sfx_channel.stop()
         super().enter_state(new_state)
 
-
     def running_particles(self):
         particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
         self.entity.game_objects.cosmetics.add(particle)
@@ -200,14 +205,16 @@ class Run_main(Player_states):
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
-        if input[-1]=='a':
-            self.enter_state('Jump_run_main')
-        elif input[-1]=='lb':
+        if input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':#depends on if the abillities have pre or main animation
             self.do_ability()
+
+    def handle_input(self,input):#caööed from jump buffer timer
+        if input == 'jump':
+            self.enter_state('Jump_run_main')
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -215,7 +222,7 @@ class Run_main(Player_states):
             self.enter_state('Run_post')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if abs(self.entity.dir[1])<0.8:
                 state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
@@ -233,9 +240,7 @@ class Run_post(Player_states):
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
-        if input[-1]=='a':
-            self.enter_state('Jump_stand_main')
-        elif input[-1]=='lb':
+        if input[-1]=='lb':
             self.enter_state('Ground_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
@@ -244,13 +249,17 @@ class Run_post(Player_states):
         elif input[-1] == 'rt':
             self.enter_state('Counter_pre')
 
+    def handle_input(self,input):#caööed from jump buffer timer
+        if input == 'jump':
+            self.enter_state('Jump_stand_main')
+
     def handle_movement(self,input):
         super().handle_movement(input)
         if self.entity.acceleration[0] != 0:
             self.enter_state('Run_pre')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if self.entity.dir[1]==0:
                 state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
@@ -289,7 +298,7 @@ class Jump_stand_main(Player_states):
                 self.enter_state('Fall_stand_pre')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if self.entity.dir[1]>0:
                 self.enter_state('Sword_up_main')
             elif self.entity.dir[1]<0:
@@ -324,12 +333,12 @@ class Jump_run_main(Player_states):
 
     def handle_release_input(self,input):#when release space
         super().handle_release_input(input)
-        if input[-1]=='a':
-            if self.entity.acceleration[0]!=0:
+        if input[-1] == 'a':
+            if self.entity.acceleration[0] != 0:
                 self.enter_state('Fall_run_pre')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if self.entity.dir[1]>0:
                 self.enter_state('Sword_up_main')
             elif self.entity.dir[1]<0:
@@ -391,17 +400,17 @@ class Fall_run_pre(Player_states):
             self.enter_state('Air_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
-        elif input[-1]=='a':
-            self.enter_state('Double_jump_pre')
 
     def handle_input(self,input):
-        if input == 'Wall':
+        if input == 'jump':#caööed from jump buffer timer
+            self.enter_state('Jump_run_main')        
+        elif input == 'Wall':
             self.enter_state('Wall_glide_main')
         elif input == 'Ground':
             self.enter_state('Run_main')
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if self.entity.dir[1]>0:
                 self.enter_state('Sword_up_main')
             elif self.entity.dir[1]<0:
@@ -454,9 +463,11 @@ class Fall_stand_pre(Player_states):
     def handle_input(self,input):
         if input == 'Ground':
             self.enter_state('Idle_main')
+        elif input == 'jump':
+            self.enter_state('Jump_run_main')            
 
     def swing_sword(self):
-        if not self.entity.sword_swinging:
+        if not self.entity.flags['sword_swinging']:
             if self.entity.dir[1]==1:
                 self.enter_state('Sword_up_main')
             elif self.entity.dir[1]==-1:
@@ -486,7 +497,7 @@ class Wall_glide_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.friction[1] = 0.4
-        self.entity.ground = True#so that we can jump
+        self.entity.flags['ground'] = True#so that we can jump
 
     def update(self):
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground

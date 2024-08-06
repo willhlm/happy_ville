@@ -94,7 +94,7 @@
  </tile>
  <tile id="21">
   <properties>
-   <property name="offset" value=""/>
+   <property name="center" value=""/>
    <property name="rate" value=""/>
    <property name="scale" value=""/>
   </properties>
