@@ -38,6 +38,17 @@ class Idle(Basic_states):
         self.entity.state = name
         self.entity.animation.frame = 0
 
+    def set_uniform(self):
+        pass
+
+class Blur(Idle):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['blur']
+
+    def set_uniform(self):
+        self.entity.shader['blurRadius'] = self.entity.blur_radius
+
 class Death(Basic_states):#idle once
     def __init__(self,entity):
         super().__init__(entity)
