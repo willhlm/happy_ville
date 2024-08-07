@@ -4,7 +4,7 @@
  <tile id="0">
   <image width="32" height="64" source="thor_mtn1.png"/>
  </tile>
- <tile id="1">
-  <image width="11" height="31" source="../../../Sprites/animations/bg_animations/thor_mtn_village/idle/lightning8.png"/>
+ <tile id="2">
+  <image width="24" height="46" source="../../../Sprites/animations/bg_animations/thor_mtn_village/idle/lightning7.png"/>
  </tile>
 </tileset>

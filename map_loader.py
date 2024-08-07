@@ -628,7 +628,7 @@ class Village_ola2(Biome):
             properties = obj.get('properties',[])
             id = obj['gid'] - self.level.map_data['objects_firstgid']
 
-            if id == 1:
+            if id == 2:
                 new_tree = entities_parallax.Thor_mtn(object_position,self.level.game_objects,parallax)
                 if self.level.layer == 'fg':
                     self.level.game_objects.all_fgs.add(new_tree)

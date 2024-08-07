@@ -3288,6 +3288,14 @@ class Zoom_col(Interactable):
                     else:
                         sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
                         sprite.blur_radius = max(sprite.blur_radius, 0.2)
+                elif hasattr(sprite, 'LAY_OBJ'):
+                    if sprite.parallax[0] > 0.8:
+                        sprite.blur_radius += (1.1/sprite.parallax[0] - sprite.blur_radius) * 0.06
+                        sprite.blur_radius = min(1.1/ sprite.parallax[0], sprite.blur_radius)
+                    else:
+                        sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
+                        sprite.blur_radius = max(sprite.blur_radius, 0.2)
+
 
         if self.interacted: return
         self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)

@@ -4,11 +4,13 @@ import Read_files
 import states_wind_objects, states_droplet, states_weather_particles
 
 class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to different layers
-    def __init__(self,pos,game_objects,parallax):
+    def __init__(self,pos,game_objects,parallax, live_blur = False):
         super().__init__(pos,game_objects)
         self.pause_group = game_objects.layer_pause
         self.group = game_objects.all_bgs
         self.parallax = parallax
+        self.blur_radius = 1/self.parallax[0]
+        self.LAY_OBJ = True
 
     def update(self):
         super().update()
@@ -26,7 +28,7 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
 
     def blur(self):#
         shader = self.game_objects.shaders['blur']
-        shader['blurRadius'] = 1/self.parallax[0]
+        shader['blurRadius'] = self.blur_radius
         for state in self.sprites.keys():
             for frame, image in enumerate(self.sprites[state]):
                 empty_layer = self.game_objects.game.display.make_layer(self.sprites['idle'][0].size)#need to be inside the loop to make new layers for each frame
