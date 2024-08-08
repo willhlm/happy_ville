@@ -46,10 +46,10 @@ class BG_Block(Staticentity):
         self.blur_radius = min(1/self.parallax[0], 10)#set a limit to 10. Bigger may cause performance issue
 
         if not live_blur:
-            self.currentstate = states_blur.Idle(self)
+            self.blurstate = states_blur.Idle(self)
             self.blur()#if we do not want live blur
         else:#if live
-            self.currentstate = states_blur.Blur(self)
+            self.blurstate = states_blur.Blur(self)
             if self.parallax[0] == 1: self.blur_radius = 0.2#a small value so you don't see blur
 
     def blur(self):
@@ -64,7 +64,7 @@ class BG_Block(Staticentity):
             self.image = self.layers.texture  # Get the texture of the layer
 
     def draw(self, target):
-        self.currentstate.set_uniform()#sets the blur radius
+        self.blurstate.set_uniform()#sets the blur radius
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
 
@@ -3289,15 +3289,14 @@ class Zoom_col(Interactable):
 
     def player_collision(self):
         self.blur_timer -= self.game_objects.game.dt
-        if self.blur_timer <= 0:
+        if self.blur_timer < 0:
             for sprite in self.game_objects.all_bgs:
-                if type(sprite).__name__ == 'BG_Block':
-                    if sprite.parallax[0] > 0.8:
-                        sprite.blur_radius += (1.1/sprite.parallax[0] - sprite.blur_radius) * 0.06
-                        sprite.blur_radius = min(1.1/ sprite.parallax[0], sprite.blur_radius)
-                    else:
-                        sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
-                        sprite.blur_radius = max(sprite.blur_radius, 0.2)
+                if sprite.parallax[0] > 0.8:
+                    sprite.blur_radius += (1.1/sprite.parallax[0] - sprite.blur_radius) * 0.06
+                    sprite.blur_radius = min(1.1/ sprite.parallax[0], sprite.blur_radius)
+                else:
+                    sprite.blur_radius -= (sprite.blur_radius - 0.2) * 0.06
+                    sprite.blur_radius = max(sprite.blur_radius, 0.2)
 
         if self.interacted: return
         self.game_objects.camera.zoom(rate = self.rate, scale = self.scale, center = self.center)
@@ -3309,9 +3308,8 @@ class Zoom_col(Interactable):
         if self.game_objects.shader_render.shaders.get('zoom', False):
             self.game_objects.shader_render.shaders['zoom'].method = 'zoom_out'
             for sprite in self.game_objects.all_bgs:
-                if type(sprite).__name__ == 'BG_Block':
-                    if sprite.parallax[0] == 1: sprite.blur_radius = 0.2
-                    else: sprite.blur_radius = min(1/sprite.parallax[0], 10)#limit the blur raidus for performance
+                if sprite.parallax[0] == 1: sprite.blur_radius = 0.2
+                else: sprite.blur_radius = min(1/sprite.parallax[0], 10)#limit the blur raidus for performance
 
 class Path_col(Interactable):
     def __init__(self, pos, game_objects, size, destination, spawn):
