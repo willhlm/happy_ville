@@ -14,8 +14,13 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Entities.Twinkle.pool(game_objects)
         Entities.Loot_magnet.pool(game_objects)
         Entities.Half_dmg.pool(game_objects)
+        Entities.Logo_loading.pool(game_objects)
+        Entities.Blood.pool(game_objects)
+        Entities.Player_Soul.pool(game_objects)
+
         Entities.Boss_HP.pool(game_objects)
         Entities.Sword.pool(game_objects)
+        Entities.Arrow.pool(game_objects)
 
         Entities.Tungsten.pool(game_objects)
 

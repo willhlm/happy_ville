@@ -617,8 +617,8 @@ class Player(Character):
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
         self.max_health = 10
-        self.max_spirit = 5
-        self.health = 7
+        self.max_spirit = 4
+        self.health = 3
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -632,7 +632,7 @@ class Player(Character):
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
-                     'Arrow':True,'Counter':True, 'Sword_fall':True,
+                     'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True}
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
@@ -669,12 +669,15 @@ class Player(Character):
             new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
+            self.death_state.die()#depending on gameplay state, different death stuff should happen
+            self.animation.update()
+            self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
+
             new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
             new_game_state.enter_state()
 
             new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
             new_game_state.enter_state()
-            self.death_state.die()#depending on gameplay state, different death stuff should happen
 
     def heal(self, health = 1):
         self.health += health
@@ -1866,7 +1869,7 @@ class Projectiles(Platform_entity):#projectiels
 
 class Bouncy_balls(Projectiles):#for ball challange room
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects)
+        super().__init__(pos, game_objects, **kwarg)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1877,7 +1880,6 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
 
         self.quest = kwarg.get('quest', None)
-        self.lifetime = kwarg.get('lifetime', 300)
 
     def kill(self):#when lifeitme runs out or hit by aila sword
         super().kill()
@@ -2236,10 +2238,11 @@ class Horn_vines(Projectiles):
 class Force(Projectiles):
     def __init__(self,entity):
         super().__init__([0,0], entity.game_objects)
+        self.entity = entity
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/force/',entity.game_objects)
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()
+        self.hitbox = self.rect.copy()        
         self.dmg = 0
         self.level = 1#upgrade pointer
 
@@ -2247,6 +2250,7 @@ class Force(Projectiles):
         self.lifetime = 30
         self.dir = self.entity.dir.copy()
         self.update_hitbox()
+        self.true_pos = list(self.entity.rect.topleft)
         self.velocity = [sign(self.dir[0]) * (abs(self.dir[0]) - abs(self.dir[1]))*10, -self.dir[1] * 10]
 
     def collision_plat(self,platform):
@@ -2269,14 +2273,13 @@ class Arrow(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.image = Arrow.sprites['idle'][0]
-        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
         self.dmg = 1
         self.lifetime = 100
 
         self.dir = kwarg.get('dir', [1,0])
         self.velocity=[self.dir[0] * 20, self.dir[1] * 20]
-        self.true_pos = list(self.entity.hitbox.topleft)
 
     def pool(game_objects):
         Arrow.sprites = Read_files.load_sprites_dict('Sprites/Attack/arrow/', game_objects)
@@ -2356,9 +2359,10 @@ class Slow_motion():
     def release_texture(self):
         pass
 
-class Bow():#connect to aila
+class Bow():
     def __init__(self, entity):
         self.entity = entity
+        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/bow/', entity.game_objects)
         self.level = 1#upgrade pointer
 
     def initiate(self):#called when using the attack
@@ -2367,7 +2371,7 @@ class Bow():#connect to aila
         else:#up or down
             dir = [0,-self.entity.dir[1]]
 
-        self.entity.projecticle.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.game_objects), dir = dir)
+        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir))
 
 #things player can pickup
 class Loot(Platform_entity):#
@@ -2838,12 +2842,29 @@ class Purple_infinity_stone(Infinity_stones):#reflect projectile
         self.description = 'reflects projectiels'
 
 #cosmetics
+class Blood(Animatedentity):
+    def __init__(self, pos, game_objects, dir = [1,0]):
+        super().__init__(pos, game_objects)
+        self.sprites = Blood.sprites
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.dir = dir
+        self.rect.center = pos
+
+    def reset_timer(self):
+        self.kill()
+
+    def pool(game_objects):#all things that should be saved in object pool
+        Blood.sprites = Read_files.load_sprites_dict('Sprites/GFX/blood/death/', game_objects)
+
+    def release_texture(self):#stuff that have pool shuold call this
+        pass      
+
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Water_running_particles.sprites
-        self.currentstate = states_basic.Death(self)
-        self.image = self.sprites['death'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
 
     def reset_timer(self):
@@ -2859,8 +2880,7 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Grass_running_particles.sprites
-        self.currentstate = states_basic.Death(self)
-        self.image = self.sprites['death'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
 
@@ -2877,8 +2897,7 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Dust_running_particles.sprites
-        self.currentstate = states_basic.Death(self)
-        self.image = self.sprites['death'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
 
@@ -2894,12 +2913,16 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
 class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/soul/', game_objects)
-        self.currentstate = states_basic.Once(self,next_state = 'Idle',animation_name='idle')
+        self.sprites = Player_Soul.sprites
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.currentstate = states_basic.Once(self, next_state = 'Idle', animation_name='once')
+
         self.timer = 0
         self.velocity = [0,0]
+
+    def pool(game_objects):
+        Player_Soul.sprites = Read_files.load_sprites_dict('Sprites/Enteties/soul/', game_objects)
 
     def update(self):
         super().update()
@@ -2914,9 +2937,8 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
         self.true_pos = [self.true_pos[0] + self.velocity[0], self.true_pos[1] + self.velocity[1]]
         self.rect.topleft = self.true_pos
 
-    def reset_timer(self):
-        super().reset_timer()
-        self.currentstate.handle_input('Idle')
+    def release_texture(self):
+        pass
 
 class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
     def __init__(self,pos,game_objects):
@@ -3014,15 +3036,22 @@ class Health_bar(Animatedentity):
 
 class Logo_loading(Animatedentity):
     def __init__(self, game_objects):
-        super().__init__([500,300],game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/logo_loading/',game_objects)
+        super().__init__([500,300], game_objects)
+        self.sprites = Logo_loading.sprites
         self.image = self.sprites['death'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.currentstate =  states_basic.Death(self)
+        self.animation.framerate = 0.1#makes it slower
+
+    def pool(game_objects):
+        Logo_loading.sprites = Read_files.load_sprites_dict('Sprites/UI/logo_loading/',game_objects)
 
     def update(self):
         super().update()
-        self.rect.topleft = [self.true_pos[0] + self.game_objects.camera.scroll[0],self.true_pos[1] + self.game_objects.camera.scroll[1]]
+        self.rect.topleft = [self.true_pos[0] + self.game_objects.camera.scroll[0], self.true_pos[1] + self.game_objects.camera.scroll[1]]
+
+    def release_texture(self):
+        pass
 
     def reset_timer(self):
         self.kill()

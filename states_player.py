@@ -1070,7 +1070,7 @@ class Thunder_pre(Abillitites):
 class Thunder_charge(Thunder_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['thunder'])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['thunder'][0])
 
     def init(self):
         self.entity.consume_spirit()
@@ -1162,7 +1162,7 @@ class Slow_motion_main(Slow_motion_pre):
     def increase_phase(self):
         self.enter_state('Idle_main')
 
-class Arrow_main(Abillitites):
+class Bow_main(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
