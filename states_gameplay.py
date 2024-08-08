@@ -38,13 +38,13 @@ class Portal(Basic_states):
         self.game_objects.platforms.draw(self.portal.bg_grey_layer)
         self.game_objects.players.draw(self.portal.bg_grey_layer)
         self.game_objects.cosmetics.draw(self.portal.bg_grey_layer)#Should be before fgs
-        #we want this one to be spirit colourm no distotion
+        #we want these ones to be spirit affected with no distotion
 
-        self.game_objects.special_shaders.draw(None)#portal inside will draws the layers properly onto the screen
+        self.game_objects.special_shaders.draw(None)#portal inside this group will draws the layers properly onto the screen
 
         self.game_objects.all_fgs.draw(self.game_objects.game.screen)
-        self.game_objects.lights.draw(self.game_objects.game.screen)#should be second to last
-        self.game_objects.shader_render.draw(self.game_objects.game.screen)#housld be last        
+        self.game_objects.lights.draw(self.game_objects.game.screen)
+        self.game_objects.shader_render.draw(self.game_objects.game.screen)
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':

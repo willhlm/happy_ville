@@ -213,8 +213,8 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         #distortion on enteties
         self.game_objects.shaders['distort']['tint'] = [0.39, 0.78, 1]
         self.game_objects.shaders['distort']['shine'] = True
-        self.game_objects.game.display.render(self.bg_grey_layer.texture, self.empty_layer, shader=self.game_objects.shaders['distort'])#make them grey
-        self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['bloom'])#make them grey
+        self.game_objects.game.display.render(self.bg_grey_layer.texture, self.empty_layer, shader = self.game_objects.shaders['distort'])#make them grey
+        self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['bloom'])
 
 class Lighitning(Staticentity):#a shader to make lighning barrier
     def __init__(self, pos, game_objects, parallax, size):

@@ -1,4 +1,4 @@
-import sys, random
+import sys
 from states_entity import Entity_States
 
 class Basic_states(Entity_States):
