@@ -493,7 +493,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity = [0,0]
         self.running_particles = Dust_running_particles#default particles while runing
 
-    def update_hitbox(self):
+    def update_hitbox(self):        
         self.hitbox.midbottom = self.rect.midbottom
 
     def update_rect_y(self):
@@ -518,6 +518,9 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.true_pos[1] += self.slow_motion*self.game_objects.game.dt*self.velocity[1]
         self.rect.top = int(self.true_pos[1])#should be int
         self.update_hitbox()
+
+    def ramp_gravity(self):#called from shift up in ramps. The extra gravity on ramp
+        self.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation        
 
     def collision_platform(self, platform):#called from collusion in clollision_block: projectile need it to give damage
         pass
@@ -1324,6 +1327,24 @@ class MrSmith(NPC):#balck smith
         new_state = states.Facilities(self.game_objects.game,'Smith',self)
         new_state.enter_state()
 
+class MrMine(NPC):#balck smith
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+
+    def define_conversations(self):#the elements will pop after saying the stuff
+        self.priority = ['reindeer']#priority events to say
+        self.event = []#normal events to say
+        self.quest = []#quest stuff to say
+
+class MrCarpenter(NPC):#balck smith
+    def __init__(self, pos,game_objects):
+        super().__init__(pos,game_objects)
+
+    def define_conversations(self):#the elements will pop after saying the stuff
+        self.priority = []#priority events to say
+        self.event = []#normal events to say
+        self.quest = []#quest stuff to say
+
 class MrBanks(NPC):#bank
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1830,6 +1851,7 @@ class Projectiles(Platform_entity):#projectiels
         for timer in self.timers:
             timer.update()
 
+    #collisions                
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
         collision_plat.take_dmg(self, self.dmg)
 
@@ -1846,6 +1868,9 @@ class Projectiles(Platform_entity):#projectiels
         pass
 
     def aila_sword(self):#aila sword without purple stone
+        pass
+
+    def ramp_gravity(self):#called from shift up in ramps. The extra gravity on ramp
         pass
 
     def upgrade_ability(self):#called from upgrade menu
@@ -1892,9 +1917,6 @@ class Bouncy_balls(Projectiles):#for ball challange room
         if self.quest: self.quest.increase_kill()
 
     #platform collisions
-    def limit_y(self):
-        pass
-
     def right_collision(self,hitbox):
         self.hitbox.right = hitbox
         self.collision_types['right'] = True
@@ -1924,7 +1946,7 @@ class Melee(Projectiles):
         self.dir = entity.dir.copy()
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
-    def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
+    def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)        
         rounded_dir = (sign(self.dir[0]), sign(self.dir[1]))#analogue controls may have none integer values
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
@@ -1935,6 +1957,12 @@ class Melee(Projectiles):
         self.entity.countered()
         self.kill()
 
+    def update_rect_y(self):
+        pass
+
+    def update_rect_x(self):
+        pass
+
 class Hurt_box(Melee):#a hitbox that spawns
     def __init__(self, entity, size = [64,64], lifetime = 100):
         super().__init__(entity)
@@ -1944,9 +1972,6 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.hitbox = pygame.Rect(entity.rect.x, entity.rect.y,size[0],size[1])
         self.lifetime = lifetime
         self.dmg = entity.dmg
-
-    def update_hitbox(self):
-        pass
 
 class Explosion(Melee):
     def __init__(self, entity):
@@ -1959,9 +1984,6 @@ class Explosion(Melee):
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.dmg = entity.dmg
-
-    def update_hitbox(self):
-        pass
 
     def reset_timer(self):
         self.kill()
@@ -2107,8 +2129,7 @@ class Thunder(Projectiles):
     def __init__(self, entity):
         super().__init__([0,0], entity.game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Thunder/',entity.game_objects)
-        self.currentstate = states_basic.Death(self)#
-        self.image = self.sprites['death'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.dmg = 1
@@ -2289,12 +2310,12 @@ class Arrow(Projectiles):
         self.velocity = [0,0]
         self.kill()
 
-    def collision_plat(self,platform):
+    def collision_platform(self, platform):
         self.velocity = [0,0]
         self.dmg = 0
 
     def release_texture(self):
-        pass
+        pass 
 
 class Migawari():
     def __init__(self,entity):
@@ -2494,8 +2515,8 @@ class Spiritorb(Loot):#the thing that gives spirit
         pass
 
 class Enemy_drop(Loot):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.lifetime = 500
         self.velocity = [random.uniform(-3, 3),-3]
 
@@ -2944,8 +2965,7 @@ class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/GFX/spawneffect/',game_objects)
-        self.currentstate = states_basic.Death(self)#
-        self.image = self.sprites['death'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.finish = False#needed for the cutscene
 
@@ -3009,13 +3029,21 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
 class Pray_effect(Animatedentity):#the thing when aila pray
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/pray_effect/',game_objects)
-        self.currentstate = states_basic.Death(self)#
-        self.image = self.sprites['death'][0]
+        self.sprites = Pray_effect.sprites
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
 
+    def pool(game_objects):
+        Pray_effect.sprites = Read_files.load_sprites_dict('Sprites/animations/pray_effect/', game_objects)
+
     def spawn(self):
+        pass
+
+    def reset_timer(self):
+        self.kill()
+
+    def release_texture(self):
         pass
 
 class Health_bar(Animatedentity):
@@ -3038,9 +3066,8 @@ class Logo_loading(Animatedentity):
     def __init__(self, game_objects):
         super().__init__([500,300], game_objects)
         self.sprites = Logo_loading.sprites
-        self.image = self.sprites['death'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
-        self.currentstate =  states_basic.Death(self)
         self.animation.framerate = 0.1#makes it slower
 
     def pool(game_objects):
@@ -3204,16 +3231,6 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
     def buisness(self):#enters after conversation
         item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, quest = self.quest)#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)
-
-class Bridge(Interactable):
-    def __init__(self, pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/bridge/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()
-        platform = Collision_block(pos,(self.image.get_width(),32))
-        self.game_objects.platforms.add(platform)
 
 class Safe_spawn(Interactable):#area which gives the coordinates which will make aila respawn at after falling into a hole
     def __init__(self, pos, game_objects, size, position):

@@ -1,0 +1,12 @@
+{
+
+    "state_1" : {
+        "0" : "I thought it would be nice to make a bridge. We would not have to take the long road through the crystal mines to get to the golden fields."
+    },
+    
+    "state_2" : {
+        "0" : "There, what did I tell you.",
+        "1" : "Wood please"
+    }
+    
+}

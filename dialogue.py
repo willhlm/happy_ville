@@ -37,14 +37,14 @@ class Dialogue(Conversation):#handles dialoage and what to say for NPC
                 return self.dialoages['conversation'][event][str(self.conv_index)]
 
         for event in self.entity.priority:#check events according yo priority
-            if self.entity.game_objects.world_state.events[event]:#if the priority event has occured
+            if self.entity.game_objects.world_state.events.get(event, False):#if the priority event has occured
                 if self.finish(event):
                     self.entity.priority.remove(event)
                     return None
                 return self.dialoages['conversation'][event][str(self.conv_index)]
 
         for event in self.entity.event:
-            if self.entity.game_objects.world_state.events[event]:#if the event has occured
+            if self.entity.game_objects.world_state.events.get(event, False):#if the event has occured
                 if self.finish(event):
                     self.entity.event.remove(event)
                     return None
