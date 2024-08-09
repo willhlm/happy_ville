@@ -929,6 +929,11 @@
                          "name":"",
                          "properties":[
                                 {
+                                 "name":"center",
+                                 "type":"string",
+                                 "value":"1, 0.5"
+                                }, 
+                                {
                                  "name":"rate",
                                  "type":"string",
                                  "value":"0.03"

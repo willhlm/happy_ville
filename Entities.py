@@ -2101,7 +2101,7 @@ class Aila_sword(Sword):
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
         self.level += 1
-        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3   
+        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
 class Thunder(Projectiles):
     def __init__(self, entity):
@@ -2242,7 +2242,7 @@ class Force(Projectiles):
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/force/',entity.game_objects)
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()        
+        self.hitbox = self.rect.copy()
         self.dmg = 0
         self.level = 1#upgrade pointer
 
@@ -2858,7 +2858,7 @@ class Blood(Animatedentity):
         Blood.sprites = Read_files.load_sprites_dict('Sprites/GFX/blood/death/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass      
+        pass
 
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
@@ -3277,6 +3277,7 @@ class Zoom_col(Interactable):
         self.scale = kwarg.get('scale', 1)
         self.center = kwarg.get('center', (0.5, 0.5))
         self.blur_timer = C.fps
+        #print(self.center)
 
     def release_texture(self):
         pass

@@ -40,7 +40,7 @@ class Title_Menu(Game_State):
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
 
-        #create buttons        
+        #create buttons
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
@@ -107,7 +107,8 @@ class Title_Menu(Game_State):
 
             #load new game level
             #self.game.game_objects.load_map(self,'light_forest_cave_10','1')
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'Village_ola2_5','1')
 
         elif self.current_button == 1:
             new_state = Load_Menu(self.game)
