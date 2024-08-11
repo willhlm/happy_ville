@@ -1,0 +1,17 @@
+{
+
+    "reindeer" : {
+        "0" : "Took a while but should be safe to pass"
+    },    
+
+    "state_1" : {
+        "0" : "Someone have blocked the path. Don't worry, I will sort it out"
+    },
+    
+    "state_2" : {
+        "0" : "Nice weather",
+        "1" : "Wood please"
+    }
+    
+      
+}

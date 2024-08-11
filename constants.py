@@ -1,6 +1,7 @@
 #game settings
 fps = 60#this is the screeen resfresh rate
 window_size = [640, 360]
+window_size = [int(640*1.2), int(360*1.2)]
 tile_size = 16
 
 #physics
@@ -14,8 +15,8 @@ shroomjump_timer_player = 3#how many frames the player can press jump, after lan
 cayote_timer_player = 10#how many frames from falling in which the player can still jump
 animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
 air_timer = 7#for how long one can press A and keep jumping
-dash_length = 5#how long  Aila dashes
-dash_vel = 13
+dash_length = 7#how long  Aila dashes
+dash_vel = 8
 wall_timer = 3#how many frams from droping from wall you can still jump
 wall_timer_2 = 7#how many frams from jumping till one change change the direction from wall you can still jump
 

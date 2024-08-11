@@ -635,6 +635,10 @@ class Village_ola2(Biome):
                 else:
                     self.level.game_objects.all_bgs.add(new_tree)
 
+            elif id == 1:#boulder
+                new_tree = platforms.Boulder(object_position, self.level.game_objects)
+                self.level.game_objects.platforms.add(new_tree)                    
+
 class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
@@ -868,7 +872,6 @@ class Forest_path(Biome):
             properties = obj.get('properties',[])
             id = obj['gid'] - self.level.map_data['objects_firstgid']
 
-            if id == 'X':#bridge that is built when the reindeer dies
-                if self.game_objects.world_state.progress > 1:#if reindeer has been defeated
-                    new_interactable = getattr(Entities, 'Bridge')(object_position, self.game_objects)
-                    self.game_objects.interactables.add(new_interactable)
+            if id == 2:#bridge that is built when the reindeer dies                                        
+                new_bridge = platforms.Bridge(object_position, self.level.game_objects)
+                self.level.game_objects.platforms.add(new_bridge)

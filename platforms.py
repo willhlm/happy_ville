@@ -10,9 +10,6 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
 
-    def reset_timer(self):#aniamtion need it
-        self.currentstate.increase_phase()
-
     def collide_x(self, entity):
         pass
 
@@ -22,17 +19,16 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def draw(self, target):#conly certain platforms will require draw
         pass
 
-    def release_texture(self):
-        pass
-
     def take_dmg(self, projectile, dmg):#called from projectile
         pass   
+
+    def release_texture(self):#called when .kill() and empty group
+        pass
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos, size)
         self.run_particles = {'dust':Entities.Dust_running_particles,'water':Entities.Water_running_particles,'grass':Entities.Grass_running_particles}[run_particle]
-        self.go_through = False
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -52,49 +48,10 @@ class Collision_block(Platform):
         entity.update_rect_y()
         entity.collision_platform(self)
 
-class Gate(Platform):#a gate that is owned by the lever
-    def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos)
-        self.game_objects = game_objects
-        self.dir = [1,0]
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
-
-        self.ID_key = kwarg.get('ID', None)#an ID to match with the gate
-        if game_objects.world_state.quests.get(self.ID_key, False):#if ballroom has been completed
-            state = 'down'
-        else:                
-            state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   
-        self.image = self.sprites[state][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state                
-                
-        self.animation = animation.Animation(self)
-        self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
-
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
-
-    def collide_x(self,entity):
-        if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self.hitbox.left)
-        else:#going to the leftx
-            entity.left_collision(self.hitbox.right)
-        entity.update_rect_x()
-        entity.collision_platform(self)
-
-    def draw(self, target):
-        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
-
-    def release_texture(self):#called when .kill() and empty group
-        for state in self.sprites.keys():
-            for frame in range(0,len(self.sprites[state])):
-                self.sprites[state][frame].release()
-
 class Collision_oneway_up(Platform):
-    def __init__(self, pos, size, run_particle = 'dust', go_through = True):
+    def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos,size)
         self.run_particles = {'dust':Entities.Dust_running_particles,'water':Entities.Water_running_particles,'grass':Entities.Grass_running_particles}[run_particle]
-        self.go_through = go_through
 
     def collide_x(self,entity):
         pass
@@ -113,7 +70,7 @@ class Collision_right_angle(Platform):#ramp
         self.define_values(pos, points)
         super().__init__([self.new_pos[0],self.new_pos[1]-self.size[1]],self.size)
         self.ratio = self.size[1]/self.size[0]
-        self.go_through = go_through
+        self.go_through = go_through#a flag that determines if aila can go through when pressing down
         self.target = 0
     #function calculates size, real bottomleft position and orientation of right angle triangle
     #the value in orientatiion represents the following:
@@ -189,7 +146,7 @@ class Collision_right_angle(Platform):#ramp
         else: return 0
         return -rel_x*self.ratio + self.hitbox.bottom
 
-    def collide(self, entity):#called in collisions
+    def collide(self, entity):#called in collisions        
         if self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
@@ -218,13 +175,13 @@ class Collision_right_angle(Platform):#ramp
             entity.velocity[0] = 0#need to have a value to avoid "dragin in air" while running
             entity.update_rect_y()
 
-    def shift_up(self, other_side, entity, benethe):        
+    def shift_up(self, other_side, entity, benethe):   
         if self.target > entity.hitbox.bottom:
             entity.go_through['ramp'] = False        
         elif other_side > 0 or benethe > 0:
             entity.go_through['ramp'] = True       
-        elif not entity.go_through['ramp']:          
-            entity.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation
+        elif not entity.go_through['ramp']: #need to be elif
+            entity.ramp_gravity()            
             entity.down_collision(self.target)
             entity.update_rect_y()                 
 
@@ -252,6 +209,107 @@ class Collision_dmg(Platform):#"spikes"
             entity.velocity[1] = 10#knock back
         entity.take_dmg(self.dmg)
         entity.update_rect_y()
+
+#texture based
+class Collision_texture(Platform):#blocks that has tectures
+    def __init__(self, pos, game_objects):
+        super().__init__(pos)    
+        self.game_objects = game_objects
+
+    def collide_x(self,entity):
+        if entity.velocity[0] > 0:#going to the right
+            entity.right_collision(self.hitbox.left)
+        else:#going to the leftx
+            entity.left_collision(self.hitbox.right)
+        entity.update_rect_x()
+        entity.collision_platform(self)
+
+    def collide_y(self,entity):
+        if entity.velocity[1] > 0:#going down   
+            entity.down_collision(self.hitbox.top)
+            entity.limit_y()
+        else:#going up
+            entity.top_collision(self.hitbox.bottom)
+        entity.update_rect_y()
+        entity.collision_platform(self)
+
+    def reset_timer(self):#aniamtion need it
+        self.currentstate.increase_phase()
+
+    def release_texture(self):#called when .kill() and empty group
+        for state in self.sprites.keys():
+            for frame in range(0,len(self.sprites[state])):
+                self.sprites[state][frame].release()
+
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
+
+class Boulder(Collision_texture):#blocks village cave
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/block/boulder/', game_objects)
+
+        if game_objects.world_state.events.get('reindeer', False):#if reindeer has been deafeated
+            state = 'down'
+        else:
+            state = 'erect'
+
+        self.image = self.sprites[state][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.animation = animation.Animation(self)
+        self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+class Gate(Collision_texture):#a gate that is owned by the lever
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.dir = [1,0]
+        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
+
+        self.ID_key = kwarg.get('ID', None)#an ID to match with the gate
+        if game_objects.world_state.quests.get(self.ID_key, False):#if ballroom has been completed
+            state = 'down'
+        else:                
+            state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   
+        self.image = self.sprites[state][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state                
+                
+        self.animation = animation.Animation(self)
+        self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+    def collide_x(self,entity):
+        if entity.velocity[0] > 0:#going to the right
+            entity.right_collision(self.hitbox.left)
+        else:#going to the leftx
+            entity.left_collision(self.hitbox.right)
+        entity.update_rect_x()
+        entity.collision_platform(self)
+
+class Bridge(Collision_texture):#bridge twoards forest path
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/block/bridge/', game_objects)
+
+        if game_objects.world_state.events.get('reindeer', False):#if reindeer has been deafeated
+            state = 'erect'
+        else:
+            state = 'down'
+
+        self.image = self.sprites[state][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.animation = animation.Animation(self)
+        self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
 
 #timer based
 class Collision_timer(Collision_block):#collision block that dissapears if aila stands on it
@@ -404,7 +462,7 @@ class Breakable_block_1(Collision_breakable):
         self.rect.topleft = pos
         self.hitbox = self.rect.copy()
 
-#dynamics ones
+#dynamics (moving) ones
 class Collision_dynamic(Collision_block):
     def __init__(self, pos, size):
         super().__init__(pos, size)

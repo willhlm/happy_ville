@@ -17,6 +17,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Entities.Logo_loading.pool(game_objects)
         Entities.Blood.pool(game_objects)
         Entities.Player_Soul.pool(game_objects)
+        Entities.Pray_effect.pool(game_objects)
 
         Entities.Boss_HP.pool(game_objects)
         Entities.Sword.pool(game_objects)
