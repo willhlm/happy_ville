@@ -184,7 +184,8 @@ class Run_main(Player_states):
     def update(self):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
-            self.running_particles()
+            pass
+            #self.running_particles()
 
         self.sfx_timer -= 1
         if self.sfx_timer == 0:
@@ -403,7 +404,7 @@ class Fall_run_pre(Player_states):
 
     def handle_input(self,input):
         if input == 'jump':#caööed from jump buffer timer
-            self.enter_state('Jump_run_main')        
+            self.enter_state('Jump_run_main')
         elif input == 'Wall':
             self.enter_state('Wall_glide_main')
         elif input == 'Ground':
@@ -464,7 +465,7 @@ class Fall_stand_pre(Player_states):
         if input == 'Ground':
             self.enter_state('Idle_main')
         elif input == 'jump':
-            self.enter_state('Jump_run_main')            
+            self.enter_state('Jump_run_main')
 
     def swing_sword(self):
         if not self.entity.flags['sword_swinging']:
@@ -539,7 +540,7 @@ class Air_dash_pre(Player_states):
 
     def update(self):
         self.entity.velocity[1] = 0
-        self.entity.velocity[0] = self.dir[0]*max(10,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.exit()
@@ -569,10 +570,11 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
 
     def exit(self):
         if self.dash_length < 0:
-            self.increase_phase()
+            self.enter_state('Air_dash_post')
 
     def increase_phase(self):
-        self.enter_state('Air_dash_post')
+        pass
+        #self.enter_state('Air_dash_post')
 
 class Air_dash_post(Air_dash_pre):
     def __init__(self,entity):

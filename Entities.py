@@ -493,7 +493,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity = [0,0]
         self.running_particles = Dust_running_particles#default particles while runing
 
-    def update_hitbox(self):        
+    def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
 
     def update_rect_y(self):
@@ -520,7 +520,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.update_hitbox()
 
     def ramp_gravity(self):#called from shift up in ramps. The extra gravity on ramp
-        self.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation        
+        self.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation
 
     def collision_platform(self, platform):#called from collusion in clollision_block: projectile need it to give damage
         pass
@@ -633,7 +633,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':False,'Double_jump':False,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True}
@@ -1732,7 +1732,7 @@ class Projectiles(Platform_entity):#projectiels
         for timer in self.timers:
             timer.update()
 
-    #collisions                
+    #collisions
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
         collision_plat.take_dmg(self, self.dmg)
 
@@ -1827,7 +1827,7 @@ class Melee(Projectiles):
         self.dir = entity.dir.copy()
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
-    def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)        
+    def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
         rounded_dir = (sign(self.dir[0]), sign(self.dir[1]))#analogue controls may have none integer values
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
@@ -2004,7 +2004,7 @@ class Aila_sword(Sword):
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
         self.level += 1
-        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3   
+        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
 class Thunder(Projectiles):
     def __init__(self, entity):
@@ -2144,7 +2144,7 @@ class Force(Projectiles):
         self.sprites = Read_files.load_sprites_dict('Sprites/Attack/force/',entity.game_objects)
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()        
+        self.hitbox = self.rect.copy()
         self.dmg = 0
         self.level = 1#upgrade pointer
 
@@ -2196,7 +2196,7 @@ class Arrow(Projectiles):
         self.dmg = 0
 
     def release_texture(self):
-        pass 
+        pass
 
 class Migawari():
     def __init__(self,entity):
@@ -2760,7 +2760,7 @@ class Blood(Animatedentity):
         Blood.sprites = Read_files.load_sprites_dict('Sprites/GFX/blood/death/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass      
+        pass
 
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):
