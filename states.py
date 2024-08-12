@@ -112,15 +112,10 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-<<<<<<< HEAD
-            self.game.game_objects.load_map(self,'light_forest_cave_13','1')
-            #self.game.game_objects.load_map(self,'village_ola2_5','1')
-=======
             #self.game.game_objects.load_map(self,'light_forest_cave_10','1')
             #self.game.game_objects.load_map(self,'light_forest_1','1')
             self.game.game_objects.load_map(self,'Village_ola2_5','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
->>>>>>> 69f482a58810ba42f3760396e835a4466033bffa
 
         elif self.current_button == 1:
             self.arrow.pressed()
