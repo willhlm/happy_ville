@@ -31,6 +31,8 @@ class Idle(Shader_states):
             self.enter_state('Alpha')
         elif input == 'tint':
             self.enter_state('Tint', **kwarg)            
+        elif input == 'blur':
+            self.enter_state('Blur')         
 
 class Hurt(Shader_states):#turn white -> enteties use it
     def __init__(self,entity):
@@ -182,3 +184,20 @@ class Tint(Shader_states):#challaenge momutment use it
     def handle_input(self, input, **kwarg):
         if input == 'idle':
             self.enter_state('Idle')              
+
+class Blur(Shader_states):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['blur']
+        self.blur_radius = 0.1
+        
+    def update(self):
+        self.blur_radius += (1.1 - self.blur_radius) * 0.06
+        self.blur_radius = min(1.1, self.blur_radius)   
+ 
+    def draw(self):
+        self.entity.shader['blurRadius'] = self.blur_radius
+
+    def handle_input(self, input, **kwarg):
+        if input == 'idle':
+            self.enter_state('Idle')         

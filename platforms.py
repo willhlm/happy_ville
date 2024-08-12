@@ -23,7 +23,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         pass   
 
     def release_texture(self):#called when .kill() and empty group
-        pass
+        pass    
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
@@ -214,7 +214,11 @@ class Collision_dmg(Platform):#"spikes"
 class Collision_texture(Platform):#blocks that has tectures
     def __init__(self, pos, game_objects):
         super().__init__(pos)    
-        self.game_objects = game_objects
+        self.game_objects = game_objects        
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -242,7 +246,7 @@ class Collision_texture(Platform):#blocks that has tectures
                 self.sprites[state][frame].release()
 
     def draw(self, target):
-        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round
+        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round         
 
 class Boulder(Collision_texture):#blocks village cave
     def __init__(self, pos, game_objects):
@@ -258,10 +262,6 @@ class Boulder(Collision_texture):#blocks village cave
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
-
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
 
 class Gate(Collision_texture):#a gate that is owned by the lever
     def __init__(self, pos, game_objects, **kwarg):
@@ -279,10 +279,6 @@ class Gate(Collision_texture):#a gate that is owned by the lever
                 
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
-
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -307,22 +303,17 @@ class Bridge(Collision_texture):#bridge twoards forest path
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
-    def update(self):
-        self.currentstate.update()
-        self.animation.update()
-
 #timer based
-class Collision_timer(Collision_block):#collision block that dissapears if aila stands on it
-    def __init__(self,game_objects, pos, size, run_particle = 'dust'):
-        super().__init__(pos, size, run_particle)
-        self.game_objects = game_objects
+class Collision_timer(Collision_texture):#collision block that dissapears if aila stands on it
+    def __init__(self, pos, game_objects):        
+        super().__init__(pos, game_objects)
         self.timers = []
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate = states_time_collision.Idle(self)#
 
     def update(self):
-        self.animation.update()
+        super().update()
         self.update_timers()
 
     def update_timers(self):
@@ -335,27 +326,22 @@ class Collision_timer(Collision_block):#collision block that dissapears if aila 
     def collide_y(self,entity):#called when aila lands on platoform
         if entity.velocity[1] < 0: return#going up
         offset = entity.velocity[1] + 1
-        if entity.hitbox.bottom <= self.hitbox.top + offset:
+        if entity.hitbox.bottom <= self.hitbox.top + offset:            
             self.timer_jobs['timer_disappear'].activate()
             entity.down_collision(self.hitbox.top)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
 
-    def draw(self, target):
-        self.game_objects.game.display.render(self.image, target, position = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#int seem nicer than round
-
-    def release_texture(self):#called when .kill() and empty group
-        for state in self.sprites.keys():
-            for frame in range(0,len(self.sprites[state])):
-                self.sprites[state][frame].release()
-
 class Rhoutta_encounter_1(Collision_timer):
-    def __init__(self,game_objects,pos,size,run_particle,go_through=True):
-        super().__init__(game_objects,pos,size,run_particle,go_through)
+    def __init__(self, game_objects, pos, particle):
+        super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
         self.image = self.sprites['idle'][0]
         self.timer_jobs = {'timer_disappear':Platform_timer_1(self,60),'timer_appear':Platform_timer_2(self,60)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.run_particles = Entities.Dust_running_particles
+        self.rect[2], self.rect[3] = self.image.width, self.image.height
+        self.hitbox = self.rect.copy()
 
     def deactivate(self):#called when first timer runs outs
         self.hitbox = [self.hitbox[0],self.hitbox[1],0,0]
@@ -368,11 +354,13 @@ class Rhoutta_encounter_1(Collision_timer):
 
 class Bubble_static(Collision_timer):#static bubble
     def __init__(self, pos, game_objects, **prop):
-        super().__init__(game_objects, pos, size = [32,32])
-        self.sprites = Bubble_static.sprites
+        super().__init__(pos, game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
         self.image = self.sprites['idle'][0]
+        self.rect[2], self.rect[3] = self.image.width, self.image.height
+        self.hitbox = self.rect.copy()
         lifetime = prop.get('lifetime', 100)
-        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime), 'timer_appear':Platform_timer_2(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.      
+        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime), 'timer_appear':Platform_timer_2(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.              
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -386,7 +374,6 @@ class Bubble_static(Collision_timer):#static bubble
             self.timer_jobs['timer_disappear'].activate()            
             entity.down_collision(self.hitbox.top)
             entity.limit_y()
-            entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()     
@@ -400,16 +387,10 @@ class Bubble_static(Collision_timer):#static bubble
         self.hitbox = self.rect.inflate(0,0)
         self.currentstate.handle_input('Transition_2')
 
-    def release_texture(self):#called when .kill() and empty group
-        pass
-
-    def pool(game_objects):#all things that should be saved in object pool
-        Bubble_static.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
-
 #breakable
-class Collision_breakable(Collision_block):#breakable collision blocks
-    def __init__(self, pos, run_particle):
-        super().__init__(pos, size = [16,16],run_particle='dust')
+class Collision_breakable(Collision_texture):#breakable collision blocks
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
         self.timer_jobs = {'invincibility':Entities.Invincibility_timer(self,C.invincibility_time_enemy)}
         self.health = 3
@@ -419,9 +400,8 @@ class Collision_breakable(Collision_block):#breakable collision blocks
         self.currentstate = states_basic.Idle(self)#
 
     def update(self):
+        super().update()
         self.update_timers()#invincibililty
-        self.currentstate.update()
-        self.animation.update()
 
     def dead(self):#called when death animatin finishes
         self.kill()
@@ -444,28 +424,18 @@ class Collision_breakable(Collision_block):#breakable collision blocks
         for timer in self.timers:
             timer.update()
 
-    def draw(self, target):
-        self.game_objects.game.screen.blit(self.image, (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#round seem nicer than int
-
-    def release_texture(self):#called when .kill() and empty group
-        for state in self.sprites.keys():
-            for frame in range(0,len(self.sprites[state])):
-                self.sprites[state][frame].release()
-
 class Breakable_block_1(Collision_breakable):
-    def __init__(self, pos, game_objects,run_particle='dust'):
-        super().__init__(pos, run_particle)
-        self.game_objects = game_objects
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
 
 #dynamics (moving) ones
-class Collision_dynamic(Collision_block):
-    def __init__(self, pos, size):
-        super().__init__(pos, size)
+class Collision_dynamic(Collision_texture):
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.velocity = [0,0]
 
     def update_true_pos_x(self):
@@ -485,7 +455,7 @@ class Collision_dynamic(Collision_block):
             entity.left_collision(self.hitbox.right)
         entity.update_rect_x()
 
-    def collide__entity_x(self,entity):            
+    def collide_entity_x(self,entity):            
         if self.velocity[0] > 0:#going to the right
             entity.left_collision(self.hitbox.left)
         else:#going to the leftx
@@ -507,18 +477,19 @@ class Collision_dynamic(Collision_block):
         if entity.velocity[1] > self.velocity[1]:#going down               
             entity.down_collision(self.hitbox.top)
             entity.limit_y()
-            entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self.hitbox.bottom)
         entity.update_rect_y()
 
 class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):
-        super().__init__(pos, size = [32,32])
-        self.game_objects = game_objects
+        super().__init__(pos, game_objects)
         self.sprites = Bubble.sprites
         self.timers = []
         self.image = self.sprites['idle'][0]
+        self.rect[2], self.rect[3] = self.image.width, self.image.height
+        self.hitbox = self.rect.copy()
+
         lifetime = prop.get('lifetime', 300)
         self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.      
         self.timer_jobs['timer_disappear'].activate()
@@ -529,11 +500,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def update(self):
         super().update()
-        self.animation.update()
         self.update_timers()
-
-    def draw(self, target):
-        self.game_objects.game.display.render(self.image, target, position = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1])))#int seem nicer than round
 
     def update_timers(self):
         for timer in self.timers:

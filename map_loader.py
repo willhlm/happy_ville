@@ -774,7 +774,7 @@ class Rhoutta_encounter(Biome):
                     if property['name'] == 'particles':
                         types = property['value']
 
-                new_platofrm = platforms.Rhoutta_encounter_1( self.level.game_objects, object_position,object_size,types)
+                new_platofrm = platforms.Rhoutta_encounter_1( self.level.game_objects, object_position, types)
                 self.level.game_objects.platforms.add(new_platofrm)
 
 class Light_forest_cave(Biome):

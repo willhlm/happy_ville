@@ -633,7 +633,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':True,'Double_jump':True,
                      'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True}
@@ -992,16 +992,6 @@ class Wall_slime(Enemy):
         self.velocity[1] = self.acceleration[1]-self.dir[1]
         self.velocity[0] = self.acceleration[0]+self.dir[0]
 
-class Woopie(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/woopie/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
-        self.health = 1
-        self.spirit=100
-
 class Vatt(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1021,15 +1011,6 @@ class Vatt(Enemy):
             if type(enemy).__name__=='Vatt':
                 enemy.aggro = True
                 enemy.currentstate.handle_input('Transform')
-
-class Larv_poison(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/larv/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],20,30)
-        self.attack=Poisonblobb
 
 class Maggot(Enemy):
     def __init__(self,pos,game_objects):
@@ -1157,34 +1138,6 @@ class Egg(Enemy):#change design
             obj.velocity=[random.randint(-100, 100),random.randint(-10, -5)]
             self.game_objects.enemies.add(obj)
 
-class Skeleton_warrior(Enemy):#change design
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/skeleton_warrior/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.attack_distance = [100,10]
-        self.attack = Sword
-        self.health = 3
-
-    def knock_back(self,dir):
-        pass
-
-class Skeleton_archer(Enemy):#change design
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/skeleton_archer/',game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],40,40)
-        self.attack_distance = 300
-        self.attack = Arrow
-        self.aggro_distance = 400
-
-    def knock_back(self,dir):
-        pass
-
 class Cultist_rogue(Enemy):
     def __init__(self, pos, game_objects, gameplay_state = None):
         super().__init__(pos,game_objects)
@@ -1304,7 +1257,7 @@ class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
-class Bierdna(NPC):#bartender
+class Busty_baker(NPC):#bartender
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
@@ -1368,14 +1321,6 @@ class MrWood(NPC):#lumber jack
         new_state.enter_state()
         if self.game_objects.world_state.quests.get('lumberjack_omamori', False):#if the quest is running
             self.game_objects.quests_events.active_quests['lumberjack_omamori'].complete()
-
-class byFane1(NPC):
-    def __init__(self, pos,game_objects):
-        super().__init__(pos,game_objects)
-
-    def load_sprites(self): #to load sprite that is not aligned with class name
-        self.sprites = Read_files.load_sprites_dict("Sprites/Enteties/NPC/Sahkar/animation/",self.game_objects)
-        self.portrait = pygame.image.load('Sprites/Enteties/NPC/Sahkar/potrait.png').convert_alpha()
 
 class Boss(Enemy):
     def __init__(self,pos,game_objects):
@@ -1459,70 +1404,6 @@ class Butterfly(Flying_enemy):
 
     def top_collision(self,hitbox):
         pass
-
-class Idun(Boss):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/idun/',game_objects)
-        self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.attack_distance = 100
-        self.attack = Sword
-
-    def death(self):
-        self.kill()
-
-    def give_abillity(self):
-        pass
-
-class Freja(Boss):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/freja/',game_objects)
-        self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.attack_distance = 100
-        self.attack = Sword
-
-    def death(self):
-        self.kill()
-
-    def give_abillity(self):
-        self.game_objects.player.dash=True
-
-class Tyr(Boss):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/tyr/',game_objects)
-        self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.attack_distance = 100
-        self.attack = Sword
-
-    def death(self):
-        self.kill()
-
-    def give_abillity(self):
-        self.game_objects.player.dash=True
-
-class Fenrisulven(Boss):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/fenrisulven/',game_objects)
-        self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.attack_distance = 100
-        self.attack = Sword
-
-    def death(self):
-        self.kill()
-
-    def give_abillity(self):
-        self.game_objects.player.dash=True
 
 class Rhoutta_encounter(Boss):
     def __init__(self,pos,game_objects):
@@ -3307,6 +3188,7 @@ class Zoom_col(Interactable):
     def player_collision(self):
         self.blur_timer -= self.game_objects.game.dt
         if self.blur_timer < 0:
+            self.game_objects.player.shader_state.handle_input('blur')
             for sprite in self.game_objects.all_bgs:
                 if sprite.parallax[0] > 0.8:
                     sprite.blur_radius += (1.1/sprite.parallax[0] - sprite.blur_radius) * 0.06
@@ -3324,6 +3206,7 @@ class Zoom_col(Interactable):
         self.interacted = False
         if self.game_objects.shader_render.shaders.get('zoom', False):
             self.game_objects.shader_render.shaders['zoom'].method = 'zoom_out'
+            self.game_objects.player.shader_state.handle_input('idle')
             for sprite in self.game_objects.all_bgs:
                 if sprite.parallax[0] == 1: sprite.blur_radius = 0.2
                 else: sprite.blur_radius = min(1/sprite.parallax[0], 10)#limit the blur raidus for performance
@@ -3419,7 +3302,7 @@ class State_trigger(Interactable):#TODO make it an event trigger -> cutscene (st
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
-        self.hitbox = self.rect.inflate(0,0)
+        self.hitbox = self.rect.copy()
         self.event = event
 
     def release_texture(self):

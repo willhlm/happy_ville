@@ -43,7 +43,8 @@ class Title_Menu(Game_State):
         #create buttons        
         self.current_button = 0
         self.initiate_buttons()
-        self.define_BG()
+        self.define_BG()    
+        self.arrow.rect.topleft = self.buttons[self.current_button].rect.topleft         
 
     def initiate_buttons(self):
         buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
@@ -65,8 +66,6 @@ class Title_Menu(Game_State):
 
     def update(self):#update menu arrow position
         self.animation.update()
-        ref_pos = self.buttons[self.current_button].rect.topleft
-        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
 
     def render(self):
         self.game.display.render(self.image, self.game.screen)#shader render
@@ -82,18 +81,24 @@ class Title_Menu(Game_State):
         #blit arrow
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
 
+    def update_arrow(self):
+        ref_pos = self.buttons[self.current_button].rect.topleft
+        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))    
+        self.arrow.play_SFX()    
+
     def handle_events(self, event):
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
                 if self.current_button < 0:
                     self.current_button = len(self.buttons) - 1
+                self.update_arrow()                    
             elif event[-1] == 'down':
                 self.current_button += 1
                 if self.current_button >= len(self.buttons):
                     self.current_button = 0
-            elif event[-1] in ('return', 'a'):
-                self.arrow.pressed()#if we want to make it e.g. glow or something
+                self.update_arrow()
+            elif event[-1] in ('return', 'a'):                
                 self.buttons[self.current_button].pressed()#if we want to make it e.g. glow or something
                 self.change_state()
             elif event[-1] == 'start':
@@ -102,18 +107,21 @@ class Title_Menu(Game_State):
 
     def change_state(self):
         if self.current_button == 0:#new game
+            self.arrow.pressed('new')#if we want to make it e.g. glow or something        
             new_state = Gameplay(self.game)
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'light_forest_cave_10','1')
-            self.game.game_objects.load_map(self,'forest_path_1','3')
+            self.game.game_objects.load_map(self,'light_forest_cave_13','1')
+            #self.game.game_objects.load_map(self,'village_ola2_5','1')
 
         elif self.current_button == 1:
+            self.arrow.pressed()
             new_state = Load_Menu(self.game)
             new_state.enter_state()
 
         elif self.current_button == 2:
+            self.arrow.pressed()
             new_state = Option_Menu(self.game)
             new_state.enter_state()
 
@@ -136,6 +144,7 @@ class Load_Menu(Game_State):
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
+        self.arrow.rect.topleft = self.button_rects[self.buttons[self.current_button]].topleft
 
     def define_BG(self):
         size = (90,100)
@@ -143,14 +152,27 @@ class Load_Menu(Game_State):
         pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
 
+    def initiate_buttons(self):
+        y_pos = 200
+        self.button_surfaces = {}
+        self.button_rects = {}
+        for b in self.buttons:
+            text = (self.game.game_objects.font.render(text = b))
+            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
+            self.button_surfaces[b] = text
+            self.button_rects[b] = pygame.Rect((100,y_pos),self.button_surfaces[b].size)
+            y_pos += 20
+
     def reset_timer(self):
         pass
 
-    def update(self):
-        #update menu arrow position
+    def update(self):        
         self.animation.update()
+
+    def update_arrow(self):
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))       
+        self.arrow.play_SFX()     
 
     def render(self):
         #fill game.screen
@@ -173,13 +195,16 @@ class Load_Menu(Game_State):
                 self.current_button -= 1
                 if self.current_button < 0:
                     self.current_button = len(self.buttons) - 1
+                self.update_arrow()
             elif event[-1] == 'down':
                 self.current_button += 1
                 if self.current_button >= len(self.buttons):
                     self.current_button = 0
+                self.update_arrow()                    
             elif event[-1] == 'start':
                 self.exit_state()
             elif event[-1] in ('return', 'a'):
+                self.arrow.pressed()
                 self.game.game_objects.load_game()#load saved game data
 
                 new_state = Gameplay(self.game)
@@ -187,17 +212,6 @@ class Load_Menu(Game_State):
                 map = self.game.game_objects.player.spawn_point['map']
                 point=self.game.game_objects.player.spawn_point['point']
                 self.game.game_objects.load_map(self,map,point)
-
-    def initiate_buttons(self):
-        y_pos = 200
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b))
-            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((100,y_pos),self.button_surfaces[b].size)
-            y_pos += 20
 
 class Option_Menu(Game_State):
     def __init__(self,game):
@@ -211,6 +225,7 @@ class Option_Menu(Game_State):
             self.buttons += ['Render FPS', 'Render Hitboxes']
         self.current_button = 0
         self.initiate_buttons()
+        self.arrow.rect.topleft = self.button_rects[self.buttons[self.current_button]].topleft
 
     def initiate_buttons(self):
         y_pos = 90
@@ -221,10 +236,10 @@ class Option_Menu(Game_State):
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
-    def update(self):
-        #update menu arrow position
+    def update_arrow(self):#update menu arrow position        
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.play_SFX()    
 
     def render(self):
         #fill game.screen
@@ -249,13 +264,16 @@ class Option_Menu(Game_State):
                 self.current_button -= 1
                 if self.current_button < 0:
                     self.current_button = len(self.buttons) - 1
+                self.update_arrow()
             elif event[-1] == 'down':
                 self.current_button += 1
                 if self.current_button >= len(self.buttons):
                     self.current_button = 0
+                self.update_arrow()
             elif event[-1] == 'start':
                 self.exit_state()
             elif event[-1] in ('return', 'a'):
+                self.arrow.pressed()
                 self.update_options()
 
     def update_options(self):
@@ -291,10 +309,11 @@ class Option_Menu_sounds(Game_State):
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
-    def update(self):
+    def update_arrow(self):
         #update menu arrow position
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.play_SFX()    
 
     def blit_buttons(self):
         for b in self.buttons:
@@ -370,10 +389,11 @@ class Option_Menu_display(Game_State):
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
-    def update(self):
+    def update_arrow(self):
         #update menu arrow position
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.play_SFX()    
 
     def blit_buttons(self):
         for b in self.buttons:
@@ -490,6 +510,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
+        self.arrow.update_pos(self.button_rects[self.buttons[self.current_button]].topleft)    
 
     def define_BG(self):
         size = (100,120)
@@ -510,9 +531,10 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
-    def update(self):
+    def update_arrow(self):
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.play_SFX()    
 
     def render(self):
         super().render()
@@ -535,7 +557,6 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.title.release()
         self.bg.release()
         self.background.release()
-        self.arrow.image.release()
         for key in self.button_surfaces.keys():
             self.button_surfaces[key].release()
 
@@ -545,11 +566,14 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
                 self.current_button -= 1
                 if self.current_button < 0:
                     self.current_button = len(self.buttons) - 1
+                self.update_arrow()
             elif event[-1] == 'down':
                 self.current_button += 1
                 if self.current_button >= len(self.buttons):
                     self.current_button = 0
+                self.update_arrow()                    
             elif event[-1] in ('return', 'a'):
+                self.arrow.pressed()
                 self.change_state()
             elif event[-1] == 'start':
                 self.exit_state()
@@ -748,7 +772,7 @@ class Fadeout(Fadein):
         self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
-class Safe_spawn_1(Gameplay):#fade
+class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a whole
     def __init__(self, game):
         super().__init__(game)
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
@@ -967,7 +991,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
             elif input[-1] == 'a':
                 self.page = 1
 
-#encountters and corresponding cutscenes
+#engine cutscenes
 class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
     def __init__(self,game):
         super().__init__(game)
@@ -1167,7 +1191,7 @@ class Death(Cutscene_engine):#when aila dies
 
     def update(self):
         super().update()
-        if self.game.state_stack[-1] != self: return
+        if self.game.state_stack[-1] != self: return#needed
         self.timer += self.game.dt
         if self.stage == 0:
 
