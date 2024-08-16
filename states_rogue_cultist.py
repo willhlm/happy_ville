@@ -73,10 +73,7 @@ class Attack_pre(Enemy_states):
 class Attack_main(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
-        attack=self.entity.attack(self.entity)#make the object
-        self.entity.projectiles.add(attack)#add to group but in main phase
-        self.dir=self.entity.dir.copy()#animation direction
-        self.entity.attack.lifetime=10
+        self.entity.attack()
 
     def increase_phase(self):
         self.enter_state('Idle')

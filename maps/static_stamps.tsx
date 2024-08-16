@@ -84,6 +84,7 @@
  <tile id="19">
   <properties>
    <property name="event" value=""/>
+   <property name="new_state" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="20">
@@ -122,6 +123,13 @@
    <property name="interact" type="bool" value="false"/>
    <property name="pulsating" type="bool" value="false"/>
    <property name="radius" value=""/>
+  </properties>
+ </tile>
+ <tile id="26">
+  <properties>
+   <property name="darker_color" type="color" value=""/>
+   <property name="line_color" type="color" value=""/>
+   <property name="water_tint" type="color" value=""/>
   </properties>
  </tile>
  <tile id="28">

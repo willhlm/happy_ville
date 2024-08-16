@@ -148,7 +148,7 @@ class Goop(Particles):#circles that "distorts" due to noise
 class Spark(Particles):#a general one
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.fade_scale = 1
+        self.fade_scale =  kwarg.get('fade_scale',1)#how fast alpha should do down in self.fading()
 
         self.image = Spark.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
