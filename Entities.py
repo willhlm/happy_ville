@@ -619,9 +619,9 @@ class Player(Character):
         self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
-        self.max_health = 10
+        self.max_health = 100
         self.max_spirit = 4
-        self.health = 3
+        self.health = 100
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1945,6 +1945,7 @@ class Melee(Projectiles):
         self.entity = entity
         self.dir = entity.dir.copy()
         self.direction_mapping = {(1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
+        if abs(self.dir[1]) < 0.5: self.dir[1] = 0
 
     def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
         rounded_dir = (sign(self.dir[0]), sign(self.dir[1]))#analogue controls may have none integer values
@@ -2040,8 +2041,9 @@ class Sword(Melee):
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = [random.randint(-180, 180),0])
 
     def sword_jump(self):
-        if self.dir[1] == -1:
-            self.entity.velocity[1] = -8
+        #print(self.dir[1])
+        if math.floor(self.dir[1]) == -1:
+            self.entity.velocity[1] = C.pogo_vel
 
     def clash_particles(self, pos, number_particles = 12, **kwarg):
         for i in range(0, number_particles):

@@ -123,16 +123,16 @@ class Controller():
             self.key=self.buttons[str(event.button)]
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
-            print(event)
+            #print(event)
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value['l_stick'][0] = event.value
-                if abs(event.value) < 0.1:
+                if abs(event.value) < 0.2:
                     self.value['l_stick'][0] = 0
 
             if event.axis==self.analogs['lv']:#left vertical
                 self.value['l_stick'][1] = event.value
-                #if abs(event.value) < 0.1:
-                #    self.value['l_stick'][1] = 0
+                if abs(event.value) < 0.1:
+                    self.value['l_stick'][1] = 0
 
             self.controller_angle('l_stick')
 

@@ -563,8 +563,8 @@
                          "type":"",
                          "visible":true,
                          "width":192,
-                         "x":336,
-                         "y":480
+                         "x":364,
+                         "y":361
                         }, 
                         {
                          "gid":3841,
@@ -575,8 +575,8 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":336,
-                         "y":592
+                         "x":635,
+                         "y":331
                         }, 
                         {
                          "gid":3841,
@@ -587,8 +587,8 @@
                          "type":"",
                          "visible":true,
                          "width":160,
-                         "x":528,
-                         "y":592
+                         "x":515,
+                         "y":252
                         }, 
                         {
                          "gid":3841,
@@ -625,6 +625,258 @@
                          "width":288,
                          "x":688,
                          "y":416
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":50,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":341,
+                         "y":591
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":51,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":442,
+                         "y":592
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":52,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":526,
+                         "y":587
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":53,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":632,
+                         "y":596
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":54,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":745,
+                         "y":593
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":55,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1069,
+                         "y":516
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":56,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2288,
+                         "y":479
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":57,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2487,
+                         "y":459
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":58,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2402,
+                         "y":167
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":59,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2287,
+                         "y":157
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":60,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2163,
+                         "y":152
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":61,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2062,
+                         "y":147
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":62,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1950,
+                         "y":142
+                        }, 
+                        {
+                         "gid":3836,
+                         "height":16,
+                         "id":63,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1874,
+                         "y":139
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -640,7 +892,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":50,
+ "nextobjectid":64,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
