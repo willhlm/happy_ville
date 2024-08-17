@@ -289,10 +289,13 @@ class Level():
                     self.game_objects.all_bgs.add(god_rays)
 
             elif id == 19:#trigger
+                kwarg = {}
                 for property in properties:
                     if property['name'] == 'event':
-                        value = property['value']
-                new_trigger = Entities.State_trigger(object_position, self.game_objects, object_size ,value)
+                        kwarg['event'] = property['value']
+                    elif property['name'] == 'new_state':
+                        kwarg['new_state'] = property['value']                        
+                new_trigger = Entities.Event_trigger(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object
@@ -354,6 +357,22 @@ class Level():
                 else:
                     self.game_objects.all_bgs.add(ligth_source)
 
+            elif id  == 26:#2D water
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'water_tint':
+                        colour= list(pygame.Color(property['value']))
+                        prop['water_tint'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
+                    elif property['name'] == 'darker_color':
+                        colour= list(pygame.Color(property['value']))
+                        prop['darker_color'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
+                    elif property['name'] == 'line_color':
+                        colour= list(pygame.Color(property['value']))
+                        prop['line_color'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
+
+                water = Entities.TwoD_water(object_position, self.game_objects, object_size, **prop)
+                self.game_objects.cosmetics.add(water)
+
             elif id == 27:#sky
                 reflection = Entities.Sky(object_position, self.game_objects, parallax, object_size)
 
@@ -365,7 +384,6 @@ class Level():
                     #else:
                     self.game_objects.all_bgs.add(reflection)
 
-
             elif id == 34:#reflection object
                 reflection = Entities.Waterfall(object_position, self.game_objects, parallax, object_size)
 
@@ -373,17 +391,6 @@ class Level():
                     self.game_objects.all_fgs.add(reflection)
                 else:
                     self.game_objects.all_bgs.add(reflection)
-
-            #move to interactables objects
-            #TODO
-            elif id == 30:#trapsª
-                for property in properties:
-                    if property['name'] == 'type':
-                        trap_type = property['value']
-
-                object_size = [int(obj['width']),int(obj['height'])]
-                new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
-                self.game_objects.interactables.add(new_trap)
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
@@ -596,7 +603,7 @@ class Biome():
         self.level = level
         self.live_blur = False#default is false live blurring
 
-    def load_objects(self):
+    def load_objects(self, data, parallax, offset):
         pass
 
     def set_camera(self):
@@ -752,7 +759,7 @@ class Rhoutta_encounter(Biome):
     def room(self, room):
         if room == '2':
             self.level.game_objects.lights.ambient = (30/255,30/255,30/255,230/255)#230
-            if self.level.game_objects.world_state.events['guide']:#if guide interaction has happened
+            if self.level.game_objects.world_state.events.get('guide', False):#if guide interaction has happened
                 self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255],interact = False)
 
     def set_camera(self):
@@ -774,7 +781,7 @@ class Rhoutta_encounter(Biome):
                     if property['name'] == 'particles':
                         types = property['value']
 
-                new_platofrm = platforms.Rhoutta_encounter_1( self.level.game_objects, object_position,object_size,types)
+                new_platofrm = platforms.Rhoutta_encounter_1( self.level.game_objects, object_position, types)
                 self.level.game_objects.platforms.add(new_platofrm)
 
 class Light_forest_cave(Biome):
@@ -782,8 +789,8 @@ class Light_forest_cave(Biome):
         super().__init__(level)
 
     def room(self, room = 1):
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,255/255], interact = False)
-        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,255/255)
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], interact = False)
+        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
 
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:
@@ -860,11 +867,11 @@ class Light_forest_cave(Biome):
                 new_challange = Entities.Challenge_ball(object_position, self.level.game_objects)
                 self.level.game_objects.interactables.add(new_challange)
 
-class Forest_path(Biome):
+class Golden_fields(Biome):
     def __init__(self, level):
         super().__init__(level)
 
-    def load_objects(self,data,parallax,offset):
+    def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]

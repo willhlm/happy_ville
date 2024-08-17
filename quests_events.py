@@ -4,8 +4,8 @@ import Entities, platforms
 class Quests_events():#quest and event handlere
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.active_quests = {}#quests the player has picked up
-        self.active_events = {}
+        self.active_quests = {}#quests the player has picked up. the object is only initiated once when picking it up
+        self.active_events = {}#events that occur during gameplay. New object is always initiated.
 
     def initiate_quest(self, quest, **kwarg):#if a quest flag is set in world_state, this should not be called
         if not self.active_quests.get(quest, False):#if it is the first time getting the quest
@@ -54,7 +54,7 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
         self.kill = kwarg['kill']
-        self.gate = platforms.Gate((self.game.game_objects.camera.scroll[0] - 250,self.game.game_objects.camera.scroll[1] + 100), self.game.game_objects, erect = True)#added to group in cutscene
+        self.gate = platforms.Gate((self.game_objects.camera.scroll[0] - 250,self.game_objects.camera.scroll[1] + 100), self.game_objects, erect = True)#added to group in cutscene
 
     def incrase_kill(self):#called when entity1 and 2 are killed
         self.kill -= 1
@@ -88,8 +88,22 @@ class Lumberjack_omamori(Quest_event):#called from monument, #TODO need to make 
     def complete(self):#called when talking to lumberjack within the timer limit        
         self.timer.kill()                         
 
+class Fragile_butterfly(Quest_event):#TODO
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        self.description = 'could you deliver my pixie dust to my love. Do not take damage.'    
+   
+    def fail(self):#should be called when taking dmg
+        self.game_objects.world_state.quests['fragile_butterfly'] = False    
+
+    def initiate_quest(self):#called to initiate
+        self.game_objects.world_state.quests['fragile_butterfly'] = True   
+
+    def complete(self):#called when delivered
+        self.game_objects.world_state.quests['fragile_butterfly'] = True
+
 #rooms from monuments       
-class Ball_room(Quest_event):#the room with ball in light forest cave
+class Ball_room(Quest_event):#the room with ball in light forest cavee
     def __init__(self, game_objects, **kwarg):  
         super().__init__(game_objects)   
         self.description = 'destroy all balls within a given time'   

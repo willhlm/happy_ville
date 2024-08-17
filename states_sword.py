@@ -5,7 +5,7 @@ def sign(num):
     return -1
 
 class Basic_states():
-    def __init__(self,entity):
+    def __init__(self, entity):
         self.entity = entity
         self.entity.state = str(type(self).__name__).lower()#the name of the class
         self.entity.animation.reset_timer()

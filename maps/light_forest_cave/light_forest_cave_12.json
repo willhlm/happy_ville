@@ -626,6 +626,42 @@
                          "width":416,
                          "x":880,
                          "y":1344
+                        }, 
+                        {
+                         "gid":8195,
+                         "height":16,
+                         "id":1936,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Flower_butterfly"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2896,
+                         "y":480
+                        }, 
+                        {
+                         "gid":8194,
+                         "height":16,
+                         "id":1937,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"MsButterfly"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2928,
+                         "y":560
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -686,7 +722,7 @@
          "y":0
         }],
  "nextlayerid":45,
- "nextobjectid":1936,
+ "nextobjectid":1939,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

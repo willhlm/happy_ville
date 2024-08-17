@@ -29,9 +29,7 @@ class Walk(Enemy_states):
 
     def update(self):
         self.init_time += 0.02*self.entity.game_objects.game.dt
-        amp = min(abs(self.entity.velocity[0]),0.3)
-        self.entity.velocity[1] += amp*math.sin(5*self.init_time)# - self.entity.dir[1]*0.1
-
+        self.entity.walk(self.init_time)
         if abs(self.entity.velocity[0]) < 0.01:
             self.enter_state('Idle')
 
