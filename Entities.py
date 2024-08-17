@@ -369,8 +369,8 @@ class Waterfall(Staticentity):
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
 
 class Reflection(Staticentity):#water
-    def __init__(self,pos,game_objects,parallax,size,dir,texture_parallax = 1 ,speed = 0, offset = 10):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects, parallax, size, dir, texture_parallax = 1, speed = 0, offset = 10):
+        super().__init__(pos, game_objects)
         self.parallax = parallax
         self.offset = offset
         self.squeeze = 1#the water flickers if it is not 1
@@ -420,7 +420,7 @@ class Reflection(Staticentity):#water
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera.scroll[1]]
         self.game_objects.shaders['water_perspective']['section'] = [self.reflect_rect[0],self.reflect_rect[1],self.reflect_rect[2],self.reflect_rect[3]]
 
-        #final rendering -> tmporary fix
+        #final rendering -> tmporary fix TODO
         if self.parallax[0] == 1:#don't blur if there is no parallax
             self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water_perspective'])
         else:
@@ -3881,8 +3881,8 @@ class Spikes(Interactable):#traps
         self.dmg = 1
 
 class Spirit_spikes(Interactable):#traps
-    def __init__(self,pos,game_objects,size):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.currentstate = states_traps.Idle(self)#
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/spirit_spikes/',game_objects)
         self.image = self.sprites['idle'][0]
@@ -3896,7 +3896,7 @@ class Spirit_spikes(Interactable):#traps
         self.currentstate.handle_input('Death')
 
 class Lightning_spikes(Interactable):#traps
-    def __init__(self,pos, game_objects, size):
+    def __init__(self,pos, game_objects):
         super().__init__(pos, game_objects)
         self.currentstate = states_traps.Idle(self)#
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/lightning_spikes/',game_objects)

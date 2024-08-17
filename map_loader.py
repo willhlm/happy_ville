@@ -384,7 +384,6 @@ class Level():
                     #else:
                     self.game_objects.all_bgs.add(reflection)
 
-
             elif id == 34:#reflection object
                 reflection = Entities.Waterfall(object_position, self.game_objects, parallax, object_size)
 
@@ -392,17 +391,6 @@ class Level():
                     self.game_objects.all_fgs.add(reflection)
                 else:
                     self.game_objects.all_bgs.add(reflection)
-
-            #move to interactables objects
-            #TODO
-            elif id == 30:#trapsª
-                for property in properties:
-                    if property['name'] == 'type':
-                        trap_type = property['value']
-
-                object_size = [int(obj['width']),int(obj['height'])]
-                new_trap = getattr(Entities, trap_type)(object_position,self.game_objects,object_size)
-                self.game_objects.interactables.add(new_trap)
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1

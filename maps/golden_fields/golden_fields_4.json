@@ -1057,6 +1057,17 @@
                          "height":144,
                          "id":350,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"golden_fields_5"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"2"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -1081,6 +1092,12 @@
                          "height":16,
                          "id":352,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"7"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -1093,6 +1110,12 @@
                          "height":16,
                          "id":353,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"6"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -1363,6 +1386,54 @@
                          "width":0,
                          "x":2016,
                          "y":832
+                        }, 
+                        {
+                         "gid":14,
+                         "height":128,
+                         "id":375,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":2032,
+                         "y":736
+                        }, 
+                        {
+                         "gid":14,
+                         "height":80,
+                         "id":376,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":1936,
+                         "y":912
+                        }, 
+                        {
+                         "gid":14,
+                         "height":96,
+                         "id":377,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":2336,
+                         "y":912
+                        }, 
+                        {
+                         "gid":13,
+                         "height":16,
+                         "id":379,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":256,
+                         "x":2016,
+                         "y":935
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1400,7 +1471,7 @@
          "y":0
         }],
  "nextlayerid":111,
- "nextobjectid":375,
+ "nextobjectid":380,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
