@@ -13,6 +13,8 @@ class Lights():
         self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
+
         self.update()
 
     def new_map(self):#called when loading a new map from map loader
@@ -68,6 +70,7 @@ class Lights():
         self.shaders['light']['angleEnd'] = self.end_angle
         self.shaders['light']['min_radius'] = self.min_radius
         self.shaders['light']['num_rectangle'] = self.num_rectangle
+        self.shaders['light']['normal_map'] = self.normal_map.texture
 
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture        
 

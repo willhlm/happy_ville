@@ -5,6 +5,7 @@
 in vec2 fragmentTexCoord;
 uniform sampler2D imageTexture;
 uniform vec2 resolution;
+uniform sampler2D normal_map;
 
 uniform vec2 lightPositions[20]; // Assuming up to 20 light sources
 uniform float lightRadii[20];     // Corresponding radius for each light source
@@ -53,6 +54,7 @@ bool isOcluded(vec2 p, vec2 q, vec2 lightPos, float lightRadius) {
 
 void main() {
     vec4 backgroundColor = ambient;
+    vec3 normal = normalize(texture(normal_map, fragmentTexCoord).xyz * 2.0 - 1.0); // Transform normal map color to normal
 
     for (int l = 0; l < num_lights; l++) { // number of light sources
         vec2 lightPos = lightPositions[l];
@@ -84,7 +86,7 @@ void main() {
                 vec2(rectangleCorners[r * 4 + 3].x, resolution.y - rectangleCorners[r * 4 + 3].y)
             );
 
-            int n = 4;//number of kanter
+            int n = 4;//number of edges
             // check occlusion for each rectangle
             for (int i = 0; i < n; i++) {
                 vec2 p = points[i];
@@ -95,22 +97,27 @@ void main() {
                 }
             }
             if (occluded) {
-                break;
-                //backgroundColor = vec4(1.0, 0.0, 0.0, 1.0); // No need to check other rectangles if one is occluded
+                break;// No need to check other rectangles if one is occluded
             }
         }
 
-        if (!occluded) {
-            // light intensity
-            float lightIntensity = max(1.0 - pow(distanceToLight / lightRadius, 2),0);
+       if (!occluded) {
+            // Light intensity
+            float lightIntensity = max(1.0 - pow(distanceToLight / lightRadius, 2), 0);
 
-            // add light together
-            float fade = smoothstep(0.0, 1, lightIntensity);
-            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w , lightIntensity * fade* colour[l].w);
+            // Calculate the direction from the fragment to the light
+            vec3 lightDir = normalize(vec3(lightPos - fragmentTexCoord * resolution, 0.0));
+            float diff = max(dot(normal, lightDir), 0.0);
+
+            // Add light to the background color
+            float fade = smoothstep(0.0, 1.0, lightIntensity);
+            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff , lightIntensity * fade* colour[l].w);
+
         }
     }
+
      backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0
         
     // smooth transition for the combined light intensities
-    color = vec4(backgroundColor.xyz, backgroundColor.w);
+    color = backgroundColor;
 }

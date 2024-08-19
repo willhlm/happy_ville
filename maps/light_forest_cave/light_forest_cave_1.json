@@ -1387,24 +1387,6 @@
                          "y":2416
                         }, 
                         {
-                         "gid":4099,
-                         "height":16,
-                         "id":1894,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Flower_butterfly"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4384,
-                         "y":1552
-                        }, 
-                        {
                          "gid":4109,
                          "height":80,
                          "id":1898,

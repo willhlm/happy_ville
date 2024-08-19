@@ -661,7 +661,8 @@ class Player(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/aila/')
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/aila/', game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/aila/texture/', game_objects)
+        self.normal_maps = Read_files.load_sprites_dict('Sprites/Enteties/aila/normal/', game_objects)
         self.image = self.sprites['idle_main'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
@@ -759,6 +760,8 @@ class Player(Character):
         self.shader_state.draw()
         pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.game_objects.lights.normal_map.clear(0,0,0,0)        
+        self.game_objects.game.display.render(self.normal_maps['idle_main'][0], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)))#shader render        
 
 class Migawari_entity(Character):#player double ganger
     def __init__(self,pos,game_objects):
