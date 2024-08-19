@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, dialogue, states, groups
 import states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
+import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
 import constants as C
 
 def sign(number):
@@ -618,7 +618,6 @@ class Character(Platform_entity):#enemy, NPC,player
     def update_vel(self):
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1],self.max_vel[1]/self.game_objects.game.dt)#set a y max speed#
-
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
     def take_dmg(self,dmg):
@@ -868,6 +867,7 @@ class Flying_enemy(Enemy):
         super().__init__(pos,game_objects)
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
+
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
         self.dir[1] = 1
         self.AI = AI_enemy_flying.Patrol(self)
@@ -935,7 +935,21 @@ class Mygga(Flying_enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 3
-        self.aggro_distance = [100,50]
+        self.aggro_distance = [180,130]
+        self.AI = AI_mygga.Patrol(self)
+        self.accel = 0.1
+        self.max_chase_vel = 4
+        self.friction = [0,0]
+
+    def patrol(self, position):#called from AI: when patroling
+        self.velocity[0] += 0.0025*(position[0]-self.rect.centerx)
+        self.velocity[1] += 0.0025*(position[1]-self.rect.centery)
+
+    def chase(self, target_distance):#called from AI: when chaising
+        self.velocity[0] += sign(target_distance[0]) * self.accel
+        self.velocity[1] += sign(target_distance[1]) * self.accel
+        self.velocity[0] = min(self.max_chase_vel, self.velocity[0])
+        self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
 
 class Roaming_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
