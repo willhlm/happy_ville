@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, dialogue, states, groups
 import states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer
+import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
 import constants as C
 
 def sign(number):
@@ -618,7 +618,6 @@ class Character(Platform_entity):#enemy, NPC,player
     def update_vel(self):
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1],self.max_vel[1]/self.game_objects.game.dt)#set a y max speed#
-
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
     def take_dmg(self,dmg):
@@ -668,9 +667,9 @@ class Player(Character):
         self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
-        self.max_health = 10
+        self.max_health = 100
         self.max_spirit = 4
-        self.health = 3
+        self.health = 100
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -760,8 +759,10 @@ class Player(Character):
         self.shader_state.draw()
         pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
-        self.game_objects.lights.normal_map.clear(0,0,0,0)        
-        self.game_objects.game.display.render(self.normal_maps['idle_main'][0], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)))#shader render        
+        
+        self.game_objects.lights.normal_map.clear(0, 0, 0, 0)            
+        self.game_objects.shaders['normal']['direction'] = self.dir[0]
+        self.game_objects.game.display.render(self.normal_maps['idle_main'][0], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal'])#shader render        
 
 class Migawari_entity(Character):#player double ganger
     def __init__(self,pos,game_objects):
@@ -871,6 +872,7 @@ class Flying_enemy(Enemy):
         super().__init__(pos,game_objects)
         self.acceleration = [0,0]
         self.friction = [C.friction[0]*0.8,C.friction[0]*0.8]
+
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
         self.dir[1] = 1
         self.AI = AI_enemy_flying.Patrol(self)
@@ -894,7 +896,7 @@ class Flying_enemy(Enemy):
 
     def walk(self, time):#called from walk state
         amp = min(abs(self.velocity[0]),0.3)
-        self.velocity[1] += amp*math.sin(5*time)# - self.entity.dir[1]*0.1     
+        self.velocity[1] += amp*math.sin(5*time)# - self.entity.dir[1]*0.1
 
     def update_rect_y(self):
         self.rect.center = self.hitbox.center
@@ -908,7 +910,7 @@ class Flying_enemy(Enemy):
         pass
 
     def ramp_gravity(self):#called from shift up in ramps. The extra gravity on ramp
-        pass        
+        pass
 
     def limit_y(self):
         pass
@@ -938,7 +940,21 @@ class Mygga(Flying_enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 3
-        self.aggro_distance = [100,50]
+        self.aggro_distance = [180,130]
+        self.AI = AI_mygga.Patrol(self)
+        self.accel = 0.1
+        self.max_chase_vel = 4
+        self.friction = [0,0]
+
+    def patrol(self, position):#called from AI: when patroling
+        self.velocity[0] += 0.0025*(position[0]-self.rect.centerx)
+        self.velocity[1] += 0.0025*(position[1]-self.rect.centery)
+
+    def chase(self, target_distance):#called from AI: when chaising
+        self.velocity[0] += sign(target_distance[0]) * self.accel
+        self.velocity[1] += sign(target_distance[1]) * self.accel
+        self.velocity[0] = min(self.max_chase_vel, self.velocity[0])
+        self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
 
 class Roaming_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
@@ -950,7 +966,7 @@ class Roaming_mygga(Flying_enemy):
         self.health = 3
         self.velocity = [random.randint(-3,3),random.randint(-3,3)]
         self.dir[0] = sign(self.velocity[0])
-        self.AI.deactivate()        
+        self.AI.deactivate()
 
     def walk(self, time):#called from walk state
         pass
@@ -960,8 +976,8 @@ class Roaming_mygga(Flying_enemy):
 
     def right_collision(self,hitbox):
         super().right_collision(hitbox)
-        self.velocity[0] *= -1 
-        self.dir[0] = -1       
+        self.velocity[0] *= -1
+        self.dir[0] = -1
 
     def left_collision(self,hitbox):
         super().left_collision(hitbox)
@@ -986,7 +1002,7 @@ class Exploding_mygga(Flying_enemy):
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 4
         self.attack_distance = [20,20]
-        self.aggro_distance = [150,100]   
+        self.aggro_distance = [150,100]
 
     def killed(self):
         self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30))
@@ -1024,7 +1040,7 @@ class Packun(Enemy):
 
     def attack(self):#called from states, attack main
         attack = Projectile_1(self.rect.topleft, self.game_objects)#make the object
-        self.projectiles.add(attack)#add to group but in main phase    
+        self.projectiles.add(attack)#add to group but in main phase
 
     def chase(self, position):#called from AI
         pass
@@ -1142,12 +1158,12 @@ class Larv_poison(Enemy):
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/larv/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)        
+        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
         self.attack_distance = [150,10]
 
     def attack(self):#called from states, attack main
         attack = Poisonblobb(self.rect.topleft, self.game_objects)#make the object
-        self.projectiles.add(attack)#add to group but in main phase        
+        self.projectiles.add(attack)#add to group but in main phase
 
 class Bird(Enemy):
     def __init__(self, pos, game_objects):
@@ -1265,8 +1281,8 @@ class Cultist_rogue(Enemy):
         self.currentstate = states_rogue_cultist.Idle(self)
         self.gameplay_state = gameplay_state
 
-    def attack(self):#called from states, attack main                
-        self.projectiles.add(Sword(self))#add to group 
+    def attack(self):#called from states, attack main
+        self.projectiles.add(Sword(self))#add to group
 
     def dead(self):#called when death animation is finished
         super().dead()
@@ -1283,8 +1299,8 @@ class Cultist_warrior(Enemy):
         self.attack_distance = [80,10]
         self.gameplay_state = gameplay_state
 
-    def attack(self):#called from states, attack main                
-        self.projectiles.add(Sword(self))#add to group 
+    def attack(self):#called from states, attack main
+        self.projectiles.add(Sword(self))#add to group
 
     def dead(self):#called when death animation is finished
         super().dead()
@@ -2023,7 +2039,7 @@ class Projectile_1(Projectiles):
         self.velocity=[-self.dir[0]*5, 0]
 
     def pool(game_objects):
-        Projectile_1.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)        
+        Projectile_1.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
 
     def release_texture(self):
         pass
@@ -2042,7 +2058,7 @@ class Projectile_1(Projectiles):
 class Falling_rock(Projectiles):#things that can be placed in cave, the source makes this and can hurt player
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Falling_rock.sprites 
+        self.sprites = Falling_rock.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
@@ -2054,12 +2070,12 @@ class Falling_rock(Projectiles):#things that can be placed in cave, the source m
         self.update_vel()
 
     def pool(game_objects):
-        Falling_rock.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)        
+        Falling_rock.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)
 
     def update_vel(self):
         self.velocity[1] += 1
         self.velocity[1] = min(7,self.velocity[1])
-    
+
     def release_texture(self):
         pass
 
@@ -2125,16 +2141,16 @@ class Hurt_box(Melee):#a hitbox that spawns
         pass
 
     def draw(self, target):
-        pass 
+        pass
 
 class Explosion(Melee):
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = Explosion.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)        
+        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
-        self.dir = [0, 0]        
+        self.dir = [0, 0]
         self.lifetime = 100
         self.dmg = 1
 
@@ -2199,8 +2215,9 @@ class Sword(Melee):
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = [random.randint(-180, 180),0])
 
     def sword_jump(self):
-        if self.dir[1] == -1:
-            self.entity.velocity[1] = -8
+        #print(self.dir[1])
+        if math.floor(self.dir[1]) == -1:
+            self.entity.velocity[1] = C.pogo_vel
 
     def clash_particles(self, pos, number_particles = 12, **kwarg):
         for i in range(0, number_particles):
@@ -2292,7 +2309,7 @@ class Thunder(Projectiles):
         self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.dmg = 1
-        self.level = 1#upgrade pointer    
+        self.level = 1#upgrade pointer
 
     def release_texture(self):
         pass
@@ -3207,7 +3224,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         super().__init__(pos, game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
         self.sounds = Read_files.load_sounds_list('Audio/SFX/enteties/')
-        self.image = self.sprites['idle'][0]        
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()
@@ -3493,7 +3510,7 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
 
     def player_collision(self):
         if not self.new_state:
-            if self.game_objects.world_state.events[self.event]: return#if event has already been done            
+            if self.game_objects.world_state.events[self.event]: return#if event has already been done
             self.game_objects.quests_events.initiate_event(self.event)#quest or event?
 
         else:#if it is an event that requires new sttae, e.g. cutscene

@@ -1,6 +1,10 @@
-import sound, Entities, sys, random
+import sound, Entities, sys, random, math
 from states_entity import Entity_States
 import constants as C
+
+def sign(number):
+    if number == 0: return 0
+    return round(number/abs(number))
 
 class Player_states(Entity_States):
     def __init__(self,entity):
@@ -27,13 +31,11 @@ class Player_states(Entity_States):
     def handle_movement(self,input):#all states should inehrent this function
         #left stick and arrow keys
         value = input[2]['l_stick']#the avlue of the press
-        self.entity.acceleration[0] = C.acceleration[0]*abs(value[0])#always positive, add acceleration to entity
+        self.entity.acceleration[0] = C.acceleration[0]*math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
 
-        if value[0] > 0.2:#x, even if value goes to 0, the direction is maintained
-            self.entity.dir[0] = 1
-        elif value[0] < -0.2:#x
-            self.entity.dir[0] = -1
+        if abs(value[0]) > 0.2:
+            self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         if self.entity.abilities.equip=='Thunder' or self.entity.abilities.equip=='Slow_motion' or self.entity.abilities.equip=='Migawari':

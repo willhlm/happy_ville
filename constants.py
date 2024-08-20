@@ -19,6 +19,7 @@ dash_length = 7#how long  Aila dashes
 dash_vel = 8
 wall_timer = 3#how many frams from droping from wall you can still jump
 wall_timer_2 = 7#how many frams from jumping till one change change the direction from wall you can still jump
+pogo_vel = -6
 
 #combat
 invincibility_time_player = 50

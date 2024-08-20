@@ -125,7 +125,7 @@ class Controller():
         if event.type==pygame.JOYAXISMOTION:#analog stick
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value['l_stick'][0] = event.value
-                if abs(event.value) < 0.1:
+                if abs(event.value) < 0.2:
                     self.value['l_stick'][0] = 0
 
             if event.axis==self.analogs['lv']:#left vertical
@@ -138,13 +138,13 @@ class Controller():
             if event.axis==self.analogs['rh']:#right horizontal
                 self.value['r_stick'][0] = event.value
                 if abs(event.value) < 0.1:
-                    self.value['r_stick'][0] = 0                
+                    self.value['r_stick'][0] = 0
 
             if event.axis==self.analogs['rv']:#right vertical
                 self.value['r_stick'][1] = event.value
                 if abs(event.value) < 0.1:
                     self.value['r_stick'][1] = 0
-                    
+
             #self.controller_angle('r_stick')
 
         if event.type == pygame.JOYHATMOTION:

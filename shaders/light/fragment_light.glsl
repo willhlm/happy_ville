@@ -70,6 +70,10 @@ void main() {
             continue;
         }
 
+        if (texture(normal_map, fragmentTexCoord).a == 0.0) {//if default. not a
+            normal = vec3(toLight, 0.0); // Default normal facing out of the screen
+        }
+        
         // Skip if fragment is too far away from light source
         float distanceToLight = calculateDistance(fragmentTexCoord * resolution, lightPos);
         if (distanceToLight >= lightRadius || distanceToLight < min_radius[l]) {
@@ -111,13 +115,10 @@ void main() {
 
             // Add light to the background color
             float fade = smoothstep(0.0, 1.0, lightIntensity);
-            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff , lightIntensity * fade* colour[l].w);
-
+            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff , lightIntensity * fade* colour[l].w * diff);
         }
     }
 
-     backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0
-        
-    // smooth transition for the combined light intensities
+    backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0        
     color = backgroundColor;
 }
