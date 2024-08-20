@@ -70,7 +70,7 @@ void main() {
             continue;
         }
 
-        if (texture(normal_map, fragmentTexCoord).a == 0.0) {//if default. not a
+        if (texture(normal_map, fragmentTexCoord).a == 0.0) {//if default. not a good solution. not sure how multiple light sources will affect this.
             normal = vec3(toLight, 0.0); // Default normal facing out of the screen
         }
         

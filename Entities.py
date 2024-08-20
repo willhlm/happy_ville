@@ -762,7 +762,7 @@ class Player(Character):
         
         self.game_objects.lights.normal_map.clear(0, 0, 0, 0)            
         self.game_objects.shaders['normal']['direction'] = self.dir[0]
-        self.game_objects.game.display.render(self.normal_maps['idle_main'][0], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal'])#shader render        
+        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal'])#shader render        
 
 class Migawari_entity(Character):#player double ganger
     def __init__(self,pos,game_objects):

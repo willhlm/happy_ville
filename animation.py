@@ -7,12 +7,15 @@ class Animation():
         self.entity.state = 'idle'#default animation state
         self.framerate = kwarg.get('framerate', C.animation_framerate)
         self.frame = 0
+        self.image_frame = 0#used for normal maps
 
     def reset_timer(self):
         self.frame = 0
+        self.image_frame = 0
 
     def update(self):
-        self.entity.image = self.entity.sprites[self.entity.state][int(self.frame)]
+        self.entity.image = self.entity.sprites[self.entity.state][int(self.frame)]  
+        self.image_frame = int(self.frame)#save the current frame. Used for normal maps     
         self.frame += self.framerate * self.entity.game_objects.game.dt * self.entity.slow_motion
 
         if self.frame >= len(self.entity.sprites[self.entity.state]):

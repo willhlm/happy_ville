@@ -26,7 +26,7 @@ class Lights():
         for light in self.lights_sources:
             light.update()
             self.list_points(light)#sort the collisions points into a ligst
-            self.positions.append((light.position[0],self.game_objects.game.window_size[1] - light.position[1]))#get te positions of the lights
+            self.positions.append((light.position[0], self.game_objects.game.window_size[1] - light.position[1]))#get te positions of the lights
             self.radius.append(light.radius)
             self.colour.append(light.colour)
             self.start_angle.append(light.start_angle)
@@ -44,7 +44,7 @@ class Lights():
     def get_points(self,platforms):
         l = []
         for rec in platforms:
-            l = l + [(rec.hitbox.topleft[0] - self.game_objects.camera.scroll[0],rec.hitbox.topleft[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.topright[0] - self.game_objects.camera.scroll[0],rec.hitbox.topright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomright[0] - self.game_objects.camera.scroll[0],rec.hitbox.bottomright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomleft[0] - self.game_objects.camera.scroll[0],rec.hitbox.bottomleft[1] - self.game_objects.camera.scroll[1])]
+            l = l + [(rec.hitbox.topleft[0] - self.game_objects.camera.scroll[0], rec.hitbox.topleft[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.topright[0] - self.game_objects.camera.scroll[0], rec.hitbox.topright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomright[0] - self.game_objects.camera.scroll[0], rec.hitbox.bottomright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomleft[0] - self.game_objects.camera.scroll[0], rec.hitbox.bottomleft[1] - self.game_objects.camera.scroll[1])]
         return l
 
     def clear_lights(self):
@@ -86,10 +86,11 @@ class Light():#light source
         self.init_radius = properties.get('radius',150)#colour
         self.radius = properties.get('radius',150)#colour
         self.colour = properties.get('colour',[1,1,1,1])#colour
-        self.interact = properties.get('interact',False)#colour#if it should interact with platforms
+        self.interact = properties.get('interact', False)#colour#if it should interact with platforms
         self.start_angle = properties.get('start_angle',0)
         self.end_angle = properties.get('end_angle', 360)
         self.min_radius = properties.get('min_radius',0)
+        self.normal = properties.get('normal', True)#if it should light up based on a normal
 
         self.target = target
 
