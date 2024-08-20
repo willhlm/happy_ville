@@ -13,6 +13,8 @@ class Lights():
         self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.vignette = game_objects.game.display.make_layer(game_objects.game.window_size)
+
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
 
         self.update()
@@ -21,8 +23,11 @@ class Lights():
         self.clear_lights()
         self.ambient = (0,0,0,0)
 
+    def clear_normal_map(self):#called at the begning of draw in game objects
+        self.normal_map.clear(0, 0, 0, 0)
+
     def update(self):
-        self.num_rectangle, self.points, self.positions, self.radius, self.colour, self.start_angle, self.end_angle, self.min_radius = [], [], [], [], [], [], [], []
+        self.normal_interact, self.num_rectangle, self.points, self.positions, self.radius, self.colour, self.start_angle, self.end_angle, self.min_radius = [], [], [], [], [], [], [], [], []
         for light in self.lights_sources:
             light.update()
             self.list_points(light)#sort the collisions points into a ligst
@@ -32,6 +37,7 @@ class Lights():
             self.start_angle.append(light.start_angle)
             self.end_angle.append(light.end_angle)
             self.min_radius.append(light.min_radius)
+            self.normal_interact.append(light.normal_interact)
 
     def list_points(self, light):
         if not light.interact: 
@@ -70,6 +76,7 @@ class Lights():
         self.shaders['light']['angleEnd'] = self.end_angle
         self.shaders['light']['min_radius'] = self.min_radius
         self.shaders['light']['num_rectangle'] = self.num_rectangle
+        self.shaders['light']['normal_interact'] = self.normal_interact
         self.shaders['light']['normal_map'] = self.normal_map.texture
 
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture        
@@ -90,7 +97,7 @@ class Light():#light source
         self.start_angle = properties.get('start_angle',0)
         self.end_angle = properties.get('end_angle', 360)
         self.min_radius = properties.get('min_radius',0)
-        self.normal = properties.get('normal', True)#if it should light up based on a normal
+        self.normal_interact = float(properties.get('normal_interact', True))#a flag to check if it should interact with normal maps
 
         self.target = target
 

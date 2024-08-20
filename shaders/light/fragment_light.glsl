@@ -20,6 +20,11 @@ uniform float angleStart[20];   // Start angle of the cone for each light source
 uniform float angleEnd[20];     // End angle of the cone for each light source
 uniform float min_radius[20];     // End angle of the cone for each light source
 
+uniform float normal_interact[20];     // if the lightsource should interact with normal map
+
+float diff;
+vec3 lightDir;
+
 out vec4 color;
 
 const float epsilon = 1e-6;
@@ -109,16 +114,15 @@ void main() {
             // Light intensity
             float lightIntensity = max(1.0 - pow(distanceToLight / lightRadius, 2), 0);
 
-            // Calculate the direction from the fragment to the light
-            vec3 lightDir = normalize(vec3(lightPos - fragmentTexCoord * resolution, 0.0));
-            float diff = max(dot(normal, lightDir), 0.0);
+            lightDir = normalize(vec3(toLight, 0.0));// Calculate the direction from the fragment to the light
+            diff = mix(1.0, max(dot(normal, lightDir), 0.0), normal_interact[l]);            
 
             // Add light to the background color
             float fade = smoothstep(0.0, 1.0, lightIntensity);
-            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff , lightIntensity * fade* colour[l].w * diff);
+            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff , lightIntensity * fade * colour[l].w );
         }
     }
 
-    backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0        
+   backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0        
     color = backgroundColor;
 }

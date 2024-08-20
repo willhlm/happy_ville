@@ -165,6 +165,7 @@ class Game_Objects():
         self.shader_render.update()#housld be last
 
     def draw(self):#need to send in screen becasue, sometimes, we want it rednered on a different layer for shaders stuff
+        self.lights.clear_normal_map()
         self.all_bgs.draw(self.game.screen)
         self.interactables.draw(self.game.screen)#should be before bg_interact
         self.bg_interact.draw(self.game.screen)
