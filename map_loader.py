@@ -371,7 +371,7 @@ class Level():
                         prop['line_color'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
 
                 water = Entities.TwoD_water(object_position, self.game_objects, object_size, **prop)
-                self.game_objects.cosmetics.add(water)
+                self.game_objects.interactables_fg.add(water)#cosmetics
 
             elif id == 27:#sky
                 reflection = Entities.Sky(object_position, self.game_objects, parallax, object_size)

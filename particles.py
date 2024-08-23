@@ -18,7 +18,8 @@ class Particles(pygame.sprite.Sprite):
         self.angle = -(2*math.pi*angle)/360
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
         motion = list(vel.keys())[0]#linear moetion or wave motion
-        self.set_velocity = {'linear':self.linear,'wave':self.wave}[motion]
+        self.set_velocity = {'linear':self.linear,'wave':self.wave, 'gravity': self.gravity}[motion]
+        self.gravity_scale = kwarg.get('gravity_scale', 1)
         amp = random.uniform(min(vel[motion][0],vel[motion][1]), max(vel[motion][0],vel[motion][1]))
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
@@ -35,6 +36,9 @@ class Particles(pygame.sprite.Sprite):
         self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
         self.rect.center = self.true_pos
         self.hitbox.center = self.true_pos
+
+    def gravity(self):
+        self.velocity[1] += self.game_objects.game.dt *  self.gravity_scale
 
     def wave(self):
         self.velocity  = [0.5*math.sin(self.lifetime*0.1 + self.angle + self.phase),-1]

@@ -444,8 +444,8 @@
                          "type":"",
                          "visible":true,
                          "width":48,
-                         "x":1840,
-                         "y":624
+                         "x":1872,
+                         "y":672
                         }, 
                         {
                          "gid":8,
@@ -751,6 +751,42 @@
                          "width":0,
                          "x":1552,
                          "y":544
+                        }, 
+                        {
+                         "gid":8,
+                         "height":16,
+                         "id":442,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":224,
+                         "x":1152,
+                         "y":816
+                        }, 
+                        {
+                         "gid":8,
+                         "height":16,
+                         "id":443,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":240,
+                         "x":2512,
+                         "y":768
+                        }, 
+                        {
+                         "gid":8,
+                         "height":48,
+                         "id":444,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":1152,
+                         "y":800
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -766,7 +802,7 @@
          "y":0
         }],
  "nextlayerid":104,
- "nextobjectid":442,
+ "nextobjectid":445,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

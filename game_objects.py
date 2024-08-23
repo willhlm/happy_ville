@@ -48,7 +48,7 @@ class Game_Objects():
         self.npcs = groups.Group()#npcs
         self.platforms = groups.Group()#platforms
         self.dynamic_platforms = groups.Group()#movinbg platforms
-        self.special_shaders = groups.Group()#portal use it for the drawing
+        self.special_shaders = groups.Group()#portal use it for the drawing: draw not called normally but in different gameplay state
         self.platforms_ramps = groups.Group()#ramps
         self.all_bgs = groups.LayeredUpdates()#bg from tiled
         self.all_fgs = groups.LayeredUpdates()#fgs from tileed
@@ -58,8 +58,9 @@ class Game_Objects():
         self.fprojectiles = groups.Group()#player prohectiles
         self.loot = groups.Group()#enemy drops and things player cn pickup upon collision
         self.entity_pause = groups.PauseGroup() #all Entities that are far away
-        self.cosmetics = groups.Group()#groups.Shader_group()#things we just want to blit after the player layer
-        self.cosmetics2 = groups.Group()#groups.Shader_group()#things we just want to blit before player layer
+        self.cosmetics = groups.Group()#things we just want to blit after the player layer
+        self.cosmetics2 = groups.Group()#things we just want to blit before player layer
+        self.interactables_fg = groups.Group()#interacrables but are blitted after the player layer
         self.cosmetics_no_clear = groups.Group()# a group that will not be cleared when changing map
 
         self.camera_blocks = groups.Group()#camera blocks
@@ -115,6 +116,7 @@ class Game_Objects():
         self.bg_fade.empty()
         self.special_shaders.empty()
         self.eprojectiles.empty()
+        self.interactables_fg.empty()
         self.fprojectiles.empty()
 
     def collide_all(self):        
@@ -123,7 +125,7 @@ class Game_Objects():
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
         self.collisions.player_collision(self.bg_fade)
-        self.collisions.interactables_collision(self.players)
+        self.collisions.interactables_collision(self.players)#need to know when it doesn't collide
 
         self.collisions.counter(self.fprojectiles, self.eprojectiles)
         self.collisions.projectile_collision(self.fprojectiles, self.enemies)
@@ -160,6 +162,7 @@ class Game_Objects():
         self.cosmetics2.update()
         self.interactables.update()
         self.weather.update()
+        self.interactables_fg.update()#twoD water use it
         self.special_shaders.update()#portal use it
         self.lights.update()
         self.shader_render.update()#housld be last
@@ -178,12 +181,13 @@ class Game_Objects():
         self.loot.draw(self.game.screen)
         self.platforms.draw(self.game.screen)
         self.players.draw(self.game.screen)
+        self.interactables_fg.draw(self.game.screen)#shoud be after player
         self.cosmetics.draw(self.game.screen)#Should be before fgs
         self.cosmetics_no_clear.draw(self.game.screen)
         self.all_fgs.draw(self.game.screen)
         #self.camera_blocks.draw()
         self.lights.draw(self.game.screen)#should be second to last
-        self.shader_render.draw(self.game.screen)#housld be last
+        self.shader_render.draw(self.game.screen)#housld be last: screen shader (can also make it compatible with enteties?)
 
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:

@@ -18,6 +18,7 @@ uniform vec4 section;
 uniform float TIME;
 
 out vec4 COLOR;
+vec4 new_water_tint;
 
 // Function to generate wave displacement, modulated by the noise from refraction_map
 float wave(vec2 uv) {
@@ -48,14 +49,16 @@ void main()
     }
     else if (uv.y > (waveLinePosition - darkerRegionHeight*0.95)) {//line
         
-        COLOR = mix(darker_color, water_tint, (uv.y - (waveLinePosition - darkerRegionHeight*0.95)) / darkerRegionHeight);
-        return;
+        new_water_tint = mix(darker_color, water_tint, (uv.y - (waveLinePosition - darkerRegionHeight*0.95)) / darkerRegionHeight);
     }
 
     else if (uv.y > (waveLinePosition - darkerRegionHeight)) {
         // Darker region with the wavy line
-        COLOR = mix(line_color, water_tint, (uv.y - (waveLinePosition - darkerRegionHeight)) / darkerRegionHeight);
-        return;
+        new_water_tint = mix(line_color, water_tint, (uv.y - (waveLinePosition - darkerRegionHeight)) / darkerRegionHeight);
+    }
+    else{
+        new_water_tint = water_tint;
+
     }
 
     vec2 refraction_offset = texture(
@@ -75,7 +78,7 @@ void main()
     vec4 refraction = texture(SCREEN_TEXTURE, screenUV - refraction_offset * refraction_strength);
     
     vec4 color = vec4(1.0);
-    color.rgb = mix(refraction.rgb, water_tint.rgb, water_tint.a);
+    color.rgb = mix(refraction.rgb, new_water_tint.rgb, new_water_tint.a);
     
     COLOR = color;
 }

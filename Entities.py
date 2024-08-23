@@ -464,13 +464,18 @@ class TwoD_water(Staticentity):
         self.empty = game_objects.game.display.make_layer(size)
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
+        
+        self.hitbox = pygame.Rect(pos, size)#for player collision
+        self.interacted = False#for player collision
 
         self.time = 0
         self.size = size
+        #TODO poison and water state
 
         self.shader = game_objects.shaders['twoD_water']
         self.shader['u_resolution'] = self.game_objects.game.window_size
-        self.shader['water_tint'] = properties.get('water_tint', (0.2, 0.6, 1.0, 0.5))
+        self.water_tint = properties.get('water_tint', (0.2, 0.6, 1.0, 0.5))#need to save it seperatly to colour the particles
+        self.shader['water_tint'] = self.water_tint
         self.shader['darker_color'] = properties.get('darker_color', (0.2, 0.6, 1.0, 0.9))
         self.shader['line_color'] = properties.get('line_color', (0.4, 0.7, 1.0, 1))
 
@@ -500,6 +505,24 @@ class TwoD_water(Staticentity):
         self.game_objects.shaders['twoD_water']['section'] = [pos[0], pos[1], self.size[0], self.size[1]]
 
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+
+    def splash(self,  pos, number_particles=20, **kwarg):
+        for i in range(0, number_particles):
+            obj1 = particles.Circle(pos, self.game_objects, **kwarg)
+            self.game_objects.cosmetics.add(obj1)        
+
+    def player_collision(self, player):#player collision
+        if self.interacted: return        
+        player.friction = [player.friction[0] * 2, player.friction[1] * 2] 
+        self.interacted = True
+        self.splash(player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [7,15]}, fade_scale = 0.3, gradient=1)        
+        self.game_objects.player.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
+
+    def player_noncollision(self):
+        if not self.interacted: return
+        self.interacted = False
+        self.game_objects.player.friction = C.friction_player.copy()
+        self.game_objects.player.timer_jobs['wet'].activate(self.water_tint)#water when player leaves
 
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
@@ -695,7 +718,8 @@ class Player(Character):
 
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump_buffer':Jump_buffer_timer(self,C.jump_buffer_timer_player),
                         'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player),
-                        'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
+                        'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2),
+                        'wet':Wet_timer(self, 100)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
 
     def update_hitbox(self):
@@ -3194,7 +3218,7 @@ class Interactable(Animatedentity):#interactables
     def interact(self):#when player press T
         pass
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         pass
 
     def player_noncollision(self):#when player doesn't collide: for grass
@@ -3326,8 +3350,8 @@ class Safe_spawn(Interactable):#area which gives the coordinates which will make
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
-        self.game_objects.player.spawn_point['safe_spawn'] = self.position
+    def player_collision(self, player):
+        player.spawn_point['safe_spawn'] = self.position
 
 class Hole(Interactable):#area which will make aila spawn to safe_point if collided
     def __init__(self, pos, game_objects, size):
@@ -3347,16 +3371,16 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
     def update(self):
         self.group_distance()
 
-    def player_collision(self):#TODO when you are invinsible, have 1 health and collides, aila hoovers
+    def player_collision(self, player):
         if self.interacted: return#enter only once
         if self.game_objects.player.health > 1:#if about to die, don't transport to safe point
             new_state = states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
             new_state.enter_state()
             self.game_objects.player.currentstate.enter_state('Invisible_main')
         else: self.game_objects.player.invincibile = False
-        self.game_objects.player.take_dmg(1)
-        self.game_objects.player.velocity = [0,0]
-        self.game_objects.player.acceleration = [0,0]
+        player.take_dmg(1)
+        player.velocity = [0,0]
+        player.acceleration = [0,0]
         self.interacted = True
 
     def player_noncollision(self):#when player doesn't collide
@@ -3381,10 +3405,10 @@ class Zoom_col(Interactable):
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
+    def player_collision(self, player):
         self.blur_timer -= self.game_objects.game.dt
         if self.blur_timer < 0:
-            self.game_objects.player.shader_state.handle_input('blur')
+            player.shader_state.handle_input('blur')
             for sprite in self.game_objects.all_bgs:
                 if sprite.parallax[0] > 0.8:
                     sprite.blur_radius += (1.1/sprite.parallax[0] - sprite.blur_radius) * 0.06
@@ -3426,13 +3450,13 @@ class Path_col(Interactable):
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
+    def player_collision(self, player):
         if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction
-            self.game_objects.player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
-            self.game_objects.player.currentstate.walk()
+            player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
+            player.currentstate.walk()
         else:#vertical travelling
-            self.game_objects.player.reset_movement()
-            self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
+            player.reset_movement()
+            player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
 
         self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
         self.kill()#so that aila only collides once
@@ -3479,7 +3503,7 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
     def update(self):
         pass
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         for layer in self.layers:
             layer.shader_state.handle_input('mix_colour')
 
@@ -3510,7 +3534,7 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
+    def player_collision(self, player):
         if not self.new_state:
             if self.game_objects.world_state.events[self.event]: return#if event has already been done
             self.game_objects.quests_events.initiate_event(self.event)#quest or event?
@@ -3529,7 +3553,7 @@ class Interactable_bushes(Interactable):
         super().__init__(pos,game_objects)
         self.interacted = False
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         if self.interacted: return
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'idle')
         self.interacted = True#sets to false when player gos away
@@ -3553,7 +3577,7 @@ class Cave_grass(Interactable_bushes):
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
 
-    def player_collision(self):
+    def player_collision(self, player):
         if self.interacted: return
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'Idle')
         self.interacted = True#sets to false when player gos away
@@ -3736,7 +3760,7 @@ class Savepoint(Interactable):#save point
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
@@ -3812,7 +3836,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
@@ -3833,7 +3857,7 @@ class Sign(Interactable):
         self.hitbox=self.rect.copy()
         self.symbols = Sign_symbols(self)
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Outline')
 
     def player_noncollision(self):#when player doesn't collide
@@ -3914,7 +3938,7 @@ class Spirit_spikes(Interactable):#traps
         self.hurt_box = Hurt_box
         self.dmg = 1
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Death')
 
 class Lightning_spikes(Interactable):#traps
@@ -3929,7 +3953,7 @@ class Lightning_spikes(Interactable):#traps
         self.hurt_box = Hurt_box
         self.dmg = 1
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Once')
 
 class Grind(Interactable):#trap
@@ -3971,8 +3995,8 @@ class Grind(Interactable):#trap
     def group_distance(self):
         pass
 
-    def player_collision(self):#player collision
-        self.game_objects.player.take_dmg(1)
+    def player_collision(self, player):#player collision
+        player.take_dmg(1)
 
     def take_dmg(self, projectile):#when player hits with e.g. sword
         if hasattr(projectile, 'sword_jump'):#if it has the attribute
@@ -4060,6 +4084,33 @@ class Invincibility_timer(Timer):
     def deactivate(self):
         super().deactivate()
         self.entity.invincibile = False
+
+class Wet_timer(Timer):#"a wet status". activates when player baths, and spawns particles that drops from player
+    def __init__(self,entity, duration):
+        super().__init__(entity, duration)
+        self.game_objects = entity.game_objects#need for general timer
+        self.spawn_frequency = 15#how often to spawn particle
+        self.spawn_timer = General_Timer(self, self.spawn_frequency)        
+
+    def activate(self, water_tint):#called when aila bathes (2D water)
+        self.lifetime = self.duration#reset the duration
+        self.water_tint = water_tint
+        self.drop()        
+        if self in self.entity.timers: return#do not append if the timer is already inside                
+        self.entity.timers.append(self)        
+        
+    def update(self):
+        super().update()
+        self.spawn_timer.update()
+
+    def time_out(self):#called when geenral timer runs out
+        self.spawn_timer.lifetime = self.spawn_frequency#reset the time
+        self.drop()        
+
+    def drop(self):
+        pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
+        obj1 = particles.Circle(pos, self.game_objects, lifetime = 100, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=1)
+        self.game_objects.cosmetics.add(obj1)          
 
 class Sword_timer(Timer):
     def __init__(self,entity,duration):
