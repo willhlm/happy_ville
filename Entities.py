@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import Read_files, particles, animation, dialogue, states, groups
-import states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
 import constants as C
 
@@ -458,7 +458,7 @@ class God_rays(Staticentity):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
-class TwoD_water(Staticentity):
+class TwoD_liquid(Staticentity):
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
         self.empty = game_objects.game.display.make_layer(size)
@@ -469,15 +469,18 @@ class TwoD_water(Staticentity):
         self.interacted = False#for player collision
 
         self.time = 0
-        self.size = size
-        #TODO poison and water state
-
-        self.shader = game_objects.shaders['twoD_water']
-        self.shader['u_resolution'] = self.game_objects.game.window_size
-        self.water_tint = properties.get('water_tint', (0.2, 0.6, 1.0, 0.5))#need to save it seperatly to colour the particles
-        self.shader['water_tint'] = self.water_tint
-        self.shader['darker_color'] = properties.get('darker_color', (0.2, 0.6, 1.0, 0.9))
-        self.shader['line_color'] = properties.get('line_color', (0.4, 0.7, 1.0, 1))
+        self.size = size        
+    
+        self.shader = game_objects.shaders['twoD_liquid']
+        self.shader['u_resolution'] = self.game_objects.game.window_size        
+        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+            if not properties.get('vertical', False):
+                self.hole = Hole(pos, game_objects, size)#for poison
+                self.currentstate = states_twoD_liquid.Poison(self, **properties)                  
+            else:#vertical scroller -> golden fields
+                self.currentstate = states_twoD_liquid.Poison_vertical(self, **properties)                  
+        else:
+            self.currentstate = states_twoD_liquid.Water(self, **properties)
 
     def release_texture(self):
         self.empty.release()
@@ -486,6 +489,7 @@ class TwoD_water(Staticentity):
 
     def update(self):
         self.time += self.game_objects.game.dt
+        self.currentstate.update()
 
     def draw(self, target):
         #noise
@@ -497,32 +501,39 @@ class TwoD_water(Staticentity):
 
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy)#make a copy of the screen
         #water
-        self.game_objects.shaders['twoD_water']['refraction_map'] = self.noise_layer.texture
-        self.game_objects.shaders['twoD_water']['SCREEN_TEXTURE'] = self.screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
-        self.game_objects.shaders['twoD_water']['TIME'] = self.time*0.01
+        self.game_objects.shaders['twoD_liquid']['refraction_map'] = self.noise_layer.texture
+        self.game_objects.shaders['twoD_liquid']['SCREEN_TEXTURE'] = self.screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
+        self.game_objects.shaders['twoD_liquid']['TIME'] = self.time*0.01
 
         pos = (int(self.true_pos[0] - self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera.scroll[1]))
-        self.game_objects.shaders['twoD_water']['section'] = [pos[0], pos[1], self.size[0], self.size[1]]
+        self.game_objects.shaders['twoD_liquid']['section'] = [pos[0], pos[1], self.size[0], self.size[1]]
 
-        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
-
-    def splash(self,  pos, number_particles=20, **kwarg):
-        for i in range(0, number_particles):
-            obj1 = particles.Circle(pos, self.game_objects, **kwarg)
-            self.game_objects.cosmetics.add(obj1)        
-
+        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render  
+          
     def player_collision(self, player):#player collision
-        if self.interacted: return        
-        player.friction = [player.friction[0] * 2, player.friction[1] * 2] 
+        if self.interacted: return     
+        player.friction = [player.friction[0] * 2, player.friction[1] * 2]         
+        vel_scale = player.velocity[1] / C.max_vel[1]
+        self.splash(player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)        
+        player.timer_jobs['wet'].deactivate()#stop dropping if inside the water again  
         self.interacted = True
-        self.splash(player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [7,15]}, fade_scale = 0.3, gradient=1)        
-        self.game_objects.player.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
+
+        self.currentstate.player_collision(player)   
 
     def player_noncollision(self):
         if not self.interacted: return
-        self.interacted = False
         self.game_objects.player.friction = C.friction_player.copy()
-        self.game_objects.player.timer_jobs['wet'].activate(self.water_tint)#water when player leaves
+        self.game_objects.player.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
+        vel_scale = abs(self.game_objects.player.velocity[1] / C.max_vel[1])
+        self.splash(self.game_objects.player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0) 
+        self.interacted = False
+
+        self.currentstate.player_noncollision()    
+
+    def splash(self,  pos, number_particles=20, **kwarg):#called from states, upoin collusions
+        for i in range(0, number_particles):
+            obj1 = particles.Circle(pos, self.game_objects, **kwarg)
+            self.game_objects.cosmetics.add(obj1)      
 
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
@@ -719,7 +730,7 @@ class Player(Character):
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump_buffer':Jump_buffer_timer(self,C.jump_buffer_timer_player),
                         'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player),
                         'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2),
-                        'wet':Wet_timer(self, 100)}#these timers are activated when promt and a job is appeneded to self.timer.
+                        'wet':Wet_timer(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
 
     def update_hitbox(self):
@@ -746,15 +757,18 @@ class Player(Character):
             new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
-            self.death_state.die()#depending on gameplay state, different death stuff should happen
-            self.animation.update()#make sure you get the new animation
-            self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
+            self.die()
+        
+    def die(self):#also called from vertical acid
+        self.death_state.die()#depending on gameplay state, different death stuff should happen
+        self.animation.update()#make sure you get the new animation
+        self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
 
-            new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
-            new_game_state.enter_state()
+        new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
+        new_game_state.enter_state()
 
-            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
-            new_game_state.enter_state()
+        new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
+        new_game_state.enter_state()
 
     def heal(self, health = 1):
         self.health += health
@@ -2949,7 +2963,7 @@ class Orange_infinity_stone(Infinity_stones):#bigger hitbox
         self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,80,40)
         self.sword.hitbox = self.sword.rect.copy()
 
-class Purple_infinity_stone(Infinity_stones):#reflect projectile
+class Purple_infinity_stone(Infinity_stones):#reflect projectile -> crystal caves
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/infinity_stones/purple/',game_objects)#for inventory
@@ -3373,7 +3387,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
 
     def player_collision(self, player):
         if self.interacted: return#enter only once
-        if self.game_objects.player.health > 1:#if about to die, don't transport to safe point
+        if player.health > 1:#if about to die, don't transport to safe point
             new_state = states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
             new_state.enter_state()
             self.game_objects.player.currentstate.enter_state('Invisible_main')
@@ -3536,7 +3550,7 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
 
     def player_collision(self, player):
         if not self.new_state:
-            if self.game_objects.world_state.events[self.event]: return#if event has already been done
+            if self.game_objects.world_state.events.get(self.event, False): return#if event has already been done
             self.game_objects.quests_events.initiate_event(self.event)#quest or event?
 
         else:#if it is an event that requires new sttae, e.g. cutscene
@@ -3546,7 +3560,7 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
 
             new_game_state = getattr(states, self.event)(self.game_objects.game)
             new_game_state.enter_state()
-            self.kill()#is this a pronlen in re spawn?
+        self.kill()#is this a pronlen in re spawn?
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
@@ -4089,7 +4103,7 @@ class Wet_timer(Timer):#"a wet status". activates when player baths, and spawns 
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
         self.game_objects = entity.game_objects#need for general timer
-        self.spawn_frequency = 15#how often to spawn particle
+        self.spawn_frequency = 5#how often to spawn particle
         self.spawn_timer = General_Timer(self, self.spawn_frequency)        
 
     def activate(self, water_tint):#called when aila bathes (2D water)
@@ -4109,7 +4123,7 @@ class Wet_timer(Timer):#"a wet status". activates when player baths, and spawns 
 
     def drop(self):
         pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
-        obj1 = particles.Circle(pos, self.game_objects, lifetime = 100, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=1)
+        obj1 = particles.Circle(pos, self.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
         self.game_objects.cosmetics.add(obj1)          
 
 class Sword_timer(Timer):

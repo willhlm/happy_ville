@@ -283,12 +283,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"golden_fields_4"
+                                 "value":"golden_fields_2"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"7"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",

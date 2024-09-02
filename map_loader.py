@@ -370,7 +370,7 @@ class Level():
                         colour= list(pygame.Color(property['value']))
                         prop['line_color'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
 
-                water = Entities.TwoD_water(object_position, self.game_objects, object_size, **prop)
+                water = Entities.TwoD_liquid(object_position, self.game_objects, object_size, **prop)
                 self.game_objects.interactables_fg.add(water)#cosmetics
 
             elif id == 27:#sky

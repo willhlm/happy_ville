@@ -67,6 +67,18 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
         self.game_objects.world_state.cutscenes_complete[type(self).__name__.lower()] = True
         self.game_objects.world_state.events[type(self).__name__.lower()] = True  
 
+class Acid_escape(Quest_event):#golden fields
+    def __init__(self, game_objects, **kwarg):
+        super().__init__(game_objects)
+        pos = [-2000 + game_objects.camera.scroll[0],game_objects.game.window_size[1] + game_objects.camera.scroll[1]]
+        size = [5000, game_objects.game.window_size[1]]
+        self.acid = Entities.TwoD_liquid(pos, game_objects, size, vertical = True)
+        game_objects.interactables_fg.add(self.acid)
+
+    def complete(self):
+        self.game_objects.world_state.events[type(self).__name__.lower()] = True  
+        self.acid.kill()
+
 #quests
 class Lumberjack_omamori(Quest_event):#called from monument, #TODO need to make so that this omamori cannot be eqquiped while this quest is runing
     def __init__(self, game_objects, item = None):

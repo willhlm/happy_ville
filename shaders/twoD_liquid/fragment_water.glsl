@@ -7,7 +7,7 @@ uniform vec2 refraction_stretch = vec2(1.0, 1.0);
 uniform float refraction_strength = 0.02;
 uniform float speed = 0.1;
 
-uniform vec4 water_tint;
+uniform vec4 liquid_tint;
 uniform vec4 darker_color; // New uniform for the darker region
 uniform vec4 line_color; // New uniform for the darker region
 
@@ -18,7 +18,7 @@ uniform vec4 section;
 uniform float TIME;
 
 out vec4 COLOR;
-vec4 new_water_tint;
+vec4 new_liquid_tint;
 
 // Function to generate wave displacement, modulated by the noise from refraction_map
 float wave(vec2 uv) {
@@ -33,6 +33,8 @@ void main()
     vec2 uv = fragmentTexCoord;
 
     // Define the heights for the wavy line and the darker region
+    float noisetwo = texture(refraction_map, uv * 2.0).r;
+
     float lineHeight = 0.05; // Height for the wavy line
     float darkerRegionHeight = 0.08; // Height of the darker region
 
@@ -49,15 +51,15 @@ void main()
     }
     else if (uv.y > (waveLinePosition - darkerRegionHeight*0.95)) {//line
         
-        new_water_tint = mix(darker_color, water_tint, (uv.y - (waveLinePosition - darkerRegionHeight*0.95)) / darkerRegionHeight);
+        new_liquid_tint = mix(darker_color, liquid_tint, (uv.y - (waveLinePosition - darkerRegionHeight*0.95)) / darkerRegionHeight);
     }
 
     else if (uv.y > (waveLinePosition - darkerRegionHeight)) {
         // Darker region with the wavy line
-        new_water_tint = mix(line_color, water_tint, (uv.y - (waveLinePosition - darkerRegionHeight)) / darkerRegionHeight);
+        new_liquid_tint = mix(line_color, liquid_tint, (uv.y - (waveLinePosition - darkerRegionHeight)) / darkerRegionHeight);
     }
     else{
-        new_water_tint = water_tint;
+        new_liquid_tint = liquid_tint;
 
     }
 
@@ -78,7 +80,7 @@ void main()
     vec4 refraction = texture(SCREEN_TEXTURE, screenUV - refraction_offset * refraction_strength);
     
     vec4 color = vec4(1.0);
-    color.rgb = mix(refraction.rgb, new_water_tint.rgb, new_water_tint.a);
+    color.rgb = mix(refraction.rgb, new_liquid_tint.rgb, new_liquid_tint.a);
     
     COLOR = color;
 }
