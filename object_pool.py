@@ -38,6 +38,8 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         Entities.Poisonblobb.pool(game_objects)
         Entities.Sword.pool(game_objects)
         Entities.Arrow.pool(game_objects)
+        Entities.Shield.pool(game_objects)
+        Entities.Thunder.pool(game_objects)
 
         entities_UI.Menu_Arrow.pool(game_objects)
 

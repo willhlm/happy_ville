@@ -660,7 +660,7 @@ class Counter_main(Player_states):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
         self.entity.consume_spirit()
-        shield=Entities.Shield(self.entity)
+        shield = Entities.Reflect(self.entity)
         self.entity.projectiles.add(shield)#add sword to group
 
     def increase_phase(self):
@@ -1091,7 +1091,6 @@ class Thunder_charge(Thunder_pre):
         collision_ene = self.entity.game_objects.collisions.thunder_attack(self.entity.thunder_aura)
         for enemy in collision_ene:
             self.entity.abilities.spirit_abilities['Thunder'].initiate(enemy.rect)
-            self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Thunder'])#add attack to group
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -1109,23 +1108,17 @@ class Thunder_main(Thunder_pre):
     def increase_phase(self):#called when an animation is finihed for that state
         self.enter_state('Idle_main')
 
-class Force_main(Abillitites):
+class Shield_main(Abillitites):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
-        self.entity.abilities.spirit_abilities['Force'].initiate()
-        self.entity.projectiles.add(self.entity.abilities.spirit_abilities['Force'])#add force to group
-        self.force_jump()
+        self.entity.abilities.spirit_abilities['Shield'].initiate()
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
         else:
             self.enter_state('Run_main')
-
-    def force_jump(self):
-        if self.dir[1]<0:
-            self.entity.velocity[1] = -10
 
 class Migawari_pre(Abillitites):
     def __init__(self,entity):
@@ -1142,7 +1135,7 @@ class Migawari_pre(Abillitites):
 class Migawari_main(Migawari_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.abilities.spirit_abilities['Migawari'].spawn(self.entity.rect.center)
+        self.entity.abilities.spirit_abilities['Migawari'].initiate()
 
     def handle_release_input(self,input):
         pass
@@ -1161,7 +1154,7 @@ class Slow_motion_pre(Abillitites):
 class Slow_motion_main(Slow_motion_pre):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.abilities.spirit_abilities['Slow_motion'].spawn()
+        self.entity.abilities.spirit_abilities['Slow_motion'].initiate()
 
     def increase_phase(self):
         self.enter_state('Idle_main')

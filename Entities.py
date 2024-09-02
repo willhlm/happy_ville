@@ -716,7 +716,7 @@ class Player(Character):
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':False,'Double_jump':False,
-                     'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
+                     'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True}
         self.currentstate = states_player.Idle_main(self)
@@ -804,22 +804,18 @@ class Player(Character):
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
         self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture       
 
-class Migawari_entity(Character):#player double ganger
-    def __init__(self,pos,game_objects):
+class Maderakkas_reflection_entity(Character):#player double ganger
+    def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/migawari/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/migawari/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1]-5,16,35)#add a smalll ofset in y to avoid collision
+        self.hitbox = pygame.Rect(pos[0],pos[1]-5,16,16)#add a smalll ofset in y to avoid collision
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
         self.invincibile = False
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player)}#these timers are activated when promt and a job is appeneded to self.timer.
-
-    def set_health(self,health):#should be called when making this object
-        self.health = health
-
-    def set_lifetime(self,lifetime):#should be called when making this object
-        self.lifetime = lifetime
+        self.health = kwarg.get('health', 1)
+        self.lifetime = kwarg.get('lifetime', 1000)
 
     def update(self):
         super().update()
@@ -1765,7 +1761,7 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
 class Player_abilities():
     def __init__(self,entity):
         self.entity = entity
-        self.spirit_abilities = {'Thunder':Thunder(entity),'Force':Force(entity),'Bow':Bow(entity),'Migawari':Migawari(entity),'Slow_motion':Slow_motion(entity)}#abilities aila has
+        self.spirit_abilities = {'Thunder': Horagalles_rage(entity),'Shield': Tjasolmais_embrace(entity),'Bow': Juksakkas_blessing(entity),'Migawari': Maderakkas_reflection(entity),'Slow_motion': Beaivis_time(entity)}#abilities aila has
         self.equip = 'Thunder'#spirit ability pointer
         self.movement_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
         self.movement_abilities = list(self.movement_dict.values())#make it a list
@@ -1917,13 +1913,13 @@ class Projectiles(Platform_entity):#projectiels
 
     #collisions
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
-        collision_plat.take_dmg(self, self.dmg)
+        pass#collision_plat.take_dmg(self, self.dmg)
 
     def collision_projectile(self, eprojectile):#projecticle proectile collision
         pass
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
-        collision_enemy.take_dmg(self.dmg)
+        pass#collision_enemy.take_dmg(self.dmg)
 
     def collision_inetractables(self,interactable):#collusion interactables
         pass
@@ -1936,9 +1932,6 @@ class Projectiles(Platform_entity):#projectiels
 
     def ramp_gravity(self):#called from shift up in ramps. The extra gravity on ramp
         pass
-
-    def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
 
     #pltform collisions.
     def right_collision(self,hitbox):
@@ -1971,7 +1964,7 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.quest = kwarg.get('quest', None)
 
     def pool(game_objects):
-        Bouncy_balls.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
+        Bouncy_balls.sprites = Read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
     def release_texture(self):
         pass
@@ -2020,7 +2013,7 @@ class Poisoncloud(Projectiles):
         self.lifetime=400
 
     def pool(game_objects):
-        Poisoncloud.sprites = Read_files.load_sprites_dict('Sprites/Attack/poisoncloud/',game_objects)
+        Poisoncloud.sprites = Read_files.load_sprites_dict('Sprites/attack/poisoncloud/',game_objects)
 
     def release_texture(self):
         pass
@@ -2063,7 +2056,7 @@ class Poisonblobb(Projectiles):
         self.currentstate.handle_input('Death')
 
     def pool(game_objects):
-        Poisonblobb.sprites = Read_files.load_sprites_dict('Sprites/Attack/poisonblobb/', game_objects)
+        Poisonblobb.sprites = Read_files.load_sprites_dict('Sprites/attack/poisonblobb/', game_objects)
 
 class Projectile_1(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
@@ -2079,7 +2072,7 @@ class Projectile_1(Projectiles):
         self.velocity=[-self.dir[0]*5, 0]
 
     def pool(game_objects):
-        Projectile_1.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
+        Projectile_1.sprites = Read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
     def release_texture(self):
         pass
@@ -2134,7 +2127,7 @@ class Horn_vines(Projectiles):#the reindeer attack
         pass
 
     def pool(game_objects):
-        Horn_vines.sprites = Read_files.load_sprites_dict('Sprites/Attack/horn_vines/',game_objects)
+        Horn_vines.sprites = Read_files.load_sprites_dict('Sprites/attack/horn_vines/',game_objects)
 
     def destroy(self):
         if self.lifetime < 0:
@@ -2198,15 +2191,15 @@ class Explosion(Melee):
         pass
 
     def pool(game_objects):
-        Explosion.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/', game_objects)
+        Explosion.sprites = Read_files.load_sprites_dict('Sprites/attack/hurt_box/', game_objects)
 
     def reset_timer(self):
         self.kill()
 
-class Shield(Melee):
+class Reflect(Melee):#pressing k
     def __init__(self,entity):
         super().__init__(entity)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/invisible/',entity.game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/hurt_box/',entity.game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = self.entity.hitbox.copy()#pygame.Rect(self.entity.rect[0],self.entity.rect[1],20,40)
         self.hitbox = self.rect.copy()
@@ -2237,7 +2230,7 @@ class Sword(Melee):
         self.hitbox = self.rect.copy()
 
     def pool(game_objects):
-        Sword.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/', game_objects)
+        Sword.sprites = Read_files.load_sprites_dict('Sprites/attack/sword/', game_objects)
 
     def init(self):
         self.sprites = Sword.sprites
@@ -2283,7 +2276,7 @@ class Aila_sword(Sword):
         self.swing = 0#a flag to check which swing we are at (0 or 1)
 
     def init(self):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
         self.image = self.sprites['slash_1'][0]
         self.dmg = 1
 
@@ -2342,22 +2335,19 @@ class Aila_sword(Sword):
         self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
 class Thunder(Projectiles):
-    def __init__(self, entity):#TODO change to pos, game_objects
-        super().__init__([0,0], entity.game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Thunder/',entity.game_objects)
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+        self.sprites = Thunder.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
-        self.dmg = 1
-        self.level = 1#upgrade pointer
+        self.dmg = kwarg.get('dmg', 1)
+
+    def pool(game_objects):
+        Thunder.sprites = Read_files.load_sprites_dict('Sprites/attack/Thunder/', game_objects)
 
     def release_texture(self):
         pass
-
-    def initiate(self, enemy_rect):
-        self.rect.midbottom = enemy_rect.midbottom
-        self.hitbox = self.rect.copy()
-        self.lifetime = 1000
 
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
@@ -2367,39 +2357,6 @@ class Thunder(Projectiles):
     def reset_timer(self):
         self.dmg = 1
         self.kill()
-
-class Force(Projectiles):
-    def __init__(self, entity):#TODO change to pos, game_objects
-        super().__init__([0,0], entity.game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/force/',entity.game_objects)
-        self.image = self.sprites['once'][0]
-        self.rect = pygame.Rect(entity.rect.centerx, entity.rect.centery,self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()
-        self.dmg = 0
-        self.level = 1#upgrade pointer
-
-    def initiate(self):
-        self.lifetime = 30
-        self.dir = self.entity.dir.copy()
-        self.update_hitbox()
-        self.true_pos = list(self.entity.rect.topleft)
-        self.velocity = [sign(self.dir[0]) * (abs(self.dir[0]) - abs(self.dir[1]))*10, -self.dir[1] * 10]
-
-    def collision_plat(self,platform):
-        self.animation.reset_timer()
-        self.currentstate.handle_input('Death')
-        self.velocity=[0,0]
-
-    def collision_enemy(self,collision_enemy):#if hit something
-        self.animation.reset_timer()
-        self.currentstate.handle_input('Death')
-        self.velocity=[0,0]
-
-        collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
-        collision_enemy.velocity[1]=-6
-
-    def release_texture(self):
-        pass
 
 class Arrow(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
@@ -2414,7 +2371,7 @@ class Arrow(Projectiles):
         self.velocity=[self.dir[0] * 20, self.dir[1] * 20]
 
     def pool(game_objects):
-        Arrow.sprites = Read_files.load_sprites_dict('Sprites/Attack/arrow/', game_objects)
+        Arrow.sprites = Read_files.load_sprites_dict('Sprites/attack/arrow/', game_objects)
 
     def collision_enemy(self,collision_enemy):
         collision_enemy.take_dmg(self.dmg)
@@ -2428,73 +2385,101 @@ class Arrow(Projectiles):
     def release_texture(self):
         pass
 
-class Migawari():
-    def __init__(self,entity):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/migawari/',entity.game_objects)
+class Shield(Projectiles):#a protection shield
+    def __init__(self, entity):
+        super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity
-        self.game_objects = entity.game_objects#animation need dt
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Animation(self)
-        self.currentstate = states_basic.Idle(self)#
+        self.image = Shield.image
+        self.rect = pygame.Rect(entity.hitbox.centerx, entity.hitbox.centery, self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.time = 0
 
-        self.health = 1
-        self.level = 1#upgrade pointer
+    def update(self):
+        self.time += self.entity.game_objects.game.dt
+        self.update_pos()
 
-    def spawn(self,pos):#called when using the ability
-        spawn = Migawari_entity(pos,self.entity.game_objects)
-        spawn.set_health(self.health)
-        spawn.set_lifetime(1000)
-        self.entity.game_objects.players.add(spawn)
+    def update_pos(self):
+        self.true_pos = [int(self.entity.hitbox.center[0] - self.game_objects.camera.scroll[0] - self.image.width*0.5),int(self.entity.hitbox.center[1] - self.game_objects.camera.scroll[1]- self.image.height*0.5)]
+    
+    def draw(self, target):
+        self.game_objects.shaders['shield']['time'] = self.time*0.1
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = self.hitbox.topleft, shader = self.game_objects.shaders['shield'])#shader render  
 
-    def reset_timer(self):
+    def release_texture(self):
         pass
+
+    def pool(game_objects):
+        size = [90, 90]        
+        Shield.image = game_objects.game.display.make_layer(size).texture
+
+#aila abilities
+class Player_ability():#the abilities aila can absorb. Handles upgrades, spawn the ability and UI and stuff
+    def __init__(self, entity):
+        self.entity = entity
+        self.level = 1#upgrade pointer       
+
+    def initiate(self):#called when using the ability
+        pass
+
+class Horagalles_rage(Player_ability):#desolate dive:thunder god: 
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/UI/horagalles_rage/',entity.game_objects)
+
+    def initiate(self, enemy_rect):
+        thunder = Thunder(enemy_rect, self.entity.game_objects, lifetime =  1000)
+        thunder.rect.midbottom = enemy_rect.midbottom
+        thunder.hitbox = thunder.rect.copy()
+        self.entity.projectiles.add(thunder)#add attack to group
+
+class Tjasolmais_embrace(Player_ability):#makes the shield, water god
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/UI/tjasolmais_embrace/',entity.game_objects)
+        #-> higher level can reflect projectiles? or maybe hurt enemy?  
+
+    def initiate(self):#called when using the abilty
+        spawn = Shield(self.entity)
+        self.entity.projectiles.add(spawn)        
+        
+class Maderakkas_reflection(Player_ability):#migawari: woman/mother god 
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/UI/maderakkas_reflection/',entity.game_objects)
+        self.health = 1
+
+    def initiate(self):#called when using the ability
+        spawn = Maderakkas_reflection_entity(self.entity.rect.midtop, self.entity.game_objects, lifetime = 1000, health = self.health)
+        self.entity.game_objects.players.add(spawn)
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
         if self.level == 2:
             self.health = 2
 
-    def release_texture(self):
-        pass
-
-class Slow_motion():
-    def __init__(self,entity):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/slow_motion/',entity.game_objects)
-        self.entity = entity
-        self.game_objects = entity.game_objects#animation need dt
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Animation(self)
-        self.currentstate = states_basic.Idle(self)#
-
-        self.level = 1#upgrade pointer
+class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
         self.duration = 200#slow motion duration, in time [whatever units]
-
-    def init(self):#called from slow motion gameplay state
         self.rate = 0.5#slow motion rate
+
+    def initiate(self):#called when using the ability from player states
+        new_state = states.Slow_motion_gameplay(self.entity.game_objects.game, rate = self.rate, duration = self.duration)
+        new_state.enter_state()
+
+    def upgrade_ability(self):#called from upgrade menu
+        self.level += 1
         if self.level == 3:
             self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila
             self.duration = 400#slow motion duration, in time [whatever units]
         elif self.level == 2:
             self.duration = 400#slow motion duration, in time [whatever units]
 
-    def spawn(self):#called when using the ability from player states
-        self.init()
-        new_state = states.Slow_motion_gameplay(self.game_objects.game, rate = self.rate, duration = self.duration)
-        new_state.enter_state()
-
-    def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
-
-    def reset_timer(self):
-        pass
-
-    def release_texture(self):
-        pass
-
-class Bow():
+class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
     def __init__(self, entity):
-        self.entity = entity
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/bow/', entity.game_objects)
+        super().__init__(entity)
+        self.sprites = Read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
         self.level = 1#upgrade pointer
 
     def initiate(self):#called when using the attack

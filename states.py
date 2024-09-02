@@ -669,7 +669,6 @@ class Ability_menu(Gameplay):#when pressing tab
         self.sprites = Read_files.load_sprites_list('Sprites/UI/ability_HUD/',game.game_objects)#TODO
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
         self.surface = self.game.display.make_layer(self.game.window_size)#TODO
-        print(self.sprites)
 
     def update(self):
         self.game.dt *= 0.5#slow motion
