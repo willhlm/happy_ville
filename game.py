@@ -2,7 +2,7 @@ import pygame, sys
 import states
 import game_objects
 import constants as C
-import Read_files
+import read_files
 from pygame_render import RenderEngine
 
 class Game():
@@ -11,7 +11,7 @@ class Game():
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size()#get the scale according to your display size
         display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
-        game_settings = Read_files.read_json('game_settings.json')['display']
+        game_settings = read_files.read_json('game_settings.json')['display']
 
         self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])
         self.screen = self.display.make_layer(self.window_size)

@@ -1,5 +1,5 @@
 import pygame, math, random
-import states_particles, animation, Read_files
+import states_particles, animation, read_files
 
 class Particles(pygame.sprite.Sprite):
     def __init__(self, pos, game_objects, **kwarg):
@@ -210,7 +210,7 @@ class Floaty_particles(Particles):#particles with a texture
         self.velocity[1] += self.game_objects.game.dt*0.01
 
     def pool(game_objects):#save the stuff in memory for later use
-        Floaty_particles.sprites = Read_files.load_sprites_dict('Sprites/GFX/particles/floaty/', game_objects)
+        Floaty_particles.sprites = read_files.load_sprites_dict('Sprites/GFX/particles/floaty/', game_objects)
 
 class Offset(Particles):#not implemented fully -> need angular motion
     def __init__(self, pos, game_objects, **kwarg):
@@ -250,4 +250,4 @@ class Offset(Particles):#not implemented fully -> need angular motion
         self.velocity  = [math.sin(self.time*0.1),math.sin(self.time*0.1)-0.5]
 
     def pool(game_objects):#save the stuff in memory for later use
-        Offset.sprites = Read_files.load_sprites_dict('Sprites/GFX/particles/offset/', game_objects)
+        Offset.sprites = read_files.load_sprites_dict('Sprites/GFX/particles/offset/', game_objects)

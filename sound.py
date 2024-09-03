@@ -1,10 +1,10 @@
 import pygame
 pygame.mixer.init()#this one is needed to avoid a delay when playing the sounds
-import Read_files
+import read_files
 
 class Sound():#class for organising sound and music playback
     def __init__(self):#channels 0 - 4 is dedicated to        
-        self.volume = Read_files.read_json('game_settings.json')['sounds']     
+        self.volume = read_files.read_json('game_settings.json')['sounds']     
         pygame.mixer.set_num_channels(20)#create X channels, #number of sounds we will simultanioulsy play       
         self.initiate_channels(reserved_channels = 4 )#need to be smaller than numver of channels
 
@@ -41,7 +41,7 @@ class Sound():#class for organising sound and music playback
         self.channels[0].fadeout(700)
 
     def load_bg_sound(self, name):
-        self.bg = pygame.mixer.Sound("Audio/maps/" + name + "/default.mp3")
+        self.bg = pygame.mixer.Sound("audio/maps/" + name + "/default.mp3")
 
     def play_sfx(self, sfx, loop = 0, vol = 0.2):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
         channel = pygame.mixer.find_channel(True)#force it to always find a channel. If no available, it will take the channel that has been alive the longest time

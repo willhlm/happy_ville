@@ -1,7 +1,7 @@
 import pygame
-import Read_files
+import read_files
 import collisions
-import Entities
+import entities
 import map_loader
 import sound
 import states
@@ -24,8 +24,8 @@ from time import perf_counter
 class Game_Objects():
     def __init__(self, game):
         self.game = game
-        self.font = Read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
-        self.shaders = Read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
+        self.font = read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
+        self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller('playstation')
         self.object_pool = object_pool.Object_pool(self)
         self.sound = sound.Sound()
@@ -68,7 +68,7 @@ class Game_Objects():
         self.layer_pause = groups.PauseLayer()#like eneitty pause but for those at different parallax layers
 
         #initiate player
-        self.player = Entities.Player([0,0],self)
+        self.player = entities.Player([0,0],self)
         self.players = groups.Group()#blits on float positions
         self.players.add(self.player)
 

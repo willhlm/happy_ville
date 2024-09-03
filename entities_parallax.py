@@ -1,9 +1,9 @@
 import pygame, random, math
-import Entities
-import Read_files
+import entities
+import read_files
 import states_blur, states_wind_objects, states_droplet, states_weather_particles
 
-class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to different layers
+class Layered_objects(entities.Animatedentity):#objects in tiled that goes to different layers
     def __init__(self, pos, game_objects, parallax, live_blur = False):
         super().__init__(pos, game_objects)
         self.pause_group = game_objects.layer_pause
@@ -28,7 +28,7 @@ class Layered_objects(Entities.Animatedentity):#objects in tiled that goes to di
         if type(self).animations.get(cache_key, False):#Check if sprites are already in memory
             self.sprites = type(self).animations[cache_key]
         else:# first time loading            
-            self.sprites = Read_files.load_sprites_dict(path, self.game_objects)
+            self.sprites = read_files.load_sprites_dict(path, self.game_objects)
             type(self).animations[cache_key] = self.sprites
             
             if not self.live_blur and self.parallax[0] != 1:# Apply blur if not live and not parllax = 1
@@ -253,7 +253,7 @@ class Falling_rock_source(Layered_objects):
 
     def drop(self):#called from states
         if self.parallax == [1,1]:
-            obj = Entities.Falling_rock(self)
+            obj = entities.Falling_rock(self)
             self.game_objects.eprojectiles.add(obj)
         else:
             sprites = self.game_objects.all_bgs.sprites()
@@ -326,7 +326,7 @@ class Droplet(Dynamic_layered_objects):
         self.velocity[1] = min(7,self.velocity[1])
 
     def pool(game_objects):
-        Droplet.sprites = Read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
+        Droplet.sprites = read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
 
 class Leaves(Dynamic_layered_objects):#leaves from trees
     def __init__(self, pos, game_objects, parallax, size, kill = False, live_blur = False):
@@ -356,7 +356,7 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         super().draw(target)
 
     def pool(game_objects):#save the texture in memory for later use
-        Leaves.sprites = Read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
+        Leaves.sprites = read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
 
     def update(self):
         super().update()
@@ -404,4 +404,4 @@ class Falling_rock(Dynamic_layered_objects):
         self.velocity[1] = min(7,self.velocity[1])
 
     def pool(game_objects):#save the texture in memory for later use
-        Falling_rock.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)
+        Falling_rock.sprites = read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)

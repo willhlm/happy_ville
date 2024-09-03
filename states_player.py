@@ -1,4 +1,4 @@
-import sound, Entities, sys, random, math
+import sound, entities, sys, random, math
 from states_entity import Entity_States
 import constants as C
 
@@ -543,7 +543,7 @@ class Air_dash_pre(Player_states):
     def update(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Dash_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.exit()
 
@@ -660,7 +660,7 @@ class Counter_main(Player_states):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
         self.entity.consume_spirit()
-        shield = Entities.Reflect(self.entity)
+        shield = entities.Reflect(self.entity)
         self.entity.projectiles.add(shield)#add sword to group
 
     def increase_phase(self):
@@ -669,7 +669,7 @@ class Counter_main(Player_states):
 class Death_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.game_objects.cosmetics.add(Entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
+        self.entity.game_objects.cosmetics.add(entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
         self.entity.velocity[1] = -3
         self.entity.acceleration[0] = 0#don't move
         if self.entity.velocity[0]<0:
@@ -783,7 +783,7 @@ class Pray_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.special = False#a flag to chekc when the animation should finish (after interaction with e.g. rune stone, or when ability upgrade screen is exited)
-        effect = Entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
+        effect = entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
@@ -1056,7 +1056,7 @@ class Thunder_pre(Abillitites):
         self.init()
 
     def init(self):
-        self.entity.thunder_aura = Entities.Thunder_aura(self.entity.rect.center,self.entity.game_objects)
+        self.entity.thunder_aura = entities.Thunder_aura(self.entity.rect.center,self.entity.game_objects)
         self.entity.game_objects.cosmetics.add(self.entity.thunder_aura)
 
     def handle_movement(self,input):

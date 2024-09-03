@@ -9,7 +9,7 @@ uniform float speed = 0.1;
 
 uniform vec4 liquid_tint;
 uniform vec4 darker_color; // New uniform for the darker region
-uniform vec4 line_color; // New uniform for the darker region
+uniform vec4 line_color; // New uniform for the line color
 
 uniform sampler2D SCREEN_TEXTURE;
 uniform sampler2D refraction_map;
@@ -17,14 +17,21 @@ uniform vec2 u_resolution;
 uniform vec4 section;
 uniform float TIME;
 
+uniform float lineHeightPixels = 5.0; // Line height in pixels
+uniform float darkerRegionHeightPixels = 6.0; // Darker region height in pixels
+
 out vec4 COLOR;
 vec4 new_liquid_tint;
 
 // Function to generate wave displacement, modulated by the noise from refraction_map
-float wave(vec2 uv) {
-    float baseWave = sin(uv.x * 10.0 + TIME * speed * 5.0) * 0.02;
+float wave(vec2 uv, vec2 texture_size) {
+    // Scale the wave frequency and amplitude by the texture size to make it independent
+    float frequency = 10 * (texture_size.x / 1024.0); // Adjust frequency based on texture width
+    float amplitude = 0.002 * (1024.0 / texture_size.y); // Adjust amplitude based on texture height
+
+    float baseWave = sin(uv.x * frequency + TIME * speed * 5.0) * amplitude;
     float noise = texture(refraction_map, uv * 2.0).r;
-    noise = (noise - 0.5) * 0.02;
+    noise = (noise - 0.5) * amplitude;
     return baseWave + noise;
 }
 
@@ -32,14 +39,15 @@ void main()
 {
     vec2 uv = fragmentTexCoord;
 
-    // Define the heights for the wavy line and the darker region
-    float noisetwo = texture(refraction_map, uv * 2.0).r;
+    // Get the texture size using the built-in function
+    vec2 texture_size = vec2(textureSize(imageTexture, 0));
 
-    float lineHeight = 0.05; // Height for the wavy line
-    float darkerRegionHeight = 0.08; // Height of the darker region
+    // Convert pixel heights to texture coordinates using the texture size
+    float lineHeight = lineHeightPixels / texture_size.y;
+    float darkerRegionHeight = darkerRegionHeightPixels / texture_size.y;
 
     // Calculate wave effect with noise using the refraction map
-    float waveEffect = wave(uv);
+    float waveEffect = wave(uv, texture_size);
 
     // Position for the wavy line
     float waveLinePosition = 1.0 - lineHeight + waveEffect;
@@ -49,18 +57,14 @@ void main()
         COLOR = vec4(0.0, 0.0, 0.0, 0.0); // Fully transparent
         return;
     }
-    else if (uv.y > (waveLinePosition - darkerRegionHeight*0.95)) {//line
-        
-        new_liquid_tint = mix(darker_color, liquid_tint, (uv.y - (waveLinePosition - darkerRegionHeight*0.95)) / darkerRegionHeight);
+    else if (uv.y > (waveLinePosition - darkerRegionHeight * 0.95)) { // Line region
+        new_liquid_tint = mix(darker_color, liquid_tint, (uv.y - (waveLinePosition - darkerRegionHeight * 0.95)) / darkerRegionHeight);
     }
-
-    else if (uv.y > (waveLinePosition - darkerRegionHeight)) {
-        // Darker region with the wavy line
+    else if (uv.y > (waveLinePosition - darkerRegionHeight)) { // Darker region
         new_liquid_tint = mix(line_color, liquid_tint, (uv.y - (waveLinePosition - darkerRegionHeight)) / darkerRegionHeight);
     }
-    else{
+    else {
         new_liquid_tint = liquid_tint;
-
     }
 
     vec2 refraction_offset = texture(

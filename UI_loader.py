@@ -1,5 +1,5 @@
 import pygame
-import Read_files
+import read_files
 import entities_UI
 
 class UI_loader():#for map, omamori, ability, journal etc
@@ -11,8 +11,8 @@ class UI_loader():#for map, omamori, ability, journal etc
         self.load_data = {'map':self.load_map_data,'omamori':self.load_omamori_data,'journal':self.load_journal_data,'fast_travel':self.load_fast_travel_data,'ability_spirit_upgrade':self.load_ability_spirit_upgrade_data,'ability_movement_upgrade':self.load_ability_movement_upgrade_data,'inventory':self.load_inventory_data,'vendor':self.load_vendor_data}[type]()
 
     def load_UI_data(self,type):
-        map_data = Read_files.read_json("UI/%s/%s.json" % (type,type))
-        self.map_data = Read_files.format_tiled_json(map_data)
+        map_data = read_files.read_json("UI/%s/%s.json" % (type,type))
+        self.map_data = read_files.format_tiled_json(map_data)
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
                 if self.source in tileset['source']:#the name of the tmx file

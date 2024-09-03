@@ -1,4 +1,4 @@
-import sys, math, Entities
+import sys, math, entities
 from states_entity import Entity_States
 
 class Reindeer_states(Entity_States):
@@ -216,7 +216,7 @@ class Dash_main(Reindeer_states):
     def update(self):
         self.entity.velocity[1]=0
         self.entity.velocity[0]=self.dir[0]*max(20,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(Entities.Dash_effect(self.entity))
+        self.entity.game_objects.cosmetics.add(entities.Dash_effect(self.entity))
 
     def increase_phase(self):
          self.enter_state('Dash_post')

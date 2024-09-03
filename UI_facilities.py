@@ -1,6 +1,6 @@
 import pygame, sys
 import UI_loader
-import entities_UI, Entities
+import entities_UI, entities
 
 class Facility_states():
     def __init__(self, game_state):
@@ -520,13 +520,13 @@ class Soul_essence(Facility_states):#called from inorinoki
         if self.pointer_index[1] == 0:#if we select health
             if self.game_objects.player.inventory['Soul_essence'] >= self.cost:
                 pos = [self.game_objects.player.rect[0],-100]
-                heart = Entities.Heart_container(pos,self.game_objects)
+                heart = entities.Heart_container(pos,self.game_objects)
                 self.game_objects.loot.add(heart)
                 self.game_objects.player.inventory['Soul_essence']-=self.cost
         elif self.pointer_index[1] == 1:#if we select spirit
             if self.game_objects.player.inventory['Soul_essence'] >= self.cost:
                 pos = [self.game_objects.player.rect[0],-100]
-                spirit = Entities.Spirit_container(pos,self.game_objects)
+                spirit = entities.Spirit_container(pos,self.game_objects)
                 self.game_objects.loot.add(spirit)
                 self.game_objects.player.inventory['Soul_essence']-=self.cost
         else:#select cancel

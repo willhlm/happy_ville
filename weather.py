@@ -1,6 +1,6 @@
 import pygame, math, random
-import Read_files, states_weather
-from Entities import Animatedentity
+import read_files, states_weather
+from entities import Animatedentity
 
 class Weather():
     def __init__(self, game_objects):
@@ -276,7 +276,7 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
 class Twinkle(Bound_entity):
     def __init__(self,game_objects, parallax):
         super().__init__(game_objects, parallax)
-        self.sprites = Read_files.load_sprites_dict('Sprites/GFX/twinkle/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/GFX/twinkle/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
 
