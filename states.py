@@ -110,6 +110,7 @@ class Title_Menu(Game_State):
             self.arrow.pressed('new')#if we want to make it e.g. glow or something
             new_state = Gameplay(self.game)
             new_state.enter_state()
+            #testing
 
             #load new game level
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
