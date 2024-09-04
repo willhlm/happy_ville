@@ -263,14 +263,16 @@ class Boulder(Collision_texture):#blocks village cave
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
-class Gate(Collision_texture):#a gate that is owned by the lever
+class Gate(Collision_texture):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.dir = [1,0]
         self.sprites = read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
 
-        self.ID_key = kwarg.get('ID', None)#an ID to match with the gate
-        if game_objects.world_state.quests.get(self.ID_key, False):#if ballroom has been completed
+        self.ID_key = kwarg.get('ID', 'None')#an ID to match with the gate
+        if game_objects.world_state.quests.get(self.ID_key[:self.ID_key.rfind('_')], False):#if ballroom has been completed
+            state = 'down'
+        elif game_objects.world_state.events.get(self.ID_key[:self.ID_key.rfind('_')], False):#if the event has been completed
             state = 'down'
         else:                
             state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   

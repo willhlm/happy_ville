@@ -67,7 +67,7 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
         self.game_objects.world_state.cutscenes_complete[type(self).__name__.lower()] = True
         self.game_objects.world_state.events[type(self).__name__.lower()] = True  
 
-class Acid_escape(Quest_event):#golden fields
+class Acid_escape(Quest_event):#called in golden fields "last room"
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
         pos = [-2000 + game_objects.camera.scroll[0],game_objects.game.window_size[1] + game_objects.camera.scroll[1]]
@@ -79,6 +79,38 @@ class Acid_escape(Quest_event):#golden fields
         self.game_objects.world_state.events[type(self).__name__.lower()] = True  
         self.acid.kill()
 
+class Golden_fields_encounter_1(Quest_event):#called from golden fields room event_trigger
+    def __init__(self, game_objects, **kwarg):
+        super().__init__(game_objects)
+        self.get_gates()
+        self.spawn_enemy()
+
+    def spawn_enemy(self):
+        self.number = 1
+        for number in range(0, self.number):            
+            pos = [1728 +  random.randint(-10, 10), 1200 +  random.randint(-10, 10)]
+            enemy = entities.Cultist_rogue(pos, self.game_objects, self)
+            self.game_objects.enemies.add(enemy)              
+
+    def get_gates(self):#trap aila
+        self.gates = {}
+        for gate in self.game_objects.map.references['gate']:
+            if gate.ID_key == 'golden_fields_encounter_1_1':#these strings are specified in tiled
+                self.gates['1'] = gate
+                self.gates['1'].currentstate.handle_input('Transform')
+            elif gate.ID_key == 'golden_fields_encounter_1_2':#these strings are specified in tiled
+                self.gates['2'] = gate#this one is already erect     
+
+    def incrase_kill(self):#called when enemy is called
+        self.number -= 1
+        if self.number == 0:#all enemies eleminated        
+            self.complete()  
+
+    def complete(self):
+        for key in self.gates.keys():
+            self.gates[key].currentstate.handle_input('Transform')
+        self.game_objects.world_state.events[type(self).__name__.lower()] = True  
+
 #quests
 class Lumberjack_omamori(Quest_event):#called from monument, #TODO need to make so that this omamori cannot be eqquiped while this quest is runing
     def __init__(self, game_objects, item = None):
@@ -87,7 +119,7 @@ class Lumberjack_omamori(Quest_event):#called from monument, #TODO need to make 
         self.time = 9000#time to compplete        
         self.omamori = item
 
-    def time_out(self):#when time runs out   
+    def time_out(self):#called when timer_display runs out   
         name = type(self.omamori).__name__
         del self.game_objects.player.omamoris.inventory[name] #remove the omamori    
         self.game_objects.world_state.quests['lumberjack_omamori'] = False        
@@ -100,7 +132,7 @@ class Lumberjack_omamori(Quest_event):#called from monument, #TODO need to make 
     def complete(self):#called when talking to lumberjack within the timer limit        
         self.timer.kill()                         
 
-class Fragile_butterfly(Quest_event):#TODO
+class Fragile_butterfly(Quest_event):#TODO -> light forest cave
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.description = 'could you deliver my pixie dust to my love. Do not take damage.'    
@@ -138,10 +170,10 @@ class Ball_room(Quest_event):#the room with ball in light forest cavee
     def get_gates(self):#trap aila
         self.gates = {}
         for gate in self.game_objects.map.references['gate']:
-            if gate.ID_key == 'ball_room1':#these strings are specified in tiled
+            if gate.ID_key == 'ball_room_1':#these strings are specified in tiled
                 gate.currentstate.handle_input('Transform')       
                 self.gates['1'] = gate
-            elif gate.ID_key == 'ball_room':#these strings are specified in tiled
+            elif gate.ID_key == 'ball_room_2':#these strings are specified in tiled
                 self.gates['2'] = gate#this one is already erect
 
     def time_out(self):#when timer runs out

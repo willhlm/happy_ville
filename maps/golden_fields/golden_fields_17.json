@@ -649,6 +649,47 @@
                          "width":16,
                          "x":2112,
                          "y":848
+                        }, 
+                        {
+                         "gid":20,
+                         "height":144,
+                         "id":671,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"golden_fields_encounter_1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1424,
+                         "y":1264
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":105,
+                 "name":"back",
+                 "objects":[
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":673,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1216,
+                         "y":1200
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -660,7 +701,53 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31229,
+                         "height":144,
+                         "id":669,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"golden_fields_encounter_1_1"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":false
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1280,
+                         "y":1264
+                        }, 
+                        {
+                         "gid":31229,
+                         "height":144,
+                         "id":670,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"golden_fields_encounter_1_2"
+                                }, 
+                                {
+                                 "name":"erect",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2160,
+                         "y":1264
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -674,8 +761,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":105,
- "nextobjectid":669,
+ "nextlayerid":106,
+ "nextobjectid":675,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -781,7 +868,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

@@ -1,7 +1,7 @@
 import pygame, random, math
 import entities
 import read_files
-import states_blur, states_wind_objects, states_droplet, states_weather_particles
+import states_blur, states_wind_objects, states_droplet_source, states_weather_particles, states_shader
 
 class Layered_objects(entities.Animatedentity):#objects in tiled that goes to different layers
     def __init__(self, pos, game_objects, parallax, live_blur = False):
@@ -18,7 +18,7 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
         super().update()
         self.group_distance()
 
-    def init_sprites(self, path):#save in memory. key (0,0) is reserved for none blurred
+    def init_sprites(self, path):#save in memory. key (0,0) is reserved for none blurred images
         if self.live_blur:
             cache_key = (0,0)
             self.blurtstate = states_blur.Blur(self)
@@ -221,25 +221,40 @@ class Cave_grass(Layered_objects):
 
 class Droplet_source(Layered_objects):
     animations = {}    
-    def __init__(self,pos,game_objects,parallax, live_blur = False):
+    def __init__(self,pos,game_objects,parallax, group, live_blur = False):
         super().__init__(pos,game_objects,parallax, live_blur)
         self.init_sprites('Sprites/animations/droplet/source/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.droplet = Droplet
-        self.currentstate = states_droplet.Idle(self)
+        self.currentstate = states_droplet_source.Idle(self)
+        self.group = group#all_bgs or all_fgs
+    
+        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+            self.shader_state = states_shader.Palette_swap(self)
+            self.original_colour = [[46, 74,132, 255]]#can append more to replace more
+            self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       
+        else:
+            self.shader_state = states_shader.Idle(self)
 
-    def drop(self):#called from states
-        sprites = self.game_objects.all_bgs.sprites()
-        bg = self.game_objects.all_bgs.reference[tuple(self.parallax)]
-        index = sprites.index(bg)#find the index in which the static layer is located
-        pos = self.rect.topleft
-        obj = Droplet(pos,self.game_objects,self.parallax)
-        self.game_objects.all_bgs.spritedict[obj] = self.game_objects.all_bgs._init_rect#in add internal
-        self.game_objects.all_bgs._spritelayers[obj] = 0
-        self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
-        obj.add_internal(self.game_objects.all_bgs)
+    def drop(self):#called from states                
+        if self.parallax == [1,1]:#TODO need to check for bg and fg etc if fg should not go into eprojectiles?
+            obj = entities.Droplet(self.rect.topleft, self.game_objects)       
+            self.game_objects.eprojectiles.add(obj)
+        else:#TODO need to put in all_bgs or all_gfs
+            sprites = self.group.sprites()
+            bg = self.group.reference[tuple(self.parallax)]
+            index = sprites.index(bg)#find the index in which the static layer is located
+            obj = Droplet(self.rect.topleft, self.game_objects, self.parallax)       
+            self.group.spritedict[obj] = self.group._init_rect#in add internal
+            self.group._spritelayers[obj] = 0
+            self.group._spritelist.insert(index,obj)#it goes behind the static layer of reference
+            obj.add_internal(self.group)
+
+    def draw(self,target):
+        self.shader_state.draw()
+        super().draw(target)
 
 class Falling_rock_source(Layered_objects):
     animations = {}    
@@ -249,13 +264,13 @@ class Falling_rock_source(Layered_objects):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
-        self.currentstate = states_droplet.Idle(self)
+        self.currentstate = states_droplet_source.Idle(self)
 
     def drop(self):#called from states
-        if self.parallax == [1,1]:
+        if self.parallax == [1,1]:#TODO need to check for bg and fg etc. I guess fg should not go into eprojectiles
             obj = entities.Falling_rock(self)
             self.game_objects.eprojectiles.add(obj)
-        else:
+        else:#TODO need to put in all_bgs or all_gfs
             sprites = self.game_objects.all_bgs.sprites()
             bg = self.game_objects.all_bgs.reference[tuple(self.parallax)]
             index = sprites.index(bg)#find the index in which the static layer is located
@@ -302,14 +317,20 @@ class Dynamic_layered_objects(Layered_objects):
     def boundary(self):
         pass
 
-class Droplet(Dynamic_layered_objects):        
+class Droplet(Dynamic_layered_objects):#cosmetic droplet   
     def __init__(self,pos,game_objects,parallax, live_blur = False):
         super().__init__(pos,game_objects,parallax, live_blur)
         self.sprites = Droplet.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = pos
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)        
         self.lifetime = 100
+
+        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+            self.shader_state = states_shader.Palette_swap(self)
+            self.original_colour = [[46, 74,132, 255]]#can append more to replace more
+            self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       
+        else:
+            self.shader_state = states_shader.Idle(self)              
 
     def update(self):
         super().update()
@@ -327,6 +348,10 @@ class Droplet(Dynamic_layered_objects):
 
     def pool(game_objects):
         Droplet.sprites = read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
+
+    def draw(self,target):
+        self.shader_state.draw()
+        super().draw(target)
 
 class Leaves(Dynamic_layered_objects):#leaves from trees
     def __init__(self, pos, game_objects, parallax, size, kill = False, live_blur = False):

@@ -1,6 +1,6 @@
 import pygame, random, sys, math
 import read_files, particles, animation, dialogue, states, groups
-import states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
 import constants as C
 
@@ -1914,13 +1914,13 @@ class Projectiles(Platform_entity):#projectiels
 
     #collisions
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
-        pass#collision_plat.take_dmg(self, self.dmg)
+        collision_plat.take_dmg(self, self.dmg)
 
     def collision_projectile(self, eprojectile):#projecticle proectile collision
         pass
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
-        pass#collision_enemy.take_dmg(self.dmg)
+        collision_enemy.take_dmg(self.dmg)
 
     def collision_inetractables(self,interactable):#collusion interactables
         pass
@@ -1948,6 +1948,9 @@ class Projectiles(Platform_entity):#projectiels
         pass
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
+        pass
+
+    def release_texture(self):#i guess all projectiles will have a pool
         pass
 
 class Bouncy_balls(Projectiles):#for ball challange room
@@ -2016,9 +2019,6 @@ class Poisoncloud(Projectiles):
     def pool(game_objects):
         Poisoncloud.sprites = read_files.load_sprites_dict('Sprites/attack/poisoncloud/',game_objects)
 
-    def release_texture(self):
-        pass
-
     def collision_ene(self,collision_ene):
         pass
 
@@ -2041,9 +2041,6 @@ class Poisonblobb(Projectiles):
         self.lifetime = kwarg.get('lifetime', 100)
         self.dir = kwarg.get('dir', [1,0])
         self.velocity = [-self.dir[0]*5,-1]
-
-    def release_texture(self):
-        pass
 
     def update(self):
         super().update()
@@ -2075,9 +2072,6 @@ class Projectile_1(Projectiles):
     def pool(game_objects):
         Projectile_1.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
-    def release_texture(self):
-        pass
-
     def collision_platform(self,platform):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
@@ -2098,20 +2092,54 @@ class Falling_rock(Projectiles):#things that can be placed in cave, the source m
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.dmg = 1
-
-    def update(self):
-        super().update()
-        self.update_vel()
+        self.currentstate = states_droplets.Idle(self)
 
     def pool(game_objects):
         Falling_rock.sprites = read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)
 
-    def update_vel(self):
-        self.velocity[1] += 1
-        self.velocity[1] = min(7,self.velocity[1])
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)        
+        super().collision_enemy(collision_enemy)
+        self.currentstate.handle_input('death')
 
-    def release_texture(self):
-        pass
+    def collision_platform(self, collision_plat):#collision platform, called from collusoin_block        
+        super().collision_platform(collision_plat)
+        self.currentstate.handle_input('death')
+
+class Droplet(Projectiles):#droplet that can be placed, the source makes this and can hurt player     
+    def __init__(self,pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Droplet.sprites
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)  
+        self.hitbox = self.rect.copy()
+        self.lifetime = 100
+        self.currentstate = states_droplets.Idle(self)
+        
+        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+            self.dmg = 1#acid
+            self.shader_state = states_shader.Palette_swap(self)
+            self.original_colour = [[46, 74,132, 255]]#can append more to replace more
+            self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       
+        else:
+            self.dmg = 0#water
+            self.shader_state = states_shader.Idle(self)
+
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
+        self.currentstate.handle_input('death')
+        if self.dmg == 0: return#do not do the stuff if dmg = 0
+        super().collision_enemy(collision_enemy)        
+
+    def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
+        self.currentstate.handle_input('death')
+        if self.dmg == 0: return#do not do the stuff if dmg = 0    
+        super().collision_platform(collision_plat)    
+
+    def pool(game_objects):
+        Droplet.sprites = read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
+
+    def draw(self,target):
+        self.shader_state.draw()
+        super().draw(target)
 
 class Horn_vines(Projectiles):#the reindeer attack
     def __init__(self, pos, game_objects):
@@ -2124,16 +2152,13 @@ class Horn_vines(Projectiles):#the reindeer attack
         self.dmg = 1
         self.lifetime = 500
 
-    def release_texture(self):
-        pass
-
     def pool(game_objects):
         Horn_vines.sprites = read_files.load_sprites_dict('Sprites/attack/horn_vines/',game_objects)
 
     def destroy(self):
         if self.lifetime < 0:
             self.entity.currentstate.handle_input('Horn_vines')
-            self.kill()
+            self.kill()    
 
 class Melee(Projectiles):
     def __init__(self, entity):
@@ -2171,9 +2196,6 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
 
-    def release_texture(self):
-        pass
-
     def draw(self, target):
         pass
 
@@ -2187,9 +2209,6 @@ class Explosion(Melee):
         self.dir = [0, 0]
         self.lifetime = 100
         self.dmg = 1
-
-    def release_texture(self):
-        pass
 
     def pool(game_objects):
         Explosion.sprites = read_files.load_sprites_dict('Sprites/attack/hurt_box/', game_objects)
@@ -2260,9 +2279,6 @@ class Sword(Melee):
 
     def collision_inetractables(self,interactable):#called when projectile hits interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
-
-    def release_texture(self):
-        pass
 
 class Aila_sword(Sword):
     def __init__(self, entity):
@@ -2347,9 +2363,6 @@ class Thunder(Projectiles):
     def pool(game_objects):
         Thunder.sprites = read_files.load_sprites_dict('Sprites/attack/Thunder/', game_objects)
 
-    def release_texture(self):
-        pass
-
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
         self.dmg = 0
@@ -2383,9 +2396,6 @@ class Arrow(Projectiles):
         self.velocity = [0,0]
         self.dmg = 0
 
-    def release_texture(self):
-        pass
-
 class Shield(Projectiles):#a protection shield
     def __init__(self, entity, **kwarg):
         super().__init__(entity.hitbox.topleft, entity.game_objects)
@@ -2396,7 +2406,7 @@ class Shield(Projectiles):#a protection shield
         self.time = 0
         self.entity.invincibile = True
         self.health = kwarg.get('health', 1)
-        self.general_Timer = General_Timer(self, 100)#how long it will last after taking reaching 0 health
+        self.general_Timer = General_Timer(self, 100, self.time_out)#how long it will last after taking reaching 0 health
 
     def take_dmg(self, dmg):#called when entity takes damage
         if self.invincibile: return
@@ -2422,9 +2432,6 @@ class Shield(Projectiles):#a protection shield
         self.game_objects.shaders['shield']['time'] = self.time*0.1
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = self.hitbox.topleft, shader = self.game_objects.shaders['shield'])#shader render  
 
-    def release_texture(self):
-        pass
-
     def pool(game_objects):
         size = [90, 90]        
         Shield.image = game_objects.game.display.make_layer(size).texture
@@ -2433,6 +2440,12 @@ class Shield(Projectiles):#a protection shield
         super().kill()
         self.entity.invincibile = False
         self.entity.tjasolmais_embrace = None
+
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
+        pass
+
+    def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
+        pass
 
 #aila abilities
 class Player_ability():#the abilities aila can absorb. Handles upgrades, spawn the ability and UI and stuff
@@ -4091,12 +4104,13 @@ class Timer():
             self.deactivate()
 
 class General_Timer(Timer):#when lifetime is 0, it calls the timeout of entety
-    def __init__(self, entity, duration):
+    def __init__(self, entity, duration, function):
         super().__init__(entity, duration)
         self.lifetime = duration
+        self.function = function
 
     def deactivate(self):
-        self.entity.time_out()
+        self.function()
 
 class Invincibility_timer(Timer):
     def __init__(self,entity,duration):
@@ -4116,7 +4130,7 @@ class Wet_timer(Timer):#"a wet status". activates when player baths, and spawns 
         super().__init__(entity, duration)
         self.game_objects = entity.game_objects#need for general timer
         self.spawn_frequency = 5#how often to spawn particle
-        self.spawn_timer = General_Timer(self, self.spawn_frequency)        
+        self.spawn_timer = General_Timer(self, self.spawn_frequency, self.time_out)        
 
     def activate(self, water_tint):#called when aila bathes (2D water)
         self.lifetime = self.duration#reset the duration
