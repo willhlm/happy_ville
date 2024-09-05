@@ -17,6 +17,10 @@ class AI():
     def handle_input(self, input):#input is hurt when taking dmg
         pass
 
+    def handle_input(self, input):#input is hurt when taking dmg
+        if input == 'Hurt':
+            self.enter_AI('Chase')
+
 class Idle(AI):#do nothing
     def __init__(self, entity):
         super().__init__(entity)
@@ -44,9 +48,9 @@ class Patrol(AI):#patrol in a circle aorund the original position
 
     def calculate_postion(self):
         angle = random.randint(0,180)
-        amp = 60
-        amp = random.randint(amp-20, amp+20)
-        amp = min(amp,80)#cap the amp
+        amp = 30
+        amp = random.randint(amp-10, amp+10)
+        #amp = min(amp,80)#cap the amp
         offset = [-20-10*self.entity.dir[0],20-10*self.entity.dir[0]]
         angle = random.randint(angle+offset[0],angle+offset[1])
 
@@ -59,10 +63,6 @@ class Patrol(AI):#patrol in a circle aorund the original position
         else:
             self.entity.dir[0] = 1
 
-    def handle_input(self, input):#input is hurt when taking dmg
-        if input == 'Hurt':
-            self.enter_AI('Chase')
-
 class Wait(AI):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -74,14 +74,10 @@ class Wait(AI):
         if self.time < 0:
             self.enter_AI(self.next_AI)
 
-    def handle_input(self, input):#input is hurt when taking dmg
-        if input == 'Hurt':
-            self.enter_AI('Chase')
-
 class Chase(AI):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.giveup = kwarg.get('giveup', 300)
+        self.giveup = kwarg.get('giveup', 400)
         self.time = self.giveup
 
     def update(self):
@@ -99,6 +95,26 @@ class Chase(AI):
             self.enter_AI('Attack')
         else:#player close, reset timer
             self.time = self.giveup
+
+    def look_target(self):
+        if self.player_distance[0] > 0:
+            self.entity.dir[0] = 1
+        else:
+            self.entity.dir[0] = -1
+
+class Knock_back(AI):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+
+    def update(self):
+        super().update()
+        self.look_target()
+        self.entity.chase_knock_back(self.player_distance)
+        self.check_vel()
+
+    def check_vel(self):
+        if abs(self.entity.velocity[0]) + abs(self.entity.velocity[1]) < 0.3:
+            self.enter_AI('Wait', next_AI = 'Chase', time = 10)
 
     def look_target(self):
         if self.player_distance[0] > 0:
