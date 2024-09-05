@@ -1,5 +1,5 @@
-import Entities
-import Read_files
+import entities
+import read_files
 
 class Save_load():
     def __init__(self, game_objects):
@@ -9,10 +9,10 @@ class Save_load():
     def save(self):
         self.save_player()#organise things to save in to a dictionary
         self.save_world_state()#organise things to save in to a dictionary
-        Read_files.save_json(self.save_dict,'save')#name of the file, save one dict
+        read_files.save_json(self.save_dict,'save')#name of the file, save one dict
 
     def load(self):
-        data = Read_files.load_json('save')#name of the file
+        data = read_files.load_json('save')#name of the file
         self.load_world_state(data)
         self.load_player(data)
 
@@ -48,4 +48,4 @@ class Save_load():
 
         self.game_objects.player.abilities={}
         for ability in player_data['abilities']:
-                self.game_objects.player.abilities[ability] = getattr(Entities, ability)
+                self.game_objects.player.abilities[ability] = getattr(entities, ability)

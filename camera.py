@@ -18,8 +18,8 @@ class Camera():
         self.scroll[0] = int(self.scroll[0])
         self.scroll[1] = int(self.scroll[1])
 
-    def set_camera(self, camera):
-        self.game_objects.camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll)
+    def set_camera(self, camera, **kwarg):
+        self.game_objects.camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.true_scroll, **kwarg)
 
     def camera_shake(self, **kwarg):
         self.game_objects.camera = Camera_shake(self.game_objects, self.true_scroll, **kwarg)
@@ -203,6 +203,6 @@ class Title_screen(Cutscenes):
         self.center[1] += 2*self.game_objects.game.dt
         self.center[1] = min(1000,self.center[1])
 
-        self.true_scroll[1]+=(self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
+        self.true_scroll[1] += (self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
         self.scroll=self.true_scroll.copy()
-        self.scroll[1]=int(self.scroll[1])
+        self.scroll[1]=int(self.scroll[1])        

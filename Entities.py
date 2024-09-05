@@ -1,6 +1,6 @@
 import pygame, random, sys, math
-import Read_files, particles, animation, dialogue, states, groups
-import states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import read_files, particles, animation, dialogue, states, groups
+import states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
 import constants as C
 
@@ -79,7 +79,7 @@ class BG_Fade(BG_Block):
         self.shader_state = states_shader.Idle(self)
         self.make_hitbox(positions, pos)
         self.interacted = False
-        self.sounds = Read_files.load_sounds_list('Audio/SFX/bg_fade/')
+        self.sounds = read_files.load_sounds_list('audio/SFX/bg_fade/')
 
     def make_hitbox(self, positions, offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
         x, y = [],[]
@@ -458,21 +458,29 @@ class God_rays(Staticentity):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
-class TwoD_water(Staticentity):
+class TwoD_liquid(Staticentity):
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
         self.empty = game_objects.game.display.make_layer(size)
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
+        
+        self.hitbox = pygame.Rect(pos, size)#for player collision
+        self.interacted = False#for player collision
 
         self.time = 0
-        self.size = size
-
-        self.shader = game_objects.shaders['twoD_water']
-        self.shader['u_resolution'] = self.game_objects.game.window_size
-        self.shader['water_tint'] = properties.get('water_tint', (0.2, 0.6, 1.0, 0.5))
-        self.shader['darker_color'] = properties.get('darker_color', (0.2, 0.6, 1.0, 0.9))
-        self.shader['line_color'] = properties.get('line_color', (0.4, 0.7, 1.0, 1))
+        self.size = size        
+    
+        self.shader = game_objects.shaders['twoD_liquid']
+        self.shader['u_resolution'] = self.game_objects.game.window_size        
+        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+            if not properties.get('vertical', False):
+                self.hole = Hole(pos, game_objects, size)#for poison
+                self.currentstate = states_twoD_liquid.Poison(self, **properties)                  
+            else:#vertical scroller -> golden fields
+                self.currentstate = states_twoD_liquid.Poison_vertical(self, **properties)                  
+        else:
+            self.currentstate = states_twoD_liquid.Water(self, **properties)
 
     def release_texture(self):
         self.empty.release()
@@ -481,25 +489,49 @@ class TwoD_water(Staticentity):
 
     def update(self):
         self.time += self.game_objects.game.dt
+        self.currentstate.update()
 
     def draw(self, target):
         #noise
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.1
-        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time * 0.05
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]#[self.game_objects.camera.scroll[0],self.game_objects.camera.scroll[1]]
         self.game_objects.shaders['noise_perlin']['scale'] = [10,10]
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy)#make a copy of the screen
         #water
-        self.game_objects.shaders['twoD_water']['refraction_map'] = self.noise_layer.texture
-        self.game_objects.shaders['twoD_water']['SCREEN_TEXTURE'] = self.screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
-        self.game_objects.shaders['twoD_water']['TIME'] = self.time*0.01
+        self.game_objects.shaders['twoD_liquid']['refraction_map'] = self.noise_layer.texture
+        self.game_objects.shaders['twoD_liquid']['SCREEN_TEXTURE'] = self.screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
+        self.game_objects.shaders['twoD_liquid']['TIME'] = self.time * 0.01
 
         pos = (int(self.true_pos[0] - self.game_objects.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera.scroll[1]))
-        self.game_objects.shaders['twoD_water']['section'] = [pos[0], pos[1], self.size[0], self.size[1]]
+        self.game_objects.shaders['twoD_liquid']['section'] = [pos[0], pos[1], self.size[0], self.size[1]]
 
-        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render  
+          
+    def player_collision(self, player):#player collision
+        if self.interacted: return     
+        player.friction = [player.friction[0] * 2, player.friction[1] * 2]         
+        vel_scale = player.velocity[1] / C.max_vel[1]
+        self.splash(player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)        
+        player.timer_jobs['wet'].deactivate()#stop dropping if inside the water again  
+        self.interacted = True
+        self.currentstate.player_collision(player)   
+ 
+    def player_noncollision(self):
+        if not self.interacted: return
+        self.game_objects.player.friction = C.friction_player.copy()
+        self.game_objects.player.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
+        vel_scale = abs(self.game_objects.player.velocity[1] / C.max_vel[1])
+        self.splash(self.game_objects.player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0) 
+        self.interacted = False
+        self.currentstate.player_noncollision()    
+
+    def splash(self,  pos, number_particles=20, **kwarg):#called from states, upoin collusions
+        for i in range(0, number_particles):
+            obj1 = particles.Circle(pos, self.game_objects, **kwarg)
+            self.game_objects.cosmetics.add(obj1)      
 
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
@@ -523,7 +555,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
 class BG_Animated(Animatedentity):
     def __init__(self, game_objects, pos, sprite_folder_path, parallax = (1,1)):
         super().__init__(pos,game_objects)
-        self.sprites = {'idle': Read_files.load_sprites_list(sprite_folder_path, game_objects)}
+        self.sprites = {'idle': read_files.load_sprites_list(sprite_folder_path, game_objects)}
         self.image = self.sprites['idle'][0]
         self.parallax = parallax
 
@@ -659,9 +691,9 @@ class Character(Platform_entity):#enemy, NPC,player
 class Player(Character):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/aila/')
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/aila/texture/', game_objects)
-        self.normal_maps = Read_files.load_sprites_dict('Sprites/Enteties/aila/normal/', game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/aila/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/aila/texture/', game_objects)
+        self.normal_maps = read_files.load_sprites_dict('Sprites/enteties/aila/normal/', game_objects)
         self.image = self.sprites['idle_main'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
@@ -682,7 +714,7 @@ class Player(Character):
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':False,'Double_jump':False,
-                     'Thunder':True,'Force':True,'Migawari':True,'Slow_motion':True,
+                     'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True}
         self.currentstate = states_player.Idle_main(self)
@@ -695,8 +727,10 @@ class Player(Character):
 
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump_buffer':Jump_buffer_timer(self,C.jump_buffer_timer_player),
                         'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player),
-                        'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2)}#these timers are activated when promt and a job is appeneded to self.timer.
+                        'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2),
+                        'wet':Wet_timer(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
+        self.tjasolmais_embrace = None
 
     def update_hitbox(self):
         super().update_hitbox()
@@ -706,7 +740,8 @@ class Player(Character):
         super().down_collision(hitbox)
         self.flags['ground'] = True#used for jumping
 
-    def take_dmg(self,dmg = 1):
+    def take_dmg(self, dmg = 1, duration = 20):
+        if self.tjasolmais_embrace: self.tjasolmais_embrace.take_dmg(dmg)            
         if self.invincibile: return
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
         self.health -= dmg*self.dmg_scale#a omamori can set the dmg_scale to 0.5
@@ -715,22 +750,26 @@ class Player(Character):
         if self.health > 0:#check if dead¨
             self.shader_state.handle_input('Hurt')#turn white
             self.shader_state.handle_input('Invincibile')#blink a bit
-            #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             self.hurt_particles(lifetime = 40, vel = {'linear':[4,7]}, colour=[0,0,0,255], scale=3, number_particles=60)
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 20, amplitude = 10)#pause the game for a while with an optional shake
+            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = duration, amplitude = 10)#pause the game for a while with an optional shake
             new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
-            self.death_state.die()#depending on gameplay state, different death stuff should happen
-            self.animation.update()#make sure you get the new animation
-            self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
+            self.die()
+        return True#return truw to show that damage was taken
+        
+    def die(self):#also called from vertical acid
+        self.death_state.die()#depending on gameplay state, different death stuff should happen
+        self.animation.update()#make sure you get the new animation
+        self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
 
-            new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
-            new_game_state.enter_state()
+        new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
+        new_game_state.enter_state()
 
-            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
-            new_game_state.enter_state()
+        new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
+        new_game_state.enter_state()
 
     def heal(self, health = 1):
         self.health += health
@@ -766,22 +805,18 @@ class Player(Character):
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
         self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
-class Migawari_entity(Character):#player double ganger
-    def __init__(self,pos,game_objects):
+class Maderakkas_reflection_entity(Character):#player double ganger
+    def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/migawari/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/migawari/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1]-5,16,35)#add a smalll ofset in y to avoid collision
+        self.hitbox = pygame.Rect(pos[0],pos[1]-5,16,16)#add a smalll ofset in y to avoid collision
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
         self.invincibile = False
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player)}#these timers are activated when promt and a job is appeneded to self.timer.
-
-    def set_health(self,health):#should be called when making this object
-        self.health = health
-
-    def set_lifetime(self,lifetime):#should be called when making this object
-        self.lifetime = lifetime
+        self.health = kwarg.get('health', 1)
+        self.lifetime = kwarg.get('lifetime', 1000)
 
     def update(self):
         super().update()
@@ -920,7 +955,7 @@ class Flying_enemy(Enemy):
 class Flower_butterfly(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/flower_butterfly/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/flower_butterfly/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -937,7 +972,7 @@ class Flower_butterfly(Flying_enemy):
 class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -986,7 +1021,7 @@ class Mygga(Flying_enemy):
 class Roaming_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1023,7 +1058,7 @@ class Roaming_mygga(Flying_enemy):
 class Exploding_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1038,7 +1073,7 @@ class Exploding_mygga(Flying_enemy):
 class Froggy(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/froggy/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/froggy/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -1057,7 +1092,7 @@ class Froggy(Enemy):
 class Packun(Enemy):
     def __init__(self,pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/packun/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/packun/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -1078,7 +1113,7 @@ class Packun(Enemy):
 class Sandrew(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/sandrew/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/sandrew/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -1101,12 +1136,12 @@ class Slime(Enemy):
         pass
 
     def pool(game_objects):#spawned in mid game by sline giant
-        Slime.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/slime/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        Slime.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
 
 class Slime_giant(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/slime_giant/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_giant/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],48,48)
@@ -1123,7 +1158,7 @@ class Slime_giant(Enemy):
 class Wall_slime(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/wall_slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/wall_slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
@@ -1140,7 +1175,7 @@ class Wall_slime(Enemy):
 class Vatt(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/vatt/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/vatt/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
@@ -1160,7 +1195,7 @@ class Vatt(Enemy):
 class Maggot(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/maggot/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/maggot/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
@@ -1173,7 +1208,7 @@ class Maggot(Enemy):
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/larv_simple/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/enemies/larv_simple/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
@@ -1182,7 +1217,7 @@ class Larv_simple(Enemy):
 class Larv_poison(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/larv/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
@@ -1195,7 +1230,7 @@ class Larv_poison(Enemy):
 class Bird(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/animals/bluebird/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/animals/bluebird/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -1211,7 +1246,7 @@ class Bird(Enemy):
 class Shroompoline(Enemy):#an enemy or interactable?
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/shroompolin/',game_objects)
+        self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/shroompolin/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
@@ -1241,7 +1276,7 @@ class Shroompoline(Enemy):#an enemy or interactable?
 class Kusa(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/kusa/',game_objects)
+        self.sprites=Read_files.load_sprites_dict('Sprites/enteties/enemies/kusa/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
@@ -1258,7 +1293,7 @@ class Kusa(Enemy):
 class Svampis(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/svampis/',game_objects)
+        self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/svampis/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
@@ -1275,7 +1310,7 @@ class Svampis(Enemy):
 class Egg(Enemy):#change design
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/enemies/egg/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/enemies/egg/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],64,64)
@@ -1299,7 +1334,7 @@ class Egg(Enemy):#change design
 class Cultist_rogue(Enemy):
     def __init__(self, pos, game_objects, gameplay_state = None):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/cultist_rogue/',game_objects)
+        self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_rogue/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 40, 40)
@@ -1318,7 +1353,7 @@ class Cultist_rogue(Enemy):
 class Cultist_warrior(Enemy):
     def __init__(self,pos,game_objects,gameplay_state=None):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/Enteties/enemies/cultist_warrior/',game_objects)
+        self.sprites=Read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_warrior/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
@@ -1355,8 +1390,8 @@ class NPC(Character):
         self.quest = []
 
     def load_sprites(self):
-        self.sprites = Read_files.load_sprites_dict("Sprites/Enteties/NPC/" + self.name + "/animation/", self.game_objects)
-        img = pygame.image.load('Sprites/Enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
+        self.sprites = read_files.load_sprites_dict("Sprites/Enteties/NPC/" + self.name + "/animation/", self.game_objects)
+        img = pygame.image.load('Sprites/enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
         self.portrait = self.game_objects.game.display.surface_to_texture(img)#need to save in memoery
 
     def update(self):
@@ -1525,7 +1560,7 @@ class Boss(Enemy):
 class Reindeer(Boss):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/reindeer/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
         self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
@@ -1544,7 +1579,7 @@ class Reindeer(Boss):
 class Butterfly(Flying_enemy):
     def __init__(self, pos, game_objects, quest = None):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/butterfly/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/butterfly/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos,self.image.size)
         self.hitbox = self.rect.copy()
@@ -1578,7 +1613,7 @@ class Butterfly(Flying_enemy):
 class Rhoutta_encounter(Boss):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/boss/rhoutta/',game_objects)
+        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/boss/rhoutta/',game_objects)
         self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
@@ -1752,7 +1787,7 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
 class Player_abilities():
     def __init__(self,entity):
         self.entity = entity
-        self.spirit_abilities = {'Thunder':Thunder(entity),'Force':Force(entity),'Bow':Bow(entity),'Migawari':Migawari(entity),'Slow_motion':Slow_motion(entity)}#abilities aila has
+        self.spirit_abilities = {'Thunder': Horagalles_rage(entity),'Shield': Tjasolmais_embrace(entity),'Bow': Juksakkas_blessing(entity),'Migawari': Maderakkas_reflection(entity),'Slow_motion': Beaivis_time(entity)}#abilities aila has
         self.equip = 'Thunder'#spirit ability pointer
         self.movement_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
         self.movement_abilities = list(self.movement_dict.values())#make it a list
@@ -1924,9 +1959,6 @@ class Projectiles(Platform_entity):#projectiels
     def ramp_gravity(self):#called from shift up in ramps. The extra gravity on ramp
         pass
 
-    def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
-
     #pltform collisions.
     def right_collision(self,hitbox):
         pass
@@ -1941,6 +1973,9 @@ class Projectiles(Platform_entity):#projectiels
         pass
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
+        pass
+
+    def release_texture(self):#i guess all projectiles will have a pool
         pass
 
 class Bouncy_balls(Projectiles):#for ball challange room
@@ -1958,7 +1993,7 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.quest = kwarg.get('quest', None)
 
     def pool(game_objects):
-        Bouncy_balls.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
+        Bouncy_balls.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
     def release_texture(self):
         pass
@@ -2007,10 +2042,7 @@ class Poisoncloud(Projectiles):
         self.lifetime=400
 
     def pool(game_objects):
-        Poisoncloud.sprites = Read_files.load_sprites_dict('Sprites/Attack/poisoncloud/',game_objects)
-
-    def release_texture(self):
-        pass
+        Poisoncloud.sprites = read_files.load_sprites_dict('Sprites/attack/poisoncloud/',game_objects)
 
     def collision_ene(self,collision_ene):
         pass
@@ -2035,9 +2067,6 @@ class Poisonblobb(Projectiles):
         self.dir = kwarg.get('dir', [1,0])
         self.velocity = [-self.dir[0]*5,-1]
 
-    def release_texture(self):
-        pass
-
     def update(self):
         super().update()
         self.update_vel()
@@ -2050,7 +2079,7 @@ class Poisonblobb(Projectiles):
         self.currentstate.handle_input('Death')
 
     def pool(game_objects):
-        Poisonblobb.sprites = Read_files.load_sprites_dict('Sprites/Attack/poisonblobb/', game_objects)
+        Poisonblobb.sprites = read_files.load_sprites_dict('Sprites/attack/poisonblobb/', game_objects)
 
 class Projectile_1(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
@@ -2066,10 +2095,7 @@ class Projectile_1(Projectiles):
         self.velocity=[-self.dir[0]*5, 0]
 
     def pool(game_objects):
-        Projectile_1.sprites = Read_files.load_sprites_dict('Sprites/Attack/projectile_1/',game_objects)
-
-    def release_texture(self):
-        pass
+        Projectile_1.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
     def collision_platform(self,platform):
         self.velocity = [0,0]
@@ -2091,20 +2117,54 @@ class Falling_rock(Projectiles):#things that can be placed in cave, the source m
         self.hitbox = self.rect.copy()
         self.lifetime = 100
         self.dmg = 1
-
-    def update(self):
-        super().update()
-        self.update_vel()
+        self.currentstate = states_droplets.Idle(self)
 
     def pool(game_objects):
-        Falling_rock.sprites = Read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)
+        Falling_rock.sprites = read_files.load_sprites_dict('Sprites/animations/falling_rock/rock/', game_objects)
 
-    def update_vel(self):
-        self.velocity[1] += 1
-        self.velocity[1] = min(7,self.velocity[1])
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)        
+        super().collision_enemy(collision_enemy)
+        self.currentstate.handle_input('death')
 
-    def release_texture(self):
-        pass
+    def collision_platform(self, collision_plat):#collision platform, called from collusoin_block        
+        super().collision_platform(collision_plat)
+        self.currentstate.handle_input('death')
+
+class Droplet(Projectiles):#droplet that can be placed, the source makes this and can hurt player     
+    def __init__(self,pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Droplet.sprites
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)  
+        self.hitbox = self.rect.copy()
+        self.lifetime = 100
+        self.currentstate = states_droplets.Idle(self)
+        
+        if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
+            self.dmg = 1#acid
+            self.shader_state = states_shader.Palette_swap(self)
+            self.original_colour = [[46, 74,132, 255]]#can append more to replace more
+            self.replace_colour = [[70, 210, 33, 255]]#new oclour. can append more to replace more       
+        else:
+            self.dmg = 0#water
+            self.shader_state = states_shader.Idle(self)
+
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
+        self.currentstate.handle_input('death')
+        if self.dmg == 0: return#do not do the stuff if dmg = 0
+        super().collision_enemy(collision_enemy)        
+
+    def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
+        self.currentstate.handle_input('death')
+        if self.dmg == 0: return#do not do the stuff if dmg = 0    
+        super().collision_platform(collision_plat)    
+
+    def pool(game_objects):
+        Droplet.sprites = read_files.load_sprites_dict('Sprites/animations/droplet/droplet/', game_objects)
+
+    def draw(self,target):
+        self.shader_state.draw()
+        super().draw(target)
 
 class Horn_vines(Projectiles):#the reindeer attack
     def __init__(self, pos, game_objects):
@@ -2117,16 +2177,13 @@ class Horn_vines(Projectiles):#the reindeer attack
         self.dmg = 1
         self.lifetime = 500
 
-    def release_texture(self):
-        pass
-
     def pool(game_objects):
-        Horn_vines.sprites = Read_files.load_sprites_dict('Sprites/Attack/horn_vines/',game_objects)
+        Horn_vines.sprites = read_files.load_sprites_dict('Sprites/attack/horn_vines/',game_objects)
 
     def destroy(self):
         if self.lifetime < 0:
             self.entity.currentstate.handle_input('Horn_vines')
-            self.kill()
+            self.kill()    
 
 class Melee(Projectiles):
     def __init__(self, entity):
@@ -2164,9 +2221,6 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
 
-    def release_texture(self):
-        pass
-
     def draw(self, target):
         pass
 
@@ -2181,19 +2235,16 @@ class Explosion(Melee):
         self.lifetime = 100
         self.dmg = 1
 
-    def release_texture(self):
-        pass
-
     def pool(game_objects):
-        Explosion.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/', game_objects)
+        Explosion.sprites = read_files.load_sprites_dict('Sprites/attack/hurt_box/', game_objects)
 
     def reset_timer(self):
         self.kill()
 
-class Shield(Melee):
+class Reflect(Melee):#pressing k
     def __init__(self,entity):
         super().__init__(entity)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/invisible/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/hurt_box/',entity.game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = self.entity.hitbox.copy()#pygame.Rect(self.entity.rect[0],self.entity.rect[1],20,40)
         self.hitbox = self.rect.copy()
@@ -2224,7 +2275,7 @@ class Sword(Melee):
         self.hitbox = self.rect.copy()
 
     def pool(game_objects):
-        Sword.sprites = Read_files.load_sprites_dict('Sprites/Attack/Sword/', game_objects)
+        Sword.sprites = read_files.load_sprites_dict('Sprites/attack/sword/', game_objects)
 
     def init(self):
         self.sprites = Sword.sprites
@@ -2254,9 +2305,6 @@ class Sword(Melee):
     def collision_inetractables(self,interactable):#called when projectile hits interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
 
-    def release_texture(self):
-        pass
-
 class Aila_sword(Sword):
     def __init__(self, entity):
         super().__init__(entity)
@@ -2270,7 +2318,7 @@ class Aila_sword(Sword):
         self.swing = 0#a flag to check which swing we are at (0 or 1)
 
     def init(self):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/aila_slash/',self.entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
         self.image = self.sprites['slash_1'][0]
         self.dmg = 1
 
@@ -2329,22 +2377,16 @@ class Aila_sword(Sword):
         self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
 
 class Thunder(Projectiles):
-    def __init__(self, entity):#TODO change to pos, game_objects
-        super().__init__([0,0], entity.game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/Thunder/',entity.game_objects)
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+        self.sprites = Thunder.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
-        self.dmg = 1
-        self.level = 1#upgrade pointer
+        self.dmg = kwarg.get('dmg', 1)
 
-    def release_texture(self):
-        pass
-
-    def initiate(self, enemy_rect):
-        self.rect.midbottom = enemy_rect.midbottom
-        self.hitbox = self.rect.copy()
-        self.lifetime = 1000
+    def pool(game_objects):
+        Thunder.sprites = read_files.load_sprites_dict('Sprites/attack/Thunder/', game_objects)
 
     def collision_enemy(self,collision_enemy):
         super().collision_enemy(collision_enemy)
@@ -2354,39 +2396,6 @@ class Thunder(Projectiles):
     def reset_timer(self):
         self.dmg = 1
         self.kill()
-
-class Force(Projectiles):
-    def __init__(self, entity):#TODO change to pos, game_objects
-        super().__init__([0,0], entity.game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/force/',entity.game_objects)
-        self.image = self.sprites['once'][0]
-        self.rect = pygame.Rect(entity.rect.centerx, entity.rect.centery,self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()
-        self.dmg = 0
-        self.level = 1#upgrade pointer
-
-    def initiate(self):
-        self.lifetime = 30
-        self.dir = self.entity.dir.copy()
-        self.update_hitbox()
-        self.true_pos = list(self.entity.rect.topleft)
-        self.velocity = [sign(self.dir[0]) * (abs(self.dir[0]) - abs(self.dir[1]))*10, -self.dir[1] * 10]
-
-    def collision_plat(self,platform):
-        self.animation.reset_timer()
-        self.currentstate.handle_input('Death')
-        self.velocity=[0,0]
-
-    def collision_enemy(self,collision_enemy):#if hit something
-        self.animation.reset_timer()
-        self.currentstate.handle_input('Death')
-        self.velocity=[0,0]
-
-        collision_enemy.velocity[0]=self.dir[0]*10#abs(push_strength[0])
-        collision_enemy.velocity[1]=-6
-
-    def release_texture(self):
-        pass
 
 class Arrow(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
@@ -2401,7 +2410,7 @@ class Arrow(Projectiles):
         self.velocity=[self.dir[0] * 20, self.dir[1] * 20]
 
     def pool(game_objects):
-        Arrow.sprites = Read_files.load_sprites_dict('Sprites/Attack/arrow/', game_objects)
+        Arrow.sprites = read_files.load_sprites_dict('Sprites/attack/arrow/', game_objects)
 
     def collision_enemy(self,collision_enemy):
         collision_enemy.take_dmg(self.dmg)
@@ -2412,76 +2421,126 @@ class Arrow(Projectiles):
         self.velocity = [0,0]
         self.dmg = 0
 
-    def release_texture(self):
-        pass
-
-class Migawari():
-    def __init__(self,entity):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/migawari/',entity.game_objects)
+class Shield(Projectiles):#a protection shield
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity
-        self.game_objects = entity.game_objects#animation need dt
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Animation(self)
-        self.currentstate = states_basic.Idle(self)#
+        self.image = Shield.image
+        self.rect = pygame.Rect(entity.hitbox.centerx, entity.hitbox.centery, self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.time = 0
+        self.entity.invincibile = True
+        self.health = kwarg.get('health', 1)
+        self.general_Timer = General_Timer(self, 100, self.time_out)#how long it will last after taking reaching 0 health
 
-        self.health = 1
-        self.level = 1#upgrade pointer
+    def take_dmg(self, dmg):#called when entity takes damage
+        if self.invincibile: return
+        self.health -= dmg
+        self.timer_jobs['invincibility'].activate()
+        #TODO make it red momentary or something to indicate that it too damage
+        if self.health < 0:
+            self.general_Timer.activate()
+            #TODO make it blink or something to indicate that it will die soon
 
-    def spawn(self,pos):#called when using the ability
-        spawn = Migawari_entity(pos,self.entity.game_objects)
-        spawn.set_health(self.health)
-        spawn.set_lifetime(1000)
-        self.entity.game_objects.players.add(spawn)
+    def time_out(self):#called when general timer it count down
+        self.kill()
 
-    def reset_timer(self):
+    def update(self):
+        self.update_timers()
+        self.time += self.entity.game_objects.game.dt
+        self.update_pos()
+
+    def update_pos(self):
+        self.true_pos = [int(self.entity.hitbox.center[0] - self.game_objects.camera.scroll[0] - self.image.width*0.5),int(self.entity.hitbox.center[1] - self.game_objects.camera.scroll[1]- self.image.height*0.5)]
+    
+    def draw(self, target):
+        self.game_objects.shaders['shield']['time'] = self.time*0.1
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = self.hitbox.topleft, shader = self.game_objects.shaders['shield'])#shader render  
+
+    def pool(game_objects):
+        size = [90, 90]        
+        Shield.image = game_objects.game.display.make_layer(size).texture
+
+    def kill(self):
+        super().kill()
+        self.entity.invincibile = False
+        self.entity.tjasolmais_embrace = None
+
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         pass
+
+    def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
+        pass
+
+#aila abilities
+class Player_ability():#the abilities aila can absorb. Handles upgrades, spawn the ability and UI and stuff
+    def __init__(self, entity):
+        self.entity = entity
+        self.level = 1#upgrade pointer       
+
+    def initiate(self):#called when using the ability
+        pass
+
+class Horagalles_rage(Player_ability):#desolate dive:thunder god: 
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/horagalles_rage/',entity.game_objects)
+
+    def initiate(self, enemy_rect):
+        thunder = Thunder(enemy_rect, self.entity.game_objects, lifetime =  1000)
+        thunder.rect.midbottom = enemy_rect.midbottom
+        thunder.hitbox = thunder.rect.copy()
+        self.entity.projectiles.add(thunder)#add attack to group
+
+class Tjasolmais_embrace(Player_ability):#makes the shield, water god
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/tjasolmais_embrace/',entity.game_objects)
+        #-> higher level can reflect projectiles? or maybe hurt enemy?  
+
+    def initiate(self):#called when using the abilty
+        shield = Shield(self.entity)
+        self.entity.tjasolmais_embrace = shield        
+        self.entity.projectiles.add(shield)               
+        
+class Maderakkas_reflection(Player_ability):#migawari: woman/mother god 
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/maderakkas_reflection/',entity.game_objects)
+        self.health = 1
+
+    def initiate(self):#called when using the ability
+        spawn = Maderakkas_reflection_entity(self.entity.rect.midtop, self.entity.game_objects, lifetime = 1000, health = self.health)
+        self.entity.game_objects.players.add(spawn)
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
         if self.level == 2:
             self.health = 2
 
-    def release_texture(self):
-        pass
-
-class Slow_motion():
-    def __init__(self,entity):
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/slow_motion/',entity.game_objects)
-        self.entity = entity
-        self.game_objects = entity.game_objects#animation need dt
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
-        self.animation = animation.Animation(self)
-        self.currentstate = states_basic.Idle(self)#
-
-        self.level = 1#upgrade pointer
+class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
         self.duration = 200#slow motion duration, in time [whatever units]
-
-    def init(self):#called from slow motion gameplay state
         self.rate = 0.5#slow motion rate
+
+    def initiate(self):#called when using the ability from player states
+        new_state = states.Slow_motion_gameplay(self.entity.game_objects.game, rate = self.rate, duration = self.duration)
+        new_state.enter_state()
+
+    def upgrade_ability(self):#called from upgrade menu
+        self.level += 1
         if self.level == 3:
             self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila
             self.duration = 400#slow motion duration, in time [whatever units]
         elif self.level == 2:
             self.duration = 400#slow motion duration, in time [whatever units]
 
-    def spawn(self):#called when using the ability from player states
-        self.init()
-        new_state = states.Slow_motion_gameplay(self.game_objects.game, rate = self.rate, duration = self.duration)
-        new_state.enter_state()
-
-    def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
-
-    def reset_timer(self):
-        pass
-
-    def release_texture(self):
-        pass
-
-class Bow():
+class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
     def __init__(self, entity):
-        self.entity = entity
-        self.sprites = Read_files.load_sprites_dict('Sprites/Attack/bow/', entity.game_objects)
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
         self.level = 1#upgrade pointer
 
     def initiate(self):#called when using the attack
@@ -2542,7 +2601,7 @@ class Loot(Platform_entity):#
 class Heart_container(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/heart_container/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/heart_container/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
@@ -2559,7 +2618,7 @@ class Heart_container(Loot):
 class Spirit_container(Loot):
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/spirit_container/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/spirit_container/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
@@ -2576,7 +2635,7 @@ class Spirit_container(Loot):
 class Soul_essence(Loot):#genkidama
     def __init__(self, pos, game_objects, ID_key = None):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/soul_essence/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/soul_essence/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
@@ -2600,7 +2659,7 @@ class Soul_essence(Loot):#genkidama
 class Spiritorb(Loot):#the thing that gives spirit
     def __init__(self,pos,game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/spiritorbs/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/spiritorbs/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
@@ -2659,8 +2718,8 @@ class Amber_Droplet(Enemy_drop):
         self.game_objects.world_state.update_statistcis('amber_droplet')
 
     def pool(game_objects):#all things that should be saved in object pool
-        Amber_Droplet.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/amber_droplet/',game_objects)
-        Amber_Droplet.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/amber_droplet/')
+        Amber_Droplet.sprites = read_files.load_sprites_dict('Sprites/enteties/items/amber_droplet/',game_objects)
+        Amber_Droplet.sounds = read_files.load_sounds_dict('audio/SFX/enteties/items/amber_droplet/')
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
@@ -2685,8 +2744,8 @@ class Bone(Enemy_drop):
         self.game_objects.player.currentstate.enter_state('Plant_bone_main')
 
     def pool(game_objects):#all things that should be saved in object pool
-        Bone.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/bone/',game_objects)
-        Bone.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/bone/')
+        Bone.sprites = read_files.load_sprites_dict('Sprites/enteties/items/bone/',game_objects)
+        Bone.sounds = read_files.load_sounds_dict('audio/SFX/enteties/items/bone/')
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
@@ -2710,8 +2769,8 @@ class Heal_item(Enemy_drop):
         self.game_objects.player.heal(1)
 
     def pool(game_objects):#all things that should be saved in object pool: #obj = cls.__new__(cls)#creatate without runing initmethod
-        Heal_item.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/heal_item/',game_objects)
-        Heal_item.sounds = Read_files.load_sounds_dict('Audio/SFX/enteties/items/heal_item/')
+        Heal_item.sprites = read_files.load_sprites_dict('Sprites/enteties/items/heal_item/',game_objects)
+        Heal_item.sounds = read_files.load_sounds_dict('audio/SFX/enteties/items/heal_item/')
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
@@ -2767,7 +2826,7 @@ class Tungsten(Interactable_item):#move omamori and infiinity stones to here a s
         self.clean()
 
     def pool(game_objects):
-        Tungsten.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/tungsten/',game_objects)
+        Tungsten.sprites = read_files.load_sprites_dict('Sprites/enteties/items/tungsten/',game_objects)
 
 class Omamori(Interactable_item):
     def __init__(self,pos, game_objects, **kwarg):
@@ -2826,7 +2885,7 @@ class Half_dmg(Omamori):
         self.entity.dmg_scale = 1
 
     def pool(game_objects):
-        Half_dmg.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/half_dmg/',game_objects)#for inventory
+        Half_dmg.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/half_dmg/',game_objects)#for inventory
 
 class Loot_magnet(Omamori):
     def __init__(self, pos, game_objects, **kwarg):
@@ -2842,7 +2901,7 @@ class Loot_magnet(Omamori):
             loot.attract(self.entity.rect.center)
 
     def pool(game_objects):
-        Loot_magnet.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/loot_magnet/',game_objects)#for inventory
+        Loot_magnet.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/loot_magnet/',game_objects)#for inventory
 
 class Boss_HP(Omamori):
     def __init__(self,pos, game_objects, **kwarg):
@@ -2860,7 +2919,7 @@ class Boss_HP(Omamori):
             enemy.health_bar()#attached a healthbar on boss
 
     def pool(game_objects):
-        Boss_HP.sprites = Read_files.load_sprites_dict('Sprites/Enteties/omamori/boss_HP/',game_objects)#for inventor
+        Boss_HP.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/boss_HP/',game_objects)#for inventor
 
 class Infinity_stones(Interactable_item):
     def __init__(self, pos, game_objects, **kwarg):
@@ -2893,7 +2952,7 @@ class Infinity_stones(Interactable_item):
 class Red_infinity_stone(Infinity_stones):#more dmg
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/infinity_stones/red/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/red/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -2909,7 +2968,7 @@ class Red_infinity_stone(Infinity_stones):#more dmg
 class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/infinity_stones/green/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/green/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -2922,7 +2981,7 @@ class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
 class Blue_infinity_stone(Infinity_stones):#get spirit at collision
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/infinity_stones/blue/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/blue/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -2935,7 +2994,7 @@ class Blue_infinity_stone(Infinity_stones):#get spirit at collision
 class Orange_infinity_stone(Infinity_stones):#bigger hitbox
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/infinity_stones/orange/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/orange/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -2950,10 +3009,10 @@ class Orange_infinity_stone(Infinity_stones):#bigger hitbox
         self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,80,40)
         self.sword.hitbox = self.sword.rect.copy()
 
-class Purple_infinity_stone(Infinity_stones):#reflect projectile
+class Purple_infinity_stone(Infinity_stones):#reflect projectile -> crystal caves
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = Read_files.load_sprites_dict('Sprites/Enteties/Items/infinity_stones/purple/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/purple/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -2974,7 +3033,7 @@ class Blood(Animatedentity):
         self.kill()
 
     def pool(game_objects):#all things that should be saved in object pool
-        Blood.sprites = Read_files.load_sprites_dict('Sprites/GFX/blood/death/', game_objects)
+        Blood.sprites = read_files.load_sprites_dict('Sprites/GFX/blood/death/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
@@ -2990,7 +3049,7 @@ class Water_running_particles(Animatedentity):#should make for grass, dust, wate
         self.kill()
 
     def pool(game_objects):#all things that should be saved in object pool
-        Water_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/water/', game_objects)
+        Water_running_particles.sprites = read_files.load_sprites_dict('Sprites/animations/running_particles/water/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
@@ -3007,7 +3066,7 @@ class Grass_running_particles(Animatedentity):#should make for grass, dust, wate
         self.kill()
 
     def pool(game_objects):#all things that should be saved in object pool
-        Grass_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/grass/', game_objects)
+        Grass_running_particles.sprites = read_files.load_sprites_dict('Sprites/animations/running_particles/grass/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
@@ -3024,7 +3083,7 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
         self.kill()
 
     def pool(game_objects):#all things that should be saved in object pool
-        Dust_running_particles.sprites = Read_files.load_sprites_dict('Sprites/animations/running_particles/dust/', game_objects)
+        Dust_running_particles.sprites = read_files.load_sprites_dict('Sprites/animations/running_particles/dust/', game_objects)
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
@@ -3041,7 +3100,7 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
         self.velocity = [0,0]
 
     def pool(game_objects):
-        Player_Soul.sprites = Read_files.load_sprites_dict('Sprites/Enteties/soul/', game_objects)
+        Player_Soul.sprites = read_files.load_sprites_dict('Sprites/enteties/soul/', game_objects)
 
     def update(self):
         super().update()
@@ -3062,7 +3121,7 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
 class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/GFX/spawneffect/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/GFX/spawneffect/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.finish = False#needed for the cutscene
@@ -3082,7 +3141,7 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
         self.rect.center = pos
 
     def pool(game_objects):#all things that should be saved in object pool
-        Slash.sprites = Read_files.load_sprites_dict('Sprites/GFX/slash/',game_objects)
+        Slash.sprites = read_files.load_sprites_dict('Sprites/GFX/slash/',game_objects)
 
     def reset_timer(self):
         self.kill()
@@ -3093,7 +3152,7 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
 class Rune_symbol(Animatedentity):#the stuff that will be blitted on uberrunestone
     def __init__(self,pos,game_objects,ID_key):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/rune_symbol/' + ID_key + '/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/rune_symbol/' + ID_key + '/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.center = pos
@@ -3104,7 +3163,7 @@ class Rune_symbol(Animatedentity):#the stuff that will be blitted on uberrunesto
 class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder attack
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/thunder_aura/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/thunder_aura/',game_objects)
         self.currentstate = states_basic.Once(self,next_state = 'Idle',animation_name='idle')#
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -3133,7 +3192,7 @@ class Pray_effect(Animatedentity):#the thing when aila pray
         self.rect.center = pos
 
     def pool(game_objects):
-        Pray_effect.sprites = Read_files.load_sprites_dict('Sprites/animations/pray_effect/', game_objects)
+        Pray_effect.sprites = read_files.load_sprites_dict('Sprites/animations/pray_effect/', game_objects)
 
     def spawn(self):
         pass
@@ -3147,7 +3206,7 @@ class Pray_effect(Animatedentity):#the thing when aila pray
 class Health_bar(Animatedentity):
     def __init__(self,entity):
         super().__init__(entity.rect.center,entity.game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/health_bar/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/health_bar/',entity.game_objects)
         self.entity = entity#the boss
         self.max_health = entity.health
         self.image = self.sprites['idle'][0]
@@ -3169,7 +3228,7 @@ class Logo_loading(Animatedentity):
         self.animation.framerate = 0.1#makes it slower
 
     def pool(game_objects):
-        Logo_loading.sprites = Read_files.load_sprites_dict('Sprites/UI/logo_loading/',game_objects)
+        Logo_loading.sprites = read_files.load_sprites_dict('Sprites/UI/logo_loading/',game_objects)
 
     def update(self):
         super().update()
@@ -3197,7 +3256,7 @@ class Twinkle(Animatedentity):#add a pool
         self.rect.center = [self.entity.rect.centerx + random.randint(-30,30),self.entity.rect.centery + random.randint(-30,30)]#this should be in a state if we want it to do something else than randomly popping up ahain
 
     def pool(game_objects):
-        Twinkle.sprites = Read_files.load_sprites_dict('Sprites/GFX/twinkle/', game_objects)
+        Twinkle.sprites = read_files.load_sprites_dict('Sprites/GFX/twinkle/', game_objects)
 
 #interactables
 class Interactable(Animatedentity):#interactables
@@ -3206,7 +3265,7 @@ class Interactable(Animatedentity):#interactables
         self.group = game_objects.interactables
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
-        if sfx: self.sfx = pygame.mixer.Sound('Audio/SFX/environment/' + sfx + '.mp3')
+        if sfx: self.sfx = pygame.mixer.Sound('audio/SFX/environment/' + sfx + '.mp3')
         else: self.sfx = None # make more dynamic incase we want to use more than just mp3
 
     def update(self):
@@ -3219,7 +3278,7 @@ class Interactable(Animatedentity):#interactables
     def interact(self):#when player press T
         pass
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         pass
 
     def player_noncollision(self):#when player doesn't collide: for grass
@@ -3249,8 +3308,8 @@ class Place_holder_interacatble(Interactable):
 class Bubble_source(Interactable):#the thng that spits out bubbles in cave
     def __init__(self, pos, game_objects, bubble, **prop):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
-        self.sounds = Read_files.load_sounds_list('Audio/SFX/enteties/')
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
+        self.sounds = read_files.load_sounds_list('audio/SFX/enteties/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
@@ -3297,7 +3356,7 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
 class Challenge_monument(Challenges):#the status spawning a portal, balls etc - challange rooms
     def __init__(self, pos, game_objects, ID):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenges/challenge_monument/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/challenges/challenge_monument/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
@@ -3318,7 +3377,7 @@ class Challenge_monument(Challenges):#the status spawning a portal, balls etc - 
 class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl quest
     def __init__(self, pos, game_objects, quest, item):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/challenges/stone_wood/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/challenges/stone_wood/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -3351,8 +3410,8 @@ class Safe_spawn(Interactable):#area which gives the coordinates which will make
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
-        self.game_objects.player.spawn_point['safe_spawn'] = self.position
+    def player_collision(self, player):
+        player.spawn_point['safe_spawn'] = self.position
 
 class Hole(Interactable):#area which will make aila spawn to safe_point if collided
     def __init__(self, pos, game_objects, size):
@@ -3372,17 +3431,21 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
     def update(self):
         self.group_distance()
 
-    def player_collision(self):#TODO when you are invinsible, have 1 health and collides, aila hoovers
+    def player_collision(self, player):
         if self.interacted: return#enter only once
-        if self.game_objects.player.health > 1:#if about to die, don't transport to safe point
+        self.player_transport(player)
+        player.take_dmg(duration = 0)
+        self.interacted = True
+
+    def player_transport(self, player):#transports the player to safe position
+        if player.health > 1:#if about to die, don't transport to safe point
             new_state = states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
             new_state.enter_state()
             self.game_objects.player.currentstate.enter_state('Invisible_main')
-        else: self.game_objects.player.invincibile = False
-        self.game_objects.player.take_dmg(1)
-        self.game_objects.player.velocity = [0,0]
-        self.game_objects.player.acceleration = [0,0]
-        self.interacted = True
+        else: 
+            self.game_objects.player.invincibile = False
+        player.velocity = [0,0]
+        player.acceleration = [0,0]
 
     def player_noncollision(self):#when player doesn't collide
         self.interacted = False
@@ -3406,10 +3469,10 @@ class Zoom_col(Interactable):
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
+    def player_collision(self, player):
         self.blur_timer -= self.game_objects.game.dt
         if self.blur_timer < 0:
-            self.game_objects.player.shader_state.handle_input('blur')
+            player.shader_state.handle_input('blur')
             for sprite in self.game_objects.all_bgs:
                 if sprite.parallax[0] > 0.8:
                     sprite.blur_radius += (1.1/sprite.parallax[0] - sprite.blur_radius) * 0.06
@@ -3451,13 +3514,13 @@ class Path_col(Interactable):
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
+    def player_collision(self, player):
         if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction
-            self.game_objects.player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
-            self.game_objects.player.currentstate.walk()
+            player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
+            player.currentstate.walk()
         else:#vertical travelling
-            self.game_objects.player.reset_movement()
-            self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
+            player.reset_movement()
+            player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
 
         self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
         self.kill()#so that aila only collides once
@@ -3504,7 +3567,7 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
     def update(self):
         pass
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         for layer in self.layers:
             layer.shader_state.handle_input('mix_colour')
 
@@ -3535,9 +3598,9 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
     def update(self):
         self.group_distance()
 
-    def player_collision(self):
+    def player_collision(self, player):
         if not self.new_state:
-            if self.game_objects.world_state.events[self.event]: return#if event has already been done
+            if self.game_objects.world_state.events.get(self.event, False): return#if event has already been done
             self.game_objects.quests_events.initiate_event(self.event)#quest or event?
 
         else:#if it is an event that requires new sttae, e.g. cutscene
@@ -3547,14 +3610,14 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
 
             new_game_state = getattr(states, self.event)(self.game_objects.game)
             new_game_state.enter_state()
-            self.kill()#is this a pronlen in re spawn?
+        self.kill()#is this a pronlen in re spawn?
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.interacted = False
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         if self.interacted: return
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'idle')
         self.interacted = True#sets to false when player gos away
@@ -3572,13 +3635,13 @@ class Interactable_bushes(Interactable):
 class Cave_grass(Interactable_bushes):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/bushes/cave_grass/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/bushes/cave_grass/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
 
-    def player_collision(self):
+    def player_collision(self, player):
         if self.interacted: return
         self.currentstate.handle_input('Once',animation_name ='hurt', next_state = 'Idle')
         self.interacted = True#sets to false when player gos away
@@ -3596,7 +3659,7 @@ class Cave_grass(Interactable_bushes):
 class Cocoon(Interactable):#larv cocoon in light forest
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/cocoon/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/cocoon/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -3629,7 +3692,7 @@ class Cocoon(Interactable):#larv cocoon in light forest
 class Cocoon_boss(Cocoon):#boss cocoon in light forest
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/cocoon_boss/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/cocoon_boss/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -3650,7 +3713,7 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/runestones/' + ID_key + '/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/runestones/' + ID_key + '/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -3673,7 +3736,7 @@ class Runestones(Interactable):
 class Uber_runestone(Interactable):
     def __init__(self, pos, game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/uber_runestone/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/uber_runestone/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -3695,7 +3758,7 @@ class Uber_runestone(Interactable):
 class Chest(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/Chest/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/Chest/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -3739,7 +3802,7 @@ class Chest(Interactable):
 class Door(Interactable):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/animations/Door/',game_objects)
+        self.sprites=read_files.load_sprites_dict('Sprites/animations/Door/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.inflate(0,0)
@@ -3754,14 +3817,14 @@ class Door(Interactable):
 class Savepoint(Interactable):#save point
     def __init__(self, pos, game_objects, map):
         super().__init__(pos, game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/animations/savepoint/',game_objects)
+        self.sprites=read_files.load_sprites_dict('Sprites/animations/savepoint/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
@@ -3783,7 +3846,7 @@ class Savepoint(Interactable):#save point
 class Inorinoki(Interactable):#the place where you trade soul essence for spirit or heart contrainer
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/inorinoki/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/inorinoki/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -3796,7 +3859,7 @@ class Fast_travel(Interactable):
     cost = 50
     def __init__(self,pos,game_objects,map):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/fast_travel/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/fast_travel/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -3832,12 +3895,12 @@ class Fast_travel(Interactable):
 class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginning
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/rhoutta_altar/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/rhoutta_altar/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
@@ -3852,13 +3915,13 @@ class Sign(Interactable):
     def __init__(self,pos,game_objects,directions):
         super().__init__(pos,game_objects)
         self.directions = directions
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/sign/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/sign/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()
         self.symbols = Sign_symbols(self)
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Outline')
 
     def player_noncollision(self):#when player doesn't collide
@@ -3875,7 +3938,7 @@ class Sign(Interactable):
 class Light_crystal(Interactable):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/light_crystals/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/light_crystals/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -3900,7 +3963,7 @@ class Light_crystal(Interactable):
 class Fireplace(Interactable):
     def __init__(self, pos, game_objects, on = False):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/fireplace/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/fireplace/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
@@ -3921,7 +3984,7 @@ class Fireplace(Interactable):
 class Spikes(Interactable):#traps
     def __init__(self,pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/spikes/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/traps/spikes/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],self.rect[2],16)
@@ -3931,7 +3994,7 @@ class Spirit_spikes(Interactable):#traps
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.currentstate = states_traps.Idle(self)#
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/spirit_spikes/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/traps/spirit_spikes/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],self.rect[2],16)
@@ -3939,14 +4002,14 @@ class Spirit_spikes(Interactable):#traps
         self.hurt_box = Hurt_box
         self.dmg = 1
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Death')
 
 class Lightning_spikes(Interactable):#traps
     def __init__(self,pos, game_objects):
         super().__init__(pos, game_objects)
         self.currentstate = states_traps.Idle(self)#
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/lightning_spikes/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/traps/lightning_spikes/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 26, 16)
@@ -3954,13 +4017,13 @@ class Lightning_spikes(Interactable):#traps
         self.hurt_box = Hurt_box
         self.dmg = 1
 
-    def player_collision(self):#player collision
+    def player_collision(self, player):#player collision
         self.currentstate.handle_input('Once')
 
 class Grind(Interactable):#trap
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/traps/grind/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/traps/grind/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
@@ -3996,8 +4059,8 @@ class Grind(Interactable):#trap
     def group_distance(self):
         pass
 
-    def player_collision(self):#player collision
-        self.game_objects.player.take_dmg(1)
+    def player_collision(self, player):#player collision
+        player.take_dmg(1)
 
     def take_dmg(self, projectile):#when player hits with e.g. sword
         if hasattr(projectile, 'sword_jump'):#if it has the attribute
@@ -4006,7 +4069,7 @@ class Grind(Interactable):#trap
 class Lever(Interactable):
     def __init__(self, pos, game_objects, ID_key):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/lever/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/lever/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -4066,12 +4129,13 @@ class Timer():
             self.deactivate()
 
 class General_Timer(Timer):#when lifetime is 0, it calls the timeout of entety
-    def __init__(self, entity, duration):
+    def __init__(self, entity, duration, function):
         super().__init__(entity, duration)
         self.lifetime = duration
+        self.function = function
 
     def deactivate(self):
-        self.entity.time_out()
+        self.function()
 
 class Invincibility_timer(Timer):
     def __init__(self,entity,duration):
@@ -4085,6 +4149,33 @@ class Invincibility_timer(Timer):
     def deactivate(self):
         super().deactivate()
         self.entity.invincibile = False
+
+class Wet_timer(Timer):#"a wet status". activates when player baths, and spawns particles that drops from player
+    def __init__(self,entity, duration):
+        super().__init__(entity, duration)
+        self.game_objects = entity.game_objects#need for general timer
+        self.spawn_frequency = 5#how often to spawn particle
+        self.spawn_timer = General_Timer(self, self.spawn_frequency, self.time_out)        
+
+    def activate(self, water_tint):#called when aila bathes (2D water)
+        self.lifetime = self.duration#reset the duration
+        self.water_tint = water_tint
+        self.drop()        
+        if self in self.entity.timers: return#do not append if the timer is already inside                
+        self.entity.timers.append(self)        
+        
+    def update(self):
+        super().update()
+        self.spawn_timer.update()
+
+    def time_out(self):#called when geenral timer runs out
+        self.spawn_timer.lifetime = self.spawn_frequency#reset the time
+        self.drop()        
+
+    def drop(self):
+        pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
+        obj1 = particles.Circle(pos, self.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
+        self.game_objects.cosmetics.add(obj1)          
 
 class Sword_timer(Timer):
     def __init__(self,entity,duration):

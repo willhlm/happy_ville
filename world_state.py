@@ -1,9 +1,9 @@
-import Read_files
+import read_files
 
 class World_state():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.state = Read_files.read_json("map_state.json")
+        self.state = read_files.read_json("map_state.json")
         self.statistics = {'kill': {}, 'amber_droplet' : 0, 'death': 0}#collects stuff aila has done, number of deaths       
         self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked

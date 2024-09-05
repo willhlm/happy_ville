@@ -280,7 +280,7 @@
                                 {
                                  "name":"ID",
                                  "type":"string",
-                                 "value":"ball_room1"
+                                 "value":"ball_room_1"
                                 }, 
                                 {
                                  "name":"erect",
@@ -303,7 +303,7 @@
                                 {
                                  "name":"ID",
                                  "type":"string",
-                                 "value":"ball_room"
+                                 "value":"ball_room_2"
                                 }, 
                                 {
                                  "name":"erect",

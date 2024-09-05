@@ -33,7 +33,14 @@ class Collisions():
         for interactable in self.game_objects.interactables.sprites():
             collision_entity = pygame.sprite.spritecollideany(interactable, enteties, Collisions.collided)
             if collision_entity:
-                interactable.player_collision()
+                interactable.player_collision(collision_entity)
+            else:
+                interactable.player_noncollision()
+
+        for interactable in self.game_objects.interactables_fg.sprites():
+            collision_entity = pygame.sprite.spritecollideany(interactable, enteties, Collisions.collided)
+            if collision_entity:
+                interactable.player_collision(collision_entity)
             else:
                 interactable.player_noncollision()
 

@@ -1,43 +1,46 @@
-import Entities, particles, entities_parallax, weather, platforms, entities_UI
+import entities, particles, entities_parallax, weather, platforms, entities_UI
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self, game_objects):    
         #loot    
-        Entities.Amber_Droplet.pool(game_objects)
-        Entities.Bone.pool(game_objects)
-        Entities.Heal_item.pool(game_objects)
-        Entities.Tungsten.pool(game_objects)
+        entities.Amber_Droplet.pool(game_objects)
+        entities.Bone.pool(game_objects)
+        entities.Heal_item.pool(game_objects)
+        entities.Tungsten.pool(game_objects)
 
         #cosmetics
-        Entities.Water_running_particles.pool(game_objects)
-        Entities.Grass_running_particles.pool(game_objects)
-        Entities.Dust_running_particles.pool(game_objects)
-        Entities.Slash.pool(game_objects)
-        Entities.Conversation_bubbles.pool(game_objects)
-        Entities.Twinkle.pool(game_objects)
-        Entities.Logo_loading.pool(game_objects)
-        Entities.Blood.pool(game_objects)
-        Entities.Player_Soul.pool(game_objects)
-        Entities.Pray_effect.pool(game_objects)
+        entities.Water_running_particles.pool(game_objects)
+        entities.Grass_running_particles.pool(game_objects)
+        entities.Dust_running_particles.pool(game_objects)
+        entities.Slash.pool(game_objects)
+        entities.Conversation_bubbles.pool(game_objects)
+        entities.Twinkle.pool(game_objects)
+        entities.Logo_loading.pool(game_objects)
+        entities.Blood.pool(game_objects)
+        entities.Player_Soul.pool(game_objects)
+        entities.Pray_effect.pool(game_objects)
 
         #omamori
-        Entities.Boss_HP.pool(game_objects)
-        Entities.Loot_magnet.pool(game_objects)
-        Entities.Half_dmg.pool(game_objects)
+        entities.Boss_HP.pool(game_objects)
+        entities.Loot_magnet.pool(game_objects)
+        entities.Half_dmg.pool(game_objects)
 
         #enemy
-        Entities.Slime.pool(game_objects)
+        entities.Slime.pool(game_objects)
 
         #projectiles        
-        Entities.Bouncy_balls.pool(game_objects)
-        Entities.Explosion.pool(game_objects)
-        Entities.Poisoncloud.pool(game_objects)
-        Entities.Horn_vines.pool(game_objects)
-        Entities.Falling_rock.pool(game_objects)
-        Entities.Projectile_1.pool(game_objects)
-        Entities.Poisonblobb.pool(game_objects)
-        Entities.Sword.pool(game_objects)
-        Entities.Arrow.pool(game_objects)
+        entities.Bouncy_balls.pool(game_objects)
+        entities.Explosion.pool(game_objects)
+        entities.Poisoncloud.pool(game_objects)
+        entities.Horn_vines.pool(game_objects)
+        entities.Falling_rock.pool(game_objects)
+        entities.Projectile_1.pool(game_objects)
+        entities.Poisonblobb.pool(game_objects)
+        entities.Sword.pool(game_objects)
+        entities.Arrow.pool(game_objects)
+        entities.Shield.pool(game_objects)
+        entities.Thunder.pool(game_objects)
+        entities.Droplet.pool(game_objects)
 
         entities_UI.Menu_Arrow.pool(game_objects)
 

@@ -1,4 +1,4 @@
-import Read_files, random
+import read_files, random
 
 class Conversation():
     def __init__(self,entity):
@@ -19,7 +19,7 @@ class Conversation():
 class Dialogue(Conversation):#handles dialoage and what to say for NPC
     def __init__(self,entity):
         super().__init__(entity)
-        self.dialoages = {'conversation': Read_files.read_json("text/NPC/conversation/" + self.entity.name + ".json"), 'comment': Read_files.read_json("text/NPC/comment/" + self.entity.name + ".json") }
+        self.dialoages = {'conversation': read_files.read_json("text/NPC/conversation/" + self.entity.name + ".json"), 'comment': read_files.read_json("text/NPC/comment/" + self.entity.name + ".json") }
 
     def get_comment(self):#random text bubbles
         event = 'state_' + str(self.entity.game_objects.world_state.progress)
@@ -59,7 +59,7 @@ class Dialogue(Conversation):#handles dialoage and what to say for NPC
 class Dialogue_interactable(Conversation):#interactables
     def __init__(self, entity, name):
         super().__init__(entity)
-        self.dialoages = {'conversation':Read_files.read_json("text/interactables/" + name + ".json")}
+        self.dialoages = {'conversation':read_files.read_json("text/interactables/" + name + ".json")}
 
     def get_conversation(self):#quest stuff first, then priority evens, and then normal events followed by notmal conversation        
         event = 'state_0'

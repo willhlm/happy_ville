@@ -1,5 +1,5 @@
 import pygame
-import Entities, states_time_collision, animation, Read_files, states_basic, states_gate
+import entities, states_time_collision, animation, read_files, states_basic, states_gate
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
@@ -28,7 +28,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos, size)
-        self.run_particles = {'dust':Entities.Dust_running_particles,'water':Entities.Water_running_particles,'grass':Entities.Grass_running_particles}[run_particle]
+        self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -51,7 +51,7 @@ class Collision_block(Platform):
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos,size)
-        self.run_particles = {'dust':Entities.Dust_running_particles,'water':Entities.Water_running_particles,'grass':Entities.Grass_running_particles}[run_particle]
+        self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
 
     def collide_x(self,entity):
         pass
@@ -251,7 +251,7 @@ class Collision_texture(Platform):#blocks that has tectures
 class Boulder(Collision_texture):#blocks village cave
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/block/boulder/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/boulder/', game_objects)
 
         if game_objects.world_state.events.get('reindeer', False):#if reindeer has been deafeated
             state = 'down'
@@ -263,14 +263,16 @@ class Boulder(Collision_texture):#blocks village cave
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
-class Gate(Collision_texture):#a gate that is owned by the lever
+class Gate(Collision_texture):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.dir = [1,0]
-        self.sprites = Read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
 
-        self.ID_key = kwarg.get('ID', None)#an ID to match with the gate
-        if game_objects.world_state.quests.get(self.ID_key, False):#if ballroom has been completed
+        self.ID_key = kwarg.get('ID', 'None')#an ID to match with the gate
+        if game_objects.world_state.quests.get(self.ID_key[:self.ID_key.rfind('_')], False):#if ballroom has been completed
+            state = 'down'
+        elif game_objects.world_state.events.get(self.ID_key[:self.ID_key.rfind('_')], False):#if the event has been completed
             state = 'down'
         else:                
             state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   
@@ -291,7 +293,7 @@ class Gate(Collision_texture):#a gate that is owned by the lever
 class Bridge(Collision_texture):#bridge twoards forest path
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/block/bridge/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/bridge/', game_objects)
 
         if game_objects.world_state.events.get('reindeer', False):#if reindeer has been deafeated
             state = 'erect'
@@ -339,7 +341,7 @@ class Rhoutta_encounter_1(Collision_timer):
         self.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
         self.image = self.sprites['idle'][0]
         self.timer_jobs = {'timer_disappear':Platform_timer_1(self,60),'timer_appear':Platform_timer_2(self,60)}#these timers are activated when promt and a job is appeneded to self.timer.
-        self.run_particles = Entities.Dust_running_particles
+        self.run_particles = entities.Dust_running_particles
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
 
@@ -355,7 +357,7 @@ class Rhoutta_encounter_1(Collision_timer):
 class Bubble_static(Collision_timer):#static bubble
     def __init__(self, pos, game_objects, **prop):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
@@ -392,7 +394,7 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
-        self.timer_jobs = {'invincibility':Entities.Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.timer_jobs = {'invincibility':entities.Invincibility_timer(self,C.invincibility_time_enemy)}
         self.health = 3
         self.invincibile = False
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
@@ -427,7 +429,7 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
 class Breakable_block_1(Collision_breakable):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -510,7 +512,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.velocity[1] -= self.game_objects.game.dt*0.01   
 
     def pool(game_objects):#all things that should be saved in object pool
-        Bubble.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)    
+        Bubble.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)    
 
     def activate(self):
         pass
@@ -519,7 +521,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.kill()
 
 #timer:
-class Platform_timer_1(Entities.Timer):
+class Platform_timer_1(entities.Timer):
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
 
@@ -527,7 +529,7 @@ class Platform_timer_1(Entities.Timer):
         super().deactivate()
         self.entity.deactivate()
 
-class Platform_timer_2(Entities.Timer):
+class Platform_timer_2(entities.Timer):
     def __init__(self,entity,duration):
         super().__init__(entity,duration)
 

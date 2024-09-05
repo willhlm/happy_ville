@@ -1,6 +1,6 @@
 import pygame, sys
 import UI_loader
-import Entities#to load the inventory -> entities_UI?
+import entities#to load the inventory -> entities_UI?
 import states_inventory
 
 class Select_menu():
@@ -58,7 +58,7 @@ class Inventory(Select_menu):
         key_items = self.iventory_UI.key_items#a dict of empty key items
         index = 0
         for key in self.game_objects.player.inventory.keys():#crease the object in inventory and sepeerate between useable items and key items
-            item = getattr(sys.modules[Entities.__name__], key)([0,0],self.game_objects)#make the object based on the string
+            item = getattr(sys.modules[entities.__name__], key)([0,0],self.game_objects)#make the object based on the string
             if hasattr(item, 'use_item'):
                 item.rect.topleft = items[index].rect.topleft
                 item.number = self.game_objects.player.inventory[key]#number of items euirepped
@@ -297,7 +297,7 @@ class Journal(Select_menu):
         self.number = 8 #number of enemies per page
 
         for enemy in self.game_objects.world_state.statistics['kill']:
-            self.enemies.append(getattr(sys.modules[Entities.__name__], enemy.capitalize())([0,0],self.game_objects))#make the object based on the string
+            self.enemies.append(getattr(sys.modules[entities.__name__], enemy.capitalize())([0,0],self.game_objects))#make the object based on the string
 
         self.select_enemies()
         self.define_pointer()

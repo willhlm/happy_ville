@@ -1,11 +1,11 @@
 import pygame, sys, random
-import Read_files
+import read_files
 import entities_UI
 import cutscene
 import constants as C
 import animation
 import UI_select_menu, UI_facilities
-import Entities
+import entities
 import particles
 
 class Game_State():
@@ -36,7 +36,7 @@ class Title_Menu(Game_State):
         self.game_objects = game.game_objects
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
-        self.sprites = {'idle': Read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
+        self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
 
@@ -110,12 +110,13 @@ class Title_Menu(Game_State):
             self.arrow.pressed('new')#if we want to make it e.g. glow or something
             new_state = Gameplay(self.game)
             new_state.enter_state()
+            #testing
 
             #load new game level
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
-            self.game.game_objects.load_map(self,'collision_map_4','1')
+            self.game.game_objects.load_map(self,'golden_fields_5','1')
+            #self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()
@@ -137,7 +138,7 @@ class Load_Menu(Game_State):
         self.game_objects = game.game_objects
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
-        self.sprites = {'idle': Read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
+        self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
 
@@ -295,7 +296,7 @@ class Option_Menu_sounds(Game_State):
         super().__init__(game)
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
-        self.game_settings = Read_files.read_json('game_settings.json')
+        self.game_settings = read_files.read_json('game_settings.json')
 
         #create buttons
         self.buttons = ['overall', 'SFX','music']
@@ -345,7 +346,7 @@ class Option_Menu_sounds(Game_State):
     def exit_state(self):
         super().exit_state()
         self.game_settings['sounds'] = self.game.game_objects.sound.volume
-        Read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
+        read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
 
     def handle_events(self, event):
         if event[0]:
@@ -375,7 +376,7 @@ class Option_Menu_display(Game_State):
         super().__init__(game)
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
-        self.game_settings = Read_files.read_json('game_settings.json')
+        self.game_settings = read_files.read_json('game_settings.json')
 
         #create buttons
         self.buttons = ['vsync', 'fullscreen','resolution']
@@ -439,7 +440,7 @@ class Option_Menu_display(Game_State):
 
     def exit_state(self):
         super().exit_state()
-        Read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
+        read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
 
     def update_options(self, int):
         if self.current_button == 0:#vsync
@@ -507,6 +508,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         super().__init__(game)
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
+
         #create buttons
         self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
         self.current_button = 0
@@ -514,13 +516,19 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.define_BG()
         self.arrow.update_pos(self.button_rects[self.buttons[self.current_button]].topleft)
 
+        #copy the screen
+        self.screen_copy = self.game.display.make_layer(self.game.window_size)
+        self.render()#need to render everything first
+        self.game.game_objects.shaders['blur']['blurRadius'] = 1
+        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#shader render
+
     def define_BG(self):
         size = (100,120)
         bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
         pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
         self.background = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
-        self.background.clear(50,50,50,100)
+        self.background.clear(50,50,50,30)
 
     def initiate_buttons(self):
         y_pos = 140
@@ -538,6 +546,9 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
         self.arrow.play_SFX()
 
+    def update(self):
+        pass
+
     def render(self):
         super().render()
         self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]/2 - self.bg.width/2,100))#shader render
@@ -553,6 +564,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
         self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
 
+        self.game.display.render(self.screen_copy.texture, self.game.screen)#shader render
         self.game.display.render(self.background.texture, self.game.screen)#shader render
 
     def release_texture(self):
@@ -666,10 +678,9 @@ class Ability_menu(Gameplay):#when pressing tab
         self.abilities = list(self.game.game_objects.player.abilities.spirit_abilities.keys())
         self.index = self.abilities.index(self.game.game_objects.player.abilities.equip)
 
-        self.sprites = Read_files.load_sprites_list('Sprites/UI/ability_HUD/',game.game_objects)#TODO
+        self.sprites = read_files.load_sprites_list('Sprites/UI/ability_HUD/',game.game_objects)#TODO
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
         self.surface = self.game.display.make_layer(self.game.window_size)#TODO
-        print(self.sprites)
 
     def update(self):
         self.game.dt *= 0.5#slow motion
@@ -689,7 +700,8 @@ class Ability_menu(Gameplay):#when pressing tab
         self.game.display.render(hud, self.game.screen,position = (250,100))
 
     def handle_events(self, input):
-        if input[0]:#press
+        self.game.game_objects.player.currentstate.handle_movement(input)#move around
+        if input[0]:#press TODO change to right analogue stick. What should it be on keyboard?
             if input[-1] == 'right':
                 self.index+=1
                 if self.index>len(self.abilities)-1:
@@ -1085,7 +1097,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
     def __init__(self,game):
         super().__init__(game)
         spawn_pos=(2920,900)
-        self.entity = Entities.Reindeer(spawn_pos, self.game.game_objects)
+        self.entity = entities.Reindeer(spawn_pos, self.game.game_objects)
         self.entity.AI.deactivate()
 
         self.game.game_objects.enemies.add(self.entity)
@@ -1123,7 +1135,7 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
         pos = (self.game.game_objects.camera.scroll[0] + 900,self.game.game_objects.camera.scroll[1] + 100)
-        self.entity = Entities.Reindeer(pos, self.game.game_objects)#make the boss
+        self.entity = entities.Reindeer(pos, self.game.game_objects)#make the boss
         self.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
         self.game.game_objects.camera.set_camera('Deer_encounter')
@@ -1204,7 +1216,7 @@ class Death(Cutscene_engine):#when aila dies
                 #spawn effect
                 pos = (0,0)#
                 offset = 100#depends on the effect animation
-                self.spawneffect = Entities.Spawneffect(pos,self.game.game_objects)
+                self.spawneffect = entities.Spawneffect(pos,self.game.game_objects)
                 self.spawneffect.rect.midbottom=self.game.game_objects.player.rect.midbottom
                 self.spawneffect.rect.bottom += offset
                 self.game.game_objects.cosmetics.add(self.spawneffect)
@@ -1242,11 +1254,11 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         #should entity stuff be in quest insted?
         spawn_pos1 = (self.game.game_objects.camera.scroll[0] - 300, self.game.game_objects.camera.scroll[1] + 100)
         spawn_pos2 = (self.game.game_objects.camera.scroll[0] + 50, self.game.game_objects.camera.scroll[1] + 100)
-        self.entity1 = Entities.Cultist_warrior(spawn_pos1, self.game.game_objects, quest)#added to group in cutscene
+        self.entity1 = entities.Cultist_warrior(spawn_pos1, self.game.game_objects, quest)#added to group in cutscene
         self.entity1.dir[0] *= -1
         self.entity1.AI.deactivate()
         self.game.game_objects.enemies.add(self.entity1)
-        self.entity2 = Entities.Cultist_rogue(spawn_pos2, self.game.game_objects, quest)#added to group in cutscene
+        self.entity2 = entities.Cultist_rogue(spawn_pos2, self.game.game_objects, quest)#added to group in cutscene
         ##
 
         self.stage = 0
@@ -1294,8 +1306,8 @@ class Rhoutta_encounter(Gameplay):#called from trigger before first rhoutta: shu
     def __init__(self, game):
         super().__init__(game)
         spawn_pos = (1520-40,416-336)#topleft position in tiled - 40 to spawn it behind aila
-        lightning = Entities.Lighitning(spawn_pos,self.game.game_objects, parallax = [1,1], size = [64,336])
-        effect = Entities.Spawneffect(spawn_pos,self.game.game_objects)
+        lightning = entities.Lighitning(spawn_pos,self.game.game_objects, parallax = [1,1], size = [64,336])
+        effect = entities.Spawneffect(spawn_pos,self.game.game_objects)
         effect.rect.midbottom = lightning.rect.midbottom
         self.game.game_objects.interactables.add(lightning)
         self.game.game_objects.cosmetics.add(effect)

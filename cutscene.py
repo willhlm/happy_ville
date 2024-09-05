@@ -1,4 +1,4 @@
-import Read_files
+import read_files
 import animation
 import states#maybe can code it so that we don't import states
 
@@ -7,7 +7,7 @@ class Cutscene_file():#cutscneens that will run based on file. The name of the f
         self.parent_class = parent_class
         self.game_objects = parent_class.game.game_objects
         self.animation=animation.Animation(self)
-        self.sprites = {'idle': Read_files.load_sprites_list('cutscene/'+type(self).__name__.lower(),parent_class.game.game_objects)}
+        self.sprites = {'idle': read_files.load_sprites_list('cutscene/'+type(self).__name__.lower(),parent_class.game.game_objects)}
         self.image=self.sprites['idle'][0]
 
     def update(self):

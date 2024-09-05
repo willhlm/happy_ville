@@ -201,3 +201,18 @@ class Blur(Shader_states):
     def handle_input(self, input, **kwarg):
         if input == 'idle':
             self.enter_state('Idle')         
+
+class Palette_swap(Shader_states):#droplet use it     
+    def __init__(self,entity):
+        super().__init__(entity)    
+        self.entity.shader = self.entity.game_objects.shaders['palette_swap']
+ 
+    def draw(self):
+        self.entity.shader['number_colour'] = len(self.entity.original_colour)
+        for index, color in enumerate(self.entity.original_colour):
+            self.entity.shader['original_' + str(index)] = color
+            self.entity.shader['replace_' + str(index)] = self.entity.replace_colour[index]        
+
+    def handle_input(self, input, **kwarg):
+        if input == 'idle':
+            self.enter_state('Idle')   

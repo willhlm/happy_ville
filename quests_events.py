@@ -1,5 +1,5 @@
 import sys, random
-import Entities, platforms
+import entities, platforms
 
 class Quests_events():#quest and event handlere
     def __init__(self, game_objects):
@@ -34,11 +34,11 @@ class Butterfly_encounter(Quest_event):#called from cutscene if aggro path is ch
         super().__init__(game_objects)
         spawn_pos = self.game_objects.map.references['cocoon_boss'].rect.topleft
         self.game_objects.weather.flash()
-        butterfly = Entities.Butterfly(spawn_pos, self.game.game_objects, self)
+        butterfly = entities.Butterfly(spawn_pos, self.game.game_objects, self)
         self.game_objects.enemies.add(butterfly)
         self.game_objects.map.references['cocoon_boss'].currentstate.handle_input('Hurt')
         spawn_pos = [2576, 1320]
-        self.gate = Entities.Lighitning(spawn_pos,self.game.game_objects,[1,1],[32,96])
+        self.gate = entities.Lighitning(spawn_pos,self.game.game_objects,[1,1],[32,96])
         self.game_objects.interactables.add(self.gate)
         butterfly.AI.activate()
 
@@ -67,6 +67,50 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
         self.game_objects.world_state.cutscenes_complete[type(self).__name__.lower()] = True
         self.game_objects.world_state.events[type(self).__name__.lower()] = True  
 
+class Acid_escape(Quest_event):#called in golden fields "last room"
+    def __init__(self, game_objects, **kwarg):
+        super().__init__(game_objects)
+        pos = [-2000 + game_objects.camera.scroll[0],game_objects.game.window_size[1] + game_objects.camera.scroll[1]]
+        size = [5000, game_objects.game.window_size[1]]
+        self.acid = entities.TwoD_liquid(pos, game_objects, size, vertical = True)
+        game_objects.interactables_fg.add(self.acid)
+
+    def complete(self):
+        self.game_objects.world_state.events[type(self).__name__.lower()] = True  
+        self.acid.kill()
+
+class Golden_fields_encounter_1(Quest_event):#called from golden fields room event_trigger
+    def __init__(self, game_objects, **kwarg):
+        super().__init__(game_objects)
+        self.get_gates()
+        self.spawn_enemy()
+
+    def spawn_enemy(self):
+        self.number = 1
+        for number in range(0, self.number):            
+            pos = [1728 +  random.randint(-10, 10), 1200 +  random.randint(-10, 10)]
+            enemy = entities.Cultist_rogue(pos, self.game_objects, self)
+            self.game_objects.enemies.add(enemy)              
+
+    def get_gates(self):#trap aila
+        self.gates = {}
+        for gate in self.game_objects.map.references['gate']:
+            if gate.ID_key == 'golden_fields_encounter_1_1':#these strings are specified in tiled
+                self.gates['1'] = gate
+                self.gates['1'].currentstate.handle_input('Transform')
+            elif gate.ID_key == 'golden_fields_encounter_1_2':#these strings are specified in tiled
+                self.gates['2'] = gate#this one is already erect     
+
+    def incrase_kill(self):#called when enemy is called
+        self.number -= 1
+        if self.number == 0:#all enemies eleminated        
+            self.complete()  
+
+    def complete(self):
+        for key in self.gates.keys():
+            self.gates[key].currentstate.handle_input('Transform')
+        self.game_objects.world_state.events[type(self).__name__.lower()] = True  
+
 #quests
 class Lumberjack_omamori(Quest_event):#called from monument, #TODO need to make so that this omamori cannot be eqquiped while this quest is runing
     def __init__(self, game_objects, item = None):
@@ -75,20 +119,20 @@ class Lumberjack_omamori(Quest_event):#called from monument, #TODO need to make 
         self.time = 9000#time to compplete        
         self.omamori = item
 
-    def time_out(self):#when time runs out   
+    def time_out(self):#called when timer_display runs out   
         name = type(self.omamori).__name__
         del self.game_objects.player.omamoris.inventory[name] #remove the omamori    
         self.game_objects.world_state.quests['lumberjack_omamori'] = False        
 
     def initiate_quest(self):#called when omamori is picked up        
         self.game_objects.world_state.quests['lumberjack_omamori'] = True        
-        self.timer = Entities.Timer_display(self, self.time)
+        self.timer = entities.Timer_display(self, self.time)
         self.game_objects.cosmetics_no_clear.add(self.timer)        
         
     def complete(self):#called when talking to lumberjack within the timer limit        
         self.timer.kill()                         
 
-class Fragile_butterfly(Quest_event):#TODO
+class Fragile_butterfly(Quest_event):#TODO -> light forest cave
     def __init__(self, game_objects):
         super().__init__(game_objects)
         self.description = 'could you deliver my pixie dust to my love. Do not take damage.'    
@@ -111,7 +155,7 @@ class Ball_room(Quest_event):#the room with ball in light forest cavee
         self.time = 600        
     
     def initiate_quest(self):#called when interact with monument      
-        self.timer = Entities.Timer_display(self, self.time)
+        self.timer = entities.Timer_display(self, self.time)
         self.game_objects.cosmetics.add(self.timer)  
         pos = self.monument.rect.center
         self.number = 5#number of balls        
@@ -120,16 +164,16 @@ class Ball_room(Quest_event):#the room with ball in light forest cavee
     
     def spawn_balls(self, pos):
         for i in range(0, self.number):
-            new_ball = Entities.Bouncy_balls((pos[0],pos[1] - 20), self.game_objects, quest = self, lifetime = self.time)         
+            new_ball = entities.Bouncy_balls((pos[0],pos[1] - 20), self.game_objects, quest = self, lifetime = self.time)         
             self.game_objects.eprojectiles.add(new_ball)   
 
     def get_gates(self):#trap aila
         self.gates = {}
         for gate in self.game_objects.map.references['gate']:
-            if gate.ID_key == 'ball_room1':#these strings are specified in tiled
+            if gate.ID_key == 'ball_room_1':#these strings are specified in tiled
                 gate.currentstate.handle_input('Transform')       
                 self.gates['1'] = gate
-            elif gate.ID_key == 'ball_room':#these strings are specified in tiled
+            elif gate.ID_key == 'ball_room_2':#these strings are specified in tiled
                 self.gates['2'] = gate#this one is already erect
 
     def time_out(self):#when timer runs out
@@ -162,7 +206,7 @@ class Portal_rooms(Quest_event):#challanges with portals
 
     def initiate_quest(self):
         pos = self.monument.rect.center                        
-        self.portal = Entities.Portal([pos[0] + 100, pos[1] - 20], self.game_objects, state = self)        
+        self.portal = entities.Portal([pos[0] + 100, pos[1] - 20], self.game_objects, state = self)        
         self.game_objects.special_shaders.add(self.portal) 
 
     def incrase_kill(self):#called when entity1 and 2 are killed
@@ -180,7 +224,7 @@ class Portal_rooms(Quest_event):#challanges with portals
         pos = [self.portal.rect.topleft, self.portal.rect.topright]
         self.gates = []
         for num in range(0,2):
-            self.gates.append(Entities.Bubble_gate(pos[num],self.game_objects,[100,340]))
+            self.gates.append(entities.Bubble_gate(pos[num],self.game_objects,[100,340]))
             self.game_objects.interactables.add(self.gates[-1])                              
 
 class Room_0(Portal_rooms):
@@ -192,6 +236,6 @@ class Room_0(Portal_rooms):
         self.number = 1
         for number in range(0, self.number):
             pos = [600 +  random.randint(-100, 100), 300 +  random.randint(-100, 100)]
-            enemy = Entities.Cultist_rogue(pos, self.game_objects, self)
+            enemy = entities.Cultist_rogue(pos, self.game_objects, self)
             self.game_objects.enemies.add(enemy)          
         

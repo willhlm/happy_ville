@@ -1,13 +1,13 @@
 import pygame
-import Read_files, animation, states_health, states_basic, states_buttons
+import read_files, animation, states_health, states_basic, states_buttons
 from sys import platform
-from Entities import Animatedentity
+from entities import Animatedentity
 
 #for map UI
 class Banner(Animatedentity):
     def __init__(self,pos,game_objects,type,text):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/map/banner/banner_' + type + '/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/map/banner/banner_' + type + '/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -41,7 +41,7 @@ class Banner(Animatedentity):
 class Item(Animatedentity):#for invenotry, an empty item
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/item/empty/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/item/empty/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -51,7 +51,7 @@ class Item(Animatedentity):#for invenotry, an empty item
 class Sword(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/sword/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/sword/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -62,7 +62,7 @@ class Sword(Animatedentity):
 class Infinity_stone(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/infinity_stone/empty/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/infinity_stone/empty/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -71,7 +71,7 @@ class Infinity_stone(Animatedentity):
 class Amber_Droplet(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/amber_droplet/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/amber_droplet/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -80,7 +80,7 @@ class Amber_Droplet(Animatedentity):
 class Bone(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/bone/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/bone/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -90,7 +90,7 @@ class Bone(Animatedentity):
 class Omamori(Animatedentity):#this will save the positions needed to the UI
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/omamori/empty/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/omamori/empty/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -102,7 +102,7 @@ class Omamori(Animatedentity):#this will save the positions needed to the UI
 class Necklace(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/inventory/necklace/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/necklace/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -115,7 +115,7 @@ class Abilities(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         name = type(self).__name__
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/abilities/' + name + '/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/abilities/' + name + '/',game_objects)
         self.image = self.sprites['idle_1'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.currentstate.set_animation_name('idle_1')
@@ -187,7 +187,7 @@ class Double_jump(Abilities):
 class Health(Animatedentity):#gameplay UI
     def __init__(self,game_objects):
         super().__init__([0,0],game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/gameplay/health/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/gameplay/health/',game_objects)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_health.Death(self)
@@ -201,7 +201,7 @@ class Health(Animatedentity):#gameplay UI
 class Spirit(Animatedentity):#gameplay UI
     def __init__(self,game_objects):
         super().__init__([0,0],game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/UI/gameplay/spirit/',game_objects)
+        self.sprites=read_files.load_sprites_dict('Sprites/UI/gameplay/spirit/',game_objects)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_health.Death(self)
@@ -209,7 +209,7 @@ class Spirit(Animatedentity):#gameplay UI
 
 class Movement_hud():#gameplay UI
     def __init__(self,entity):
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/gameplay/movement/hud/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/gameplay/movement/hud/',entity.game_objects)
         self.entity = entity
         self.game_objects = entity.game_objects#animation need it
         self.image = self.sprites['idle_1'][0]
@@ -228,7 +228,7 @@ class Menu_Arrow():
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         
     def pool(game_objects):
-        Menu_Arrow.sounds = Read_files.load_sounds_dict('Audio/UI/arrow/')        
+        Menu_Arrow.sounds = read_files.load_sounds_dict('Audio/UI/arrow/')        
         img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()    
         Menu_Arrow.image = game_objects.game.display.surface_to_texture(img)
 
@@ -286,7 +286,7 @@ class Controllers():
 class Xbox(Controllers):
     def __init__(self, pos, game_objects,type):
         super().__init__(pos, game_objects,type)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/controller/xbox/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/xbox/',game_objects)
         self.image = self.sprites['a_idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -294,7 +294,7 @@ class Xbox(Controllers):
 class Playstation(Controllers):
     def __init__(self, pos, game_objects,type):
         super().__init__(pos, game_objects,type)
-        self.sprites = Read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
