@@ -1011,21 +1011,7 @@ class Mygga(Flying_enemy):
         self.velocity[0] = min(self.max_chase_vel, self.velocity[0])
         self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
 
-    def chase(self, target_distance):#called from AI: when chaising
-        self.velocity[0] += sign(target_distance[0]) * self.accel_chase[0]
-        self.velocity[1] += sign(target_distance[1]) * self.accel_chase[1]
-        for i in range(2):
-            if abs(self.velocity[i]) > self.max_chase_vel:
-                self.velocity[i] = sign(self.velocity[i]) *  self.max_chase_vel
-
-    def chase_knock_back(self, target_distance):#called from AI: when chaising
-        self.velocity[0] *= self.deaccel_knock#sign(target_distance[0])
-        self.velocity[1] *= self.deaccel_knock#sign(target_distance[1])
-
-    def walk(self, time):#called from walk state
-        amp = min(abs(self.velocity[0]),0.008)
-        self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
-
+<<<<<<< HEAD
 class Mygga_torpedo(Flying_enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -1048,9 +1034,29 @@ class Mygga_torpedo(Flying_enemy):
         self.velocity[0] = min(4, self.velocity[0])
         self.velocity[1] = min(4, self.velocity[1])
 
-class Mygga_roaming(Flying_enemy):
+class Mygga_roaming(Flying_enemy):#just flys around and bounces on walls. Also attacks projectiles in 4 directions from time to time
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+=======
+    def chase(self, target_distance):#called from AI: when chaising
+        self.velocity[0] += sign(target_distance[0]) * self.accel_chase[0]
+        self.velocity[1] += sign(target_distance[1]) * self.accel_chase[1]
+        for i in range(2):
+            if abs(self.velocity[i]) > self.max_chase_vel:
+                self.velocity[i] = sign(self.velocity[i]) *  self.max_chase_vel
+
+    def chase_knock_back(self, target_distance):#called from AI: when chaising
+        self.velocity[0] *= self.deaccel_knock#sign(target_distance[0])
+        self.velocity[1] *= self.deaccel_knock#sign(target_distance[1])
+
+    def walk(self, time):#called from walk state
+        amp = min(abs(self.velocity[0]),0.008)
+        self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
+
+class Roaming_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+>>>>>>> 5fd78924d5cfb00d0be1666b006b0416a22f5a38
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)

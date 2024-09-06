@@ -507,7 +507,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         super().__init__(game)
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
-        
+
         #create buttons
         self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
         self.current_button = 0
@@ -519,7 +519,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.screen_copy = self.game.display.make_layer(self.game.window_size)
         self.render()#need to render everything first
         self.game.game_objects.shaders['blur']['blurRadius'] = 1
-        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#shader render        
+        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#shader render
 
     def define_BG(self):
         size = (100,120)
@@ -549,7 +549,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         pass
 
     def render(self):
-        super().render()      
+        super().render()
         self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]/2 - self.bg.width/2,100))#shader render
 
         #blit title
