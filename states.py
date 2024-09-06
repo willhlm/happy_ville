@@ -619,7 +619,7 @@ class Pause_gameplay(Gameplay):#a pause screen with optional shake. = when entet
         amp = kwarg.get('amplitude', 0)
         scale = kwarg.get('scale', 0.9)
         self.game.game_objects.camera_manager.camera_shake(amplitude = amp, duration = self.duration, scale = scale)
-        print(amp)
+
     def update(self):
         self.game.game_objects.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
         self.game.game_objects.camera_manager.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
