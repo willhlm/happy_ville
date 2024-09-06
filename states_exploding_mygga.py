@@ -20,7 +20,7 @@ class Idle(Enemy_states):
         if input=='Walk':
              self.enter_state('Walk')
         elif input == 'attack':
-            self.enter_state('attack_pre')
+            self.enter_state('Pre_explode')
 
 class Walk(Enemy_states):
     def __init__(self,entity):
@@ -37,9 +37,9 @@ class Walk(Enemy_states):
         if input=='Idle':
              self.enter_state('Idle')
         elif input == 'attack':
-            self.enter_state('attack_pre')
+            self.enter_state('Pre_explode')
 
-class Attack_pre(Enemy_states):
+class Pre_explode(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -47,13 +47,17 @@ class Attack_pre(Enemy_states):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
-        self.enter_state('Attack_main')
+        player_distance = self.entity.AI.player_distance
+        if abs(player_distance[0]) < 50 and abs(player_distance[1]) < 50:
+            self.enter_state('Death')
+        else:
+            self.enter_state('De_explode')
 
     def handle_input(self,input):
         if input=='Idle':
              self.enter_state('Idle')
 
-class Attack_main(Enemy_states):
+class De_explode(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -62,7 +66,7 @@ class Attack_main(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
-        self.entity.AI.handle_input('finish_attack')
+        self.entity.AI.handle_input('De_explode')
 
 class Death(Enemy_states):
     def __init__(self,entity):
@@ -74,3 +78,4 @@ class Death(Enemy_states):
 
     def increase_phase(self):
         self.entity.dead()
+        #self.entity.AI.handle_input('Attack')

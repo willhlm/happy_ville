@@ -19,7 +19,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
     def draw(self, target):#conly certain platforms will require draw
         pass
 
-    def take_dmg(self, projectile, dmg):#called from projectile
+    def take_dmg(self, projectile):#called from projectile
         pass   
 
     def release_texture(self):#called when .kill() and empty group
@@ -32,21 +32,19 @@ class Collision_block(Platform):
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self.hitbox.left)
+            entity.right_collision(self)
         else:#going to the leftx
-            entity.left_collision(self.hitbox.right)
+            entity.left_collision(self)
         entity.update_rect_x()
-        entity.collision_platform(self)
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down   
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
         else:#going up
-            entity.top_collision(self.hitbox.bottom)
+            entity.top_collision(self)
         entity.update_rect_y()
-        entity.collision_platform(self)
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
@@ -60,7 +58,7 @@ class Collision_oneway_up(Platform):
         if entity.velocity[1] < 0: return#going up
         offset = entity.velocity[1] + abs(entity.velocity[0]) + 1
         if entity.hitbox.bottom <= self.hitbox.top + offset:
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
@@ -170,9 +168,7 @@ class Collision_right_angle(Platform):#ramp
 
     def shift_down(self,entity):
         if entity.hitbox.top < self.target:
-            entity.top_collision(self.target)
-            entity.velocity[1] = 2#need to have a value to avoid "dragin in air" while running
-            entity.velocity[0] = 0#need to have a value to avoid "dragin in air" while running
+            entity.ramp_top_collision(self.target)
             entity.update_rect_y()
 
     def shift_up(self, other_side, entity, benethe):   
@@ -181,9 +177,8 @@ class Collision_right_angle(Platform):#ramp
         elif other_side > 0 or benethe > 0:
             entity.go_through['ramp'] = True       
         elif not entity.go_through['ramp']: #need to be elif
-            entity.ramp_gravity()            
-            entity.down_collision(self.target)
-            entity.update_rect_y()                 
+            entity.ramp_down_collision(self.target)
+            entity.update_rect_y()    
 
 class Collision_dmg(Platform):#"spikes"
     def __init__(self,pos,size):
@@ -192,20 +187,20 @@ class Collision_dmg(Platform):#"spikes"
 
     def collide_x(self,entity):
         if entity.velocity[0]>0:#going to the right
-            entity.right_collision(self.hitbox.left)
+            entity.right_collision(self)
             entity.velocity[0] = -10#knock back
         else:#going to the left
-            entity.left_collision(self.hitbox.right)
+            entity.left_collision(self)
             entity.velocity[0] = 10#knock back
         entity.take_dmg(self.dmg)
         entity.update_rect_x()
 
     def collide_y(self,entity):
         if entity.velocity[1]>0:#going down
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
             entity.velocity[1] = -10#knock back
         else:#going up
-            entity.top_collision(self.hitbox.bottom)
+            entity.top_collision(self)
             entity.velocity[1] = 10#knock back
         entity.take_dmg(self.dmg)
         entity.update_rect_y()
@@ -222,20 +217,18 @@ class Collision_texture(Platform):#blocks that has tectures
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self.hitbox.left)
+            entity.right_collision(self)
         else:#going to the leftx
-            entity.left_collision(self.hitbox.right)
+            entity.left_collision(self)
         entity.update_rect_x()
-        entity.collision_platform(self)
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down   
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
             entity.limit_y()
         else:#going up
-            entity.top_collision(self.hitbox.bottom)
+            entity.top_collision(self)
         entity.update_rect_y()
-        entity.collision_platform(self)
 
     def reset_timer(self):#aniamtion need it
         self.currentstate.increase_phase()
@@ -246,7 +239,7 @@ class Collision_texture(Platform):#blocks that has tectures
                 self.sprites[state][frame].release()
 
     def draw(self, target):
-        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1])))#int seem nicer than round         
+        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])))#int seem nicer than round         
 
 class Boulder(Collision_texture):#blocks village cave
     def __init__(self, pos, game_objects):
@@ -284,11 +277,10 @@ class Gate(Collision_texture):#a gate. The ones that are owned by the lever will
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self.hitbox.left)
+            entity.right_collision(self)
         else:#going to the leftx
-            entity.left_collision(self.hitbox.right)
+            entity.left_collision(self)
         entity.update_rect_x()
-        entity.collision_platform(self)
 
 class Bridge(Collision_texture):#bridge twoards forest path
     def __init__(self, pos, game_objects):
@@ -330,7 +322,7 @@ class Collision_timer(Collision_texture):#collision block that dissapears if ail
         offset = entity.velocity[1] + 1
         if entity.hitbox.bottom <= self.hitbox.top + offset:            
             self.timer_jobs['timer_disappear'].activate()
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
@@ -366,18 +358,18 @@ class Bubble_static(Collision_timer):#static bubble
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self.hitbox.left)
+            entity.right_collision(self)
         else:#going to the leftx
-            entity.left_collision(self.hitbox.right)
+            entity.left_collision(self)
         entity.update_rect_x()
 
     def collide_y(self,entity):                    
         if entity.velocity[1] > 0:#going down   
             self.timer_jobs['timer_disappear'].activate()            
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
             entity.limit_y()
         else:#going up
-            entity.top_collision(self.hitbox.bottom)
+            entity.top_collision(self)
         entity.update_rect_y()     
 
     def deactivate(self):#called when first timer runs out          
@@ -408,15 +400,15 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
     def dead(self):#called when death animatin finishes
         self.kill()
 
-    def take_dmg(self, projectile, dmg):
+    def take_dmg(self, projectile):
         if self.invincibile: return
-        self.health -= dmg
+        self.health -= projectile.dmg
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
         projectile.clash_particles(self.hitbox.center)
 
         if self.health > 0:#check if dead¨
             self.animation.handle_input('Hurt')#turn white
-            self.game_objects.camera.camera_shake(3,10)
+            self.game_objects.camera_manager.camera_shake(3,10)
         else:#if dead
             if self.currentstate.state_name != 'death':#if not already dead
                 self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
@@ -452,23 +444,23 @@ class Collision_dynamic(Collision_texture):
 
     def collide_x(self,entity):
         if entity.velocity[0] > self.velocity[0]:#going to the right
-            entity.right_collision(self.hitbox.left)
+            entity.right_collision(self)
         else:#going to the leftx
-            entity.left_collision(self.hitbox.right)
+            entity.left_collision(self)
         entity.update_rect_x()
 
     def collide_entity_x(self,entity):            
         if self.velocity[0] > 0:#going to the right
-            entity.left_collision(self.hitbox.left)
+            entity.left_collision(self)
         else:#going to the leftx
-            entity.right_collision(self.hitbox.right)
+            entity.right_collision(self)
         entity.update_rect_x()
 
     def collide_entity_y(self,entity):                      
         if self.velocity[1] < 0:#going up              
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
         else:#going up
-            entity.top_collision(self.hitbox.bottom)
+            entity.top_collision(self)
         entity.update_rect_y()
 
     def update(self):
@@ -477,10 +469,10 @@ class Collision_dynamic(Collision_texture):
 
     def collide_y(self,entity):                    
         if entity.velocity[1] > self.velocity[1]:#going down               
-            entity.down_collision(self.hitbox.top)
+            entity.down_collision(self)
             entity.limit_y()
         else:#going up
-            entity.top_collision(self.hitbox.bottom)
+            entity.top_collision(self)
         entity.update_rect_y()
 
 class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups

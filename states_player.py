@@ -543,7 +543,7 @@ class Air_dash_pre(Player_states):
     def update(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Dash_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.exit()
 
@@ -575,8 +575,7 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
             self.enter_state('Air_dash_post')
 
     def increase_phase(self):
-        pass
-        #self.enter_state('Air_dash_post')
+        pass#self.enter_state('Air_dash_post')        
 
 class Air_dash_post(Air_dash_pre):
     def __init__(self,entity):

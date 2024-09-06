@@ -59,8 +59,7 @@ class Collisions():
 
     def projectile_collision(self, projectiles, enemies):
         for projectile in projectiles.sprites():#go through the group
-            #projectile collision?
-            #collision_plat = pygame.sprite.spritecollideany(projectile, self.game_objects.platforms,Collisions.collided)
+            #projectile collision?            
             collision_enemy = pygame.sprite.spritecollideany(projectile, enemies, Collisions.collided)
             collision_inetractables = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables, Collisions.collided)
 
@@ -71,10 +70,6 @@ class Collisions():
             #if hit enemy
             if collision_enemy:
                 projectile.collision_enemy(collision_enemy)#go through the projecticle in case there are projectile that should do dmg to enemy
-
-            #hit platform
-            #if collision_plat:
-            #    projectile.collision_plat(collision_plat)#go through the projecticle in case there are projectile that should do dmg to platform
 
     #check for player collision
     def player_collision(self, enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce

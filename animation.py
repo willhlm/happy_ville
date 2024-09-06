@@ -14,8 +14,9 @@ class Animation():
         self.image_frame = 0
 
     def update(self):
-        self.entity.image = self.entity.sprites[self.entity.state][int(self.frame)]  
-        self.image_frame = int(self.frame)#save the current frame. Used for normal maps     
+        frame = int(self.frame)
+        self.entity.image = self.entity.sprites[self.entity.state][frame]  
+        self.image_frame = frame#save the current frame. Used for normal maps     
         self.frame += self.framerate * self.entity.game_objects.game.dt * self.entity.slow_motion
 
         if self.frame >= len(self.entity.sprites[self.entity.state]):

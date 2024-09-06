@@ -25,7 +25,7 @@ class Level():
         self.orginise_references()
 
     def set_camera(self):
-        self.game_objects.camera.reset_player_center()##need to be after load_group -> normal position
+        self.game_objects.camera_manager.camera.reset_player_center()##need to be after load_group -> normal position
         self.biome.set_camera()#need to be after load_group  -> biome specific camera
 
     def check_biome(self):

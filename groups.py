@@ -41,7 +41,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
 
     @staticmethod
     def group_distance(s):
-        pos = [s.true_pos[0] - s.parallax[0]*s.game_objects.camera.scroll[0], s.true_pos[1] - s.parallax[1]*s.game_objects.camera.scroll[1]]
+        pos = [s.true_pos[0] - s.parallax[0]*s.game_objects.camera_manager.camera.scroll[0], s.true_pos[1] - s.parallax[1]*s.game_objects.camera_manager.camera.scroll[1]]
         if pos[0] < s.bounds[0] or pos[0] > s.bounds[1] or pos[1] < s.bounds[2] or pos[1] > s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             pass
         else:#manually add to a specific layer
@@ -70,7 +70,7 @@ class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside
 
     @staticmethod
     def group_distance(s):
-        pos = [s.true_pos[0] - s.game_objects.camera.scroll[0], s.true_pos[1] - s.game_objects.camera.scroll[1]]
+        pos = [s.true_pos[0] - s.game_objects.camera_manager.camera.scroll[0], s.true_pos[1] - s.game_objects.camera_manager.camera.scroll[1]]
         if pos[0] < s.bounds[0] or pos[0] > s.bounds[1] or pos[1] < s.bounds[2] or pos[1] > s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             pass#s.update_pos(pos)
         else:

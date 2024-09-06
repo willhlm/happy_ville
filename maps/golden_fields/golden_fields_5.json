@@ -745,6 +745,24 @@
                          "width":1120,
                          "x":1632,
                          "y":688
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":333,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2336,
+                         "y":384
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -760,7 +778,7 @@
          "y":0
         }],
  "nextlayerid":104,
- "nextobjectid":333,
+ "nextobjectid":335,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -7,7 +7,7 @@ class Quests_events():#quest and event handlere
         self.active_quests = {}#quests the player has picked up. the object is only initiated once when picking it up
         self.active_events = {}#events that occur during gameplay. New object is always initiated.
 
-    def initiate_quest(self, quest, **kwarg):#if a quest flag is set in world_state, this should not be called
+    def initiate_quest(self, quest, **kwarg):
         if not self.active_quests.get(quest, False):#if it is the first time getting the quest
             self.active_quests[quest] = getattr(sys.modules[__name__], quest.capitalize())(self.game_objects, **kwarg)#make a class based on the name of the newstate: need to import sys
         self.active_quests[quest].initiate_quest()#if it alraedy exits, re initate it
@@ -54,7 +54,7 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
         self.kill = kwarg['kill']
-        self.gate = platforms.Gate((self.game_objects.camera.scroll[0] - 250,self.game_objects.camera.scroll[1] + 100), self.game_objects, erect = True)#added to group in cutscene
+        self.gate = platforms.Gate((self.game_objects.camera_manager.camera.scroll[0] - 250,self.game_objects.camera_manager.camera.scroll[1] + 100), self.game_objects, erect = True)#added to group in cutscene
 
     def incrase_kill(self):#called when entity1 and 2 are killed
         self.kill -= 1
@@ -70,7 +70,7 @@ class Cultist_encounter(Quest_event):#called from cutscene when meeting the cult
 class Acid_escape(Quest_event):#called in golden fields "last room"
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
-        pos = [-2000 + game_objects.camera.scroll[0],game_objects.game.window_size[1] + game_objects.camera.scroll[1]]
+        pos = [-2000 + game_objects.camera_manager.camera.scroll[0],game_objects.game.window_size[1] + game_objects.camera_manager.camera.scroll[1]]
         size = [5000, game_objects.game.window_size[1]]
         self.acid = entities.TwoD_liquid(pos, game_objects, size, vertical = True)
         game_objects.interactables_fg.add(self.acid)

@@ -97,12 +97,12 @@ class Fog(Screen_shader):
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.005
         self.game_objects.shaders['noise_perlin']['u_resolution'] = (640,360)
         self.game_objects.shaders['noise_perlin']['scale'] = (10,10)
-        self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]
+        self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera_manager.camera.scroll[0]*self.parallax[0],self.game_objects.camera_manager.camera.scroll[1]*self.parallax[1]]
 
         self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])
         self.shader['noise'] = self.noise_layer.texture
         self.shader['TIME'] = self.time*0.001
-        self.shader['scroll'] = [self.game_objects.camera.scroll[0]*self.parallax[0],self.game_objects.camera.scroll[1]*self.parallax[1]]
+        self.shader['scroll'] = [self.game_objects.camera_manager.camera.scroll[0]*self.parallax[0],self.game_objects.camera_manager.camera.scroll[1]*self.parallax[1]]
         super().draw(target)
 
 class Particles_shader(Screen_shader):#particles. Better performance
@@ -161,7 +161,7 @@ class Vertical_circles(Particles_shader):
         self.shader['parallax'] = self.parallax
         self.shader['centers'] = self.centers
         self.shader['radius'] = self.radius
-        self.shader['scroll'] = self.game_objects.camera.scroll
+        self.shader['scroll'] = self.game_objects.camera_manager.camera.scroll
         super().draw(target)
 
     def update_vel(self, i):#how it should move
@@ -225,7 +225,7 @@ class Rain(Particles_shader):
     def draw(self, target):
         self.shader['parallax'] = self.parallax
         self.shader['centers'] = self.centers
-        self.shader['scroll'] = self.game_objects.camera.scroll
+        self.shader['scroll'] = self.game_objects.camera_manager.camera.scroll
         super().draw(target)
 
     def update_vel(self, i):#how it should move
@@ -263,7 +263,7 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
         self.rect.topleft = self.true_pos.copy()
 
     def boundary(self):#continiouse falling
-        pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0], self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]]
+        pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]]
         if pos[0] < -100:
             self.true_pos[0] += self.width
         elif pos[0] > self.width:
