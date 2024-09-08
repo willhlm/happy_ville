@@ -491,8 +491,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":304,
-                         "x":1600,
+                         "width":576,
+                         "x":1328,
                          "y":528
                         }, 
                         {
@@ -747,22 +747,22 @@
                          "y":688
                         }, 
                         {
-                         "gid":3,
-                         "height":16,
-                         "id":333,
+                         "gid":33,
+                         "height":128,
+                         "id":339,
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"class",
+                                 "name":"spawn_position",
                                  "type":"string",
-                                 "value":"Mygga_roaming"
+                                 "value":""
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":16,
-                         "x":2336,
-                         "y":384
+                         "width":112,
+                         "x":1584,
+                         "y":400
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -778,7 +778,7 @@
          "y":0
         }],
  "nextlayerid":104,
- "nextobjectid":335,
+ "nextobjectid":342,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

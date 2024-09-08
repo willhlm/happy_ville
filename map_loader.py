@@ -383,6 +383,34 @@ class Level():
                     #else:
                     self.game_objects.all_bgs.add(reflection)
 
+            elif id == 32:#smoke
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'colour':
+                        colour= list(pygame.Color(property['value']))
+                        prop['colour'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
+                    elif property['name'] == 'spawn_rate':
+                        prop['spawn_rate'] = property['value']
+                    elif property['name'] == 'radius':
+                        prop['radius'] = property['value']
+                    elif property['name'] == 'speed':
+                        prop['speed'] = property['value']
+                    elif property['name'] == 'horizontalSpread':                        
+                        prop['horizontalSpread'] = property['value']                        
+                    elif property['name'] == 'lifetime':
+                        prop['lifetime'] = property['value']
+                    elif property['name'] == 'spawn_position':
+                        if property['value']:
+                            string = property['value'].strip('()')  # Remove parentheses
+                            prop['spawn_position'] = [float(x) for x in string.split(',')]
+                                            
+                smoke = entities.Smoke(object_position, self.game_objects, object_size, **prop)
+                self.game_objects.cosmetics.add(smoke)
+
+            elif id == 33:#upsteam
+                upstream = entities.Up_stream(object_position, self.game_objects, object_size)
+                self.game_objects.interactables.add(upstream)
+
             elif id == 34:#reflection object
                 reflection = entities.Waterfall(object_position, self.game_objects, parallax, object_size)
 

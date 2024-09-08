@@ -127,9 +127,9 @@
  </tile>
  <tile id="26">
   <properties>
-   <property name="darker_color" type="color" value=""/>
-   <property name="line_color" type="color" value=""/>
-   <property name="water_tint" type="color" value=""/>
+   <property name="darker_color" value=""/>
+   <property name="line_color" value=""/>
+   <property name="water_tint" value=""/>
   </properties>
  </tile>
  <tile id="28">
@@ -140,6 +140,17 @@
  <tile id="30">
   <properties>
    <property name="type" value=""/>
+  </properties>
+ </tile>
+ <tile id="32">
+  <properties>
+   <property name="colour" type="color" value=""/>
+   <property name="horizontalSpread" value=""/>
+   <property name="lifetime" value=""/>
+   <property name="radius" value=""/>
+   <property name="spawn_position" value=""/>
+   <property name="spawn_rate" value=""/>
+   <property name="speed" value=""/>
   </properties>
  </tile>
 </tileset>

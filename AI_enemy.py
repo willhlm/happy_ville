@@ -121,10 +121,13 @@ class Chase(Idle):
 
     def update(self):
         self.check_sight()
+        self.update_timers()
+
         if self.look_player(): return#make the direction along the player. If this happens, do not continue in update            
         if self.attack(): return#are we withtin attack distance? If this happens, do not continue in update
+        if self.check_ground(): return#do not continue if this happens -> do not chase down a cliff. but still agro so projectiles can be shot (it is set after self.attack)
+        
         self.parent.entity.chase() 
-        self.update_timers()
 
     def check_sight(self):
         if abs(self.parent.player_distance[0]) < self.parent.entity.aggro_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.aggro_distance[1]:#if wihtin sight, stay in chase
@@ -150,6 +153,13 @@ class Chase(Idle):
     def update_timers(self):
         for timer in self.timers:
             timer.update()    
+            
+    def check_ground(self):#this will always trigger when the enemy spawn, if they are spawn in air in tiled
+        point = [self.parent.entity.hitbox.midbottom[0] + self.parent.entity.dir[0]*self.parent.entity.hitbox[3],self.parent.entity.hitbox.midbottom[1] + 8]
+        collide = self.parent.entity.game_objects.collisions.check_ground(point)
+        if not collide:#there is no ground in front            
+            return True
+        return False            
 
 class Attack(Idle):
     def __init__(self, parent, **kwarg):

@@ -534,6 +534,76 @@ class TwoD_liquid(Staticentity):
             obj1 = particles.Circle(pos, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)      
 
+class Up_stream(Staticentity):
+    def __init__(self, pos, game_objects, size, **properties):
+        super().__init__(pos, game_objects)
+        self.image = game_objects.game.display.make_layer(size)
+        self.hitbox = pygame.Rect(pos, size)
+        self.time = 0
+    
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+
+    def draw(self, target):
+        self.game_objects.shaders['up_stream']['time'] = self.time*0.1
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render  
+            
+    def player_collision(self, player):#player collision
+        player.velocity[1] -= self.game_objects.game.dt*0.5 
+ 
+    def player_noncollision(self):
+        pass
+
+class Smoke(Staticentity):
+    def __init__(self, pos, game_objects, size, **properties):
+        super().__init__(pos, game_objects)
+        self.image = game_objects.game.display.make_layer(size)
+        self.noise_layer = game_objects.game.display.make_layer(size)
+
+        self.hitbox = pygame.Rect(pos, size)
+        self.time = 0
+        self.size = size
+
+        self.colour = properties.get('colour', (1,1,1,1))
+        self.spawn_rate = properties.get('spawn_rate', 10)
+        self.radius = properties.get('radius', 0.03)
+        self.speed = properties.get('speed', 0.2)
+        self.horizontalSpread = properties.get('horizontalSpread', 0.5)
+        self.lifetime = properties.get('lifetime', 2)
+        self.spawn_position = properties.get('spawn_position', (0.5, 0.0))
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+
+    def draw(self, target):
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time * 0.05
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]#[self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
+        self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        self.game_objects.shaders['smoke']['noiseTexture'] = self.noise_layer.texture
+        self.game_objects.shaders['smoke']['time'] = self.time*0.01
+        self.game_objects.shaders['smoke']['textureSize'] = self.size
+
+        self.game_objects.shaders['smoke']['baseParticleColor'] = self.colour
+        self.game_objects.shaders['smoke']['spawnRate'] = self.spawn_rate
+        self.game_objects.shaders['smoke']['baseParticleRadius'] = self.radius
+        self.game_objects.shaders['smoke']['baseParticleSpeed'] = self.speed
+        self.game_objects.shaders['smoke']['horizontalSpread'] = self.horizontalSpread
+        self.game_objects.shaders['smoke']['particleLifetime'] = self.lifetime
+        self.game_objects.shaders['smoke']['spawnPosition'] = self.spawn_position
+
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['smoke'])#shader render  
+
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -667,7 +737,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
             self.shader_state.handle_input('Hurt')#turn white
             self.AI.handle_input('Hurt')
-            #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 10)#makes the game freez for few frames
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
         else:#if dead
@@ -960,7 +1030,7 @@ class Flying_enemy(Enemy):
     def limit_y(self):
         pass
 
-class Flower_butterfly(Flying_enemy):
+class Flower_butterfly(Flying_enemy):#peaceful ones
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/flower_butterfly/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -1012,9 +1082,8 @@ class Mygga(Flying_enemy):
         self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
 
     def chase(self, target_distance):#called from AI: when chaising
-        self.velocity[0] += sign(target_distance[0]) * self.accel_chase[0]
-        self.velocity[1] += sign(target_distance[1]) * self.accel_chase[1]
         for i in range(2):
+            self.velocity[i] += sign(target_distance[i]) * self.accel_chase[i]
             if abs(self.velocity[i]) > self.max_chase_vel:
                 self.velocity[i] = sign(self.velocity[i]) *  self.max_chase_vel
 
@@ -1026,27 +1095,55 @@ class Mygga(Flying_enemy):
         amp = min(abs(self.velocity[0]),0.008)
         self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
-class Mygga_torpedo(Flying_enemy):
+class Mygga_torpedo(Flying_enemy):#TODO
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/torpedo_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_tornado/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 3
         self.aggro_distance = [180,130]
         self.attack_distance = [150,100]
-        self.AI = AI_mygga.Patrol(self)        
+        self.AI = AI_mygga.Patrol(self)      
+          
+        self.accel = [0.013, 0.008]
+        self.accel_chase = [0.022, 0.009]
+        self.deaccel_knock = 0.88
+        self.max_chase_vel = 1.7
+        self.max_patrol_vel = 1.2
+        self.friction = [0.009,0.009]
+
+    def knock_back(self,dir):
+        self.AI.enter_AI('Knock_back')
+        amp = [16,16]
+        self.velocity[0] = dir[0]*amp[0]
+        self.velocity[1] = -dir[1]*amp[1]
+
+    def player_collision(self, player):#when player collides with enemy
+        super().player_collision(player)
+        self.velocity = [0, 0]
+        self.AI.enter_AI('Wait', time = 30, next_AI = 'Chase')
 
     def patrol(self, position):#called from AI: when patroling
-        self.velocity[0] += 0.0025*(position[0]-self.rect.centerx)
-        self.velocity[1] += 0.0025*(position[1]-self.rect.centery)
+        self.velocity[0] += sign(position[0] - self.rect.centerx) * self.accel[0]
+        self.velocity[1] += sign(position[1] - self.rect.centery) * self.accel[1]
+        self.velocity[0] = min(self.max_chase_vel, self.velocity[0])
+        self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
 
     def chase(self, target_distance):#called from AI: when chaising
-        self.velocity[0] += sign(target_distance[0]) * 2
-        self.velocity[1] += sign(target_distance[1]) * 2
-        self.velocity[0] = min(4, self.velocity[0])
-        self.velocity[1] = min(4, self.velocity[1])
+        for i in range(2):
+            self.velocity[i] += sign(target_distance[i]) * self.accel_chase[i]
+            if abs(self.velocity[i]) > self.max_chase_vel:
+                self.velocity[i] = sign(self.velocity[i]) *  self.max_chase_vel
+
+    def chase_knock_back(self, target_distance):#called from AI: when chaising
+        self.velocity[0] *= self.deaccel_knock#sign(target_distance[0])
+        self.velocity[1] *= self.deaccel_knock#sign(target_distance[1])
+
+    def walk(self, time):#called from walk state
+        amp = min(abs(self.velocity[0]),0.008)
+        self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
 class Mygga_roaming(Flying_enemy):
     def __init__(self,pos,game_objects):
@@ -1072,6 +1169,18 @@ class Mygga_roaming(Flying_enemy):
     def update_vel(self):
         pass
 
+    #ramp collisions     
+    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
+        self.hitbox.top = position
+        self.collision_types['top'] = True        
+        self.velocity[1] *= -1        
+
+    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
+        self.hitbox.bottom = position
+        self.collision_types['bottom'] = True
+        self.velocity[1] *= -1   
+    
+    #platform collision
     def right_collision(self, block):
         super().right_collision(block)
         self.velocity[0] *= -1
@@ -1220,14 +1329,17 @@ class Vatt(Enemy):
         self.spirit = 3
         self.aggro = False
         self.currentstate = states_vatt.Idle(self)
-        self.attack_distance = 60
-        self.AI = AI_vatt.Peace(self)
+        self.attack_distance = [60, 30]
+        self.AI = AI_vatt.AI(self)
 
     def turn_clan(self):#this is acalled when tranformation is finished
         for enemy in self.game_objects.enemies.sprites():
             if type(enemy).__name__=='Vatt':
-                enemy.aggro = True
-                enemy.currentstate.handle_input('Transform')
+                enemy.aggro = True                
+                enemy.AI.handle_input('Hurt')                
+
+    def patrol(self, direction):#called from AI: when patroling
+        self.velocity[0] += self.dir[0]*0.3 * direction[0]
 
 class Maggot(Enemy):
     def __init__(self,pos,game_objects):
@@ -1257,11 +1369,11 @@ class Larv_poison(Enemy):
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
         self.attack_distance = [150,10]
 
     def attack(self):#called from states, attack main
-        attack = Poisonblobb(self.rect.topleft, self.game_objects)#make the object
+        attack = Poisonblobb(self.rect.topleft, self.game_objects, dir = self.dir)#make the object
         self.projectiles.add(attack)#add to group but in main phase
 
 class Shroompoline(Enemy):#an enemy or interactable?
@@ -2101,12 +2213,12 @@ class Poisonblobb(Projectiles):
         self.sprites = Poisonblobb.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(self.rect.x, self.rect.y, 16, 16)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
 
         self.dmg = 1
         self.lifetime = kwarg.get('lifetime', 100)
         self.dir = kwarg.get('dir', [1,0])
-        self.velocity = [-self.dir[0]*5,-1]
+        self.velocity = [self.dir[0]*5,-1]
 
     def update(self):
         super().update()

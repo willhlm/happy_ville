@@ -125,8 +125,8 @@ class Knock_back(AI):
 class Attack(AI):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.currentstate.handle_input('attack')
+        self.entity.currentstate.handle_input('attack')   
 
     def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
-        if input == 'De_explode':
+        if input == 'finish_attack':
             self.enter_AI('Wait', next_AI = 'Chase', time = 30)

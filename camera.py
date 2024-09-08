@@ -27,6 +27,12 @@ class Camera_manager():
     def camera_shake(self, **kwarg):
         self.add_decorator(Camera_shake_decorator(self.camera, **kwarg))
 
+    def reset_player_center(self):#called when loading a map in maploader
+        self.camera.reset_player_center()
+
+    def set_camera_position(self):
+        self.camera.set_camera_position()
+
 class Camera():#default camera
     def __init__(self, game_objects, scroll = [0,0]):
         self.game_objects = game_objects
@@ -67,7 +73,7 @@ class No_camera(Camera):
         pass
 
     def exit_state(self):#go back to the cameera
-        self.set_camera('Camera')         
+        self.game_objects.camera_manager.set_camera('Camera')       
 
 #decorators
 class Camera_shake_decorator():
@@ -79,8 +85,8 @@ class Camera_shake_decorator():
 
     def update(self):
         self.amp *= self.scale
-        self.current_camera.scroll[0] += random.uniform(-self.amp,self.amp)
-        self.current_camera.scroll[1] += random.uniform(-self.amp,self.amp)
+        self.current_camera.scroll[0] += random.uniform(-self.amp, self.amp)
+        self.current_camera.scroll[1] += random.uniform(-self.amp, self.amp)
         self.duration -= self.current_camera.game_objects.game.dt
         self.exit_state()
 
@@ -106,7 +112,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
 
         if stop == 'bottom' or stop == 'top' or stop == 'center':
             if self.recenteralise_vertical in self.updates:
-              self.updates.remove(self.recenteralise_vertical)
+                self.updates.remove(self.recenteralise_vertical)
 
         if stop =='right' or stop =='left' or stop == 'center':
             if self.recenteralise_horizontal in self.updates:
@@ -134,6 +140,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
 
     def recenteralise_vertical(self):
         target = self.game_objects.camera_manager.camera.original_center[1]
+        
         if self.game_objects.camera_manager.camera.center[1]-target > 0:#camera is below
             self.game_objects.camera_manager.camera.center[1] -= self.game_objects.game.dt*2
             self.game_objects.camera_manager.camera.center[1] = max(target, self.game_objects.camera_manager.camera.center[1])
