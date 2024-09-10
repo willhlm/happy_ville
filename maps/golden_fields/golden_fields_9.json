@@ -277,7 +277,7 @@
                          "visible":true,
                          "width":64,
                          "x":1840,
-                         "y":336
+                         "y":288
                         }, 
                         {
                          "gid":1,
@@ -294,12 +294,12 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1856,
-                         "y":384
+                         "x":1872,
+                         "y":336
                         }, 
                         {
                          "gid":8,
-                         "height":192,
+                         "height":224,
                          "id":443,
                          "name":"",
                          "rotation":0,
@@ -311,7 +311,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":64,
+                         "height":96,
                          "id":444,
                          "name":"",
                          "rotation":0,
@@ -341,7 +341,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":192,
+                         "width":112,
                          "x":1648,
                          "y":352
                         }, 
@@ -942,6 +942,102 @@
                          "width":16,
                          "x":1184,
                          "y":1072
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":497,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1280,
+                         "y":384
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":498,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1328,
+                         "y":720
+                        }, 
+                        {
+                         "gid":15,
+                         "height":16,
+                         "id":499,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"top"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":544,
+                         "x":1648,
+                         "y":256
+                        }, 
+                        {
+                         "gid":8,
+                         "height":64,
+                         "id":500,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":1760,
+                         "y":320
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":501,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":1760,
+                         "y":448
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":502,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1680,
+                         "y":576
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -955,7 +1051,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31220,
+                         "gid":31221,
                          "height":80,
                          "id":493,
                          "name":"",
@@ -986,7 +1082,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":497,
+ "nextobjectid":503,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1092,7 +1188,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

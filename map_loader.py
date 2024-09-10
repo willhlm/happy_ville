@@ -12,9 +12,9 @@ class Level():
         self.area_change = True#a flag to chenge if we change area
         self.biome = Biome(self)
 
-    def load_map(self,map_name,spawn):
+    def load_map(self, map_name, spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
-        self.level_name = map_name.lower()
+        self.level_name = map_name.lower()#biom_room
         self.spawn = spawn
         self.game_objects.lights.new_map()#set ambient default light and clear light sources
         self.check_biome()#pause the sound if we change area
@@ -515,6 +515,14 @@ class Level():
                     new_loot = entities.Soul_essence(object_position, self.game_objects, soul_essence_int)
                     self.game_objects.loot.add(new_loot)
                 soul_essence_int += 1
+
+            elif id == 14:#interactable_item
+                for property in properties:
+                    if property['name'] == 'interactable_item':
+                        name = property['value']          
+                if not self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'].get(name, False):#if it has not been interacted with: (assume only one interactable)
+                    new_loot = getattr(entities, name)(object_position, self.game_objects)
+                    self.game_objects.loot.add(new_loot)
 
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects

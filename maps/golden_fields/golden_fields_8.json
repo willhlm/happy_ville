@@ -631,6 +631,18 @@
                          "width":112,
                          "x":2272,
                          "y":768
+                        }, 
+                        {
+                         "gid":31225,
+                         "height":80,
+                         "id":452,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":2128,
+                         "y":672
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -646,7 +658,7 @@
          "y":0
         }],
  "nextlayerid":104,
- "nextobjectid":452,
+ "nextobjectid":453,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -750,6 +762,10 @@
         {
          "firstgid":31214,
          "source":"objects\/objects.tsx"
+        }, 
+        {
+         "firstgid":31218,
+         "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
  "type":"map",

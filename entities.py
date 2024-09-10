@@ -813,6 +813,10 @@ class Player(Character):
         super().update_hitbox()
         self.sword.update_hitbox()
 
+    def ramp_down_collision(self, position):#when colliding with platform beneth
+        super().ramp_down_collision(position)
+        self.flags['ground'] = True#used for jumping
+
     def down_collision(self,hitbox):#when colliding with platform beneth
         super().down_collision(hitbox)
         self.flags['ground'] = True#used for jumping
@@ -1095,7 +1099,7 @@ class Mygga(Flying_enemy):
         amp = min(abs(self.velocity[0]),0.008)
         self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
-class Mygga_torpedo(Flying_enemy):#TODO
+class Mygga_torpedo(Flying_enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_tornado/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -1370,7 +1374,8 @@ class Larv_poison(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
-        self.attack_distance = [150,10]
+        self.aggro_distance = [180,150]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.attack_distance = [200,180]
 
     def attack(self):#called from states, attack main
         attack = Poisonblobb(self.rect.topleft, self.game_objects, dir = self.dir)#make the object
@@ -2091,8 +2096,8 @@ class Projectiles(Platform_entity):#projectiels
     def collision_platform(self, collision_plat):#collision platform
         collision_plat.take_dmg(self)
 
-    def collision_projectile(self, eprojectile):#projecticle proectile collision
-        pass
+    def collision_projectile(self, eprojectile):#fprojecticle proectile collision with eprojecitile: called from collisions
+        eprojectile.take_dmg(self.dmg)
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         collision_enemy.take_dmg(self.dmg)
@@ -2103,7 +2108,7 @@ class Projectiles(Platform_entity):#projectiels
     def countered(self,dir, pos):#called from sword collsion with purple infinity stone equipped
         pass
 
-    def aila_sword(self):#aila sword without purple stone
+    def take_dmg(self, dmg):
         pass
 
     #pltform, ramp collisions.
@@ -2226,6 +2231,10 @@ class Poisonblobb(Projectiles):
 
     def update_vel(self):
         self.velocity[1] += 0.1*self.game_objects.game.dt*self.slow_motion#graivity
+
+    def take_dmg(self, dmg):#aila sword without purple stone
+        self.velocity = [0,0]
+        self.currentstate.handle_input('Death')
 
     def collision_platform(self,platform):
         self.velocity = [0,0]
@@ -2499,7 +2508,7 @@ class Aila_sword(Sword):
     def remove_stone(self):#not impleented
         pass
 
-    def collision_projectile(self, eprojectile):#projecticle proectile collision
+    def collision_projectile(self, eprojectile):#fprojecticle proectile collision with projectile
         if eprojectile.invincibile: return
         eprojectile.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
 
@@ -2507,7 +2516,7 @@ class Aila_sword(Sword):
             eprojectile.countered(self.dir, self.rect.center)
             self.sword_jump()
         else:
-            eprojectile.aila_sword()
+            eprojectile.take_dmg(self.dmg)
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
@@ -2734,6 +2743,9 @@ class Loot(Platform_entity):#
     def player_collision(self, player):#when the player collides with this object
         pass
 
+    def release_texture(self):#stuff that have pool shuold call this
+        pass
+
     #plotfprm collisions
     def top_collision(self,block):
         self.hitbox.top = block.hitbox.bottom
@@ -2804,7 +2816,7 @@ class Soul_essence(Loot):#genkidama
 
     def player_collision(self, player):
         player.inventory['Soul_essence'] += 1
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = 'interacted'#write in the state file that this has been picked up
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = True#write in the state file that this has been picked up
         #make a cutscene?TODO
         self.kill()
 
@@ -2881,9 +2893,6 @@ class Amber_Droplet(Enemy_drop):
         Amber_Droplet.sprites = read_files.load_sprites_dict('Sprites/enteties/items/amber_droplet/',game_objects)
         Amber_Droplet.sounds = read_files.load_sounds_dict('audio/SFX/enteties/items/amber_droplet/')
 
-    def release_texture(self):#stuff that have pool shuold call this
-        pass
-
 class Bone(Enemy_drop):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -2940,20 +2949,24 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         super().__init__(pos, game_objects)
         self.quest = kwarg.get('quest', None)#quests can be initated when they are picked up
         if not kwarg.get('entity', None):#if it is spawn in the wild
-            self.spawn()
+            velocity = kwarg.get('velocity', [2, -4])
+            velocity_range = kwarg.get('velocity_range', [1, 0])#olus minus the velocity
+            self.velocity = [random.uniform(velocity[0] - velocity_range[0], velocity[0] + velocity_range[0]),random.uniform(velocity[1] - velocity_range[1], velocity[1] + velocity_range[1])]
+            self.hitbox = pygame.Rect([pos[0], pos[1]],(16,16))#light need hitbox
+            self.light = self.game_objects.lights.add_light(self, radius = 50)
+            self.state = 'wild'
 
-    def spawn(self):
-        self.hitbox = pygame.Rect(self.rect.topleft,(16,16))
-        self.velocity = [random.uniform(0, 3), -4]
-        self.light = self.game_objects.lights.add_light(self, radius = 50)
+    def update(self):
+        super().update()
         self.twinkle()
 
-    def twinkle(self, num = 3):
-        self.twinkles = []
-        for i in range(0, num + 1):
-            self.twinkles.append(Twinkle(self,self.game_objects))
-            self.twinkles[-1].animation.frame = random.randint(0, len(self.twinkles[-1].sprites['idle']) - 1)
-            self.game_objects.cosmetics.add(self.twinkles[-1])
+    def pickup(self, player):
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'][type(self).__name__] = True#save in state file that the items on this map has picked up (assume that only one interactable item on each room)
+
+    def twinkle(self):
+        pos = [self.hitbox.centerx + random.randint(-50, 50), self.hitbox.centery + random.randint(-50, 50)]
+        twinkle = Twinkle(pos, self.game_objects)#twinkle.animation.frame = random.randint(0, len(twinkle.sprites['idle']) - 1)                    
+        self.game_objects.cosmetics.add(twinkle)
 
     def interact(self, player):#when player press T
         player.currentstate.enter_state('Pray_pre')
@@ -2965,14 +2978,13 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
 
     def kill(self):
         super().kill()
-        for twinkle in self.twinkles:
-            twinkle.kill()
         self.game_objects.lights.remove_light(self.light)
 
-    def release_texture(self):#do not remove the textuer from memory when calling kill
-        pass
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites['wild'] = read_files.load_sprites_list('Sprites/enteties/items/interactables_items/',game_objects)#the sprite to render when they are in the wild
 
-class Tungsten(Interactable_item):#move omamori and infiinity stones to here a swell
+class Tungsten(Interactable_item):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Tungsten.sprites
@@ -2981,12 +2993,14 @@ class Tungsten(Interactable_item):#move omamori and infiinity stones to here a s
         self.hitbox = self.rect.copy()
         self.description = 'A heavy rock'
 
-    def pickup(self):
-        self.game_objects.player.inventory['Tungsten'] += 1
-        self.clean()
+    def pickup(self, player):
+        super().pickup(player)
+        player.inventory['Tungsten'] += 1
 
-    def pool(game_objects):
-        Tungsten.sprites = read_files.load_sprites_dict('Sprites/enteties/items/tungsten/',game_objects)
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/tungsten/',game_objects)
+        super().pool(game_objects)  
 
 class Omamori(Interactable_item):
     def __init__(self,pos, game_objects, **kwarg):
@@ -3007,9 +3021,11 @@ class Omamori(Interactable_item):
             spr.update()#the position
             spr.update_uniforms()#the unforms for the draw
             self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)
-
+    
     def pickup(self, player):
+        super().pickup(player)        
         player.omamoris.inventory[type(self).__name__] = self
+        self.entity = player
 
     def handle_input(self,input):
         pass
@@ -3044,24 +3060,28 @@ class Half_dmg(Omamori):
         super().detach()
         self.entity.dmg_scale = 1
 
-    def pool(game_objects):
-        Half_dmg.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/half_dmg/',game_objects)#for inventory
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/half_dmg/',game_objects)#for inventory
+        super().pool(game_objects)  
 
 class Loot_magnet(Omamori):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Loot_magnet.sprites
-        self.image = self.sprites['idle'][0]
+        self.image = self.sprites[self.state][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.description = 'Attracts loot ' + '[' + str(self.level) + ']'
 
-    def equipped(self):#an updated that should be called when equppied
+    def equipped(self):#an update that should be called when equppied
         for loot in self.entity.game_objects.loot.sprites():
             loot.attract(self.entity.rect.center)
 
-    def pool(game_objects):
-        Loot_magnet.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/loot_magnet/',game_objects)#for inventory
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/loot_magnet/',game_objects)#for inventory
+        super().pool(game_objects)        
 
 class Boss_HP(Omamori):
     def __init__(self,pos, game_objects, **kwarg):
@@ -3078,8 +3098,10 @@ class Boss_HP(Omamori):
         for enemy in self.entity.game_objects.enemies.sprites():
             enemy.health_bar()#attached a healthbar on boss
 
-    def pool(game_objects):
-        Boss_HP.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/boss_HP/',game_objects)#for inventor
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/boss_HP/',game_objects)#for inventor
+        super().pool(game_objects)  
 
 class Infinity_stones(Interactable_item):
     def __init__(self, pos, game_objects, **kwarg):
@@ -3105,19 +3127,25 @@ class Infinity_stones(Interactable_item):
     def slash(self):#called when swingin sword
         pass
 
-    def pickup(self, player):
-        player.sword.stones[self.colour.keys()[0]] = self
+    def pickup(self, player):    
+        super().pickup(player)        
+        player.sword.stones[list(self.colour.keys())[0]] = self
         self.sword = player.sword
 
 class Red_infinity_stone(Infinity_stones):#more dmg
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/red/',game_objects)#for inventory
+        self.sprites = Red_infinity_stone.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.colour = {'red':[255,64,64,255]}
         self.description = '10 procent more damage'
+
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/red/',game_objects)#for inventory
+        super().pool(game_objects)  
 
     def attach(self):
         self.sword.dmg*=1.1
@@ -3128,12 +3156,17 @@ class Red_infinity_stone(Infinity_stones):#more dmg
 class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/green/',game_objects)#for inventory
+        self.sprites = Green_infinity_stone.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.colour = {'green':[105,139,105,255]}
         self.description = 'fast sword swings'
+
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/green/',game_objects)#for inventory
+        super().pool(game_objects)  
 
     def slash(self):
         self.sword.entity.animation.framerate = 0.33
@@ -3141,12 +3174,17 @@ class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
 class Blue_infinity_stone(Infinity_stones):#get spirit at collision
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/blue/',game_objects)#for inventory
+        self.sprites = Blue_infinity_stone.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.colour = {'blue':[0,0,205,255]}
         self.description = 'add spirit to the swinger'
+
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/blue/',game_objects)#for inventory
+        super().pool(game_objects)  
 
     def collision(self):
         self.sword.entity.add_spirit()
@@ -3154,12 +3192,17 @@ class Blue_infinity_stone(Infinity_stones):#get spirit at collision
 class Orange_infinity_stone(Infinity_stones):#bigger hitbox
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/orange/',game_objects)#for inventory
+        self.sprites = Orange_infinity_stone.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.colour = {'orange':[255,127,36,255]}
         self.description = 'larger hitbox'
+
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/orange/',game_objects)#for inventory
+        super().pool(game_objects)  
 
     def detach(self):
         self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,40,40)
@@ -3172,12 +3215,17 @@ class Orange_infinity_stone(Infinity_stones):#bigger hitbox
 class Purple_infinity_stone(Infinity_stones):#reflect projectile -> crystal caves
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/purple/',game_objects)#for inventory
+        self.sprites = Purple_infinity_stone.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.colour = {'purple':[154,50,205,255]}
         self.description = 'reflects projectiels'
+
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/purple/',game_objects)#for inventory
+        super().pool(game_objects) 
 
 #cosmetics
 class Blood(Animatedentity):
@@ -3400,20 +3448,19 @@ class Logo_loading(Animatedentity):
     def reset_timer(self):
         self.kill()
 
-class Twinkle(Animatedentity):#add a pool
-    def __init__(self, entity, game_objects):
-        super().__init__(entity.rect.center, game_objects)
-        self.entity = entity
+class Twinkle(Animatedentity):
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = Twinkle.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(entity.rect.centerx,entity.rect.centery,self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+
+    def reset_timer(self):
+        super().reset_timer()
+        self.kill()
 
     def release_texture(self):
         pass
-
-    def reset_timer(self):#called when an animation cyckle is finished
-        super().reset_timer()
-        self.rect.center = [self.entity.rect.centerx + random.randint(-30,30),self.entity.rect.centery + random.randint(-30,30)]#this should be in a state if we want it to do something else than randomly popping up ahain
 
     def pool(game_objects):
         Twinkle.sprites = read_files.load_sprites_dict('Sprites/GFX/twinkle/', game_objects)
@@ -4284,7 +4331,7 @@ class Timer():
         self.entity.timers.remove(self)
 
     def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt*self.entity.game_objects.player.slow_motion
+        self.lifetime -= self.entity.game_objects.game.dt * self.entity.game_objects.player.slow_motion
         if self.lifetime < 0:
             self.deactivate()
 
@@ -4294,7 +4341,7 @@ class General_Timer(Timer):#when lifetime is 0, it calls the timeout of entety
         self.lifetime = duration
         self.function = function
 
-    def deactivate(self):
+    def deactivate(self):    
         self.function()
 
 class Invincibility_timer(Timer):

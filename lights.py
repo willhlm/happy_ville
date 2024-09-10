@@ -50,7 +50,7 @@ class Lights():
     def get_points(self,platforms):
         l = []
         for rec in platforms:
-            l = l + [(rec.hitbox.topleft[0] - self.game_objects.camera.scroll[0], rec.hitbox.topleft[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.topright[0] - self.game_objects.camera.scroll[0], rec.hitbox.topright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomright[0] - self.game_objects.camera.scroll[0], rec.hitbox.bottomright[1] - self.game_objects.camera.scroll[1]),(rec.hitbox.bottomleft[0] - self.game_objects.camera.scroll[0], rec.hitbox.bottomleft[1] - self.game_objects.camera.scroll[1])]
+            l = l + [(rec.hitbox.topleft[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.topleft[1] - self.game_objects.camera_manager.camera.scroll[1]),(rec.hitbox.topright[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.topright[1] - self.game_objects.camera_manager.camera.scroll[1]),(rec.hitbox.bottomright[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.bottomright[1] - self.game_objects.camera_manager.camera.scroll[1]),(rec.hitbox.bottomleft[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.bottomleft[1] - self.game_objects.camera_manager.camera.scroll[1])]
         return l
 
     def clear_lights(self):
@@ -135,7 +135,7 @@ class Light():#light source
 
     def set_pos(self):#I think all should do this
         self.hitbox.center = self.target.hitbox.center
-        self.position = [self.hitbox.center[0] - self.game_objects.camera.scroll[0],self.hitbox.center[1] - self.game_objects.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
+        self.position = [self.hitbox.center[0] - self.game_objects.camera_manager.camera.scroll[0],self.hitbox.center[1] - self.game_objects.camera_manager.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
 
     def update(self):#if they e.g. fade
         for update in self.updates:

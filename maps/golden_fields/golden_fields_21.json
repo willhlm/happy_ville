@@ -425,15 +425,15 @@
                         }, 
                         {
                          "gid":27,
-                         "height":160,
+                         "height":32,
                          "id":716,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":768,
+                         "width":640,
                          "x":1248,
-                         "y":1232
+                         "y":1104
                         }, 
                         {
                          "gid":8,
@@ -625,6 +625,137 @@
                          "width":16,
                          "x":768,
                          "y":1024
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":742,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1936,
+                         "y":992
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":744,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1552,
+                         "y":512
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":745,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1472,
+                         "y":576
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":746,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1664,
+                         "y":576
+                        }, 
+                        {
+                         "gid":8,
+                         "height":64,
+                         "id":747,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":1936,
+                         "y":560
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":748,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":144,
+                         "x":1152,
+                         "y":592
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":105,
+                 "name":"back",
+                 "objects":[
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":739,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1280,
+                         "y":848
+                        }, 
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":740,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1808,
+                         "y":976
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -636,7 +767,19 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31222,
+                         "height":137,
+                         "id":743,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":1984,
+                         "y":1024
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -650,8 +793,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":105,
- "nextobjectid":739,
+ "nextlayerid":106,
+ "nextobjectid":749,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -757,7 +900,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

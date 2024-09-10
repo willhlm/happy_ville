@@ -769,6 +769,154 @@
                          "width":192,
                          "x":1152,
                          "y":1040
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":424,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2016,
+                         "y":592
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":425,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1744,
+                         "y":784
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":427,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1568,
+                         "y":992
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":430,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2128,
+                         "y":336
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":431,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2368,
+                         "y":640
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":105,
+                 "name":"back",
+                 "objects":[
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":432,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2304,
+                         "y":288
+                        }, 
+                        {
+                         "gid":31217,
+                         "height":32,
+                         "id":433,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2400,
+                         "y":288
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":104,
+                 "name":"interactables",
+                 "objects":[
+                        {
+                         "gid":31222,
+                         "height":137,
+                         "id":426,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":1328,
+                         "y":1040
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -783,8 +931,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":104,
- "nextobjectid":424,
+ "nextlayerid":106,
+ "nextobjectid":434,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -888,6 +1036,10 @@
         {
          "firstgid":31214,
          "source":"objects\/objects.tsx"
+        }, 
+        {
+         "firstgid":31218,
+         "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
  "type":"map",

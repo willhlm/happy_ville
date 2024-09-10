@@ -281,7 +281,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31230,
+                         "gid":31231,
                          "height":32,
                          "id":368,
                          "name":"",
@@ -1461,6 +1461,42 @@
                          "width":224,
                          "x":2416,
                          "y":688
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":391,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_torpedo"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2512,
+                         "y":352
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":392,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1872,
+                         "y":880
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1498,7 +1534,7 @@
          "y":0
         }],
  "nextlayerid":111,
- "nextobjectid":391,
+ "nextobjectid":393,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1604,7 +1640,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

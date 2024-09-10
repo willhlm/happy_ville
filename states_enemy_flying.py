@@ -1,4 +1,4 @@
-import sys
+import sys, math
 from states_entity import Entity_States
 
 def sign(number):
@@ -62,8 +62,10 @@ class Attack_main(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)        
         self.duration = 50
-        ratio = abs(self.entity.AI.player_distance[1]/self.entity.AI.player_distance[0])
-        self.velocity = [4*sign(self.entity.AI.player_distance[0]),ratio * 4*sign(self.entity.AI.player_distance[1])]
+        distance = (self.entity.AI.player_distance[1]**2 + self.entity.AI.player_distance[0]**2)**0.5
+        if distance == 0: distance = 1
+        ratio = [abs(self.entity.AI.player_distance[0])/distance, abs(self.entity.AI.player_distance[1])/distance]
+        self.velocity = [ratio[0] * 4 * sign(self.entity.AI.player_distance[0]), ratio[1] * 4 * sign(self.entity.AI.player_distance[1])]
 
     def update(self):
         self.entity.velocity = self.velocity.copy()

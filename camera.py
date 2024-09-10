@@ -103,7 +103,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
     def reset(self):
         self.stops = {'bottom':0,'top':0,'left':0,'right':0,'center':0}#counds number of active stops, setted in camera stop states
 
-    def update(self):#called from camera, in case the camera needs to be re centeralised        
+    def update(self):#called from camera, in case the camera needs to be re centeralised  
         for update in self.updates:
             update()
 

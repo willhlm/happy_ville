@@ -3,7 +3,7 @@ import read_files
 class World_state():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.state = read_files.read_json("map_state.json")
+        self.state = read_files.read_json("map_state.json")#save the state of each map (i.e. if chest has been opened, soul essence picoed up etc)
         self.statistics = {'kill': {}, 'amber_droplet' : 0, 'death': 0}#collects stuff aila has done, number of deaths       
         self.progress = 1#should tick everytime an event occures which modifies the happinies (e.g. a boss dies)
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
@@ -28,5 +28,5 @@ class World_state():
             self.travel_points[map] = cord
 
     def init_state_file(self, level_name):#make a state file if it is the first time loading this map, state of different interactables
-        self.state[level_name] = {'chest': {},'lever': {},'soul_essence': {},'runestone': {}}#a place holder for things that should depend on map state
+        self.state[level_name] = {'chest': {},'lever': {},'soul_essence': {},'runestone': {}, 'interactable_items': {}}#a place holder for things that should depend on map state
         self.state.pop('placeholder_level', 0)#removes the placeholder tag
