@@ -19,7 +19,7 @@ class Idle(Weather_States):
         super().__init__(entity)
 
     def update(self):
-        rand=random.randint(1, 1000)
+        rand = random.randint(0, 1000)
         if rand==0:
             self.enter_state('Wind')
 
@@ -29,5 +29,5 @@ class Wind(Weather_States):
         self.entity.blow()
 
     def handle_input(self,input):
-        if input == 'Finish':
+        if input == 'finish':
             self.enter_state('Idle')

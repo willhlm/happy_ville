@@ -77,7 +77,7 @@ class Particles(pygame.sprite.Sprite):
         return angle
 
     def draw(self, target):
-        pos = (int(self.rect[0]-self.game_objects.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera.scroll[1]))
+        pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
 
     def release_texture(self):
@@ -136,7 +136,7 @@ class Goop(Particles):#circles that "distorts" due to noise
     def draw(self, target):#his called just before the draw
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.image.size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
-        self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera.scroll
+        self.game_objects.shaders['noise_perlin']['scroll'] = self.game_objects.camera_manager.camera.scroll
         self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 

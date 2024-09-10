@@ -7,6 +7,16 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Bone.pool(game_objects)
         entities.Heal_item.pool(game_objects)
         entities.Tungsten.pool(game_objects)
+        entities.Red_infinity_stone.pool(game_objects)
+        entities.Green_infinity_stone.pool(game_objects)
+        entities.Blue_infinity_stone.pool(game_objects)
+        entities.Orange_infinity_stone.pool(game_objects)
+        entities.Purple_infinity_stone.pool(game_objects)
+
+        #omamori
+        entities.Boss_HP.pool(game_objects)
+        entities.Loot_magnet.pool(game_objects)
+        entities.Half_dmg.pool(game_objects)
 
         #cosmetics
         entities.Water_running_particles.pool(game_objects)
@@ -19,11 +29,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Blood.pool(game_objects)
         entities.Player_Soul.pool(game_objects)
         entities.Pray_effect.pool(game_objects)
-
-        #omamori
-        entities.Boss_HP.pool(game_objects)
-        entities.Loot_magnet.pool(game_objects)
-        entities.Half_dmg.pool(game_objects)
 
         #enemy
         entities.Slime.pool(game_objects)
@@ -41,6 +46,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Shield.pool(game_objects)
         entities.Thunder.pool(game_objects)
         entities.Droplet.pool(game_objects)
+        entities.Maderakkas_reflection_entity.pool(game_objects)
 
         entities_UI.Menu_Arrow.pool(game_objects)
 
@@ -62,5 +68,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         weather.Rain.pool(game_objects)
         weather.Fireflies.pool(game_objects)
         weather.Flash.pool(game_objects)
+        weather.Wind.pool(game_objects)
 
         platforms.Bubble.pool(game_objects)

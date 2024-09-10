@@ -47,7 +47,7 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
 
     def draw(self, target):
         self.blurtstate.set_uniform()#sets the blur radius
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera.scroll[1]))
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render      
 
     def release_texture(self):  # Called when .kill() and when emptying the group        
@@ -90,7 +90,7 @@ class Light_forest_tree1(Trees):
         position = self.rect.center
         size = [64,64]
         self.spawn_box = [position,size]
-        #self.create_leaves()
+        self.create_leaves()
 
 class Light_forest_tree2(Trees):
     animations = {}
@@ -106,7 +106,7 @@ class Light_forest_tree2(Trees):
         position = self.rect.center
         size = [64,64]
         self.spawn_box = [position,size]
-        #self.create_leaves()
+        self.create_leaves()
 
 class Cocoon(Layered_objects):#larv cocoon in light forest
     animations = {}
@@ -391,11 +391,11 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.colour[-1] = max(self.colour[-1],0)
 
     def update_vel(self):
-        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[0] - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
-        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[1] - self.friction[1]*self.velocity[1])
+        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.velocity[0] - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
+        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.velocity[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
-        if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
+        if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
             self.resetting()
 
     def reset(self):

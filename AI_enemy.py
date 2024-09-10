@@ -116,21 +116,25 @@ class Turn_around(Idle):#when the player jumps over, should be a delays before t
 class Chase(Idle):
     def __init__(self, parent, **kwarg):
         super().__init__(parent)
-        self.timer_jobs = Giveup_timer(self, kwarg.get('give_up',300))#if player is out of sight for more than duration, go to peace, else, remain
+        self.timer_jobs = {'attack_cooldown': Timer(self, duration = kwarg.get('attack_cooldown', 100), function = self.on_attack_cooldown), 'give_up': Timer(self, duration = kwarg.get('give_up', 300), function = self.on_giveup)}#if player is out of sight for more than duration, go to peace, else, remain
         self.timers = []
+        self.attack_able = True
 
     def update(self):
         self.check_sight()
+        self.update_timers()
+
         if self.look_player(): return#make the direction along the player. If this happens, do not continue in update            
         if self.attack(): return#are we withtin attack distance? If this happens, do not continue in update
+        if self.check_ground(): return#do not continue if this happens -> do not chase down a cliff. but still agro so projectiles can be shot (it is set after self.attack)
+        
         self.parent.entity.chase() 
-        self.update_timers()
 
     def check_sight(self):
         if abs(self.parent.player_distance[0]) < self.parent.entity.aggro_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.aggro_distance[1]:#if wihtin sight, stay in chase
-            self.timer_jobs.restore()
+            self.timer_jobs['give_up'].restore()
         else:#out of sight
-            self.timer_jobs.activate()        
+            self.timer_jobs['give_up'].activate()        
 
     def look_player(self):#look at the player
         if self.parent.player_distance[0] > 0 and self.parent.entity.dir[0] == -1 or self.parent.player_distance[0] < 0 and self.parent.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
@@ -142,14 +146,30 @@ class Chase(Idle):
 
     def attack(self):
         if abs(self.parent.player_distance[0]) < self.parent.entity.attack_distance[0] and abs(self.parent.player_distance[1]) < self.parent.entity.attack_distance[1]:
-            self.parent.append_child(Wait(self.parent, duration = 100))        
-            self.parent.append_child(Attack(self.parent))
-            return True
+            if self.attack_able:
+                self.parent.append_child(Wait(self.parent, duration = 20))        
+                self.parent.append_child(Attack(self.parent))
+                self.timer_jobs['attack_cooldown'].activate() 
+                self.attack_able = False
+                return True
         return False
 
     def update_timers(self):
         for timer in self.timers:
             timer.update()    
+            
+    def check_ground(self):#this will always trigger when the enemy spawn, if they are spawn in air in tiled
+        point = [self.parent.entity.hitbox.midbottom[0] + self.parent.entity.dir[0]*self.parent.entity.hitbox[3],self.parent.entity.hitbox.midbottom[1] + 8]
+        collide = self.parent.entity.game_objects.collisions.check_ground(point)
+        if not collide:#there is no ground in front            
+            return True
+        return False         
+
+    def on_giveup(self):#when giveup timer runs out
+        self.parent.pop_child()#stop chasing
+
+    def on_attack_cooldown(self):#when attack cooldown timer runs out
+        self.attack_able = True      
 
 class Attack(Idle):
     def __init__(self, parent, **kwarg):
@@ -160,10 +180,11 @@ class Attack(Idle):
         if input == 'Finish_attack':
             self.parent.pop_child()
 
-class Giveup_timer():
-    def __init__(self,AI,duration = 100):
+class Timer():
+    def __init__(self, AI, duration, function):
         self.AI = AI
         self.duration = duration
+        self.function = function
 
     def restore(self):
         self.lifetime = self.duration
@@ -175,9 +196,9 @@ class Giveup_timer():
 
     def deactivate(self):
         self.AI.timers.remove(self)
-        self.AI.parent.pop_child()
+        self.function()
 
     def update(self):
-        self.lifetime -= 1
+        self.lifetime -= self.AI.parent.entity.game_objects.game.dt
         if self.lifetime < 0:
             self.deactivate()

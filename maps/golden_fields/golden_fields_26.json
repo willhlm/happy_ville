@@ -893,7 +893,91 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31222,
+                         "height":137,
+                         "id":609,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":2048,
+                         "y":1280
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":610,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1952,
+                         "y":720
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":611,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Sandrew"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1648,
+                         "y":432
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":612,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1248,
+                         "y":656
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":613,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":528,
+                         "y":816
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -908,7 +992,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":609,
+ "nextobjectid":614,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1014,7 +1098,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

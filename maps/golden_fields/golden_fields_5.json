@@ -533,7 +533,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":112,
+                         "height":128,
                          "id":313,
                          "name":"",
                          "rotation":0,
@@ -745,6 +745,78 @@
                          "width":1120,
                          "x":1632,
                          "y":688
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":342,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1760,
+                         "y":368
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":343,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2160,
+                         "y":384
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":344,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_torpedo"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2480,
+                         "y":416
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":345,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1536,
+                         "y":576
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -760,7 +832,7 @@
          "y":0
         }],
  "nextlayerid":104,
- "nextobjectid":333,
+ "nextobjectid":346,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -324,8 +324,8 @@
                          "type":"",
                          "visible":true,
                          "width":288,
-                         "x":1088,
-                         "y":784
+                         "x":1104,
+                         "y":800
                         }, 
                         {
                          "gid":8,
@@ -365,15 +365,15 @@
                         }, 
                         {
                          "gid":8,
-                         "height":48,
+                         "height":112,
                          "id":631,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":544,
-                         "x":1760,
-                         "y":768
+                         "width":1568,
+                         "x":880,
+                         "y":976
                         }, 
                         {
                          "gid":8,
@@ -493,6 +493,72 @@
                          "width":64,
                          "x":1696,
                          "y":624
+                        }, 
+                        {
+                         "gid":8,
+                         "height":48,
+                         "id":642,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":960,
+                         "y":864
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":643,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Sandrew"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1088,
+                         "y":528
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":644,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2112,
+                         "y":512
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":645,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1632,
+                         "y":544
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -519,7 +585,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":642,
+ "nextobjectid":646,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -625,7 +691,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

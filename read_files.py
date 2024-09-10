@@ -77,7 +77,7 @@ def load_shaders_dict(game_objects):#returns a dicy with "state" as key and shad
         shader_dict[subdir.split("/")[-1]] = load_shader_list(subdir,game_objects)
     return shader_dict
 
-def load_shader_list(path_to_folder,game_objects):#use this to load multiple sprites in a path_to_folder
+def load_shader_list(path_to_folder, game_objects):#use this to load multiple sprites in a path_to_folder
     list_of_shader = []
     for f in listdir(path_to_folder):
         if not isfile(join(path_to_folder, f)): continue#skip the folders

@@ -258,7 +258,7 @@
                  "objects":[
                         {
                          "gid":15,
-                         "height":80,
+                         "height":528,
                          "id":454,
                          "name":"",
                          "properties":[
@@ -271,8 +271,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2176,
-                         "y":560
+                         "x":2320,
+                         "y":928
                         }, 
                         {
                          "gid":11,
@@ -294,7 +294,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2160,
+                         "x":2304,
                          "y":560
                         }, 
                         {
@@ -312,7 +312,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2128,
+                         "x":2272,
                          "y":528
                         }, 
                         {
@@ -359,13 +359,13 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":112,
-                         "x":1168,
+                         "width":80,
+                         "x":1232,
                          "y":592
                         }, 
                         {
                          "gid":8,
-                         "height":80,
+                         "height":96,
                          "id":504,
                          "name":"",
                          "rotation":0,
@@ -373,7 +373,7 @@
                          "visible":true,
                          "width":32,
                          "x":1200,
-                         "y":544
+                         "y":560
                         }, 
                         {
                          "gid":8,
@@ -453,8 +453,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":48,
-                         "x":1120,
+                         "width":128,
+                         "x":1104,
                          "y":592
                         }, 
                         {
@@ -502,7 +502,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2000,
+                         "x":2016,
                          "y":816
                         }, 
                         {
@@ -876,6 +876,60 @@
                          "width":64,
                          "x":1808,
                          "y":624
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":545,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Larv_poison"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1520,
+                         "y":528
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":546,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Sandrew"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2048,
+                         "y":672
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":548,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_roaming"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1552,
+                         "y":736
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -887,7 +941,31 @@
                  "draworder":"topdown",
                  "id":104,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":31222,
+                         "height":137,
+                         "id":544,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":1072,
+                         "y":560
+                        }, 
+                        {
+                         "gid":31222,
+                         "height":137,
+                         "id":547,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":2128,
+                         "y":704
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -902,7 +980,7 @@
          "y":0
         }],
  "nextlayerid":105,
- "nextobjectid":544,
+ "nextobjectid":549,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1008,7 +1086,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

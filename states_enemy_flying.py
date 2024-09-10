@@ -1,5 +1,10 @@
-import sys, random, math
+import sys, math
 from states_entity import Entity_States
+
+def sign(number):
+    if number > 0: return 1
+    elif number < 0: return -1
+    else: return 0
 
 class Enemy_states(Entity_States):
     def __init__(self,entity):
@@ -20,7 +25,7 @@ class Idle(Enemy_states):
         if input=='Walk':
              self.enter_state('Walk')
         elif input == 'attack':
-            self.enter_state('Pre_explode')
+            self.enter_state('Attack_pre')
 
 class Walk(Enemy_states):
     def __init__(self,entity):
@@ -37,9 +42,9 @@ class Walk(Enemy_states):
         if input=='Idle':
              self.enter_state('Idle')
         elif input == 'attack':
-            self.enter_state('Pre_explode')
+            self.enter_state('Attack_pre')
 
-class Pre_explode(Enemy_states):
+class Attack_pre(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -47,26 +52,30 @@ class Pre_explode(Enemy_states):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
-        player_distance = self.entity.AI.player_distance
-        if abs(player_distance[0]) < 50 and abs(player_distance[1]) < 50:
-            self.enter_state('Death')
-        else:
-            self.enter_state('De_explode')
+        self.enter_state('Attack_main')
 
     def handle_input(self,input):
         if input=='Idle':
              self.enter_state('Idle')
 
-class De_explode(Enemy_states):
+class Attack_main(Enemy_states):
     def __init__(self,entity):
-        super().__init__(entity)
+        super().__init__(entity)        
+        self.duration = 50
+        distance = (self.entity.AI.player_distance[1]**2 + self.entity.AI.player_distance[0]**2)**0.5
+        if distance == 0: distance = 1
+        ratio = [abs(self.entity.AI.player_distance[0])/distance, abs(self.entity.AI.player_distance[1])/distance]
+        self.velocity = [ratio[0] * 4 * sign(self.entity.AI.player_distance[0]), ratio[1] * 4 * sign(self.entity.AI.player_distance[1])]
 
     def update(self):
-        self.entity.velocity = [0,0]
+        self.entity.velocity = self.velocity.copy()
+        self.duration -= self.entity.game_objects.game.dt
+        if self.duration < 0:
+            self.enter_state('Idle')
+            self.entity.AI.handle_input('finish_attack')
 
     def increase_phase(self):
-        self.enter_state('Idle')
-        self.entity.AI.handle_input('De_explode')
+        pass
 
 class Death(Enemy_states):
     def __init__(self,entity):
@@ -78,4 +87,3 @@ class Death(Enemy_states):
 
     def increase_phase(self):
         self.entity.dead()
-        #self.entity.AI.handle_input('Attack')

@@ -6,7 +6,7 @@ class AI():
         self.player_distance = [0,0]
 
     def enter_AI(self, newAI, **kwarg):
-        self.entity.AI = getattr(sys.modules[__name__], newAI)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
+        self.entity.AI = getattr(sys.modules[__name__], newAI.capitalize())(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
 
     def update(self):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx,self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance
@@ -20,6 +20,18 @@ class AI():
 class Idle(AI):#do nothing
     def __init__(self, entity):
         super().__init__(entity)   
+
+class Roaming_attack(AI):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)   
+        self.frequency = kwarg.get('frequency', 100)
+        self.time = self.frequency
+
+    def update(self):
+        self.time -= self.entity.game_objects.game.dt
+        if self.time < 0:
+            self.entity.attack()
+            self.time = self.frequency        
 
 class Patrol(AI):#patrol in a circle aorund the original position
     def __init__(self, entity, **kwarg):

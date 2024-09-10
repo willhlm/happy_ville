@@ -110,13 +110,13 @@ class Title_Menu(Game_State):
             self.arrow.pressed('new')#if we want to make it e.g. glow or something
             new_state = Gameplay(self.game)
             new_state.enter_state()
-            #testing
 
             #load new game level
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            self.game.game_objects.load_map(self,'golden_fields_5','1')
-            #self.game.game_objects.load_map(self,'collision_map_4','1')
+            #self.game.game_objects.load_map(self,'golden_fields_5','2')
+            #self.game.game_objects.load_map(self,'light_forest_17','1')
+            self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()
@@ -619,11 +619,11 @@ class Pause_gameplay(Gameplay):#a pause screen with optional shake. = when entet
         self.duration = kwarg.get('duration', 12)
         amp = kwarg.get('amplitude', 0)
         scale = kwarg.get('scale', 0.9)
-        self.game.game_objects.camera.camera_shake(amplitude = amp, duration = self.duration, scale = scale)
+        self.game.game_objects.camera_manager.camera_shake(amplitude = amp, duration = self.duration, scale = scale)
 
     def update(self):
         self.game.game_objects.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
-        self.game.game_objects.camera.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
+        self.game.game_objects.camera_manager.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
 
         self.duration -= self.game.dt
         if self.duration < 0:
@@ -1042,7 +1042,7 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
 class New_game(Cutscene_engine):#first screen to be played when starying a new game -> needs to be called after that the map has loaded
     def __init__(self,game):
         super().__init__(game)
-        self.game.game_objects.camera.set_camera('New_game')#when starting a new game, should be a cutscene
+        self.game.game_objects.camera_manager.set_camera('New_game')#when starting a new game, should be a cutscene
         self.camera_stops = []#temporary remove the came stops
         for camera_stop in self.game.game_objects.camera_blocks:
             self.camera_stops.append(camera_stop)
@@ -1060,7 +1060,7 @@ class New_game(Cutscene_engine):#first screen to be played when starying a new g
     def exit_state(self):
         for camera_stop in self.camera_stops:
             self.game.game_objects.camera_blocks.add(camera_stop)
-        self.game.game_objects.camera.exit_state()
+        self.game.game_objects.camera_manager.camera.exit_state()
         super().exit_state()
 
 class Title_screen(Cutscene_engine):#screen played after waking up from boss dream
@@ -1101,7 +1101,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
         self.entity.AI.deactivate()
 
         self.game.game_objects.enemies.add(self.entity)
-        self.game.game_objects.camera.set_camera('Deer_encounter')
+        self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
         self.stage = 0
 
@@ -1127,18 +1127,18 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
             self.exit_state()
 
     def exit_state(self):
-        self.game.game_objects.camera.exit_state()
+        self.game.game_objects.camera_manager.camera.exit_state()
         self.entity.kill()
         super().exit_state()
 
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
-        pos = (self.game.game_objects.camera.scroll[0] + 900,self.game.game_objects.camera.scroll[1] + 100)
+        pos = (self.game.game_objects.camera_manager.camera.scroll[0] + 900,self.game.game_objects.camera_manager.camera.scroll[1] + 100)
         self.entity = entities.Reindeer(pos, self.game.game_objects)#make the boss
         self.game.game_objects.enemies.add(self.entity)
         self.entity.dir[0]=-1
-        self.game.game_objects.camera.set_camera('Deer_encounter')
+        self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.entity.AI.deactivate()
         self.stage = 0
         self.game.game_objects.player.currentstate.enter_state('Walk_main')
@@ -1159,12 +1159,12 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
             if self.timer>200:
                 self.entity.currentstate.enter_state('Transform')
                 self.game.game_objects.player.velocity[0] = -20
-                self.game.game_objects.camera.camera_shake(amp=3,duration=100)#amplitude, duration
+                self.game.game_objects.camera_manager.camera_shake(amp=3,duration=100)#amplitude, duration
                 self.stage=2
 
         elif self.stage==2:
             if self.timer > 400:
-                self.game.game_objects.camera.exit_state()#exsiting deer encounter camera
+                self.game.game_objects.camera_manager.camera.exit_state()#exsiting deer encounter camera
                 self.entity.AI.activate()
                 self.exit_state()
 
@@ -1252,8 +1252,8 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         quest = self.game.game_objects.quests_events.active_quests['cultist_encounter']
 
         #should entity stuff be in quest insted?
-        spawn_pos1 = (self.game.game_objects.camera.scroll[0] - 300, self.game.game_objects.camera.scroll[1] + 100)
-        spawn_pos2 = (self.game.game_objects.camera.scroll[0] + 50, self.game.game_objects.camera.scroll[1] + 100)
+        spawn_pos1 = (self.game.game_objects.camera_manager.camera.scroll[0] - 300, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
+        spawn_pos2 = (self.game.game_objects.camera_manager.camera.scroll[0] + 50, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
         self.entity1 = entities.Cultist_warrior(spawn_pos1, self.game.game_objects, quest)#added to group in cutscene
         self.entity1.dir[0] *= -1
         self.entity1.AI.deactivate()
@@ -1262,7 +1262,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         ##
 
         self.stage = 0
-        self.game.game_objects.camera.set_camera('Cultist_encounter')
+        self.game.game_objects.camera_manager.set_camera('Cultist_encounter')
         self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
         self.game.game_objects.player.currentstate.walk()#to force tha walk animation
 
@@ -1299,7 +1299,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
     def exit_state(self):
         self.entity1.AI.activate()
         self.entity2.AI.activate()
-        self.game.game_objects.camera.exit_state()
+        self.game.game_objects.camera_manager.camera.exit_state()
         super().exit_state()
 
 class Rhoutta_encounter(Gameplay):#called from trigger before first rhoutta: shuold spawn lightning and a gap spawns, or something -> TODO make a cutsene
@@ -1336,7 +1336,7 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
         elif self.stage == 1:#aggro
 
             if self.timer > 200:
-                self.game.game_objects.camera.camera_shake(duration = 200)
+                self.game.game_objects.camera_manager.camera_shake(duration = 200)
                 self.stage = 2
 
         elif self.stage == 2:#spawn
