@@ -801,9 +801,9 @@ class Player(Character):
         pos = (round(self.true_pos[0]-self.game_objects.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera.true_scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
-        #normal map draw                    
+        #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
-        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture       
+        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
 class Maderakkas_reflection_entity(Character):#player double ganger
     def __init__(self,pos, game_objects, **kwarg):
@@ -920,7 +920,7 @@ class Flying_enemy(Enemy):
 
     def knock_back(self,dir):
         amp = [30,30]
-        self.velocity[0] = dir[0]*amp[0]*(1 - abs(dir[1]))
+        self.velocity[0] = dir[0]*amp[0]
         self.velocity[1] = -dir[1]*amp[1]
 
     def chase(self, target_distance):#called from AI: when chaising
@@ -976,22 +976,47 @@ class Mygga(Flying_enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 3
-        self.aggro_distance = [180,130]
+        self.health = 30
+        self.aggro_distance = [130, 80]
         self.AI = AI_mygga.Patrol(self)
-        self.accel = 0.1
-        self.max_chase_vel = 4
-        self.friction = [0,0]
+        self.accel = [0.013, 0.008]
+        self.accel_chase = [0.022, 0.009]
+        self.deaccel_knock = 0.88
+        self.max_chase_vel = 1.7
+        self.max_patrol_vel = 1.2
+        self.friction = [0.009,0.009]
+
+    def knock_back(self,dir):
+        self.AI.enter_AI('Knock_back')
+        amp = [16,16]
+        self.velocity[0] = dir[0]*amp[0]
+        self.velocity[1] = -dir[1]*amp[1]
+
+    def player_collision(self, player):#when player collides with enemy
+        super().player_collision(player)
+        self.velocity = [0, 0]
+        self.AI.enter_AI('Wait', time = 30, next_AI = 'Chase')
 
     def patrol(self, position):#called from AI: when patroling
-        self.velocity[0] += 0.0025*(position[0]-self.rect.centerx)
-        self.velocity[1] += 0.0025*(position[1]-self.rect.centery)
-
-    def chase(self, target_distance):#called from AI: when chaising
-        self.velocity[0] += sign(target_distance[0]) * self.accel
-        self.velocity[1] += sign(target_distance[1]) * self.accel
+        self.velocity[0] += sign(position[0] - self.rect.centerx) * self.accel[0]
+        self.velocity[1] += sign(position[1] - self.rect.centery) * self.accel[1]
         self.velocity[0] = min(self.max_chase_vel, self.velocity[0])
         self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
+
+    def chase(self, target_distance):#called from AI: when chaising
+        self.velocity[0] += sign(target_distance[0]) * self.accel_chase[0]
+        self.velocity[1] += sign(target_distance[1]) * self.accel_chase[1]
+        for i in range(2):
+            if abs(self.velocity[i]) > self.max_chase_vel:
+                self.velocity[i] = sign(self.velocity[i]) *  self.max_chase_vel
+
+    def chase_knock_back(self, target_distance):#called from AI: when chaising
+        self.velocity[0] *= self.deaccel_knock#sign(target_distance[0])
+        self.velocity[1] *= self.deaccel_knock#sign(target_distance[1])
+
+    def walk(self, time):#called from walk state
+        amp = min(abs(self.velocity[0]),0.008)
+        self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
 class Roaming_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
