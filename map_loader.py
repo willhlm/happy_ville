@@ -941,7 +941,7 @@ class Crystal_mines(Biome):
             properties = obj.get('properties',[])
             id = obj['gid'] - self.level.map_data['objects_firstgid']
 
-            if id == 7:#bridge that is built when the reindeer dies                                        
+            if id == 7:#Conveyor_belt
                 kwarg = {}
                 for property in properties:
                     if property['name'] == 'right':
@@ -954,3 +954,12 @@ class Crystal_mines(Biome):
                 new_conveyor_belt = platforms.Conveyor_belt(object_position, self.level.game_objects, object_size, **kwarg)
                 self.level.game_objects.platforms.add(new_conveyor_belt)
            
+            if id == 8:#smacker
+                kwarg = {'hole': entities.Hole(object_position, self.level.game_objects, object_size)}
+                for property in properties:
+                    if property['name'] == 'distance':
+                        kwarg['distance'] = property['value']
+
+                new_smacker = platforms.Smacker(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.dynamic_platforms.add(new_smacker)           
+                self.level.game_objects.platforms.add(new_smacker)

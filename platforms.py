@@ -1,5 +1,5 @@
 import pygame
-import entities, states_time_collision, animation, read_files, states_basic, states_gate
+import entities, states_time_collision, animation, read_files, states_basic, states_gate, states_smacker
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
@@ -522,6 +522,10 @@ class Collision_dynamic(Collision_texture):
         super().__init__(pos, game_objects)
         self.velocity = [0,0]
 
+    def update(self):
+        super().update()
+        self.update_vel()
+
     def update_true_pos_x(self):
         self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
         self.rect.left = int(self.true_pos[0])#should be int
@@ -532,32 +536,28 @@ class Collision_dynamic(Collision_texture):
         self.rect.top = int(self.true_pos[1])#should be int
         self.hitbox.top = self.rect.top   
 
-    def collide_x(self,entity):
+    def collide_x(self,entity):#entity moving
         if entity.velocity[0] > self.velocity[0]:#going to the right
             entity.right_collision(self)
         else:#going to the leftx
             entity.left_collision(self)
         entity.update_rect_x()
 
-    def collide_entity_x(self,entity):            
+    def collide_entity_x(self,entity):  #platofmr miving          
         if self.velocity[0] > 0:#going to the right
             entity.left_collision(self)
         else:#going to the leftx
             entity.right_collision(self)
         entity.update_rect_x()
 
-    def collide_entity_y(self,entity):                      
+    def collide_entity_y(self,entity):  #platofmr miving                    
         if self.velocity[1] < 0:#going up              
             entity.down_collision(self)
         else:#going up
             entity.top_collision(self)
         entity.update_rect_y()
 
-    def update(self):
-        super().update()
-        self.update_vel()
-
-    def collide_y(self,entity):                    
+    def collide_y(self,entity):  #entity moving                  
         if entity.velocity[1] > self.velocity[1]:#going down               
             entity.down_collision(self)
             entity.limit_y()
@@ -601,6 +601,34 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def deactivate(self):#called when first timer runs out         
         self.kill()
+
+class Smacker(Collision_dynamic):#trap
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/traps/smacker/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+
+        self.hole = kwarg.get('hole', None)
+        
+        self.frequency = int(kwarg.get('frequency', 100))#infinte -> idle - active
+        self.distance = kwarg.get('distance', 4*16)
+        self.original_pos = pos
+
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.animation = animation.Animation(self)
+        self.currentstate = states_smacker.Idle(self)
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+    def collide_entity_y(self,entity):#plpaotfrom mobings  
+        self.currentstate.collide_entity_y(entity)                
+
+    def collide_y(self,entity):#entity moving       
+        self.currentstate.collide_y(entity)        
 
 #timer:
 class Conveyor_belt_timer(entities.Timer):#not in use
