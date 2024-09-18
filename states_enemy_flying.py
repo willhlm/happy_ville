@@ -58,7 +58,7 @@ class Attack_pre(Enemy_states):
         if input=='Idle':
              self.enter_state('Idle')
 
-class Attack_main(Enemy_states):
+class Attack_main(Enemy_states):#taiatari
     def __init__(self,entity):
         super().__init__(entity)        
         self.duration = 50
@@ -76,6 +76,10 @@ class Attack_main(Enemy_states):
 
     def increase_phase(self):
         pass
+
+    def handle_input(self,input):
+        if input == 'collision':#collision with walls -> alla alkbar sends this input
+            self.enter_state('Death')
 
 class Death(Enemy_states):
     def __init__(self,entity):
