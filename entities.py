@@ -1063,16 +1063,18 @@ class Mygga(Flying_enemy):
         self.AI = AI_mygga.Patrol(self)
         self.accel = [0.013, 0.008]
         self.accel_chase = [0.026, 0.009]
-        self.deaccel_knock = 0.88
+        self.deaccel_knock = 0.84
         self.max_chase_vel = 1.8
         self.max_patrol_vel = 1.2
         self.friction = [0.009,0.009]
 
     def knock_back(self,dir):
         self.AI.enter_AI('Knock_back')
-        amp = [16,16]
-        self.velocity[0] = dir[0]*amp[0]
-        self.velocity[1] = -dir[1]*amp[1]
+        amp = 19
+        if dir[1] != 0:
+            self.velocity[1] = -dir[1] * amp
+        else:
+            self.velocity[0] = dir[0] * amp
 
     def player_collision(self, player):#when player collides with enemy
         super().player_collision(player)
