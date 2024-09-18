@@ -1497,6 +1497,42 @@
                          "width":16,
                          "x":1872,
                          "y":880
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":393,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_suicide"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1520,
+                         "y":368
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":394,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Mygga_suicide"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1696,
+                         "y":368
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1534,7 +1570,7 @@
          "y":0
         }],
  "nextlayerid":111,
- "nextobjectid":393,
+ "nextobjectid":395,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

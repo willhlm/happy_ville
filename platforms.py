@@ -1,5 +1,5 @@
 import pygame
-import entities, states_time_collision, animation, read_files, states_basic, states_gate
+import entities, states_time_collision, animation, read_files, states_basic, states_gate, states_smacker
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
@@ -23,7 +23,11 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         pass   
 
     def release_texture(self):#called when .kill() and empty group
-        pass    
+        pass   
+
+    def kill(self):
+        self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
+        super().kill()         
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
@@ -210,6 +214,7 @@ class Collision_texture(Platform):#blocks that has tectures
     def __init__(self, pos, game_objects):
         super().__init__(pos)    
         self.game_objects = game_objects        
+        self.dir = [1,0]#animation needs it
 
     def update(self):
         self.currentstate.update()
@@ -259,7 +264,6 @@ class Boulder(Collision_texture):#blocks village cave
 class Gate(Collision_texture):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.dir = [1,0]
         self.sprites = read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
 
         self.ID_key = kwarg.get('ID', 'None')#an ID to match with the gate
@@ -296,6 +300,92 @@ class Bridge(Collision_texture):#bridge twoards forest path
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
+
+class Conveyor_belt(Collision_texture):
+    def __init__(self, pos, game_objects, size, **kwarg):
+        super().__init__(pos, game_objects)
+        self.tile_size = [16,16]
+        
+        if kwarg.get('vertical', False):#default is horizontal belft
+            angle = 90              
+            size[1] = max(size[1], self.tile_size[1] * 3)#assert at least 3 tiles
+            if kwarg.get('up', False):#default is up down betls
+                self.direction = [0, -1]
+            else:#down
+                self.direction = [0, 1]      
+            animation_direction =  self.direction[1]                          
+        else:#horizontal
+            angle = 0             
+            size[0] = max(size[0], self.tile_size[0] * 3)#assert at least 3 tiles
+            if kwarg.get('right', False):#default is left moving belts
+                self.direction = [1,0]
+            else:#left
+                self.direction = [-1, 0]
+            animation_direction =  -self.direction[0]                 
+        
+        #self.timer = Conveyor_belt_timer(self, 10, self.direction)
+        #self.timers = []
+
+        self.make_belt(size, angle)
+        self.animation = animation.Animation(self, direction = animation_direction)#can revert the animation direction
+        self.currentstate = states_basic.Idle(self)     
+
+        self.rect = pygame.Rect(pos, size)
+        self.true_pos = list(self.rect.topleft)
+        self.hitbox = self.rect.copy()        
+
+    #def update(self):
+    #    super().update()
+        #for timer in self.timers:
+        #    timer.update()
+
+    def make_belt(self, size, angle = 0):#the spits are divided into left, middle and right. Merge them here                
+        sprites = read_files.load_sprites_dict('Sprites/block/conveyor_belt/', self.game_objects)
+
+        self.sprites = {'idle' : []}
+        self.layers = []#store each layer so that it can be released
+        principle_sections = ['left', 'middle','right']#the middle will be placed multiple times depending on the size     
+
+        if angle == 0:
+            sections = [principle_sections[0]] + [principle_sections[1]] * (int(size[0]/self.tile_size[0]) - 2) + [principle_sections[2]]
+        else:#90
+            sections = [principle_sections[0]] + [principle_sections[1]] * (int(size[1]/self.tile_size[1]) - 2) + [principle_sections[2]]
+
+        for frame in range(0, len(sprites[sections[0]]) - 1):  
+            self.layers.append(self.game_objects.game.display.make_layer(size))
+            for index, section in enumerate(sections):
+                if angle == 0:
+                    pos = [sprites[sections[index - 1]][frame].width * index , 0]
+                else:#vertical
+                    pos = [0, sprites[sections[index - 1]][frame].height * index ]
+
+                self.game_objects.game.display.render(sprites[section][frame], self.layers[-1], position = pos, angle = angle)#int seem nicer than round         
+
+            self.sprites['idle'].append(self.layers[-1].texture)            
+        self.image =  self.sprites['idle'][0]      
+
+        for state in sprites.keys():
+            for frame in range(0,len(sprites[state])):
+                sprites[state][frame].release()   
+
+    def release_texture(self):
+        super().release_texture()
+        for layer in self.layers:
+            layer.release()
+
+    def collide_x(self,entity):
+        if entity.velocity[0] > 0:#going to the right
+            entity.right_collision(self)
+            entity.velocity[1] += self.game_objects.game.dt * self.direction[1]
+        else:#going to the leftx
+            entity.left_collision(self)
+            entity.velocity[1] += self.game_objects.game.dt * -self.direction[1]
+        entity.update_rect_x()
+ 
+    def collide_y(self,entity):
+        super().collide_y(entity)
+        entity.velocity[0] += self.game_objects.game.dt * self.direction[0]
+        #self.timer.activate(entity)
 
 #timer based
 class Collision_timer(Collision_texture):#collision block that dissapears if aila stands on it
@@ -432,6 +522,10 @@ class Collision_dynamic(Collision_texture):
         super().__init__(pos, game_objects)
         self.velocity = [0,0]
 
+    def update(self):
+        super().update()
+        self.update_vel()
+
     def update_true_pos_x(self):
         self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
         self.rect.left = int(self.true_pos[0])#should be int
@@ -442,32 +536,28 @@ class Collision_dynamic(Collision_texture):
         self.rect.top = int(self.true_pos[1])#should be int
         self.hitbox.top = self.rect.top   
 
-    def collide_x(self,entity):
+    def collide_x(self,entity):#entity moving
         if entity.velocity[0] > self.velocity[0]:#going to the right
             entity.right_collision(self)
         else:#going to the leftx
             entity.left_collision(self)
         entity.update_rect_x()
 
-    def collide_entity_x(self,entity):            
+    def collide_entity_x(self,entity):  #platofmr miving          
         if self.velocity[0] > 0:#going to the right
             entity.left_collision(self)
         else:#going to the leftx
             entity.right_collision(self)
         entity.update_rect_x()
 
-    def collide_entity_y(self,entity):                      
+    def collide_entity_y(self,entity):  #platofmr miving                    
         if self.velocity[1] < 0:#going up              
             entity.down_collision(self)
         else:#going up
             entity.top_collision(self)
         entity.update_rect_y()
 
-    def update(self):
-        super().update()
-        self.update_vel()
-
-    def collide_y(self,entity):                    
+    def collide_y(self,entity):  #entity moving                  
         if entity.velocity[1] > self.velocity[1]:#going down               
             entity.down_collision(self)
             entity.limit_y()
@@ -512,7 +602,56 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def deactivate(self):#called when first timer runs out         
         self.kill()
 
+class Smacker(Collision_dynamic):#trap
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/traps/smacker/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+
+        self.hole = kwarg.get('hole', None)
+        
+        self.frequency = int(kwarg.get('frequency', 100))#infinte -> idle - active
+        self.distance = kwarg.get('distance', 4*16)
+        self.original_pos = pos
+
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+        self.animation = animation.Animation(self)
+        self.currentstate = states_smacker.Idle(self)
+
+    def update(self):
+        self.currentstate.update()
+        self.animation.update()
+
+    def collide_entity_y(self,entity):#plpaotfrom mobings  
+        self.currentstate.collide_entity_y(entity)                
+
+    def collide_y(self,entity):#entity moving       
+        self.currentstate.collide_y(entity)        
+
 #timer:
+class Conveyor_belt_timer(entities.Timer):#not in use
+    def __init__(self, entity, duration, direction):
+        super().__init__(entity, duration)
+        self.direction = direction
+
+    def activate(self, entity):#add timer to the entity timer list
+        self.lifetime = self.duration
+        self.entity = entity
+        entity.friction[0] = 0.12
+        if self in self.entity.timers: return#do not append if the timer is already inside        
+        self.entity.timers.append(self)
+
+    def update(self):
+        super().update()
+        self.entity.velocity[0] += self.entity.game_objects.game.dt * self.direction[0] * 0.5
+
+    def deactivate(self):
+        if self not in self.entity.timers: return#do not remove if the timer is not inside
+        self.entity.timers.remove(self)
+        self.entity.friction = C.friction_player.copy()#put it back
+
 class Platform_timer_1(entities.Timer):
     def __init__(self,entity, duration):
         super().__init__(entity, duration)

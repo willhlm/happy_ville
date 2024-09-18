@@ -8,6 +8,7 @@ class Animation():
         self.framerate = kwarg.get('framerate', C.animation_framerate)
         self.frame = 0
         self.image_frame = 0#used for normal maps
+        self.direction = kwarg.get('direction', 1)#1 or -1: animaion direction
 
     def reset_timer(self):
         self.frame = 0
@@ -17,8 +18,8 @@ class Animation():
         frame = int(self.frame)
         self.entity.image = self.entity.sprites[self.entity.state][frame]  
         self.image_frame = frame#save the current frame. Used for normal maps     
-        self.frame += self.framerate * self.entity.game_objects.game.dt * self.entity.slow_motion
+        self.frame += self.framerate * self.entity.game_objects.game.dt * self.entity.slow_motion * self.direction
 
-        if self.frame >= len(self.entity.sprites[self.entity.state]):
+        if self.frame * self.direction >= len(self.entity.sprites[self.entity.state]):
             self.entity.reset_timer()
             self.reset_timer()

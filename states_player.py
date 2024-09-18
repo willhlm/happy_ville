@@ -575,7 +575,7 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
             self.enter_state('Air_dash_post')
 
     def increase_phase(self):
-        pass#self.enter_state('Air_dash_post')        
+        pass#self.enter_state('Air_dash_post')
 
 class Air_dash_post(Air_dash_pre):
     def __init__(self,entity):
@@ -886,7 +886,7 @@ class Sword(Player_states):#main phases shold inheret this
         self.entity.timer_jobs['sword'].activate()
         self.dir = self.entity.dir.copy()#animation direction
         self.entity.sword.dir = self.dir.copy()#sword direction
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 1)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.slash()
 
     def slash(self):#if we have green infinity stone

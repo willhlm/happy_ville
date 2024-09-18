@@ -929,3 +929,37 @@ class Golden_fields(Biome):
                 new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, group)
                 group.add(new_drop)
   
+class Crystal_mines(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+
+    def load_objects(self, data, parallax, offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 7:#Conveyor_belt
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'right':
+                        kwarg['right'] = property['value']
+                    elif property['name'] == 'up':
+                        kwarg['up'] = property['value']
+                    elif property['name'] == 'vertical':
+                        kwarg['vertical'] = property['value']
+
+                new_conveyor_belt = platforms.Conveyor_belt(object_position, self.level.game_objects, object_size, **kwarg)
+                self.level.game_objects.platforms.add(new_conveyor_belt)
+           
+            if id == 8:#smacker
+                kwarg = {'hole': entities.Hole(object_position, self.level.game_objects, object_size)}
+                for property in properties:
+                    if property['name'] == 'distance':
+                        kwarg['distance'] = property['value']
+
+                new_smacker = platforms.Smacker(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.dynamic_platforms.add(new_smacker)           
+                self.level.game_objects.platforms.add(new_smacker)
