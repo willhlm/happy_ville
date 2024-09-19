@@ -9,9 +9,10 @@ class Controller():
         self.keyup = False
         self.value = {'l_stick':[0,0],'r_stick':[0,0],'d_pad':[0,0]}#movement (left analog, arrow keys), right analog, d_pad
         self.key = False
-        self.outputs = [self.keydown,self.keyup,self.value,self.key]
+        self.outputs = [self.keydown, self.keyup, self.value, self.key]
         self.map_keyboard()
         self.methods = [self.keybord]#joystick may be appended
+        self.input_buffer = []
 
         pygame.joystick.init()#initialise joystick module
         self.initiate_controls()#initialise joysticks and add to list
@@ -65,14 +66,13 @@ class Controller():
         self.keydown = False
         self.key = None
         for method in self.methods:#check for keyboard and controller
-            method(event)
-        #self.methods[-1](event)
+            method(event)#self.methods[-1](event)
 
     def keybord(self,event):
         if event.type == pygame.KEYDOWN:
             self.keydown = True
-            self.key = self.keyboard_map.get(event.key, '')
-
+            self.key = self.keyboard_map.get(event.key, '')            
+            
             if self.key=='right':
                 self.value['l_stick'][0]=1
             elif self.key=='left':
@@ -82,11 +82,13 @@ class Controller():
             elif self.key=='down':
                 self.value['l_stick'][1]=1
 
+            self.insert_buffer()
+
         elif event.type == pygame.KEYUP:#lift bottom
             self.keyup = True
             self.key = self.keyboard_map.get(event.key, '')
 
-            if self.key=='right':
+            if self.key == 'right':
                 keys_pressed=pygame.key.get_pressed()
                 if keys_pressed[pygame.K_LEFT]:
                     self.value['l_stick'][0]=-1
@@ -101,6 +103,8 @@ class Controller():
 
             elif self.key=='up' or self.key=='down':
                 self.value['l_stick'][1]=0
+            
+            self.insert_buffer()
 
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
             self.initiate_controls()
@@ -115,23 +119,27 @@ class Controller():
             self.controller_type.pop()
 
         if event.type==pygame.JOYBUTTONDOWN:#press a button
-            self.keydown=True
-            self.key=self.buttons[str(event.button)]
+            self.keydown = True
+            self.key = self.buttons[str(event.button)]
+            self.insert_buffer()
 
         elif event.type==pygame.JOYBUTTONUP:#release a button
-            self.keyup=True
-            self.key=self.buttons[str(event.button)]
+            self.keyup = True
+            self.key = self.buttons[str(event.button)]
+            self.insert_buffer()
 
         if event.type==pygame.JOYAXISMOTION:#analog stick
             if event.axis==self.analogs['lh']:#left horizontal
                 self.value['l_stick'][0] = event.value
                 if abs(event.value) < 0.2:
                     self.value['l_stick'][0] = 0
+                self.insert_buffer()
 
             if event.axis==self.analogs['lv']:#left vertical
                 self.value['l_stick'][1] = event.value
                 if abs(event.value) < 0.1:
                     self.value['l_stick'][1] = 0
+                self.insert_buffer()
 
             #self.controller_angle('l_stick')
 
@@ -139,17 +147,23 @@ class Controller():
                 self.value['r_stick'][0] = event.value
                 if abs(event.value) < 0.1:
                     self.value['r_stick'][0] = 0
+                self.insert_buffer()
 
             if event.axis==self.analogs['rv']:#right vertical
                 self.value['r_stick'][1] = event.value
                 if abs(event.value) < 0.1:
                     self.value['r_stick'][1] = 0
+                self.insert_buffer()
 
             #self.controller_angle('r_stick')
 
         if event.type == pygame.JOYHATMOTION:
             self.keydown = True
             self.value['d_pad'] = [event.value[0],event.value[1]]
+            self.insert_buffer()
+
+    def insert_buffer(self):
+        self.input_buffer.append(Inputs(self, self.key, self.keydown, self.keyup, self.value))
 
     def output(self):
         return [self.keydown, self.keyup, self.value, self.key]
@@ -168,3 +182,27 @@ class Controller():
             #print(angle)
             if angle < 45:
                 self.value[stick][1] = 0
+
+class Inputs():#different inputs such as keys and buttons
+    def __init__(self, controller, key, keydown, keyup, value, lifetime = 10):
+        self.controller = controller
+        self.lifetime = lifetime
+        self.key = key
+        self.keydown = keydown
+        self.keyup = keyup
+        self.value = value
+
+    def output(self):
+        return [self.keydown, self.keyup, self.value, self.key]
+
+    def update(self, dt):
+        self.lifetime -= dt
+        if self.lifetime < 0:
+            self.remove_input()
+
+    def remove_input(self):
+        self.controller.input_buffer.remove(self)    
+        print(self.key) 
+
+    def processed(self):
+        self.remove_input()             

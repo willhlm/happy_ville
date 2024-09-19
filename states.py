@@ -86,7 +86,8 @@ class Title_Menu(Game_State):
         self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
         self.arrow.play_SFX()
 
-    def handle_events(self, event):
+    def handle_events(self, input):
+        event = input.output()
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -472,34 +473,40 @@ class Gameplay(Game_State):
         image.release()
 
     def handle_events(self, input):
-        self.game.game_objects.player.currentstate.handle_movement(input)#move around
-        if input[0]:#press
-            if input[-1]=='start':#escape button
+        event = input.output()
+        self.game.game_objects.player.currentstate.handle_movement(event)#move around
+        if event[0]:#press
+            if event[-1]=='start':#escape button
+                input.processed()
                 new_state = Pause_Menu(self.game)
                 new_state.enter_state()
 
-            elif input[-1]=='rb':
+            elif event[-1]=='rb':
+                input.processed()
                 new_state = Ability_menu(self.game)
                 new_state.enter_state()
 
-            elif input[-1] == 'y':
+            elif event[-1] == 'y':
+                input.processed()
                 self.game.game_objects.collisions.check_interaction_collision()
 
-            elif input[-1] == 'select':
+            elif event[-1] == 'select':
+                input.processed()
                 new_state = Select_menu(self.game)
                 new_state.enter_state()
 
-            elif input[-1] == 'down':
+            elif event[-1] == 'down':
+                input.processed()
                 self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
             else:
                 self.game.game_objects.player.currentstate.handle_press_input(input)
-                self.game.game_objects.player.abilities.handle_input(input)#to change movement ability with d pad
+                self.game.game_objects.player.abilities.handle_input(event)#to change movement ability with d pad
                 #self.game.game_objects.player.omamoris.handle_input(input)
-        elif input[1]:#release
+        elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-        elif input[2]['l_stick'][1] > 0.85:
+        elif event[2]['l_stick'][1] > 0.85:
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
@@ -573,22 +580,31 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         for key in self.button_surfaces.keys():
             self.button_surfaces[key].release()
 
-    def handle_events(self, event):
+    def handle_events(self, input):
+        event = input.output()
         if event[0]:
             if event[-1] == 'up':
+                input.processed()
                 self.current_button -= 1
                 if self.current_button < 0:
                     self.current_button = len(self.buttons) - 1
                 self.update_arrow()
             elif event[-1] == 'down':
+                input.processed()
                 self.current_button += 1
                 if self.current_button >= len(self.buttons):
                     self.current_button = 0
                 self.update_arrow()
-            elif event[-1] in ('return', 'a'):
+            elif event[-1] == 'a':
+                input.processed()
                 self.arrow.pressed()
                 self.change_state()
+            elif event[-1] == 'return':
+                input.processed()
+                self.arrow.pressed()
+                self.change_state()                
             elif event[-1] == 'start':
+                input.processed()
                 self.exit_state()
 
     def exit_state(self):

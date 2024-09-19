@@ -790,7 +790,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Wall_glide':False,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
@@ -802,10 +802,8 @@ class Player(Character):
         self.omamoris = Omamoris(self)#
         self.flags = {'ground': True, 'sword_swinging': False}# a flag to check if on graon (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump_buffer':Jump_buffer_timer(self,C.jump_buffer_timer_player),
-                        'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player),
-                        'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2),
-                        'wet':Wet_timer(self, 60), 'dash_buffer':Dash_buffer_timer(self, C.jump_buffer_timer_player),}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'wet':Wet_timer(self, 60),
+                        'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
 
@@ -4459,45 +4457,15 @@ class Sword_timer(Timer):
         super().deactivate()
         self.entity.flags['sword_swinging'] = False
 
-class Jump_buffer_timer(Timer):#can be combined with shroomjump?
-    def __init__(self, entity, duration):
-        super().__init__(entity, duration)#called from player states, when pressing jump
-
-    def update(self):#called everyframe after activation (activated after pressing jump)
-        if self.entity.flags['ground']:#start jumping if we a re on the ground
-            self.entity.flags['ground'] = False
-            self.entity.velocity[1] = C.jump_vel_player#start jumping on this frame
-            self.entity.currentstate.handle_input('jump')#handle if we should go to jump state
-            self.entity.timer_jobs['air'].activate()
-            self.deactivate()
-        super().update()#need to be after
-
-class Dash_buffer_timer(Timer):#ground dash buffer time
-    def __init__(self, entity, duration):
-        super().__init__(entity, duration)#called from player states, when pressing dash
-
-    def update(self):#called everyframe after activation (activated after pressing jump)
-        if self.entity.flags['ground']:#start dashing if we a re on the ground
-            self.entity.flags['ground'] = False
-            self.entity.currentstate.handle_input('dash')#handle if we should go to jump state
-            self.deactivate()
-        super().update()#need to be after        
-
-class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
-    def __init__(self, entity, duration):
-        super().__init__(entity, duration)
-
-    def update(self):#called everyframe after activation (activated after jumping)
-        self.entity.velocity[1] = C.jump_vel_player
-        super().update()#need to be after
-
 class Cayote_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
 
     def activate(self):#called when entering fall run or fall stand
-        if self.entity.flags['ground']:#if we fall from a plotform
-            super().activate()
+        self.lifetime = self.duration
+        if self in self.entity.timers: return#do not append if the timer is already inside
+        self.entity.timers.append(self)
+        self.entity.flags['ground'] = True
 
     def deactivate(self):#called when timer runs out
         super().deactivate()
@@ -4518,47 +4486,3 @@ class Shroomjump_timer(Timer):
     def deactivate(self):#called when timer expires
         super().deactivate()
         self.shrooming = False
-
-class Wall_timer(Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-        self.active = False
-
-    def activate(self):
-        super().activate()
-        self.active = True
-
-    def deactivate(self):
-        super().deactivate()
-        self.active = False
-
-    def handle_input(self,input):#called from handle press input in player states
-        #return
-        if not self.active: return
-        if input=='a':#pressed jump
-            #self.entity.velocity[0] = -self.entity.dir[0]*10
-            self.entity.velocity[1] = -7#to get a vertical velocity
-
-class Wall_timer_2(Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-
-    def activate(self,dir):#add timer to the entity timer list
-        super().activate()
-        self.dir = dir.copy()
-
-    def update(self):
-        self.check_sign()
-        super().update()
-
-    def check_sign(self):
-        if self.entity.dir[0]*self.dir[0]>=0:#if it is zero or same direction
-            self.entity.dir[0] = 0
-        else:#if aila change direction
-            self.entity.dir[0] = -self.dir[0]
-            if self not in self.entity.timers: return#do not remove if the timer is not inside
-            self.entity.timers.remove(self)
-
-    def deactivate(self):#lifetime
-        super().deactivate()
-        self.entity.dir[0] = self.dir[0]

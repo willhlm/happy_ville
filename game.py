@@ -29,13 +29,17 @@ class Game():
         pygame.event.set_blocked([pygame.TEXTINPUT])#for some reason, there is a text input here and there. So, blocking it
 
     def event_loop(self):
-        for event in pygame.event.get():
-            if event.type==pygame.QUIT:
+        events = pygame.event.get()  
+        for event in events:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             else:
-                self.game_objects.controller.map_inputs(event)
-                self.state_stack[-1].handle_events(self.game_objects.controller.output())
+                self.game_objects.controller.map_inputs(event)#makes a list of inputs (input buffer)
+
+        for input in self.game_objects.controller.input_buffer:
+            input.update(self.dt)
+            self.state_stack[-1].handle_events(input)  
 
     def run(self):
         while True:
