@@ -37,7 +37,8 @@ class Game():
             else:
                 self.game_objects.controller.map_inputs(event)#makes a list of inputs (input buffer)
 
-        for input in self.game_objects.controller.input_buffer:
+        inputs = self.game_objects.controller.input_buffer.copy()
+        for input in inputs:
             input.update(self.dt)
             self.state_stack[-1].handle_events(input)  
 

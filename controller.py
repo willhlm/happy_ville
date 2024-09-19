@@ -12,7 +12,7 @@ class Controller():
         self.outputs = [self.keydown, self.keyup, self.value, self.key]
         self.map_keyboard()
         self.methods = [self.keybord]#joystick may be appended
-        self.input_buffer = []
+        self.input_buffer = set()
 
         pygame.joystick.init()#initialise joystick module
         self.initiate_controls()#initialise joysticks and add to list
@@ -163,7 +163,7 @@ class Controller():
             self.insert_buffer()
 
     def insert_buffer(self):
-        self.input_buffer.append(Inputs(self, self.key, self.keydown, self.keyup, self.value))
+        self.input_buffer.add(Inputs(self, self.key, self.keydown, self.keyup, self.value))
 
     def output(self):
         return [self.keydown, self.keyup, self.value, self.key]
@@ -201,8 +201,7 @@ class Inputs():#different inputs such as keys and buttons
             self.remove_input()
 
     def remove_input(self):
-        self.controller.input_buffer.remove(self)    
-        print(self.key) 
+        self.controller.input_buffer.discard(self)    
 
     def processed(self):
         self.remove_input()             
