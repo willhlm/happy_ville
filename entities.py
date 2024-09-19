@@ -569,7 +569,7 @@ class Smoke(Staticentity):
         self.size = size
 
         self.colour = properties.get('colour', (1,1,1,1))
-        self.spawn_rate = properties.get('spawn_rate', 10)
+        self.spawn_rate = int(properties.get('spawn_rate', 10))
         self.radius = properties.get('radius', 0.03)
         self.speed = properties.get('speed', 0.2)
         self.horizontalSpread = properties.get('horizontalSpread', 0.5)
@@ -785,15 +785,15 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = {'Idle':True,'Walk':True,'Run':True,'Pray':True,'Stand_up':True,'Jump_run':True,
-                     'Jump_stand':True,'Fall_run':True,'Fall_stand':True,'Death':True,
+        self.states = {'Idle':True,'Walk':True,'Run':True,'Pray':True,'Stand_up':True,
+                     'Jump':True,'Fall':True,'Death':True,
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Wall_glide':False,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Wall_glide':False,'Double_jump':False,
                      'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
-                     'Sword_jump1':True, 'Sword_jump2':True}
+                     'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
@@ -805,7 +805,7 @@ class Player(Character):
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump_buffer':Jump_buffer_timer(self,C.jump_buffer_timer_player),
                         'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player),
                         'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2),
-                        'wet':Wet_timer(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
+                        'wet':Wet_timer(self, 60), 'dash_buffer':Dash_buffer_timer(self, C.jump_buffer_timer_player),}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
 
@@ -816,10 +816,12 @@ class Player(Character):
     def ramp_down_collision(self, position):#when colliding with platform beneth
         super().ramp_down_collision(position)
         self.flags['ground'] = True#used for jumping
+        self.friction = C.friction_player.copy()
 
-    def down_collision(self,hitbox):#when colliding with platform beneth
-        super().down_collision(hitbox)
+    def down_collision(self, block):#when colliding with platform beneth
+        super().down_collision(block)
         self.flags['ground'] = True#used for jumping
+        self.friction = C.friction_player.copy()
 
     def take_dmg(self, dmg = 1, duration = 20):
         if self.tjasolmais_embrace: self.tjasolmais_embrace.take_dmg(dmg)
@@ -2423,7 +2425,7 @@ class Melee(Projectiles):
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-
+        
     def countered(self,dir,pos):#called from sword collision_projectile, purple initinty stone
         return
         self.entity.countered()
@@ -4458,13 +4460,24 @@ class Jump_buffer_timer(Timer):#can be combined with shroomjump?
         super().__init__(entity, duration)#called from player states, when pressing jump
 
     def update(self):#called everyframe after activation (activated after pressing jump)
-        if self.entity.flags['ground']:
+        if self.entity.flags['ground']:#start jumping if we a re on the ground
             self.entity.flags['ground'] = False
             self.entity.velocity[1] = C.jump_vel_player#start jumping on this frame
             self.entity.currentstate.handle_input('jump')#handle if we should go to jump state
             self.entity.timer_jobs['air'].activate()
             self.deactivate()
         super().update()#need to be after
+
+class Dash_buffer_timer(Timer):#ground dash buffer time
+    def __init__(self, entity, duration):
+        super().__init__(entity, duration)#called from player states, when pressing dash
+
+    def update(self):#called everyframe after activation (activated after pressing jump)
+        if self.entity.flags['ground']:#start dashing if we a re on the ground
+            self.entity.flags['ground'] = False
+            self.entity.currentstate.handle_input('dash')#handle if we should go to jump state
+            self.deactivate()
+        super().update()#need to be after        
 
 class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
     def __init__(self, entity, duration):

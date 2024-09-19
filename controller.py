@@ -61,8 +61,8 @@ class Controller():
                                 }
 
     def map_inputs(self,event):
-        self.keyup=False
-        self.keydown=False
+        self.keyup = False
+        self.keydown = False
         self.key = None
         for method in self.methods:#check for keyboard and controller
             method(event)

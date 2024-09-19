@@ -3,8 +3,8 @@ from states_entity import Entity_States
 import constants as C
 
 def sign(number):
-    if number == 0: return 0
-    return round(number/abs(number))
+    if number > 0: return 1
+    else: return -1
 
 class Player_states(Entity_States):
     def __init__(self,entity):
@@ -31,14 +31,14 @@ class Player_states(Entity_States):
     def handle_movement(self,input):#all states should inehrent this function
         #left stick and arrow keys
         value = input[2]['l_stick']#the avlue of the press
-        self.entity.acceleration[0] = C.acceleration[0]*math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
+        self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
 
         if abs(value[0]) > 0.2:
             self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        if self.entity.abilities.equip=='Thunder' or self.entity.abilities.equip=='Slow_motion' or self.entity.abilities.equip=='Migawari':
+        if self.entity.abilities.equip == 'Thunder' or self.entity.abilities.equip == 'Slow_motion' or self.entity.abilities.equip == 'Migawari':
             self.enter_state(self.entity.abilities.equip + '_pre')
         else:
             self.enter_state(self.entity.abilities.equip + '_main')
@@ -49,7 +49,7 @@ class Idle_main(Player_states):
 
     def update(self):
         if not self.entity.collision_types['bottom']:
-            self.enter_state('Fall_stand_pre')
+            self.enter_state('Fall_pre')
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
@@ -62,9 +62,11 @@ class Idle_main(Player_states):
         elif input[-1] == 'rt':
             self.enter_state('Counter_pre')
 
-    def handle_input(self,input):#caööed from jump buffer timer
-        if input == 'jump':
-            self.enter_state('Jump_stand_main')
+    def handle_input(self,input):
+        if input == 'jump':#caööed from jump buffer timer
+            self.enter_state('Jump_main')
+        elif input == 'dash':#called from dash buffer timer
+            self.enter_state('Ground_dash_pre')            
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -93,7 +95,7 @@ class Walk_main(Player_states):
             #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
-            self.enter_state('Fall_run_pre')
+            self.enter_state('Fall_pre')
 
     def running_particles(self):
         particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
@@ -109,9 +111,11 @@ class Walk_main(Player_states):
         elif input[-1]=='b':#depends on if the abillities have pre or main animation. Should all have pre?
             self.do_ability()
 
-    def handle_input(self,input):#caööed from jump buffer timer
-        if input == 'jump':
-            self.enter_state('Jump_run_main')
+    def handle_input(self,input):
+        if input == 'jump':#caööed from jump buffer timer
+            self.enter_state('Jump_main')
+        elif input == 'dash':#called from dash buffer timer
+            self.enter_state('Ground_dash_pre')                 
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -139,7 +143,7 @@ class Run_pre(Player_states):
             #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
-            self.enter_state('Fall_run_pre')
+            self.enter_state('Fall_pre')
 
     def increase_phase(self):
         self.enter_state('Run_main')
@@ -158,9 +162,11 @@ class Run_pre(Player_states):
         elif input[-1]=='b':#depends on if the abillities have pre or main animation
             self.do_ability()
 
-    def handle_input(self,input):#caööed from jump buffer timer
-        if input == 'jump':
-            self.enter_state('Jump_run_main')
+    def handle_input(self,input):
+        if input == 'jump':#caööed from jump buffer timer
+            self.enter_state('Jump_main')
+        elif input == 'dash':#called from dash buffer timer
+            self.enter_state('Ground_dash_pre')                  
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -170,7 +176,7 @@ class Run_pre(Player_states):
     def swing_sword(self):
         if not self.entity.flags['sword_swinging']:
             if abs(self.entity.dir[1])<0.8:
-                state='Sword_run'+str(int(self.entity.sword.swing)+1)+'_main'
+                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
                 self.enter_state(state)
                 self.entity.sword.swing = not self.entity.sword.swing
             elif self.entity.dir[1]>0.8:
@@ -194,8 +200,8 @@ class Run_main(Player_states):
             self.entity.game_objects.sound.play_sfx(self.entity.sounds['run'][self.sfx_timer%2], vol = 0.8)
             self.sfx_timer = self.sfx_loop_time
 
-        if not self.entity.collision_types['bottom']:#disable this one while on ramp
-            self.enter_state('Fall_run_pre')
+        if not self.entity.collision_types['bottom']:#TODO disable this one while entering ramp
+            self.enter_state('Fall_pre')
 
     def enter_state(self, new_state):
         #self.sfx_channel.stop()
@@ -215,9 +221,11 @@ class Run_main(Player_states):
         elif input[-1]=='b':#depends on if the abillities have pre or main animation
             self.do_ability()
 
-    def handle_input(self,input):#caööed from jump buffer timer
-        if input == 'jump':
-            self.enter_state('Jump_run_main')
+    def handle_input(self,input):
+        if input == 'jump':#caööed from jump buffer timer
+            self.enter_state('Jump_main')
+        elif input == 'dash':#called from dash buffer timer
+            self.enter_state('Ground_dash_pre')                   
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -225,13 +233,13 @@ class Run_main(Player_states):
             self.enter_state('Run_post')
 
     def swing_sword(self):
-        if not self.entity.flags['sword_swinging']:
-            if abs(self.entity.dir[1])<0.8:
-                state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
-                self.enter_state(state)
-                self.entity.sword.swing = not self.entity.sword.swing
-            elif self.entity.dir[1]>0.8:
-                self.enter_state('Sword_up_main')
+        if self.entity.flags['sword_swinging']: return        
+        if abs(self.entity.dir[1]) < 0.8:
+            state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
+            self.enter_state(state)
+            self.entity.sword.swing = not self.entity.sword.swing
+        elif self.entity.dir[1] > 0.8:
+            self.enter_state('Sword_up_main')
 
 class Run_post(Player_states):
     def __init__(self,entity):
@@ -239,7 +247,7 @@ class Run_post(Player_states):
 
     def update(self):
         if not self.entity.collision_types['bottom']:
-            self.enter_state('Fall_stand_pre')
+            self.enter_state('Fall_pre')
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
@@ -252,9 +260,11 @@ class Run_post(Player_states):
         elif input[-1] == 'rt':
             self.enter_state('Counter_pre')
 
-    def handle_input(self,input):#caööed from jump buffer timer
-        if input == 'jump':
-            self.enter_state('Jump_stand_main')
+    def handle_input(self,input):
+        if input == 'jump':#caööed from jump buffer timer
+            self.enter_state('Jump_main')
+        elif input == 'dash':#called from dash buffer timer
+            self.enter_state('Ground_dash_pre')              
 
     def handle_movement(self,input):
         super().handle_movement(input)
@@ -274,61 +284,22 @@ class Run_post(Player_states):
     def increase_phase(self):
         self.enter_state('Idle_main')
 
-class Jump_stand_main(Player_states):
+class Jump_main(Player_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.frame = kwarg.get('frame', 0)
+        self.time = C.jump_dash_timer
 
     def update(self):
-        if self.entity.velocity[1] > 0.7:#when you start falling
-            self.enter_state('Fall_stand_pre')
-        elif self.entity.acceleration[0] != 0:#if you start moving
-            self.enter_state('Jump_run_main')
-
-    def handle_press_input(self,input):
-        super().handle_press_input(input)
-        if input[-1]=='lb':
-            self.enter_state('Air_dash_pre')
-        elif input[-1]=='x':
-            self.swing_sword()
-        elif input[-1]=='b':
-            self.do_ability()
-
-    def handle_release_input(self,input):#when release space
-        super().handle_release_input(input)
-        if input[-1]=='a':
-            if self.entity.acceleration[0]==0:
-                self.enter_state('Fall_stand_pre')
-
-    def swing_sword(self):
-        if not self.entity.flags['sword_swinging']:
-            if self.entity.dir[1]>0:
-                self.enter_state('Sword_up_main')
-            elif self.entity.dir[1]<0:
-                self.enter_state('Sword_down_main')
-            else:#right or left
-                state='Sword_jump'+str(int(self.entity.sword.swing)+1)+'_main'
-                self.enter_state(state)
-                self.entity.sword.swing = not self.entity.sword.swing
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        pass
-
-class Jump_run_main(Player_states):
-    def __init__(self,entity, **kwarg):
-        super().__init__(entity)
-        self.entity.animation.frame = kwarg.get('frame', 0)
-
-    def update(self):
+        self.time -= self.entity.game_objects.game.dt
         if self.entity.velocity[1] > 0.7:
-            self.enter_state('Fall_run_pre')
-        elif self.entity.acceleration[0] == 0:
-            self.enter_state('Jump_stand_main')
+            self.enter_state('Fall_pre')
 
     def handle_press_input(self,input):
         super().handle_press_input(input)
         if input[-1]=='lb':
-            self.enter_state('Air_dash_pre')
+            if self.time > 0: self.enter_state('Dash_jump_main')
+            else: self.enter_state('Air_dash_pre')               
         elif input[-1]=='x':
             self.swing_sword()
         elif input[-1]=='b':
@@ -337,19 +308,18 @@ class Jump_run_main(Player_states):
     def handle_release_input(self,input):#when release space
         super().handle_release_input(input)
         if input[-1] == 'a':
-            if self.entity.acceleration[0] != 0:
-                self.enter_state('Fall_run_pre')
+            self.enter_state('Fall_pre')
 
     def swing_sword(self):
-        if not self.entity.flags['sword_swinging']:
-            if self.entity.dir[1]>0:
-                self.enter_state('Sword_up_main')
-            elif self.entity.dir[1]<0:
-                self.enter_state('Sword_down_main')
-            else:#right or left
-                state='Sword_jump'+str(int(self.entity.sword.swing)+1)+'_main'
-                self.enter_state(state)
-                self.entity.sword.swing = not self.entity.sword.swing
+        if self.entity.flags['sword_swinging']: return
+        if self.entity.dir[1]>0:
+            self.enter_state('Sword_up_main')
+        elif self.entity.dir[1]<0:
+            self.enter_state('Sword_down_main')
+        else:#right or left
+            state='Sword_jump'+str(int(self.entity.sword.swing)+1)+'_main'
+            self.enter_state(state)
+            self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
@@ -363,11 +333,8 @@ class Double_jump_pre(Player_states):
         self.entity.velocity[1] = C.jump_vel_player
 
     def update(self):
-        if self.entity.velocity[1] > 0:#falling down
-            if self.entity.acceleration[0]==0:
-                self.enter_state('Fall_stand_pre')
-            else:
-                self.enter_state('Fall_run_pre')
+        if self.entity.velocity[1] > 0:#falling down            
+            self.enter_state('Fall_pre')
 
     def increase_phase(self):#called when an animation is finihed for that state
         self.enter_state('Double_jump_main')
@@ -382,7 +349,7 @@ class Double_jump_main(Double_jump_pre):
     def increase_phase(self):#called when an animation is finihed for that state
         pass
 
-class Fall_run_pre(Player_states):
+class Fall_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.init()
@@ -391,104 +358,48 @@ class Fall_run_pre(Player_states):
         self.entity.timer_jobs['ground'].activate()
         #self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
 
-    def update(self):
-        if self.entity.acceleration[0] == 0:
-            self.enter_state('Fall_stand_pre')#TODO, it should start at a specific animation frame, depending on the current one
-
     def handle_press_input(self,input):
-        super().handle_press_input(input)
-        if input[-1]=='b':
+        if input[-1] == 'a':
+            self.entity.timer_jobs['shroomjump'].activate()
+            self.entity.timer_jobs['jump_buffer'].activate()
+            self.entity.timer_jobs['wall'].handle_input('a')
+        elif input[-1]=='b':
             self.do_ability()
         elif input[-1]=='lb':
+            self.entity.timer_jobs['dash_buffer'].activate()            
             self.enter_state('Air_dash_pre')
         elif input[-1]=='x':
             self.swing_sword()
 
     def handle_input(self,input):
         if input == 'jump':#caööed from jump buffer timer
-            self.enter_state('Jump_run_main')
+            self.enter_state('Jump_main')
         elif input == 'Wall':
             self.enter_state('Wall_glide_main')
+        elif input == 'dash':#called from dash buffer timer
+            self.enter_state('Ground_dash_pre')
         elif input == 'Ground':
-            self.enter_state('Run_main')
+            if self.entity.acceleration[0] != 0:
+                self.enter_state('Run_main')
+            else:
+                self.enter_state('Idle_main')
 
     def swing_sword(self):
-        if not self.entity.flags['sword_swinging']:
-            if self.entity.dir[1]>0:
-                self.enter_state('Sword_up_main')
-            elif self.entity.dir[1]<0:
-                self.enter_state('Sword_down_main')
-            else:#right or left
-                self.enter_state('Sword_fall_main', frame = self.entity.animation.frame)
-                self.entity.sword.swing = not self.entity.sword.swing
+        if self.entity.flags['sword_swinging']: return
+        if self.entity.dir[1]>0:
+            self.enter_state('Sword_up_main')
+        elif self.entity.dir[1]<0:
+            self.enter_state('Sword_down_main')
+        else:#right or left
+            self.enter_state('Sword_fall_main', frame = self.entity.animation.frame)
+            self.entity.sword.swing = not self.entity.sword.swing
 
     def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_state('Fall_run_main')
+        self.enter_state('Fall_main')
 
-class Fall_run_main(Fall_run_pre):
+class Fall_main(Fall_pre):
     def __init__(self,entity):
         super().__init__(entity)
-
-    def update(self):
-        if self.entity.acceleration[0] == 0:
-            self.enter_state('Fall_stand_main')
-
-    def init(self):
-        pass
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        pass
-
-class Fall_stand_pre(Player_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.init()
-
-    def init(self):
-        self.entity.timer_jobs['ground'].activate()
-        #self.entity.velocity[1] = 1#so that the falling from platform looks natural, 0 looks strange
-
-    def update(self):
-        if self.entity.acceleration[0] != 0:
-            self.enter_state('Fall_run_pre')#TODO, it should start at a specific animation frame, depending on the current one
-
-    def handle_press_input(self,input):
-        super().handle_press_input(input)
-        if input[-1]=='b':
-            self.do_ability()
-        elif input[-1]=='x':
-            self.swing_sword()
-        elif input[-1]=='lb':
-            self.enter_state('Air_dash_pre')
-        elif input[-1]=='a':
-            self.enter_state('Double_jump_pre')
-
-    def handle_input(self,input):
-        if input == 'Ground':
-            self.enter_state('Idle_main')
-        elif input == 'jump':
-            self.enter_state('Jump_run_main')
-
-    def swing_sword(self):
-        if not self.entity.flags['sword_swinging']:
-            if self.entity.dir[1]==1:
-                self.enter_state('Sword_up_main')
-            elif self.entity.dir[1]==-1:
-                self.enter_state('Sword_down_main')
-            else:#right or left
-                self.enter_state('Sword_fall_main', frame = self.entity.animation.frame)
-                self.entity.sword.swing = not self.entity.sword.swing
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_state('Fall_stand_main')
-
-class Fall_stand_main(Fall_stand_pre):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        if self.entity.acceleration[0] != 0:
-            self.enter_state('Fall_run_main')
 
     def init(self):
         pass
@@ -505,7 +416,7 @@ class Wall_glide_main(Player_states):
     def update(self):
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
             self.entity.timer_jobs['wall'].activate()
-            self.enter_state('Fall_stand_pre')
+            self.enter_state('Fall_pre')
 
     def handle_press_input(self,input):
         #super().handle_press_input(input)
@@ -513,18 +424,18 @@ class Wall_glide_main(Player_states):
             self.entity.velocity[0] = -self.dir[0]*10
             self.entity.velocity[1] = -7#to get a vertical velocity
             self.entity.timer_jobs['wall_2'].activate(self.dir)
-            self.enter_state('Jump_run_main')
+            self.enter_state('Jump_main')
         elif input[-1] == 'right' or input[-1] == 'left':
             self.entity.velocity[0] = self.entity.dir[0]*2
             self.entity.timer_jobs['wall'].activate()
-            self.enter_state('Fall_run_pre')
+            self.enter_state('Fall_pre')
 
     def handle_release_input(self,input):
         super().handle_release_input(input)
         if input[-1] == 'right' or input[-1] == 'left':
             self.entity.timer_jobs['wall'].activate()
             self.entity.velocity[0] = -self.entity.dir[0]*2
-            self.enter_state('Fall_stand_pre')
+            self.enter_state('Fall_pre')
 
     def handle_input(self,input):#when hit the ground
         if input == 'Ground':
@@ -545,11 +456,14 @@ class Air_dash_pre(Player_states):
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
-        self.exit()
+        self.exit_state()
 
-    def exit(self):
+    def exit_state(self):
         if self.dash_length < 0:
             self.increase_phase()
+
+    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
+        pass
 
     def handle_input(self,input):#if hit wall
         if input == 'Wall':
@@ -570,7 +484,7 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
         self.entity.consume_spirit(1)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
 
-    def exit(self):
+    def exit_state(self):
         if self.dash_length < 0:
             self.enter_state('Air_dash_post')
 
@@ -584,9 +498,6 @@ class Air_dash_post(Air_dash_pre):
     def update(self):
         pass
 
-    def handle_press_input(self,input):
-        pass
-
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
@@ -595,29 +506,93 @@ class Air_dash_post(Air_dash_pre):
 
 class Ground_dash_pre(Air_dash_pre):
     def __init__(self,entity):
-        super().__init__(entity)
+        super().__init__(entity)   
+        self.time = C.jump_dash_timer
 
-    def exit(self):
+    def update(self):
+        super().update()
+        self.time -= self.entity.game_objects.game.dt 
+
+    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
+        if input[-1] == 'a':
+            if self.time >0:
+                self.enter_state('Dash_jump_main')
+
+    def handle_input(self,input):#if hit wall
+        super().handle_input(input)
+        if input == 'jump':
+            if self.time >0:
+                self.enter_state('Dash_jump_main')
+
+    def exit_state(self):
         if self.dash_length < 0:
             self.increase_phase()
 
     def increase_phase(self):
         self.enter_state('Ground_dash_main')
 
-class Ground_dash_main(Air_dash_main):#level one dash: normal
+class Ground_dash_main(Air_dash_pre):#level one dash: normal
     def __init__(self,entity):
         super().__init__(entity)
-
-    def exit(self):
-        if self.dash_length < 0:
-            self.increase_phase()
+        self.entity.velocity[0] = C.dash_vel*self.dir[0]
+        self.entity.consume_spirit(1)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
 
     def increase_phase(self):
         self.enter_state('Ground_dash_post')
 
-class Ground_dash_post(Air_dash_post):
+class Ground_dash_post(Air_dash_pre):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def update(self):
+        pass
+
+    def increase_phase(self):
+        if self.entity.acceleration[0] == 0:
+            self.enter_state('Idle_main')
+        else:
+            self.enter_state('Run_main')
+
+class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.velocity[0] = C.dash_vel*self.dir[0]
+        self.entity.consume_spirit(1)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])        
+        self.entity.friction = [0.15,0.01]
+        self.entity.timer_jobs['jump_buffer'].activate()
+
+    def update(self):
+        self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.dash_length -= self.entity.game_objects.game.dt
+        self.exit_state()
+
+    def increase_phase(self):
+        self.enter_state('Dash_jump_post')
+
+class Dash_jump_post(Air_dash_pre):#level one dash: normal
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.dir = self.entity.dir.copy()
+        self.dash_length = C.dash_length
+
+    def update(self):
+        self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.dash_length -= self.entity.game_objects.game.dt
+        self.exit_state()
+
+    def increase_phase(self):
+        pass
+
+    def increase_phase(self):
+        self.entity.friction = C.friction_player.copy()               
+        if self.entity.acceleration[0] == 0:
+            self.enter_state('Idle_main')
+        else:
+            self.enter_state('Run_main')
 
 class Dash_attack_main(Player_states):#enters from pre dash
     def __init__(self,entity):
@@ -884,8 +859,7 @@ class Sword(Player_states):#main phases shold inheret this
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.timer_jobs['sword'].activate()
-        self.dir = self.entity.dir.copy()#animation direction
-        self.entity.sword.dir = self.dir.copy()#sword direction
+        self.entity.sword.dir = self.entity.dir.copy()#sword direction
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 1)
         self.slash()
 
@@ -901,6 +875,7 @@ class Sword_stand1_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
+        self.entity.sword.dir[1] = 0
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -919,38 +894,17 @@ class Sword_stand2_main(Sword_stand1_main):
         super().__init__(entity)
         self.entity.sword.currentstate.enter_state('Slash_2')
 
-class Sword_run1_main(Sword):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
-        self.entity.projectiles.add(self.entity.sword)#add sword to group
-        self.entity.sword.currentstate.enter_state('Slash_1')
-
-    def increase_phase(self):
-        if self.entity.acceleration[0] == 0:
-            self.enter_state('Idle_main')
-        else:
-            self.enter_state('Run_main')
-
-class Sword_run2_main(Sword_run1_main):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.sword.currentstate.enter_state('Slash_2')
-
 class Sword_fall_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.sword.lifetime=10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_' + str(int(self.entity.sword.swing)+1))#slash 1 and 2
-        self.entity.state = 'fall_stand_main'#animation name
+        self.entity.state = 'fall_main'#animation name
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
     def increase_phase(self):
-        if self.entity.acceleration[0]==0:
-            self.enter_state('Fall_stand_main')
-        else:
-            self.enter_state('Fall_run_main')
+        self.enter_state('Fall_main')
 
     def handle_input(self,input):
         if input == 'Ground':
@@ -964,19 +918,16 @@ class Sword_jump1_main(Sword):
         super().__init__(entity)
         self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_1')
-        self.entity.state = 'jump_stand_main'
+        self.entity.state = 'jump_main'
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
     def update(self):
         if self.entity.velocity[1] > 0.7:#when you start falling
-            self.enter_state('Fall_stand_pre')
+            self.enter_state('Fall_pre')
 
     def increase_phase(self):
-        if self.entity.acceleration[0]==0:
-            self.enter_state('Jump_stand_main', frame = self.entity.animation.frame)
-        else:
-            self.enter_state('Jump_run_main', frame = self.entity.animation.frame)
+        self.enter_state('Jump_main', frame = self.entity.animation.frame)
 
 class Sword_jump2_main(Sword_jump1_main):
     def __init__(self,entity, **kwarg):
@@ -990,11 +941,8 @@ class Air_sword1_main(Sword):
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
-    def increase_phase(self):
-        if self.entity.acceleration[0]==0:
-            self.enter_state('Fall_stand_main')
-        else:
-            self.enter_state('Fall_run_main')
+    def increase_phase(self):        
+        self.enter_state('Fall_main')
 
 class Air_sword2_main(Air_sword1_main):
     def __init__(self,entity):
@@ -1022,10 +970,7 @@ class Sword_down_main(Sword):
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
 
     def increase_phase(self):
-        if self.entity.acceleration[0]==0:
-            self.enter_state('Fall_stand_pre')
-        else:
-            self.enter_state('Fall_run_pre')
+        self.enter_state('Fall_pre')        
 
 class Plant_bone_main(Player_states):
     def __init__(self,entity):

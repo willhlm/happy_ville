@@ -10,6 +10,7 @@ friction = [0.5,0]#need to be less than 1
 friction_player = [0.24,0.01]
 jump_vel_player = -6
 max_vel = [30,5.2]#[30,6]
+jump_dash_timer = 3#how many frames from pressing jump/dash to pressing dash/jump one can do dash jump
 jump_buffer_timer_player = 4##how many frames from falling in which the player can jump when landing
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
 cayote_timer_player = 10#how many frames from falling in which the player can still jump
