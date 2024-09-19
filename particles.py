@@ -8,7 +8,7 @@ class Particles(pygame.sprite.Sprite):
         self.spawn_point = [pos[0],pos[1]]
 
         self.lifetime = kwarg.get('lifetime', 60)
-        self.colour = kwarg.get('colour', [255, 255, 255, 255])
+        self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))
         dir = kwarg.get('dir', 'isotropic') 
         angle = self.define_angle(dir)
 
@@ -49,7 +49,7 @@ class Particles(pygame.sprite.Sprite):
 
     def fading(self):
         self.colour[-1] -= self.fade_scale * self.game_objects.game.dt
-        self.colour[-1] = max(self.colour[-1],0)
+        self.colour[-1] = max(self.colour[-1], 0)
 
     def destroy(self):
         if self.lifetime < 0:

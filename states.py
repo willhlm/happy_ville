@@ -115,8 +115,8 @@ class Title_Menu(Game_State):
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            #self.game.game_objects.load_map(self,'light_forest_17','1')
-            self.game.game_objects.load_map(self,'collision_map_4','1')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()
@@ -474,7 +474,7 @@ class Gameplay(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        self.game.game_objects.player.currentstate.handle_movement(event)#move around
+        self.game.game_objects.player.currentstate.handle_movement(input)#move around
         if event[0]:#press
             if event[-1]=='start':#escape button
                 input.processed()

@@ -752,7 +752,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0] * 30 * (1 - abs(dir[1]))
         self.velocity[1] = -dir[1] * 10
 
-    def hurt_particles(self, type='Circle', number_particles=20, **kwarg):
+    def hurt_particles(self, type = 'Circle', number_particles = 20, **kwarg):
         for i in range(0, number_particles):
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
@@ -832,7 +832,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            self.hurt_particles(lifetime = 40, vel = {'linear':[4,7]}, colour=[0,0,0,255], scale=3, number_particles=60)
+            self.hurt_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             new_game_state = states.Pause_gameplay(self.game_objects.game, duration = duration, amplitude = 10)#pause the game for a while with an optional shake
             new_game_state.enter_state()
@@ -2585,7 +2585,7 @@ class Aila_sword(Sword):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
         self.clash_particles(collision_enemy.hitbox.center)
-        self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][2])#should be in states
+        self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0])#should be in states
 
         #self.game_objects.camera_manager.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         collision_enemy.currentstate.handle_input('sword')
