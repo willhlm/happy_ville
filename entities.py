@@ -1065,16 +1065,18 @@ class Mygga(Flying_enemy):
         self.AI = AI_mygga.Patrol(self)
         self.accel = [0.013, 0.008]
         self.accel_chase = [0.026, 0.009]
-        self.deaccel_knock = 0.88
+        self.deaccel_knock = 0.84
         self.max_chase_vel = 1.8
         self.max_patrol_vel = 1.2
         self.friction = [0.009,0.009]
 
     def knock_back(self,dir):
         self.AI.enter_AI('Knock_back')
-        amp = [16,16]
-        self.velocity[0] = dir[0]*amp[0]
-        self.velocity[1] = -dir[1]*amp[1]
+        amp = 19
+        if dir[1] != 0:
+            self.velocity[1] = -dir[1] * amp
+        else:
+            self.velocity[0] = dir[0] * amp
 
     def player_collision(self, player):#when player collides with enemy
         super().player_collision(player)
@@ -1109,7 +1111,7 @@ class Mygga_torpedo(Flying_enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 30        
+        self.health = 30
         self.AI = AI_mygga.Patrol(self)
 
         self.aggro_distance = [180,130]
@@ -1161,7 +1163,7 @@ class Mygga_suicide(Flying_enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 1        
+        self.health = 1
         self.AI = AI_mygga.Patrol(self)
 
         self.aggro_distance = [180,130]
@@ -1181,7 +1183,7 @@ class Mygga_suicide(Flying_enemy):
 
     def suicide(self):#called from states
         self.projectiles.add(Explosion(self))
-        self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration        
+        self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
     #pltform collisions.
     def right_collision(self, block):
@@ -2538,6 +2540,7 @@ class Aila_sword(Sword):
         super().__init__(entity)
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.currentstate = states_sword.Slash_1(self)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/aila_sword/')
 
         self.tungsten_cost = 1#the cost to level up to next level
         self.level = 0#determines how many stone one can attach
@@ -2584,6 +2587,7 @@ class Aila_sword(Sword):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
         self.clash_particles(collision_enemy.hitbox.center)
+        self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][2])#should be in states
 
         #self.game_objects.camera_manager.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         collision_enemy.currentstate.handle_input('sword')
@@ -2591,7 +2595,7 @@ class Aila_sword(Sword):
             self.stones[stone].collision()#call collision specific for stone
 
     def clash_particles(self, pos, number_particles=12):
-        angle = random.randint(-180, 180)#the ejection anglex
+        angle = random.randint(-180, 180)#the erection anglex
         color = [255,255,255,255]
         for i in range(0,number_particles):
             obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel={'linear':[7,14]},dir=[angle,0],scale=1,colour=color,state = 'Idle')
