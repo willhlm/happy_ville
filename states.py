@@ -18,7 +18,7 @@ class Game_State():
     def render(self):
         pass
 
-    def handle_events(self,event):
+    def handle_events(self, input):
         pass
 
     def enter_state(self):
@@ -88,6 +88,7 @@ class Title_Menu(Game_State):
 
     def handle_events(self, input):
         event = input.output()
+        input.processed()    
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -192,7 +193,9 @@ class Load_Menu(Game_State):
         #blit arrow
         #self.arrow.draw(self.game.screen)
 
-    def handle_events(self, event):
+    def handle_events(self, input):
+        event = input.output()
+        input.processed()    
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -261,7 +264,9 @@ class Option_Menu(Game_State):
 
         #self.arrow.draw(self.game.screen)
 
-    def handle_events(self, event):
+    def handle_events(self, input):
+        event = input.output()
+        input.processed()            
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -348,7 +353,9 @@ class Option_Menu_sounds(Game_State):
         self.game_settings['sounds'] = self.game.game_objects.sound.volume
         read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
 
-    def handle_events(self, event):
+    def handle_events(self, input):
+        event = input.output()
+        input.processed()    
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -423,7 +430,9 @@ class Option_Menu_display(Game_State):
 
         #self.arrow.draw(self.game.screen)
 
-    def handle_events(self, event):
+    def handle_events(self, input):
+        event = input.output()
+        input.processed()            
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -582,29 +591,25 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
 
     def handle_events(self, input):
         event = input.output()
+        input.processed()    
         if event[0]:
             if event[-1] == 'up':
-                input.processed()
                 self.current_button -= 1
                 if self.current_button < 0:
                     self.current_button = len(self.buttons) - 1
                 self.update_arrow()
             elif event[-1] == 'down':
-                input.processed()
                 self.current_button += 1
                 if self.current_button >= len(self.buttons):
                     self.current_button = 0
                 self.update_arrow()
             elif event[-1] == 'a':
-                input.processed()
                 self.arrow.pressed()
                 self.change_state()
             elif event[-1] == 'return':
-                input.processed()
                 self.arrow.pressed()
                 self.change_state()                
             elif event[-1] == 'start':
-                input.processed()
                 self.exit_state()
 
     def exit_state(self):
@@ -715,18 +720,20 @@ class Ability_menu(Gameplay):#when pressing tab
         self.game.display.render(hud, self.game.screen,position = (250,100))
 
     def handle_events(self, input):
+        event = input.output()
+        input.processed()            
         self.game.game_objects.player.currentstate.handle_movement(input)#move around
-        if input[0]:#press TODO change to right analogue stick. What should it be on keyboard?
-            if input[-1] == 'right':
+        if event[0]:#press TODO change to right analogue stick. What should it be on keyboard?
+            if event[-1] == 'right':
                 self.index+=1
                 if self.index>len(self.abilities)-1:
                     self.index=0
-            elif input[-1] =='left':
+            elif event[-1] =='left':
                 self.index-=1
                 if self.index<0:
                     self.index=len(self.abilities)-1
-        elif input [1]:#release
-            if input[-1]=='rb':
+        elif event [1]:#release
+            if event[-1]=='rb':
                 self.game.game_objects.player.abilities.equip=self.abilities[self.index]
                 self.exit_state()
 
@@ -770,7 +777,7 @@ class Fadein(Gameplay):
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
     def handle_events(self, input):
-        pass
+        input.processed()
 
 class Fadeout(Fadein):
     def __init__(self,game, previous_state, map_name, spawn, fade):
@@ -823,7 +830,7 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a whole
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
     def handle_events(self, input):
-        pass
+        input.processed()
 
 class Safe_spawn_2(Gameplay):#fade
     def __init__(self, game):
@@ -849,7 +856,7 @@ class Safe_spawn_2(Gameplay):#fade
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
     def handle_events(self, input):
-        pass
+        input.processed()
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -895,11 +902,13 @@ class Conversation(Gameplay):
         self.game.display.render(self.conv_screen.texture,self.game.screen,shader = self.game.game_objects.shaders['alpha'])#shader render
 
     def handle_events(self, input):
-        if input[0]:
-            if input[-1] == 'start':
+        event = input.output()
+        input.processed()    
+        if event[0]:
+            if event[-1] == 'start':
                 self.fade_back()
 
-            elif input[-1] == 'y':
+            elif event[-1] == 'y':
                 if self.letter_frame < len(self.conv):
                     self.letter_frame = 10000
 
@@ -1014,10 +1023,12 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
             self.exit_state()
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'start':
+        event = input.output()
+        input.processed()            
+        if event[0]:#press
+            if event[-1] == 'start':
                 self.page = 1
-            elif input[-1] == 'a':
+            elif event[-1] == 'a':
                 self.page = 1
 
 #engine cutscenes
@@ -1048,10 +1059,12 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
         self.game.display.render(self.rect2.texture, self.game.screen, position = [0,self.pos[1]])
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'start':
+        event = input.output()
+        input.processed()            
+        if event[0]:#press
+            if event[-1] == 'start':
                 self.exit_state()
-            elif input[-1] == 'a':
+            elif event[-1] == 'a':
                 self.press = True
 
 class New_game(Cutscene_engine):#first screen to be played when starying a new game -> needs to be called after that the map has loaded
@@ -1103,9 +1116,17 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
             self.exit_state()
 
     def handle_events(self,input):
-        super().handle_events(input)
-        if input[2]['l_stick'][0] > 0: return#can only go left
-        input[2]['l_stick'][0] *= 0.5#half the speed
+        event = input.output()
+        if event[0]:#press
+            if event[-1] == 'start':
+                input.processed()            
+                self.exit_state()
+            elif event[-1] == 'a':
+                input.processed()            
+                self.press = True
+
+        if event[2]['l_stick'][0] > 0: return#can only go left
+        event[2]['l_stick'][0] *= 0.5#half the speed
         self.game.game_objects.player.currentstate.handle_movement(input)
 
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
@@ -1254,7 +1275,7 @@ class Death(Cutscene_engine):#when aila dies
         self.stage = 1
 
     def handle_events(self,input):
-        pass
+        input.processed()
 
     def cinematic(self):
         pass

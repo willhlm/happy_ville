@@ -17,7 +17,7 @@ class Facility_states():
         pass
 
     def handle_events(self,input):
-        pass
+        input.processed()  
 
     def exit_state(self):
         self.release_texture()
@@ -94,31 +94,33 @@ class Spirit_upgrade_menu(Facility_states):
         self.game_objects.game.screen.blit(text,(380,120))
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'select':
+        event = input.output()
+        input.processed()          
+        if event[0]:#press
+            if event[-1] == 'select':
                 self.exit_state()
-            elif input[-1] == 'rb' or input[-1] == 'lb':#nezt page
+            elif event[-1] == 'rb' or input[-1] == 'lb':#nezt page
                 self.enter_state(self.next_page)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or input[-1]=='return':
                 self.choose_ability()
 
-            elif input[-1] =='right':
+            elif event[-1] =='right':
                 self.index[1] += 1
                 self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
                 self.letter_frame = 0
 
-            elif input[-1] =='left':
+            elif event[-1] =='left':
                 self.index[1] -= 1
                 self.index[1] = max(0,self.index[1])
                 self.letter_frame = 0
 
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.index[0] += 1
                 self.index[0] = min(self.index[0],len(self.abillity_UI.abilities)-1)
                 self.letter_frame = 0
                 self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
 
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.index[0] -= 1
                 self.index[0] = max(0,self.index[0])
                 self.letter_frame = 0
@@ -195,19 +197,21 @@ class Fast_travel_unlock(Facility_states):
         self.blit_pointer()
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'select':
+        event = input.output()
+        input.processed()           
+        if event[0]:#press
+            if event[-1] == 'select':
                 self.exit_state()
 
-            elif input[-1] =='right':
+            elif event[-1] =='right':
                 self.index[0] += 1
                 self.index[0] = min(self.index[0],len(self.pos)-1)
 
-            elif input[-1] =='left':
+            elif event[-1] =='left':
                 self.index[0] -= 1
                 self.index[0] = max(0,self.index[0])
 
-            elif input[-1] == 'a' or 'return':
+            elif event[-1] == 'a' or 'return':
                 if self.index[0] == 1:#no
                     self.exit_state()
                 elif self.index[0] == 0:#yes
@@ -247,19 +251,21 @@ class Fast_travel_menu(Facility_states):
         self.blit_pointer()
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'select':
+        event = input.output()
+        input.processed()              
+        if event[0]:#press
+            if event[-1] == 'select':
                 self.exit_state()
 
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.index[0] += 1
                 self.index[0] = min(self.index[0],len(self.destinations)-1)
 
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.index[0] -= 1
                 self.index[0] = max(0,self.index[0])
 
-            elif input[-1] == 'a':
+            elif event[-1] == 'a':
                 self.exit_state()
                 level = self.destinations[self.index[0]]
                 cord = self.game_objects.world_state.travel_points[level]
@@ -305,16 +311,18 @@ class Smith(Facility_states):#called from mr smith
         self.game_objects.game.display.render(self.respond, self.game_objects.game.screen, position = (300,195),shader = self.game_objects.shaders['colour'])#shader render
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'y':
+        event = input.output()
+        input.processed()               
+        if event[0]:#press
+            if event[-1] == 'y':
                 self.exit_state()
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.pointer_index[1] += 1
                 self.pointer_index[1] = min(self.pointer_index[1],len(self.actions)-1)
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.pointer_index[1] -= 1
                 self.pointer_index[1] = max(self.pointer_index[1],0)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.select()
 
     def select(self):
@@ -384,16 +392,18 @@ class Bank(Facility_states):#caled from mr banks
         self.game_objects.game.display.render(self.pointer.image, self.game_objects.game.screen, position =(300,130+10*self.pointer_index[1]))#shader render              
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'y':
+        event = input.output()
+        input.processed()             
+        if event[0]:#press
+            if event[-1] == 'y':
                 self.exit_state()
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.pointer_index[1] += 1
                 self.pointer_index[1] = min(self.pointer_index[1],len(self.actions)-1)
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.pointer_index[1] -= 1
                 self.pointer_index[1] = max(self.pointer_index[1],0)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.select()
 
     def select(self):#exchane of money
@@ -424,20 +434,22 @@ class Bank_withdraw(Bank):#caled from mr banks
         pass
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] =='down':
+        event = input.output()
+        input.processed()           
+        if event[0]:#press
+            if event[-1] =='down':
                 self.ammount -= 1
                 self.ammount = max(self.ammount,0)
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.ammount += 1
                 self.ammount = min(self.ammount,self.npc.ammount)
-            elif input[-1] =='right':
+            elif event[-1] =='right':
                 self.ammount += 100
                 self.ammount = min(self.ammount,self.npc.ammount)
-            elif input[-1] == 'left':
+            elif event[-1] == 'left':
                 self.ammount -= 100
                 self.ammount = max(self.ammount,0)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.select()
 
 class Bank_deposite(Bank):#caled from mr banks
@@ -459,20 +471,22 @@ class Bank_deposite(Bank):#caled from mr banks
         pass
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] =='down':
+        event = input.output()
+        input.processed()           
+        if event[0]:#press
+            if event[-1] =='down':
                 self.ammount -= 1
                 self.ammount = max(self.ammount,0)
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.ammount += 1
                 self.ammount = min(self.ammount,self.game_objects.player.inventory['Amber_Droplet'])
-            elif input[-1] =='right':
+            elif event[-1] =='right':
                 self.ammount += 100
                 self.ammount = min(self.ammount,self.game_objects.player.inventory['Amber_Droplet'])
-            elif input[-1] == 'left':
+            elif event[-1] == 'left':
                 self.ammount -= 100
                 self.ammount = max(self.ammount,0)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.select()
 
 class Soul_essence(Facility_states):#called from inorinoki
@@ -504,16 +518,18 @@ class Soul_essence(Facility_states):#called from inorinoki
             self.game_objects.game.display.render(surf, self.game_objects.game.screen, position = (self.bg_pos[0] + 30,self.bg_pos[1] + 10+index*10))#shader render        
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'y':
+        event = input.output()
+        input.processed()           
+        if event[0]:#press
+            if event[-1] == 'y':
                 self.exit_state()
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.pointer_index[1] += 1
                 self.pointer_index[1] = min(self.pointer_index[1],len(self.actions)-1)
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.pointer_index[1] -= 1
                 self.pointer_index[1] = max(self.pointer_index[1],0)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.select()
 
     def select(self):
@@ -616,11 +632,13 @@ class Vendor(Facility_states):#called from Astrid
         self.game_objects.game.display.render(self.pointer.image, self.game_objects.game.screen, position = position)#shader render
 
     def handle_events(self, input):
-        if input[0]:#press
-            if input[-1] == 'y':
+        event = input.output()
+        input.processed()            
+        if event[0]:#press
+            if event[-1] == 'y':
                 self.exit_state()
 
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.item_index[1] += 1
                 self.item_index[1] = min(self.item_index[1],len(self.items)-1)
 
@@ -631,7 +649,7 @@ class Vendor(Facility_states):#called from Astrid
                 self.pointer_index[1] = min(self.pointer_index[1],self.display_number-1)                                    
                 self.letter_frame = 0                    
 
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.item_index[1]-=1
                 self.item_index[1] = max(self.item_index[1],0)
 
@@ -642,7 +660,7 @@ class Vendor(Facility_states):#called from Astrid
                 self.pointer_index[1] = max(self.pointer_index[1],0)
                 self.letter_frame = 0
 
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.select()
 
     def select(self):
@@ -687,14 +705,16 @@ class Vendor2(Vendor):#called from vendor when selecting an item
             self.set_response('Get loss you poor piece of shit')
 
     def handle_frame2(self,input):
-        if input[0]:#press
-            if input[-1] == 'y':
+        event = input.output()
+        input.processed()             
+        if event[0]:#press
+            if event[-1] == 'y':
                 self.exit_state()
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.pointer_index[1] += 1
                 self.pointer_index[1] = min(self.pointer_index[1],1)
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.pointer_index[1] -= 1
                 self.pointer_index[1] = max(self.pointer_index[1],0)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.select()
