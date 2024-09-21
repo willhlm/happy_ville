@@ -483,7 +483,10 @@ class Gameplay(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        self.game.game_objects.player.currentstate.handle_movement(input)#move around
+        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys 
+            input.processed()
+            self.game.game_objects.player.currentstate.handle_movement(event)#move around
+
         if event[0]:#press
             if event[-1]=='start':#escape button
                 input.processed()
@@ -505,17 +508,21 @@ class Gameplay(Game_State):
                 new_state.enter_state()
 
             elif event[-1] == 'down':
-                input.processed()
+                input.processed()#should it be processed here or when passed through?
                 self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
+
+            elif sum(event[2]['d_pad']) != 0:#d_pad was pressed      
+                input.processed()     
+                self.game.game_objects.player.abilities.handle_input(event[2]['d_pad'])#to change movement ability with d pad
 
             else:
                 self.game.game_objects.player.currentstate.handle_press_input(input)
-                self.game.game_objects.player.abilities.handle_input(event)#to change movement ability with d pad
                 #self.game.game_objects.player.omamoris.handle_input(input)
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
         elif event[2]['l_stick'][1] > 0.85:
+            input.processed()#should it be processed here or when passed through?
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay

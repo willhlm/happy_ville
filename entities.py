@@ -2023,10 +2023,7 @@ class Player_abilities():
         self.number += 1
         self.number = min(self.number,3)#limit the number of abilities one can equip at the same time
 
-    def handle_input(self,input):#movement stuff
-        value = input[2]['d_pad']
-        if sum(value) == 0: return#if d_pad wasn't pressed
-
+    def handle_input(self,value):#movement stuff
         if value[0] == 1:#pressed right
             self.remove_ability()
             self.movement_abilities = self.movement_abilities[-1:] + self.movement_abilities[:-1]#rotate the abilityes to the right
