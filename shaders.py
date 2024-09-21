@@ -173,15 +173,13 @@ class Hurt(Shaders):#turn white -> enteties use it
         if self.duration < 0:
             self.entity.shader_render.append_shader(self.next_animation)
 
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+    def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip, shader = self.renderer.game_objects.shaders['colour'])#shader render
-        return self.renderer.game_objects.game.screen.texture
 
 class Invincibile(Shaders):#blink white -> enteyties use it
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['invincible']
         self.duration = C.invincibility_time_player-(C.hurt_animation_length+1)#a duration which considers the player invinsibility
         self.time = 0
 
@@ -192,4 +190,8 @@ class Invincibile(Shaders):#blink white -> enteyties use it
             self.enter_state('Idle')
 
     def set_uniforms(self):
-        self.entity.shader['time']  = self.time#(colour,colour,colour)
+        self.entity.game_objects.shaders['invincible']['time']  = self.time#(colour,colour,colour)
+
+    def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.set_uniforms()
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip, shader = self.renderer.game_objects.shaders['invincible'])#shader render

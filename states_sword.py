@@ -28,8 +28,9 @@ class Slash_1(Basic_states):
         self.sign = sign(self.entity.dir[0])
         self.entity.hitbox[2] = 45
         self.entity.hitbox[3] = 29
+        self.entity.dir = [self.sign, 0]#sword dir
 
-    def update_hitbox(self):
+    def update_rect(self):
         self.entity.rect.center = [self.entity.hitbox.center[0] - self.sign * 35, self.entity.hitbox.center[1] - 14]
 
 class Slash_2(Slash_1):
@@ -41,18 +42,20 @@ class Slash_down(Basic_states):
         super().__init__(entity)
         self.entity.hitbox[2] = 40
         self.entity.hitbox[3] = 35
+        self.entity.dir = [sign(self.entity.dir[0]), -1]#sword dir
 
         if self.entity.dir[0] > 0:
             self.offset = 45
         else:
             self.offset = 36
 
-    def update_hitbox(self):
+    def update_rect(self):
         self.entity.rect.center = [self.entity.hitbox.center[0] + self.offset, self.entity.hitbox.center[1] - 4]
 
 class Slash_up(Slash_down):#not implemented
     def __init__(self,entity):
         super().__init__(entity)
+        self.entity.dir = [sign(self.entity.dir[0]), 1]#sword dir
 
-    def update_hitbox(self):
+    def update_rect(self):
         self.entity.rect.center = [self.entity.hitbox.center[0] + self.offset, self.entity.hitbox.center[1] + 10]

@@ -487,7 +487,7 @@ class Gameplay(Game_State):
             input.processed()
             self.game.game_objects.player.currentstate.handle_movement(event)#move around
 
-        if event[0]:#press
+        if event[0]:#press or analogue stick
             if event[-1]=='start':#escape button
                 input.processed()
                 new_state = Pause_Menu(self.game)
@@ -517,7 +517,7 @@ class Gameplay(Game_State):
 
             else:
                 self.game.game_objects.player.currentstate.handle_press_input(input)
-                #self.game.game_objects.player.omamoris.handle_input(input)
+                #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
@@ -728,8 +728,9 @@ class Ability_menu(Gameplay):#when pressing tab
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()            
-        self.game.game_objects.player.currentstate.handle_movement(input)#move around
+        input.processed()      
+        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys 
+            self.game.game_objects.player.currentstate.handle_movement(event)#move around
         if event[0]:#press TODO change to right analogue stick. What should it be on keyboard?
             if event[-1] == 'right':
                 self.index+=1
@@ -1124,17 +1125,17 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
 
     def handle_events(self,input):
         event = input.output()
+        input.processed()            
         if event[0]:#press
             if event[-1] == 'start':
-                input.processed()            
                 self.exit_state()
             elif event[-1] == 'a':
-                input.processed()            
                 self.press = True
 
-        if event[2]['l_stick'][0] > 0: return#can only go left
-        event[2]['l_stick'][0] *= 0.5#half the speed
-        self.game.game_objects.player.currentstate.handle_movement(input)
+        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys 
+            if event[2]['l_stick'][0] > 0: return#can only go left
+            event[2]['l_stick'][0] *= 0.5#half the speed        
+            self.game.game_objects.player.currentstate.handle_movement(event)
 
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,game):

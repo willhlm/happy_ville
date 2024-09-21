@@ -2060,7 +2060,7 @@ class Double_jump(Movement_abilities):
         super().__init__(entity)
 
 class Omamoris():#omamori handler -> "neckalce"
-    def __init__(self,entity):
+    def __init__(self, entity):
         self.entity = entity
         self.equipped = {'0':[],'1':[],'2':[]}#equiped omamoris
         self.inventory = {}#omamoris in inventory.: 'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)
@@ -2075,10 +2075,10 @@ class Omamoris():#omamori handler -> "neckalce"
             for omamori in omamoris:
                 omamori.equipped()
 
-    def handle_input(self,input):
+    def handle_press_input(self,input):
         for omamoris in self.equipped.values():
             for omamori in omamoris:
-                omamori.handle_input(input)
+                omamori.handle_press_input(input)
 
     def equip_omamori(self, omamori_string, list_of_places):
         new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0], self.entity.game_objects, entity = self.entity)
@@ -2554,8 +2554,10 @@ class Aila_sword(Sword):
             self.kill()#removes from projectiles gruop
 
     def update_hitbox(self):#called from aila's update_hitbox, every frame
-        super().update_hitbox()#follows the hitbox of aila depending on the direction
-        self.currentstate.update_hitbox()
+        hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
+        setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
+        self.rect.center = self.hitbox.center#match the positions of hitboxes
+        self.currentstate.update_rect()
 
     def set_stone(self,stone_str):#called from smith
         if len(self.equip) < self.level:
@@ -3085,7 +3087,7 @@ class Omamori(Interactable_item):
         player.omamoris.inventory[type(self).__name__] = self
         self.entity = player
 
-    def handle_input(self,input):
+    def handle_press_input(self,input):
         pass
 
     def detach(self):

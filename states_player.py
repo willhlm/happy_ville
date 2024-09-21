@@ -22,12 +22,13 @@ class Player_states(Entity_States):
     def handle_release_input(self,input):#all states should inehrent this function, if it should be able to jump
         pass
 
-    def handle_movement(self,event):#all states should inehrent this function
+    def handle_movement(self, event):#all states should inehrent this function
         value = event[2]['l_stick']#the avlue of the press
+
         self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
 
-        if abs(value[0]) > 0.2:
+        if abs(value[0]) > 0.1:
             self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
@@ -346,12 +347,12 @@ class Jump_main(Player_states):
 
     def swing_sword(self):
         if self.entity.flags['sword_swinging']: return
-        if self.entity.dir[1]>0:
+        if self.entity.dir[1] > 0.7:
             self.enter_state('Sword_up_main')
-        elif self.entity.dir[1]<0:
+        elif self.entity.dir[1] < -0.7:
             self.enter_state('Sword_down_main')
         else:#right or left
-            state='Sword_jump'+str(int(self.entity.sword.swing)+1)+'_main'
+            state = 'Sword_jump' + str(int(self.entity.sword.swing)+1)+'_main'
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
 
@@ -418,9 +419,9 @@ class Fall_pre(Player_states):
 
     def swing_sword(self):
         if self.entity.flags['sword_swinging']: return
-        if self.entity.dir[1]>0:
+        if self.entity.dir[1] > 0.7:
             self.enter_state('Sword_up_main')
-        elif self.entity.dir[1]<0:
+        elif self.entity.dir[1] < -0.7:
             self.enter_state('Sword_down_main')
         else:#right or left
             self.enter_state('Sword_fall_main', frame = self.entity.animation.frame)
@@ -454,29 +455,24 @@ class Wall_glide_main(Player_states):
             self.entity.velocity[1] = -7#to get a vertical velocity
             input.processed()            
             self.enter_state('Jump_main')
-        elif event[-1] == 'right':
+
+    def handle_movement(self, event):        
+        value = event[2]['l_stick']#the avlue of the press
+        self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
+        self.entity.dir[1] = -value[1]
+
+        curr_dir = self.entity.dir[0]
+        if abs(value[0]) > 0.1:
+            self.entity.dir[0] = sign(value[0])
+
+        if value[0] * curr_dir < 0:#change sign
             self.entity.velocity[0] = self.entity.dir[0]*2            
             self.enter_state('Fall_pre')
             self.entity.timer_jobs['ground'].activate()
-            input.processed()
-        elif event[-1] == 'left':
-            self.entity.velocity[0] = self.entity.dir[0]*2            
-            self.enter_state('Fall_pre')
-            self.entity.timer_jobs['ground'].activate()            
-            input.processed()
-
-    def handle_release_input(self,input):
-        event = input.output()
-        if event[-1] == 'right':
-            input.processed()
+        elif value[0] == 0:#release
             self.entity.velocity[0] = -self.entity.dir[0]*2
             self.enter_state('Fall_pre')  
-            self.entity.timer_jobs['ground'].activate()          
-        elif event[-1] == 'left':
-            input.processed()
-            self.entity.velocity[0] = -self.entity.dir[0]*2
-            self.enter_state('Fall_pre')
-            self.entity.timer_jobs['ground'].activate()
+            self.entity.timer_jobs['ground'].activate()   
 
     def handle_input(self,input):#when hit the ground
         if input == 'Ground':

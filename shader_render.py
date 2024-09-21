@@ -34,7 +34,7 @@ class Entity_shader(Screen_shader):#shader applied to enteties: not used yet -> 
     def __init__(self, entity, default_shader = 'idle', **kwarg):        
         self.entity = entity
         self.game_objects = entity.game_objects
-        self.layer = entity.layer#layer saved in pool of entity
+        self.layer = game_objects.game.display.make_layer(entity.image.size)#layer saved in pool of entity
         self.set_shader(default_shader, **kwarg)
 
     def draw(self, blit_pos, flip):       
