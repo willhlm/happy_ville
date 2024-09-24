@@ -2427,7 +2427,7 @@ class Melee(Projectiles):
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-        
+
     def countered(self,dir,pos):#called from sword collision_projectile, purple initinty stone
         return
         self.entity.countered()
@@ -2587,7 +2587,7 @@ class Aila_sword(Sword):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
         self.clash_particles(collision_enemy.hitbox.center)
-        self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][2])#should be in states
+        self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0])#should be in states
 
         #self.game_objects.camera_manager.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         collision_enemy.currentstate.handle_input('sword')
@@ -4481,7 +4481,7 @@ class Dash_buffer_timer(Timer):#ground dash buffer time
             self.entity.flags['ground'] = False
             self.entity.currentstate.handle_input('dash')#handle if we should go to jump state
             self.deactivate()
-        super().update()#need to be after        
+        super().update()#need to be after
 
 class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
     def __init__(self, entity, duration):
