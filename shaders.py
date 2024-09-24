@@ -111,7 +111,7 @@ class Speed_lines(Shaders):
 
         return self.renderer.game_objects.game.screen
 
-class Zoom(Shaders):#only in?
+class Zoom(Shaders):#only zoom in?
     def __init__(self, renderer, **kwarg):
         super().__init__(renderer)
         self.zoom = 1#zoom scale
