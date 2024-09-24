@@ -15,6 +15,7 @@ class Controller():
         self.input_buffer = set()
 
         pygame.joystick.init()#initialise joystick module
+        self.joysticks = []
 
     def add_controller(self):
         self.initiate_controls()#initialise joysticks and add to list
