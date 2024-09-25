@@ -84,7 +84,7 @@ class Attack_main(Enemy_states):
         if input == 'Wall':
             self.entity.velocity[0] = -5 * self.dir[0] * self.entity.velocity[0]
             self.increase_phase()
-            self.entity.game_objects.camera.camera_shake(duration = 15)
+            self.entity.game_objects.camera_manager.camera_shake(duration = 15)
         elif input == 'sword':#if aila hits            
             self.entity.velocity[0] *= 3            
             self.entity.dir[0] *= -1

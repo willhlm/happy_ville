@@ -752,7 +752,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0] * 30 * (1 - abs(dir[1]))
         self.velocity[1] = -dir[1] * 10
 
-    def hurt_particles(self, type='Circle', number_particles=20, **kwarg):
+    def hurt_particles(self, type = 'Circle', number_particles = 20, **kwarg):
         for i in range(0, number_particles):
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
@@ -790,7 +790,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Wall_glide':False,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
@@ -802,10 +802,8 @@ class Player(Character):
         self.omamoris = Omamoris(self)#
         self.flags = {'ground': True, 'sword_swinging': False}# a flag to check if on graon (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'jump_buffer':Jump_buffer_timer(self,C.jump_buffer_timer_player),
-                        'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player),
-                        'air':Air_timer(self,C.air_timer),'wall':Wall_timer(self,C.wall_timer),'wall_2':Wall_timer_2(self,C.wall_timer_2),
-                        'wet':Wet_timer(self, 60), 'dash_buffer':Dash_buffer_timer(self, C.jump_buffer_timer_player),}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'wet':Wet_timer(self, 60),
+                        'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
 
@@ -834,7 +832,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            self.hurt_particles(lifetime = 40, vel = {'linear':[4,7]}, colour=[0,0,0,255], scale=3, number_particles=60)
+            self.hurt_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             new_game_state = states.Pause_gameplay(self.game_objects.game, duration = duration, amplitude = 10)#pause the game for a while with an optional shake
             new_game_state.enter_state()
@@ -2025,10 +2023,7 @@ class Player_abilities():
         self.number += 1
         self.number = min(self.number,3)#limit the number of abilities one can equip at the same time
 
-    def handle_input(self,input):#movement stuff
-        value = input[2]['d_pad']
-        if sum(value) == 0: return#if d_pad wasn't pressed
-
+    def handle_input(self,value):#movement stuff
         if value[0] == 1:#pressed right
             self.remove_ability()
             self.movement_abilities = self.movement_abilities[-1:] + self.movement_abilities[:-1]#rotate the abilityes to the right
@@ -2065,7 +2060,7 @@ class Double_jump(Movement_abilities):
         super().__init__(entity)
 
 class Omamoris():#omamori handler -> "neckalce"
-    def __init__(self,entity):
+    def __init__(self, entity):
         self.entity = entity
         self.equipped = {'0':[],'1':[],'2':[]}#equiped omamoris
         self.inventory = {}#omamoris in inventory.: 'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)
@@ -2080,10 +2075,10 @@ class Omamoris():#omamori handler -> "neckalce"
             for omamori in omamoris:
                 omamori.equipped()
 
-    def handle_input(self,input):
+    def handle_press_input(self,input):
         for omamoris in self.equipped.values():
             for omamori in omamoris:
-                omamori.handle_input(input)
+                omamori.handle_press_input(input)
 
     def equip_omamori(self, omamori_string, list_of_places):
         new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0], self.entity.game_objects, entity = self.entity)
@@ -2559,8 +2554,10 @@ class Aila_sword(Sword):
             self.kill()#removes from projectiles gruop
 
     def update_hitbox(self):#called from aila's update_hitbox, every frame
-        super().update_hitbox()#follows the hitbox of aila depending on the direction
-        self.currentstate.update_hitbox()
+        hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
+        setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
+        self.rect.center = self.hitbox.center#match the positions of hitboxes
+        self.currentstate.update_rect()
 
     def set_stone(self,stone_str):#called from smith
         if len(self.equip) < self.level:
@@ -3090,7 +3087,7 @@ class Omamori(Interactable_item):
         player.omamoris.inventory[type(self).__name__] = self
         self.entity = player
 
-    def handle_input(self,input):
+    def handle_press_input(self,input):
         pass
 
     def detach(self):
@@ -4459,45 +4456,15 @@ class Sword_timer(Timer):
         super().deactivate()
         self.entity.flags['sword_swinging'] = False
 
-class Jump_buffer_timer(Timer):#can be combined with shroomjump?
-    def __init__(self, entity, duration):
-        super().__init__(entity, duration)#called from player states, when pressing jump
-
-    def update(self):#called everyframe after activation (activated after pressing jump)
-        if self.entity.flags['ground']:#start jumping if we a re on the ground
-            self.entity.flags['ground'] = False
-            self.entity.velocity[1] = C.jump_vel_player#start jumping on this frame
-            self.entity.currentstate.handle_input('jump')#handle if we should go to jump state
-            self.entity.timer_jobs['air'].activate()
-            self.deactivate()
-        super().update()#need to be after
-
-class Dash_buffer_timer(Timer):#ground dash buffer time
-    def __init__(self, entity, duration):
-        super().__init__(entity, duration)#called from player states, when pressing dash
-
-    def update(self):#called everyframe after activation (activated after pressing jump)
-        if self.entity.flags['ground']:#start dashing if we a re on the ground
-            self.entity.flags['ground'] = False
-            self.entity.currentstate.handle_input('dash')#handle if we should go to jump state
-            self.deactivate()
-        super().update()#need to be after
-
-class Air_timer(Timer):#activated when jumped. It keeps a constant vertical velocity for the duration. Needs to be deactivated when releasing jump bottom
-    def __init__(self, entity, duration):
-        super().__init__(entity, duration)
-
-    def update(self):#called everyframe after activation (activated after jumping)
-        self.entity.velocity[1] = C.jump_vel_player
-        super().update()#need to be after
-
 class Cayote_timer(Timer):#a timer to check how long time one has not been on ground
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
 
     def activate(self):#called when entering fall run or fall stand
-        if self.entity.flags['ground']:#if we fall from a plotform
-            super().activate()
+        self.lifetime = self.duration
+        if self in self.entity.timers: return#do not append if the timer is already inside
+        self.entity.timers.append(self)
+        self.entity.flags['ground'] = True
 
     def deactivate(self):#called when timer runs out
         super().deactivate()
@@ -4518,47 +4485,3 @@ class Shroomjump_timer(Timer):
     def deactivate(self):#called when timer expires
         super().deactivate()
         self.shrooming = False
-
-class Wall_timer(Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-        self.active = False
-
-    def activate(self):
-        super().activate()
-        self.active = True
-
-    def deactivate(self):
-        super().deactivate()
-        self.active = False
-
-    def handle_input(self,input):#called from handle press input in player states
-        #return
-        if not self.active: return
-        if input=='a':#pressed jump
-            #self.entity.velocity[0] = -self.entity.dir[0]*10
-            self.entity.velocity[1] = -7#to get a vertical velocity
-
-class Wall_timer_2(Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-
-    def activate(self,dir):#add timer to the entity timer list
-        super().activate()
-        self.dir = dir.copy()
-
-    def update(self):
-        self.check_sign()
-        super().update()
-
-    def check_sign(self):
-        if self.entity.dir[0]*self.dir[0]>=0:#if it is zero or same direction
-            self.entity.dir[0] = 0
-        else:#if aila change direction
-            self.entity.dir[0] = -self.dir[0]
-            if self not in self.entity.timers: return#do not remove if the timer is not inside
-            self.entity.timers.remove(self)
-
-    def deactivate(self):#lifetime
-        super().deactivate()
-        self.entity.dir[0] = self.dir[0]

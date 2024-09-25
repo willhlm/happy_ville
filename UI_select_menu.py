@@ -21,7 +21,7 @@ class Select_menu():
         pass
 
     def handle_events(self,input):
-        pass
+        input.processed()        
 
     def exit_state(self):                
         self.game_state.screen.release()
@@ -127,22 +127,24 @@ class Inventory(Select_menu):
             self.game_objects.game.display.render(self.texts[index], self.game_state.screen, position = self.iventory_UI.buttons[button].rect.center,shader = self.game_objects.shaders['colour'])#shader render
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'select':
+        event = input.output()
+        input.processed()        
+        if event[0]:#press
+            if event[-1] == 'select':
                 self.exit_state()
-            elif input[-1] == 'rb':#nezt page
+            elif event[-1] == 'rb':#nezt page
                 self.iventory_UI.buttons['rb'].currentstate.handle_input('press')
                 self.enter_state('Omamori', screen_alpha = 230)
-            elif input[-1] == 'lb':#previouse page
+            elif event[-1] == 'lb':#previouse 
                 self.iventory_UI.buttons['lb'].currentstate.handle_input('press')
                 self.enter_state('Map', screen_alpha = 230)
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':                
                 self.iventory_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
             self.state.handle_input(input)
             self.letter_frame = 0
-        elif input[1]:#release
-            if input[-1]=='a' or input[-1]=='return':
+        elif event[1]:#release
+            if event[-1]=='a' or event[-1]=='return':
                 self.iventory_UI.buttons['a'].currentstate.handle_input('release')
 
     def use_item(self):
@@ -215,33 +217,35 @@ class Omamori(Select_menu):
         self.game_objects.game.display.render(self.pointer, self.game_state.screen, position = self.omamori_list[self.omamori_index].rect.topleft)
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'select':
+        event = input.output()
+        input.processed()              
+        if event[0]:#press
+            if event[-1] == 'select':
                 self.exit_state()
-            elif input[-1] == 'rb':#nezt page
+            elif event[-1] == 'rb':#nezt page
                 if self.game_objects.world_state.statistics['kill']:#if we have killed something
                     self.enter_state('Journal', screen_alpha = 230)
-            elif input[-1] == 'lb':#previouse page
+            elif event[-1] == 'lb':#previouse page
                 self.previous_state()
-            elif input[-1]=='a' or input[-1]=='return':
+            elif event[-1]=='a' or event[-1]=='return':
                 self.choose_omamori()
 
-            elif input[-1] =='right':
+            elif event[-1] =='right':
                 self.letter_frame = 0
                 self.omamori_index += 1
                 self.omamori_index = min(self.omamori_index, len(self.omamori_list)-1)
 
-            elif input[-1] =='left':
+            elif event[-1] =='left':
                 self.letter_frame = 0
                 self.omamori_index -= 1
                 self.omamori_index = max(0,self.omamori_index)
 
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.letter_frame = 0
                 self.omamori_index += 4
                 self.omamori_index = min(self.omamori_index, len(self.omamori_list)-1)
 
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.letter_frame = 0
                 self.omamori_index -= 4
                 self.omamori_index = max(0,self.omamori_index)
@@ -282,8 +286,10 @@ class Omamori_2(Omamori):#blit potential response from action
         text.release()        
 
     def handle_events(self,input):
-        if input[0]:#press 
-            if input[-1]=='a' or input[-1]=='return':
+        event = input.output()
+        input.processed()             
+        if event[0]:#press 
+            if event[-1]=='a' or event[-1]=='return':
                self.previous_state()
 
 class Journal(Select_menu):
@@ -349,14 +355,16 @@ class Journal(Select_menu):
         text.release()
 
     def handle_events(self,input):
-        if input[0]:#press
-            if input[-1] == 'select':
+        event = input.output()
+        input.processed()            
+        if event[0]:#press
+            if event[-1] == 'select':
                 self.exit_state()
-            elif input[-1] == 'rb':#nezt page
+            elif event[-1] == 'rb':#nezt page
                 pass
-            elif input[-1] == 'lb':#previouse page
+            elif event[-1] == 'lb':#previouse page
                 self.previous_state()
-            elif input[-1] =='down':
+            elif event[-1] =='down':
                 self.letter_frame = 0
                 self.journal_index[0] += 1
                 if self.journal_index[0] == self.number:
@@ -365,7 +373,7 @@ class Journal(Select_menu):
                     self.select_enemies()
                 self.journal_index[0] = min(self.journal_index[0],len(self.selected_enemies)-1)
 
-            elif input[-1] =='up':
+            elif event[-1] =='up':
                 self.letter_frame = 0
                 self.journal_index[0] -= 1
                 if self.journal_index[0] == -1:
@@ -426,26 +434,28 @@ class Map(Select_menu):
         self.update_pos(scroll)
 
     def handle_events(self,input):
-        self.scroll = [-2*input[2]['r_stick'][0],-2*input[2]['r_stick'][1]]#right analog stick
+        event = input.output()
+        input.processed()             
+        self.scroll = [-2*event[2]['r_stick'][0],-2*event[2]['r_stick'][1]]#right analog stick
 
-        if input[0]:#press
-            if input[-1] == 'select':
+        if event[0]:#press
+            if event[-1] == 'select':
                 self.exit_state()
-            elif input[-1] == 'rb':#nezt page
+            elif event[-1] == 'rb':#nezt page
                 self.previous_state()
-            elif input[-1] == 'right':#should it be left analogue stick?
+            elif event[-1] == 'right':#should it be left analogue stick?
                 self.map_UI.objects[self.index].currentstate.set_animation_name('idle')
                 self.index += 1
                 self.index = min(self.index,len(self.map_UI.objects)-1)
                 self.map_UI.objects[self.index].currentstate.set_animation_name('equip')
                 self.calculate_position()
-            elif input[-1] == 'left':#should it be left analogue stick?
+            elif event[-1] == 'left':#should it be left analogue stick?
                 self.map_UI.objects[self.index].currentstate.set_animation_name('idle')
                 self.index -= 1
                 self.index = max(0,self.index)
                 self.map_UI.objects[self.index].currentstate.set_animation_name('equip')
                 self.calculate_position()
-            elif input[-1] == 'a':#when pressing a
+            elif event[-1] == 'a':#when pressing a
                 self.map_UI.objects[self.index].activate()#open the local map. I guess it should be a new state
 
     def exit_state(self):

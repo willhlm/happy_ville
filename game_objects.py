@@ -182,7 +182,7 @@ class Game_Objects():
         self.players.draw(self.game.screen)
         self.interactables_fg.draw(self.game.screen)#shoud be after player
         self.cosmetics.draw(self.game.screen)#Should be before fgs
-        self.cosmetics_no_clear.draw(self.game.screen)
+        self.cosmetics_no_clear.draw(self.game.screen)#Should be before fgs
         self.all_fgs.draw(self.game.screen)
         #self.camera_blocks.draw()
         self.lights.draw(self.game.screen)#should be second to last

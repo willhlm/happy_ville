@@ -26,6 +26,7 @@ class Camera_manager():
 
     def camera_shake(self, **kwarg):
         self.add_decorator(Camera_shake_decorator(self.camera, **kwarg))
+        self.game_objects.controller.rumble(duration = 10 * kwarg.get('duration', 100))
 
     def reset_player_center(self):#called when loading a map in maploader
         self.camera.reset_player_center()
@@ -79,9 +80,9 @@ class No_camera(Camera):
 class Camera_shake_decorator():
     def __init__(self, current_camera, **kwarg):
         self.current_camera = current_camera
-        self.amp = kwarg.get('amplitude', 3)
+        self.amp = kwarg.get('amplitude', 10)
         self.duration = kwarg.get('duration', 100)
-        self.scale = kwarg.get('scale', 0.9)         
+        self.scale = kwarg.get('scale', 0.98)         
 
     def update(self):
         self.amp *= self.scale

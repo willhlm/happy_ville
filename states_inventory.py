@@ -17,21 +17,23 @@ class Items(Inventory_states):
         self.inventory.define_pointer()
 
     def handle_input(self,input):
-        if input[-1] =='right':
+        event = input.output()
+        input.processed()                
+        if event[-1] =='right':
             self.inventory.item_index[0] += 1
             self.inventory.item_index[0] = min(self.inventory.item_index[0], len(self.inventory.items['items'])-1)
 
-        elif input[-1] =='left':
+        elif event[-1] =='left':
             self.inventory.item_index[0] -= 1
             if self.inventory.item_index[0] < 0:
                 self.inventory.item_index[0] = 0
                 self.enter_state('Sword')
 
-        elif input[-1] =='down':
+        elif event[-1] =='down':
             self.inventory.item_index[0] += 6
             self.inventory.item_index[0] = min(self.inventory.item_index[0], len(self.inventory.items['items'])-1)
 
-        elif input[-1] =='up':
+        elif event[-1] =='up':
             self.inventory.item_index[0] -= 6
             if self.inventory.item_index[0] < 0:
                 self.inventory.item_index[0] += 6*2
@@ -45,7 +47,9 @@ class Sword(Inventory_states):
         self.inventory.define_pointer([size[0],size[1]])
 
     def handle_input(self,input):
-        if input[-1] =='right':
+        event = input.output()
+        input.processed()               
+        if event[-1] =='right':
             if self.inventory.item_index[0] ==0:#if on bottom right
                 self.enter_state('Items')
             elif self.inventory.item_index[0] ==1:#if in middle right
@@ -58,7 +62,7 @@ class Sword(Inventory_states):
             elif self.inventory.item_index[0] == 4:#if on bottom left
                 self.inventory.item_index[0] -= 4
 
-        elif input[-1] =='left':
+        elif event[-1] =='left':
             if self.inventory.item_index[0] ==0:#if on bottom right
                 self.inventory.item_index[0] += 4
             elif self.inventory.item_index[0] ==1:#if in middle right
@@ -70,7 +74,7 @@ class Sword(Inventory_states):
             elif self.inventory.item_index[0] == 4:#if on bottom left
                 pass
 
-        elif input[-1] =='down':
+        elif event[-1] =='down':
             if self.inventory.item_index[0] ==0:#if on bottom right
                 pass
             elif self.inventory.item_index[0] ==1:#if in middle right
@@ -82,7 +86,7 @@ class Sword(Inventory_states):
             elif self.inventory.item_index[0] == 4:#if on bottom left
                 pass
 
-        elif input[-1] =='up':
+        elif event[-1] =='up':
             if self.inventory.item_index[0] ==0:#if on bottom right
                 self.inventory.item_index[0] += 1
             elif self.inventory.item_index[0] ==1:#if in middle right
@@ -100,24 +104,26 @@ class Key_items(Inventory_states):
         self.inventory.define_pointer()
 
     def handle_input(self,input):
-        if input[-1] =='right':
+        event = input.output()
+        input.processed()                
+        if event[-1] =='right':
             self.inventory.item_index[0] += 1
             self.inventory.item_index[0] = min(self.inventory.item_index[0], len(self.inventory.items['items'])-1)
 
-        elif input[-1] =='left':
+        elif event[-1] =='left':
             self.inventory.item_index[0] -= 1
             if self.inventory.item_index[0] < 0:
                 self.inventory.item_index[0] = 1
                 self.enter_state('Sword')
 
-        elif input[-1] =='down':
+        elif event[-1] =='down':
             self.inventory.item_index[0] += 6
             if self.inventory.item_index[0] > len(self.inventory.items['items'])-1:
                 self.inventory.item_index[0] -= 6*2
                 self.enter_state('Items')
             #self.inventory.item_index[0] = min(self.inventory.item_index[0],len(self.inventory.pointer_pos['items'])-1)
 
-        elif input[-1] =='up':
+        elif event[-1] =='up':
             self.inventory.item_index[0] -= 6
             if self.inventory.item_index[0] < 0:
                 self.inventory.item_index[0] = 0
