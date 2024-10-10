@@ -146,7 +146,7 @@ class Conversation_bubbles(Staticentity):
         self.image = self.layer.texture
         texture.release()
 
-#shaders -> should this be here or in enteties_parallx?
+#shaders -> should this be here or in enteties_parallx or elsewhere?
 class Portal(Staticentity):#portal to make a small spirit world with challenge rooms
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
@@ -369,7 +369,7 @@ class Waterfall(Staticentity):
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
 
-class Reflection(Staticentity):#water
+class Reflection(Staticentity):#water, e.g. village
     def __init__(self, pos, game_objects, parallax, size, dir, texture_parallax = 1, speed = 0, offset = 10):
         super().__init__(pos, game_objects)
         self.parallax = parallax
@@ -534,7 +534,7 @@ class TwoD_liquid(Staticentity):
             obj1 = particles.Circle(pos, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
 
-class Up_stream(Staticentity):
+class Up_stream(Staticentity):#a draft that can lift enteties
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
@@ -558,7 +558,7 @@ class Up_stream(Staticentity):
     def player_noncollision(self):
         pass
 
-class Smoke(Staticentity):
+class Smoke(Staticentity):#2D smoke
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
@@ -2515,7 +2515,7 @@ class Sword(Melee):
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir)
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
-        self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = [random.randint(-180, 180),0])
+        self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
 
     def sword_jump(self):
         #print(self.dir[1])
@@ -2535,16 +2535,15 @@ class Aila_sword(Sword):
         super().__init__(entity)
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.currentstate = states_sword.Slash_1(self)
-        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/aila_sword/')
 
         self.tungsten_cost = 1#the cost to level up to next level
-        self.level = 0#determines how many stone one can attach
-        self.equip = []#stone pointers, the ones attached to the sword, strings
-        self.stones = {'red':Red_infinity_stone([0,0],entity.game_objects, entity = self),'green':Green_infinity_stone([0,0],entity.game_objects, entity = self),'blue':Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange':Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple':Purple_infinity_stone([0,0],entity.game_objects, entity = self)}#the ones aila has picked up
+        self.stones = {'red': Red_infinity_stone([0,0], entity.game_objects, entity = self), 'green': Green_infinity_stone([0,0], entity.game_objects, entity = self), 'blue': Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange': Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple': Purple_infinity_stone([0,0], entity.game_objects, entity = self)}#gets filled in when pick up stone. used also for inventory
         self.swing = 0#a flag to check which swing we are at (0 or 1)
+        self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#stones can change these to do specific things
 
     def init(self):
         self.sprites = read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/aila_sword/')
         self.image = self.sprites['slash_1'][0]
         self.dmg = 1
 
@@ -2559,23 +2558,10 @@ class Aila_sword(Sword):
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         self.currentstate.update_rect()
 
-    def set_stone(self,stone_str):#called from smith
-        if len(self.equip) < self.level:
-            self.equip.append(stone_str)
-            self.stones[stone_str].attach()
-
-    def remove_stone(self):#not impleented
-        pass
-
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with projectile
         if eprojectile.invincibile: return
         eprojectile.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
-
-        if 'purple' in self.equip:#if the purpuple stone is equped
-            eprojectile.countered(self.dir, self.rect.center)
-            self.sword_jump()
-        else:
-            eprojectile.take_dmg(self.dmg)
+        self.stone_states['projectile_collision'].projectile_collision(eprojectile)
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
@@ -2588,22 +2574,19 @@ class Aila_sword(Sword):
 
         #self.game_objects.camera_manager.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         collision_enemy.currentstate.handle_input('sword')
-        for stone in self.equip:
-            self.stones[stone].collision()#call collision specific for stone
+        self.stone_states['enemy_collision'].enemy_collision()
 
     def clash_particles(self, pos, number_particles=12):
         angle = random.randint(-180, 180)#the erection anglex
-        color = [255,255,255,255]
+        color = [255, 255, 255, 255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos,self.game_objects,distance=0,lifetime=15,vel={'linear':[7,14]},dir=[angle,0],scale=1,colour=color,state = 'Idle')
+            obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 40, vel = {'linear':[7,14]}, dir = angle, scale = 1.2, fade_scale = 5, colour = color, state = 'Idle')
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
-        if self.level >= 3: return
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
-        self.level += 1
-        self.tungsten_cost += 2#1, 3, 5 tungstes to level upp 1, 2, 3
+        self.tungsten_cost += 2#1, 3, 5 tungstes to level up
 
 class Thunder(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
@@ -3175,21 +3158,12 @@ class Infinity_stones(Interactable_item):
     def reset_timer(self):
         pass
 
-    def attach(self):#called from sword when balcksmith attached the stone
-        pass
-
-    def detach(self):
-        pass
-
-    def collision(self):#hit enemy
-        pass
-
-    def slash(self):#called when swingin sword
+    def attach(self, player):#called from sword when balcksmith attached the stone
         pass
 
     def pickup(self, player):
         super().pickup(player)
-        player.sword.stones[list(self.colour.keys())[0]] = self
+        self.attach(player)
         self.sword = player.sword
 
 class Red_infinity_stone(Infinity_stones):#more dmg
@@ -3208,10 +3182,7 @@ class Red_infinity_stone(Infinity_stones):#more dmg
         super().pool(game_objects)
 
     def attach(self):
-        self.sword.dmg*=1.1
-
-    def detach(self):
-        self.sword.dmg*=(1/1.1)
+        self.sword.dmg *= 1.1
 
 class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
     def __init__(self, pos, game_objects, **kwarg):
@@ -3226,10 +3197,10 @@ class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
     @classmethod
     def pool(cls, game_objects):
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/green/',game_objects)#for inventory
-        super().pool(game_objects)
+        super().pool(game_objects)  
 
-    def slash(self):
-        self.sword.entity.animation.framerate = 0.33
+    def attach(self, player):
+        player.stone_states['slash'].enter_state('Slash')              
 
 class Blue_infinity_stone(Infinity_stones):#get spirit at collision
     def __init__(self, pos, game_objects, **kwarg):
@@ -3246,8 +3217,8 @@ class Blue_infinity_stone(Infinity_stones):#get spirit at collision
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/blue/',game_objects)#for inventory
         super().pool(game_objects)
 
-    def collision(self):
-        self.sword.entity.add_spirit()
+    def attach(self, player):
+        player.stone_states['enemy_collision'].enter_state('Enemy_collision')
 
 class Orange_infinity_stone(Infinity_stones):#bigger hitbox
     def __init__(self, pos, game_objects, **kwarg):
@@ -3264,12 +3235,8 @@ class Orange_infinity_stone(Infinity_stones):#bigger hitbox
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/orange/',game_objects)#for inventory
         super().pool(game_objects)
 
-    def detach(self):
-        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,40,40)
-        self.sword.hitbox = self.sword.rect.copy()
-
     def attach(self):
-        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y,80,40)
+        self.sword.rect = pygame.Rect(self.sword.entity.rect.x,self.sword.entity.rect.y, 80, 40)
         self.sword.hitbox = self.sword.rect.copy()
 
 class Purple_infinity_stone(Infinity_stones):#reflect projectile -> crystal caves
@@ -3286,6 +3253,9 @@ class Purple_infinity_stone(Infinity_stones):#reflect projectile -> crystal cave
     def pool(cls, game_objects):
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/purple/',game_objects)#for inventory
         super().pool(game_objects)
+
+    def attach(self, player):
+        player.stone_states['projectile_collision'].enter_state('Projectile_collision')
 
 #cosmetics
 class Blood(Animatedentity):
@@ -4203,20 +4173,20 @@ class Sign(Interactable):
             self.game_objects.cosmetics.add(self.symbols)
 
 class Light_crystal(Interactable):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/animations/light_crystals/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
         self.timers = []
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.timer_jobs = {'invincibility': Invincibility_timer(self,C.invincibility_time_enemy)}
 
     def update(self):
         super().update()
         self.update_timers()#invincibililty
 
-    def take_dmg(self,projectile):
+    def take_dmg(self, projectile):
         if self.invincibile: return
         projectile.clash_particles(self.hitbox.center)
         self.timer_jobs['invincibility'].activate()
@@ -4405,8 +4375,8 @@ class General_Timer(Timer):#when lifetime is 0, it calls the timeout of entety
         self.function()
 
 class Invincibility_timer(Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
+    def __init__(self, entity, duration):
+        super().__init__(entity, duration)
         self.entity.invincibile = False#a flag to check if one should take damage
 
     def activate(self):#called when taking a dmg

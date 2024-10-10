@@ -798,11 +798,7 @@ class Sword(Player_states):#main phases shold inheret this
         self.entity.timer_jobs['sword'].activate()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
-        self.slash()
-
-    def slash(self):#if we have green infinity stone
-        for stone in self.entity.sword.equip:
-            self.entity.sword.stones[stone].slash()#call collision specific for stone
+        self.entity.sword.stone_states['slash'].slash_speed()
 
     def enter_state(self, input, **kwarg):
         self.entity.animation.framerate = C.animation_framerate
@@ -811,8 +807,6 @@ class Sword(Player_states):#main phases shold inheret this
 class Sword_stand1_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
-        self.entity.sword.dir[1] = 0
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -834,7 +828,6 @@ class Sword_stand2_main(Sword_stand1_main):
 class Sword_fall_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.lifetime=10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_' + str(int(self.entity.sword.swing)+1))#slash 1 and 2
         self.entity.state = 'fall_main'#animation name
         self.entity.animation.frame = kwarg.get('frame', 0)
@@ -853,7 +846,6 @@ class Sword_fall_main(Sword):
 class Sword_jump1_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.state = 'jump_main'
         self.entity.animation.frame = kwarg.get('frame', 0)
@@ -877,7 +869,6 @@ class Sword_jump2_main(Sword_jump1_main):
 class Air_sword1_main(Sword):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
@@ -892,7 +883,6 @@ class Air_sword2_main(Air_sword1_main):
 class Sword_up_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -908,7 +898,6 @@ class Sword_up_main(Sword):
 class Sword_down_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10
         self.entity.sword.currentstate.enter_state('Slash_down')
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
 
