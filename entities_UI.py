@@ -56,7 +56,7 @@ class Sword(Animatedentity):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
 
-    def set_level(self,level):
+    def set_level(self, level):
         self.currentstate.set_animation_name('level_'+str(level))
 
 class Infinity_stone(Animatedentity):

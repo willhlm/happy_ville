@@ -8,7 +8,7 @@ class Particles(pygame.sprite.Sprite):
         self.spawn_point = [pos[0],pos[1]]
 
         self.lifetime = kwarg.get('lifetime', 60)
-        self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))
+        self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))#make a copy of the list by list()
         dir = kwarg.get('dir', 'isotropic') 
         angle = self.define_angle(dir)
 
@@ -17,7 +17,7 @@ class Particles(pygame.sprite.Sprite):
         
         self.angle = -(2*math.pi*angle)/360
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
-        motion = list(vel.keys())[0]#linear moetion or wave motion
+        motion = list(vel.keys())[0]#linear, wave, gravity motion etc
         self.set_velocity = {'linear':self.linear,'wave':self.wave, 'gravity': self.gravity}[motion]
         self.gravity_scale = kwarg.get('gravity_scale', 1)
         amp = random.uniform(min(vel[motion][0],vel[motion][1]), max(vel[motion][0],vel[motion][1]))
@@ -57,23 +57,24 @@ class Particles(pygame.sprite.Sprite):
 
     def define_angle(self,dir):#is there a better way?
         if dir == 'isotropic':
-            angle=random.randint(-180, 180)#the ejection anglex
-        elif dir[1] == -1:#hit from down hit
-            spawn_angle = 30
-            angle = random.randint(90-spawn_angle, 90+spawn_angle)#the ejection anglex       
-        elif dir[1] == 1:#hit from above hit
-            spawn_angle = 30
-            angle=random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex     
-        elif dir[0] == -1:#rigth hit
-            spawn_angle = 30
-            angle=random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
-        elif dir[0] == 1:#left hit
-            spawn_angle = 30
-            angle=random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex                           
-        else:#integer
-            dir[0] += 180*random.randint(0,1)
+            angle = random.randint(-180, 180)#the ejection anglex
+        elif isinstance(dir, (int, float)):#interger/float
+            dir += 180 * random.randint(0,1)
             spawn_angle = 10
-            angle=random.randint(dir[0]-spawn_angle, dir[0]+spawn_angle)#the ejection anglex
+            angle = random.randint(dir - spawn_angle, dir + spawn_angle)#the ejection anglex
+        else:#list 
+            if dir[1] == -1:#hit from down hit
+                spawn_angle = 30
+                angle = random.randint(90-spawn_angle, 90+spawn_angle)#the ejection anglex       
+            elif dir[1] == 1:#hit from above hit
+                spawn_angle = 30
+                angle = random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex     
+            elif dir[0] == -1:#rigth hit
+                spawn_angle = 30
+                angle = random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
+            elif dir[0] == 1:#left hit
+                spawn_angle = 30
+                angle = random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex                           
         return angle
 
     def draw(self, target):
@@ -152,7 +153,7 @@ class Goop(Particles):#circles that "distorts" due to noise
 class Spark(Particles):#a general one
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.fade_scale =  kwarg.get('fade_scale',1)#how fast alpha should do down in self.fading()
+        self.fade_scale =  kwarg.get('fade_scale', 1)#how fast alpha should do down in self.fading()
 
         self.image = Spark.image
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -165,7 +166,7 @@ class Spark(Particles):#a general one
 
     def draw(self, target):#called from group draw
         self.shader['colour'] = self.colour
-        self.shader['velocity'] =self.velocity
+        self.shader['velocity'] = self.velocity
         super().draw(target)
 
     def pool(game_objects):#save the stuff in memory for later use

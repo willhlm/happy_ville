@@ -261,13 +261,13 @@ class Boulder(Collision_texture):#blocks village cave
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
-class Gate(Collision_texture):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
+class Gate_1(Collision_texture):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate/', game_objects)
+        self.init()
 
         self.ID_key = kwarg.get('ID', 'None')#an ID to match with the gate
-        if game_objects.world_state.quests.get(self.ID_key[:self.ID_key.rfind('_')], False):#if ballroom has been completed
+        if game_objects.world_state.quests.get(self.ID_key[:self.ID_key.rfind('_')], False):#if quest accodicated with it has been completed
             state = 'down'
         elif game_objects.world_state.events.get(self.ID_key[:self.ID_key.rfind('_')], False):#if the event has been completed
             state = 'down'
@@ -279,12 +279,15 @@ class Gate(Collision_texture):#a gate. The ones that are owned by the lever will
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
-    def collide_x(self,entity):
-        if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self)
-        else:#going to the leftx
-            entity.left_collision(self)
-        entity.update_rect_x()
+    def init(self):
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_1/', self.game_objects)
+
+class Gate_2(Gate_1):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+
+    def init(self):
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_2/', self.game_objects)        
 
 class Bridge(Collision_texture):#bridge twoards forest path
     def __init__(self, pos, game_objects):
@@ -330,9 +333,13 @@ class Conveyor_belt(Collision_texture):
         self.animation = animation.Animation(self, direction = animation_direction)#can revert the animation direction
         self.currentstate = states_basic.Idle(self)     
 
-        self.rect = pygame.Rect(pos, size)
+        self.rect = pygame.Rect(pos, size)    
         self.true_pos = list(self.rect.topleft)
-        self.hitbox = self.rect.copy()        
+        if angle == 0:
+            self.hitbox = pygame.Rect(pos[0], pos[1], (self.rect[2] - 16), self.rect[3] * 0.55)
+        else:
+            self.hitbox = pygame.Rect(pos[0], pos[1], (self.rect[2]) * 0.55, (self.rect[3]-16))
+        self.hitbox.center = self.rect.center
 
     #def update(self):
     #    super().update()
@@ -420,20 +427,40 @@ class Collision_timer(Collision_texture):#collision block that dissapears if ail
 class Rhoutta_encounter_1(Collision_timer):
     def __init__(self, game_objects, pos, particle):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,60),'timer_appear':Platform_timer_2(self,60)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'timer_disappear': Timer(self, 60, self.deactivate),'timer_appear': Timer(self, 60, self.activate)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.run_particles = entities.Dust_running_particles
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
 
-    def deactivate(self):#called when first timer runs outs
-        self.hitbox = [self.hitbox[0],self.hitbox[1],0,0]
+    def deactivate(self):#called when timer_disappear runs out
+        self.hitbox = [self.hitbox[0], self.hitbox[1], 0, 0]
         self.timer_jobs['timer_appear'].activate()
         self.currentstate.handle_input('Transition_1')
 
-    def activate(self):#when it shoudl dissapear
+    def activate(self):#called when timer_appear runs out
         self.hitbox = self.rect.inflate(0,0)
+        self.currentstate.handle_input('Transition_2')
+
+class Crystal_mines_1(Collision_timer):
+    def __init__(self, game_objects, pos):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/crystal_mines_1/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.timer_jobs = {'timer_disappear': Timer(self, 60, self.deactivate),'timer_appear': Timer(self, 60, self.activate)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.run_particles = entities.Dust_running_particles
+        self.rect[2], self.rect[3] = self.image.width, self.image.height
+        self.hitbox = pygame.Rect(pos[0], pos[1], self.rect[2], self.rect[3]*0.4)
+        self.hitbox.center = self.rect.center
+
+    def deactivate(self):#called when timer_disappear runs out
+        self.hitbox[2], self.hitbox[3] = 0, 0
+        self.timer_jobs['timer_appear'].activate()
+        self.currentstate.handle_input('Transition_1')
+
+    def activate(self):#called when timer_appear runs out
+        self.hitbox[2], self.hitbox[3] = self.rect[2], self.rect[3]*0.4
         self.currentstate.handle_input('Transition_2')
 
 class Bubble_static(Collision_timer):#static bubble
@@ -630,8 +657,8 @@ class Smacker(Collision_dynamic):#trap
     def collide_y(self,entity):#entity moving       
         self.currentstate.collide_y(entity)        
 
-#timer:
-class Conveyor_belt_timer(entities.Timer):#not in use
+#timers:
+class Conveyor_belt_timer(entities.Timer):#not in use: if we want to make convyeor belt "jumps"
     def __init__(self, entity, duration, direction):
         super().__init__(entity, duration)
         self.direction = direction
@@ -652,18 +679,23 @@ class Conveyor_belt_timer(entities.Timer):#not in use
         self.entity.timers.remove(self)
         self.entity.friction = C.friction_player.copy()#put it back
 
-class Platform_timer_1(entities.Timer):
-    def __init__(self,entity, duration):
-        super().__init__(entity, duration)
+class Timer():
+    def __init__(self, entity, duration, timeout):
+        self.entity = entity
+        self.duration = duration
+        self.timeout = timeout
 
-    def deactivate(self):#when timer runs out
-        super().deactivate()
-        self.entity.deactivate()
+    def activate(self):#add timer to the entity timer list
+        if self in self.entity.timers: return#do not append if the timer is already inside
+        self.lifetime = self.duration
+        self.entity.timers.append(self)
 
-class Platform_timer_2(entities.Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
+    def deactivate(self):
+        if self not in self.entity.timers: return#do not remove if the timer is not inside
+        self.entity.timers.remove(self)
+        self.timeout()
 
-    def deactivate(self):#when timer runs out
-        super().deactivate()
-        self.entity.activate()
+    def update(self):
+        self.lifetime -= self.entity.game_objects.game.dt * self.entity.game_objects.player.slow_motion
+        if self.lifetime < 0:
+            self.deactivate()    

@@ -398,7 +398,10 @@ class Fall_pre(Player_states):
             input.processed()
             self.do_ability()
         elif event[-1]=='lb':
-            if self.enter_state('Air_dash_pre'):
+            if self.entity.flags['ground']:
+                input.processed()
+                self.enter_state('Ground_dash_pre')                
+            elif self.enter_state('Air_dash_pre'):
                 input.processed()
         elif event[-1]=='x':
             input.processed()
@@ -438,10 +441,9 @@ class Fall_main(Fall_pre):
         pass
 
 class Wall_glide_main(Player_states):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
         self.entity.friction[1] = 0.4
-        self.entity.flags['ground'] = True#so that we can jump
 
     def update(self):
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
@@ -449,12 +451,15 @@ class Wall_glide_main(Player_states):
             self.entity.timer_jobs['ground'].activate()
 
     def handle_press_input(self,input):
-        event = input.output()
+        event = input.output()        
         if event[-1] == 'a':
             self.entity.velocity[0] = -self.dir[0]*10
             self.entity.velocity[1] = -7#to get a vertical velocity
             input.processed()            
             self.enter_state('Jump_main')
+        elif event[-1] == 'lb':
+            input.processed()      
+            self.enter_state('Ground_dash_pre')       
 
     def handle_movement(self, event):        
         value = event[2]['l_stick']#the avlue of the press
@@ -501,7 +506,7 @@ class Air_dash_pre(Player_states):
 
     def handle_input(self,input):#if hit wall
         if input == 'Wall':
-            if self.entity.acceleration[0]!=0:
+            if self.entity.acceleration[0] != 0:
                 self.enter_state('Wall_glide_main')
             else:
                 self.enter_state('Idle_main')
@@ -553,11 +558,12 @@ class Ground_dash_pre(Air_dash_pre):
             input.processed()            
             self.enter_state('Dash_jump_main')
 
-    def handle_input(self,input):#if hit wall
-        super().handle_input(input)
+    def handle_input(self,input):
         if input == 'jump':
             if self.time >0:
-                self.enter_state('Dash_jump_main')
+                self.enter_state('Dash_jump_main')        
+        elif input == 'interrupt':
+            self.enter_state('Idle_main')            
 
     def exit_state(self):
         if self.dash_length < 0:
@@ -598,11 +604,22 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
         self.entity.friction = [0.15,0.01]
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.jump_vel_player
+        self.buffer_time = C.jump_dash_wall_timer
+
+    def handle_input(self,input):#if hit wall
+        if input == 'Wall':
+            if self.entity.collision_types['right'] and self.entity.dir[0] > 0 or self.entity.collision_types['left'] and self.entity.dir[0] < 0:
+                if self.entity.acceleration[0] != 0:
+                    if self.buffer_time < 0:
+                        self.enter_state('Wall_glide_main')
+        elif input == 'interrupt':
+            self.enter_state('Idle_main')
 
     def update(self):
-        self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
+        self.buffer_time -= self.entity.game_objects.game.dt
         self.exit_state()
 
     def increase_phase(self):
@@ -611,12 +628,23 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
 class Dash_jump_post(Air_dash_pre):#level one dash: normal
     def __init__(self,entity):
         super().__init__(entity)
+        self.buffer_time = C.jump_dash_wall_timer
 
     def update(self):
-        self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
+        self.buffer_time -= self.entity.game_objects.game.dt
         self.exit_state()
+
+    def handle_input(self,input):#if hit wall
+        if input == 'Wall':
+            if self.entity.collision_types['right'] and self.entity.dir[0] > 0 or self.entity.collision_types['left'] and self.entity.dir[0] < 0:
+                if self.entity.acceleration[0] != 0:
+                    if self.buffer_time < 0:
+                        self.enter_state('Wall_glide_main')
+        elif input == 'interrupt':
+            self.enter_state('Idle_main')
 
     def increase_phase(self):
         self.entity.friction = C.friction_player.copy()   
@@ -798,11 +826,7 @@ class Sword(Player_states):#main phases shold inheret this
         self.entity.timer_jobs['sword'].activate()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
-        self.slash()
-
-    def slash(self):#if we have green infinity stone
-        for stone in self.entity.sword.equip:
-            self.entity.sword.stones[stone].slash()#call collision specific for stone
+        self.entity.sword.stone_states['slash'].slash_speed()
 
     def enter_state(self, input, **kwarg):
         self.entity.animation.framerate = C.animation_framerate
@@ -811,8 +835,6 @@ class Sword(Player_states):#main phases shold inheret this
 class Sword_stand1_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
-        self.entity.sword.dir[1] = 0
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -834,7 +856,6 @@ class Sword_stand2_main(Sword_stand1_main):
 class Sword_fall_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.lifetime=10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_' + str(int(self.entity.sword.swing)+1))#slash 1 and 2
         self.entity.state = 'fall_main'#animation name
         self.entity.animation.frame = kwarg.get('frame', 0)
@@ -853,7 +874,6 @@ class Sword_fall_main(Sword):
 class Sword_jump1_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.state = 'jump_main'
         self.entity.animation.frame = kwarg.get('frame', 0)
@@ -877,7 +897,6 @@ class Sword_jump2_main(Sword_jump1_main):
 class Air_sword1_main(Sword):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_1')
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
@@ -892,7 +911,6 @@ class Air_sword2_main(Air_sword1_main):
 class Sword_up_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10#swrod hitbox duration
         self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -908,7 +926,6 @@ class Sword_up_main(Sword):
 class Sword_down_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.sword.lifetime = 10
         self.entity.sword.currentstate.enter_state('Slash_down')
         self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
 

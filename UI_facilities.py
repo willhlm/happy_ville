@@ -281,7 +281,7 @@ class Smith(Facility_states):#called from mr smith
         self.set_response('')
 
     def init(self):
-        self.actions = ['upgrade','enhance','cancel']
+        self.actions = ['upgrade','cancel']
         self.init_canvas([64,22*len(self.actions)])#specific for each facility
 
     def init_canvas(self,size=[64,64]):
@@ -328,8 +328,6 @@ class Smith(Facility_states):#called from mr smith
     def select(self):
         if self.pointer_index[1] == 0:#if we select upgrade
             self.upgrade()
-        elif self.pointer_index[1] == 1:#selct enhace
-            self.game_state.state.append(Smith_2(self.game_state,self.npc))#go to next frame
         else:#select cancel
             self.exit_state()
 
@@ -339,26 +337,6 @@ class Smith(Facility_states):#called from mr smith
             self.set_response('Now it is better')
         else:#not enough tungsten
             self.set_response('You do not have enough heavy rocks')
-
-class Smith_2(Smith):#the enhance screen
-    def __init__(self, game_state, npc):
-        super().__init__(game_state,npc)
-
-    def init(self):
-        self.actions=[]
-        for index, stones in enumerate(self.game_objects.player.sword.stones):
-            self.actions.append(stones)
-        self.actions.append('cancel')
-        self.init_canvas([64,17*len(self.actions)])
-        self.set_response('Lets enhance')
-
-    def select(self):
-        if self.pointer_index[1] < len(self.actions)-1:#if we selec
-            stone_str = self.actions[self.pointer_index[1]]
-            self.game_objects.player.sword.set_stone(stone_str)
-            self.set_response('Now it is ' + stone_str)
-        else:#select cancel
-            self.game_state.state.pop()
 
 class Bank(Facility_states):#caled from mr banks
     def __init__(self, game_state, npc):

@@ -499,7 +499,7 @@ class Level():
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
                         kwarg['erect'] = property['value']
-                gate = platforms.Gate(object_position,self.game_objects, **kwarg)
+                gate = platforms.Gate_1(object_position,self.game_objects, **kwarg)
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
 
@@ -523,6 +523,17 @@ class Level():
                 if not self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'].get(name, False):#if it has not been interacted with: (assume only one interactable)
                     new_loot = getattr(entities, name)(object_position, self.game_objects)
                     self.game_objects.loot.add(new_loot)
+
+            elif id == 15:#gate
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'ID':
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'erect':
+                        kwarg['erect'] = property['value']                        
+                gate = platforms.Gate_2(object_position,self.game_objects, **kwarg)
+                self.references['gate'].append(gate)
+                self.game_objects.platforms.add(gate)
 
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects
@@ -954,7 +965,7 @@ class Crystal_mines(Biome):
                 new_conveyor_belt = platforms.Conveyor_belt(object_position, self.level.game_objects, object_size, **kwarg)
                 self.level.game_objects.platforms.add(new_conveyor_belt)
            
-            if id == 8:#smacker
+            elif id == 8:#smacker
                 kwarg = {'hole': entities.Hole(object_position, self.level.game_objects, object_size)}
                 for property in properties:
                     if property['name'] == 'distance':
@@ -963,3 +974,7 @@ class Crystal_mines(Biome):
                 new_smacker = platforms.Smacker(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.dynamic_platforms.add(new_smacker)           
                 self.level.game_objects.platforms.add(new_smacker)
+
+            elif id == 9:#platform
+                new_platofrm = platforms.Crystal_mines_1(self.level.game_objects, object_position)
+                self.level.game_objects.platforms.add(new_platofrm)

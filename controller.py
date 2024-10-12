@@ -74,8 +74,8 @@ class Controller():
     def keybord(self,event):
         if event.type == pygame.KEYDOWN:
             self.keydown = True
-            self.key = self.keyboard_map.get(event.key, '')            
-            
+            self.key = self.keyboard_map.get(event.key, '')
+
             if self.key=='right':
                 self.value['l_stick'][0] = 1
             elif self.key=='left':
@@ -106,7 +106,7 @@ class Controller():
 
             elif self.key=='up' or self.key=='down':
                 self.value['l_stick'][1] = 0
-            
+
             self.insert_buffer()
 
         if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
@@ -145,7 +145,7 @@ class Controller():
             if event.axis == self.analogs['rh']:#right horizontal
                 self.value['r_stick'][0] = event.value
                 if abs(event.value) < 0.1:
-                    self.value['r_stick'][0] = 0                
+                    self.value['r_stick'][0] = 0
 
             if event.axis == self.analogs['rv']:#right vertical
                 self.value['r_stick'][1] = event.value
@@ -189,7 +189,7 @@ class Inputs():#different inputs such as keys and buttons
             self.remove_input()
 
     def remove_input(self):
-        self.controller.input_buffer.discard(self)    
+        self.controller.input_buffer.discard(self)
 
     def processed(self):
-        self.remove_input()             
+        self.remove_input()
