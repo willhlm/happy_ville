@@ -8,7 +8,7 @@ class Particles(pygame.sprite.Sprite):
         self.spawn_point = [pos[0],pos[1]]
 
         self.lifetime = kwarg.get('lifetime', 60)
-        self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))
+        self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))#make a copy of the list by list()
         dir = kwarg.get('dir', 'isotropic') 
         angle = self.define_angle(dir)
 

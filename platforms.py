@@ -333,9 +333,13 @@ class Conveyor_belt(Collision_texture):
         self.animation = animation.Animation(self, direction = animation_direction)#can revert the animation direction
         self.currentstate = states_basic.Idle(self)     
 
-        self.rect = pygame.Rect(pos, size)
+        self.rect = pygame.Rect(pos, size)    
         self.true_pos = list(self.rect.topleft)
-        self.hitbox = self.rect.copy()        
+        if angle == 0:
+            self.hitbox = pygame.Rect(pos[0], pos[1], (self.rect[2] - 16), self.rect[3] * 0.55)
+        else:
+            self.hitbox = pygame.Rect(pos[0], pos[1], (self.rect[2]) * 0.55, (self.rect[3]-16))
+        self.hitbox.center = self.rect.center
 
     #def update(self):
     #    super().update()
@@ -447,15 +451,16 @@ class Crystal_mines_1(Collision_timer):
         self.timer_jobs = {'timer_disappear': Timer(self, 60, self.deactivate),'timer_appear': Timer(self, 60, self.activate)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.run_particles = entities.Dust_running_particles
         self.rect[2], self.rect[3] = self.image.width, self.image.height
-        self.hitbox = self.rect.copy()
+        self.hitbox = pygame.Rect(pos[0], pos[1], self.rect[2], self.rect[3]*0.4)
+        self.hitbox.center = self.rect.center
 
     def deactivate(self):#called when timer_disappear runs out
-        self.hitbox = [self.hitbox[0], self.hitbox[1], 0, 0]
+        self.hitbox[2], self.hitbox[3] = 0, 0
         self.timer_jobs['timer_appear'].activate()
         self.currentstate.handle_input('Transition_1')
 
     def activate(self):#called when timer_appear runs out
-        self.hitbox = self.rect.inflate(0,0)
+        self.hitbox[2], self.hitbox[3] = self.rect[2], self.rect[3]*0.4
         self.currentstate.handle_input('Transition_2')
 
 class Bubble_static(Collision_timer):#static bubble

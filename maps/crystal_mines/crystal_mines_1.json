@@ -17,7 +17,7 @@
                  "x":0,
                  "y":0
                 }],
-         "name":"bg7",
+         "name":"bg10",
          "offsetx":-500,
          "offsety":-500,
          "opacity":1,
@@ -273,7 +273,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"village_3"
+                                 "value":"crystal_mines_26"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -296,7 +296,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"village_2"
+                                 "value":"village_ola2_3"
                                 }, 
                                 {
                                  "name":"spawn",

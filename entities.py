@@ -1871,8 +1871,7 @@ class Camera_Stop(Staticentity):
         super().__init__(pos, game_objects)
         self.hitbox = self.rect.inflate(0,0)
         self.size = size
-        self.rect[2] = size[0]
-        self.rect[3] = size[1]
+        self.rect[2], self.rect[3] = size[0], size[1]
         self.offset = int(offset)#number of tiles in the "negative direction" in which the stop should apply
         self.currentstate = getattr(states_camerastop, 'Idle_' + dir)(self)
 
