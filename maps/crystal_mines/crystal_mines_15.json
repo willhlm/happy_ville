@@ -278,7 +278,7 @@
                          "visible":true,
                          "width":224,
                          "x":1088,
-                         "y":944
+                         "y":976
                         }, 
                         {
                          "gid":8,
@@ -290,11 +290,11 @@
                          "visible":true,
                          "width":272,
                          "x":1408,
-                         "y":944
+                         "y":976
                         }, 
                         {
                          "gid":8,
-                         "height":240,
+                         "height":208,
                          "id":522,
                          "name":"",
                          "rotation":0,
@@ -326,7 +326,7 @@
                          "visible":true,
                          "width":592,
                          "x":1088,
-                         "y":768
+                         "y":800
                         }, 
                         {
                          "gid":11,
@@ -338,6 +338,11 @@
                                  "name":"path_to",
                                  "type":"string",
                                  "value":"crystal_mines_13"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"6"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -385,7 +390,7 @@
                          "visible":true,
                          "width":16,
                          "x":1536,
-                         "y":848
+                         "y":880
                         }, 
                         {
                          "gid":1,
@@ -402,8 +407,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1456,
-                         "y":800
+                         "x":1472,
+                         "y":848
                         }, 
                         {
                          "gid":8,

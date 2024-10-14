@@ -214,12 +214,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"crystal_mines_4"
+                                 "value":"crystal_mines_5"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"6"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -367,7 +367,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"5"
                                 }],
                          "rotation":0,
                          "type":"",

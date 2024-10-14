@@ -162,6 +162,12 @@
                          "height":144,
                          "id":499,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -174,6 +180,12 @@
                          "height":144,
                          "id":500,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"2"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -186,6 +198,12 @@
                          "height":80,
                          "id":506,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"ball_room"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
@@ -237,12 +255,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"crystal_mines_11"
+                                 "value":"crystal_mines_8"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -343,7 +361,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -396,7 +414,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"4"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",

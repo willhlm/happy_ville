@@ -287,24 +287,6 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":33865,
-                         "height":32,
-                         "id":520,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"interactable_item",
-                                 "type":"string",
-                                 "value":"Purple_infinity_stone"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2464,
-                         "y":816
-                        }, 
-                        {
                          "gid":33862,
                          "height":144,
                          "id":534,

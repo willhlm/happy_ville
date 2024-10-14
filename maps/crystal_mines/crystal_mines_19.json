@@ -421,7 +421,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -498,7 +498,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"4"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",

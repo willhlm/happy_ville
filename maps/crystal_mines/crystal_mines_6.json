@@ -170,7 +170,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":33863,
+                         "gid":33864,
                          "height":32,
                          "id":528,
                          "name":"",
@@ -236,7 +236,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -402,7 +402,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":33850,
+         "firstgid":33851,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

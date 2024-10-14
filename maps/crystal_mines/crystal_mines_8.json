@@ -523,8 +523,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1552,
-                         "y":912
+                         "x":1856,
+                         "y":1424
                         }, 
                         {
                          "gid":8,
@@ -624,7 +624,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",

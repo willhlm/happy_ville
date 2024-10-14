@@ -148,7 +148,7 @@
                  "objects":[
                         {
                          "gid":33847,
-                         "height":400,
+                         "height":320,
                          "id":365,
                          "name":"",
                          "properties":[
@@ -167,7 +167,7 @@
                          "visible":true,
                          "width":16,
                          "x":1456,
-                         "y":1376
+                         "y":1296
                         }, 
                         {
                          "gid":33847,
@@ -342,7 +342,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":160,
+                         "width":448,
                          "x":1312,
                          "y":1504
                         }, 
@@ -704,7 +704,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":592,
+                         "height":384,
                          "id":395,
                          "name":"",
                          "rotation":0,
@@ -712,7 +712,7 @@
                          "visible":true,
                          "width":208,
                          "x":1472,
-                         "y":1504
+                         "y":1296
                         }, 
                         {
                          "gid":8,
@@ -809,6 +809,47 @@
                          "width":208,
                          "x":1264,
                          "y":576
+                        }, 
+                        {
+                         "gid":11,
+                         "height":80,
+                         "id":406,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"crystal_mines_25"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1616,
+                         "y":1376
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":407,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"6"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1552,
+                         "y":1344
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -822,7 +863,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":33861,
+                         "gid":33862,
                          "height":144,
                          "id":389,
                          "name":"",
@@ -840,7 +881,7 @@
                          "y":208
                         }, 
                         {
-                         "gid":33860,
+                         "gid":33861,
                          "height":32,
                          "id":390,
                          "name":"",
@@ -871,7 +912,7 @@
          "y":0
         }],
  "nextlayerid":62,
- "nextobjectid":406,
+ "nextobjectid":408,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -990,7 +1031,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":33850,
+         "firstgid":33851,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
