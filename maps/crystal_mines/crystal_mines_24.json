@@ -176,8 +176,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":240,
-                         "x":1040,
+                         "width":320,
+                         "x":960,
                          "y":1024
                         }, 
                         {
@@ -188,8 +188,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":240,
-                         "x":1008,
+                         "width":288,
+                         "x":960,
                          "y":784
                         }, 
                         {
@@ -212,7 +212,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1152,
+                         "x":1024,
                          "y":864
                         }, 
                         {
@@ -290,12 +290,12 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1200,
+                         "x":1072,
                          "y":832
                         }, 
                         {
                          "gid":8,
-                         "height":16,
+                         "height":112,
                          "id":455,
                          "name":"",
                          "rotation":0,
@@ -303,7 +303,7 @@
                          "visible":true,
                          "width":720,
                          "x":1280,
-                         "y":928
+                         "y":1024
                         }, 
                         {
                          "gid":8,
@@ -462,7 +462,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":33850,
+         "firstgid":33851,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

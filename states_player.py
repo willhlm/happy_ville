@@ -345,6 +345,10 @@ class Jump_main(Player_states):
             self.entity.velocity[1] = 0.5*self.entity.velocity[1]
             self.enter_state('Fall_pre')
 
+    def handle_input(self, input):
+        if input == 'belt':
+            self.enter_state('Belt_glide_main')
+
     def swing_sword(self):
         if self.entity.flags['sword_swinging']: return
         if self.entity.dir[1] > 0.7:
@@ -412,6 +416,8 @@ class Fall_pre(Player_states):
             self.enter_state('Jump_main')
         elif input == 'Wall':
             self.enter_state('Wall_glide_main')
+        elif input == 'belt':
+            self.enter_state('Belt_glide_main')            
         elif input == 'dash':#called from dash buffer timer
             self.enter_state('Ground_dash_pre')
         elif input == 'Ground':
@@ -487,6 +493,61 @@ class Wall_glide_main(Player_states):
         self.entity.friction[1] = C.friction_player[1]
         super().enter_state(input)
 
+class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_glide has been unlocked
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.entity.friction[1] = 0.4
+
+    def update(self):
+        if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
+            self.enter_state('Fall_pre')
+            if self.entity.states['Wall_glide']:
+                self.entity.timer_jobs['ground'].activate()
+
+    def handle_press_input(self,input):
+        event = input.output()     
+        if event[-1] == 'a':
+            input.processed()  
+            if self.entity.states['Wall_glide']:
+                self.entity.velocity[0] = -self.dir[0]*10
+                self.entity.velocity[1] = -7#to get a vertical velocity                          
+                self.enter_state('Jump_main')
+            else:
+                self.entity.velocity[0] = -self.entity.dir[0]*10            
+                self.enter_state('Fall_pre')                
+        elif event[-1] == 'lb':
+            if self.entity.states['Wall_glide']:
+                input.processed()      
+                self.enter_state('Ground_dash_pre')       
+
+    def handle_movement(self, event):        
+        value = event[2]['l_stick']#the avlue of the press
+        self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
+        self.entity.dir[1] = -value[1]
+
+        curr_dir = self.entity.dir[0]
+        if abs(value[0]) > 0.1:
+            self.entity.dir[0] = sign(value[0])
+
+        if value[0] * curr_dir < 0:#change sign
+            self.entity.velocity[0] = self.entity.dir[0]*2            
+            self.enter_state('Fall_pre')
+            if self.entity.states['Wall_glide']:
+                self.entity.timer_jobs['ground'].activate()
+        elif value[0] == 0:#release
+            self.entity.velocity[0] = -self.entity.dir[0]*2
+            self.enter_state('Fall_pre')  
+            if self.entity.states['Wall_glide']:
+                self.entity.timer_jobs['ground'].activate()   
+
+    def handle_input(self,input):#when hit the ground
+        if input == 'Ground':
+            self.enter_state('Run_main')
+
+    def enter_state(self,input):#reset friction before exiting this state
+        self.entity.friction[1] = C.friction_player[1]
+        super().enter_state(input)
+
 class Air_dash_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -505,9 +566,10 @@ class Air_dash_pre(Player_states):
             self.increase_phase()
 
     def handle_input(self,input):#if hit wall
-        if input == 'Wall':
+        if input == 'Wall' or input == 'belt':
             if self.entity.acceleration[0] != 0:
-                self.enter_state('Wall_glide_main')
+                state = input.capitalize() + '_glide_main'
+                self.enter_state(state)
             else:
                 self.enter_state('Idle_main')
         elif input == 'interrupt':
@@ -607,11 +669,12 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
         self.buffer_time = C.jump_dash_wall_timer
 
     def handle_input(self,input):#if hit wall
-        if input == 'Wall':
+        if input == 'Wall' or input =='belt':
             if self.entity.collision_types['right'] and self.entity.dir[0] > 0 or self.entity.collision_types['left'] and self.entity.dir[0] < 0:
                 if self.entity.acceleration[0] != 0:
                     if self.buffer_time < 0:
-                        self.enter_state('Wall_glide_main')
+                        state = input.capitalize() + '_glide_main'
+                        self.enter_state(state)
         elif input == 'interrupt':
             self.enter_state('Idle_main')
 
@@ -638,11 +701,12 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
         self.exit_state()
 
     def handle_input(self,input):#if hit wall
-        if input == 'Wall':
+        if input == 'Wall' or input == 'belt':
             if self.entity.collision_types['right'] and self.entity.dir[0] > 0 or self.entity.collision_types['left'] and self.entity.dir[0] < 0:
                 if self.entity.acceleration[0] != 0:
                     if self.buffer_time < 0:
-                        self.enter_state('Wall_glide_main')
+                        state = input.capitalize() + '_glide_main'
+                        self.enter_state(state)
         elif input == 'interrupt':
             self.enter_state('Idle_main')
 

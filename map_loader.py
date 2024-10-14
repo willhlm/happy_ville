@@ -978,3 +978,22 @@ class Crystal_mines(Biome):
             elif id == 9:#platform
                 new_platofrm = platforms.Crystal_mines_1(self.level.game_objects, object_position)
                 self.level.game_objects.platforms.add(new_platofrm)
+
+            elif id == 10:#crystal emitter
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'dir':#for proectile
+                        pos = property['value']
+                        string_list = pos.split(",")
+                        kwarg['dir'] = [int(item) for item in string_list]
+                    elif property['name'] == 'velocity':#for proectile
+                        amp = property['value']
+                        string_list = amp.split(",")
+                        kwarg['amp'] = [int(item) for item in string_list]
+                    elif property['name'] == 'lifetime':#for proectile
+                        kwarg['lifetime'] = int(property['value'])
+                    elif property['name'] == 'frequency':#for emitter
+                        kwarg['frequency'] = int(property['value'])                         
+
+                new_emitter = entities.Crystal_source(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.interactables.add(new_emitter)                

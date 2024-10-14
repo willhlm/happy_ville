@@ -684,15 +684,15 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation: The extra gravity on ramp
 
     #pltform collisions.
-    def right_collision(self, block):
+    def right_collision(self, block, type = 'Wall'):
         self.hitbox.right = block.hitbox.left
         self.collision_types['right'] = True
-        self.currentstate.handle_input('Wall')
+        self.currentstate.handle_input(type)
 
-    def left_collision(self, block):
+    def left_collision(self, block, type = 'Wall'):
         self.hitbox.left = block.hitbox.right
         self.collision_types['left'] = True
-        self.currentstate.handle_input('Wall')
+        self.currentstate.handle_input(type)
 
     def down_collision(self, block):
         self.hitbox.bottom = block.hitbox.top
@@ -704,7 +704,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
-    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop        
         self.velocity[1] = 1.2/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
@@ -772,8 +772,8 @@ class Player(Character):
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/aila/texture/', game_objects)
         self.normal_maps = read_files.load_sprites_dict('Sprites/enteties/aila/normal/', game_objects)
         self.image = self.sprites['idle_main'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],16,35)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
         self.max_health = 100
@@ -785,12 +785,12 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = {'Idle':True,'Walk':True,'Run':True,'Pray':True,'Stand_up':True,
+        self.states = {'Idle':True, 'Walk':True, 'Run':True,'Pray':True,'Stand_up':True,
                      'Jump':True,'Fall':True,'Death':True,
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
@@ -1184,11 +1184,11 @@ class Mygga_suicide(Flying_enemy):
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
     #pltform collisions.
-    def right_collision(self, block):
+    def right_collision(self, block, type = 'Wall'):
         super().right_collision(block)
         self.currentstate.handle_input('collision')#for suicide
 
-    def left_collision(self, block):
+    def left_collision(self, block, type = 'Wall'):
         super().left_collision(block)
         self.currentstate.handle_input('collision')#for suicide
 
@@ -1244,12 +1244,12 @@ class Mygga_roaming(Flying_enemy):
         self.velocity[1] *= -1
 
     #platform collision
-    def right_collision(self, block):
+    def right_collision(self, block, type = 'Wall'):
         super().right_collision(block)
         self.velocity[0] *= -1
         self.dir[0] = -1
 
-    def left_collision(self, block):
+    def left_collision(self, block, type = 'Wall'):
         super().left_collision(block)
         self.velocity[0] *= -1
         self.dir[0] = 1
@@ -1812,10 +1812,10 @@ class Butterfly(Flying_enemy):
         self.quest.incrase_kill()
         super().dead()
 
-    def right_collision(self,block):
+    def right_collision(self,block, type = 'Wall'):
         pass
 
-    def left_collision(self,block):
+    def left_collision(self,block, type = 'Wall'):
         pass
 
     def down_collision(self,block):
@@ -2160,8 +2160,16 @@ class Projectiles(Platform_entity):#projectiels
     def collision_inetractables(self,interactable):#collusion interactables
         pass
 
-    def countered(self,dir, pos):#called from sword collsion with purple infinity stone equipped
-        pass
+    def reflect(self, dir, pos, clamp_value = 10):#projectile collision when purple infinity stone is equipped: pos, dir are aila sword 
+        dy = max(-clamp_value, min(clamp_value, self.rect.centery - pos[1]))
+        dx = max(-clamp_value, min(clamp_value, self.rect.centerx - pos[0]))
+
+        if dir[1] != 0:#up or down
+            self.velocity[0] = dx * 0.2
+            self.velocity[1] = -10 * dir[1]            
+        else:#right or left
+            self.velocity[0] = 10 * dir[0]
+            self.velocity[1] = dy * 0.2     
 
     def take_dmg(self, dmg):
         pass
@@ -2173,10 +2181,10 @@ class Projectiles(Platform_entity):#projectiels
     def ramp_down_collision(self, position):#called from collusion in clollision_ramp
         pass
 
-    def right_collision(self, block):
+    def right_collision(self, block, type = 'Wall'):
         self.collision_platform(block)
 
-    def left_collision(self, block):
+    def left_collision(self, block, type = 'Wall'):
         self.collision_platform(block)
 
     def down_collision(self, block):
@@ -2215,23 +2223,23 @@ class Bouncy_balls(Projectiles):#for ball challange room
         super().kill()
         self.game_objects.lights.remove_light(self.light)
 
-    def aila_sword(self):#when hit by aila sword without purple stone
+    def take_dmg(self):#when hit by aila sword without purple stone
         self.velocity = [0,0]
         self.dmg = 0
         self.currentstate.handle_input('Death')
         if self.quest: self.quest.increase_kill()
 
     #platform collisions
-    def right_collision(self, block):
+    def right_collision(self, block, type = 'Wall'):
         self.hitbox.right = block.hitbox.left
         self.collision_types['right'] = True
-        self.currentstate.handle_input('Wall')
+        self.currentstate.handle_input(type)
         self.velocity[0] = -self.velocity[0]
 
-    def left_collision(self,hitbox):
+    def left_collision(self,hitbox, type = 'Wall'):
         self.hitbox.left = block.hitbox.right
         self.collision_types['left'] = True
-        self.currentstate.handle_input('Wall')
+        self.currentstate.handle_input(type)
         self.velocity[0] = -self.velocity[0]
 
     def top_collision(self,hitbox):
@@ -2309,9 +2317,9 @@ class Projectile_1(Projectiles):
         self.dmg = 1
         self.lifetime = kwarg.get('lifetime', 200)
         self.dir = kwarg.get('dir', [1, 0])
-        amp = kwarg.get('amp', [5, 0])
+        amp = kwarg.get('amp', [5, 5])
         self.velocity = [-amp[0] * self.dir[0], amp[1] * self.dir[1]]
-
+        
     def pool(game_objects):
         Projectile_1.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
@@ -2323,14 +2331,7 @@ class Projectile_1(Projectiles):
         self.collision_platform(None)
 
     def ramp_down_collision(self, position):#called from collusion in clollision_ramp
-        self.collision_platform(None)
-
-    def countered(self, dir, pos):#called from sword collsion with purple infinity stone
-        dy = self.rect.centery - pos[1]
-        dx = self.rect.centerx - pos[0]
-
-        self.velocity[0] = 300/dx
-        self.velocity[1] = 0
+        self.collision_platform(None)        
 
 class Falling_rock(Projectiles):#things that can be placed in cave, the source makes this and can hurt player
     def __init__(self, pos, game_objects):
@@ -2422,7 +2423,7 @@ class Melee(Projectiles):
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
         
-    def countered(self,dir,pos):#called from sword collision_projectile, purple initinty stone
+    def reflect(self, dir, pos):#called from sword collision_projectile, purple initinty stone
         return
         self.entity.countered()
         self.kill()
@@ -2536,7 +2537,7 @@ class Aila_sword(Sword):
         self.currentstate = states_sword.Slash_1(self)
 
         self.tungsten_cost = 1#the cost to level up to next level
-        self.stones = {'red': Red_infinity_stone([0,0], entity.game_objects, entity = self), 'green': Green_infinity_stone([0,0], entity.game_objects, entity = self), 'blue': Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange': Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple': Purple_infinity_stone([0,0], entity.game_objects, entity = self)}#gets filled in when pick up stone. used also for inventory
+        self.stones = {}#{'red': Red_infinity_stone([0,0], entity.game_objects, entity = self), 'green': Green_infinity_stone([0,0], entity.game_objects, entity = self), 'blue': Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange': Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple': Purple_infinity_stone([0,0], entity.game_objects, entity = self)}#gets filled in when pick up stone. used also for inventory
         self.swing = 0#a flag to check which swing we are at (0 or 1)
         self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#stones can change these to do specific things
 
@@ -2800,12 +2801,12 @@ class Loot(Platform_entity):#
         self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
         self.bounce_coefficient *= self.bounce_coefficient
 
-    def right_collision(self,block):
-        super().right_collision(block)
+    def right_collision(self,block, type = 'Wall'):
+        super().right_collision(block, type)
         self.velocity[0] = -self.velocity[0]
 
-    def left_collision(self,block):
-        super().left_collision(block)
+    def left_collision(self,block, type = 'Wall'):
+        super().left_collision(block, type)
         self.velocity[0] = -self.velocity[0]
 
     def limit_y(self):
@@ -3199,7 +3200,7 @@ class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
         super().pool(game_objects)  
 
     def attach(self, player):
-        player.stone_states['slash'].enter_state('Slash')              
+        player.sword.stone_states['slash'].enter_state('Slash', 'slash')              
 
 class Blue_infinity_stone(Infinity_stones):#get spirit at collision
     def __init__(self, pos, game_objects, **kwarg):
@@ -3217,7 +3218,7 @@ class Blue_infinity_stone(Infinity_stones):#get spirit at collision
         super().pool(game_objects)
 
     def attach(self, player):
-        player.stone_states['enemy_collision'].enter_state('Enemy_collision')
+        player.sword.stone_states['enemy_collision'].enter_state('Enemy_collision', 'enemy_collision')
 
 class Orange_infinity_stone(Infinity_stones):#bigger hitbox
     def __init__(self, pos, game_objects, **kwarg):
@@ -3254,7 +3255,7 @@ class Purple_infinity_stone(Infinity_stones):#reflect projectile -> crystal cave
         super().pool(game_objects)
 
     def attach(self, player):
-        player.stone_states['projectile_collision'].enter_state('Projectile_collision')
+        player.sword.stone_states['projectile_collision'].enter_state('Projectile_collision', 'projectile_collision')
 
 #cosmetics
 class Blood(Animatedentity):
@@ -3560,12 +3561,34 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
 
     def update(self):
         super().update()
-        self.time += 1
+        self.time += self.game_objects.game.dt
         if self.time > 100:
             bubble = self.bubble(self.rect.midtop, self.game_objects, **self.prop)
             self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
-            self.time =0
+            self.time = 0
+
+class Crystal_source(Interactable):#the thng that spits out crystals in crystal mines
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/crystal_source/', game_objects)        
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.time = 0
+        self.frequency = kwarg.get('frequency', 15)
+        self.kwarg = kwarg
+
+    def group_distance(self):
+        pass
+
+    def update(self):
+        super().update()
+        self.time += self.game_objects.game.dt
+        if self.time > self.frequency:
+            crystal = Projectile_1(self.rect.center, self.game_objects, **self.kwarg)
+            self.game_objects.eprojectiles.add(crystal)
+            self.time = 0
 
 class Challenges(Interactable):#monuments you interact to get quests or challenges
     def __init__(self, pos, game_objects):

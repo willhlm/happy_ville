@@ -102,6 +102,7 @@ class Game_Objects():
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
+        self.dynamic_platforms.empty()
         self.loot.empty()
         self.platforms_ramps.empty()
         self.entity_pause.empty()

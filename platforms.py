@@ -382,10 +382,10 @@ class Conveyor_belt(Collision_texture):
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self)
+            entity.right_collision(self, 'belt')
             entity.velocity[1] += self.game_objects.game.dt * self.direction[1]
         else:#going to the leftx
-            entity.left_collision(self)
+            entity.left_collision(self, 'belt')
             entity.velocity[1] += self.game_objects.game.dt * -self.direction[1]
         entity.update_rect_x()
  
