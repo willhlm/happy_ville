@@ -625,7 +625,7 @@ class Ground_dash_pre(Air_dash_pre):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)   
         self.time = C.jump_dash_timer
-        self.wall_dir = kwarg.get('wall_dir', False)        
+        dir = kwarg.get('wall_dir', False)        
         if dir:
             self.dir[0] = -dir[0]
 

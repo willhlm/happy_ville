@@ -493,10 +493,24 @@ class Gameplay(Game_State):
             value['l_stick'][1] = -1        
         if keys[pygame.K_DOWN]:#left
             value['l_stick'][1] = 1    
+        
+        for joystick in self.game.game_objects.controller.joysticks:# Controller input handling            
+            axis_x = joystick.get_axis(0)  # Left stick X axis
+            axis_y = joystick.get_axis(1)  # Left stick Y axis
+
+            if abs(axis_x) > 0.1:
+                value['l_stick'][0] = axis_x
+            if abs(axis_y) > 0.1:
+                value['l_stick'][1] = axis_y  
+            elif abs(axis_y) > 0.98:#if poiting up or down, set x to 0
+                value['l_stick'][0] = 0
+
         self.game.game_objects.player.currentstate.handle_movement(value)#move around                    
 
     def handle_events(self, input):
         event = input.output()
+
+
         if event[0]:#press or analogue stick
             if event[-1]=='start':#escape button
                 input.processed()
