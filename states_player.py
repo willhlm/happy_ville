@@ -10,7 +10,7 @@ class Player_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def enter_state(self,newstate, **kwarg):
+    def enter_state(self, newstate, **kwarg):
         state = newstate[:newstate.rfind('_')]#get the name up to last _ (remove pre, main, post)
         if self.entity.states[state]:
             self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
@@ -22,8 +22,8 @@ class Player_states(Entity_States):
     def handle_release_input(self,input):#all states should inehrent this function, if it should be able to jump
         pass
 
-    def handle_movement(self, event):#all states should inehrent this function
-        value = event[2]['l_stick']#the avlue of the press
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
+        value = event['l_stick']#the avlue of the press
 
         self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
@@ -67,8 +67,8 @@ class Idle_main(Player_states):
         elif input == 'dash':#called from dash buffer timer
             self.enter_state('Ground_dash_pre')            
 
-    def handle_movement(self,input):
-        super().handle_movement(input)
+    def handle_movement(self,event):
+        super().handle_movement(event)
         if self.entity.acceleration[0] != 0:
             self.enter_state('Run_pre')
 
@@ -122,8 +122,8 @@ class Walk_main(Player_states):
         elif input == 'dash':#called from dash buffer timer
             self.enter_state('Ground_dash_pre')                 
 
-    def handle_movement(self,input):
-        super().handle_movement(input)
+    def handle_movement(self,event):
+        super().handle_movement(event)
         if self.entity.acceleration[0] == 0:
             self.enter_state('Idle_main')
 
@@ -180,8 +180,8 @@ class Run_pre(Player_states):
         elif input == 'dash':#called from dash buffer timer
             self.enter_state('Ground_dash_pre')                  
 
-    def handle_movement(self,input):
-        super().handle_movement(input)
+    def handle_movement(self,event):
+        super().handle_movement(event)
         if self.entity.acceleration[0]==0:
             self.enter_state('Run_post')
 
@@ -246,8 +246,8 @@ class Run_main(Player_states):
         elif input == 'dash':#called from dash buffer timer
             self.enter_state('Ground_dash_pre')                   
 
-    def handle_movement(self,input):
-        super().handle_movement(input)
+    def handle_movement(self,event):
+        super().handle_movement(event)
         if self.entity.acceleration[0]==0:
             self.enter_state('Run_post')
 
@@ -290,8 +290,8 @@ class Run_post(Player_states):
         elif input == 'dash':#called from dash buffer timer
             self.enter_state('Ground_dash_pre')              
 
-    def handle_movement(self,input):
-        super().handle_movement(input)
+    def handle_movement(self,event):
+        super().handle_movement(event)
         if self.entity.acceleration[0] != 0:
             self.enter_state('Run_pre')
 
@@ -309,13 +309,14 @@ class Run_post(Player_states):
         self.enter_state('Idle_main')
 
 class Jump_main(Player_states):
-    def __init__(self,entity, **kwarg):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.velocity[1] = C.jump_vel_player
         self.air_timer = C.air_timer 
         self.entity.flags['ground'] = False
+        self.wall_dir = kwarg.get('wall_dir', False)
 
     def update(self):
         self.jump_dash_timer -= self.entity.game_objects.game.dt
@@ -329,8 +330,12 @@ class Jump_main(Player_states):
         event = input.output()
         if event[-1]=='lb':
             input.processed()
-            if self.jump_dash_timer > 0: self.enter_state('Dash_jump_main')
-            else: self.enter_state('Air_dash_pre')               
+            if self.jump_dash_timer > 0: 
+                if self.wall_dir:
+                    self.entity.dir[0] = -self.wall_dir[0]#if the jmup came from wall glide, jump away
+                self.enter_state('Dash_jump_main')
+            else: 
+                self.enter_state('Air_dash_pre')               
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
@@ -389,22 +394,23 @@ class Double_jump_main(Double_jump_pre):
         pass
 
 class Fall_pre(Player_states):
-    def __init__(self, entity):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
+        self.wall_dir = kwarg.get('wall_dir', False)
 
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
             if self.entity.flags['ground']:
                 input.processed()
-                self.enter_state('Jump_main')        
+                self.enter_state('Jump_main', wall_dir = self.wall_dir)        
         elif event[-1]=='b':
             input.processed()
             self.do_ability()
         elif event[-1]=='lb':
             if self.entity.flags['ground']:
                 input.processed()
-                self.enter_state('Ground_dash_pre')                
+                self.enter_state('Ground_dash_pre', wall_dir = self.wall_dir)                
             elif self.enter_state('Air_dash_pre'):
                 input.processed()
         elif event[-1]=='x':
@@ -450,25 +456,31 @@ class Wall_glide_main(Player_states):
     def __init__(self, entity):
         super().__init__(entity)
         self.entity.friction[1] = 0.4
+        if self.entity.collision_types['right']:
+            self.dir = [1,0]
+        else:
+            self.dir = [-1,0]
 
     def update(self):
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
-            self.enter_state('Fall_pre')
+            self.enter_state('Fall_pre', wall_dir = self.dir)
             self.entity.timer_jobs['ground'].activate()
 
     def handle_press_input(self,input):
         event = input.output()        
         if event[-1] == 'a':
+            #self.entity.dir[0] *= -1#if we want to jump vertically
             self.entity.velocity[0] = -self.dir[0]*10
             self.entity.velocity[1] = -7#to get a vertical velocity
             input.processed()            
-            self.enter_state('Jump_main')
+            self.enter_state('Jump_main', wall_dir = self.dir)
         elif event[-1] == 'lb':
-            input.processed()      
+            input.processed()    
+            self.entity.dir[0] *= -1  
             self.enter_state('Ground_dash_pre')       
 
     def handle_movement(self, event):        
-        value = event[2]['l_stick']#the avlue of the press
+        value = event['l_stick']#the avlue of the press
         self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
 
@@ -478,20 +490,20 @@ class Wall_glide_main(Player_states):
 
         if value[0] * curr_dir < 0:#change sign
             self.entity.velocity[0] = self.entity.dir[0]*2            
-            self.enter_state('Fall_pre')
+            self.enter_state('Fall_pre', wall_dir = self.dir)
             self.entity.timer_jobs['ground'].activate()
         elif value[0] == 0:#release
             self.entity.velocity[0] = -self.entity.dir[0]*2
-            self.enter_state('Fall_pre')  
+            self.enter_state('Fall_pre', wall_dir = self.dir)  
             self.entity.timer_jobs['ground'].activate()   
 
     def handle_input(self,input):#when hit the ground
         if input == 'Ground':
             self.enter_state('Run_main')
 
-    def enter_state(self,input):#reset friction before exiting this state
+    def enter_state(self, input, **kwarg):#reset friction before exiting this state
         self.entity.friction[1] = C.friction_player[1]
-        super().enter_state(input)
+        super().enter_state(input, **kwarg)
 
 class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity):
@@ -517,11 +529,12 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
                 self.enter_state('Fall_pre')                
         elif event[-1] == 'lb':
             if self.entity.states['Wall_glide']:
+                self.entity.dir[0] *= -1  
                 input.processed()      
                 self.enter_state('Ground_dash_pre')       
 
     def handle_movement(self, event):        
-        value = event[2]['l_stick']#the avlue of the press
+        value = event['l_stick']#the avlue of the press
         self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
 
@@ -549,10 +562,13 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
         super().enter_state(input)
 
 class Air_dash_pre(Player_states):
-    def __init__(self,entity):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
         self.dash_length = C.dash_length
+
+    def handle_movement(self, event):#all dash states should omit setting entity.dir
+        pass
 
     def update(self):
         self.entity.velocity[1] = 0
@@ -579,7 +595,7 @@ class Air_dash_pre(Player_states):
         self.enter_state('Air_dash_main')
 
 class Air_dash_main(Air_dash_pre):#level one dash: normal
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
@@ -606,9 +622,12 @@ class Air_dash_post(Air_dash_pre):
             self.enter_state('Run_main')
 
 class Ground_dash_pre(Air_dash_pre):
-    def __init__(self,entity):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)   
         self.time = C.jump_dash_timer
+        self.wall_dir = kwarg.get('wall_dir', False)        
+        if dir:
+            self.dir[0] = -dir[0]
 
     def update(self):
         super().update()
@@ -667,6 +686,9 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.jump_vel_player
         self.buffer_time = C.jump_dash_wall_timer
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
+        pass
 
     def handle_input(self,input):#if hit wall
         if input == 'Wall' or input =='belt':
@@ -734,7 +756,7 @@ class Death_pre(Player_states):
     def update(self):
         self.entity.invincibile = True
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):
@@ -755,7 +777,7 @@ class Death_charge(Player_states):
             self.entity.dead()
             self.enter_state('Death_post')
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def handle_input(self,input):
@@ -769,7 +791,7 @@ class Death_main(Player_states):
     def update(self):
         self.entity.invincibile = True
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):
@@ -783,7 +805,7 @@ class Death_post(Player_states):
     def update(self):
         self.entity.invincibile = True
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):
@@ -793,14 +815,14 @@ class Invisible_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
 class Stand_up_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):
@@ -816,7 +838,7 @@ class Pray_pre(Player_states):
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
         self.entity.acceleration[0] = 0
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):
@@ -832,7 +854,7 @@ class Pray_main(Player_states):
         super().__init__(entity)
         self.special = False
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def handle_input(self,input):#called from either when the ability scnreen is exited (special), or when the saving point/runestone animation is finshed
@@ -848,7 +870,7 @@ class Pray_post(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):
@@ -873,7 +895,7 @@ class Spawn_main(Player_states):#enters when aila respawn after death
         super().__init__(entity)
         self.entity.invincibile = False
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):#when animation finishes
@@ -1000,7 +1022,7 @@ class Plant_bone_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):
@@ -1021,7 +1043,7 @@ class Thunder_pre(Abillitites):
         self.entity.thunder_aura = entities.Thunder_aura(self.entity.rect.center,self.entity.game_objects)
         self.entity.game_objects.cosmetics.add(self.entity.thunder_aura)
 
-    def handle_movement(self,input):
+    def handle_movement(self,event):
         pass
 
     def handle_release_input(self,input):

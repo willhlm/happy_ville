@@ -18,7 +18,7 @@ class Shader_states():
         pass
 
 class Idle(Shader_states):
-    def __init__(self,entity):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['idle']
  

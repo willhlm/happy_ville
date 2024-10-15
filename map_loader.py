@@ -534,6 +534,10 @@ class Level():
                 gate = platforms.Gate_2(object_position,self.game_objects, **kwarg)
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
+            
+            elif id == 16:#air dash statue               
+                statue = entities.Air_dash_statue(object_position, self.game_objects)
+                self.game_objects.interactables.add(statue)                
 
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects
@@ -696,6 +700,12 @@ class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
 
+    def room(self, room):#called wgen a new room is loaded
+        return
+        if room in ['11', '8', '7', '6', '5']:
+            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
+
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
@@ -751,24 +761,7 @@ class Light_forest(Biome):
                 new_stone_wood = entities.Stone_wood(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_stone_wood)
 
-class Light_forest_semi_cave(Biome):
-    def __init__(self, level):
-        super().__init__(level)
-
-    def room(self, room):#called wgen a new room is loaded
-        if room in ['11', '8', '7', '6', '5']:
-            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
-            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
-
-    def load_objects(self, data, parallax, offset):
-        for obj in data['objects']:
-            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
-            object_size = [int(obj['width']),int(obj['height'])]
-            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.level.map_data['objects_firstgid']
-
-            if id == 5:#cocoon
+            elif id == 7:#cocoon
                 if parallax == [1,1]:#if BG1 layer
                     new_cocoon = entities.Cocoon(object_position, self.level.game_objects)
                     self.level.game_objects.interactables.add(new_cocoon)

@@ -790,7 +790,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
@@ -800,7 +800,7 @@ class Player(Character):
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
-        self.flags = {'ground': True, 'sword_swinging': False}# a flag to check if on graon (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': True, 'sword_swinging': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
         self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'wet':Wet_timer(self, 60),
                         'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
@@ -3651,6 +3651,33 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
     def buisness(self):#enters after conversation
         item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, quest = self.quest)#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)
+
+class Air_dash_statue(Interactable):#interact with it to get air dash
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/statues/air_dash_statue/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = self.rect.copy()
+
+        self.interacted = self.game_objects.player.states.get('Air_dash', False)
+
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self, colour = [0,0,0,100])
+        self.text = 'dash in air'
+
+    def draw(self, target):
+        self.shader_state.draw()
+        super().draw(target)
+
+    def interact(self):#when player press t/y
+        if self.interacted: return
+        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        self.game_objects.player.states['Air_dash'] = True#give ability
+        self.shader_state.handle_input('tint', colour = [0,0,0,100])
+        self.interacted = True        
+
+        new_game_state = states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['air_dash_main'][0], self.text)
+        new_game_state.enter_state()
 
 class Safe_spawn(Interactable):#area which gives the coordinates which will make aila respawn at after falling into a hole
     def __init__(self, pos, game_objects, size, position):
