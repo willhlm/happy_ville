@@ -418,14 +418,10 @@ class Fall_pre(Player_states):
             self.swing_sword()     
 
     def handle_input(self,input):
-        if input == 'jump':#caööed from jump buffer timer
-            self.enter_state('Jump_main')
-        elif input == 'Wall':
+        if input == 'Wall':
             self.enter_state('Wall_glide_main')
         elif input == 'belt':
             self.enter_state('Belt_glide_main')            
-        elif input == 'dash':#called from dash buffer timer
-            self.enter_state('Ground_dash_pre')
         elif input == 'Ground':
             if self.entity.acceleration[0] != 0:
                 self.enter_state('Run_main')
@@ -492,7 +488,7 @@ class Wall_glide_main(Player_states):
             self.entity.velocity[0] = self.entity.dir[0]*2            
             self.enter_state('Fall_pre', wall_dir = self.dir)
             self.entity.timer_jobs['ground'].activate()
-        elif value[0] == 0:#release
+        elif abs(value[0]) == 0:#release
             self.entity.velocity[0] = -self.entity.dir[0]*2
             self.enter_state('Fall_pre', wall_dir = self.dir)  
             self.entity.timer_jobs['ground'].activate()   
@@ -625,9 +621,10 @@ class Ground_dash_pre(Air_dash_pre):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)   
         self.time = C.jump_dash_timer
-        dir = kwarg.get('wall_dir', False)        
-        if dir:
-            self.dir[0] = -dir[0]
+        wall_dir = kwarg.get('wall_dir', False)   
+        if wall_dir:
+            self.entity.dir[0] = -wall_dir[0]
+            self.dir[0] = -wall_dir[0]
 
     def update(self):
         super().update()
