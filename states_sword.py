@@ -22,6 +22,9 @@ class Basic_states():#states for aila sword
     def update(self):#called every frame
         pass
 
+    def update_rect(self):
+        pass
+
 class Slash_1(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -68,8 +71,8 @@ class Stone_states():
     def __init__(self, entity):
         self.entity = entity    
 
-    def enter_state(self,newstate,**kwarg):
-        self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
+    def enter_state(self, newstate, key, **kwarg):
+        self.entity.stone_states[key] = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
 
     def projectile_collision(self, eprojectile):#called when projectile collision
         eprojectile.take_dmg(self.entity.dmg)
@@ -92,7 +95,7 @@ class Projectile_collision(Stone_states):#pirpöle stone ca nset this state
         super().__init__(entity)
 
     def projectile_collision(self, eprojecitile):
-        eprojectile.countered(self.entity.dir, self.entity.rect.center)
+        eprojecitile.reflect(self.entity.dir, self.entity.hitbox.center)
         self.entity.sword_jump()        
 
 class Slash(Stone_states):#green stone can set this

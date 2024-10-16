@@ -752,7 +752,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_semi_cave_3"
+                                 "value":"light_forest_19"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -983,7 +983,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_semi_cave_11"
+                                 "value":"light_forest_24"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1315,7 +1315,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":37189,
+         "firstgid":37195,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

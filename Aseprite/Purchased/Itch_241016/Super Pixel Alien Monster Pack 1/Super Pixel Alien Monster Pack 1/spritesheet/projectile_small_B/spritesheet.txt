@@ -1,0 +1,4 @@
+projectile_small_B/frame0000.png = 0 0 8 8
+projectile_small_B/frame0001.png = 8 0 8 8
+projectile_small_B/frame0002.png = 16 0 8 8
+projectile_small_B/frame0003.png = 24 0 8 8

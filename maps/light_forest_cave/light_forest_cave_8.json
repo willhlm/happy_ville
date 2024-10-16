@@ -217,19 +217,7 @@
                  "draworder":"topdown",
                  "id":21,
                  "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":43300,
-                         "height":137,
-                         "id":1899,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":160,
-                         "x":3104,
-                         "y":960
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -274,7 +262,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_3"
+                                 "value":"light_forest_19"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -323,24 +311,6 @@
                          "width":16,
                          "x":4592,
                          "y":1392
-                        }, 
-                        {
-                         "gid":8207,
-                         "height":96,
-                         "id":1847,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"left"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3040,
-                         "y":960
                         }, 
                         {
                          "height":0,
@@ -1269,16 +1239,63 @@
                          "y":1152
                         }, 
                         {
-                         "gid":8200,
+                         "gid":8203,
                          "height":96,
-                         "id":1900,
+                         "id":1901,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"light_forest_24"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"3"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3024,
+                         "x":3136,
                          "y":960
+                        }, 
+                        {
+                         "gid":8193,
+                         "height":16,
+                         "id":1902,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"3"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3216,
+                         "y":912
+                        }, 
+                        {
+                         "gid":8207,
+                         "height":384,
+                         "id":1903,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"left"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3120,
+                         "y":1248
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1294,7 +1311,7 @@
          "y":0
         }],
  "nextlayerid":39,
- "nextobjectid":1901,
+ "nextobjectid":1904,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

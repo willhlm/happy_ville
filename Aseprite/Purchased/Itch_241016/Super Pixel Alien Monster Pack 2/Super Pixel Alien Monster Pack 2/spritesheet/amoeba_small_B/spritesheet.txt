@@ -1,0 +1,15 @@
+amoeba_small_B/idle/frame0000.png = 0 0 32 24
+amoeba_small_B/idle/frame0001.png = 32 0 32 24
+amoeba_small_B/idle/frame0002.png = 64 0 32 24
+amoeba_small_B/idle/frame0003.png = 96 0 32 24
+amoeba_small_B/idle/frame0004.png = 128 0 32 24
+amoeba_small_B/idle/frame0005.png = 160 0 32 24
+amoeba_small_B/idle/frame0006.png = 192 0 32 24
+amoeba_small_B/idle/frame0007.png = 224 0 32 24
+amoeba_small_B/move/frame0000.png = 0 24 32 24
+amoeba_small_B/move/frame0001.png = 32 24 32 24
+amoeba_small_B/move/frame0002.png = 64 24 32 24
+amoeba_small_B/move/frame0003.png = 96 24 32 24
+amoeba_small_B/move/frame0004.png = 128 24 32 24
+amoeba_small_B/move/frame0005.png = 160 24 32 24
+amoeba_small_B/move/frame0006.png = 192 24 32 24

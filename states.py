@@ -116,8 +116,9 @@ class Title_Menu(Game_State):
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            self.game.game_objects.load_map(self,'crystal_mines_7','1')
-            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
+            #self.game.game_objects.load_map(self,'crystal_mines_18','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()
@@ -464,6 +465,7 @@ class Gameplay(Game_State):
         super().__init__(game)
 
     def update(self):
+        self.handle_movement()
         self.game.game_objects.update()
         self.game.game_objects.collide_all()
         self.game.game_objects.UI['gameplay'].update()
@@ -481,12 +483,12 @@ class Gameplay(Game_State):
         self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-40,20),shader = self.game.game_objects.shaders['colour'])#shader render
         image.release()
 
+    def handle_movement(self):#every frame
+        value = self.game.game_objects.controller.continious_input_checks()
+        self.game.game_objects.player.currentstate.handle_movement(value)#move around
+
     def handle_events(self, input):
         event = input.output()
-        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys
-            input.processed()
-            self.game.game_objects.player.currentstate.handle_movement(event)#move around
-
         if event[0]:#press or analogue stick
             if event[-1]=='start':#escape button
                 input.processed()
@@ -986,7 +988,7 @@ class Cutscenes(Gameplay):
     def handle_events(self, input):
         self.current_scene.handle_events(input)
 
-class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item
+class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
     def __init__(self, game, img, text = ''):
         super().__init__(game)
         self.page = 0

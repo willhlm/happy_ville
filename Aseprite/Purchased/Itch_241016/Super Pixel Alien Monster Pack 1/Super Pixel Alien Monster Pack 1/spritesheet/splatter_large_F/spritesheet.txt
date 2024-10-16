@@ -1,0 +1,7 @@
+splatter_large_F/frame0000.png = 0 0 64 64
+splatter_large_F/frame0001.png = 64 0 64 64
+splatter_large_F/frame0002.png = 128 0 64 64
+splatter_large_F/frame0003.png = 192 0 64 64
+splatter_large_F/frame0004.png = 256 0 64 64
+splatter_large_F/frame0005.png = 320 0 64 64
+splatter_large_F/frame0006.png = 384 0 64 64

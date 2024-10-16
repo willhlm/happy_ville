@@ -435,7 +435,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"crystal_mines_25"
+                                 "value":"crystal_mines_5"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -615,6 +615,42 @@
                          "width":144,
                          "x":2192,
                          "y":1024
+                        }, 
+                        {
+                         "gid":14,
+                         "height":96,
+                         "id":392,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":2064,
+                         "y":784
+                        }, 
+                        {
+                         "gid":14,
+                         "height":80,
+                         "id":393,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1152,
+                         "y":1312
+                        }, 
+                        {
+                         "gid":14,
+                         "height":96,
+                         "id":394,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1632,
+                         "y":528
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -628,7 +664,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":33854,
+                         "gid":33855,
                          "height":137,
                          "id":386,
                          "name":"",
@@ -653,7 +689,7 @@
          "y":0
         }],
  "nextlayerid":62,
- "nextobjectid":392,
+ "nextobjectid":395,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -772,7 +808,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":33850,
+         "firstgid":33851,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

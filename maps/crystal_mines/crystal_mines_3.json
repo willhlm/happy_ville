@@ -147,7 +147,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":33854,
+                         "gid":33855,
                          "height":137,
                          "id":381,
                          "name":"",
@@ -373,8 +373,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1536,
-                         "y":992
+                         "x":992,
+                         "y":752
                         }, 
                         {
                          "gid":8,
@@ -642,7 +642,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"crystal_mines_7"
+                                 "value":"crystal_mines_9"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -793,6 +793,30 @@
                          "width":192,
                          "x":2128,
                          "y":1040
+                        }, 
+                        {
+                         "gid":14,
+                         "height":96,
+                         "id":382,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":1504,
+                         "y":1056
+                        }, 
+                        {
+                         "gid":14,
+                         "height":96,
+                         "id":383,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":2688,
+                         "y":1040
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -808,7 +832,7 @@
          "y":0
         }],
  "nextlayerid":62,
- "nextobjectid":382,
+ "nextobjectid":384,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -927,7 +951,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":33850,
+         "firstgid":33851,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

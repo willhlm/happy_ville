@@ -155,20 +155,8 @@
                          "type":"",
                          "visible":true,
                          "width":112,
-                         "x":2224,
+                         "x":2208,
                          "y":944
-                        }, 
-                        {
-                         "gid":33849,
-                         "height":64,
-                         "id":507,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":112,
-                         "x":1120,
-                         "y":896
                         }, 
                         {
                          "gid":33849,
@@ -179,8 +167,8 @@
                          "type":"",
                          "visible":true,
                          "width":112,
-                         "x":1520,
-                         "y":864
+                         "x":1600,
+                         "y":880
                         }, 
                         {
                          "gid":33849,
@@ -191,8 +179,101 @@
                          "type":"",
                          "visible":true,
                          "width":112,
-                         "x":1936,
+                         "x":1984,
+                         "y":944
+                        }, 
+                        {
+                         "gid":33850,
+                         "height":32,
+                         "id":516,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"dir",
+                                 "type":"string",
+                                 "value":"1,0"
+                                }, 
+                                {
+                                 "name":"frequency",
+                                 "type":"string",
+                                 "value":"100"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2384,
                          "y":880
+                        }, 
+                        {
+                         "gid":33849,
+                         "height":64,
+                         "id":521,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":2096,
+                         "y":848
+                        }, 
+                        {
+                         "gid":33850,
+                         "height":32,
+                         "id":524,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"dir",
+                                 "type":"string",
+                                 "value":"1,0"
+                                }, 
+                                {
+                                 "name":"frequency",
+                                 "type":"string",
+                                 "value":"25"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1808,
+                         "y":880
+                        }, 
+                        {
+                         "gid":33864,
+                         "height":32,
+                         "id":527,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1024,
+                         "y":560
+                        }, 
+                        {
+                         "gid":33850,
+                         "height":32,
+                         "id":530,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"dir",
+                                 "type":"string",
+                                 "value":"0,-1"
+                                }, 
+                                {
+                                 "name":"frequency",
+                                 "type":"string",
+                                 "value":"100"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":800,
+                         "y":864
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -204,7 +285,43 @@
                  "draworder":"topdown",
                  "id":61,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":33862,
+                         "height":144,
+                         "id":534,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1232,
+                         "y":592
+                        }, 
+                        {
+                         "gid":33861,
+                         "height":32,
+                         "id":535,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1136,
+                         "y":592
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -249,12 +366,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"crystal_mines_9"
+                                 "value":"crystal_mines_11"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -262,18 +379,6 @@
                          "width":16,
                          "x":2672,
                          "y":896
-                        }, 
-                        {
-                         "gid":13,
-                         "height":16,
-                         "id":480,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":496,
-                         "x":1904,
-                         "y":976
                         }, 
                         {
                          "gid":8,
@@ -313,7 +418,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":208,
+                         "height":336,
                          "id":492,
                          "name":"",
                          "rotation":0,
@@ -343,8 +448,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":160,
-                         "x":864,
+                         "width":192,
+                         "x":832,
                          "y":1040
                         }, 
                         {
@@ -361,15 +466,15 @@
                         }, 
                         {
                          "gid":8,
-                         "height":64,
+                         "height":96,
                          "id":497,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":256,
-                         "x":688,
-                         "y":832
+                         "width":224,
+                         "x":576,
+                         "y":864
                         }, 
                         {
                          "gid":8,
@@ -379,33 +484,21 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1888,
-                         "x":752,
+                         "width":2080,
+                         "x":560,
                          "y":512
                         }, 
                         {
                          "gid":8,
-                         "height":48,
-                         "id":500,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":80,
-                         "x":2560,
-                         "y":704
-                        }, 
-                        {
-                         "gid":8,
-                         "height":224,
+                         "height":256,
                          "id":501,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":160,
-                         "x":592,
-                         "y":672
+                         "x":560,
+                         "y":768
                         }, 
                         {
                          "gid":1,
@@ -426,47 +519,6 @@
                          "y":864
                         }, 
                         {
-                         "gid":1,
-                         "height":16,
-                         "id":508,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"2"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":848,
-                         "y":704
-                        }, 
-                        {
-                         "gid":11,
-                         "height":96,
-                         "id":509,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"crystal_mines_8"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"3"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":720,
-                         "y":768
-                        }, 
-                        {
                          "gid":8,
                          "height":16,
                          "id":513,
@@ -477,6 +529,126 @@
                          "width":688,
                          "x":1088,
                          "y":976
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":514,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":1616,
+                         "x":944,
+                         "y":624
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":515,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":112,
+                         "x":2528,
+                         "y":720
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":522,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":128,
+                         "x":1904,
+                         "y":832
+                        }, 
+                        {
+                         "gid":13,
+                         "height":16,
+                         "id":523,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":496,
+                         "x":1904,
+                         "y":976
+                        }, 
+                        {
+                         "gid":14,
+                         "height":128,
+                         "id":525,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":1856,
+                         "y":800
+                        }, 
+                        {
+                         "gid":14,
+                         "height":128,
+                         "id":526,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":128,
+                         "x":2416,
+                         "y":848
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":529,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":832,
+                         "x":864,
+                         "y":704
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":531,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":160,
+                         "x":864,
+                         "y":832
+                        }, 
+                        {
+                         "gid":8,
+                         "height":32,
+                         "id":532,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":256,
+                         "x":576,
+                         "y":896
+                        }, 
+                        {
+                         "gid":8,
+                         "height":48,
+                         "id":533,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":1040,
+                         "x":912,
+                         "y":672
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -492,7 +664,7 @@
          "y":0
         }],
  "nextlayerid":62,
- "nextobjectid":514,
+ "nextobjectid":536,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -611,7 +783,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":33850,
+         "firstgid":33851,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

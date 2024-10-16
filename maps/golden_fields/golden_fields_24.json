@@ -330,7 +330,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"big_tree_1"
+                                 "value":"tall_trees_1"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -418,8 +418,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":352,
-                         "x":1984,
+                         "width":432,
+                         "x":1904,
                          "y":816
                         }, 
                         {
@@ -514,7 +514,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":480,
+                         "width":400,
                          "x":1504,
                          "y":816
                         }, 
@@ -702,7 +702,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

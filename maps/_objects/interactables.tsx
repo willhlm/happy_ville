@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="14" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="15" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -73,5 +73,8 @@
    <property name="erect" type="bool" value="true"/>
   </properties>
   <image width="144" height="32" source="../../Sprites/animations/gate_2/erect/vines6.png"/>
+ </tile>
+ <tile id="16">
+  <image width="48" height="80" source="../../Sprites/animations/statues/air_dash_statue/idle/idle.png"/>
  </tile>
 </tileset>
