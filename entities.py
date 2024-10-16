@@ -936,6 +936,7 @@ class Enemy(Character):
         self.pause_group = game_objects.entity_pause
         self.description = 'enemy'##used in journal
         self.original_pos = pos
+        self.dir[0] = 1
 
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.AI(self)
@@ -1429,7 +1430,7 @@ class Larv_simple(Enemy):
 class Larv_jr(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects,True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)

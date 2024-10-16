@@ -110,25 +110,27 @@ def load_single_sfx(path):
     return pygame.mixer.Sound(path)
 
 'sprite loader'
-def load_sprites_dict(base_path, game_objects):#returns a dict with "state" as key and list of sprites as value
+def load_sprites_dict(base_path, game_objects, flip_x = False):#returns a dict with "state" as key and list of sprites as value
     sprite_dict = {}
     for subdir in [d[0] for d in walk(base_path)]:
         if subdir == base_path:
             pass
-        sprite_dict[subdir.split("/")[-1]] = load_sprites_list(subdir, game_objects)
+        sprite_dict[subdir.split("/")[-1]] = load_sprites_list(subdir, game_objects, flip_x)
     return sprite_dict
 
-def load_sprites_list(path_to_folder, game_objects):#returns a list of sprites
+def load_sprites_list(path_to_folder, game_objects, flip_x = False):#returns a list of sprites
     list_of_sprites = [join(path_to_folder, f) for f in listdir(path_to_folder) if isfile(join(path_to_folder, f))]
     if join(path_to_folder,'.DS_Store') in list_of_sprites:
         list_of_sprites.remove(join(path_to_folder,'.DS_Store'))
     if join(path_to_folder,'.gitkeep') in list_of_sprites:#sp that we can push empty folders
         list_of_sprites.remove(join(path_to_folder,'.gitkeep'))
     list_of_sprites.sort()
-    return [game_objects.game.display.surface_to_texture(load_sprite(file)) for file in list_of_sprites]
+    return [game_objects.game.display.surface_to_texture(load_sprite(file, flip_x)) for file in list_of_sprites]
 
-def load_sprite(path_to_sprite):#use to load single sprite, full path must be provided
-    return pygame.image.load(path_to_sprite).convert_alpha()
+def load_sprite(path_to_sprite, flip_x = False):#use to load single sprite, full path must be provided
+    temp = pygame.image.load(path_to_sprite).convert_alpha()
+    temp = pygame.transform.flip(temp, flip_x, False)
+    return temp
 
 def generic_sheet_reader(path_to_sheet, w, h, r, c):
 #width, height, no o sprites in row, no o sprites in column
