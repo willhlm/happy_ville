@@ -196,7 +196,7 @@ class Controller():
             self.value[stick][0] = 0
 
 class Inputs():#different inputs such as keys and buttons
-    def __init__(self, controller, key, keydown, keyup, value, lifetime = 50):
+    def __init__(self, controller, key, keydown, keyup, value, lifetime = 10):
         self.controller = controller
         self.lifetime = lifetime
         self.key = key
