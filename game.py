@@ -25,7 +25,7 @@ class Game():
         self.DEBUG_MODE = True
         self.RENDER_FPS_FLAG = True
         self.RENDER_HITBOX_FLAG = True
-        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP,pygame.JOYAXISMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.JOYAXISMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
         pygame.event.set_blocked([pygame.TEXTINPUT])#for some reason, there is a text input here and there. So, blocking it
 
     def event_loop(self):
