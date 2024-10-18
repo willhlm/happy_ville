@@ -342,6 +342,8 @@ class Jump_main(Player_states):
         elif event[-1]=='b':
             input.processed()
             self.do_ability()
+        elif event[-1]=='a':
+            input.processed()
 
     def handle_release_input(self,input):#when release space
         event = input.output()
@@ -415,7 +417,12 @@ class Fall_pre(Player_states):
                 input.processed()
         elif event[-1]=='x':
             input.processed()
-            self.swing_sword()     
+            self.swing_sword()   
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()          
 
     def handle_input(self,input):
         if input == 'Wall':
@@ -474,6 +481,11 @@ class Wall_glide_main(Player_states):
             input.processed()    
             self.entity.dir[0] *= -1  
             self.enter_state('Ground_dash_pre')       
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()    
 
     def handle_movement(self, event):        
         value = event['l_stick']#the avlue of the press
