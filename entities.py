@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import read_files, particles, animation, dialogue, states, groups
 import states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
+import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
 import constants as C
 
 def sign(number):
@@ -1418,6 +1418,15 @@ class Maggot(Enemy):
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
         self.friction[0] = C.friction[0]*2
 
+class Larv(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.AI = AI_larv.Idle(self)
+        print(self.AI)
+
+    def walk(self):
+        self.velocity[0] += self.dir[0]*0.3
+
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1427,14 +1436,17 @@ class Larv_simple(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
         self.attack_distance = [0,0]
 
-class Larv_jr(Enemy):
+class Larv_jr(Larv):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects,True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.hitbox = pygame.Rect(pos[0],pos[1],22,12)
         self.attack_distance = [0,0]
+        self.init_x = self.rect.x
+        self.patrol_dist = 100
+        self.health = 15
 
 class Larv_poison(Enemy):
     def __init__(self, pos, game_objects):
