@@ -1,0 +1,4 @@
+projectile_large_C/frame0000.png = 0 0 16 16
+projectile_large_C/frame0001.png = 16 0 16 16
+projectile_large_C/frame0002.png = 32 0 16 16
+projectile_large_C/frame0003.png = 48 0 16 16

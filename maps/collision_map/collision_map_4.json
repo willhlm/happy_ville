@@ -617,7 +617,7 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"Larv_jr"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -640,7 +640,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":64,
+ "nextobjectid":66,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",

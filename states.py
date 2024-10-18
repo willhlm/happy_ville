@@ -88,7 +88,7 @@ class Title_Menu(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()    
+        input.processed()
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -116,8 +116,14 @@ class Title_Menu(Game_State):
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
+<<<<<<< HEAD
             self.game.game_objects.load_map(self,'crystal_mines_18','1')
             #self.game.game_objects.load_map(self,'light_forest_1','1')
+=======
+            #self.game.game_objects.load_map(self,'crystal_mines_18','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'collision_map_4','1')
+>>>>>>> 97cf723e4946ca6fa835ef4e8691a5236299653e
 
         elif self.current_button == 1:
             self.arrow.pressed()
@@ -195,7 +201,7 @@ class Load_Menu(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()    
+        input.processed()
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -266,7 +272,7 @@ class Option_Menu(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()            
+        input.processed()
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -355,7 +361,7 @@ class Option_Menu_sounds(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()    
+        input.processed()
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -432,7 +438,7 @@ class Option_Menu_display(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()            
+        input.processed()
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -484,7 +490,7 @@ class Gameplay(Game_State):
 
     def handle_movement(self):#every frame
         value = self.game.game_objects.controller.continious_input_checks()
-        self.game.game_objects.player.currentstate.handle_movement(value)#move around                    
+        self.game.game_objects.player.currentstate.handle_movement(value)#move around
 
     def handle_events(self, input):
         event = input.output()
@@ -512,8 +518,8 @@ class Gameplay(Game_State):
                 input.processed()#should it be processed here or when passed through?
                 self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
-            elif sum(event[2]['d_pad']) != 0:#d_pad was pressed      
-                input.processed()     
+            elif sum(event[2]['d_pad']) != 0:#d_pad was pressed
+                input.processed()
                 self.game.game_objects.player.abilities.handle_input(event[2]['d_pad'])#to change movement ability with d pad
 
             else:
@@ -599,7 +605,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()    
+        input.processed()
         if event[0]:
             if event[-1] == 'up':
                 self.current_button -= 1
@@ -616,7 +622,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
                 self.change_state()
             elif event[-1] == 'return':
                 self.arrow.pressed()
-                self.change_state()                
+                self.change_state()
             elif event[-1] == 'start':
                 self.exit_state()
 
@@ -729,8 +735,8 @@ class Ability_menu(Gameplay):#when pressing tab
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()      
-        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys 
+        input.processed()
+        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys
             self.game.game_objects.player.currentstate.handle_movement(event)#move around
         if event[0]:#press TODO change to right analogue stick. What should it be on keyboard?
             if event[-1] == 'right':
@@ -912,7 +918,7 @@ class Conversation(Gameplay):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()    
+        input.processed()
         if event[0]:
             if event[-1] == 'start':
                 self.fade_back()
@@ -1033,7 +1039,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()            
+        input.processed()
         if event[0]:#press
             if event[-1] == 'start':
                 self.page = 1
@@ -1069,7 +1075,7 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()            
+        input.processed()
         if event[0]:#press
             if event[-1] == 'start':
                 self.exit_state()
@@ -1126,16 +1132,16 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()            
+        input.processed()
         if event[0]:#press
             if event[-1] == 'start':
                 self.exit_state()
             elif event[-1] == 'a':
                 self.press = True
 
-        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys 
+        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys
             if event[2]['l_stick'][0] > 0: return#can only go left
-            event[2]['l_stick'][0] *= 0.5#half the speed        
+            event[2]['l_stick'][0] *= 0.5#half the speed
             self.game.game_objects.player.currentstate.handle_movement(event)
 
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall

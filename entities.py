@@ -704,7 +704,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
-    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop        
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
         self.velocity[1] = 1.2/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
@@ -936,6 +936,7 @@ class Enemy(Character):
         self.pause_group = game_objects.entity_pause
         self.description = 'enemy'##used in journal
         self.original_pos = pos
+        self.dir[0] = 1
 
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.AI(self)
@@ -1421,6 +1422,15 @@ class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_simple/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.attack_distance = [0,0]
+
+class Larv_jr(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects,True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
@@ -2160,16 +2170,16 @@ class Projectiles(Platform_entity):#projectiels
     def collision_inetractables(self,interactable):#collusion interactables
         pass
 
-    def reflect(self, dir, pos, clamp_value = 10):#projectile collision when purple infinity stone is equipped: pos, dir are aila sword 
+    def reflect(self, dir, pos, clamp_value = 10):#projectile collision when purple infinity stone is equipped: pos, dir are aila sword
         dy = max(-clamp_value, min(clamp_value, self.rect.centery - pos[1]))
         dx = max(-clamp_value, min(clamp_value, self.rect.centerx - pos[0]))
 
         if dir[1] != 0:#up or down
             self.velocity[0] = dx * 0.2
-            self.velocity[1] = -10 * dir[1]            
+            self.velocity[1] = -10 * dir[1]
         else:#right or left
             self.velocity[0] = 10 * dir[0]
-            self.velocity[1] = dy * 0.2     
+            self.velocity[1] = dy * 0.2
 
     def take_dmg(self, dmg):
         pass
@@ -2319,7 +2329,7 @@ class Projectile_1(Projectiles):
         self.dir = kwarg.get('dir', [1, 0])
         amp = kwarg.get('amp', [5, 5])
         self.velocity = [-amp[0] * self.dir[0], amp[1] * self.dir[1]]
-        
+
     def pool(game_objects):
         Projectile_1.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
@@ -2331,7 +2341,7 @@ class Projectile_1(Projectiles):
         self.collision_platform(None)
 
     def ramp_down_collision(self, position):#called from collusion in clollision_ramp
-        self.collision_platform(None)        
+        self.collision_platform(None)
 
 class Falling_rock(Projectiles):#things that can be placed in cave, the source makes this and can hurt player
     def __init__(self, pos, game_objects):
@@ -2422,7 +2432,7 @@ class Melee(Projectiles):
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
-        
+
     def reflect(self, dir, pos):#called from sword collision_projectile, purple initinty stone
         return
         self.entity.countered()
@@ -3197,10 +3207,10 @@ class Green_infinity_stone(Infinity_stones):#faster slash (changing framerate)
     @classmethod
     def pool(cls, game_objects):
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/infinity_stones/green/',game_objects)#for inventory
-        super().pool(game_objects)  
+        super().pool(game_objects)
 
     def attach(self, player):
-        player.sword.stone_states['slash'].enter_state('Slash', 'slash')              
+        player.sword.stone_states['slash'].enter_state('Slash', 'slash')
 
 class Blue_infinity_stone(Infinity_stones):#get spirit at collision
     def __init__(self, pos, game_objects, **kwarg):
@@ -3571,7 +3581,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
 class Crystal_source(Interactable):#the thng that spits out crystals in crystal mines
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/crystal_source/', game_objects)        
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/crystal_source/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
@@ -3674,7 +3684,7 @@ class Air_dash_statue(Interactable):#interact with it to get air dash
         self.game_objects.player.currentstate.enter_state('Pray_pre')
         self.game_objects.player.states['Air_dash'] = True#give ability
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
-        self.interacted = True        
+        self.interacted = True
 
         new_game_state = states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['air_dash_main'][0], self.text)
         new_game_state.enter_state()

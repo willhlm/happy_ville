@@ -1,0 +1,16 @@
+exofish_B/frame0000.png = 0 0 24 16
+exofish_B/frame0001.png = 24 0 24 16
+exofish_B/frame0002.png = 48 0 24 16
+exofish_B/frame0003.png = 72 0 24 16
+exofish_B/frame0004.png = 96 0 24 16
+exofish_B/frame0005.png = 120 0 24 16
+exofish_B/frame0006.png = 144 0 24 16
+exofish_B/frame0007.png = 168 0 24 16
+exofish_B/frame0008.png = 192 0 24 16
+exofish_B/frame0009.png = 216 0 24 16
+exofish_B/frame0010.png = 240 0 24 16
+exofish_B/frame0011.png = 264 0 24 16
+exofish_B/frame0012.png = 288 0 24 16
+exofish_B/frame0013.png = 312 0 24 16
+exofish_B/frame0014.png = 336 0 24 16
+exofish_B/frame0015.png = 360 0 24 16
