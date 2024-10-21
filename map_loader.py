@@ -937,6 +937,10 @@ class Crystal_mines(Biome):
     def __init__(self, level):
         super().__init__(level)
 
+    def room(self, room = 1):       
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)         
+        self.level.game_objects.lights.ambient = (100/255,100/255,100/255,170/255)     
+
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
             new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]

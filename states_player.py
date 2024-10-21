@@ -61,6 +61,11 @@ class Idle_main(Player_states):
             input.processed()
             self.do_ability()
 
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()    
+
     def handle_input(self,input):
         if input == 'jump':#caööed from jump buffer timer
             self.enter_state('Jump_main')
@@ -115,6 +120,11 @@ class Walk_main(Player_states):
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()    
 
     def handle_input(self,input):
         if input == 'jump':#caööed from jump buffer timer
@@ -173,6 +183,11 @@ class Run_pre(Player_states):
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()    
 
     def handle_input(self,input):
         if input == 'jump':#caööed from jump buffer timer
@@ -246,6 +261,11 @@ class Run_main(Player_states):
         elif input == 'dash':#called from dash buffer timer
             self.enter_state('Ground_dash_pre')                   
 
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()    
+
     def handle_movement(self,event):
         super().handle_movement(event)
         if self.entity.acceleration[0]==0:
@@ -294,6 +314,11 @@ class Run_post(Player_states):
         super().handle_movement(event)
         if self.entity.acceleration[0] != 0:
             self.enter_state('Run_pre')
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()    
 
     def swing_sword(self):
         if self.entity.flags['sword_swinging']: return
