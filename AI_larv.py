@@ -18,9 +18,9 @@ class AI():
         pass
 
 class Idle(AI):#do nothing
-    def __init__(self, entity):
+    def __init__(self, entity, timer = 90):
         super().__init__(entity)
-        self.idle_timer = 90
+        self.idle_timer = timer
 
     def update(self):
         self.idle_timer -= 1
@@ -31,13 +31,19 @@ class Idle(AI):#do nothing
 class Walk(AI):
     def __init__(self, entity):
         super().__init__(entity)
-        self.entity.dir = [self.entity.dir[0]*-1, self.entity.dir[1]]
+        self.RETURN_FLAG = False
+        if abs(self.entity.hitbox.x - self.entity.init_x) >= self.entity.patrol_dist:
+            self.RETURN_FLAG = True
+            self.entity.dir = [(self.entity.init_x - self.entity.hitbox.x)/abs(self.entity.hitbox.x - self.entity.init_x), self.entity.dir[1]]
 
     def update(self):
         self.entity.walk()
         if self.check_ground(): self.enter_AI('Idle')
         elif self.check_wall(): self.enter_AI('Idle')
-        elif abs(self.entity.hitbox.x - self.entity.init_x + self.entity.dir[0]) > self.entity.patrol_dist:
+        if self.RETURN_FLAG:
+            if abs(self.entity.hitbox.x - self.entity.init_x) < self.entity.patrol_dist:
+                self.RETURN_FLAG = False
+        elif abs(self.entity.hitbox.x - self.entity.init_x) > self.entity.patrol_dist:
             self.enter_AI('Idle')
 
     def check_ground(self):#this will always trigger when the enemy spawn, if they are spawn in air in tiled

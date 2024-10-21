@@ -749,7 +749,8 @@ class Character(Platform_entity):#enemy, NPC,player
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
     def knock_back(self, dir):
-        self.velocity[0] = dir[0] * 30 * (1 - abs(dir[1]))
+        amp_x = 50
+        self.velocity[0] = dir[0] * amp_x * (1 - abs(dir[1]))
         self.velocity[1] = -dir[1] * 10
 
     def hurt_particles(self, type = 'Circle', number_particles = 20, **kwarg):
@@ -1426,6 +1427,10 @@ class Larv(Enemy):
 
     def walk(self):
         self.velocity[0] += self.dir[0]*0.3
+
+    def knock_back(self, dir):
+        super().knock_back(dir)
+        self.AI = AI_larv.Idle(self, timer = 40)
 
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
