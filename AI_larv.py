@@ -18,28 +18,34 @@ class AI():
         pass
 
 class Idle(AI):#do nothing
-    def __init__(self, entity, timer = 90):
+    def __init__(self, entity, carry_dir = False,  timer = 90):
         super().__init__(entity)
+        self.carry_dir = carry_dir
         self.idle_timer = timer
 
     def update(self):
         self.idle_timer -= 1
         if self.idle_timer == 0:
-            self.enter_AI('Walk')
+            if self.carry_dir:
+                self.enter_AI('Walk', change_dir = True)
+            else:
+                self.enter_AI('Walk')
 
 
 class Walk(AI):
-    def __init__(self, entity):
+    def __init__(self, entity, change_dir = False):
         super().__init__(entity)
         self.RETURN_FLAG = False
         if abs(self.entity.hitbox.x - self.entity.init_x) >= self.entity.patrol_dist:
             self.RETURN_FLAG = True
             self.entity.dir = [(self.entity.init_x - self.entity.hitbox.x)/abs(self.entity.hitbox.x - self.entity.init_x), self.entity.dir[1]]
+        elif change_dir:
+            self.entity.dir = [self.entity.dir[0] * -1, self.entity.dir[1]]
 
     def update(self):
         self.entity.walk()
-        if self.check_ground(): self.enter_AI('Idle')
-        elif self.check_wall(): self.enter_AI('Idle')
+        if self.check_ground(): self.enter_AI('Idle', carry_dir = True, timer = 50)
+        elif self.check_wall(): self.enter_AI('Idle', carry_dir = True, timer = 50)
         if self.RETURN_FLAG:
             if abs(self.entity.hitbox.x - self.entity.init_x) < self.entity.patrol_dist:
                 self.RETURN_FLAG = False

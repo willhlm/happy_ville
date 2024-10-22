@@ -1426,11 +1426,11 @@ class Larv(Enemy):
         print(self.AI)
 
     def walk(self):
-        self.velocity[0] += self.dir[0]*0.3
+        self.velocity[0] += self.dir[0]*0.22
 
     def knock_back(self, dir):
         super().knock_back(dir)
-        self.AI = AI_larv.Idle(self, timer = 40)
+        self.AI = AI_larv.Idle(self, carry_dir = False, timer = 40)
 
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
