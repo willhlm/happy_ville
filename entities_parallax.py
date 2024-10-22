@@ -118,16 +118,6 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
 
-class Thor_mtn(Layered_objects):
-    animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
-        self.init_sprites('Sprites/animations/bg_animations/thor_mtn_village/')#blur or lead from memory                    
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.true_pos = self.rect.topleft
-
 class Vines(Layered_objects):#light forest
     animations = {}
     def __init__(self, pos, game_objects, parallax, live_blur = False):
@@ -198,7 +188,7 @@ class Small_tree1(Layered_objects):
         self.shader['upsidedown'] = 0
         super().draw(target)
 
-#lightf orest cave
+#lightf forest cave
 class Ljusmaskar(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax, live_blur = False):
@@ -280,6 +270,68 @@ class Falling_rock_source(Layered_objects):
             self.game_objects.all_bgs._spritelayers[obj] = 0
             self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
             obj.add_internal(self.game_objects.all_bgs)
+
+#crystal mines
+class Crystals(Layered_objects):
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+        self.init_sprites('Sprites/animations/crystals/' + type(self).__name__.lower() + '/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+        self.shader = game_objects.shaders['highlight']  
+        
+        self.speed = 2
+        self.time = 0
+
+    def update(self):
+        super().update()  
+        if self.time * self.speed >= 1:
+            if random.randint(0,500) == 0: self.time = 0                    
+        else:
+            self.time += 0.01 * self.game_objects.game.dt
+
+    def draw(self, target):
+        self.shader['shine_progress'] = self.time
+        self.shader['speed'] = self.speed
+        super().draw(target)
+
+class Crystal_1(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)        
+
+class Crystal_2(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+
+class Crystal_3(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+
+class Crystal_4(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+
+class Crystal_5(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)                          
+
+#village
+class Thor_mtn(Layered_objects):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)
+        self.init_sprites('Sprites/animations/bg_animations/thor_mtn_village/')#blur or lead from memory                    
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
 
 class Light_source(Layered_objects):#works for parallax = 1. Not sure how we would liek to deal with light sources for other parallax
     def __init__(self, pos, game_objects, parallax, live_blur = False):

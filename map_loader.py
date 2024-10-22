@@ -994,3 +994,38 @@ class Crystal_mines(Biome):
 
                 new_emitter = entities.Crystal_source(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_emitter)                
+
+            elif id == 11:#crystal  1
+                new_crystal = entities_parallax.Crystal_1(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+                
+            elif id == 12:#crystal  1
+                new_crystal = entities_parallax.Crystal_2(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+
+            elif id == 13:#crystal  3
+                new_crystal = entities_parallax.Crystal_3(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+
+            elif id == 14:#crystal  4
+                new_crystal = entities_parallax.Crystal_4(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+
+            elif id == 15:#crystal  5
+                new_crystal = entities_parallax.Crystal_5(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)                                                                            
