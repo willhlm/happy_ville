@@ -563,7 +563,19 @@
                  "draworder":"topdown",
                  "id":62,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":57,
+                         "height":48,
+                         "id":345,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":1136,
+                         "y":688
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -694,24 +706,6 @@
                          "y":624
                         }, 
                         {
-                         "gid":15,
-                         "height":16,
-                         "id":284,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"top"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":272,
-                         "x":1728,
-                         "y":336
-                        }, 
-                        {
                          "gid":29,
                          "height":16,
                          "id":289,
@@ -766,30 +760,6 @@
                          "y":688
                         }, 
                         {
-                         "gid":12,
-                         "height":16,
-                         "id":206,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":240,
-                         "x":1440,
-                         "y":592
-                        }, 
-                        {
-                         "gid":12,
-                         "height":16,
-                         "id":207,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":96,
-                         "x":1248,
-                         "y":656
-                        }, 
-                        {
                          "gid":8,
                          "height":64,
                          "id":208,
@@ -800,30 +770,6 @@
                          "width":128,
                          "x":1808,
                          "y":1072
-                        }, 
-                        {
-                         "gid":12,
-                         "height":16,
-                         "id":210,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":336,
-                         "x":1696,
-                         "y":496
-                        }, 
-                        {
-                         "gid":12,
-                         "height":16,
-                         "id":211,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":48,
-                         "x":1616,
-                         "y":544
                         }, 
                         {
                          "height":0,
@@ -1270,18 +1216,6 @@
                          "y":1280
                         }, 
                         {
-                         "gid":14,
-                         "height":80,
-                         "id":307,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":64,
-                         "x":1264,
-                         "y":640
-                        }, 
-                        {
                          "gid":11,
                          "height":16,
                          "id":309,
@@ -1382,21 +1316,21 @@
                          "y":784
                         }, 
                         {
-                         "gid":16,
+                         "gid":3,
                          "height":16,
-                         "id":333,
+                         "id":346,
                          "name":"",
                          "properties":[
                                 {
-                                 "name":"particle",
+                                 "name":"class",
                                  "type":"string",
-                                 "value":"Fog"
+                                 "value":"Crab_crystal"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":832,
+                         "x":1408,
                          "y":624
                         }],
                  "opacity":1,
@@ -1437,7 +1371,7 @@
          "y":0
         }],
  "nextlayerid":90,
- "nextobjectid":343,
+ "nextobjectid":347,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

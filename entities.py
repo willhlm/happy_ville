@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import read_files, particles, animation, dialogue, states, groups
-import states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
+import states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
 import constants as C
 
 def sign(number):
@@ -604,6 +604,36 @@ class Smoke(Staticentity):#2D smoke
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['smoke'])#shader render
 
+class Explosion_shader(Staticentity):#2D explosion
+    def __init__(self, pos, game_objects, size, **properties):
+        super().__init__(pos, game_objects)
+        self.image = game_objects.game.display.make_layer(size)
+        self.noise_layer = game_objects.game.display.make_layer(size)
+
+        self.hitbox = pygame.Rect(pos, size)
+        self.time = 0
+        self.size = size
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+
+    def draw(self, target):
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time * 0.05
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]#[self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [10,10]
+        self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        self.game_objects.shaders['explosion']['noiseTexture'] = self.noise_layer.texture
+        self.game_objects.shaders['explosion']['time'] = self.time*0.01
+        self.game_objects.shaders['explosion']['textureSize'] = self.size
+
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['explosion'])#shader render
+
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -747,6 +777,7 @@ class Character(Platform_entity):#enemy, NPC,player
             self.invincibile = True
             self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
+        return True#return truw to show that damage was taken
 
     def knock_back(self, dir):
         self.velocity[0] = dir[0] * 30 * (1 - abs(dir[1]))
@@ -790,7 +821,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':False,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,
                      'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
@@ -806,6 +837,7 @@ class Player(Character):
                         'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
+        self.time =0
 
     def update_hitbox(self):
         super().update_hitbox()
@@ -876,6 +908,9 @@ class Player(Character):
     def update(self):
         super().update()
         self.omamoris.update()
+        self.time += 1
+        if self.time == 100:
+            self.game_objects.cosmetics.add(Explosion_shader(self.rect.center, self.game_objects, [200,200])        )
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -1280,6 +1315,34 @@ class Exploding_mygga(Flying_enemy):
         self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
+class Crab_crystal(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/crab_crystal/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
+
+        self.currentstate = states_crab_crystal.Idle(self)
+        self.AI = AI_crab_crystal.AI(self)    
+
+        self.hide_distance = [100, 50]#the distance to hide
+        self.fly_distance = [150, 50]#the distance to hide
+        self.attack_distance = [250, 50]    
+        self.aggro_distance = [300, 50]    
+
+    def chase(self, dir = 1):#called from AI: when chaising
+        self.velocity[0] += dir*0.6
+
+    def take_dmg(self,dmg):
+        return self.currentstate.take_dmg(dmg)
+
+    def attack(self):#called from currenrstate    
+        for i in range(0, 3):
+            vel = random.randint(-3,3)
+            new_projectile = Poisonblobb(self.rect.midtop, self.game_objects, dir = [1, -1], amp = [vel, 4])
+            self.game_objects.eprojectiles.add(new_projectile)
+
 class Froggy(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1365,10 +1428,10 @@ class Slime_giant(Enemy):
             obj.velocity = [random.randint(-10, 10),random.randint(-10, -5)]
             self.game_objects.enemies.add(obj)
 
-class Wall_slime(Enemy):
+class Slime_wall(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/wall_slime/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_wall/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
@@ -1421,7 +1484,7 @@ class Maggot(Enemy):
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_simple/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
@@ -1439,7 +1502,7 @@ class Larv_jr(Enemy):
 class Larv_poison(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_poison/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
@@ -2295,8 +2358,9 @@ class Poisonblobb(Projectiles):
 
         self.dmg = 1
         self.lifetime = kwarg.get('lifetime', 100)
-        self.dir = kwarg.get('dir', [1,0])
-        self.velocity = [self.dir[0]*5,-1]
+        self.dir = kwarg.get('dir', [1, -1])
+        amp = kwarg.get('amp', [5, 5])
+        self.velocity = [-amp[0] * self.dir[0], amp[1] * self.dir[1]]
 
     def update(self):
         super().update()
@@ -2575,14 +2639,12 @@ class Aila_sword(Sword):
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
-        if collision_enemy.invincibile: return
-        collision_enemy.take_dmg(self.dmg)
-        collision_enemy.knock_back(self.dir)
-        collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
-        self.clash_particles(collision_enemy.hitbox.center)
-        self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0])#should be in states
+        if collision_enemy.take_dmg(self.dmg):#if damage was taken
+            collision_enemy.knock_back(self.dir)
+            collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
+            self.clash_particles(collision_enemy.hitbox.center)
+            self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0])#should be in states
 
-        #self.game_objects.camera_manager.camera.camera_shake(amp=2,duration=30)#amplitude and duration
         collision_enemy.currentstate.handle_input('sword')
         self.stone_states['enemy_collision'].enemy_collision()
 

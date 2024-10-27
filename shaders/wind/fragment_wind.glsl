@@ -5,6 +5,7 @@ uniform float time;       // Time for animating wind
 uniform vec2 velocity;    // Speed of the wind (x for horizontal, y for vertical)
 uniform sampler2D noiseTexture; // Noise texture    
 uniform vec3 windColor = vec3(1.0);
+uniform float lifetime;   // Lifetime for fading out
 
 out vec4 color;
 
@@ -54,16 +55,19 @@ void main()
     // Adjust the smoothstep thresholds to make lines more visible
     float lineIntensity = smoothstep(0.3, 1.0, abs(windPattern));
 
+    // Gradually increase the transparency based on the time (fade-in)
+    float timeTransparency = smoothstep(0.0, 1.0, time * 0.4);  // Adjust factor for timing
+
+    // Fade out based on lifetime (fade-out)
+    // We assume lifetime is normalized from 0 to 1 (1 = full lifetime, 0 = expired)
+    float lifetimeTransparency = smoothstep(0.0, 50, lifetime);
+
+    // Combine both fade-in (time) and fade-out (lifetime) transparency
+    float finalTransparency = timeTransparency * lifetimeTransparency;
+
     // Apply the irregular pulsing effect to control line visibility
     //float pulseEffect = irregularPulse(time, pulseScale);
 
-    // Fetch noise value for blending from the rotated coordinates
-    //vec3 noiseColor = texture(noiseTexture, rotatedTexCoord).rgb;
-    //float noiseIntensity = noiseColor.r; // Use the red channel of the noise texture
-
-    // Blend line intensity with noise intensity and apply pulsing effect
-    float finalIntensity = lineIntensity;// * noiseIntensity * pulseEffect;
-
-    // Final color with transparency
-    color = vec4(windColor, finalIntensity);
+    // Final color with combined transparency effects
+    color = vec4(windColor, lineIntensity * finalTransparency);
 }

@@ -317,7 +317,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":31221,
+                         "gid":31222,
                          "height":137,
                          "id":312,
                          "name":"",
@@ -1206,7 +1206,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":31217,
+         "firstgid":31218,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
