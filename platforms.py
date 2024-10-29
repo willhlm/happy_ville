@@ -20,14 +20,14 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         pass
 
     def take_dmg(self, projectile):#called from projectile
-        pass   
+        pass
 
     def release_texture(self):#called when .kill() and empty group
-        pass   
+        pass
 
     def kill(self):
         self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
-        super().kill()         
+        super().kill()
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
@@ -42,7 +42,7 @@ class Collision_block(Platform):
         entity.update_rect_x()
 
     def collide_y(self,entity):
-        if entity.velocity[1] > 0:#going down   
+        if entity.velocity[1] > 0:#going down
             entity.down_collision(self)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
@@ -148,18 +148,18 @@ class Collision_right_angle(Platform):#ramp
         else: return 0
         return -rel_x*self.ratio + self.hitbox.bottom
 
-    def collide(self, entity):#called in collisions        
+    def collide(self, entity):#called in collisions
         if self.orientation == 0:
             rel_x = self.hitbox.right - entity.hitbox.left
             other_side = self.hitbox.left - entity.hitbox.left
             benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom 
-            self.shift_up(other_side, entity, benethe)    
+            self.target = -rel_x*self.ratio + self.hitbox.bottom
+            self.shift_up(other_side, entity, benethe)
         elif self.orientation == 1:
             rel_x = entity.hitbox.right - self.hitbox.left
             other_side = entity.hitbox.right - self.hitbox.right
             benethe = entity.hitbox.bottom - self.hitbox.bottom
-            self.target = -rel_x*self.ratio + self.hitbox.bottom 
+            self.target = -rel_x*self.ratio + self.hitbox.bottom
             self.shift_up(other_side, entity, benethe)
         elif self.orientation == 2:
             rel_x = self.hitbox.right - entity.hitbox.left
@@ -175,14 +175,14 @@ class Collision_right_angle(Platform):#ramp
             entity.ramp_top_collision(self.target)
             entity.update_rect_y()
 
-    def shift_up(self, other_side, entity, benethe):   
+    def shift_up(self, other_side, entity, benethe):
         if self.target > entity.hitbox.bottom:
-            entity.go_through['ramp'] = False        
+            entity.go_through['ramp'] = False
         elif other_side > 0 or benethe > 0:
-            entity.go_through['ramp'] = True       
+            entity.go_through['ramp'] = True
         elif not entity.go_through['ramp']: #need to be elif
             entity.ramp_down_collision(self.target)
-            entity.update_rect_y()    
+            entity.update_rect_y()
 
 class Collision_dmg(Platform):#"spikes"
     def __init__(self,pos,size):
@@ -212,8 +212,8 @@ class Collision_dmg(Platform):#"spikes"
 #texture based
 class Collision_texture(Platform):#blocks that has tectures
     def __init__(self, pos, game_objects):
-        super().__init__(pos)    
-        self.game_objects = game_objects        
+        super().__init__(pos)
+        self.game_objects = game_objects
         self.dir = [1,0]#animation needs it
 
     def update(self):
@@ -228,7 +228,7 @@ class Collision_texture(Platform):#blocks that has tectures
         entity.update_rect_x()
 
     def collide_y(self,entity):
-        if entity.velocity[1] > 0:#going down   
+        if entity.velocity[1] > 0:#going down
             entity.down_collision(self)
             entity.limit_y()
         else:#going up
@@ -244,7 +244,7 @@ class Collision_texture(Platform):#blocks that has tectures
                 self.sprites[state][frame].release()
 
     def draw(self, target):
-        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])))#int seem nicer than round         
+        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])))#int seem nicer than round
 
 class Boulder(Collision_texture):#blocks village cave
     def __init__(self, pos, game_objects):
@@ -271,11 +271,11 @@ class Gate_1(Collision_texture):#a gate. The ones that are owned by the lever wi
             state = 'down'
         elif game_objects.world_state.events.get(self.ID_key[:self.ID_key.rfind('_')], False):#if the event has been completed
             state = 'down'
-        else:                
-            state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled   
+        else:
+            state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled
         self.image = self.sprites[state][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state                
-                
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state
+
         self.animation = animation.Animation(self)
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
@@ -287,7 +287,20 @@ class Gate_2(Gate_1):#a gate. The ones that are owned by the lever will handle i
         super().__init__(pos, game_objects, **kwarg)
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_2/', self.game_objects)        
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_2/', self.game_objects)
+
+class Door(Gate_1):
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+        #self.sfx = ADDSFXHERE
+        self.key = kwarg.get('key', 'None')
+
+class Door_right_orient(Door):
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+
+    def init(self):
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/door_right/', self.game_objects)
 
 class Bridge(Collision_texture):#bridge twoards forest path
     def __init__(self, pos, game_objects):
@@ -308,32 +321,32 @@ class Conveyor_belt(Collision_texture):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.tile_size = [16,16]
-        
+
         if kwarg.get('vertical', False):#default is horizontal belft
-            angle = 90              
+            angle = 90
             size[1] = max(size[1], self.tile_size[1] * 3)#assert at least 3 tiles
             if kwarg.get('up', False):#default is up down betls
                 self.direction = [0, -1]
             else:#down
-                self.direction = [0, 1]      
-            animation_direction =  self.direction[1]                          
+                self.direction = [0, 1]
+            animation_direction =  self.direction[1]
         else:#horizontal
-            angle = 0             
+            angle = 0
             size[0] = max(size[0], self.tile_size[0] * 3)#assert at least 3 tiles
             if kwarg.get('right', False):#default is left moving belts
                 self.direction = [1,0]
             else:#left
                 self.direction = [-1, 0]
-            animation_direction =  -self.direction[0]                 
-        
+            animation_direction =  -self.direction[0]
+
         #self.timer = Conveyor_belt_timer(self, 10, self.direction)
         #self.timers = []
 
         self.make_belt(size, angle)
         self.animation = animation.Animation(self, direction = animation_direction)#can revert the animation direction
-        self.currentstate = states_basic.Idle(self)     
+        self.currentstate = states_basic.Idle(self)
 
-        self.rect = pygame.Rect(pos, size)    
+        self.rect = pygame.Rect(pos, size)
         self.true_pos = list(self.rect.topleft)
         if angle == 0:
             self.hitbox = pygame.Rect(pos[0], pos[1], (self.rect[2] - 16), self.rect[3] * 0.55)
@@ -346,19 +359,19 @@ class Conveyor_belt(Collision_texture):
         #for timer in self.timers:
         #    timer.update()
 
-    def make_belt(self, size, angle = 0):#the spits are divided into left, middle and right. Merge them here                
+    def make_belt(self, size, angle = 0):#the spits are divided into left, middle and right. Merge them here
         sprites = read_files.load_sprites_dict('Sprites/block/conveyor_belt/', self.game_objects)
 
         self.sprites = {'idle' : []}
         self.layers = []#store each layer so that it can be released
-        principle_sections = ['left', 'middle','right']#the middle will be placed multiple times depending on the size     
+        principle_sections = ['left', 'middle','right']#the middle will be placed multiple times depending on the size
 
         if angle == 0:
             sections = [principle_sections[0]] + [principle_sections[1]] * (int(size[0]/self.tile_size[0]) - 2) + [principle_sections[2]]
         else:#90
             sections = [principle_sections[0]] + [principle_sections[1]] * (int(size[1]/self.tile_size[1]) - 2) + [principle_sections[2]]
 
-        for frame in range(0, len(sprites[sections[0]]) - 1):  
+        for frame in range(0, len(sprites[sections[0]]) - 1):
             self.layers.append(self.game_objects.game.display.make_layer(size))
             for index, section in enumerate(sections):
                 if angle == 0:
@@ -366,14 +379,14 @@ class Conveyor_belt(Collision_texture):
                 else:#vertical
                     pos = [0, sprites[sections[index - 1]][frame].height * index ]
 
-                self.game_objects.game.display.render(sprites[section][frame], self.layers[-1], position = pos, angle = angle)#int seem nicer than round         
+                self.game_objects.game.display.render(sprites[section][frame], self.layers[-1], position = pos, angle = angle)#int seem nicer than round
 
-            self.sprites['idle'].append(self.layers[-1].texture)            
-        self.image =  self.sprites['idle'][0]      
+            self.sprites['idle'].append(self.layers[-1].texture)
+        self.image =  self.sprites['idle'][0]
 
         for state in sprites.keys():
             for frame in range(0,len(sprites[state])):
-                sprites[state][frame].release()   
+                sprites[state][frame].release()
 
     def release_texture(self):
         super().release_texture()
@@ -388,7 +401,7 @@ class Conveyor_belt(Collision_texture):
             entity.left_collision(self, 'belt')
             entity.velocity[1] += self.game_objects.game.dt * -self.direction[1]
         entity.update_rect_x()
- 
+
     def collide_y(self,entity):
         super().collide_y(entity)
         entity.velocity[0] += self.game_objects.game.dt * self.direction[0]
@@ -396,7 +409,7 @@ class Conveyor_belt(Collision_texture):
 
 #timer based
 class Collision_timer(Collision_texture):#collision block that dissapears if aila stands on it
-    def __init__(self, pos, game_objects):        
+    def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.timers = []
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
@@ -417,7 +430,7 @@ class Collision_timer(Collision_texture):#collision block that dissapears if ail
     def collide_y(self,entity):#called when aila lands on platoform
         if entity.velocity[1] < 0: return#going up
         offset = entity.velocity[1] + 1
-        if entity.hitbox.bottom <= self.hitbox.top + offset:            
+        if entity.hitbox.bottom <= self.hitbox.top + offset:
             self.timer_jobs['timer_disappear'].activate()
             entity.down_collision(self)
             entity.limit_y()
@@ -471,7 +484,7 @@ class Bubble_static(Collision_timer):#static bubble
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
         lifetime = prop.get('lifetime', 100)
-        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime), 'timer_appear':Platform_timer_2(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.              
+        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime), 'timer_appear':Platform_timer_2(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -480,16 +493,16 @@ class Bubble_static(Collision_timer):#static bubble
             entity.left_collision(self)
         entity.update_rect_x()
 
-    def collide_y(self,entity):                    
-        if entity.velocity[1] > 0:#going down   
-            self.timer_jobs['timer_disappear'].activate()            
+    def collide_y(self,entity):
+        if entity.velocity[1] > 0:#going down
+            self.timer_jobs['timer_disappear'].activate()
             entity.down_collision(self)
             entity.limit_y()
         else:#going up
             entity.top_collision(self)
-        entity.update_rect_y()     
+        entity.update_rect_y()
 
-    def deactivate(self):#called when first timer runs out          
+    def deactivate(self):#called when first timer runs out
         self.hitbox = [self.hitbox[0],self.hitbox[1],0,0]
         self.timer_jobs['timer_appear'].activate()
         self.currentstate.handle_input('Transition_1')
@@ -556,12 +569,12 @@ class Collision_dynamic(Collision_texture):
     def update_true_pos_x(self):
         self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
         self.rect.left = int(self.true_pos[0])#should be int
-        self.hitbox.left = self.rect.left                
+        self.hitbox.left = self.rect.left
 
     def update_true_pos_y(self):
         self.true_pos[1] += self.game_objects.game.dt*self.velocity[1]
         self.rect.top = int(self.true_pos[1])#should be int
-        self.hitbox.top = self.rect.top   
+        self.hitbox.top = self.rect.top
 
     def collide_x(self,entity):#entity moving
         if entity.velocity[0] > self.velocity[0]:#going to the right
@@ -570,22 +583,22 @@ class Collision_dynamic(Collision_texture):
             entity.left_collision(self)
         entity.update_rect_x()
 
-    def collide_entity_x(self,entity):  #platofmr miving          
+    def collide_entity_x(self,entity):  #platofmr miving
         if self.velocity[0] > 0:#going to the right
             entity.left_collision(self)
         else:#going to the leftx
             entity.right_collision(self)
         entity.update_rect_x()
 
-    def collide_entity_y(self,entity):  #platofmr miving                    
-        if self.velocity[1] < 0:#going up              
+    def collide_entity_y(self,entity):  #platofmr miving
+        if self.velocity[1] < 0:#going up
             entity.down_collision(self)
         else:#going up
             entity.top_collision(self)
         entity.update_rect_y()
 
-    def collide_y(self,entity):  #entity moving                  
-        if entity.velocity[1] > self.velocity[1]:#going down               
+    def collide_y(self,entity):  #entity moving
+        if entity.velocity[1] > self.velocity[1]:#going down
             entity.down_collision(self)
             entity.limit_y()
         else:#going up
@@ -602,7 +615,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.hitbox = self.rect.copy()
 
         lifetime = prop.get('lifetime', 300)
-        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.      
+        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.timer_jobs['timer_disappear'].activate()
         #TODO horitoxntal or veritcal moment
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
@@ -615,18 +628,18 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def update_timers(self):
         for timer in self.timers:
-            timer.update()        
+            timer.update()
 
     def update_vel(self):
-        self.velocity[1] -= self.game_objects.game.dt*0.01   
+        self.velocity[1] -= self.game_objects.game.dt*0.01
 
     def pool(game_objects):#all things that should be saved in object pool
-        Bubble.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)    
+        Bubble.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
 
     def activate(self):
         pass
 
-    def deactivate(self):#called when first timer runs out         
+    def deactivate(self):#called when first timer runs out
         self.kill()
 
 class Smacker(Collision_dynamic):#trap
@@ -638,7 +651,7 @@ class Smacker(Collision_dynamic):#trap
         self.hitbox = self.rect.copy()
 
         self.hole = kwarg.get('hole', None)
-        
+
         self.frequency = int(kwarg.get('frequency', 100))#infinte -> idle - active
         self.distance = kwarg.get('distance', 4*16)
         self.original_pos = pos
@@ -651,11 +664,11 @@ class Smacker(Collision_dynamic):#trap
         self.currentstate.update()
         self.animation.update()
 
-    def collide_entity_y(self,entity):#plpaotfrom mobings  
-        self.currentstate.collide_entity_y(entity)                
+    def collide_entity_y(self,entity):#plpaotfrom mobings
+        self.currentstate.collide_entity_y(entity)
 
-    def collide_y(self,entity):#entity moving       
-        self.currentstate.collide_y(entity)        
+    def collide_y(self,entity):#entity moving
+        self.currentstate.collide_y(entity)
 
 #timers:
 class Conveyor_belt_timer(entities.Timer):#not in use: if we want to make convyeor belt "jumps"
@@ -667,7 +680,7 @@ class Conveyor_belt_timer(entities.Timer):#not in use: if we want to make convye
         self.lifetime = self.duration
         self.entity = entity
         entity.friction[0] = 0.12
-        if self in self.entity.timers: return#do not append if the timer is already inside        
+        if self in self.entity.timers: return#do not append if the timer is already inside
         self.entity.timers.append(self)
 
     def update(self):
@@ -698,4 +711,4 @@ class Timer():
     def update(self):
         self.lifetime -= self.entity.game_objects.game.dt * self.entity.game_objects.player.slow_motion
         if self.lifetime < 0:
-            self.deactivate()    
+            self.deactivate()

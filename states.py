@@ -46,6 +46,8 @@ class Title_Menu(Game_State):
         self.define_BG()
         self.arrow.rect.topleft = self.buttons[self.current_button].rect.topleft
 
+        #self.game.game_objects.shader_render.append_shader('bloom')
+
     def initiate_buttons(self):
         buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
         self.buttons = []
@@ -114,11 +116,11 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_1','1')
+            self.game.game_objects.load_map(self,'village_ola2_13','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            #self.game.game_objects.load_map(self,'crystal_mines_18','1')
-            #self.game.game_objects.load_map(self,'light_forest_1','1')
-            self.game.game_objects.load_map(self,'collision_map_4','1')
+            #self.game.game_objects.load_map(self,'crystal_mines_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_23','1')
+            #self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()

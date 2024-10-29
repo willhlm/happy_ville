@@ -85,7 +85,7 @@ class Level():
         for group in self.map_data['groups']:
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
             offset = [self.map_data['groups'][group]['offsetx'], self.map_data['groups'][group]['offsety']]
-            
+
             self.layer = group#name of the folder in tiled
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'back')#objects behind layers
@@ -293,7 +293,7 @@ class Level():
                     if property['name'] == 'event':
                         kwarg['event'] = property['value']
                     elif property['name'] == 'new_state':
-                        kwarg['new_state'] = property['value']                        
+                        kwarg['new_state'] = property['value']
                 new_trigger = entities.Event_trigger(object_position, self.game_objects, object_size, **kwarg)
                 self.game_objects.interactables.add(new_trigger)
 
@@ -395,15 +395,15 @@ class Level():
                         prop['radius'] = property['value']
                     elif property['name'] == 'speed':
                         prop['speed'] = property['value']
-                    elif property['name'] == 'horizontalSpread':                        
-                        prop['horizontalSpread'] = property['value']                        
+                    elif property['name'] == 'horizontalSpread':
+                        prop['horizontalSpread'] = property['value']
                     elif property['name'] == 'lifetime':
                         prop['lifetime'] = property['value']
                     elif property['name'] == 'spawn_position':
                         if property['value']:
                             string = property['value'].strip('()')  # Remove parentheses
                             prop['spawn_position'] = [float(x) for x in string.split(',')]
-                                            
+
                 smoke = entities.Smoke(object_position, self.game_objects, object_size, **prop)
                 self.game_objects.cosmetics.add(smoke)
 
@@ -519,7 +519,7 @@ class Level():
             elif id == 14:#interactable_item
                 for property in properties:
                     if property['name'] == 'interactable_item':
-                        name = property['value']          
+                        name = property['value']
                 if not self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'].get(name, False):#if it has not been interacted with: (assume only one interactable)
                     new_loot = getattr(entities, name)(object_position, self.game_objects)
                     self.game_objects.loot.add(new_loot)
@@ -530,14 +530,14 @@ class Level():
                     if property['name'] == 'ID':
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
-                        kwarg['erect'] = property['value']                        
+                        kwarg['erect'] = property['value']
                 gate = platforms.Gate_2(object_position,self.game_objects, **kwarg)
                 self.references['gate'].append(gate)
                 self.game_objects.platforms.add(gate)
-            
-            elif id == 16:#air dash statue               
+
+            elif id == 16:#air dash statue
                 statue = entities.Air_dash_statue(object_position, self.game_objects)
-                self.game_objects.interactables.add(statue)                
+                self.game_objects.interactables.add(statue)
 
     @staticmethod
     def blur_value(parallax):#called from load_layers and load_back/front_objects
@@ -685,7 +685,7 @@ class Village_ola2(Biome):
             properties = obj.get('properties',[])
             id = obj['gid'] - self.level.map_data['objects_firstgid']
 
-            if id == 2:
+            if id == 0:
                 new_tree = entities_parallax.Thor_mtn(object_position, self.level.game_objects, parallax, self.live_blur)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(new_tree)
@@ -694,7 +694,22 @@ class Village_ola2(Biome):
 
             elif id == 1:#boulder
                 new_tree = platforms.Boulder(object_position, self.level.game_objects)
-                self.level.game_objects.platforms.add(new_tree)                    
+                self.level.game_objects.platforms.add(new_tree)
+
+            elif id == 2:# locked door
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'ID':
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'erect':
+                        kwarg['erect'] = property['value']
+                    elif propert['name'] == 'key':
+                        kwarg['key'] = property['value']
+                door = platforms.Door_right_orient(object_position, self.level.game_objects, **kwarg)
+                door_i = entities.Door_inter(object_position, self.level.game_objects, door)
+                self.level.game_objects.platforms.add(door)
+                self.level.game_objects.interactables.add(door_i)
+                #self.references['gate'].append(door)
 
 class Light_forest(Biome):
     def __init__(self, level):
@@ -827,9 +842,9 @@ class Light_forest_cave(Biome):
     def __init__(self, level):
         super().__init__(level)
 
-    def room(self, room = 1):        
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)         
-        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)        
+    def room(self, room = 1):
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
+        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
 
     def load_objects(self,data,parallax,offset):
         for obj in data['objects']:
@@ -862,7 +877,7 @@ class Light_forest_cave(Biome):
                     group = self.level.game_objects.all_fgs
                 else:
                     group = self.level.game_objects.all_bgs
-                
+
                 new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, group)
                 group.add(new_drop)
 
@@ -920,7 +935,7 @@ class Golden_fields(Biome):
             properties = obj.get('properties',[])
             id = obj['gid'] - self.level.map_data['objects_firstgid']
 
-            if id == 2:#bridge that is built when the reindeer dies                                        
+            if id == 2:#bridge that is built when the reindeer dies
                 new_bridge = platforms.Bridge(object_position, self.level.game_objects)
                 self.level.game_objects.platforms.add(new_bridge)
 
@@ -929,13 +944,17 @@ class Golden_fields(Biome):
                     group = self.level.game_objects.all_fgs
                 else:
                     group = self.level.game_objects.all_bgs
-                
+
                 new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, group)
                 group.add(new_drop)
-  
+
 class Crystal_mines(Biome):
     def __init__(self, level):
         super().__init__(level)
+
+    def room(self, room = 1):
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
+        self.level.game_objects.lights.ambient = (100/255,100/255,100/255,170/255)
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
@@ -957,7 +976,7 @@ class Crystal_mines(Biome):
 
                 new_conveyor_belt = platforms.Conveyor_belt(object_position, self.level.game_objects, object_size, **kwarg)
                 self.level.game_objects.platforms.add(new_conveyor_belt)
-           
+
             elif id == 8:#smacker
                 kwarg = {'hole': entities.Hole(object_position, self.level.game_objects, object_size)}
                 for property in properties:
@@ -965,7 +984,7 @@ class Crystal_mines(Biome):
                         kwarg['distance'] = property['value']
 
                 new_smacker = platforms.Smacker(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.dynamic_platforms.add(new_smacker)           
+                self.level.game_objects.dynamic_platforms.add(new_smacker)
                 self.level.game_objects.platforms.add(new_smacker)
 
             elif id == 9:#platform
@@ -986,7 +1005,7 @@ class Crystal_mines(Biome):
                     elif property['name'] == 'lifetime':#for proectile
                         kwarg['lifetime'] = int(property['value'])
                     elif property['name'] == 'frequency':#for emitter
-                        kwarg['frequency'] = int(property['value'])                         
+                        kwarg['frequency'] = int(property['value'])
 
                 new_emitter = entities.Crystal_source(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_emitter)                
+                self.level.game_objects.interactables.add(new_emitter)

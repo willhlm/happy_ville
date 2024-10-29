@@ -1432,6 +1432,17 @@ class Larv(Enemy):
         super().knock_back(dir)
         self.AI = AI_larv.Idle(self, carry_dir = False, timer = 40)
 
+    #pltform collisions.
+    def right_collision(self, block, type = 'Wall'):
+        super().right_collision(block, type)
+        if self.dir[0] > 0:
+            self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
+
+    def left_collision(self, block, type = 'Wall'):
+        super().left_collision(block, type)
+        if self.dir[0] < 0:
+            self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
+
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1596,7 +1607,7 @@ class Cultist_warrior(Enemy):
 class Bird(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/animals/bluebird/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/animals/bluebird/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -4378,6 +4389,28 @@ class Grind(Interactable):#trap
     def take_dmg(self, projectile):#when player hits with e.g. sword
         if hasattr(projectile, 'sword_jump'):#if it has the attribute
             projectile.sword_jump()
+
+class Door_inter(Interactable): #game object for itneracting with locked door
+    def __init__(self, pos, game_objects, door_obj):
+        super().__init__(pos, game_objects)
+        self.door = door_obj
+        self.rect = door_obj.rect.copy()
+        self.rect = self.rect.inflate(5,0)
+        self.hitbox = self.rect.inflate(0,0)
+
+    def interact(self):
+        if type(self.door.currentstate).__name__ == 'Erect':
+            self.door.currentstate.handle_input('Transform')
+            if self.sfx: self.play_sfx()
+
+    def update(self):
+        pass
+
+    def draw(self, target):
+        pass
+
+    def release_texture(self):
+        pass
 
 class Lever(Interactable):
     def __init__(self, pos, game_objects, ID_key):
