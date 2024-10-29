@@ -383,6 +383,10 @@ class Level():
                     #else:
                     self.game_objects.all_bgs.add(reflection)
 
+            elif id == 31:#explosion
+                explosion = entities.Explosion_shader(object_position, self.game_objects, object_size)
+                self.game_objects.cosmetics.add(explosion)
+
             elif id == 32:#smoke
                 prop = {}
                 for property in properties:
@@ -730,14 +734,14 @@ class Light_forest(Biome):
             id = obj['gid'] - self.level.map_data['objects_firstgid']
 
             if id == 2:#light forest tree tree
-                new_tree = entities_parallax.Light_forest_tree1(object_position,self.level.game_objects,parallax)
+                new_tree = entities_parallax.Tree_1(object_position,self.level.game_objects,parallax)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(new_tree)
                 else:
                     self.level.game_objects.all_bgs.add(new_tree)
 
             elif id == 3:#light forest tree tree
-                new_tree = entities_parallax.Light_forest_tree2(object_position,self.level.game_objects,parallax)
+                new_tree = entities_parallax.Tree_2(object_position,self.level.game_objects,parallax)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(new_tree)
                 else:
@@ -793,7 +797,7 @@ class Light_forest(Biome):
                 self.level.game_objects.interactables.add(new_cocoon)
 
             elif id == 9:#vines
-                new_viens = entities_parallax.Vines(object_position, self.level.game_objects, parallax)
+                new_viens = entities_parallax.Vines_1(object_position, self.level.game_objects, parallax)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(new_viens)
                 else:
@@ -889,7 +893,7 @@ class Light_forest_cave(Biome):
                     self.level.game_objects.all_bgs.add(new_rock)
 
             elif id == 4:#vines
-                new_vine = entities_parallax.Vines_1(object_position, self.level.game_objects, parallax)
+                new_vine = entities_parallax.Vines_2(object_position, self.level.game_objects, parallax)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(new_vine)
                 else:
@@ -954,7 +958,7 @@ class Crystal_mines(Biome):
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
-        self.level.game_objects.lights.ambient = (100/255,100/255,100/255,170/255)
+        self.level.game_objects.lights.ambient = (50/255,50/255,100/255,170/255)
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
@@ -1009,3 +1013,38 @@ class Crystal_mines(Biome):
 
                 new_emitter = entities.Crystal_source(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_emitter)
+
+            elif id == 11:#crystal  1
+                new_crystal = entities_parallax.Crystal_1(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+
+            elif id == 12:#crystal  1
+                new_crystal = entities_parallax.Crystal_2(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+
+            elif id == 13:#crystal  3
+                new_crystal = entities_parallax.Crystal_3(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+
+            elif id == 14:#crystal  4
+                new_crystal = entities_parallax.Crystal_4(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)
+
+            elif id == 15:#crystal  5
+                new_crystal = entities_parallax.Crystal_5(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_crystal)
+                else:
+                    self.level.game_objects.all_bgs.add(new_crystal)

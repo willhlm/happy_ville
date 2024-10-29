@@ -9,7 +9,7 @@ out vec4 color;
 
 void main()
 {
-    vec4 lightval = texture(imageTexture,fragmentTexCoord);//light circle
+    vec4 lightval = texture(imageTexture,fragmentTexCoord);//light circles
     vec4 background = texture(background,fragmentTexCoord);//screen
 
     color = background*lightval;

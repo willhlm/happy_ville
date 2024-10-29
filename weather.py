@@ -75,6 +75,7 @@ class Wind(Screen_shader):
         self.shader['noiseTexture'] = self.noise_layer.texture
         self.shader['time'] = self.time * 0.01
         self.shader['velocity'] = self.velocity
+        self.shader['lifetime'] = self.lifetime
         super().draw(target)
 
     def kill(self):

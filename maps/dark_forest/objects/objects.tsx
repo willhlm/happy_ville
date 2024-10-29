@@ -9,7 +9,7 @@
   <image width="112" height="176" source="../../../Sprites/animations/cocoon_boss/idle/idle.png"/>
  </tile>
  <tile id="9">
-  <image width="32" height="96" source="../../../Sprites/animations/vines/light_forest/idle/idle.png"/>
+  <image width="32" height="96" source="../../../Sprites/animations/vines/vines_1/idle/idle.png"/>
  </tile>
  <tile id="10">
   <image width="80" height="80" source="../../../Sprites/animations/bushes/small_tree1/idle/test.png"/>

@@ -76,11 +76,11 @@ class Trees(Layered_objects):
         obj.add_internal(self.game_objects.all_bgs)
 
 #light forest
-class Light_forest_tree1(Trees):
+class Tree_1(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax, live_blur = False):
         super().__init__(pos,game_objects,parallax, live_blur)        
-        self.init_sprites('Sprites/animations/trees/light_forest_tree1/')#blur or lead from memory
+        self.init_sprites('Sprites/animations/trees/tree_1/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -92,11 +92,11 @@ class Light_forest_tree1(Trees):
         self.spawn_box = [position,size]
         self.create_leaves()
 
-class Light_forest_tree2(Trees):
+class Tree_2(Trees):
     animations = {}
     def __init__(self,pos,game_objects,parallax, live_blur = False):
         super().__init__(pos,game_objects,parallax, live_blur)
-        self.init_sprites('Sprites/animations/trees/light_forest_tree2/')#blur or lead from memory
+        self.init_sprites('Sprites/animations/trees/tree_2/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
@@ -118,44 +118,11 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
 
-class Thor_mtn(Layered_objects):
+class Vines_1(Layered_objects):#light forest
     animations = {}
     def __init__(self, pos, game_objects, parallax, live_blur = False):
         super().__init__(pos, game_objects, parallax, live_blur)
-        self.init_sprites('Sprites/animations/bg_animations/thor_mtn_village/')#blur or lead from memory                    
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.true_pos = self.rect.topleft
-
-class Vines(Layered_objects):#light forest
-    animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
-        self.init_sprites('Sprites/animations/vines/light_forest/')#blur or lead from memory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.true_pos = self.rect.topleft
-        self.shader = game_objects.shaders['sway_wind']
-        self.time = 0
-        self.offset = random.uniform(0,10)
-        self.upsidedown = 1
-
-    def update(self):
-        self.time += self.game_objects.game.dt
-        self.group_distance()
-
-    def draw(self,target):
-        self.shader['TIME'] = self.time
-        self.shader['offset'] = self.offset
-        self.shader['upsidedown'] = self.upsidedown
-        super().draw(target)
-
-class Vines_1(Layered_objects):#light forest cave
-    animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
-        self.init_sprites('Sprites/animations/vines/light_forest_cave/')#blur or lead from memory
+        self.init_sprites('Sprites/animations/vines/vines_1/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.true_pos = self.rect.topleft
@@ -198,7 +165,7 @@ class Small_tree1(Layered_objects):
         self.shader['upsidedown'] = 0
         super().draw(target)
 
-#lightf orest cave
+#lightf forest cave
 class Ljusmaskar(Layered_objects):
     animations = {}
     def __init__(self,pos,game_objects,parallax, live_blur = False):
@@ -280,6 +247,91 @@ class Falling_rock_source(Layered_objects):
             self.game_objects.all_bgs._spritelayers[obj] = 0
             self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
             obj.add_internal(self.game_objects.all_bgs)
+
+class Vines_2(Layered_objects):#light forest cave
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)
+        self.init_sprites('Sprites/animations/vines/vines_2/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.true_pos = self.rect.topleft
+        self.shader = game_objects.shaders['sway_wind']
+        self.time = 0
+        self.offset = random.uniform(0,10)
+        self.upsidedown = 1
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+        self.group_distance()
+
+    def draw(self,target):
+        self.shader['TIME'] = self.time
+        self.shader['offset'] = self.offset
+        self.shader['upsidedown'] = self.upsidedown
+        super().draw(target)
+
+#crystal mines
+class Crystals(Layered_objects):
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+        self.init_sprites('Sprites/animations/crystals/' + type(self).__name__.lower() + '/')#blur or lead from memory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
+        self.shader = game_objects.shaders['highlight']  
+        
+        self.speed = 2
+        self.shine_progress = 0
+
+    def update(self):
+        super().update()  
+        if self.shine_progress * self.speed >= 1:
+            if random.randint(0,500) == 0: self.shine_progress = 0                    
+        else:
+            self.shine_progress += 0.01 * self.game_objects.game.dt
+
+    def draw(self, target):
+        self.shader['shine_progress'] = self.shine_progress
+        self.shader['speed'] = self.speed
+        super().draw(target)
+
+class Crystal_1(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)        
+
+class Crystal_2(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+
+class Crystal_3(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+
+class Crystal_4(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)  
+
+class Crystal_5(Crystals):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)                          
+
+#village
+class Thor_mtn(Layered_objects):
+    animations = {}
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)
+        self.init_sprites('Sprites/animations/bg_animations/thor_mtn_village/')#blur or lead from memory                    
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.true_pos = self.rect.topleft
 
 class Light_source(Layered_objects):#works for parallax = 1. Not sure how we would liek to deal with light sources for other parallax
     def __init__(self, pos, game_objects, parallax, live_blur = False):

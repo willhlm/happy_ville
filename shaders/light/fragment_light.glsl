@@ -74,10 +74,6 @@ void main() {
         if (angleToLight < start || angleToLight > end) {
             continue;
         }
-
-        if (texture(normal_map, fragmentTexCoord).a == 0.0) {//if default. not a good solution. not sure how multiple light sources will affect this.
-            normal = vec3(toLight, 0.0); // Default normal facing out of the screen
-        }
         
         // Skip if fragment is too far away from light source
         float distanceToLight = calculateDistance(fragmentTexCoord * resolution, lightPos);
@@ -111,18 +107,22 @@ void main() {
         }
 
        if (!occluded) {
+            if (texture(normal_map, fragmentTexCoord).a == 0.0) {//if default. not a good solution. not sure how multiple light sources will affect this.
+                normal = vec3(toLight, 0.0); // Default normal facing out of the screen
+            }
+
             // Light intensity
             float lightIntensity = max(1.0 - pow(distanceToLight / lightRadius, 2), 0);
 
             lightDir = normalize(vec3(toLight, 0.0));// Calculate the direction from the fragment to the light
-            diff = mix(1.0, max(dot(normal, lightDir), 0.0), normal_interact[l]);            
+            diff = mix(1.0, dot(normal, lightDir), clamp(ambient.a, 0.3, 0.9)* normal_interact[l]);         //smoothstep(0.3, 0.9, ambient.a)   
 
             // Add light to the background color
             float fade = smoothstep(0.0, 1.0, lightIntensity);
-            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff , lightIntensity * fade * colour[l].w );
+            backgroundColor += vec4(colour[l].xyz *  fade * colour[l].w * diff, lightIntensity * fade * colour[l].w);
         }
     }
 
-   backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0        
+    backgroundColor.xyz /= max(mix(backgroundColor.w, 1, ambient.w), epsilon);//normalise the colour, and prevent division by 0        
     color = backgroundColor;
 }

@@ -19,7 +19,7 @@ class Idle(Weather_States):
         super().__init__(entity)
 
     def update(self):
-        rand = random.randint(0, 1000)
+        rand = random.randint(0, 100)
         if rand==0:
             self.enter_state('Wind')
 

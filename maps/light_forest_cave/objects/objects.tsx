@@ -14,7 +14,7 @@
   <image width="16" height="48" source="../../../Sprites/animations/falling_rock/source/idle/idle.png"/>
  </tile>
  <tile id="4">
-  <image width="32" height="112" source="../../../Sprites/animations/vines/light_forest_cave/idle/idle.png"/>
+  <image width="32" height="112" source="../../../Sprites/animations/vines/vines_2/idle/idle.png"/>
  </tile>
  <tile id="5">
   <properties>
