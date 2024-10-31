@@ -1334,14 +1334,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Crab_crystal"
+                                 "value":"Mygga_crystal"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1408,
-                         "y":624
+                         "x":1184,
+                         "y":544
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1381,7 +1381,7 @@
          "y":0
         }],
  "nextlayerid":90,
- "nextobjectid":350,
+ "nextobjectid":352,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

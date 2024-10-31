@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import read_files, particles, animation, dialogue, states, groups
-import states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
+import states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
 import constants as C
 
 def sign(number):
@@ -810,7 +810,7 @@ class Player(Character):
 
         self.max_health = 100
         self.max_spirit = 4
-        self.health = 1
+        self.health = 10
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1242,8 +1242,8 @@ class Mygga_suicide(Flying_enemy):
         self.currentstate.handle_input('collision')#for suicide
 
 class Mygga_roaming(Flying_enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1251,13 +1251,7 @@ class Mygga_roaming(Flying_enemy):
         self.health = 3
         self.velocity = [random.randint(-3,3),random.randint(-3,3)]
         self.dir[0] = sign(self.velocity[0])
-        self.AI.enter_AI('roaming_attack', frequency = 150)
-
-    def attack(self):#called from roaming AI
-        dirs = [[1,1],[-1,1],[1,-1],[-1,-1]]
-        for direction in dirs:
-            obj = Projectile_1(self.hitbox.center, self.game_objects, dir = direction, amp = [3,3])
-            self.game_objects.eprojectiles.add(obj)
+        self.AI.enter_AI('idle')
 
     def walk(self, time):#called from walk state
         pass
@@ -1295,6 +1289,46 @@ class Mygga_roaming(Flying_enemy):
         self.hitbox.top = block.hitbox.bottom
         self.collision_types['top'] = True
         self.velocity[1] *= -1
+
+class Mygga_roaming_projectile(Mygga_roaming):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.AI.enter_AI('roaming_attack', frequency = 150)
+
+    def attack(self):#called from roaming AI
+        dirs = [[1,1],[-1,1],[1,-1],[-1,-1]]
+        for direction in dirs:
+            obj = Projectile_1(self.hitbox.center, self.game_objects, dir = direction, amp = [3,3])
+            self.game_objects.eprojectiles.add(obj)
+
+class Mygga_crystal(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_crystal/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.health = 3  
+        self.AI = AI_mygga_crystal.Patrol(self)
+        self.currentstate = states_mygga_crystal.Idle(self)
+
+        self.flee_distance = [50, 50]#the distance to hide
+        self.attack_distance = [100, 100]
+        self.aggro_distance = [150, 100]   
+
+    def attack(self):#called from roaming AI
+        dirs = [[1,1], [-1,1], [1,-1], [-1,-1]]
+        for direction in dirs:
+            obj = Poisonblobb(self.hitbox.topleft, self.game_objects, dir = direction, amp = [3,3])
+            self.game_objects.eprojectiles.add(obj)
+
+    def chase(self, direction):#called from AI: when chaising
+        self.velocity[0] += direction[0]*0.5
+        self.velocity[1] += direction[1]*0.5
+
+    def patrol(self, position):#called from AI: when patroling
+        self.velocity[0] += (position[0]-self.rect.centerx) * 0.002
+        self.velocity[1] += (position[1]-self.rect.centery) * 0.002
 
 class Exploding_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
