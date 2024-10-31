@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import read_files, particles, animation, dialogue, states, groups
 import states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga
+import AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
 import constants as C
 
 def sign(number):
@@ -780,7 +780,8 @@ class Character(Platform_entity):#enemy, NPC,player
         return True#return truw to show that damage was taken
 
     def knock_back(self, dir):
-        self.velocity[0] = dir[0] * 30 * (1 - abs(dir[1]))
+        amp_x = 50
+        self.velocity[0] = dir[0] * amp_x * (1 - abs(dir[1]))
         self.velocity[1] = -dir[1] * 10
 
     def hurt_particles(self, type = 'Circle', number_particles = 20, **kwarg):
@@ -1320,12 +1321,12 @@ class Crab_crystal(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
 
         self.currentstate = states_crab_crystal.Idle(self)
-        self.AI = AI_crab_crystal.AI(self)    
+        self.AI = AI_crab_crystal.AI(self)
 
         self.hide_distance = [100, 50]#the distance to hide
         self.fly_distance = [150, 50]#the distance to hide
-        self.attack_distance = [250, 50]    
-        self.aggro_distance = [300, 50]    
+        self.attack_distance = [250, 50]
+        self.aggro_distance = [300, 50]
 
     def chase(self, dir = 1):#called from AI: when chaising
         self.velocity[0] += dir*0.6
@@ -1333,7 +1334,7 @@ class Crab_crystal(Enemy):
     def take_dmg(self,dmg):
         return self.currentstate.take_dmg(dmg)
 
-    def attack(self):#called from currenrstate    
+    def attack(self):#called from currenrstate
         for i in range(0, 3):
             vel = random.randint(-3,3)
             new_projectile = Poisonblobb(self.rect.midtop, self.game_objects, dir = [1, -1], amp = [vel, 4])
@@ -1477,6 +1478,30 @@ class Maggot(Enemy):
         self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
         self.friction[0] = C.friction[0]*2
 
+class Larv(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.AI = AI_larv.Idle(self)
+        print(self.AI)
+
+    def walk(self):
+        self.velocity[0] += self.dir[0]*0.22
+
+    def knock_back(self, dir):
+        super().knock_back(dir)
+        self.AI = AI_larv.Idle(self, carry_dir = False, timer = 40)
+
+    #pltform collisions.
+    def right_collision(self, block, type = 'Wall'):
+        super().right_collision(block, type)
+        if self.dir[0] > 0:
+            self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
+
+    def left_collision(self, block, type = 'Wall'):
+        super().left_collision(block, type)
+        if self.dir[0] < 0:
+            self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
+
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -1486,14 +1511,17 @@ class Larv_simple(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
         self.attack_distance = [0,0]
 
-class Larv_jr(Enemy):
+class Larv_jr(Larv):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects,True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.hitbox = pygame.Rect(pos[0],pos[1],22,12)
         self.attack_distance = [0,0]
+        self.init_x = self.rect.x
+        self.patrol_dist = 100
+        self.health = 15
 
 class Larv_poison(Enemy):
     def __init__(self, pos, game_objects):
@@ -4423,6 +4451,28 @@ class Grind(Interactable):#trap
     def take_dmg(self, projectile):#when player hits with e.g. sword
         if hasattr(projectile, 'sword_jump'):#if it has the attribute
             projectile.sword_jump()
+
+class Door_inter(Interactable): #game object for itneracting with locked door
+    def __init__(self, pos, game_objects, door_obj):
+        super().__init__(pos, game_objects)
+        self.door = door_obj
+        self.rect = door_obj.rect.copy()
+        self.rect = self.rect.inflate(5,0)
+        self.hitbox = self.rect.inflate(0,0)
+
+    def interact(self):
+        if type(self.door.currentstate).__name__ == 'Erect':
+            self.door.currentstate.handle_input('Transform')
+            if self.sfx: self.play_sfx()
+
+    def update(self):
+        pass
+
+    def draw(self, target):
+        pass
+
+    def release_texture(self):
+        pass
 
 class Lever(Interactable):
     def __init__(self, pos, game_objects, ID_key):
