@@ -614,7 +614,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1245,9 +1245,19 @@
                          "name":"",
                          "properties":[
                                 {
+                                 "name":"right",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
                                  "name":"spawn",
                                  "type":"string",
                                  "value":"2"
+                                }, 
+                                {
+                                 "name":"up",
+                                 "type":"bool",
+                                 "value":true
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1371,7 +1381,7 @@
          "y":0
         }],
  "nextlayerid":90,
- "nextobjectid":347,
+ "nextobjectid":350,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

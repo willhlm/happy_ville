@@ -69,6 +69,9 @@ class Title_Menu(Game_State):
     def update(self):#update menu arrow position
         self.animation.update()
 
+    def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
+        self.update()
+
     def render(self):
         self.game.display.render(self.image, self.game.screen)#shader render
 
@@ -118,7 +121,7 @@ class Title_Menu(Game_State):
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            self.game.game_objects.load_map(self,'crystal_mines_1','1')
+            self.game.game_objects.load_map(self,'crystal_mines_1','2')
             #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
 
         elif self.current_button == 1:
@@ -467,6 +470,9 @@ class Gameplay(Game_State):
 
     def update(self):
         self.handle_movement()
+        self.fade_update()
+
+    def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.game.game_objects.update()
         self.game.game_objects.collide_all()
         self.game.game_objects.UI['gameplay'].update()
@@ -700,6 +706,7 @@ class Slow_motion_gameplay(Slow_gameplay):#called from aila ability
 
     def exit_state(self):
         super().exit_state()
+        self.surface.release()
         self.game.game_objects.player.slow_motion = 1
 
 class Ability_menu(Gameplay):#when pressing tab
@@ -758,7 +765,7 @@ class Fadein(Gameplay):
         self.fade_surface.clear(0,0,0,255)
 
     def init(self):
-        self.aila_state = 'Idle_main'
+        self.aila_state = 'Idle_main'#for respawn after death
         for state in self.game.state_stack:
             if 'Death' == type(state).__name__:
                 self.aila_state = 'Invisible_main'
@@ -766,10 +773,7 @@ class Fadein(Gameplay):
                 break
 
     def update(self):
-        self.game.game_objects.update()
-        self.game.game_objects.platform_collision()
-        self.game.game_objects.UI['gameplay'].update()
-
+        self.fade_update()
         self.count += self.game.dt
         if self.count > self.fade_length*2:
             self.exit()
@@ -804,7 +808,7 @@ class Fadeout(Fadein):
         pass
 
     def update(self):
-        self.previous_state.update()
+        self.previous_state.fade_update()
         self.count += self.game.dt
         if self.count > self.fade_length:
             self.exit()

@@ -268,7 +268,7 @@ class Run_main(Player_states):
 
     def handle_movement(self,event):
         super().handle_movement(event)
-        if self.entity.acceleration[0]==0:
+        if self.entity.acceleration[0] == 0:
             self.enter_state('Run_post')
 
     def swing_sword(self):

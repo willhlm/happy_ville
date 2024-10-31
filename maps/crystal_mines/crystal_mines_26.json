@@ -194,7 +194,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -303,7 +303,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":47,
+         "firstgid":52,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

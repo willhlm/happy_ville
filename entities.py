@@ -809,7 +809,7 @@ class Player(Character):
 
         self.max_health = 100
         self.max_spirit = 4
-        self.health = 100
+        self.health = 1
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -837,7 +837,6 @@ class Player(Character):
                         'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
-        self.time =0
 
     def update_hitbox(self):
         super().update_hitbox()
@@ -908,9 +907,6 @@ class Player(Character):
     def update(self):
         super().update()
         self.omamoris.update()
-        self.time += 1
-        if self.time == 100:
-            self.game_objects.cosmetics.add(Explosion_shader(self.rect.center, self.game_objects, [200,200])        )
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -1642,7 +1638,7 @@ class Cultist_warrior(Enemy):
 class Bird(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/animals/bluebird/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/animals/bluebird/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
@@ -3872,15 +3868,19 @@ class Path_col(Interactable):
     def update(self):
         self.group_distance()
 
-    def player_collision(self, player):
+    def player_movement(self, player):#the movement aila does when colliding
         if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction
             player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
-            player.currentstate.walk()
+            player.acceleration[0] = C.acceleration[0]
         else:#vertical travelling
-            player.reset_movement()
-            player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
+            if player.velocity[1] < 0:#up
+                player.velocity[1] = -10
+            else:#down
+                pass       
 
-        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
+    def player_collision(self, player):
+        self.player_movement(player)
+        self.game_objects.load_map(self.game_objects.game.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
         self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
