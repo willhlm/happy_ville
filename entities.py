@@ -991,11 +991,16 @@ class Enemy(Character):
         self.group_distance()
 
     def player_collision(self, player):#when player collides with enemy
-        if not self.aggro: return
-        if player.invincibile: return
-        player.take_dmg(1)
-        pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
-        player.knock_back([pm_one,0])
+        if type(player.currentstate).__name__ in ['Thunder_main', 'Thunder_post']:
+            self.take_dmg(1)
+            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
+            self.knock_back([pm_one,0])
+        else:
+            if not self.aggro: return
+            if player.invincibile: return
+            player.take_dmg(1)
+            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
+            player.knock_back([pm_one,0])
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -1309,7 +1314,8 @@ class Mygga_crystal(Flying_enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 3  
-        self.AI = AI_mygga_crystal.Patrol(self)
+        
+        self.AI = AI_mygga_crystal.AI(self)
         self.currentstate = states_mygga_crystal.Idle(self)
 
         self.flee_distance = [50, 50]#the distance to hide

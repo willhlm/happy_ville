@@ -1062,73 +1062,59 @@ class Plant_bone_main(Player_states):
     def increase_phase(self):
         self.enter_state('Idle_main')
 
-class Abillitites(Player_states):
-    def __init__(self,entity):
+class Thunder_pre(Player_states):
+    def __init__(self, entity):
         super().__init__(entity)
-        self.dir = self.entity.dir.copy()#animation direction
 
-class Thunder_pre(Abillitites):
-    def __init__(self,entity):
+    def update(self):
+        self.entity.velocity = [0, 0]
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
+        self.dir = event['l_stick']#the avlue of the press, right, left, up down
+
+    def increase_phase(self):#called when an animation is finihed for that state
+        if self.dir == [0,0]: self.dir = [0, 1]
+        self.enter_state('Thunder_main', dir = self.dir)
+
+class Thunder_main(Player_states):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)
-        self.entity.acceleration[0] = 0
-        self.init()
+        self.dir = kwarg.get('dir', [0, 1])
+        self.time = 30
+        self.entity.invincibile = True
 
-    def init(self):
-        self.entity.thunder_aura = entities.Thunder_aura(self.entity.rect.center,self.entity.game_objects)
-        self.entity.game_objects.cosmetics.add(self.entity.thunder_aura)
+    def update(self):
+        self.entity.velocity = [8*self.dir[0], 8*self.dir[1]]
+        self.time -= self.entity.game_objects.game.dt
+        if self.time < 0:
+            self.enter_state('Thunder_post')
 
     def handle_movement(self,event):
         pass
 
-    def handle_release_input(self,input):
-        event = input.output()
-        if event[-1]=='b':#when release the botton
-            self.entity.thunder_aura.currentstate.handle_input('Death')
-            input.processed()
-            self.enter_state('Idle_main')
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_state('Thunder_charge')
-
-class Thunder_charge(Thunder_pre):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['thunder'][0])
-
-    def init(self):
-        self.entity.consume_spirit()
-
-    def handle_release_input(self,input):
-        event = input.output()
-        if event[-1]=='b':#when release the botton
-            input.processed()
-            self.attack()
-            self.enter_state('Thunder_main')
-
-    def attack(self):
-        self.entity.thunder_aura.currentstate.enter_state('Death')
-
-        collision_ene = self.entity.game_objects.collisions.thunder_attack(self.entity.thunder_aura)
-        for enemy in collision_ene:
-            self.entity.abilities.spirit_abilities['Thunder'].initiate(enemy.rect)
-
     def increase_phase(self):#called when an animation is finihed for that state
         pass
+    
+    def handle_input(self, input):
+        if input in ['Ground', 'Wall', 'belt']:
+            self.entity.game_objects.camera_manager.camera_shake()
+            self.enter_state('Thunder_post')
 
-class Thunder_main(Thunder_pre):
+class Thunder_post(Player_states):
     def __init__(self,entity):
-        super().__init__(entity)
-
-    def init(self):
-        pass
+        super().__init__(entity)        
 
     def update(self):
+        self.entity.velocity = [0,0]
+
+    def handle_movement(self,event):
         pass
 
     def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_state('Idle_main')
+        self.entity.invincibile = False
+        self.enter_state('Idle_main')    
 
-class Shield_main(Abillitites):
+class Shield_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
@@ -1140,7 +1126,7 @@ class Shield_main(Abillitites):
         else:
             self.enter_state('Run_main')
 
-class Migawari_pre(Abillitites):
+class Migawari_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -1162,7 +1148,7 @@ class Migawari_main(Migawari_pre):
         self.entity.consume_spirit()
         self.enter_state('Idle_main')
 
-class Slow_motion_pre(Abillitites):
+class Slow_motion_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -1177,7 +1163,7 @@ class Slow_motion_main(Slow_motion_pre):
     def increase_phase(self):
         self.enter_state('Idle_main')
 
-class Bow_main(Abillitites):
+class Bow_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.consume_spirit()
