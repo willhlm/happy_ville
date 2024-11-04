@@ -122,8 +122,7 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_13','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
-
+            #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()

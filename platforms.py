@@ -411,18 +411,9 @@ class Conveyor_belt(Collision_texture):
 class Collision_timer(Collision_texture):#collision block that dissapears if aila stands on it
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.timers = []
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate = states_time_collision.Idle(self)#
-
-    def update(self):
-        super().update()
-        self.update_timers()
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
 
     def collide_x(self,entity):
         pass
@@ -431,7 +422,7 @@ class Collision_timer(Collision_texture):#collision block that dissapears if ail
         if entity.velocity[1] < 0: return#going up
         offset = entity.velocity[1] + 1
         if entity.hitbox.bottom <= self.hitbox.top + offset:
-            self.timer_jobs['timer_disappear'].activate()
+            self.game_objects.timer_manager.start_timer(60, self.deactivate)
             entity.down_collision(self)
             entity.limit_y()
             entity.running_particles = self.run_particles#save the particles to make
@@ -442,14 +433,13 @@ class Rhoutta_encounter_1(Collision_timer):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.timer_jobs = {'timer_disappear': Timer(self, 60, self.deactivate),'timer_appear': Timer(self, 60, self.activate)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.run_particles = entities.Dust_running_particles
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
 
     def deactivate(self):#called when timer_disappear runs out
         self.hitbox = [self.hitbox[0], self.hitbox[1], 0, 0]
-        self.timer_jobs['timer_appear'].activate()
+        self.game_objects.timer_manager.start_timer(60, self.activate)
         self.currentstate.handle_input('Transition_1')
 
     def activate(self):#called when timer_appear runs out
@@ -461,7 +451,6 @@ class Crystal_mines_1(Collision_timer):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/crystal_mines_1/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.timer_jobs = {'timer_disappear': Timer(self, 60, self.deactivate),'timer_appear': Timer(self, 60, self.activate)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.run_particles = entities.Dust_running_particles
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = pygame.Rect(pos[0], pos[1], self.rect[2], self.rect[3]*0.4)
@@ -469,7 +458,7 @@ class Crystal_mines_1(Collision_timer):
 
     def deactivate(self):#called when timer_disappear runs out
         self.hitbox[2], self.hitbox[3] = 0, 0
-        self.timer_jobs['timer_appear'].activate()
+        self.game_objects.timer_manager.start_timer(60, self.activate)
         self.currentstate.handle_input('Transition_1')
 
     def activate(self):#called when timer_appear runs out
@@ -484,7 +473,6 @@ class Bubble_static(Collision_timer):#static bubble
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
         lifetime = prop.get('lifetime', 100)
-        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime), 'timer_appear':Platform_timer_2(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -495,7 +483,7 @@ class Bubble_static(Collision_timer):#static bubble
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down
-            self.timer_jobs['timer_disappear'].activate()
+            self.game_objects.timer_manager.start_timer(self.lifeitme, self.deactivate)
             entity.down_collision(self)
             entity.limit_y()
         else:#going up
@@ -504,7 +492,7 @@ class Bubble_static(Collision_timer):#static bubble
 
     def deactivate(self):#called when first timer runs out
         self.hitbox = [self.hitbox[0],self.hitbox[1],0,0]
-        self.timer_jobs['timer_appear'].activate()
+        self.game_objects.timer_manager.start_timer(self.lifeitme, self.activate)
         self.currentstate.handle_input('Transition_1')
 
     def activate(self):
@@ -515,38 +503,31 @@ class Bubble_static(Collision_timer):#static bubble
 class Collision_breakable(Collision_texture):#breakable collision blocks
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
-        self.timer_jobs = {'invincibility':entities.Invincibility_timer(self,C.invincibility_time_enemy)}
+        self.flags = {'invincibility': False}
         self.health = 3
-        self.invincibile = False
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#
 
-    def update(self):
-        super().update()
-        self.update_timers()#invincibililty
-
     def dead(self):#called when death animatin finishes
         self.kill()
 
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False
+
     def take_dmg(self, projectile):
-        if self.invincibile: return
+        if self.flags['invincibility']: return
         self.health -= projectile.dmg
-        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+        self.flags['invincibility'] = True 
+        
         projectile.clash_particles(self.hitbox.center)
+        self.game_objects.camera_manager.camera_shake(3,10)
 
         if self.health > 0:#check if dead¨
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while        
             self.animation.handle_input('Hurt')#turn white
-            self.game_objects.camera_manager.camera_shake(3,10)
-        else:#if dead
-            if self.currentstate.state_name != 'death':#if not already dead
-                self.game_objects.game.state_stack[-1].handle_input('dmg')#makes the game freez for few frames
-                self.currentstate.enter_state('Death')#overrite any state and go to deat
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
+        else:#if dead        
+            self.currentstate.enter_state('Death')#overrite any state and go to deat
 
 class Breakable_block_1(Collision_breakable):
     def __init__(self, pos, game_objects):
@@ -609,26 +590,16 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def __init__(self, pos, game_objects, **prop):
         super().__init__(pos, game_objects)
         self.sprites = Bubble.sprites
-        self.timers = []
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
 
         lifetime = prop.get('lifetime', 300)
-        self.timer_jobs = {'timer_disappear':Platform_timer_1(self,lifetime)}#these timers are activated when promt and a job is appeneded to self.timer.
-        self.timer_jobs['timer_disappear'].activate()
+        self.game_objects.timer_manager.start_timer(self.lifeitme, self.deactivate)
         #TODO horitoxntal or veritcal moment
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate = states_time_collision.Idle(self)#
-
-    def update(self):
-        super().update()
-        self.update_timers()
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
 
     def update_vel(self):
         self.velocity[1] -= self.game_objects.game.dt*0.01
@@ -670,8 +641,29 @@ class Smacker(Collision_dynamic):#trap
     def collide_y(self,entity):#entity moving
         self.currentstate.collide_y(entity)
 
-#timers:
-class Conveyor_belt_timer(entities.Timer):#not in use: if we want to make convyeor belt "jumps"
+#not used
+class Timer():
+    def __init__(self, entity, duration, callback):
+        self.entity = entity
+        self.duration = duration    
+        self.callback = callback
+
+    def activate(self):#add timer to the entity timer list
+        if self in self.entity.timers: return#do not append if the timer is already inside
+        self.lifetime = self.duration
+        self.entity.timers.append(self)
+
+    def deactivate(self):
+        if self not in self.entity.timers: return#do not remove if the timer is not inside
+        self.entity.timers.remove(self)
+        self.callback()
+
+    def update(self):
+        self.lifetime -= self.entity.game_objects.game.dt * self.entity.game_objects.player.slow_motion
+        if self.lifetime < 0:
+            self.deactivate()
+
+class Conveyor_belt_timer(Timer):#not in use: if we want to make convyeor belt "jumps"
     def __init__(self, entity, duration, direction):
         super().__init__(entity, duration)
         self.direction = direction
@@ -692,23 +684,3 @@ class Conveyor_belt_timer(entities.Timer):#not in use: if we want to make convye
         self.entity.timers.remove(self)
         self.entity.friction = C.friction_player.copy()#put it back
 
-class Timer():
-    def __init__(self, entity, duration, timeout):
-        self.entity = entity
-        self.duration = duration
-        self.timeout = timeout
-
-    def activate(self):#add timer to the entity timer list
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.lifetime = self.duration
-        self.entity.timers.append(self)
-
-    def deactivate(self):
-        if self not in self.entity.timers: return#do not remove if the timer is not inside
-        self.entity.timers.remove(self)
-        self.timeout()
-
-    def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt * self.entity.game_objects.player.slow_motion
-        if self.lifetime < 0:
-            self.deactivate()
