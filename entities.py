@@ -834,24 +834,24 @@ class Player(Character):
         self.flags = {'ground': True, 'sword_swinging': False, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
-        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
 
     def ramp_down_collision(self, position):#when colliding with platform beneth
         super().ramp_down_collision(position)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+        self.friction = C.friction_player.copy()#water liquid slow works if this is commented
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+        self.friction = C.friction_player.copy()#water liquid slow works if this is commented
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-
+        
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
@@ -4598,3 +4598,18 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
         obj1 = particles.Circle(pos, self.entity.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
         self.entity.game_objects.cosmetics.add(obj1)
 
+class Friction_status(Status):
+    def __init__(self,entity, duration):
+        super().__init__(entity, duration)
+
+    def deactivate(self):
+        self.entity.friction =  C.friction_player.copy()           
+        if self not in self.entity.timers: return#do not remove if the timer is not inside
+        self.entity.timers.remove(self)        
+
+    def update(self):
+        self.entity.friction[0] += self.entity.game_objects.game.dt* 0.001
+        self.entity.friction[0] = min(self.entity.friction[0], C.friction_player[0])
+
+        if self.entity.friction[0] == C.friction_player[0]:
+            self.deactivate()

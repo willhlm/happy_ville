@@ -104,9 +104,6 @@ class Level():
                     self.biome.load_objects(data[object], parallax, offset)
 
     def load_statics(self,data,parallax,offset):#load statics and collision
-        chest_int = 1
-        soul_essence_int = 1
-
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]

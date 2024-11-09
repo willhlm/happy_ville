@@ -491,6 +491,11 @@ class Wall_glide_main(Player_states):
         else:
             self.dir = [-1,0]
 
+    def update(self):#is needed
+        if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
+            self.enter_state('Fall_pre', wall_dir = self.dir)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+
     def handle_press_input(self,input):
         event = input.output()        
         if event[-1] == 'a':
@@ -539,6 +544,12 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
     def __init__(self, entity):
         super().__init__(entity)
         self.entity.friction[1] = 0.4
+
+    def update(self):#is needed
+        if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
+            self.enter_state('Fall_pre')
+            if self.entity.states['Wall_glide']:
+                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
 
     def handle_press_input(self,input):
         event = input.output()     
@@ -721,8 +732,8 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
                 if self.entity.acceleration[0] != 0:
                     if self.buffer_time < 0:
                         state = input.capitalize() + '_glide_main'
-                        self.enter_state(state)
-        elif input == 'interrupt':
+                        self.enter_state(state)                        
+        elif input == 'interrupt':            
             self.enter_state('Idle_main')
 
     def update(self):
@@ -754,17 +765,18 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
                     if self.buffer_time < 0:
                         state = input.capitalize() + '_glide_main'
                         self.enter_state(state)
-        elif input == 'interrupt':
-            self.enter_state('Idle_main')
+        elif input == 'interrupt':    
+            self.enter_state('Idle_main')    
 
-    def increase_phase(self):
-        self.entity.friction = C.friction_player.copy()   
+    def increase_phase(self):        
+        #self.entity.friction = C.friction_player.copy()   
         if self.entity.flags['ground']:
             if self.entity.acceleration[0] == 0:
                 self.enter_state('Idle_main')
             else:
                 self.enter_state('Run_main')
         else:
+            self.entity.timer_jobs['friction'].activate()
             self.enter_state('Fall_pre')
 
 class Death_pre(Player_states):
