@@ -18,6 +18,7 @@ import lights
 import shader_render
 import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
 import quests_events
+import timer
 
 from time import perf_counter
 
@@ -41,6 +42,7 @@ class Game_Objects():
         self.shader_render = shader_render.Screen_shader(self, 'vignette')     
         self.render_state = states_gameplay.Idle(self)
         self.quests_events = quests_events.Quests_events(self)
+        self.timer_manager = timer.Timer_manager(self)
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies
@@ -118,6 +120,7 @@ class Game_Objects():
         self.eprojectiles.empty()
         self.interactables_fg.empty()
         self.fprojectiles.empty()
+        self.timer_manager.clear_timers()
 
     def collide_all(self):        
         self.platform_collision()
@@ -144,6 +147,7 @@ class Game_Objects():
     def update(self):
         self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
         self.camera_manager.update()#should be first
+        self.timer_manager.update()
         self.platforms.update()        
         self.platforms_ramps.update()
         self.layer_pause.update()#should be before all_bgs and all_fgs

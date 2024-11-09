@@ -614,7 +614,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1245,9 +1245,19 @@
                          "name":"",
                          "properties":[
                                 {
+                                 "name":"right",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
                                  "name":"spawn",
                                  "type":"string",
                                  "value":"2"
+                                }, 
+                                {
+                                 "name":"up",
+                                 "type":"bool",
+                                 "value":true
                                 }],
                          "rotation":0,
                          "type":"",
@@ -1324,14 +1334,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Crab_crystal"
+                                 "value":"Mygga_crystal"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1408,
-                         "y":624
+                         "x":1184,
+                         "y":544
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1371,7 +1381,7 @@
          "y":0
         }],
  "nextlayerid":90,
- "nextobjectid":347,
+ "nextobjectid":355,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

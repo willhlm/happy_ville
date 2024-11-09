@@ -14,6 +14,7 @@ class Level():
 
     def load_map(self, map_name, spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
+        self.spawned = False
         self.level_name = map_name.lower()#biom_room
         self.spawn = spawn
         self.game_objects.lights.new_map()#set ambient default light and clear light sources
@@ -123,14 +124,31 @@ class Level():
                 continue
 
             id = obj['gid'] - self.map_data['statics_firstgid']
-            if id == 0:#player
+            if id == 0:  # Player                
+                if self.spawned: continue#skip if player has already spawned                   
                 for property in properties:
-                    if property['name'] == 'spawn':
-                        if type(self.spawn).__name__ != 'str':#if respawn/fast tarvel
+                    if property['name'] == 'spawn':#determine spawn type and set position accordingly                        
+                        if isinstance(self.spawn, str):# Normal load case
+                            if property['value'] != self.spawn:
+                                continue
+                            
+                            self.game_objects.player.set_pos(object_position)                          
+                        else:#coordinate-based spawn
                             self.game_objects.player.set_pos(self.spawn)
-                        else:#if notmal load
-                            if property['value'] == self.spawn:
-                                self.game_objects.player.set_pos(object_position)
+                        
+                        self.game_objects.player.reset_movement()                                                                                                                                
+                        self.spawned = True#mark as spawned to avoid re-entry                        
+                        for prop in properties:#handle spawn movement based on direction property
+                            if prop['name'] == 'right':
+                                self.game_objects.player.dir[0] = 1
+                                self.game_objects.player.acceleration[0] = C.acceleration[0]
+                            elif prop['name'] == 'left':
+                                self.game_objects.player.dir[0] = -1
+                                self.game_objects.player.acceleration[0] = C.acceleration[0]
+                            if prop['name'] == 'up':
+                                self.game_objects.player.velocity[1] = C.jump_vel_player
+                            elif prop['name'] == 'down':
+                                pass                                                                                
 
             elif id == 1:#npcs
                 for property in properties:
@@ -796,20 +814,6 @@ class Light_forest(Biome):
                 self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.level.game_objects.interactables.add(new_cocoon)
 
-            elif id == 9:#vines
-                new_viens = entities_parallax.Vines_1(object_position, self.level.game_objects, parallax)
-                if self.level.layer.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(new_viens)
-                else:
-                    self.level.game_objects.all_bgs.add(new_viens)
-
-            elif id == 10:#smalltree 1
-                new_viens = entities_parallax.Small_tree1(object_position, self.level.game_objects, parallax)
-                if self.level.layer.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(new_viens)
-                else:
-                    self.level.game_objects.all_bgs.add(new_viens)
-
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
         super().__init__(level)
@@ -1048,3 +1052,37 @@ class Crystal_mines(Biome):
                     self.level.game_objects.all_fgs.add(new_crystal)
                 else:
                     self.level.game_objects.all_bgs.add(new_crystal)
+
+class Dark_forest(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+
+    def room(self, room = 1):
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
+        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
+
+    def load_objects(self, data, parallax, offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 9:#vines
+                new_viens = entities_parallax.Vines_1(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_viens)
+                else:
+                    self.level.game_objects.all_bgs.add(new_viens)
+
+            elif id == 10:#smalltree 1
+                new_viens = entities_parallax.Small_tree1(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_viens)
+                else:
+                    self.level.game_objects.all_bgs.add(new_viens)
+
+            elif id == 11:#smalltree 1
+                new_block = platforms.Dark_forest_1(object_position, self.level.game_objects)
+                self.level.game_objects.platforms.add(new_block)                    

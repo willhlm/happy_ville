@@ -1,10 +1,8 @@
-import constants as C
-
 class Entity_States():
     def __init__(self,entity):
         self.entity = entity
-        self.entity.state = str(type(self).__name__).lower()#the name of the class
-        self.dir = self.entity.dir
+        self.entity.state = type(self).__name__.lower()#the name of the class
+        self.dir = self.entity.dir.copy()
         self.entity.animation.reset_timer()
 
     def update(self):
@@ -15,6 +13,3 @@ class Entity_States():
 
     def increase_phase(self):
         pass
-
-    def walk(self):
-        self.entity.acceleration = C.acceleration.copy()

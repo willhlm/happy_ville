@@ -161,27 +161,28 @@ class Controller():
             self.insert_buffer()
 
     def continious_input_checks(self):#called in update loop of gameplay: used for aila movement
-        keys = pygame.key.get_pressed()#check for continious presses    
+        keys = pygame.key.get_pressed()#check for continious presses
         value = {'l_stick': [0, 0]}#value = {'l_stick':[0,0],'r_stick':[0,0],'d_pad':[0,0]}
         if keys[pygame.K_RIGHT]:#right
             value['l_stick'][0] = 1
         if keys[pygame.K_LEFT]:#left
-            value['l_stick'][0] = -1           
+            value['l_stick'][0] = -1
         if keys[pygame.K_UP]:#left
-            value['l_stick'][1] = -1        
+            value['l_stick'][1] = -1
         if keys[pygame.K_DOWN]:#left
-            value['l_stick'][1] = 1    
-        
-        for joystick in self.joysticks:#Controller input handling            
+            value['l_stick'][1] = 1
+
+        for joystick in self.joysticks:#Controller input handling
             axis_x = joystick.get_axis(0)  # Left stick X axis
             axis_y = joystick.get_axis(1)  # Left stick Y axis
+            print(axis_x)
 
-            if abs(axis_x) > 0.1:
+            if abs(axis_x) > 0.05:
                 value['l_stick'][0] = axis_x
-            if abs(axis_y) > 0.1:
+            if abs(axis_y) > 0.05:
                 value['l_stick'][1] = axis_y
-                if abs(axis_y) > 0.98:#if poiting up or down, set x to 0
-                    value['l_stick'][0] = 0                      
+                if abs(axis_y) > 1.2:#if poiting up or down, set x to 0
+                    value['l_stick'][0] = 0
         return value
 
     def insert_buffer(self):

@@ -3,7 +3,11 @@
  <image source="static_stamps.png" width="112" height="80"/>
  <tile id="0">
   <properties>
+   <property name="down" type="bool" value="false"/>
+   <property name="left" type="bool" value="false"/>
+   <property name="right" type="bool" value="false"/>
    <property name="spawn" value=""/>
+   <property name="up" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="1">
@@ -144,7 +148,7 @@
  </tile>
  <tile id="32">
   <properties>
-   <property name="colour" type="color" value=""/>
+   <property name="colour" value=""/>
    <property name="horizontalSpread" value=""/>
    <property name="lifetime" value=""/>
    <property name="radius" value=""/>

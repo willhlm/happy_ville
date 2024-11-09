@@ -1,7 +1,7 @@
 import pygame, random, sys, math
 import read_files, particles, animation, dialogue, states, groups
-import states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
+import states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+import AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
 import constants as C
 
 def sign(number):
@@ -744,11 +744,9 @@ class Character(Platform_entity):#enemy, NPC,player
         self.friction = C.friction.copy()
         self.max_vel = C.max_vel.copy()
 
-        self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
         self.shader_state = states_shader.Idle(self)
 
     def update(self):
-        self.update_timers()
         self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
         self.animation.update()#need to be after currentstate since animation will animate the current state
@@ -760,11 +758,12 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
     def take_dmg(self,dmg):
-        if self.invincibile: return
+        if self.flags['invincibility']: return
         self.health -= dmg
-
-        if self.health > 0:#check if dead¨
-            self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
+        self.flags['invincibility'] = True
+        
+        if self.health > 0:#check if dead¨            
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')#turn white
             self.AI.handle_input('Hurt')
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
@@ -773,8 +772,7 @@ class Character(Platform_entity):#enemy, NPC,player
         else:#if dead
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
             #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 30)#makes the game freez for few frames
-            self.aggro = False
-            self.invincibile = True
+            self.flags['aggro'] = False
             self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
         return True#return truw to show that damage was taken
@@ -789,13 +787,15 @@ class Character(Platform_entity):#enemy, NPC,player
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
 
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
-
     def draw(self, target):
         self.shader_state.draw()#for entetirs to turn white
         super().draw(target)
+
+    def on_invincibility_timeout(self):#runs when sword timer runs out
+        self.flags['invincibility'] = False  
+
+    def on_attack_timeout(self):#when attack cooldown timer runs out
+        self.flags['attack_able'] = True         
 
 class Player(Character):
     def __init__(self, pos, game_objects):
@@ -810,7 +810,7 @@ class Player(Character):
 
         self.max_health = 100
         self.max_spirit = 4
-        self.health = 100
+        self.health = 10
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -824,40 +824,48 @@ class Player(Character):
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
-                     'Bow':True,'Counter':True, 'Sword_fall':True,
-                     'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
+                     'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
-        self.inventory = {'Amber_Droplet':403,'Bone':2,'Soul_essence':10,'Tungsten':10}#the keys need to have the same name as their respective classes
+        self.inventory = {'Amber_Droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
-        self.flags = {'ground': True, 'sword_swinging': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': True, 'sword_swinging': False, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player),'wet':Wet_timer(self, 60),
-                        'sword':Sword_timer(self, C.sword_time_player),'shroomjump':Shroomjump_timer(self,C.shroomjump_timer_player),'ground':Cayote_timer(self,C.cayote_timer_player)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timers = []#a list where timers are append whe applicable, e.g. wet status
+        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
-        self.time =0
+
+    def ramp_down_collision(self, position):#when colliding with platform beneth
+        super().ramp_down_collision(position)
+        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
+        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+
+    def down_collision(self, block):#when colliding with platform beneth
+        super().down_collision(block)
+        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
+        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+
+    def right_collision(self, block, type = 'Wall'):
+        super().right_collision(block, type)
+        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
+
+    def left_collision(self, block, type = 'Wall'):
+        super().left_collision(block, type)
+        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
 
     def update_hitbox(self):
         super().update_hitbox()
         self.sword.update_hitbox()
 
-    def ramp_down_collision(self, position):#when colliding with platform beneth
-        super().ramp_down_collision(position)
-        self.flags['ground'] = True#used for jumping
-        self.friction = C.friction_player.copy()
-
-    def down_collision(self, block):#when colliding with platform beneth
-        super().down_collision(block)
-        self.flags['ground'] = True#used for jumping
-        self.friction = C.friction_player.copy()
-
     def take_dmg(self, dmg = 1, duration = 20):
         if self.tjasolmais_embrace: self.tjasolmais_embrace.take_dmg(dmg)
-        if self.invincibile: return
-        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+        if self.flags['invincibility']: return
+
+        self.flags['invincibility'] = True
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.health -= dmg*self.dmg_scale#a omamori can set the dmg_scale to 0.5
         self.game_objects.UI['gameplay'].remove_hearts(dmg*self.dmg_scale)#update UI
 
@@ -904,14 +912,12 @@ class Player(Character):
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
-        self.friction = C.friction_player.copy()
+        self.friction = C.friction_player.copy()    
 
     def update(self):
         super().update()
         self.omamoris.update()
-        self.time += 1
-        if self.time == 100:
-            self.game_objects.cosmetics.add(Explosion_shader(self.rect.center, self.game_objects, [200,200])        )
+        self.update_timers()
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -922,6 +928,16 @@ class Player(Character):
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
         self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
+    def update_timers(self):
+        for timer in self.timers:
+            timer.update()
+
+    def on_cayote_timeout(self):
+        self.flags['ground'] = False    
+
+    def on_shroomjump_timout(self):
+        self.flags['shroompoline'] = False                
+
 class Maderakkas_reflection_entity(Character):#player double ganger
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
@@ -930,8 +946,7 @@ class Maderakkas_reflection_entity(Character):#player double ganger
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1]-5,16,16)#add a smalll ofset in y to avoid collision
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
-        self.invincibile = False
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_player)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.flags = {'invincibility': False}        
         self.health = kwarg.get('health', 1)
         self.lifetime = kwarg.get('lifetime', 1000)
 
@@ -941,15 +956,15 @@ class Maderakkas_reflection_entity(Character):#player double ganger
         self.destroy()
 
     def take_dmg(self,dmg):
-        if self.invincibile: return
+        if self.flags['invincibility']: return
         self.health -= dmg
+        self.flags['invincibility'] = True
 
         if self.health > 0:#check if dead¨
-            self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             #self.shader_state.handle_input('Hurt')#turn white
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
         else:#if dead
-            self.invincible = True
             self.currentstate.enter_state('Death')#overrite any state and go to deat
             if self.game_objects.player.abilities.spirit_abilities['Migawari'].level == 3:
                 self.game_objects.player.heal(1)
@@ -972,7 +987,6 @@ class Enemy(Character):
         self.pause_group = game_objects.entity_pause
         self.description = 'enemy'##used in journal
         self.original_pos = pos
-        self.dir[0] = 1
 
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.AI(self)
@@ -981,10 +995,8 @@ class Enemy(Character):
         self.spirit = 10
         self.health = 3
 
-        self.aggro = True#colliding with player
+        self.flags = {'aggro': True, 'invincibility': False, 'attack_able': True}#'attack able': a flag used as a cooldown of attack
         self.dmg = 1#projectile damage
-
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
 
         self.attack_distance = [0,0]#at which distance to the player to attack
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
@@ -995,11 +1007,16 @@ class Enemy(Character):
         self.group_distance()
 
     def player_collision(self, player):#when player collides with enemy
-        if not self.aggro: return
-        if player.invincibile: return
-        player.take_dmg(1)
-        pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
-        player.knock_back([pm_one,0])
+        if type(player.currentstate).__name__ in ['Thunder_main', 'Thunder_post']:
+            self.take_dmg(1)
+            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
+            self.knock_back([pm_one,0])
+        else:
+            if not self.flags['aggro']: return
+            if player.flags['invincibility']: return
+            player.take_dmg(1)
+            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
+            player.knock_back([pm_one,0])
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -1081,7 +1098,7 @@ class Flower_butterfly(Flying_enemy):#peaceful ones
         self.health = 1
         self.aggro_distance = [0,0]
         self.game_objects.lights.add_light(self, colour = [77/255,168/255,177/255,200/255], interact = False)
-        self.aggro = False
+        self.flags['aggro'] = False
 
     def update(self):
         super().update()
@@ -1246,8 +1263,8 @@ class Mygga_suicide(Flying_enemy):
         self.currentstate.handle_input('collision')#for suicide
 
 class Mygga_roaming(Flying_enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1255,13 +1272,7 @@ class Mygga_roaming(Flying_enemy):
         self.health = 3
         self.velocity = [random.randint(-3,3),random.randint(-3,3)]
         self.dir[0] = sign(self.velocity[0])
-        self.AI.enter_AI('roaming_attack', frequency = 150)
-
-    def attack(self):#called from roaming AI
-        dirs = [[1,1],[-1,1],[1,-1],[-1,-1]]
-        for direction in dirs:
-            obj = Projectile_1(self.hitbox.center, self.game_objects, dir = direction, amp = [3,3])
-            self.game_objects.eprojectiles.add(obj)
+        self.AI.enter_AI('idle')
 
     def walk(self, time):#called from walk state
         pass
@@ -1299,6 +1310,47 @@ class Mygga_roaming(Flying_enemy):
         self.hitbox.top = block.hitbox.bottom
         self.collision_types['top'] = True
         self.velocity[1] *= -1
+
+class Mygga_roaming_projectile(Mygga_roaming):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.AI.enter_AI('roaming_attack', frequency = 150)
+
+    def attack(self):#called from roaming AI
+        dirs = [[1,1],[-1,1],[1,-1],[-1,-1]]
+        for direction in dirs:
+            obj = Projectile_1(self.hitbox.center, self.game_objects, dir = direction, amp = [3,3])
+            self.game_objects.eprojectiles.add(obj)
+
+class Mygga_crystal(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_crystal/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.health = 3  
+        
+        self.AI = AI_mygga_crystal.Patrol(self)
+        self.currentstate = states_mygga_crystal.Idle(self)                
+
+        self.flee_distance = [50, 50]#starting fleeing if too close
+        self.attack_distance = [100, 100]#attack distance
+        self.aggro_distance = [150, 100]#start chasing
+
+    def attack(self):#called from roaming AI
+        dirs = [[1,1], [-1,1], [1,-1], [-1,-1]]
+        for direction in dirs:
+            obj = Poisonblobb(self.hitbox.topleft, self.game_objects, dir = direction, amp = [3,3])
+            self.game_objects.eprojectiles.add(obj)
+
+    def chase(self, direction):#called from AI: when chaising
+        self.velocity[0] += direction[0]*0.5
+        self.velocity[1] += direction[1]*0.5
+
+    def patrol(self, position):#called from AI: when patroling
+        self.velocity[0] += (position[0]-self.rect.centerx) * 0.002
+        self.velocity[1] += (position[1]-self.rect.centery) * 0.002
 
 class Exploding_mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
@@ -1352,7 +1404,7 @@ class Froggy(Enemy):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.health = 1
-        self.aggro = 0
+        self.flags['aggro'] = False
         self.attack_distance = [150,50]
 
         self.currentstate = states_froggy.Idle(self)
@@ -1455,7 +1507,7 @@ class Vatt(Enemy):
         self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
         self.health = 3
         self.spirit = 3
-        self.aggro = False
+        self.flags['aggro'] = False
         self.currentstate = states_vatt.Idle(self)
         self.attack_distance = [60, 30]
         self.AI = AI_vatt.AI(self)
@@ -1463,7 +1515,7 @@ class Vatt(Enemy):
     def turn_clan(self):#this is acalled when tranformation is finished
         for enemy in self.game_objects.enemies.sprites():
             if type(enemy).__name__=='Vatt':
-                enemy.aggro = True
+                enemy.flags['aggro'] = True
                 enemy.AI.handle_input('Hurt')
 
     def patrol(self, direction):#called from AI: when patroling
@@ -1479,7 +1531,8 @@ class Maggot(Enemy):
         self.currentstate = states_maggot.Fall_stand(self)
         self.AI = AI_maggot.Idle(self)
         self.health = 1
-        self.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period (minimum time needed to that the swrod doesn't hit every frame)
+
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.friction[0] = C.friction[0]*2
 
 class Larv(Enemy):
@@ -1544,22 +1597,23 @@ class Larv_poison(Enemy):
 class Shroompoline(Enemy):#an enemy or interactable?
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/shroompolin/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/shroompolin/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=pygame.Rect(pos[0],pos[1],64,64)
-        self.jump_box=pygame.Rect(pos[0],pos[1],32,10)
-        self.aggro = False#player collision
-        self.invincibile = True#taking dmg
+        self.hitbox = pygame.Rect(pos[0],pos[1],64,64)
+        self.jump_box = pygame.Rect(pos[0],pos[1],32,10)
+        self.flags['aggro'] = False#player collision
+        self.flags['invincibility'] = True
 
-    def player_collision(self,player):
-        if self.game_objects.player.velocity[1]>0:#going down
-            offset=self.game_objects.player.velocity[1]+1
-            if self.game_objects.player.hitbox.bottom < self.jump_box.top+offset:
+    def player_collision(self, player):
+        if self.game_objects.player.velocity[1] > 0:#going down
+            offset = self.game_objects.player.velocity[1] + 1
+            if self.game_objects.player.hitbox.bottom < self.jump_box.top + offset:
                 self.currentstate.enter_state('Hurt')
-                self.game_objects.player.currentstate.enter_state('Jump_stand_main')
                 self.game_objects.player.velocity[1] = -10
-                self.game_objects.player.timer_jobs['shroomjump'].activate()
+                player.flags['shroompoline'] = True
+                self.game_objects.player.currentstate.enter_state('Jump_main')
+                self.game_objects.timer_manager.start_timer(C.shroomjump_timer_player, player.on_shroomjump_timout)#adds a timer to timer_manager and sets self.invincible to false after a while
 
     def update_hitbox(self):
         super().update_hitbox()
@@ -1675,7 +1729,7 @@ class Bird(Enemy):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.currentstate = states_bird.Idle(self)
-        self.aggro = False
+        self.flags['aggro'] = False
         self.health = 1
         self.AI = AI_bird.Idle(self)
         self.aggro_distance = [100,50]#at which distance is should fly away
@@ -2123,7 +2177,7 @@ class Player_abilities():
         self.number += 1
         self.number = min(self.number,3)#limit the number of abilities one can equip at the same time
 
-    def handle_input(self,value):#movement stuff
+    def handle_input(self, value):#movement stuff
         if value[0] == 1:#pressed right
             self.remove_ability()
             self.movement_abilities = self.movement_abilities[-1:] + self.movement_abilities[:-1]#rotate the abilityes to the right
@@ -2230,23 +2284,17 @@ class Omamoris():#omamori handler -> "neckalce"
 class Projectiles(Platform_entity):#projectiels
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.timers = []#a list where timers are append whe applicable, e.g. jump, invincibility etc.
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
         self.lifetime = kwarg.get('lifetime', 300)
+        self.flags = {'invincibility': False}
 
     def update(self):
         super().update()
-        self.update_timers()
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
         self.destroy()
 
     def destroy(self):
         if self.lifetime < 0:
             self.kill()
-
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
 
     #collisions
     def collision_platform(self, collision_plat):#collision platform
@@ -2299,6 +2347,9 @@ class Projectiles(Platform_entity):#projectiels
 
     def release_texture(self):#i guess all projectiles will have a pool
         pass
+
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False
 
 class Bouncy_balls(Projectiles):#for ball challange room
     def __init__(self, pos, game_objects, **kwarg):
@@ -2381,8 +2432,8 @@ class Poisonblobb(Projectiles):
         super().__init__(pos, game_objects)
         self.sprites = Poisonblobb.sprites
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
+        self.hitbox = self.rect.copy()
 
         self.dmg = 1
         self.lifetime = kwarg.get('lifetime', 100)
@@ -2395,7 +2446,7 @@ class Poisonblobb(Projectiles):
         self.update_vel()
 
     def update_vel(self):
-        self.velocity[1] += 0.1*self.game_objects.game.dt*self.slow_motion#graivity
+        self.velocity[1] += 0.1 * self.game_objects.game.dt * self.slow_motion#graivity
 
     def take_dmg(self, dmg):#aila sword without purple stone
         self.velocity = [0,0]
@@ -2661,8 +2712,10 @@ class Aila_sword(Sword):
         self.currentstate.update_rect()
 
     def collision_projectile(self, eprojectile):#fprojecticle proectile collision with projectile
-        if eprojectile.invincibile: return
-        eprojectile.timer_jobs['invincibility'].activate()#adds a timer to self.timers and sets self.invincible to true for the given period
+        if eprojectile.flags['invincibility']: return
+        eprojectile.flags['invincibility'] = True
+        self.entity.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, eprojectile.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+
         self.stone_states['projectile_collision'].projectile_collision(eprojectile)
 
     def collision_enemy(self, collision_enemy):
@@ -2743,15 +2796,16 @@ class Shield(Projectiles):#a protection shield
         self.time = 0
         self.entity.invincibile = True
         self.health = kwarg.get('health', 1)
-        self.general_Timer = General_Timer(self, 100, self.time_out)#how long it will last after taking reaching 0 health
 
     def take_dmg(self, dmg):#called when entity takes damage
-        if self.invincibile: return
+        if self.flags['invincibility']: return
         self.health -= dmg
-        self.timer_jobs['invincibility'].activate()
-        #TODO make it red momentary or something to indicate that it too damage
-        if self.health < 0:
-            self.general_Timer.activate()
+
+        self.flags['invincibility'] = True                
+        if self.health > 0:#TODO make it red momentary or something to indicate that it too damage
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while        
+        else:
+            self.game_objects.timer_manager.start_timer(100, self.time_out)#adds a timer to timer_manager and sets self.invincible to false after a while
             #TODO make it blink or something to indicate that it will die soon
 
     def time_out(self):#called when general timer it count down
@@ -3900,15 +3954,19 @@ class Path_col(Interactable):
     def update(self):
         self.group_distance()
 
-    def player_collision(self, player):
+    def player_movement(self, player):#the movement aila does when colliding
         if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction
             player.currentstate.enter_state('Run_main')#infstaed of idle, should make her move a little dependeing on the direction
-            player.currentstate.walk()
+            player.acceleration[0] = C.acceleration[0]
         else:#vertical travelling
-            player.reset_movement()
-            player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
+            if player.velocity[1] < 0:#up
+                player.velocity[1] = -10
+            else:#down
+                pass       
 
-        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
+    def player_collision(self, player):
+        self.player_movement(player)
+        self.game_objects.load_map(self.game_objects.game.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
         self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
@@ -4050,30 +4108,24 @@ class Cocoon(Interactable):#larv cocoon in light forest
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.health = 3
-        self.timers = []
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
-
-    def update(self):
-        super().update()
-        self.update_timers()#invincibililty
+        self.flags = {'invincibility': False}
 
     def take_dmg(self,projectile):
-        if self.invincibile: return
+        if self.flags['invincibility']: return
         #projectile.clash_particles(self.hitbox.center)
         self.health -= 1
-        self.timer_jobs['invincibility'].activate()
+        self.flags['invincibility']  = True
 
         if self.health > 0:
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.currentstate.handle_input('Once', animation_name = 'hurt', next_state = 'Idle')
             #self.shader_state.handle_input('Hurt')#turn white
         else:#death
-            self.invincibile = True
             self.currentstate.handle_input('Once', animation_name = 'interact', next_state = 'Interacted')
             self.game_objects.enemies.add(Maggot(self.rect.center,self.game_objects))
 
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False
 
 class Cocoon_boss(Cocoon):#boss cocoon in light forest
     def __init__(self, pos, game_objects):
@@ -4151,16 +4203,10 @@ class Chest(Interactable):
         self.health=3
         self.inventory = {'Amber_Droplet':3}
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
-        self.timers = []
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
         self.hitbox.midbottom = self.rect.midbottom
 
         if state:
             self.currentstate = states_basic.Interacted(self)
-
-    def update(self):
-        super().update()
-        self.update_timers()#invincibililty
 
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
@@ -4170,20 +4216,20 @@ class Chest(Interactable):
             self.inventory[key]=0
 
     def take_dmg(self,projectile):
-        if self.invincibile: return
+        if self.flags['invincibility']: return
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
-        self.timer_jobs['invincibility'].activate()
-
+        self.flags['invincibility'] = True
+        
         if self.health > 0:
             self.currentstate.handle_input('Hurt')
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while            
         else:
             self.currentstate.handle_input('Opening')
             self.game_objects.world_state.state[self.game_objects.map.level_name]['chest'][self.ID_key] = True#write in the state dict that this has been picked up
 
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False
 
 class Door(Interactable):
     def __init__(self,pos,game_objects):
@@ -4328,23 +4374,18 @@ class Light_crystal(Interactable):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
-        self.timers = []
-        self.timer_jobs = {'invincibility': Invincibility_timer(self,C.invincibility_time_enemy)}
-
-    def update(self):
-        super().update()
-        self.update_timers()#invincibililty
+        self.flags = {'invincibility': False}
 
     def take_dmg(self, projectile):
-        if self.invincibile: return
+        if self.flags['invincibility']: return
         projectile.clash_particles(self.hitbox.center)
-        self.timer_jobs['invincibility'].activate()
+        self.flags['invincibility'] = True
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while                    
         self.currentstate.handle_input('Transform')
         self.game_objects.lights.add_light(self)#should be when interacted state is initialised and not on taking dmg
 
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False        
 
 class Fireplace(Interactable):
     def __init__(self, pos, game_objects, on = False):
@@ -4483,8 +4524,6 @@ class Lever(Interactable):
         self.hitbox = self.rect.copy()
 
         self.ID_key = ID_key#an ID to match with the gate and an unique ID key to identify which item that the player is intracting within the world
-        self.timers = []
-        self.timer_jobs = {'invincibility':Invincibility_timer(self,C.invincibility_time_enemy)}
 
         if self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'].get(self.ID_key, False):
             self.currentstate = states_lever.Down(self)
@@ -4492,22 +4531,19 @@ class Lever(Interactable):
             self.currentstate = states_lever.Idle(self)
             self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = False
 
-    def update(self):
-        super().update()
-        self.update_timers()#invincibililty
-
     def take_dmg(self,projectile):
-        if self.invincibile: return
-        self.timer_jobs['invincibility'].activate()
+        if self.flags['invincibility']: return
+        self.flags['invincibility'] = True
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while                    
+
         projectile.clash_particles(self.hitbox.center)
 
         self.currentstate.handle_input('Transform')
         self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = not self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key]#write in the state dict that this has been picked up
         self.gate.currentstate.handle_input('Transform')
 
-    def update_timers(self):
-        for timer in self.timers:
-            timer.update()
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False
 
     def add_gate(self, gate):#called from map loader
         self.gate = gate
@@ -4516,11 +4552,12 @@ class Lever(Interactable):
         else:
             self.gate.currentstate.enter_state('Erect')
 
-#timer toools: activate with the attrubute activate, which will run until the specified duration is run out
-class Timer():
-    def __init__(self, entity, duration):
+#status effects (like wet)
+class Status():
+    def __init__(self, entity, duration, callback = None):
         self.entity = entity
-        self.duration = duration
+        self.duration = duration     
+        self.callback = callback   
 
     def activate(self):#add timer to the entity timer list
         if self in self.entity.timers: return#do not append if the timer is already inside
@@ -4532,38 +4569,15 @@ class Timer():
         self.entity.timers.remove(self)
 
     def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt * self.entity.game_objects.player.slow_motion
+        self.lifetime -= self.entity.game_objects.game.dt
         if self.lifetime < 0:
             self.deactivate()
 
-class General_Timer(Timer):#when lifetime is 0, it calls the timeout of entety
-    def __init__(self, entity, duration, function):
-        super().__init__(entity, duration)
-        self.lifetime = duration
-        self.function = function
-
-    def deactivate(self):
-        self.function()
-
-class Invincibility_timer(Timer):
-    def __init__(self, entity, duration):
-        super().__init__(entity, duration)
-        self.entity.invincibile = False#a flag to check if one should take damage
-
-    def activate(self):#called when taking a dmg
-        super().activate()
-        self.entity.invincibile = True
-
-    def deactivate(self):
-        super().deactivate()
-        self.entity.invincibile = False
-
-class Wet_timer(Timer):#"a wet status". activates when player baths, and spawns particles that drops from player
+class Wet_status(Status):#"a wet status". activates when player baths, and spawns particles that drops from player
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
-        self.game_objects = entity.game_objects#need for general timer
         self.spawn_frequency = 5#how often to spawn particle
-        self.spawn_timer = General_Timer(self, self.spawn_frequency, self.time_out)
+        self.time = 0
 
     def activate(self, water_tint):#called when aila bathes (2D water)
         self.lifetime = self.duration#reset the duration
@@ -4574,55 +4588,13 @@ class Wet_timer(Timer):#"a wet status". activates when player baths, and spawns 
 
     def update(self):
         super().update()
-        self.spawn_timer.update()
-
-    def time_out(self):#called when geenral timer runs out
-        self.spawn_timer.lifetime = self.spawn_frequency#reset the time
-        self.drop()
+        self.time += self.entity.game_objects.game.dt
+        if self.time > self.spawn_frequency:
+            self.time = 0
+            self.drop()
 
     def drop(self):
         pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
-        obj1 = particles.Circle(pos, self.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
-        self.game_objects.cosmetics.add(obj1)
+        obj1 = particles.Circle(pos, self.entity.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
+        self.entity.game_objects.cosmetics.add(obj1)
 
-class Sword_timer(Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-
-    def activate(self):#called when sword is swang
-        super().activate()
-        self.entity.flags['sword_swinging'] = True
-
-    def deactivate(self):
-        super().deactivate()
-        self.entity.flags['sword_swinging'] = False
-
-class Cayote_timer(Timer):#a timer to check how long time one has not been on ground
-    def __init__(self,entity, duration):
-        super().__init__(entity, duration)
-
-    def activate(self):#called when entering fall run or fall stand
-        self.lifetime = self.duration
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.entity.timers.append(self)
-        self.entity.flags['ground'] = True
-
-    def deactivate(self):#called when timer runs out
-        super().deactivate()
-        self.entity.flags['ground'] = False
-
-class Shroomjump_timer(Timer):
-    def __init__(self,entity,duration):
-        super().__init__(entity,duration)
-        self.shrooming = False
-
-    def activate(self):#called when pressed jump putton and/or landing on a shroom
-        if self.shrooming:#second time entering (pressing or landing on shroom)
-            self.entity.velocity[1] = -15
-            return
-        super().activate()
-        self.shrooming = True
-
-    def deactivate(self):#called when timer expires
-        super().deactivate()
-        self.shrooming = False
