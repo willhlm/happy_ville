@@ -831,7 +831,7 @@ class Player(Character):
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.inventory = {'Amber_Droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#
-        self.flags = {'ground': True, 'sword_swinging': False, 'invincibility': False, 'shroompoline': False}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.flags = {'ground': True, 'sword_swinging': False, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
@@ -987,7 +987,6 @@ class Enemy(Character):
         self.pause_group = game_objects.entity_pause
         self.description = 'enemy'##used in journal
         self.original_pos = pos
-        self.dir[0] = 1
 
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.AI(self)
@@ -2178,7 +2177,7 @@ class Player_abilities():
         self.number += 1
         self.number = min(self.number,3)#limit the number of abilities one can equip at the same time
 
-    def handle_input(self,value):#movement stuff
+    def handle_input(self, value):#movement stuff
         if value[0] == 1:#pressed right
             self.remove_ability()
             self.movement_abilities = self.movement_abilities[-1:] + self.movement_abilities[:-1]#rotate the abilityes to the right

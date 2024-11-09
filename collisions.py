@@ -44,8 +44,8 @@ class Collisions():
             else:
                 interactable.player_noncollision()
 
-    def light_collision(self, light):
-        return pygame.sprite.spritecollide(light, self.game_objects.platforms, False, Collisions.collided)
+    def sprite_collide(self, sprite, group):
+        return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
 
     @staticmethod
     def counter(fprojectiles, eprojectiles):

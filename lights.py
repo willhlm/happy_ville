@@ -43,7 +43,7 @@ class Lights():
         if not light.interact: 
             self.num_rectangle.append(0)
         else:
-            platforms = self.game_objects.collisions.light_collision(light)#collision -> collision occures at coordinates as pe tiled position
+            platforms = self.game_objects.collisions.sprite_collide(light, self.game_objects.platforms)#collision -> collision occures at coordinates as pe tiled position
             self.num_rectangle.append(len(platforms))        
             self.points = self.points + self.get_points(platforms)
 

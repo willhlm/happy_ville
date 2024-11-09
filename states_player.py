@@ -27,7 +27,6 @@ class Player_states(Entity_States):
 
         self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
-
         if abs(value[0]) > 0.1:
             self.entity.dir[0] = sign(value[0])
 

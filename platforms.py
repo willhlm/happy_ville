@@ -246,6 +246,32 @@ class Collision_texture(Platform):#blocks that has tectures
     def draw(self, target):
         self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])))#int seem nicer than round
 
+class Dark_forest_1(Collision_texture):#a platform which dissapears when there is no light
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/light_interaction/dark_forest_1/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.light_hitbox = self.hitbox.copy()
+
+    def update(self):
+        self.check_light()
+    
+    def check_light(self):
+        for light in self.game_objects.lights.lights_sources:
+            collision = self.light_hitbox.colliderect(light.hitbox)
+            if collision:
+                self.light()
+                return
+        self.no_light()
+
+    def no_light(self):
+        self.hitbox[2], self.hitbox[3] = 0, 0
+    
+    def light(self):
+        self.hitbox = self.rect.copy()
+
 class Boulder(Collision_texture):#blocks village cave
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)

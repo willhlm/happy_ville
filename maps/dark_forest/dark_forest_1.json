@@ -663,7 +663,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_semi_cave_3"
+                                 "value":"light_forest_19"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -823,7 +823,7 @@
                         }, 
                         {
                          "gid":20,
-                         "height":304,
+                         "height":608,
                          "id":280,
                          "name":"",
                          "properties":[
@@ -843,18 +843,6 @@
                          "width":16,
                          "x":5680,
                          "y":608
-                        }, 
-                        {
-                         "gid":22,
-                         "height":16,
-                         "id":283,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":5216,
-                         "y":544
                         }, 
                         {
                          "gid":15,
@@ -1302,9 +1290,68 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":336,
-                         "x":7376,
+                         "width":592,
+                         "x":7264,
                          "y":752
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":299,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"2"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":7600,
+                         "y":464
+                        }, 
+                        {
+                         "gid":11,
+                         "height":234,
+                         "id":300,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"dark_forest_2"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":7648,
+                         "y":538
+                        }, 
+                        {
+                         "gid":15,
+                         "height":240,
+                         "id":301,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":7664,
+                         "y":544
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1320,7 +1367,7 @@
          "y":0
         }],
  "nextlayerid":95,
- "nextobjectid":299,
+ "nextobjectid":302,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

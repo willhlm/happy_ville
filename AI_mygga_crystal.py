@@ -79,8 +79,8 @@ class Wait(AI):
 class Chase(AI):#keep some distance and keep attacking            
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
-        self.timer_jobs = {'give_up': Timer(self.entity, duration = kwarg.get('give_up', 300), function = self.on_giveup)}#if player is out of sight for more than duration, go to peace, else, remain
-        self.chase_direction = [0, 0]                
+        self.give_up_duration = kwarg.get('give_up', 300)
+        self.chase_direction = [0, 0]   
 
     def update(self):   
         super().update()   
@@ -95,17 +95,19 @@ class Chase(AI):#keep some distance and keep attacking
     def check_sight(self):        
         if abs(self.player_distance[0]) < self.entity.flee_distance[0] and abs(self.player_distance[1]) < self.entity.flee_distance[1]:#player close close 
             self.enter_AI('Flee')
+            self.entity.game_objects.timer_manager.remove_ID_timer('giveup')#remove the giveup timer if exist, before changing state
         
         elif abs(self.player_distance[0]) < self.entity.attack_distance[0] and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close             
             if self.entity.flags['attack_able']:
                 self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_attack_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
                 self.enter_AI('Attack')
+                self.entity.game_objects.timer_manager.remove_ID_timer('giveup')#remove the giveup timer if exist, before changing state
 
         elif abs(self.player_distance[0]) > self.entity.aggro_distance[0] or abs(self.player_distance[1]) > self.entity.aggro_distance[1]:#player far away     
-            self.timer_jobs['give_up'].activate()
+            self.entity.game_objects.timer_manager.start_timer(self.give_up_duration, self.on_giveup, ID = 'giveup')#adds a timer to timer_manager and sets self.invincible to false after a while
 
     def on_giveup(self):#when giveup timer runs out
-        self.enter_AI('Wait', next_AI = 'Patrol', time = 20)    
+        self.enter_AI('Wait', next_AI = 'Patrol', time = 20)  
 
 class Flee(AI):
     def __init__(self, entity, **kwarg):
@@ -140,27 +142,4 @@ class Attack(AI):
         
     def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
         if input == 'finish_attack':
-            self.enter_AI('Wait', time = 30, next_AI = self.next_AI)
-
-class Timer():
-    def __init__(self, entity, duration, function):
-        self.entity = entity
-        self.duration = duration
-        self.function = function
-
-    def restore(self):
-        self.lifetime = self.duration
-
-    def activate(self):#add timer to the entity timer list
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.restore()
-        self.entity.timers.append(self)
-
-    def deactivate(self):
-        self.entity.timers.remove(self)
-        self.function()
-
-    def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt
-        if self.lifetime < 0:
-            self.deactivate()            
+            self.enter_AI('Wait', time = 30, next_AI = self.next_AI)          
