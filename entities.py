@@ -918,6 +918,7 @@ class Player(Character):
         super().update()
         self.omamoris.update()
         self.update_timers()
+        #print(self.friction)
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -4553,7 +4554,7 @@ class Lever(Interactable):
             self.gate.currentstate.enter_state('Erect')
 
 #status effects (like wet)
-class Status():
+class Status():#like timers, but there is an effect during update
     def __init__(self, entity, duration, callback = None):
         self.entity = entity
         self.duration = duration     

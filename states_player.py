@@ -485,6 +485,7 @@ class Fall_main(Fall_pre):
 class Wall_glide_main(Player_states):
     def __init__(self, entity):
         super().__init__(entity)
+        self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
         self.entity.friction[1] = 0.4
         if self.entity.collision_types['right']:
             self.dir = [1,0]
@@ -543,6 +544,7 @@ class Wall_glide_main(Player_states):
 class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity):
         super().__init__(entity)
+        self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
         self.entity.friction[1] = 0.4
 
     def update(self):#is needed
