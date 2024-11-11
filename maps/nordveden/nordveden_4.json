@@ -1020,7 +1020,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2352,
+                         "x":2384,
                          "y":352
                         }, 
                         {
@@ -1032,7 +1032,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"nordveden_4"
+                                 "value":"nordveden_5"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1043,7 +1043,7 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":2352,
+                         "x":2384,
                          "y":400
                         }, 
                         {
@@ -1527,6 +1527,24 @@
                          "width":80,
                          "x":592,
                          "y":544
+                        }, 
+                        {
+                         "gid":1,
+                         "height":16,
+                         "id":1779,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"2"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2320,
+                         "y":304
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1771,7 +1789,7 @@
          "y":0
         }],
  "nextlayerid":50,
- "nextobjectid":1779,
+ "nextobjectid":1780,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
