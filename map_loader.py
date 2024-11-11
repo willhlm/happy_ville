@@ -1055,8 +1055,10 @@ class Dark_forest(Biome):
         super().__init__(level)
 
     def room(self, room = 1):
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
-        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
+        if room == '2':
+            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,255/255)
+        else:
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
@@ -1083,3 +1085,12 @@ class Dark_forest(Biome):
             elif id == 11:#smalltree 1
                 new_block = platforms.Dark_forest_1(object_position, self.level.game_objects)
                 self.level.game_objects.platforms.add(new_block)                    
+
+            elif id == 12:#shource of shadow_light
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'on':
+                        kwarg['on'] = property['value']
+
+                new_lantern = entities.Shadow_light_lantern(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.interactables.add(new_lantern)                         

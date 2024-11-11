@@ -1721,6 +1721,42 @@ class Cultist_warrior(Enemy):
         super().dead()
         if self.gameplay_state: self.gameplay_state.incrase_kill()
 
+class Shadow_enemy(Enemy):#enemies that can onlly take dmg in light -> dark forst
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+
+    def check_light(self):
+        for light in self.game_objects.lights.lights_sources:
+            if not light.shadow_interact: continue
+            collision = self.hitbox.colliderect(light.hitbox)
+            if collision:
+                self.light()
+                return
+        self.no_light()
+
+    def no_light(self):
+        self.flags['invincibility'] = True
+    
+    def light(self):
+        self.flags['invincibility'] = False
+
+class Shadow_warrior(Shadow_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_warrior/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
+        self.health = 3
+        self.attack_distance = [80,10]
+
+    def update(self):
+        super().update()
+        self.check_light()
+
+    def attack(self):#called from states, attack main
+        self.projectiles.add(Sword(self))#add to group
+
 #animals
 class Bird(Enemy):
     def __init__(self, pos, game_objects):
@@ -2664,7 +2700,7 @@ class Sword(Melee):
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
-        if collision_enemy.invincibile: return
+        if collision_enemy.flags['invincibility']: return
         collision_enemy.take_dmg(self.dmg)
         collision_enemy.knock_back(self.dir)
         collision_enemy.hurt_particles(dir = self.dir)
@@ -4406,7 +4442,7 @@ class Fireplace(Interactable):
 
     def make_light(self):
         self.light_sources.append(self.game_objects.lights.add_light(self, colour = [255/255,175/255,100/255,255/255],flicker=True,radius = 100))
-        self.light_sources.append(self.game_objects.lights.add_light(self, radius = 50))
+        self.light_sources.append(self.game_objects.lights.add_light(self, flicker = True, radius = 50))
         self.light_sources.append(self.game_objects.lights.add_light(self, colour = [255/255,175/255,100/255,255/255],radius = 100))
 
 class Spikes(Interactable):#traps
@@ -4552,6 +4588,31 @@ class Lever(Interactable):
             self.gate.currentstate.enter_state('Down')
         else:
             self.gate.currentstate.enter_state('Erect')
+
+class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction. Shadow light inetracts with dark forest enemy and platofrm
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/shadow_light_lantern/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = self.rect.copy()
+        
+        self.light_sources = []
+        if kwarg.get('on', False):
+            self.make_light()
+
+    def interact(self):#when player press t/y
+        if not self.light_sources:
+            self.make_light()
+        else:
+            for light in self.light_sources:
+                self.game_objects.lights.remove_light(light)
+            self.light_sources = []
+            
+    def make_light(self):
+        self.light_sources.append(self.game_objects.lights.add_light(self, shadow_interact = True, colour = [100/255,175/255,255/255,255/255],flicker=True,radius = 300))
+        self.light_sources.append(self.game_objects.lights.add_light(self, radius = 250, colour = [100/255,175/255,255/255,255/255],flicker=True))
+        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [100/255,175/255,255/255,255/255],radius = 200))        
 
 #status effects (like wet)
 class Status():#like timers, but there is an effect during update

@@ -253,13 +253,14 @@ class Dark_forest_1(Collision_texture):#a platform which dissapears when there i
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
-        self.light_hitbox = self.hitbox.copy()
+        self.light_hitbox = self.hitbox.copy()#the hitbox that collides with light
 
     def update(self):
         self.check_light()
     
     def check_light(self):
         for light in self.game_objects.lights.lights_sources:
+            if not light.shadow_interact: continue
             collision = self.light_hitbox.colliderect(light.hitbox)
             if collision:
                 self.light()

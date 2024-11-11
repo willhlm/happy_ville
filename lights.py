@@ -13,7 +13,7 @@ class Lights():
         self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
-        self.vignette = game_objects.game.display.make_layer(game_objects.game.window_size)
+        #self.vignette = game_objects.game.display.make_layer(game_objects.game.window_size)
 
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
 
@@ -79,7 +79,7 @@ class Lights():
         self.shaders['light']['normal_interact'] = self.normal_interact
         self.shaders['light']['normal_map'] = self.normal_map.texture
 
-        self.shaders['blend']['background'] = self.game_objects.game.screen.texture        
+        self.shaders['blend']['background'] = self.game_objects.game.screen.texture     
 
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])
@@ -97,7 +97,11 @@ class Light():#light source
         self.start_angle = properties.get('start_angle',0)
         self.end_angle = properties.get('end_angle', 360)
         self.min_radius = properties.get('min_radius',0)
+        self.max_radius = properties.get('max_radius',300)
+        self.expand_speed = properties.get('expand_speed',100)
+
         self.normal_interact = float(properties.get('normal_interact', True))#a flag to check if it should interact with normal maps
+        self.shadow_interact = properties.get('shadow_interact', False)#a flag to check if it should collide with light based stuff (dark forest platform, enemy)
 
         self.target = target
 
@@ -107,14 +111,15 @@ class Light():#light source
         self.time = 0
 
         self.updates = [self.set_pos]#self.fade, self.pulsating#can decide what to do by appending things here
-        update_functions = {'flicker': self.flicker, 'fade': self.fade, 'pulsating': self.pulsating}
-        for prop, func in update_functions.items():
+        self.update_functions = {'flicker': self.flicker, 'fade': self.fade, 'pulsating': self.pulsating, 'expand': self.expand, 'lifetime': self.lifetime}
+        for prop, func in self.update_functions.items():
             if properties.get(prop, False):
                 self.updates.append(func)
 
     def expand(self):
-        self.radius += self.game_objects.game.dt*100
-        self.radius = min(self.radius,300)
+        self.radius += self.game_objects.game.dt*self.expand_speed
+        self.radius = min(self.radius, self.max_radius)
+        self.hitbox[2], self.hitbox[3] = 2*self.radius, 2*self.radius
 
     def flicker(self):
         flickerrange = 0.1
@@ -125,17 +130,20 @@ class Light():#light source
         self.colour[-1] *= rate
 
     def pulsating(self):#
-        self.time += self.game_objects.game.dt*0.01
+        self.time += self.game_objects.game.dt * 0.01
         self.radius = 0.5 * self.init_radius * math.sin(self.time) + self.init_radius * 0.5
 
     def lifetime(self):
         if self.colour[-1] < 0.01:
             self.game_objects.lights.remove_light(self)
-            self.target.state.handle_input('light_gone')
+            #self.target.state.handle_input('light_gone')
 
     def set_pos(self):#I think all should do this
         self.hitbox.center = self.target.hitbox.center
         self.position = [self.hitbox.center[0] - self.game_objects.camera_manager.camera.scroll[0],self.hitbox.center[1] - self.game_objects.camera_manager.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
+
+    def add_decorator(self, key):
+        self.updates.append(self.update_functions[key])
 
     def update(self):#if they e.g. fade
         for update in self.updates:

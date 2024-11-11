@@ -1358,6 +1358,29 @@
                  "visible":true,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":95,
+                 "name":"back",
+                 "objects":[
+                        {
+                         "gid":40321,
+                         "height":48,
+                         "id":302,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":7472,
+                         "y":544
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"bg1",
          "opacity":1,
@@ -1366,8 +1389,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":95,
- "nextobjectid":302,
+ "nextlayerid":96,
+ "nextobjectid":303,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
@@ -1467,6 +1490,10 @@
          "tilecount":6300,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":40309,
+         "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,
  "type":"map",
