@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="static_stamps" tilewidth="16" tileheight="16" tilecount="35" columns="7">
+<tileset version="1.10" tiledversion="1.10.1" name="static_stamps" tilewidth="16" tileheight="16" tilecount="35" columns="7">
  <image source="static_stamps.png" width="112" height="80"/>
  <tile id="0">
   <properties>

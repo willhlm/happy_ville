@@ -761,8 +761,8 @@ class Character(Platform_entity):#enemy, NPC,player
         if self.flags['invincibility']: return
         self.health -= dmg
         self.flags['invincibility'] = True
-        
-        if self.health > 0:#check if dead¨            
+
+        if self.health > 0:#check if dead¨
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')#turn white
             self.AI.handle_input('Hurt')
@@ -792,10 +792,10 @@ class Character(Platform_entity):#enemy, NPC,player
         super().draw(target)
 
     def on_invincibility_timeout(self):#runs when sword timer runs out
-        self.flags['invincibility'] = False  
+        self.flags['invincibility'] = False
 
     def on_attack_timeout(self):#when attack cooldown timer runs out
-        self.flags['attack_able'] = True         
+        self.flags['attack_able'] = True
 
 class Player(Character):
     def __init__(self, pos, game_objects):
@@ -851,7 +851,7 @@ class Player(Character):
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        
+
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
@@ -912,7 +912,7 @@ class Player(Character):
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
-        self.friction = C.friction_player.copy()    
+        self.friction = C.friction_player.copy()
 
     def update(self):
         super().update()
@@ -934,10 +934,10 @@ class Player(Character):
             timer.update()
 
     def on_cayote_timeout(self):
-        self.flags['ground'] = False    
+        self.flags['ground'] = False
 
     def on_shroomjump_timout(self):
-        self.flags['shroompoline'] = False                
+        self.flags['shroompoline'] = False
 
 class Maderakkas_reflection_entity(Character):#player double ganger
     def __init__(self,pos, game_objects, **kwarg):
@@ -947,7 +947,7 @@ class Maderakkas_reflection_entity(Character):#player double ganger
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1]-5,16,16)#add a smalll ofset in y to avoid collision
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
-        self.flags = {'invincibility': False}        
+        self.flags = {'invincibility': False}
         self.health = kwarg.get('health', 1)
         self.lifetime = kwarg.get('lifetime', 1000)
 
@@ -1330,10 +1330,10 @@ class Mygga_crystal(Flying_enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 3  
-        
+        self.health = 3
+
         self.AI = AI_mygga_crystal.Patrol(self)
-        self.currentstate = states_mygga_crystal.Idle(self)                
+        self.currentstate = states_mygga_crystal.Idle(self)
 
         self.flee_distance = [50, 50]#starting fleeing if too close
         self.attack_distance = [100, 100]#attack distance
@@ -2838,9 +2838,9 @@ class Shield(Projectiles):#a protection shield
         if self.flags['invincibility']: return
         self.health -= dmg
 
-        self.flags['invincibility'] = True                
+        self.flags['invincibility'] = True
         if self.health > 0:#TODO make it red momentary or something to indicate that it too damage
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while        
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         else:
             self.game_objects.timer_manager.start_timer(100, self.time_out)#adds a timer to timer_manager and sets self.invincible to false after a while
             #TODO make it blink or something to indicate that it will die soon
@@ -3989,7 +3989,8 @@ class Path_col(Interactable):
         pass
 
     def update(self):
-        self.group_distance()
+        pass
+        #self.group_distance()
 
     def player_movement(self, player):#the movement aila does when colliding
         if self.rect[3] > self.rect[2]:#if player was trvelling horizontally, enforce running in that direction
@@ -3999,7 +4000,7 @@ class Path_col(Interactable):
             if player.velocity[1] < 0:#up
                 player.velocity[1] = -10
             else:#down
-                pass       
+                pass
 
     def player_collision(self, player):
         self.player_movement(player)
@@ -4257,10 +4258,10 @@ class Chest(Interactable):
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
         self.flags['invincibility'] = True
-        
+
         if self.health > 0:
             self.currentstate.handle_input('Hurt')
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while            
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         else:
             self.currentstate.handle_input('Opening')
             self.game_objects.world_state.state[self.game_objects.map.level_name]['chest'][self.ID_key] = True#write in the state dict that this has been picked up
@@ -4417,12 +4418,12 @@ class Light_crystal(Interactable):
         if self.flags['invincibility']: return
         projectile.clash_particles(self.hitbox.center)
         self.flags['invincibility'] = True
-        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while                    
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.currentstate.handle_input('Transform')
         self.game_objects.lights.add_light(self)#should be when interacted state is initialised and not on taking dmg
 
     def on_invincibility_timeout(self):
-        self.flags['invincibility'] = False        
+        self.flags['invincibility'] = False
 
 class Fireplace(Interactable):
     def __init__(self, pos, game_objects, on = False):
@@ -4571,7 +4572,7 @@ class Lever(Interactable):
     def take_dmg(self,projectile):
         if self.flags['invincibility']: return
         self.flags['invincibility'] = True
-        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while                    
+        self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
 
         projectile.clash_particles(self.hitbox.center)
 
@@ -4618,8 +4619,8 @@ class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction.
 class Status():#like timers, but there is an effect during update
     def __init__(self, entity, duration, callback = None):
         self.entity = entity
-        self.duration = duration     
-        self.callback = callback   
+        self.duration = duration
+        self.callback = callback
 
     def activate(self):#add timer to the entity timer list
         if self in self.entity.timers: return#do not append if the timer is already inside
@@ -4665,9 +4666,9 @@ class Friction_status(Status):
         super().__init__(entity, duration)
 
     def deactivate(self):
-        self.entity.friction =  C.friction_player.copy()           
+        self.entity.friction =  C.friction_player.copy()
         if self not in self.entity.timers: return#do not remove if the timer is not inside
-        self.entity.timers.remove(self)        
+        self.entity.timers.remove(self)
 
     def update(self):
         self.entity.friction[0] += self.entity.game_objects.game.dt* 0.001
