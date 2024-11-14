@@ -119,9 +119,9 @@ class Title_Menu(Game_State):
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_13','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_6','1')
+            self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -471,11 +471,13 @@ class Gameplay(Game_State):
 
     def update(self):
         self.handle_movement()
-        self.fade_update()
+        self.game.game_objects.update()
+        self.game.game_objects.collide_all()
+        self.game.game_objects.UI['gameplay'].update()        
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.game.game_objects.update()
-        self.game.game_objects.collide_all()
+        self.game.game_objects.platform_collision()
         self.game.game_objects.UI['gameplay'].update()
 
     def render(self):
@@ -772,7 +774,7 @@ class Fadein(Gameplay):
                 break
 
     def update(self):
-        self.fade_update()
+        self.fade_update()#so that it doesn't collide with collision path
         self.count += self.game.dt
         if self.count > self.fade_length*2:
             self.exit()
@@ -807,7 +809,7 @@ class Fadeout(Fadein):
         pass
 
     def update(self):
-        self.previous_state.fade_update()
+        self.previous_state.fade_update()#so that it don't consider player input
         self.count += self.game.dt
         if self.count > self.fade_length:
             self.exit()

@@ -3745,7 +3745,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
 
         self.bubble = bubble#the bubble is in platform, so the reference is sent in init
         self.prop = prop
-        self.time = 0
+        self.time = random.randint(0, 10)
 
     def group_distance(self):
         pass
@@ -3754,10 +3754,11 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         super().update()
         self.time += self.game_objects.game.dt
         if self.time > 100:
-            bubble = self.bubble(self.rect.midtop, self.game_objects, **self.prop)
+
+            bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
             self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
-            self.time = 0
+            self.time = random.randint(0, 50)
 
 class Crystal_source(Interactable):#the thng that spits out crystals in crystal mines
     def __init__(self, pos, game_objects, **kwarg):
@@ -4231,20 +4232,22 @@ class Uber_runestone(Interactable):
         if self.runestone_number == 25:
             pass#do a cutscene?
 
-class Chest(Interactable):
+class Loot_containers(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/Chest/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/' + type(self).__name__.lower() + '/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
-        self.health=3
-        self.inventory = {'Amber_Droplet':3}
-        self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.hitbox.midbottom = self.rect.midbottom
+
+        self.health = 3
+        self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
+        self.flags = {'invincibility':False}
 
         if state:
             self.currentstate = states_basic.Interacted(self)
+            self.flags['invincibility'] = True
 
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
@@ -4253,21 +4256,45 @@ class Chest(Interactable):
                 self.game_objects.loot.add(obj)
             self.inventory[key]=0
 
+    def on_invincibility_timeout(self):
+        self.flags['invincibility'] = False
+
     def take_dmg(self,projectile):
         if self.flags['invincibility']: return
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
         self.flags['invincibility'] = True
+        self.hit_loot()
 
         if self.health > 0:
             self.currentstate.handle_input('Hurt')
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         else:
             self.currentstate.handle_input('Opening')
-            self.game_objects.world_state.state[self.game_objects.map.level_name]['chest'][self.ID_key] = True#write in the state dict that this has been picked up
+            self.game_objects.world_state.state[self.game_objects.map.level_name][type(self).__name__.lower()][self.ID_key] = True#write in the state dict that this has been picked up
 
-    def on_invincibility_timeout(self):
-        self.flags['invincibility'] = False
+    def hit_loot(self):
+        for i in range(0, random.randint(1,3)):
+            obj = Amber_Droplet(self.hitbox.midtop, self.game_objects)
+            self.game_objects.loot.add(obj)   
+
+class Chest(Loot_containers):
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects, state, ID_key)
+        self.inventory = {'Amber_Droplet':3}
+
+    def hit_loot(self):
+        pass
+
+class Amber_tree(Loot_containers):#amber source
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects, state, ID_key)    
+        self.inventory = {'Amber_Droplet':3}
+
+class Amber_rock(Loot_containers):#amber source
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects, state, ID_key)    
+        self.inventory = {'Amber_Droplet':3}
 
 class Door(Interactable):
     def __init__(self,pos,game_objects):

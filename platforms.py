@@ -214,7 +214,7 @@ class Collision_texture(Platform):#blocks that has tectures
     def __init__(self, pos, game_objects):
         super().__init__(pos)
         self.game_objects = game_objects
-        self.dir = [1,0]#animation needs it
+        #self.dir = [1,0]
 
     def update(self):
         self.currentstate.update()
@@ -246,6 +246,71 @@ class Collision_texture(Platform):#blocks that has tectures
     def draw(self, target):
         self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])))#int seem nicer than round
 
+class Collision_shadow_light(Collision_texture):#collsion block but only lights and interacts when there is light overlap
+    def __init__(self, pos, game_objects, size):
+        super().__init__(pos, game_objects)
+        self.size = size
+
+        self.empty = game_objects.game.display.make_layer(size)
+        self.noise_layer = game_objects.game.display.make_layer(size)
+        self.image = game_objects.game.display.make_layer(size)
+        self.lights = game_objects.game.display.make_layer(size)
+
+        self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
+        self.cut_rect = self.rect.copy()  # A rectangle used to cut out light sources for shader
+        self.hitbox = self.rect.copy()  # The initial hitbox of the platform
+        self.time = 0        
+        self.platforms = []#keep diffeernt collision blocks to dynamically change the size
+
+    def update(self):
+        self.check_light()  # Check if the platform is hit by light
+        self.time += self.game_objects.game.dt * 0.01
+
+    def check_light(self):
+        for index, light in enumerate(self.game_objects.lights.lights_sources):
+            #if not light.shadow_light: continue
+            collision = self.hitbox.colliderect(light.hitbox)
+            if not collision: continue
+            overlap_rect = self.hitbox.clip(light.hitbox)
+
+            # if overlap_rect.width > 0 and overlap_rect.height > 0:
+            if index < len(self.platforms):#dynamically change the hitbox size depending on the overlap between light and rectangle                        
+                self.platforms[index].hitbox = overlap_rect  # Update the block's hitbox
+                self.platforms[index].rect = overlap_rect  # Update the block's visual representation
+            else:
+                new_block = Collision_block(overlap_rect.topleft, size=[overlap_rect.width,overlap_rect.height])
+                self.platforms.append(new_block)
+                self.game_objects.platforms.add(new_block)
+
+    def draw(self, target):
+        #noise
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
+        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture        
+
+        #the rectangle
+        self.game_objects.shaders['rectangle_border']['TIME'] = self.time 
+        self.game_objects.shaders['rectangle_border']['noiseTexture'] = self.noise_layer.texture
+        self.game_objects.game.display.render(self.empty.texture, self.image, shader=self.game_objects.shaders['rectangle_border'])#make the rectangle   
+        
+        #copy the light texture
+        blit_pos=(int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))        
+        self.cut_rect[0],self.cut_rect[1] = blit_pos[0], self.size[1] - blit_pos[1]
+        self.game_objects.game.display.render(self.game_objects.lights.layer3.texture, self.lights, section = self.cut_rect)#cut out the light texture
+
+        #blend
+        self.game_objects.shaders['blend_shadow_light']['platform'] = self.image.texture
+        self.game_objects.game.display.render(self.lights.texture, target, position = blit_pos, shader = self.game_objects.shaders['blend_shadow_light'])#blend light and rectangle
+
+    def release_texture(self):#called when .kill() and empty group
+        self.image.release()
+        self.noise_layer.release()
+        self.empty.release()
+        self.lights.release()
+        self.platforms = []
+
 class Dark_forest_1(Collision_texture):#a platform which dissapears when there is no light
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -254,10 +319,27 @@ class Dark_forest_1(Collision_texture):#a platform which dissapears when there i
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
         self.light_hitbox = self.hitbox.copy()#the hitbox that collides with light
+        self.shader = game_objects.shaders['outline']
+        self.time = 0
+        self.size = self.image.size
+        self.lights = game_objects.game.display.make_layer(self.size)
+        self.cut_rect = pygame.Rect(pos[0], pos[1], self.size[0], self.size[1])
 
     def update(self):
         self.check_light()
+        self.time += self.game_objects.game.dt 
+        self.shader['TIME'] = self.time 
     
+    def draw(self, target):
+        #copy the light texture
+        blit_pos=(int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))        
+        self.cut_rect[0],self.cut_rect[1] = blit_pos[0], self.size[1] - blit_pos[1]
+        self.game_objects.game.display.render(self.game_objects.lights.layer3.texture, self.lights, section = self.cut_rect)#cut out the light texture
+
+        #blend
+        self.game_objects.shaders['blend_shadow_light']['platform'] = self.image
+        self.game_objects.game.display.render(self.lights.texture, target, position = blit_pos, shader = self.game_objects.shaders['blend_shadow_light'])#blend light and rectangle        
+
     def check_light(self):
         for light in self.game_objects.lights.lights_sources:
             if not light.shadow_interact: continue
@@ -622,7 +704,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.hitbox = self.rect.copy()
 
         lifetime = prop.get('lifetime', 300)
-        self.game_objects.timer_manager.start_timer(self.lifeitme, self.deactivate)
+        self.game_objects.timer_manager.start_timer(lifetime, self.deactivate)
         #TODO horitoxntal or veritcal moment
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
@@ -631,11 +713,11 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def update_vel(self):
         self.velocity[1] -= self.game_objects.game.dt*0.01
 
+    def release_texture(self):
+        pass
+
     def pool(game_objects):#all things that should be saved in object pool
         Bubble.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
-
-    def activate(self):
-        pass
 
     def deactivate(self):#called when first timer runs out
         self.kill()

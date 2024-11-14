@@ -10,7 +10,6 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
         self.group = game_objects.all_bgs
         self.parallax = parallax
 
-        self.blur_radius = 1/self.parallax[0]        
         self.live_blur = live_blur
         self.blurtstate = states_blur.Idle(self) 
 
@@ -225,8 +224,8 @@ class Droplet_source(Layered_objects):
 
 class Falling_rock_source(Layered_objects):
     animations = {}    
-    def __init__(self,pos,game_objects,parallax, live_blur = False):
-        super().__init__(pos,game_objects,parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax, live_blur = False):
+        super().__init__(pos, game_objects, parallax, live_blur)
         self.init_sprites('Sprites/animations/falling_rock/source/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -235,14 +234,13 @@ class Falling_rock_source(Layered_objects):
 
     def drop(self):#called from states
         if self.parallax == [1,1]:#TODO need to check for bg and fg etc. I guess fg should not go into eprojectiles
-            obj = entities.Falling_rock(self)
+            obj = entities.Falling_rock(self.rect.bottomleft, self.game_objects)
             self.game_objects.eprojectiles.add(obj)
         else:#TODO need to put in all_bgs or all_gfs
             sprites = self.game_objects.all_bgs.sprites()
             bg = self.game_objects.all_bgs.reference[tuple(self.parallax)]
             index = sprites.index(bg)#find the index in which the static layer is located
-            pos = self.rect.topleft
-            obj = Falling_rock(pos,self.game_objects,self.parallax)
+            obj = Falling_rock(self.rect.topleft, self.game_objects, self.parallax)
             self.game_objects.all_bgs.spritedict[obj] = self.game_objects.all_bgs._init_rect#in add internal
             self.game_objects.all_bgs._spritelayers[obj] = 0
             self.game_objects.all_bgs._spritelist.insert(index,obj)#it goes behind the static layer of reference
@@ -443,8 +441,8 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.colour[-1] = max(self.colour[-1],0)
 
     def update_vel(self):
-        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.velocity[0] - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
-        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.velocity[1] - self.friction[1]*self.velocity[1])
+        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
+        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
         if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
