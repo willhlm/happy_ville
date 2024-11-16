@@ -262,6 +262,8 @@ class Collision_shadow_light(Collision_texture):#collsion block but only lights 
         self.time = 0        
         self.platforms = []#keep diffeernt collision blocks to dynamically change the size
 
+        self.game_objects.shaders['rectangle_border']['screenSize'] = self.game_objects.game.window_size
+
     def update(self):
         self.check_light()  # Check if the platform is hit by light
         self.time += self.game_objects.game.dt * 0.01
@@ -296,9 +298,9 @@ class Collision_shadow_light(Collision_texture):#collsion block but only lights 
         self.game_objects.game.display.render(self.empty.texture, self.image, shader=self.game_objects.shaders['rectangle_border'])#make the rectangle   
         
         #copy the light texture
-        blit_pos=(int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))        
-        self.cut_rect[0],self.cut_rect[1] = blit_pos[0], self.size[1] - blit_pos[1]
-        self.game_objects.game.display.render(self.game_objects.lights.layer3.texture, self.lights, section = self.cut_rect)#cut out the light texture
+        blit_pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))        
+        self.cut_rect.topleft = blit_pos
+        self.game_objects.game.display.render(self.game_objects.lights.layer3.texture, self.lights, flip = [False, True], section = self.cut_rect, shader = self.game_objects.shaders['reverse_y'])#cut out the light texture
 
         #blend
         self.game_objects.shaders['blend_shadow_light']['platform'] = self.image.texture

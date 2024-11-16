@@ -4,10 +4,11 @@ in vec2 fragmentTexCoord;
 uniform sampler2D imageTexture;          // Original texture
 uniform sampler2D noiseTexture;          // Perlin noise texture
 
-uniform float baseOutlineWidth = 50.0;   // Base width of the outline in pixels
+uniform float baseOutlineWidth = 10.0;   // Base width of the outline in pixels
 uniform vec4 colorStart = vec4(0.2, 0.3, 1.0, 1.0); // Starting color of the outline (e.g., blue)
 uniform vec4 colorEnd = vec4(0.2, 0.7, 0.7, 1.0);   // Ending color of the outline (e.g., pink)
-uniform vec2 screenSize = vec2(360, 640);
+uniform vec2 screenSize;
+uniform float pulse_amplitude = 5;
 uniform float TIME;
 
 out vec4 COLOR;
@@ -33,8 +34,8 @@ void main() {
     float minDist = min(min(leftDist, rightDist), min(topDist, bottomDist));
 
     // Convert outline width from pixels to texture space
-    float pulse = 0.5 + 0.5 * sin(TIME * 2.0); // Pulse effect for outline thickness
-    float outlineWidthUV = (baseOutlineWidth + pulse * 5.0) * TEXTURE_PIXEL_SIZE.x;
+    float pulse = pulse_amplitude + pulse_amplitude * sin(TIME * 2.0); // Pulse effect for outline thickness
+    float outlineWidthUV = (baseOutlineWidth + pulse * 5.0);
 
     // Sample Perlin noise to modulate the outline thickness or color
     float noiseValue = texture(noiseTexture, fragmentTexCoord * 0.05 + vec2(TIME * 0.1, 0.0)).r; // Use time for animation
