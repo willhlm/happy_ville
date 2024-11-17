@@ -363,6 +363,7 @@ class Level():
                         prop['fade'] = property['value']
                     elif property['name'] == 'pulsting':
                         prop['pulsting'] = property['value']
+                prop['parallax'] = parallax
 
                 ligth_source = entities_parallax.Light_source(object_position, self.game_objects, parallax)
                 self.game_objects.lights.add_light(ligth_source, **prop)
@@ -1069,7 +1070,7 @@ class Dark_forest(Biome):
 
     def room(self, room = 1):
         if room == '2':
-            self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
+            self.level.game_objects.lights.ambient = [30/255,30/255,30/255,170/255]
             self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
 
     def load_objects(self, data, parallax, offset):
@@ -1096,7 +1097,7 @@ class Dark_forest(Biome):
 
             elif id == 11:#smalltree 1
                 new_block = platforms.Dark_forest_1(object_position, self.level.game_objects)
-                self.level.game_objects.platforms.add(new_block)                    
+                self.level.game_objects.cosmetics.add(new_block)                    
 
             elif id == 12:#shource of shadow_light
                 kwarg = {}

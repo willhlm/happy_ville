@@ -2,7 +2,6 @@
 
 in vec2 fragmentTexCoord;
 uniform sampler2D imageTexture;          // Original texture
-uniform sampler2D noiseTexture;          // Perlin noise texture
 
 uniform float baseOutlineWidth = 10.0;   // Base width of the outline in pixels
 uniform vec4 colorStart = vec4(0.2, 0.3, 1.0, 1.0); // Starting color of the outline (e.g., blue)
@@ -37,15 +36,11 @@ void main() {
     float pulse = pulse_amplitude + pulse_amplitude * sin(TIME * 2.0); // Pulse effect for outline thickness
     float outlineWidthUV = (baseOutlineWidth + pulse * 5.0);
 
-    // Sample Perlin noise to modulate the outline thickness or color
-    float noiseValue = texture(noiseTexture, fragmentTexCoord * 0.05 + vec2(TIME * 0.1, 0.0)).r; // Use time for animation
-    float noiseFactor = (noiseValue * 0.5 + 0.5);  // Normalize the noise value to range [0.0, 1.0]
-
     // Calculate a smooth gradient for magical color effect
     vec4 outlineColor = mix(colorStart, colorEnd, sin(TIME + minDist * 10.0) * 0.5 + 0.5);
 
     // Apply the outline effect with glow
-    float fadeFactor = smoothstep(0.0, outlineWidthUV * (1.0 + noiseFactor), minDist);  // Modulate with noise factor
+    float fadeFactor = smoothstep(0.0, outlineWidthUV * 1.0, minDist);  // Modulate with noise factor
 
     // Blend the outline color with a glowing effect
     vec4 glowColor = mix(outlineColor, vec4(outlineColor.rgb * 1.5, 1.0), 1.0 - fadeFactor);

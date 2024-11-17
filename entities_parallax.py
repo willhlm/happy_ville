@@ -331,7 +331,7 @@ class Thor_mtn(Layered_objects):
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
 
-class Light_source(Layered_objects):#works for parallax = 1. Not sure how we would liek to deal with light sources for other parallax
+class Light_source(Layered_objects):#should we decrease alpha for large parallax?
     def __init__(self, pos, game_objects, parallax, live_blur = False):
         super().__init__(pos, game_objects, parallax, live_blur)
         self.rect = pygame.Rect(pos[0],pos[1],16,16)
