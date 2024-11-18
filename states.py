@@ -92,18 +92,18 @@ class Title_Menu(Game_State):
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:
-            if event[-1] == 'up':
-                self.current_button -= 1
-                if self.current_button < 0:
-                    self.current_button = len(self.buttons) - 1
-                self.update_arrow()
-            elif event[-1] == 'down':
-                self.current_button += 1
-                if self.current_button >= len(self.buttons):
-                    self.current_button = 0
-                self.update_arrow()
-            elif event[-1] in ('return', 'a'):
+        if event[2]['l_stick'][1] < 0:#up
+            self.current_button -= 1
+            if self.current_button < 0:
+                self.current_button = len(self.buttons) - 1
+            self.update_arrow()
+        elif event[2]['l_stick'][1] > 0:#down
+            self.current_button += 1
+            if self.current_button >= len(self.buttons):
+                self.current_button = 0
+            self.update_arrow()
+        elif event[0]:
+            if event[-1] in ('return', 'a'):
                 self.buttons[self.current_button].pressed()#if we want to make it e.g. glow or something
                 self.change_state()
             elif event[-1] == 'start':
@@ -119,9 +119,14 @@ class Title_Menu(Game_State):
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
+<<<<<<< HEAD
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             self.game.game_objects.load_map(self,'nordveden_12','1')
+=======
+            self.game.game_objects.load_map(self,'dark_forest_2','1')
+>>>>>>> 92ef092b017a4fe6ccb17bca957e840871ba4947
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -471,11 +476,13 @@ class Gameplay(Game_State):
 
     def update(self):
         self.handle_movement()
-        self.fade_update()
+        self.game.game_objects.update()
+        self.game.game_objects.collide_all()
+        self.game.game_objects.UI['gameplay'].update()        
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.game.game_objects.update()
-        self.game.game_objects.collide_all()
+        self.game.game_objects.platform_collision()
         self.game.game_objects.UI['gameplay'].update()
 
     def render(self):
@@ -497,7 +504,7 @@ class Gameplay(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        if event[0]:#press or analogue stick
+        if event[0]:#press
             if event[-1]=='start':#escape button
                 input.processed()
                 new_state = Pause_Menu(self.game)
@@ -740,8 +747,6 @@ class Ability_menu(Gameplay):#when pressing tab
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys
-            self.game.game_objects.player.currentstate.handle_movement(event)#move around
         if event[0]:#press TODO change to right analogue stick. What should it be on keyboard?
             if event[-1] == 'right':
                 self.index+=1
@@ -774,7 +779,7 @@ class Fadein(Gameplay):
                 break
 
     def update(self):
-        self.fade_update()
+        self.fade_update()#so that it doesn't collide with collision path
         self.count += self.game.dt
         if self.count > self.fade_length*2:
             self.exit()
@@ -809,7 +814,7 @@ class Fadeout(Fadein):
         pass
 
     def update(self):
-        self.previous_state.fade_update()
+        self.previous_state.fade_update()#so that it don't consider player input
         self.count += self.game.dt
         if self.count > self.fade_length:
             self.exit()

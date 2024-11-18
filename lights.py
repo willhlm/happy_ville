@@ -3,7 +3,7 @@ import pygame, math, random
 class Lights():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.ambient = (0,0,0,0)#ambient colour
+        self.ambient = [0,0,0,0]#ambient colour
         self.lights_sources = []#append lights
         self.shaders = {'light':game_objects.shaders['light'],'blur':game_objects.shaders['blur'],'blend':game_objects.shaders['blend']}
 
@@ -13,7 +13,7 @@ class Lights():
         self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
-        self.vignette = game_objects.game.display.make_layer(game_objects.game.window_size)
+        #self.vignette = game_objects.game.display.make_layer(game_objects.game.window_size)
 
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
 
@@ -21,7 +21,7 @@ class Lights():
 
     def new_map(self):#called when loading a new map from map loader
         self.clear_lights()
-        self.ambient = (0,0,0,0)
+        self.ambient = [0,0,0,0]
 
     def clear_normal_map(self):#called at the begning of draw in game objects
         self.normal_map.clear(0, 0, 0, 0)
@@ -40,7 +40,7 @@ class Lights():
             self.normal_interact.append(light.normal_interact)
 
     def list_points(self, light):
-        if not light.interact: 
+        if not light.platform_interact: 
             self.num_rectangle.append(0)
         else:
             platforms = self.game_objects.collisions.sprite_collide(light, self.game_objects.platforms)#collision -> collision occures at coordinates as pe tiled position
@@ -59,7 +59,7 @@ class Lights():
     def add_light(self, target, **properties):
         light = Light(self.game_objects, target, **properties)
         self.lights_sources.append(light)
-        self.shaders['light']['num_lights'] = len(self.lights_sources)    
+        self.shaders['light']['num_lights'] = len(self.lights_sources)  
         return light
 
     def remove_light(self, light):
@@ -79,7 +79,7 @@ class Lights():
         self.shaders['light']['normal_interact'] = self.normal_interact
         self.shaders['light']['normal_map'] = self.normal_map.texture
 
-        self.shaders['blend']['background'] = self.game_objects.game.screen.texture        
+        self.shaders['blend']['background'] = self.game_objects.game.screen.texture     
 
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])
@@ -93,28 +93,34 @@ class Light():#light source
         self.init_radius = properties.get('radius',150)#colour
         self.radius = properties.get('radius',150)#colour
         self.colour = properties.get('colour',[1,1,1,1])#colour
-        self.interact = properties.get('interact', False)#colour#if it should interact with platforms
         self.start_angle = properties.get('start_angle',0)
         self.end_angle = properties.get('end_angle', 360)
         self.min_radius = properties.get('min_radius',0)
+        self.max_radius = properties.get('max_radius',300)
+        self.expand_speed = properties.get('expand_speed',100)
+        self.parallax = properties.get('parallax',[1,1])
+
+        self.platform_interact = properties.get('platform_interact', False)#colour#if it should interact with platforms
         self.normal_interact = float(properties.get('normal_interact', True))#a flag to check if it should interact with normal maps
+        self.shadow_interact = properties.get('shadow_interact', False)#a flag to check if it should collide with light based stuff (dark forest platform, enemy)
 
-        self.target = target
-
-        self.position = target.hitbox.center#the blit position
-        self.hitbox = pygame.Rect(self.position[0]-self.radius,self.position[1]-self.radius,self.radius*2,2*self.radius)
-        self.rect = self.hitbox.copy()
         self.time = 0
 
-        self.updates = [self.set_pos]#self.fade, self.pulsating#can decide what to do by appending things here
-        update_functions = {'flicker': self.flicker, 'fade': self.fade, 'pulsating': self.pulsating}
-        for prop, func in update_functions.items():
+        self.target = target
+        self.position = target.hitbox.center#the blit position                     
+        self.hitbox = pygame.Rect(self.position[0]-self.radius,self.position[1]-self.radius,self.radius*2,2*self.radius)
+        self.rect = self.hitbox.copy()            
+
+        self.updates = [self.follow_target]#self.fade, self.pulsating#can decide what to do by appending things here
+        self.update_functions = {'flicker': self.flicker, 'fade': self.fade, 'pulsating': self.pulsating, 'expand': self.expand, 'lifetime': self.lifetime}
+        for prop, func in self.update_functions.items():
             if properties.get(prop, False):
                 self.updates.append(func)
 
     def expand(self):
-        self.radius += self.game_objects.game.dt*100
-        self.radius = min(self.radius,300)
+        self.radius += self.game_objects.game.dt*self.expand_speed
+        self.radius = min(self.radius, self.max_radius)
+        self.hitbox[2], self.hitbox[3] = 2*self.radius, 2*self.radius
 
     def flicker(self):
         flickerrange = 0.1
@@ -125,17 +131,20 @@ class Light():#light source
         self.colour[-1] *= rate
 
     def pulsating(self):#
-        self.time += self.game_objects.game.dt*0.01
+        self.time += self.game_objects.game.dt * 0.01
         self.radius = 0.5 * self.init_radius * math.sin(self.time) + self.init_radius * 0.5
 
     def lifetime(self):
         if self.colour[-1] < 0.01:
             self.game_objects.lights.remove_light(self)
-            self.target.state.handle_input('light_gone')
+            #self.target.state.handle_input('light_gone')
 
-    def set_pos(self):#I think all should do this
+    def follow_target(self):
         self.hitbox.center = self.target.hitbox.center
-        self.position = [self.hitbox.center[0] - self.game_objects.camera_manager.camera.scroll[0],self.hitbox.center[1] - self.game_objects.camera_manager.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
+        self.position = [self.hitbox.center[0] - self.parallax[0] * self.game_objects.camera_manager.camera.scroll[0],self.hitbox.center[1] - self.parallax[1] * self.game_objects.camera_manager.camera.scroll[1]]#te shader needs tye position without the scroll (i.e. "on screen" values)
+
+    def add_decorator(self, key):
+        self.updates.append(self.update_functions[key])
 
     def update(self):#if they e.g. fade
         for update in self.updates:

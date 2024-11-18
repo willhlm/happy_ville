@@ -23,10 +23,10 @@ class World_state():
     def update_statistcis(self, key):#called when amber is picked up
         self.statistics[key] += 1#increaase total money, deaths etc
 
-    def save_travelpoint(self,map,cord):#called when inetracted with fast travel
+    def save_travelpoint(self, map, cord):#called when inetracted with fast travel
         if not self.travel_points.get(map, False):#if first time intercted with it            
             self.travel_points[map] = cord
 
     def init_state_file(self, level_name):#make a state file if it is the first time loading this map, state of different interactables
-        self.state[level_name] = {'chest': {},'lever': {},'soul_essence': {},'runestone': {}, 'interactable_items': {}}#a place holder for things that should depend on map state
+        self.state[level_name] = {'amber_rock': {}, 'amber_tree': {}, 'chest': {},'lever': {},'soul_essence': {},'runestone': {}, 'interactable_items': {}}#a place holder for things that should depend on map state
         self.state.pop('placeholder_level', 0)#removes the placeholder tag

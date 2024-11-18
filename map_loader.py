@@ -14,7 +14,7 @@ class Level():
 
     def load_map(self, map_name, spawn):
         self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
-        self.spawned = False
+        self.spawned = False#a flag so that we only spawn alia once
         self.level_name = map_name.lower()#biom_room
         self.spawn = spawn
         self.game_objects.lights.new_map()#set ambient default light and clear light sources
@@ -363,6 +363,7 @@ class Level():
                         prop['fade'] = property['value']
                     elif property['name'] == 'pulsting':
                         prop['pulsting'] = property['value']
+                prop['parallax'] = parallax
 
                 ligth_source = entities_parallax.Light_source(object_position, self.game_objects, parallax)
                 self.game_objects.lights.add_light(ligth_source, **prop)
@@ -397,6 +398,10 @@ class Level():
                      #   self.game_objects.cosmetics.add(reflection)
                     #else:
                     self.game_objects.all_bgs.add(reflection)
+
+            elif id == 28:#shadow light platform
+                platform = platforms.Collision_shadow_light(object_position, self.game_objects, object_size)
+                self.game_objects.cosmetics.add(platform)
 
             elif id == 31:#explosion
                 explosion = entities.Explosion_shader(object_position, self.game_objects, object_size)
@@ -441,6 +446,8 @@ class Level():
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         chest_int = 1
         soul_essence_int = 1
+        amber_tree_int = 1
+        amber_rock_int = 1
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
@@ -558,9 +565,17 @@ class Level():
                 statue = entities.Air_dash_statue(object_position, self.game_objects)
                 self.game_objects.interactables.add(statue)
 
-    @staticmethod
-    def blur_value(parallax):#called from load_layers and load_back/front_objects
-        return round(1/parallax[0])
+            elif id == 17:
+                state = self.game_objects.world_state.state[self.level_name]['amber_tree'].get(str(amber_tree_int), False)
+                amber_tree = entities.Amber_tree(object_position, self.game_objects, state, str(amber_tree_int))
+                self.game_objects.interactables.add(amber_tree)     
+                amber_tree_int += 1
+
+            elif id == 18:
+                state = self.game_objects.world_state.state[self.level_name]['amber_rock'].get(str(amber_rock_int), False)
+                amber_rock = entities.Amber_rock(object_position, self.game_objects, state, str(amber_rock_int))
+                self.game_objects.interactables.add(amber_rock)     
+                amber_rock_int += 1
 
     def load_layers(self, data, parallax, offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
@@ -569,7 +584,6 @@ class Level():
         'The groups should contain "fg", "bg" in their name.'
         'The tile layer in groups can be called whatever.'
         'recommended convention: bg_#, bg_interact_# or bg_fade_# for the layers  (normal, stiff infront of interactables, e.g. grass, and stuff that fades upon collision with player). It doesnt have to be called bg but needs _fade_# and _interact_# for the spaceial ones'
-        'The main group needs to be called "bg1"'#world state file reads it
         'The objects need to be called statics, interactables, front or back.'
         'Each level can have a tmx file called "objects" and be placed in object layer called front or back'
 
@@ -650,7 +664,7 @@ class Level():
             elif self.layer.startswith('fg'):#fg
                 self.game_objects.all_fgs.add(entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax, live_blur = self.biome.live_blur))#pos,img,parallax
 
-            if animation_entities.get(tile_layer,False):#add animations
+            if animation_entities.get(tile_layer, False):#add animations
                 for bg_animation in animation_entities[tile_layer]:
                     if 'fg' in tile_layer:
                         self.game_objects.all_fgs.add(bg_animation)
@@ -1055,8 +1069,9 @@ class Dark_forest(Biome):
         super().__init__(level)
 
     def room(self, room = 1):
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
-        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
+        if room == '2':
+            self.level.game_objects.lights.ambient = [30/255,30/255,30/255,170/255]
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:
@@ -1082,4 +1097,13 @@ class Dark_forest(Biome):
 
             elif id == 11:#smalltree 1
                 new_block = platforms.Dark_forest_1(object_position, self.level.game_objects)
-                self.level.game_objects.platforms.add(new_block)                    
+                self.level.game_objects.cosmetics.add(new_block)                    
+
+            elif id == 12:#shource of shadow_light
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'on':
+                        kwarg['on'] = property['value']
+
+                new_lantern = entities.Shadow_light_lantern(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.interactables.add(new_lantern)                         

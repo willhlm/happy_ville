@@ -64,10 +64,10 @@ class Controller():
                                 pygame.K_k: 'rt'
                                 }
 
-    def map_inputs(self,event):
+    def map_inputs(self,event):        
         self.keyup = False
         self.keydown = False
-        self.key = None
+        self.key = None        
         for method in self.methods:#check for keyboard and controller
             method(event)#self.methods[-1](event)
 
@@ -109,7 +109,7 @@ class Controller():
 
             self.insert_buffer()
 
-        if event.type==pygame.JOYDEVICEADDED:#if a controller is added while playing
+        if event.type == pygame.JOYDEVICEADDED:#if a controller is added while playing  
             self.add_controller()
             self.methods.append(self.joystick)
 
@@ -175,7 +175,6 @@ class Controller():
         for joystick in self.joysticks:#Controller input handling
             axis_x = joystick.get_axis(0)  # Left stick X axis
             axis_y = joystick.get_axis(1)  # Left stick Y axis
-            print(axis_x)
 
             if abs(axis_x) > 0.05:
                 value['l_stick'][0] = axis_x

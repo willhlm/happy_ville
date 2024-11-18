@@ -11,7 +11,7 @@ class Weather():
     def update(self):
         self.currentstate.update()#bloew the wind from time to time
 
-    def flash(self, **kwarg):#lightning
+    def flash(self, **kwarg):#lightning        
         self.game_objects.cosmetics.add(Flash(self.game_objects, **kwarg))
 
     def blow(self, **kwarg):#called from currentstate
@@ -86,19 +86,29 @@ class Wind(Screen_shader):
 class Flash(Screen_shader):#white colour fades out and then in
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, kwarg.get('parallax', [1,1]))
-        self.fade_length = 20
+        self.fade_length = 40
         self.image.clear(255,255,255,int(255/self.fade_length))
         self.shader = None
+        self.add_light_source()
 
-    def update_image(self):#called from group
+    def add_light_source(self):
+        radius = self.game_objects.game.window_size[0] * 0.5
+        position = [self.game_objects.camera_manager.camera.scroll[0] + self.game_objects.game.window_size[0] * 0.5, self.game_objects.camera_manager.camera.scroll[1] + self.game_objects.game.window_size[1]*0.5]#put a bg light in center
+        self.hitbox = pygame.Rect(0, 0, self.game_objects.game.window_size[0], self.game_objects.game.window_size[1])#for the light source
+        self.hitbox.center = position
+        self.light = self.game_objects.lights.add_light(target = self ,radius = radius, fade = True, lifetime = True)#put a bg light in center        
+
+    def update_image(self):
         alpha = int((self.fade_length - self.time)*(255/self.fade_length))
         self.image.clear(255,255,255,alpha)
+        self.hitbox.center = [self.game_objects.camera_manager.camera.scroll[0] + self.game_objects.game.window_size[0] * 0.5, self.game_objects.camera_manager.camera.scroll[1] + self.game_objects.game.window_size[1]*0.5]#put a bg light in center
 
     def update(self):
         super().update()
         self.update_image()
         if self.time > self.fade_length:
             self.kill()
+            self.game_objects.lights.remove_light(self.light)
 
 class Fog(Screen_shader):
     def __init__(self, game_objects, parallax, num):
@@ -119,6 +129,7 @@ class Fog(Screen_shader):
         self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])
         self.shader['noise'] = self.noise_layer.texture
         self.shader['TIME'] = self.time*0.001
+        self.shader['fog_color'] = (0, 0, 0, 1)
         self.shader['scroll'] = [self.game_objects.camera_manager.camera.scroll[0]*self.parallax[0],self.game_objects.camera_manager.camera.scroll[1]*self.parallax[1]]
         super().draw(target)
 

@@ -137,7 +137,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
             self.game_objects.camera_manager.camera.center[0] += self.game_objects.game.dt*2
             self.game_objects.camera_manager.camera.center[0] = min(target, self.game_objects.camera_manager.camera.center[0])
 
-        if self.game_objects.camera_manager.camera.center[0] == target:#if finished
+        if abs(self.game_objects.camera_manager.camera.center[0] - target) <= 0.1:#if finished
             self.updates.remove(self.recenteralise_horizontal)
 
     def recenteralise_vertical(self):
@@ -150,7 +150,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
             self.game_objects.camera_manager.camera.center[1] += self.game_objects.game.dt*2
             self.game_objects.camera_manager.camera.center[1] = min(target, self.game_objects.camera_manager.camera.center[1])
 
-        if self.game_objects.camera_manager.camera.center[1] == target:#if finished
+        if abs(self.game_objects.camera_manager.camera.center[1] - target) <= 0.1:#if finished
             self.updates.remove(self.recenteralise_vertical)
 
 #cutscene cameras

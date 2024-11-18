@@ -50,6 +50,7 @@ class Idle_main(Player_states):
         if event[-1] == 'a':
             input.processed()
             self.enter_state('Jump_main')
+            self.entity.game_objects.weather.flash()
         elif event[-1]=='lb':
             input.processed()
             self.enter_state('Ground_dash_pre')
