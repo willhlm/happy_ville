@@ -4034,7 +4034,7 @@ class Path_inter(Interactable):
         self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
 
 class Shade_trigger(Interactable):#it changes the colourof shade screen to a new colour specified by self.new_colour
-    def __init__(self, pos, game_objects, size, colour):
+    def __init__(self, pos, game_objects, size, colour = pygame.Color(0,0,0,0)):
         super().__init__(pos, game_objects)
         self.new_colour = [colour.g,colour.b,colour.a]
         self.rect = pygame.Rect(pos,size)

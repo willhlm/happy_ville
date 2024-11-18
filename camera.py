@@ -5,7 +5,7 @@ class Camera_manager():
         self.game_objects = game_objects
         self.camera = Camera(game_objects)# The default camera
         self.decorators = []# List of decorators
-        self.stop_handeler = Stop_handeler(game_objects)#is put here so that it only has to be loaded once        
+        self.stop_handeler = Stop_handeler(game_objects)#is put here so that it only has to be loaded once
 
     def set_camera(self, camera, **kwarg):
         self.camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.camera.true_scroll, **kwarg)
@@ -39,11 +39,12 @@ class Camera():#default camera
         self.game_objects = game_objects
         self.true_scroll = scroll
         self.scroll = self.true_scroll.copy()
-        self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
-        self.original_center = self.center.copy()        
+        #self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
+        self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + 30]
+        self.original_center = self.center.copy()
 
     def update(self):
-        self.game_objects.camera_manager.stop_handeler.update()#centeralised sometimes the camera, if there is no more camera stops left        
+        self.game_objects.camera_manager.stop_handeler.update()#centeralised sometimes the camera, if there is no more camera stops left
 
         self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
         self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
@@ -65,16 +66,16 @@ class Camera():#default camera
 
 class No_camera(Camera):
     def __init__(self, game_objects, scroll, **kwarg):
-        super().__init__(game_objects, scroll)   
+        super().__init__(game_objects, scroll)
 
     def camera_shake(self, **kwarg):
-        pass          
+        pass
 
     def update(self):
         pass
 
     def exit_state(self):#go back to the cameera
-        self.game_objects.camera_manager.set_camera('Camera')       
+        self.game_objects.camera_manager.set_camera('Camera')
 
 #decorators
 class Camera_shake_decorator():
@@ -82,7 +83,7 @@ class Camera_shake_decorator():
         self.current_camera = current_camera
         self.amp = kwarg.get('amplitude', 10)
         self.duration = kwarg.get('duration', 100)
-        self.scale = kwarg.get('scale', 0.98)         
+        self.scale = kwarg.get('scale', 0.98)
 
     def update(self):
         self.amp *= self.scale
@@ -104,7 +105,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
     def reset(self):
         self.stops = {'bottom':0,'top':0,'left':0,'right':0,'center':0}#counds number of active stops, setted in camera stop states
 
-    def update(self):#called from camera, in case the camera needs to be re centeralised  
+    def update(self):#called from camera, in case the camera needs to be re centeralised
         for update in self.updates:
             update()
 
@@ -120,14 +121,14 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
                 self.updates.remove(self.recenteralise_horizontal)
 
     def remove_stop(self,stop):#called from camera stop states
-        self.stops[stop] -= 1        
+        self.stops[stop] -= 1
         if self.stops['bottom'] == 0 and self.stops['top'] == 0 and self.stops['center'] == 0:
-            self.updates.append(self.recenteralise_vertical)            
+            self.updates.append(self.recenteralise_vertical)
         elif self.stops['left'] == 0 and self.stops['right'] == 0 and self.stops['center'] == 0:
             self.updates.append(self.recenteralise_horizontal)
 
     def recenteralise_horizontal(self):
-        target = self.game_objects.camera_manager.camera.original_center[0]   
+        target = self.game_objects.camera_manager.camera.original_center[0]
 
         if self.game_objects.camera_manager.camera.center[0] - target > 0:
             self.game_objects.camera_manager.camera.center[0] -= self.game_objects.game.dt*2
@@ -141,7 +142,7 @@ class Stop_handeler():#depending on active camera stops, the re centeralisation 
 
     def recenteralise_vertical(self):
         target = self.game_objects.camera_manager.camera.original_center[1]
-        
+
         if self.game_objects.camera_manager.camera.center[1]-target > 0:#camera is below
             self.game_objects.camera_manager.camera.center[1] -= self.game_objects.game.dt*2
             self.game_objects.camera_manager.camera.center[1] = max(target, self.game_objects.camera_manager.camera.center[1])
@@ -204,4 +205,4 @@ class Title_screen(Cutscenes):
 
         self.true_scroll[1] += (self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])
         self.scroll = self.true_scroll.copy()
-        self.scroll[1] = int(self.scroll[1])        
+        self.scroll[1] = int(self.scroll[1])

@@ -5,6 +5,8 @@ import constants as C
 import read_files
 from pygame_render import RenderEngine
 
+pygame.print_debug_info()
+
 class Game():
     def __init__(self):
         #initiate all screens
@@ -29,7 +31,7 @@ class Game():
         pygame.event.set_blocked([pygame.TEXTINPUT])#for some reason, there is a text input here and there. So, blocking it
 
     def event_loop(self):
-        events = pygame.event.get()  
+        events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -40,11 +42,12 @@ class Game():
         inputs = self.game_objects.controller.input_buffer.copy()
         for input in inputs:
             input.update(self.dt)
-            self.state_stack[-1].handle_events(input)  
+            self.state_stack[-1].handle_events(input)
 
     def run(self):
         while True:
-            self.screen.clear(0, 0, 0, 0)  
+
+            self.screen.clear(0, 0, 0, 0)
 
             #tick clock
             self.clock.tick(60)
