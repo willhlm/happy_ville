@@ -134,5 +134,5 @@ class Collisions():
         return dynamic_Entities.hitbox.colliderect(static_entities.hitbox)
 
     @staticmethod
-    def collided_point(dynamic_Entities,static_entities):
+    def collided_point(dynamic_Entities, static_entities):
         return static_entities.hitbox.collidepoint(dynamic_Entities.hitbox.midbottom)

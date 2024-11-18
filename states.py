@@ -495,7 +495,7 @@ class Gameplay(Game_State):
         image.release()
 
     def handle_movement(self):#every frame
-        value = self.game.game_objects.controller.continious_input_checks()
+        value = self.game.game_objects.controller.continuous_input_checks()
         self.game.game_objects.player.currentstate.handle_movement(value)#move around
 
     def handle_events(self, input):

@@ -86,11 +86,11 @@ class Wind(Screen_shader):
 class Flash(Screen_shader):#white colour fades out and then in
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, kwarg.get('parallax', [1,1]))
-        self.fade_length = 40
-        self.image.clear(255,255,255,int(255/self.fade_length))
+        self.fade_length = 100
+        self.image.clear(255,255,255,int(170/self.fade_length))
         self.shader = None
         self.add_light_source()
-
+ 
     def add_light_source(self):
         radius = self.game_objects.game.window_size[0] * 0.5
         position = [self.game_objects.camera_manager.camera.scroll[0] + self.game_objects.game.window_size[0] * 0.5, self.game_objects.camera_manager.camera.scroll[1] + self.game_objects.game.window_size[1]*0.5]#put a bg light in center
