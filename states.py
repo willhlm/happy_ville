@@ -120,7 +120,7 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_13','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             self.game.game_objects.load_map(self,'dark_forest_2','1')
-            #self.game.game_objects.load_map(self,'dark_forest_2','1')
+            #self.game.game_objects.load_map(self,'crystal_mines_3','1')
             #self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
@@ -494,7 +494,7 @@ class Gameplay(Game_State):
         image.release()
 
     def handle_movement(self):#every frame
-        value = self.game.game_objects.controller.continious_input_checks()
+        value = self.game.game_objects.controller.continuous_input_checks()
         self.game.game_objects.player.currentstate.handle_movement(value)#move around
 
     def handle_events(self, input):

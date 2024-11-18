@@ -22,9 +22,7 @@ air_timer = 7#for how long one can press A and keep jumping
 
 #input buffers
 shroomjump_timer_player = 3#how many frames the player can press jump, after landing on a shroompolin, and do shroomjump
-jump_buffer_timer_player = 4##how many frames from falling in which the player can jump when landing
-wall_timer = 3#how many frams from droping from wall you can still jump
-wall_timer_2 = 7#how many frams from jumping till one change change the direction from wall you can still jump
+#jump_buffer_timer_player = 4##how many frames from falling in which the player can jump when landing
 
 #combat
 invincibility_time_player = 50

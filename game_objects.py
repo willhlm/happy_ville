@@ -27,7 +27,7 @@ class Game_Objects():
         self.game = game
         self.font = read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
-        self.controller = controller.Controller('playstation')
+        self.controller = controller.Controller()
         self.object_pool = object_pool.Object_pool(self)
         self.sound = sound.Sound()
         self.lights = lights.Lights(self)

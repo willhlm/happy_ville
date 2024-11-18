@@ -214,7 +214,7 @@ class Collision_texture(Platform):#blocks that has tectures
     def __init__(self, pos, game_objects):
         super().__init__(pos)
         self.game_objects = game_objects
-        #self.dir = [1,0]
+        self.dir = [1,0]#states need it
 
     def update(self):
         self.currentstate.update()
@@ -339,9 +339,6 @@ class Conveyor_belt(Collision_texture):
                 self.direction = [-1, 0]
             animation_direction =  -self.direction[0]
 
-        #self.timer = Conveyor_belt_timer(self, 10, self.direction)
-        #self.timers = []
-
         self.make_belt(size, angle)
         self.animation = animation.Animation(self, direction = animation_direction)#can revert the animation direction
         self.currentstate = states_basic.Idle(self)
@@ -353,11 +350,6 @@ class Conveyor_belt(Collision_texture):
         else:
             self.hitbox = pygame.Rect(pos[0], pos[1], (self.rect[2]) * 0.55, (self.rect[3]-16))
         self.hitbox.center = self.rect.center
-
-    #def update(self):
-    #    super().update()
-        #for timer in self.timers:
-        #    timer.update()
 
     def make_belt(self, size, angle = 0):#the spits are divided into left, middle and right. Merge them here
         sprites = read_files.load_sprites_dict('Sprites/block/conveyor_belt/', self.game_objects)
@@ -404,8 +396,9 @@ class Conveyor_belt(Collision_texture):
 
     def collide_y(self,entity):
         super().collide_y(entity)
-        entity.velocity[0] += self.game_objects.game.dt * self.direction[0]
-        #self.timer.activate(entity)
+        entity.velocity[0] += self.game_objects.game.dt * self.direction[0] * 0.1
+        entity.friction[0] = C.friction_player[0] - 0.1 * self.direction[0] * entity.dir[0]
+        entity.timer_jobs['friction'].activate()
 
 #shadow light platforms: platforms that appear under shadow light
 class Shadow_light(Collision_texture):#parent class: add the subclasses to cosmetics group
@@ -731,46 +724,4 @@ class Smacker(Collision_dynamic):#trap
     def collide_y(self,entity):#entity moving
         self.currentstate.collide_y(entity)
 
-#not used
-class Timer():
-    def __init__(self, entity, duration, callback):
-        self.entity = entity
-        self.duration = duration    
-        self.callback = callback
-
-    def activate(self):#add timer to the entity timer list
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.lifetime = self.duration
-        self.entity.timers.append(self)
-
-    def deactivate(self):
-        if self not in self.entity.timers: return#do not remove if the timer is not inside
-        self.entity.timers.remove(self)
-        self.callback()
-
-    def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt * self.entity.game_objects.player.slow_motion
-        if self.lifetime < 0:
-            self.deactivate()
-
-class Conveyor_belt_timer(Timer):#not in use: if we want to make convyeor belt "jumps"
-    def __init__(self, entity, duration, direction):
-        super().__init__(entity, duration)
-        self.direction = direction
-
-    def activate(self, entity):#add timer to the entity timer list
-        self.lifetime = self.duration
-        self.entity = entity
-        entity.friction[0] = 0.12
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.entity.timers.append(self)
-
-    def update(self):
-        super().update()
-        self.entity.velocity[0] += self.entity.game_objects.game.dt * self.direction[0] * 0.5
-
-    def deactivate(self):
-        if self not in self.entity.timers: return#do not remove if the timer is not inside
-        self.entity.timers.remove(self)
-        self.entity.friction = C.friction_player.copy()#put it back
 

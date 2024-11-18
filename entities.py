@@ -4688,18 +4688,23 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
         obj1 = particles.Circle(pos, self.entity.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
         self.entity.game_objects.cosmetics.add(obj1)
 
-class Friction_status(Status):
+class Friction_status(Status):#gradually sets the friction to target
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
+        self.target = C.friction_player[0] 
 
     def deactivate(self):
-        self.entity.friction =  C.friction_player.copy()
+        self.entity.friction[0] = self.target
         if self not in self.entity.timers: return#do not remove if the timer is not inside
         self.entity.timers.remove(self)
 
-    def update(self):
-        self.entity.friction[0] += self.entity.game_objects.game.dt* 0.001
-        self.entity.friction[0] = min(self.entity.friction[0], C.friction_player[0])
+    def activate(self, target = C.friction_player[0]):#add timer to the entity timer list
+        self.sign = sign(target - self.entity.friction[0])
+        self.target = target        
+        if self in self.entity.timers: return#do not append if the timer is already inside
+        self.entity.timers.append(self)    
 
-        if self.entity.friction[0] == C.friction_player[0]:
+    def update(self):
+        self.entity.friction[0] += self.sign * self.entity.game_objects.game.dt * 0.001
+        if abs(self.entity.friction[0] - self.target) < 0.01:
             self.deactivate()
