@@ -15,13 +15,13 @@ class Controller:
         self.input_buffer = set()
 
         pygame._sdl2.controller.init()  # Initialize the SDL2 controller module
-
+        self.controllers = []
+        
     def update_controller(self):
         self.initiate_controls()
         self.get_controller_type()
 
-    def initiate_controls(self):
-        self.controllers = []
+    def initiate_controls(self):        
         for controller_id in range(pygame._sdl2.controller.get_count()):  # Use get_count() to get controller count
             self.controllers.append(pygame._sdl2.controller.Controller(controller_id))
 
@@ -69,7 +69,7 @@ class Controller:
             pygame.K_UP: "up",
             pygame.K_DOWN: "down",
             pygame.K_TAB: "rb",
-            pygame.K_SPACE: "a",  # Jump, should be X on PS4
+            pygame.K_SPACE: "a",
             pygame.K_t: "y",
             pygame.K_e: "b",
             pygame.K_f: "x",

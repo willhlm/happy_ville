@@ -336,6 +336,7 @@ class Run_post(Player_states):
 class Jump_main(Player_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['jump'][random.randint(0,2)], vol = 0.1)
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.velocity[1] = C.jump_vel_player
@@ -697,7 +698,7 @@ class Ground_dash_main(Air_dash_pre):#level one dash: normal
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][1])
 
     def increase_phase(self):
         self.enter_state('Ground_dash_post')

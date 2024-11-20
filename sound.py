@@ -3,7 +3,7 @@ pygame.mixer.init()#this one is needed to avoid a delay when playing the sounds
 import read_files
 
 class Sound():#class for organising sound and music playback
-    def __init__(self):#channels 0 - 4 is dedicated to        
+    def __init__(self):     
         self.volume = read_files.read_json('game_settings.json')['sounds']     
         pygame.mixer.set_num_channels(20)#create X channels, #number of sounds we will simultanioulsy play       
         self.initiate_channels(reserved_channels = 4 )#need to be smaller than numver of channels
@@ -15,9 +15,26 @@ class Sound():#class for organising sound and music playback
             pygame.mixer.set_reserved(i)
         self.channels[0].set_volume(self.volume['music'] * 0.1)
 
-    def play_bg_sound(self):
+    def play_bg_sound(self):#called from game_objects
         self.channels[0].set_volume(self.volume['music'] * 0.1)
         self.channels[0].play(self.bg, loops = -1, fade_ms = 300)
+
+    def pause_bg_sound(self):#called when e.g. changing the map
+        self.channels[0].fadeout(700)
+
+    def load_bg_sound(self, name):
+        path = "audio/maps/" + name + "/default.mp3"        
+        self.bg = read_files.load_single_sfx(path)
+
+    def play_sfx(self, sfx, loop = 0, vol = 0.2, fade = 0):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
+        channel = pygame.mixer.find_channel(True)#force it to always find a channel. If no available, it will take the channel that has been alive the longest time
+        
+        channel.set_volume(vol * self.volume['SFX'] * 0.1)#the 0.1 normalise it to 1
+        channel.play(sfx, loops = loop, fade_ms = fade)
+        return channel
+
+    def fade_sound(self, channel, time = 700):
+        channel.fadeout(time) 
 
     def intensity_music(self, int):
         self.volume['music'] += int
@@ -35,27 +52,4 @@ class Sound():#class for organising sound and music playback
         self.volume['overall'] = min(self.volume['overall'],10)
         self.volume['overall'] = max(self.volume['overall'],0)          
         self.intensity_SFX(int)
-        self.intensity_music(int)
-
-    def pause_bg_sound(self):
-        self.channels[0].fadeout(700)
-
-    def load_bg_sound(self, name):
-        self.bg = pygame.mixer.Sound("audio/maps/" + name + "/default.mp3")
-
-    def play_sfx(self, sfx, loop = 0, vol = 0.2):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
-        channel = pygame.mixer.find_channel(True)#force it to always find a channel. If no available, it will take the channel that has been alive the longest time
-        
-        channel.set_volume(vol * self.volume['SFX'] * 0.1)#the 0.1 normalise it to 1
-        channel.play(sfx, loops = loop)
-
-        return channel
-
-    def play_sound(self, sfx):
-        pass
-
-    def pause_sound(self, channel):
-        pass
-
-    def load_sound(self, name):
-        pass
+        self.intensity_music(int)        

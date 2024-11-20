@@ -5,7 +5,7 @@ import constants as C
 import read_files
 from pygame_render import RenderEngine
 
-pygame.print_debug_info()
+#pygame.print_debug_info()
 
 class Game():
     def __init__(self):

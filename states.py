@@ -36,7 +36,10 @@ class Title_Menu(Game_State):
         self.game_objects = game.game_objects
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
-        self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
+        self.sound = read_files.load_single_sfx('audio/load_screen/new_game/title_screen.ogg')
+        self.play_music()
+
+        self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/start_screen',game.game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
 
@@ -110,6 +113,9 @@ class Title_Menu(Game_State):
                 pygame.quit()
                 sys.exit()
 
+    def play_music(self):#called from e.g. exiting ganeplay state
+        self.channel = self.game.game_objects.sound.play_sfx(self.sound, loop = -1, fade = 700)
+
     def change_state(self):
         if self.current_button == 0:#new game
             self.arrow.pressed('new')#if we want to make it e.g. glow or something
@@ -139,6 +145,10 @@ class Title_Menu(Game_State):
         elif self.current_button == 3:
             pygame.quit()
             sys.exit()
+
+    def enter_state(self):
+        super().enter_state()
+        self.game.game_objects.sound.fade_sound(self.channel.fadeout(700), 700)        
 
 class Load_Menu(Game_State):
     def __init__(self,game):
@@ -648,6 +658,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
             for state in self.game.state_stack[1:]:#except the first one
                 state.release_texture()
             self.game.state_stack = [self.game.state_stack[0]]
+            self.game.state_stack[-1].play_music()
 
         elif self.current_button == 3:
             pygame.quit()

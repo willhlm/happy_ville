@@ -1540,7 +1540,6 @@ class Larv(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.AI = AI_larv.Idle(self)
-        print(self.AI)
 
     def walk(self):
         self.velocity[0] += self.dir[0]*0.22
