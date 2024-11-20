@@ -1404,7 +1404,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":720,
+                         "width":736,
                          "x":0,
                          "y":128
                         }, 
@@ -1469,8 +1469,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":768,
-                         "x":832,
+                         "width":784,
+                         "x":816,
                          "y":128
                         }, 
                         {
@@ -1499,8 +1499,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":256,
-                         "x":0,
+                         "width":304,
+                         "x":-48,
                          "y":368
                         }, 
                         {
@@ -1547,8 +1547,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":256,
-                         "x":0,
+                         "width":304,
+                         "x":-48,
                          "y":1280
                         }, 
                         {
@@ -1643,8 +1643,8 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":672,
-                         "x":0,
+                         "width":736,
+                         "x":-64,
                          "y":1824
                         }, 
                         {
@@ -2854,6 +2854,52 @@
                          "width":0,
                          "x":1712,
                          "y":128
+                        }, 
+                        {
+                         "gid":19,
+                         "height":288,
+                         "id":1839,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"angle",
+                                 "type":"string",
+                                 "value":"2.5"
+                                }, 
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#64ffffdc"
+                                }, 
+                                {
+                                 "name":"position",
+                                 "type":"string",
+                                 "value":"1,1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":128,
+                         "x":727,
+                         "y":198
+                        }, 
+                        {
+                         "gid":17,
+                         "height":16,
+                         "id":1838,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"colour",
+                                 "type":"color",
+                                 "value":"#ffffff7f"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1075,
+                         "y":211
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2995,7 +3041,7 @@
          "y":0
         }],
  "nextlayerid":50,
- "nextobjectid":1836,
+ "nextobjectid":1840,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",

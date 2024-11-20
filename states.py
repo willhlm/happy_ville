@@ -126,7 +126,7 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_12','1')
+            self.game.game_objects.load_map(self,'nordveden_13','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
@@ -772,7 +772,7 @@ class Fadein(Gameplay):
     def __init__(self, game):
         super().__init__(game)
         self.count = 0
-        self.fade_length = 20
+        self.fade_length = 25
         self.init()
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.fade_surface.clear(0,0,0,255)
@@ -811,7 +811,7 @@ class Fadeout(Fadein):
     def __init__(self,game, previous_state, map_name, spawn, fade):
         super().__init__(game)
         self.previous_state = previous_state
-        self.fade_length = 60
+        self.fade_length = 25
         self.fade_surface.clear(0,0,0,int(255/self.fade_length))
         self.map_name = map_name
         self.spawn = spawn

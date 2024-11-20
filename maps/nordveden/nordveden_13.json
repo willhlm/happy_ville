@@ -361,7 +361,7 @@
                          "visible":true,
                          "width":1168,
                          "x":848,
-                         "y":800
+                         "y":768
                         }, 
                         {
                          "gid":8,
@@ -438,8 +438,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1254,
-                         "y":562
+                         "x":1231,
+                         "y":549
                         }, 
                         {
                          "gid":3,
@@ -456,8 +456,32 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1318,
-                         "y":577
+                         "x":1303,
+                         "y":568
+                        }, 
+                        {
+                         "gid":13,
+                         "height":16,
+                         "id":1739,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":576,
+                         "x":944,
+                         "y":672
+                        }, 
+                        {
+                         "gid":14,
+                         "height":80,
+                         "id":1740,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":48,
+                         "x":1536,
+                         "y":640
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -485,7 +509,7 @@
          "y":0
         }],
  "nextlayerid":50,
- "nextobjectid":1740,
+ "nextobjectid":1741,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
