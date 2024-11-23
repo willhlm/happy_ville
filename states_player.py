@@ -95,7 +95,7 @@ class Walk_main(Player_states):
         self.particle_timer -= self.entity.game_objects.game.dt
         if self.particle_timer < 0:
             self.running_particles()
-            #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
+            self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_pre')

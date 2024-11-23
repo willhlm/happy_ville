@@ -91,14 +91,6 @@ class Game_Objects():
             new_game_state = states.Fadein(self.game)#when this state is finished, it will set aila to idle
             new_game_state.enter_state()
 
-    def load_bg_music(self):#called from fade
-        if not self.map.area_change: return
-        try:
-            self.sound.load_bg_sound(self.map.biome_name)
-            self.sound.play_bg_sound()
-        except FileNotFoundError:
-            print("No BG music found")
-
     def clean_groups(self):#called wgen changing map
         self.npcs.empty()
         self.enemies.empty()

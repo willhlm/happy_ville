@@ -685,6 +685,24 @@
                          "width":256,
                          "x":1952,
                          "y":848
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":339,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Maggot"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1504,
+                         "y":672
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -741,7 +759,7 @@
          "y":0
         }],
  "nextlayerid":97,
- "nextobjectid":339,
+ "nextobjectid":340,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

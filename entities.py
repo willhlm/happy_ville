@@ -1267,6 +1267,7 @@ class Mygga_roaming(Flying_enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1526,6 +1527,7 @@ class Maggot(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/maggot/',game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/maggot/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
@@ -1562,7 +1564,8 @@ class Larv(Enemy):
 class Larv_simple(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/', game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/larv/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
@@ -2732,7 +2735,7 @@ class Aila_sword(Sword):
 
     def init(self):
         self.sprites = read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
-        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/aila_sword/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/projectiles/aila_sword/')
         self.image = self.sprites['slash_1'][0]
         self.dmg = 1
 
@@ -3753,7 +3756,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         super().update()
         self.time += self.game_objects.game.dt
         if self.time > 100:
-
+            self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.05)        
             bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
             self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)

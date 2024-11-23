@@ -53,16 +53,18 @@ class Wind(Screen_shader):
         self.lifetime = kwarg.get('lifetime', 500)  
 
         game_objects.weather.velocity = self.velocity.copy()
+        self.channel = self.game_objects.sound.play_sfx(self.sounds['idle'][0], loop = -1, fade = 1000, vol = 0.2)
 
     @classmethod
     def pool(cls, game_objects):
-        super().pool(game_objects)
+        cls.image = game_objects.game.display.make_layer(game_objects.game.window_size)
         cls.noise_layer = game_objects.game.display.make_layer(cls.image.size)
+        cls.sounds = read_files.load_sounds_dict('audio/SFX/environment/wind/')
 
     def update(self):
         super().update()
         self.lifetime -= self.game_objects.game.dt
-        if self.lifetime < 0:
+        if self.lifetime < 0:            
             self.kill()
     
     def draw(self, target):
@@ -80,6 +82,7 @@ class Wind(Screen_shader):
 
     def kill(self):
         super().kill()
+        self.game_objects.sound.fade_sound(self.channel)
         self.game_objects.weather.velocity = [0,0]    
         self.game_objects.weather.currentstate.handle_input('finish')
 

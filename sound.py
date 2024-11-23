@@ -6,29 +6,38 @@ class Sound():#class for organising sound and music playback
     def __init__(self):     
         self.volume = read_files.read_json('game_settings.json')['sounds']     
         pygame.mixer.set_num_channels(20)#create X channels, #number of sounds we will simultanioulsy play       
-        self.initiate_channels(reserved_channels = 4 )#need to be smaller than numver of channels
+        self.reserved_channels = 4
+        self.initiate_channels(self.reserved_channels)#need to be smaller than numver of channels
+        self.index = 0#a pointer so that priority sounds to not overlap
 
     def initiate_channels(self, reserved_channels = 4):#note channel 0 should be used for level bg music        
-        self.channels = []#the reserved channels
-        for i in range(reserved_channels):            
-            self.channels.append(pygame.mixer.Channel(i))
+        self.channels = []
+        for i in range(reserved_channels):   
+            channel = pygame.mixer.Channel(i)
+            channel.set_volume(self.volume['music'] * 0.1) 
             pygame.mixer.set_reserved(i)
-        self.channels[0].set_volume(self.volume['music'] * 0.1)
+            self.channels.append(channel)
 
-    def play_bg_sound(self):#called from game_objects
-        self.channels[0].set_volume(self.volume['music'] * 0.1)
-        self.channels[0].play(self.bg, loops = -1, fade_ms = 300)
-
-    def pause_bg_sound(self):#called when e.g. changing the map
-        self.channels[0].fadeout(700)
-
-    def load_bg_sound(self, name):
-        path = "audio/maps/" + name + "/default.mp3"        
-        self.bg = read_files.load_single_sfx(path)
+    def play_priority_sound(self, sfx, vol = 0.2, index = 0, loop = -1, fade = 300):
+        if self.index == index:#look for an empty priority channel. If it doesn't exits, take the supplised index
+            for i in range(self.reserved_channels):
+                channel = self.channels[i]                
+                if not channel.get_busy():                    
+                    self.index = i
+                    break
+            else:
+                self.index = index
+        else:
+            self.index = index
+            channel = self.channels[self.index]
+            
+        channel.stop()#to avoid any lingering fade effect
+        channel.set_volume(vol * self.volume['music'] * 0.1)
+        channel.play(sfx, loops=loop, fade_ms = fade)
+        return channel
 
     def play_sfx(self, sfx, loop = 0, vol = 0.2, fade = 0):#finds an available channel and playts SFX sounds, takes mixer.Sound objects
         channel = pygame.mixer.find_channel(True)#force it to always find a channel. If no available, it will take the channel that has been alive the longest time
-        
         channel.set_volume(vol * self.volume['SFX'] * 0.1)#the 0.1 normalise it to 1
         channel.play(sfx, loops = loop, fade_ms = fade)
         return channel
@@ -36,20 +45,34 @@ class Sound():#class for organising sound and music playback
     def fade_sound(self, channel, time = 700):
         channel.fadeout(time) 
 
-    def intensity_music(self, int):
-        self.volume['music'] += int
-        self.volume['music'] = min(self.volume['music'],10)
-        self.volume['music'] = max(self.volume['music'],0)        
-        self.channels[0].set_volume(self.volume['music'] * 0.1)   
+    def fade_all_sounds(self, time = 700):#when changing biome
+        for i in range(self.reserved_channels):
+            channel = self.channels[i]
+            self.fade_sound(channel, time)
 
-    def intensity_SFX(self, int):
-        self.volume['SFX'] += int
-        self.volume['SFX'] = min(self.volume['SFX'],10)
-        self.volume['SFX'] = max(self.volume['SFX'],0)        
+    def change_volume(self, category, amount):
+        # Update the volume category and constrain it between 0 and 10
+        self.volume[category] += amount
+        self.volume[category] = min(self.volume[category], 10)
+        self.volume[category] = max(self.volume[category], 0)
 
-    def intensity_overall(self, int):
-        self.volume['overall'] += int
-        self.volume['overall'] = min(self.volume['overall'],10)
-        self.volume['overall'] = max(self.volume['overall'],0)          
-        self.intensity_SFX(int)
-        self.intensity_music(int)        
+        # Apply changes based on the category
+        if category == 'music':
+            self.channels[0].set_volume(self.volume['music'] * 0.1)  # Adjust music volume
+        elif category == 'SFX':
+            pass  # You can add functionality here if you want to adjust specific SFX channels
+        elif category == 'overall':
+            # If 'overall' category is modified, apply the same change to both music and SFX
+            self.intensity_music(amount)  # Adjust music volume
+            self.intensity_SFX(amount)    # Adjust SFX volume
+
+    def intensity_music(self, amount):
+        self.volume['music'] += amount
+        self.volume['music'] = min(self.volume['music'], 10)
+        self.volume['music'] = max(self.volume['music'], 0)        
+        self.channels[0].set_volume(self.volume['music'] * 0.1)  # Apply to the music channel
+
+    def intensity_SFX(self, amount):
+        self.volume['SFX'] += amount
+        self.volume['SFX'] = min(self.volume['SFX'], 10)
+        self.volume['SFX'] = max(self.volume['SFX'], 0)                         

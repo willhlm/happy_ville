@@ -31,8 +31,10 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.init_time = 0
+        self.time = 0
 
     def update(self):
+        self.play_sfx()
         self.init_time += 0.02*self.entity.game_objects.game.dt
         self.entity.walk(self.init_time)
         if abs(self.entity.velocity[0]) < 0.01:
@@ -43,6 +45,15 @@ class Walk(Enemy_states):
              self.enter_state('Idle')
         elif input == 'attack':
             self.enter_state('Attack_pre')
+
+    def play_sfx(self):
+        try:#TODO not all enemies have walk sounds at the moment
+            self.time -= self.entity.game_objects.game.dt
+            if self.time < 0:
+                self.time = 100
+                self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'][0], vol = 0.05)        
+        except:
+            pass
 
 class Attack_pre(Enemy_states):
     def __init__(self,entity):

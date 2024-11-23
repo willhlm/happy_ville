@@ -695,8 +695,15 @@ class Biome():
     def room(self, room):#called wgen a new room is loaded
         pass
 
-    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
-        self.level.game_objects.sound.pause_bg_sound()
+    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
+        self.level.game_objects.sound.fade_all_sounds(time = 3000)#but shouldn't fade
+        try:#load next one
+            path = "audio/music/maps/" + 'light_forest' + "/default.mp3"        
+            sound = read_files.load_single_sfx(path)
+            self.channel = self.level.game_objects.sound.play_priority_sound(sound, index = 1, loop = -1, fade = 700)
+        except FileNotFoundError:
+            print("No BG music found")
+
         self.release_textures()
 
     def release_textures(self):
@@ -970,6 +977,12 @@ class Golden_fields(Biome):
 class Crystal_mines(Biome):
     def __init__(self, level):
         super().__init__(level)
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/crystal_mines')
+        self.channel = self.level.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, fade = 1000, vol = 0.2)
+
+    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
+        super().clear_biome()
+        self.level.game_objects.sound.fade_sound(self.channel)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)

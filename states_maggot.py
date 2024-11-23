@@ -19,8 +19,16 @@ class Idle(Basic_states):
 class Walk(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
+        self.time = 0
+
+    def play_sfx(self):
+        self.time -= self.entity.game_objects.game.dt
+        if self.time < 0:
+            self.time = 100
+            self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'][0], vol = 0.1)        
 
     def update(self):
+        self.play_sfx()
         if abs(self.entity.velocity[0]) <= 0.0001:
             self.enter_state('Idle')
 

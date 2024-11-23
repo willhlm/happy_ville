@@ -36,7 +36,7 @@ class Title_Menu(Game_State):
         self.game_objects = game.game_objects
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
-        self.sound = read_files.load_single_sfx('audio/load_screen/new_game/title_screen.ogg')
+        self.sound = read_files.load_single_sfx('audio/music/load_screen/new_game/title_screen.ogg')
         self.play_music()
 
         self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/start_screen',game.game_objects)}
@@ -114,7 +114,7 @@ class Title_Menu(Game_State):
                 sys.exit()
 
     def play_music(self):#called from e.g. exiting ganeplay state
-        self.channel = self.game.game_objects.sound.play_sfx(self.sound, loop = -1, fade = 700)
+        self.channel = self.game.game_objects.sound.play_priority_sound(self.sound, index = 0, loop = -1, fade = 700)
 
     def change_state(self):
         if self.current_button == 0:#new game
@@ -126,9 +126,9 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_13','1')
+            #self.game.game_objects.load_map(self,'nordveden_13','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
-            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -144,11 +144,7 @@ class Title_Menu(Game_State):
 
         elif self.current_button == 3:
             pygame.quit()
-            sys.exit()
-
-    def enter_state(self):
-        super().enter_state()
-        self.game.game_objects.sound.fade_sound(self.channel.fadeout(700), 700)        
+            sys.exit()      
 
 class Load_Menu(Game_State):
     def __init__(self,game):
@@ -389,11 +385,11 @@ class Option_Menu_sounds(Game_State):
 
     def update_options(self, int):
         if self.current_button == 0:#overall
-            self.game.game_objects.sound.intensity_overall(int)
+            self.game.game_objects.sound.change_volume('overall', int)
         if self.current_button == 1:#SFX
-            self.game.game_objects.sound.intensity_SFX(int)
+            self.game.game_objects.sound.intensity_SFX('SFX', int)
         elif self.current_button == 2:#music
-            self.game.game_objects.sound.intensity_music(int)
+            self.game.game_objects.sound.intensity_music('music', int)
 
 class Option_Menu_display(Game_State):
     def __init__(self,game):
@@ -792,7 +788,6 @@ class Fadein(Gameplay):
             self.exit()
 
     def exit(self):
-        self.game.game_objects.load_bg_music()
         self.game.game_objects.player.reset_movement()
         self.game.game_objects.player.currentstate.enter_state(self.aila_state)
         self.fade_surface.release()

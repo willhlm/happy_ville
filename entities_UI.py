@@ -228,7 +228,7 @@ class Menu_Arrow():
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         
     def pool(game_objects):
-        Menu_Arrow.sounds = read_files.load_sounds_dict('Audio/UI/arrow/')        
+        Menu_Arrow.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')        
         img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()    
         Menu_Arrow.image = game_objects.game.display.surface_to_texture(img)
 
