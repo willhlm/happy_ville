@@ -34,12 +34,18 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.init_time = 0
+        self.time = 0
+        self.channel = self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'][0], loop = -1, vol = 0.05)     
 
     def update(self):
         self.init_time += 0.02*self.entity.game_objects.game.dt
         self.entity.walk(self.init_time)
         if abs(self.entity.velocity[0]) < 0.01:
             self.enter_state('Idle')
+
+    def enter_state(self, state):
+        super().enter_state(state)
+        self.channel.fadeout(300)        
 
     def handle_input(self,input):
         if input=='Idle':

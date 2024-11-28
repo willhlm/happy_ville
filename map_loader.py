@@ -32,8 +32,8 @@ class Level():
     def check_biome(self):
         self.area_change = self.level_name[:self.level_name.rfind('_')] != self.biome_name
         if self.area_change:#new biome
-            self.biome.clear_biome()
             self.biome_name = self.level_name[:self.level_name.rfind('_')]
+            self.biome.clear_biome()
             self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize(), Biome)(self)#returns Biome (default) if there is no biome class
         room = self.level_name[self.level_name.rfind('_') + 1 :]
         self.biome.room(room)
@@ -685,6 +685,7 @@ class Biome():
     def __init__(self, level):
         self.level = level
         self.live_blur = False#default is false live blurring
+        self.play_music()
 
     def load_objects(self, data, parallax, offset):
         pass
@@ -695,15 +696,15 @@ class Biome():
     def room(self, room):#called wgen a new room is loaded
         pass
 
-    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
-        self.level.game_objects.sound.fade_all_sounds(time = 3000)#but shouldn't fade
-        try:#load next one
-            path = "audio/music/maps/" + 'light_forest' + "/default.mp3"        
-            sound = read_files.load_single_sfx(path)
-            self.channel = self.level.game_objects.sound.play_priority_sound(sound, index = 1, loop = -1, fade = 700)
+    def play_music(self):
+        try:#try laoding bg music
+            sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
+            self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700)
         except FileNotFoundError:
-            print("No BG music found")
+            print("No BG music found")        
 
+    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
+        self.level.game_objects.sound.fade_all_sounds(time = 2000)
         self.release_textures()
 
     def release_textures(self):
@@ -754,6 +755,11 @@ class Village_ola2(Biome):
 class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
+
+    def play_music(self):
+        #super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/nord_veden')
+        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
         return
@@ -868,6 +874,11 @@ class Light_forest_cave(Biome):
     def __init__(self, level):
         super().__init__(level)
 
+    def play_music(self):
+        #super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/light_forest_cave')
+        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
+
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
         self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
@@ -977,12 +988,11 @@ class Golden_fields(Biome):
 class Crystal_mines(Biome):
     def __init__(self, level):
         super().__init__(level)
-        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/crystal_mines')
-        self.channel = self.level.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, fade = 1000, vol = 0.2)
 
-    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
-        super().clear_biome()
-        self.level.game_objects.sound.fade_sound(self.channel)
+    def play_music(self):
+        super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/crystal_mines')
+        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)

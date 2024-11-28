@@ -15,21 +15,20 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
         self.game_objects = game_objects
         self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
         self.true_pos = list(self.rect.topleft)
+        self.blit_pos = self.true_pos.copy()
 
         self.bounds = [-200, 800, -100, 350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
-        self.parallax = [1,1]
         self.shader = None#which shader program to run
         self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
 
     def group_distance(self):
-        blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        if blit_pos[0] < self.bounds[0] or blit_pos[0] > self.bounds[1] or blit_pos[1] < self.bounds[2] or blit_pos[1] > self.bounds[3]:
+        if self.blit_pos[0] < self.bounds[0] or self.blit_pos[0] > self.bounds[1] or self.blit_pos[1] < self.bounds[2] or self.blit_pos[1] > self.bounds[3]:
             self.remove(self.group)#remove from group
             self.add(self.pause_group)#add to pause
 
     def draw(self, target):#called just before draw in group
-        pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
     def kill(self):
         self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
@@ -332,22 +331,36 @@ class Sky(Staticentity):
 
 class Waterfall(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
-        super().__init__(pos,game_objects)
+        super().__init__(pos, game_objects)
         self.parallax = parallax
 
         self.size = size
         self.empty = game_objects.game.display.make_layer(size)
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
+        self.blur_layer = game_objects.game.display.make_layer(size)
         self.time = 5#offset the time
+        
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/waterfall/')
+        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1) 
 
     def release_texture(self):
         self.empty.release()
         self.noise_layer.release()
         self.screen_copy.release()
+        self.blur_layer.release()
+        self.channel.fadeout(300)
+
+    def set_volume(self):
+        center_blit_pos = [self.true_pos[0] + self.size[0]*0.5-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1]+ self.size[1]*0.5-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        distance_to_center = ((center_blit_pos[0]- 320)**2 + (center_blit_pos[1]-180) ** 2)**0.5
+        max_distance = (320**2 + 180**2)**0.5
+        distance = 1 - (distance_to_center / max_distance)            
+        self.channel.set_volume(0.5*max(0, min(1, distance)))    
 
     def update(self):
-        self.time += self.game_objects.game.dt * 0.01
+        self.time += self.game_objects.game.dt * 0.01        
+        self.set_volume()
 
     def draw(self, target):
         #noise
@@ -366,8 +379,15 @@ class Waterfall(Staticentity):
         self.game_objects.shaders['waterfall']['TIME'] = self.time
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
-        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
+        self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]        
+
+        if self.parallax[0] == 1:#TODO, blue state #don't blur if there is no parallax
+            self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
+        else:
+            self.blur_layer.clear(0, 0, 0, 0)
+            self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
+            self.game_objects.game.display.render(self.empty.texture, self.blur_layer, shader = self.game_objects.shaders['waterfall'])
+            self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['blur'])
 
 class Reflection(Staticentity):#water, e.g. village
     def __init__(self, pos, game_objects, parallax, size, dir, texture_parallax = 1, speed = 0, offset = 10):
@@ -387,12 +407,15 @@ class Reflection(Staticentity):#water, e.g. village
         self.water_speed = speed
         self.blur_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.colour = (0.39, 0.78, 1, 1)
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/river/')
+        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.2)            
 
     def release_texture(self):#called when .kill() and empty group
         self.empty.release()
         self.noise_layer.release()
         self.water_noise_layer.release()
         self.blur_layer.release()
+        self.channel.fadeout(300)
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
@@ -762,6 +785,11 @@ class Character(Platform_entity):#enemy, NPC,player
         self.health -= dmg
         self.flags['invincibility'] = True
 
+        try:#TODO add hit sounds to all enteties
+            self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)    
+        except:
+            pass
+
         if self.health > 0:#check if dead¨
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')#turn white
@@ -922,12 +950,12 @@ class Player(Character):
 
     def draw(self, target):#called in group
         self.shader_state.draw()
-        pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.blit_pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
-        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
+        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
     def update_timers(self):
         for timer in self.timers:
@@ -1110,6 +1138,7 @@ class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1161,6 +1190,7 @@ class Mygga_torpedo(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_torpedo/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1209,9 +1239,10 @@ class Mygga_torpedo(Flying_enemy):
         amp = min(abs(self.velocity[0]),0.008)
         self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
-class Mygga_suicide(Flying_enemy):
+class Mygga_suicide(Flying_enemy):#torpedo and explode
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_torpedo/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1265,7 +1296,7 @@ class Mygga_suicide(Flying_enemy):
 
 class Mygga_roaming(Flying_enemy):
     def __init__(self, pos, game_objects):
-        super().__init__(pos, game_objects)
+        super().__init__(pos, game_objects)        
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
@@ -1327,6 +1358,7 @@ class Mygga_roaming_projectile(Mygga_roaming):
 class Mygga_crystal(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_crystal/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1344,7 +1376,7 @@ class Mygga_crystal(Flying_enemy):
         dirs = [[1,1], [-1,1], [1,-1], [-1,-1]]
         for direction in dirs:
             obj = Poisonblobb(self.hitbox.topleft, self.game_objects, dir = direction, amp = [3,3])
-            self.game_objects.eprojectiles.add(obj)
+            self.game_objects.eprojectiles.add(obj)                
 
     def chase(self, direction):#called from AI: when chaising
         self.velocity[0] += direction[0]*0.5
@@ -1354,9 +1386,10 @@ class Mygga_crystal(Flying_enemy):
         self.velocity[0] += (position[0]-self.rect.centerx) * 0.002
         self.velocity[1] += (position[1]-self.rect.centery) * 0.002
 
-class Exploding_mygga(Flying_enemy):
+class Mygga_exploding(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga_exploding/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
@@ -1367,6 +1400,7 @@ class Exploding_mygga(Flying_enemy):
         self.currentstate = states_exploding_mygga.Idle(self)
 
     def killed(self):
+        self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)            
         self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
@@ -2169,9 +2203,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
         super().__init__([0,0],game_objects)
-        if parallax[0] == 1: self.colour = (colour.g, colour.b, colour.a, 0)
-        else: self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
-
+        self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
         self.shader_state = states_shader.Idle(self)
 
         layer1 = self.game_objects.game.display.make_layer(game_objects.game.window_size)#make an empty later
@@ -2182,13 +2214,11 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
         self.image.release()
 
     def update(self):
-        self.true_pos = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]#this is [0,0]
         self.shader_state.update()
 
     def draw(self, target):
         self.shader_state.draw()
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
+        self.game_objects.game.display.render(self.image, target, shader = self.shader)#shader render
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -2763,7 +2793,7 @@ class Aila_sword(Sword):
             collision_enemy.knock_back(self.dir)
             collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
             self.clash_particles(collision_enemy.hitbox.center)
-            self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0])#should be in states
+            #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
 
         collision_enemy.currentstate.handle_input('sword')
         self.stone_states['enemy_collision'].enemy_collision()
@@ -4039,8 +4069,8 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
     def __init__(self, pos, game_objects, size, colour = pygame.Color(0,0,0,0)):
         super().__init__(pos, game_objects)
         self.new_colour = [colour.g,colour.b,colour.a]
+        self.light_colour = self.game_objects.lights.ambient[0:3]
         self.rect = pygame.Rect(pos,size)
-        self.rect.topleft = pos
         self.hitbox = self.rect.copy()
 
     def draw(self, target):
@@ -4053,10 +4083,12 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
         pass
 
     def player_collision(self, player):#player collision
+        self.game_objects.lights.ambient = self.new_colour + [0.5 * max((self.game_objects.player.hitbox.centerx - self.rect.left)/self.rect[2],0)]
         for layer in self.layers:
             layer.shader_state.handle_input('mix_colour')
 
     def player_noncollision(self):#when player doesn't collide
+        self.game_objects.lights.ambient = self.light_colour + [0.5 * max((self.game_objects.player.hitbox.centerx - self.rect.left)/self.rect[2],0)]
         for layer in self.layers:
             layer.shader_state.handle_input('idle')
 
@@ -4262,10 +4294,11 @@ class Loot_containers(Interactable):
         self.flags['invincibility'] = False
 
     def take_dmg(self,projectile):
+        self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)           
         if self.flags['invincibility']: return
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
-        self.flags['invincibility'] = True
+        self.flags['invincibility'] = True                 
         self.hit_loot()
 
         if self.health > 0:
@@ -4278,29 +4311,30 @@ class Loot_containers(Interactable):
     def hit_loot(self):
         for i in range(0, random.randint(1,3)):
             obj = Amber_Droplet(self.hitbox.midtop, self.game_objects)
-            self.game_objects.loot.add(obj)   
+            self.game_objects.loot.add(obj)               
 
 class Chest(Loot_containers):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
         self.inventory = {'Amber_Droplet':3}
-
-    def hit_loot(self):
-        pass
 
 class Amber_tree(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
-        super().__init__(pos, game_objects, state, ID_key)    
+        super().__init__(pos, game_objects, state, ID_key)  
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_tree/')
         self.inventory = {'Amber_Droplet':3}
 
 class Amber_rock(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)    
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_rock/')
         self.inventory = {'Amber_Droplet':3}
 
 class Door(Interactable):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/door/')
         self.sprites=read_files.load_sprites_dict('Sprites/animations/Door/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -4308,6 +4342,7 @@ class Door(Interactable):
 
     def interact(self):
         self.currentstate.handle_input('Opening')
+        self.game_objects.sound.play_sfx(self.sounds['open'][0], vol = 0.2)            
         try:
             self.game_objects.change_map(collision.next_map)
         except:

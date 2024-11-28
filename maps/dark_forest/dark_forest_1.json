@@ -768,42 +768,6 @@
                          "y":496
                         }, 
                         {
-                         "gid":3,
-                         "height":16,
-                         "id":277,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3328,
-                         "y":496
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":278,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":6944,
-                         "y":336
-                        }, 
-                        {
                          "gid":1,
                          "height":16,
                          "id":279,

@@ -50,7 +50,13 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render      
 
     def release_texture(self):  # Called when .kill() and when emptying the group        
-        pass   
+        pass  
+
+    def group_distance(self):
+        blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        if blit_pos[0] < self.bounds[0] or blit_pos[0] > self.bounds[1] or blit_pos[1] < self.bounds[2] or blit_pos[1] > self.bounds[3]:
+            self.remove(self.group)#remove from group
+            self.add(self.pause_group)#add to pause         
 
 class Trees(Layered_objects):
     def __init__(self, pos, game_objects, parallax, live_blur = False):

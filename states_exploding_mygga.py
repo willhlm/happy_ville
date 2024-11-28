@@ -26,8 +26,16 @@ class Walk(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.init_time = 0
+        self.channel = self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'][0], loop = -1)     
+
+    def set_volume(self):
+        distance_to_center = ((self.entity.blit_pos[0] - 320)**2 + (self.entity.blit_pos[1]-180) ** 2)**0.5
+        max_distance = (320**2 + 180**2)**0.5
+        distance = 1 - (distance_to_center / max_distance)            
+        self.channel.set_volume(max(0, min(1, distance)))
 
     def update(self):
+        self.set_volume()
         self.init_time += 0.02*self.entity.game_objects.game.dt
         self.entity.walk(self.init_time)
         if abs(self.entity.velocity[0]) < 0.01:
@@ -38,6 +46,10 @@ class Walk(Enemy_states):
              self.enter_state('Idle')
         elif input == 'attack':
             self.enter_state('Pre_explode')
+
+    def enter_state(self, state):
+        super().enter_state(state)
+        self.channel.fadeout(300)
 
 class Pre_explode(Enemy_states):
     def __init__(self,entity):

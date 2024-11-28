@@ -36,7 +36,7 @@ class Title_Menu(Game_State):
         self.game_objects = game.game_objects
         self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
-        self.sound = read_files.load_single_sfx('audio/music/load_screen/new_game/title_screen.ogg')
+        self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
         self.play_music()
 
         self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/start_screen',game.game_objects)}
@@ -114,7 +114,8 @@ class Title_Menu(Game_State):
                 sys.exit()
 
     def play_music(self):#called from e.g. exiting ganeplay state
-        self.channel = self.game.game_objects.sound.play_priority_sound(self.sound, index = 0, loop = -1, fade = 700)
+        self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['main'][0], index = 0, loop = -1, fade = 700, vol = 0.3)
+        self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['whisper'][0], index = 1, loop = -1, fade = 700, vol = 0.1)
 
     def change_state(self):
         if self.current_button == 0:#new game
@@ -125,10 +126,10 @@ class Title_Menu(Game_State):
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            #self.game.game_objects.load_map(self,'crystal_mines_1','1')
+            self.game.game_objects.load_map(self,'light_forest_cave_1','1')
             #self.game.game_objects.load_map(self,'nordveden_13','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -387,9 +388,9 @@ class Option_Menu_sounds(Game_State):
         if self.current_button == 0:#overall
             self.game.game_objects.sound.change_volume('overall', int)
         if self.current_button == 1:#SFX
-            self.game.game_objects.sound.intensity_SFX('SFX', int)
+            self.game.game_objects.sound.change_volume('SFX', int)
         elif self.current_button == 2:#music
-            self.game.game_objects.sound.intensity_music('music', int)
+            self.game.game_objects.sound.change_volume('music', int)
 
 class Option_Menu_display(Game_State):
     def __init__(self,game):
@@ -488,7 +489,7 @@ class Gameplay(Game_State):
         self.game.game_objects.UI['gameplay'].update()
 
     def render(self):
-        self.game.game_objects.render_state.render()#handles normal and portal rendering
+        self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
         self.game.game_objects.UI['gameplay'].render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
