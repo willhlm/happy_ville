@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.1" name="static_stamps" tilewidth="16" tileheight="16" tilecount="35" columns="7">
+<tileset version="1.8" tiledversion="1.8.2" name="static_stamps" tilewidth="16" tileheight="16" tilecount="35" columns="7">
  <image source="static_stamps.png" width="112" height="80"/>
  <tile id="0">
   <properties>
@@ -80,7 +80,7 @@
  <tile id="18">
   <properties>
    <property name="angle" value=""/>
-   <property name="colour" type="color" value=""/>
+   <property name="colour" value=""/>
    <property name="falloff" value=""/>
    <property name="position" value=""/>
   </properties>
@@ -155,6 +155,14 @@
    <property name="spawn_position" value=""/>
    <property name="spawn_rate" value=""/>
    <property name="speed" value=""/>
+  </properties>
+ </tile>
+ <tile id="33">
+  <properties>
+   <property name="down" type="bool" value="false"/>
+   <property name="left" type="bool" value="false"/>
+   <property name="right" type="bool" value="false"/>
+   <property name="up" type="bool" value="true"/>
   </properties>
  </tile>
 </tileset>

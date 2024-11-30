@@ -558,11 +558,12 @@ class TwoD_liquid(Staticentity):
             self.game_objects.cosmetics.add(obj1)
 
 class Up_stream(Staticentity):#a draft that can lift enteties
-    def __init__(self, pos, game_objects, size, **properties):
+    def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
         self.hitbox = pygame.Rect(pos, size)
-        self.time = 0
+        self.time = 0            
+        self.dir = [kwarg.get('horizontal', 0), kwarg.get('vertical', 0)]
 
     def release_texture(self):
         self.image.release()
@@ -571,12 +572,15 @@ class Up_stream(Staticentity):#a draft that can lift enteties
         self.time += self.game_objects.game.dt
 
     def draw(self, target):
+        self.game_objects.shaders['up_stream']['dir'] = self.dir
+
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
     def player_collision(self, player):#player collision
-        player.velocity[1] -= self.game_objects.game.dt*0.5
+        player.velocity[0] += self.dir[0] * self.game_objects.game.dt    
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt*0.5        
 
     def player_noncollision(self):
         pass

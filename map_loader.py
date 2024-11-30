@@ -432,7 +432,21 @@ class Level():
                 self.game_objects.cosmetics.add(smoke)
 
             elif id == 33:#upsteam
-                upstream = entities.Up_stream(object_position, self.game_objects, object_size)
+                prop = {}
+                up, down, left, right = 0, 0, 0, 0
+                for property in properties:
+                    if property['name'] == 'up':
+                        up = -int(property['value'])
+                    elif property['name'] == 'down':
+                        down = int(property['value'])
+                    elif property['name'] == 'left':
+                        left = -int(property['value'])                        
+                    elif property['name'] == 'right':
+                        right = int(property['value'])
+
+                prop['vertical'] = up + down
+                prop['horizontal'] = left + right
+                upstream = entities.Up_stream(object_position, self.game_objects, object_size, **prop)
                 self.game_objects.interactables.add(upstream)
 
             elif id == 34:#reflection object
