@@ -126,9 +126,9 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            #self.game.game_objects.load_map(self,'nordveden_13','1')
+            self.game.game_objects.load_map(self,'nordveden_14','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
-            self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -144,7 +144,7 @@ class Title_Menu(Game_State):
 
         elif self.current_button == 3:
             pygame.quit()
-            sys.exit()      
+            sys.exit()
 
 class Load_Menu(Game_State):
     def __init__(self,game):

@@ -1113,7 +1113,7 @@ class Mygga(Flying_enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 30
+        self.health = 3
         self.aggro_distance = [130, 80]
         self.AI = AI_mygga.Patrol(self)
         self.accel = [0.013, 0.008]
@@ -1581,7 +1581,7 @@ class Larv_jr(Larv):
         self.attack_distance = [0,0]
         self.init_x = self.rect.x
         self.patrol_dist = 100
-        self.health = 15
+        self.health = 3
 
 class Larv_poison(Enemy):
     def __init__(self, pos, game_objects):
@@ -1738,7 +1738,7 @@ class Shadow_enemy(Enemy):#enemies that can onlly take dmg in light -> dark fors
 
     def no_light(self):
         self.flags['invincibility'] = True
-    
+
     def light(self):
         self.flags['invincibility'] = False
 
@@ -3756,7 +3756,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         super().update()
         self.time += self.game_objects.game.dt
         if self.time > 100:
-            self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.05)        
+            self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.05)
             bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
             self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
@@ -4278,7 +4278,7 @@ class Loot_containers(Interactable):
     def hit_loot(self):
         for i in range(0, random.randint(1,3)):
             obj = Amber_Droplet(self.hitbox.midtop, self.game_objects)
-            self.game_objects.loot.add(obj)   
+            self.game_objects.loot.add(obj)
 
 class Chest(Loot_containers):
     def __init__(self, pos, game_objects, state, ID_key):
@@ -4290,12 +4290,12 @@ class Chest(Loot_containers):
 
 class Amber_tree(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
-        super().__init__(pos, game_objects, state, ID_key)    
+        super().__init__(pos, game_objects, state, ID_key)
         self.inventory = {'Amber_Droplet':3}
 
 class Amber_rock(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
-        super().__init__(pos, game_objects, state, ID_key)    
+        super().__init__(pos, game_objects, state, ID_key)
         self.inventory = {'Amber_Droplet':3}
 
 class Door(Interactable):
@@ -4626,7 +4626,7 @@ class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction.
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
-        
+
         self.light_sources = []
         if kwarg.get('on', False):
             self.make_light()
@@ -4638,11 +4638,11 @@ class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction.
             for light in self.light_sources:
                 self.game_objects.lights.remove_light(light)
             self.light_sources = []
-            
+
     def make_light(self):
         self.light_sources.append(self.game_objects.lights.add_light(self, shadow_interact = True, colour = [100/255,175/255,255/255,255/255],flicker=True,radius = 300))
         self.light_sources.append(self.game_objects.lights.add_light(self, radius = 250, colour = [100/255,175/255,255/255,255/255],flicker=True))
-        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [100/255,175/255,255/255,255/255],radius = 200))        
+        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [100/255,175/255,255/255,255/255],radius = 200))
 
 #status effects (like wet)
 class Status():#like timers, but there is an effect during update
@@ -4693,7 +4693,7 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
 class Friction_status(Status):#gradually sets the friction to target
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
-        self.target = C.friction_player[0] 
+        self.target = C.friction_player[0]
 
     def deactivate(self):
         self.entity.friction[0] = self.target
@@ -4702,9 +4702,9 @@ class Friction_status(Status):#gradually sets the friction to target
 
     def activate(self, target = C.friction_player[0]):#add timer to the entity timer list
         self.sign = sign(target - self.entity.friction[0])
-        self.target = target        
+        self.target = target
         if self in self.entity.timers: return#do not append if the timer is already inside
-        self.entity.timers.append(self)    
+        self.entity.timers.append(self)
 
     def update(self):
         self.entity.friction[0] += self.sign * self.entity.game_objects.game.dt * 0.001
