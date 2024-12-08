@@ -39,8 +39,9 @@ class Camera():#default camera
         self.game_objects = game_objects
         self.true_scroll = scroll
         self.scroll = self.true_scroll.copy()
+        self.y_offset = 30
         #self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
-        self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + 30]
+        self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + self.y_offset]
         self.original_center = self.center.copy()
 
     def update(self):
