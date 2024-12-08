@@ -124,11 +124,11 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_1','1')
+            self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_cave_10','1')
             #self.game.game_objects.load_map(self,'nordveden_13','1')
-            self.game.game_objects.load_map(self,'dark_forest_2','1')
+            #self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
@@ -504,6 +504,7 @@ class Gameplay(Game_State):
     def handle_movement(self):#every frame
         value = self.game.game_objects.controller.continuous_input_checks()
         self.game.game_objects.player.currentstate.handle_movement(value)#move around
+        self.game.game_objects.camera_manager.handle_movement(value)
 
     def handle_events(self, input):
         event = input.output()

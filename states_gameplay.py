@@ -22,6 +22,7 @@ class Portal(Basic_states):
         self.portal = portal
 
     def render(self):
+        self.game_objects.lights.clear_normal_map()
         self.portal.empty_layer.clear(0,0,0,0)
         self.portal.bg_grey_layer.clear(0,0,0,0)
 

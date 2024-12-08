@@ -2,83 +2,237 @@
 
 in vec2 fragmentTexCoord; // Texture coordinate from the vertex shader
 
-uniform sampler2D noiseTexture; // Perlin noise texture
-uniform float time; // Current time
-uniform vec2 textureSize; // Size of the texture
+uniform float iTime;
+uniform vec2 iResolution = vec2(640,360);
+out vec4 fragColor;
 
-// Particle parameters for explosion
-uniform vec4 baseParticleColor = vec4(1, 0.6, 0.1, 1); // Initial bright explosion color (orange/red)
-uniform float baseParticleRadius = 0.05; // Smaller initial radius for particles
-uniform float baseParticleSpeed = 1; // Initial speed for explosion particles
-uniform float particleLifetime = 2.0; // Lifetime for explosion particles
-uniform vec2 explosionCenter = vec2(0.5, 0.5); // Explosion starts from the center
+uniform vec3 boom_pal1 = vec3(.2, .15, .3);
+uniform vec3 boom_pal2 = vec3(.9, .15, .05);
+uniform vec3 boom_pal3 = vec3(.9, .5, .1);
+uniform vec3 boom_pal4 = vec3(.95, .95, .35);
 
-uniform float radiusVariation = 0.02; // Variation in particle size
-uniform float edgeFalloff = 0.05; // Smooth falloff at the edges of particles
-uniform float colorVariation = 0.3; // Higher variation in particle color
-uniform int numParticles = 100; // Total number of particles emitted at once
+uniform vec3 smoke_pal1 = vec3(.2, .15, .3);
+uniform vec3 smoke_pal2 = vec3(.35, .3, .45);
+uniform vec3 smoke_pal3 = vec3(.5, .45, .6);
 
-out vec4 color;
+uniform float size = 5.;
+uniform float disperse = 1.;
+uniform float boom_repeat = 1.;
+uniform float boom_shape = 12.;
+uniform float boom_distortion  = .5;
+uniform float boom_bubbles  = .5;
+uniform float boom_bw = .5;
 
-// Function to calculate particle opacity, accounting for aspect ratio
-float circle(vec2 uv, vec2 position, float radius, vec2 aspectRatio) {
-    vec2 scaledUV = (uv - position) / aspectRatio; // Scale UV coordinates to account for aspect ratio
-    return smoothstep(radius, radius - edgeFalloff, length(scaledUV));
+uniform float smoke_repeat = 1.0;
+uniform float smoke_shape = 16.0;
+uniform float smoke_distortion  = 1.5;
+uniform float smoke_bubbles  = 0.5;
+uniform float smoke_bw = .75;
+
+uniform vec2 disp = vec2(0.0);
+
+vec3 n_rand3(vec3 p) {
+    vec3 r = 
+        fract(
+            sin(
+                vec3(
+                    dot(p, vec3(127.1,311.7,371.8)),
+                    dot(p,vec3(269.5,183.3,456.1)),
+                    dot(p,vec3(352.5,207.3,198.67))
+                )
+            ) * 43758.5453
+        ) * 2.0 - 1.0;
+    return normalize(vec3(r.x/cos(r.x), r.y/cos(r.y), r.z/cos(r.z)));
+}
+
+float noise(vec3 p) {
+
+    vec3 fv = fract(p);
+    vec3 nv = vec3(floor(p));
+    
+    vec3 u = fv*fv*fv*(fv*(fv*6.0-15.0)+10.0);
+    
+    return (
+        mix(
+            mix(
+                mix(
+                    dot( n_rand3( nv+vec3(0.0,0.0,0.0) ), fv-vec3(0.0,0.0,0.0)), 
+                    dot( n_rand3( nv+vec3(1.0,0.0,0.0) ), fv-vec3(1.0,0.0,0.0)), 
+                    u.x
+                ), 
+                mix(
+                    dot( n_rand3( nv+vec3(0.0,1.0,0.0) ), fv-vec3(0.0,1.0,0.0)), 
+                    dot( n_rand3( nv+vec3(1.0,1.0,0.0) ), fv-vec3(1.0,1.0,0.0)), 
+                    u.x
+                ), 
+                u.y
+            ),
+            mix(
+                mix(
+                    dot( n_rand3( nv+vec3(0.0,0.0,1.0) ), fv-vec3(0.0,0.0,1.0)), 
+                    dot( n_rand3( nv+vec3(1.0,0.0,1.0) ), fv-vec3(1.0,0.0,1.0)), 
+                    u.x
+                ), 
+                mix(
+                    dot( n_rand3( nv+vec3(0.0,1.0,1.0) ), fv-vec3(0.0,1.0,1.0)), 
+                    dot( n_rand3( nv+vec3(1.0,1.0,1.0) ), fv-vec3(1.0,1.0,1.0)), 
+                    u.x
+                ), 
+                u.y
+            ),
+            u.z
+       )
+  );
+}
+
+float worley(vec3 s)
+{
+    vec3 si = floor(s);
+    vec3 sf = fract(s);
+
+    float m_dist = 1.;  
+
+    for (int y= -1; y <= 1; y++) {
+        for (int x= -1; x <= 1; x++) {
+            for (int z= -1; z <= 1; z++) {
+                vec3 neighbor = vec3(float(x),float(y), float(z));
+
+                vec3 point = fract(n_rand3(si + neighbor));
+                point = 0.5 + 0.5*sin(disperse * iTime + 6.2831*point);
+
+                vec3 diff = neighbor + point - sf;
+
+                float dist = length(diff);
+
+                m_dist = min(m_dist, dist);
+            }
+        }
+    }
+
+    return m_dist;
+}
+
+float oct_noise(vec3 pos, float o)
+{
+
+    float ns = 0.0;
+    float d = 0.0;
+    
+    int io = int(o);
+    float fo = fract(o);
+    
+    for(int i=0;i<=io;++i)
+    {
+        float v = pow(2.0,float(i));
+        d += 1.0/v;
+        ns += noise(pos*v)*(1.0/v);
+    }
+    
+    
+    float v = pow(2.0,float(io+1));
+    d+= 1.0*fo/v;
+    ns += noise(pos*v)*(1.0*fo/v);
+    
+    return ns/d;
+}
+
+float boom (vec2 p)
+{
+    float repeat = mod(iTime * boom_repeat, 2.);
+    float shape = 1.-pow(distance(vec3(p, 0.), vec3(0.)),2.) / (repeat*boom_shape) - repeat*2.;
+    
+    float distortion = noise(vec3(p*boom_distortion, iTime*.5));
+    float bubbles = boom_bubbles-pow(worley(vec3(p*1.2,iTime*2.)), 3.);
+    float bw = boom_bw;
+    float effects = (bw * bubbles + (1.-bw) * distortion);
+
+    return shape + effects;
+}
+
+float smoke (vec2 p)
+{
+    float repeat = mod(iTime * smoke_repeat, 2.);
+    float shape = 1.-pow(distance(vec3(p - vec2(0, 2) * pow(repeat/1.45,2.)*1.5, 0.), vec3(0.)),2.) / (repeat* smoke_shape) - pow(repeat*1.5,.5);
+    
+    float distortion = noise(vec3(p*smoke_distortion - vec2(0, 2) * pow(repeat/1.45,2.)*1.5, iTime*.1));
+    float bubbles = smoke_bubbles-pow(worley(vec3((p/pow(repeat,.35)) - vec2(0, 2) * pow(repeat/1.65,2.)*1.5, iTime*.1)), 2.);
+    float bw = smoke_bw;
+    float effects = (bw * bubbles + (1.-bw) * distortion);
+
+    return shape + effects;
+}
+
+float f (vec2 p){
+    float b = boom(p);
+    float s = smoke(p);
+    return b > s ? b : s;
+}
+
+vec2 grad( vec2 x )
+{
+    vec2 h = vec2( 0.01, 0.0 );
+    return vec2( f(x+h.xy) - f(x-h.xy),
+                 f(x+h.yx) - f(x-h.yx) )/(2.0*h.x);
+}
+
+float border (vec2 uv)
+{
+
+    float b = f( uv );
+    vec2  g = grad( uv );
+    float de = abs(b)/length(g);
+    float eps = .01;
+    
+    return smoothstep( 1.0*eps, 2.0*eps, de );
+}
+
+float posterize(float v, int n)
+{
+    float fn = float(n);
+    return floor(v*fn)/(fn-1.);
 }
 
 void main() {
+    // Declare the boom palette array
+    vec3 boom_pal[4];
+    boom_pal[0] = boom_pal1;
+    boom_pal[1] = boom_pal2;
+    boom_pal[2] = boom_pal3;
+    boom_pal[3] = boom_pal4;
+
+    // Declare the smoke palette array
+    vec3 smoke_pal[3];
+    smoke_pal[0] = smoke_pal1;
+    smoke_pal[1] = smoke_pal2;
+    smoke_pal[2] = smoke_pal3;
+
     vec2 uv = fragmentTexCoord;
+    uv.y = 1.0 - uv.y;
+    vec2 pos = uv - vec2(0.5, 0.4);
+    vec2 SCREEN_PIXEL_SIZE = vec2(1.0 / iResolution.x, 1.0 / iResolution.y);
+    pos.x /= SCREEN_PIXEL_SIZE.x / SCREEN_PIXEL_SIZE.y;
+    pos *= 1.0 * size;
+    pos = pos - disp;
 
-    // Aspect ratio calculation
-    vec2 aspectRatio = vec2(textureSize.y / textureSize.x, 1.0); // Aspect ratio correction
+    int bpl = 4; // boom_pal.length() equivalent
+    int spl = 3; // smoke_pal.length() equivalent
 
-    // Initialize color accumulator
-    vec4 accumulatedColor = vec4(0.0); // Initialize particle color to transparent
+    float boom_val = boom(pos);
+    float boom_a = step(0., boom_val);
+    vec3 boom_col = boom_pal[int(posterize(boom_val, bpl) * float(bpl))] - vec3(1.0 - boom_a);
 
-    // Loop to create a fixed number of particles
-    for (int i = 0; i < numParticles; i++) {
-        // Seed for randomness
-        float seed = float(i) * 0.1; // Unique seed for each particle
+    float smoke_val = smoke(pos);
+    float smoke_a = step(0., smoke_val);
+    vec3 smoke_col = smoke_pal[int(posterize(smoke_val, spl) * float(spl))] - vec3(1.0 - smoke_a);
 
-        // Calculate random initial direction for each particle (explosion is radial)
-        float angle = fract(sin(seed) * 43758.5453) * 6.283185; // Random angle (0 to 2π for full circular motion)
-        vec2 randomDirection = vec2(cos(angle), sin(angle)); // Radial movement in all directions
+    float b = step(1., border(pos));
 
-        // Particle age based on explosion time
-        float particleAge = min(time, particleLifetime); // Clamp age to lifetime
-        float speed = 1 - smoothstep(0, 1, particleAge );
-        // Compute the position of the particle based on its initial direction and speed
-        vec2 particlePosition = explosionCenter + randomDirection * (speed * baseParticleSpeed); // Constant speed
+    float bw = step(smoke_val * 1.25, boom_val);
 
-        // Radius gradually increases with time
-        float radius = baseParticleRadius * (1.0 + particleAge) + fract(sin(seed + 2.0) * 43758.5453) * radiusVariation;
+    vec3 color = bw * boom_col + (1.0 - bw) * smoke_col;
+    float alpha = bw * boom_a + (1.0 - bw) * smoke_a;
 
-        // Color transition from bright (orange/red) to darker (grey) over time
-        vec3 startColor = vec3(1.0, 0.4, 0.1); // Bright orange/red color at the start
-        vec3 endColor = vec3(0.3, 0.3, 0.3);  // Dark grey color at the end
-        vec3 particleColor = mix(startColor, endColor, particleAge / particleLifetime);
+    vec4 result = vec4(alpha == 1.0 ? color : vec3(0.5), alpha) - vec4(vec3(1.0 - b), 1.0);
 
-        // Introduce a particle-specific noise offset
-        vec2 noiseOffset = vec2(fract(sin(seed + 4.0) * 43758.5453) * 2.0 - 1.0, fract(sin(seed + 5.0) * 43758.5453) * 2.0 - 1.0);
-
-        // Sample the noise texture to get the noise value
-        vec2 noiseUV = (uv - particlePosition + noiseOffset);
-        float noiseValue = texture(noiseTexture, noiseUV).r; // Sample the noise texture (using the red channel)
-
-        // Compute particle opacity with noise effect and fade it over time
-        float alpha = 1.0 - smoothstep(0.0, particleLifetime, particleAge); // Gradually fade over lifetime
-        float particleAlpha = circle(uv, particlePosition, radius, aspectRatio) * alpha * noiseValue;
-
-        // Set the particle color and alpha using the uniform
-        vec4 particleColorVec4 = vec4(particleColor, particleAlpha); // Apply color and alpha to the particle
-
-        // Accumulate color using alpha blending
-        vec3 blendedColor = accumulatedColor.rgb * (1.0 - particleColorVec4.a) + particleColorVec4.rgb * particleColorVec4.a;
-        float finalAlpha = accumulatedColor.a + particleColorVec4.a * (1.0 - accumulatedColor.a);
-
-        accumulatedColor = vec4(blendedColor, finalAlpha);
-    }
-
-    // Output the final color
-    color = accumulatedColor;
+    fragColor = vec4(result.rgb, alpha);
 }

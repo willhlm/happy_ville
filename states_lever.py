@@ -17,32 +17,32 @@ class Basic_states():
     def handle_input(self,input):
         pass
 
-class Idle(Basic_states):
+class Off(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)        
 
     def handle_input(self,input):
         if input== 'Transform':
-            self.enter_state('Transform_down')
+            self.enter_state('Transform_on')
 
-class Transform_down(Basic_states):
+class Transform_on(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)        
 
     def increase_phase(self):
-        self.enter_state('Down')
+        self.enter_state('On')
 
-class Transform_up(Basic_states):
+class Transform_off(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)        
 
     def increase_phase(self):
-        self.enter_state('Idle')        
+        self.enter_state('Off')        
 
-class Down(Basic_states):
+class On(Basic_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity, **kwarg)
 
     def handle_input(self,input):
         if input== 'Transform':
-            self.enter_state('Transform_up')            
+            self.enter_state('Transform_off')            

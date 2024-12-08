@@ -1,7 +1,7 @@
 import shaders
 
 class Screen_shader():#Shaders applied to whole screen, Can do multiple ones
-    def __init__(self, game_objects, default_shader = 'None', **kwarg):
+    def __init__(self, game_objects, default_shader = 'vignette', **kwarg):
         self.game_objects = game_objects        
         self.layer = game_objects.game.display.make_layer(game_objects.game.screen.size)
         if not default_shader: return
@@ -18,7 +18,7 @@ class Screen_shader():#Shaders applied to whole screen, Can do multiple ones
         for key in self.shaders.keys():        
             base_texture = self.shaders[key].draw(base_texture)             
 
-        self.shaders[key].draw_screen(base_texture)#some shaders require last render to be done to screen: don't need this?            
+        self.shaders[key].draw_screen(base_texture)#some shaders require last render to be done to screen
         
     def append_shader(self, shader, **kwarg):
         self.shaders[shader] = getattr(shaders, shader.capitalize())(self, **kwarg)

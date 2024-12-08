@@ -5,8 +5,8 @@ class Controller:
     def __init__(self):
         self.keydown = False
         self.keyup = False
-        self.value = {'l_stick': [0, 0], 'r_stick': [0, 0], 'd_pad': [0, 0], 'l_trigger': 0, 'r_trigger': 0}
         self.key = False
+        self.value = {'l_stick': [0, 0], 'r_stick': [0, 0], 'd_pad': [0, 0], 'l_trigger': 0, 'r_trigger': 0}
         self.outputs = [self.keydown, self.keyup, self.value, self.key]
 
         self.map_keyboard()
@@ -17,12 +17,12 @@ class Controller:
         pygame._sdl2.controller.init()  # Initialize the SDL2 controller module
         self.controllers = []
         
-    def update_controller(self):
+    def update_controller(self):#called when adding or removing controlelrs
         self.initiate_controls()
         self.get_controller_type()
 
     def initiate_controls(self):        
-        for controller_id in range(pygame._sdl2.controller.get_count()):  # Use get_count() to get controller count
+        for controller_id in range(pygame._sdl2.controller.get_count()):
             self.controllers.append(pygame._sdl2.controller.Controller(controller_id))
 
     def rumble(self, duration=1000):
@@ -147,7 +147,6 @@ class Controller:
             if event.axis == pygame.CONTROLLER_AXIS_TRIGGERRIGHT:
                 self.value["r_trigger"] = self.normalize_axis(event.value)
 
-            self.controller_angle("l_stick")
             self.insert_buffer()
 
     def normalize_axis(self, value):#value taken from documentation
@@ -155,7 +154,7 @@ class Controller:
 
     def continuous_input_checks(self):
         keys = pygame.key.get_pressed()
-        value = {"l_stick": [0, 0]}
+        value = {"l_stick": [0, 0], 'r_stick': [0, 0]}
         if keys[pygame.K_RIGHT]:
             value["l_stick"][0] = 1
         if keys[pygame.K_LEFT]:
@@ -166,15 +165,24 @@ class Controller:
             value["l_stick"][1] = 1
 
         for controller in self.controllers:
-            axis_x = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_LEFTX))
-            axis_y = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_LEFTY))
+            l_axis_x = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_LEFTX))
+            l_axis_y = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_LEFTY))
 
-            if abs(axis_x) > 0.1:
-                value["l_stick"][0] = axis_x
-            if abs(axis_y) > 0.1:
-                value["l_stick"][1] = axis_y
-                if abs(axis_y) > 0.98:
-                    self.value['l_stick'][0] = 0                
+            r_axis_x = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTX))
+            r_axis_y = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTY))
+
+            if abs(l_axis_x) > 0.1:
+                value["l_stick"][0] = l_axis_x
+            if abs(l_axis_y) > 0.1:
+                value["l_stick"][1] = l_axis_y
+                if abs(l_axis_y) > 0.98:
+                    self.value['l_stick'][0] = 0   
+
+            if abs(r_axis_x) > 0.1:
+                value["r_stick"][0] = r_axis_x
+            if abs(r_axis_y) > 0.1:
+                value["r_stick"][1] = r_axis_y
+
         return value
 
     def insert_buffer(self):
@@ -183,13 +191,8 @@ class Controller:
     def output(self):
         return [self.keydown, self.keyup, self.value, self.key]
 
-    def controller_angle(self, stick):
-        x, y = self.value[stick]
-        if abs(y) > 0.98:
-            self.value[stick][0] = 0
-
 class Inputs:
-    def __init__(self, controller, key, keydown, keyup, value, lifetime=10):
+    def __init__(self, controller, key, keydown, keyup, value, lifetime = 10):
         self.controller = controller
         self.lifetime = lifetime
         self.key = key

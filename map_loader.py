@@ -13,7 +13,7 @@ class Level():
         self.biome = Biome(self)
 
     def load_map(self, map_name, spawn):
-        self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
+        self.references = {'shade':[],'gate':[],'lever':[], 'platforms':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.spawned = False#a flag so that we only spawn alia once
         self.level_name = map_name.lower()#biom_room
         self.spawn = spawn
@@ -432,7 +432,6 @@ class Level():
                 self.game_objects.cosmetics.add(smoke)
 
             elif id == 33:#upsteam
-                prop = {}
                 up, down, left, right = 0, 0, 0, 0
                 for property in properties:
                     if property['name'] == 'up':
@@ -447,7 +446,7 @@ class Level():
                 prop['vertical'] = up + down
                 prop['horizontal'] = left + right
                 upstream = entities.Up_stream(object_position, self.game_objects, object_size, **prop)
-                self.game_objects.interactables.add(upstream)
+                self.game_objects.interactables_fg.add(upstream)
 
             elif id == 34:#reflection object
                 reflection = entities.Waterfall(object_position, self.game_objects, parallax, object_size)
@@ -458,10 +457,8 @@ class Level():
                     self.game_objects.all_bgs.add(reflection)
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
-        chest_int = 1
-        soul_essence_int = 1
-        amber_tree_int = 1
-        amber_rock_int = 1
+        chest_int, soul_essence_int, amber_tree_int, amber_rock_int = 1, 1, 1, 1
+
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
@@ -525,10 +522,13 @@ class Level():
                 self.game_objects.interactables.add(runestone)
 
             elif id == 10:#lever
+                kwarg = {}
                 for property in properties:
                     if property['name'] == 'ID':
-                        ID = property['value']
-                lever = entities.Lever(object_position,self.game_objects, ID)
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'on':
+                        kwarg['on'] = property['value']                        
+                lever = entities.Lever(object_position,self.game_objects, **kwarg)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
 
@@ -590,6 +590,10 @@ class Level():
                 amber_rock = entities.Amber_rock(object_position, self.game_objects, state, str(amber_rock_int))
                 self.game_objects.interactables.add(amber_rock)     
                 amber_rock_int += 1
+
+            elif id == 19:#collision block that can only brak with charge flag on projectile
+                platform = platforms.Breakable_block_charge_1(object_position, self.game_objects)
+                self.game_objects.platforms.add(platform)     
 
     def load_layers(self, data, parallax, offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
@@ -689,11 +693,14 @@ class Level():
         if self.references.get('shade_trigger',False):
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
-        if self.references.get('lever',False):#assume that the gate-lever is on the same map
-            for lever in self.references['lever']:
-                for gate in self.references['gate']:
-                    if lever.ID_key == gate.ID_key:
-                        lever.add_gate(gate)
+        for lever in self.references['lever']:#assume that the gate,platform - lever is on the same map
+            for gate in self.references['gate']:
+                if lever.ID_key == gate.ID_key:
+                    lever.add_reference(gate)
+
+            for platform in self.references['platforms']:
+                if lever.ID_key == platform.ID_key:
+                    lever.add_reference(platform)                    
 
 class Biome():
     def __init__(self, level):
@@ -1144,3 +1151,17 @@ class Dark_forest(Biome):
 
                 new_lantern = entities.Shadow_light_lantern(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_lantern)                         
+
+            elif id == 13:#shource of shadow_light
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'ID':
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'erect':
+                        kwarg['erect'] = property['value']                            
+
+                new_platform = platforms.Dark_forest_2(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.dynamic_platforms.add(new_platform)
+                self.level.game_objects.platforms.add(new_platform)                
+                self.level.references['platforms'].append(new_platform)
+                

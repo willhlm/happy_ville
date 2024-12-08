@@ -20,10 +20,10 @@ class Spawn(Basic_states):
     def update(self):
         self.entity.radius += self.entity.game_objects.game.dt*0.001    
         self.entity.thickness += 2*self.entity.game_objects.game.dt*0.001   
-        self.entity.thickness = min(self.entity.thickness,0.1)              
-        if self.entity.radius >= 0.1:
+        self.entity.thickness = min(self.entity.thickness, self.entity.thickness_limit)              
+        if self.entity.radius >= self.entity.thickness_limit:
             self.enter_state('Idle')
-        self.entity.radius = min(self.entity.radius,0.1)              
+        self.entity.radius = min(self.entity.radius, self.entity.thickness_limit)              
 
 class Idle(Basic_states):
     def __init__(self,entity):
@@ -41,10 +41,10 @@ class Grow(Basic_states):
 
     def update(self):    
         self.entity.radius += self.entity.game_objects.game.dt*0.01    
-        if self.entity.radius >= 1 - self.entity.thickness:
+        if self.entity.radius >= self.entity.radius_limit:
             self.enter_state('Idle')
             self.entity.state.initiate_room()
-        self.entity.radius = min(self.entity.radius, 1 - self.entity.thickness)       
+        self.entity.radius = min(self.entity.radius, self.entity.radius_limit)       
 
 class Shrink(Basic_states):#after beamting the challenge room
     def __init__(self,entity):

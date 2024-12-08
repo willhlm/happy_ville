@@ -30,7 +30,7 @@ class Vignette(Shaders):
     def draw(self, base_texture, pos = [0,0], flip = [False, False]):
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, shader = self.renderer.game_objects.shaders['vignette'])#shader render
-        return self.renderer.game_objects.game.screen.texture
+        return self.renderer.game_objects.game.screen.texture    
 
 class Chromatic_aberration(Shaders):
     def __init__(self, renderer, **kwarg):
@@ -173,6 +173,11 @@ class Hurt(Shaders):#turn white -> enteties use it
         if self.duration < 0:
             self.entity.shader_render.append_shader(self.next_animation)
 
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.set_uniforms()
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, flip = flip, shader = self.renderer.game_objects.shaders['colour'])#shader render
+        return self.renderer.layer.texture
+
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip, shader = self.renderer.game_objects.shaders['colour'])#shader render
@@ -180,7 +185,7 @@ class Hurt(Shaders):#turn white -> enteties use it
 class Invincibile(Shaders):#blink white -> enteyties use it
     def __init__(self,entity):
         super().__init__(entity)
-        self.duration = C.invincibility_time_player-(C.hurt_animation_length+1)#a duration which considers the player invinsibility
+        self.duration = C.invincibility_time_player - (C.hurt_animation_length + 1)#a duration which considers the player invinsibility
         self.time = 0
 
     def update(self):

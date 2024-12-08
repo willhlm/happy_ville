@@ -24,7 +24,7 @@ class Idle(Shader_states):
  
     def handle_input(self, input, **kwarg):
         if input == 'Hurt':
-            self.enter_state('Hurt')
+            self.enter_state('Hurt', **kwarg)
         elif input == 'mix_colour':
             self.enter_state('Mix_colour')
         elif input == 'alpha':
@@ -34,18 +34,28 @@ class Idle(Shader_states):
         elif input == 'blur':
             self.enter_state('Blur')         
 
-class Hurt(Shader_states):#turn white -> enteties use it
-    def __init__(self,entity):
+class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.duration = C.hurt_animation_length#hurt animation duration
-        self.entity.shader = self.entity.game_objects.shaders['colour']
+        self.entity.shader = self.entity.game_objects.shaders['shock_damage']
         self.next_animation = 'Idle'
+        self.time = 0
+        self.amplitude = kwarg.get('amplitude', 1) * 0.05
+        self.frequency = kwarg.get('frequency', 100)
+        self.colour = kwarg.get('colour', [1, 1, 1, 1])
+        self.decay_rate = kwarg.get('decay_rate', 10)
 
     def draw(self):
-        self.entity.shader['colour'] = (255,255,255,255)
+        self.entity.shader['time'] = self.time*0.01
+        self.entity.shader['frequency'] = self.frequency
+        self.entity.shader['amplitude'] = self.amplitude
+        self.entity.shader['colour'] = self.colour
+        self.entity.shader['decay_rate'] = self.decay_rate
 
     def update(self):
         self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
+        self.time += self.entity.game_objects.game.dt*self.entity.slow_motion
         if self.duration < 0:
             self.enter_state(self.next_animation)
 
@@ -57,7 +67,7 @@ class Invincibile(Shader_states):#blink white -> enteyties use it
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['invincible']
-        self.duration = C.invincibility_time_player-(C.hurt_animation_length+1)#a duration which considers the player invinsibility
+        self.duration = C.invincibility_time_player - (C.hurt_animation_length + 1)#a duration which considers the player invinsibility
         self.time = 0
 
     def update(self):

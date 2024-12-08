@@ -1,5 +1,5 @@
 import pygame
-import entities, states_time_collision, animation, read_files, states_basic, states_gate, states_smacker
+import entities, states_time_collision, animation, read_files, states_basic, states_gate, states_smacker, states_moving_platform
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
@@ -280,14 +280,14 @@ class Gate_1(Collision_texture):#a gate. The ones that are owned by the lever wi
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_1/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gates/gate_1/', self.game_objects)
 
 class Gate_2(Gate_1):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_2/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gates/gate_2/', self.game_objects)
 
 class Door(Gate_1):
     def __init__(self, pos, game_objects, **kwarg):
@@ -588,7 +588,6 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
         super().__init__(pos, game_objects)
         self.flags = {'invincibility': False}
         self.health = 3
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#
 
@@ -603,22 +602,34 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
         self.health -= projectile.dmg
         self.flags['invincibility'] = True 
         
-        projectile.clash_particles(self.hitbox.center)
-        self.game_objects.camera_manager.camera_shake(3,10)
+        self.game_objects.camera_manager.camera_shake(amplitude = 3, duration = 10)
 
         if self.health > 0:#check if dead¨
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while        
-            self.animation.handle_input('Hurt')#turn white
+            #turn white
         else:#if dead        
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
 class Breakable_block_1(Collision_breakable):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/', game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
+
+class Breakable_block_charge_1(Collision_breakable):#only projectiles that has 'charge' can break these blocks
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/charge_blocks/type1/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.health = 3
+
+    def take_dmg(self, projectile):       
+        if not projectile.flags['charge_blocks']: return
+        super().take_dmg(projectile)
 
 #dynamics (moving) ones
 class Collision_dynamic(Collision_texture):
@@ -695,6 +706,21 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def deactivate(self):#called when first timer runs out
         self.kill()
+
+class Dark_forest_2(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
+    def __init__(self, pos, game_objects, **prop):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/moving_platform/dark_forest_2/', game_objects)
+        self.image = self.sprites['off'][0]
+        self.rect[2], self.rect[3] = self.image.width, self.image.height
+        self.hitbox = self.rect.copy()
+        self.ID_key = prop.get('ID', None)
+
+        self.animation = animation.Animation(self)
+        self.currentstate = states_moving_platform.Off(self)#
+
+    def update_vel(self):
+        pass
 
 class Smacker(Collision_dynamic):#trap
     def __init__(self, pos, game_objects, **kwarg):

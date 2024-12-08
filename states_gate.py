@@ -23,7 +23,7 @@ class Erect(Basic_states):
         self.entity.hitbox = self.entity.rect.copy()
 
     def handle_input(self,input):
-        if input== 'Transform':
+        if input == 'Transform' or input == 'Off':
             self.enter_state('Transform_down')
 
 class Transform_down(Basic_states):
@@ -47,5 +47,5 @@ class Down(Basic_states):
         self.entity.hitbox[3] = 0
 
     def handle_input(self,input):
-        if input== 'Transform':
+        if input == 'Transform' or input == 'On':
             self.enter_state('Transform_up')
