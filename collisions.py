@@ -130,7 +130,7 @@ class Collisions():
 
     #make the hitbox collide instead of rect
     @staticmethod
-    def collided(dynamic_Entities,static_entities):
+    def collided(dynamic_Entities, static_entities):
         return dynamic_Entities.hitbox.colliderect(static_entities.hitbox)
 
     @staticmethod

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="202" tileheight="318" tilecount="7" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="202" tileheight="318" tilecount="8" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -32,5 +32,11 @@
  </tile>
  <tile id="8">
   <image width="112" height="176" source="../../../Sprites/animations/cocoon_boss/idle/idle.png"/>
+ </tile>
+ <tile id="9">
+  <properties>
+   <property name="ID" value=""/>
+  </properties>
+  <image width="64" height="64" source="../../../Sprites/block/breakable/light_forest/type2/idle/breakable1.png"/>
  </tile>
 </tileset>

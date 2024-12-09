@@ -606,7 +606,7 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
 
         if self.health > 0:#check if dead¨
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while        
-            #turn white
+            #turn white TODO
         else:#if dead        
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
@@ -630,6 +630,28 @@ class Breakable_block_charge_1(Collision_breakable):#only projectiles that has '
     def take_dmg(self, projectile):       
         if not projectile.flags['charge_blocks']: return
         super().take_dmg(projectile)
+
+#one side breakble collision
+class Collision_breakable_oneside(Collision_breakable):
+    def __init__(self, pos, game_objects, ID):
+        super().__init__(pos, game_objects)    
+        self.ID_key = ID
+
+    def kill(self):#called when death animatin finishes
+        super().kill()
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['breakable_platform'][self.ID_key] = True#write in the               
+        
+class Breakable_oneside_1(Collision_breakable_oneside):
+    def __init__(self, pos, game_objects, ID):
+        super().__init__(pos, game_objects, ID)    
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type2/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+
+    def take_dmg(self, projectile):  
+        if projectile.rect.centerx - self.hitbox.centerx > 0:#projectile from right: depends on the speciic objects
+            super().take_dmg(projectile)           
 
 #dynamics (moving) ones
 class Collision_dynamic(Collision_texture):

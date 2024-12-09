@@ -59,7 +59,7 @@ class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
         if self.duration < 0:
             self.enter_state(self.next_animation)
 
-    def handle_input(self,input):
+    def handle_input(self,input,**kwarg):
         if input == 'Invincibile':
             self.next_animation = 'Invincibile'
 
