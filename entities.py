@@ -3136,6 +3136,19 @@ class Loot(Platform_entity):#
     def release_texture(self):#stuff that have pool shuold call this
         pass
 
+    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
+        self.hitbox.top = position
+        self.collision_types['top'] = True
+        self.velocity[1] = -self.velocity[1]
+
+    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
+        self.hitbox.bottom = position
+        self.collision_types['bottom'] = True
+        self.currentstate.handle_input('Ground')
+        self.velocity[0] = 0.5 * self.velocity[0]
+        self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
+        self.bounce_coefficient *= self.bounce_coefficient
+
     #plotfprm collisions
     def top_collision(self,block):
         self.hitbox.top = block.hitbox.bottom

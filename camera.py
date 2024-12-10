@@ -1,4 +1,4 @@
-import random, sys
+import random, sys, states_centraliser
 
 class Camera_manager():
     def __init__(self, game_objects):
@@ -6,7 +6,7 @@ class Camera_manager():
         self.camera = Camera(game_objects)# The default camera
         self.decorators = []# List of decorators
         self.stop_handeler = Stop_handeler(game_objects)#is put here so that it only has to be loaded once
-        self.centraliser = None
+        self.centraliser = states_centraliser.Idle(self)
 
     def set_camera(self, camera, **kwarg):
         self.camera = getattr(sys.modules[__name__], camera)(self.game_objects, self.camera.true_scroll, **kwarg)
@@ -18,7 +18,7 @@ class Camera_manager():
         self.decorators.remove(decorator)
 
     def update(self):
-        self.camera.update()
+        self.camera.update()  
         for decorator in self.decorators:
             decorator.update()
 
@@ -29,22 +29,13 @@ class Camera_manager():
         self.add_decorator(Camera_shake_decorator(self.camera, **kwarg))
         self.game_objects.controller.rumble(duration = 10 * kwarg.get('duration', 100))
 
-    def centeralise(self, **kwarg):
-        if self.centraliser in self.decorators: return
-        self.centraliser = Camera_centraliser_decorator(self.camera, **kwarg)
-        self.add_decorator(self.centraliser)    
-
-    def stop_centeralise(self):
-        if self.centraliser not in self.decorators: return         
-        self.remove_decorator(self.centraliser)    
-
     def reset_player_center(self):#called when loading a map in maploader
         self.camera.reset_player_center()
 
     def set_camera_position(self):
         self.camera.set_camera_position()
 
-    def handle_movement(self, input):#right analogue stick
+    def handle_movement(self, input):#right analogue stick: called from gameplay state
         self.camera.handle_movement(input)
 
 class Camera():#default camera
@@ -57,7 +48,7 @@ class Camera():#default camera
         self.original_center = self.center.copy()
 
     def update(self):
-        self.game_objects.camera_manager.stop_handeler.update()#centeralised sometimes the camera, if there is no more camera stops left
+        self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do
 
         self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
         self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
@@ -78,19 +69,7 @@ class Camera():#default camera
         self.true_scroll = [self.game_objects.player.true_pos[0] - self.center[0], self.game_objects.player.true_pos[1] - self.center[1]]#-self.game_objects.player.rect[2]*0.5,-self.game_objects.player.rect[3]*0.5 if there was a camera stopp
 
     def handle_movement(self, event):#right analogue stick        
-        return
-        value = event['r_stick']
-        if value == [0, 0] and self.game_objects.camera_manager.stop_handeler.stops['bottom'] == 0:#recentralise          
-            smoothing_factor = 0.1
-            self.center[0] += (self.original_center[0] - self.center[0]) * smoothing_factor
-            self.center[1] += (self.original_center[1] - self.center[1]) * smoothing_factor
-        elif value != [0,0]:            
-            new_x = self.center[0] - value[0]
-            new_y = self.center[1] - value[1]
-
-            max_displacement = [100, 50]
-            self.center[0] = max(self.original_center[0] - max_displacement[0], min(self.original_center[0] + max_displacement[0], new_x))
-            self.center[1] = max(self.original_center[1] - max_displacement[1], min(self.original_center[1] + max_displacement[1], new_y))            
+        self.game_objects.camera_manager.centraliser.handle_movement(event['r_stick'])          
 
 class No_camera(Camera):
     def __init__(self, game_objects, scroll, **kwarg):
@@ -124,87 +103,22 @@ class Camera_shake_decorator():
         if self.duration < 0:
             self.current_camera.game_objects.camera_manager.remove_decorator(self)
 
-class Camera_centraliser_decorator():#not sued
-    def __init__(self, current_camera, **kwarg):
-        self.current_camera = current_camera
-        self.smoothing_factor = kwarg.get('smoothing_factor', 0.05)
-        self.updates = [self.recenteralise_horizontal, self.recenteralise_vertical]
-
-    def recenteralise_horizontal(self):
-        self.current_camera.center[0] += (self.current_camera.original_center[0] - self.current_camera.center[0]) * self.smoothing_factor
-
-    def recenteralise_vertical(self):
-        self.current_camera.center[1] += (self.current_camera.original_center[1] - self.current_camera.center[1]) * self.smoothing_factor        
-
-    def update(self):
-        for update in self.updates:
-            update()
-        self.exit_state()
-
-    def exit_state(self):#when centered
-        if abs(self.current_camera.center[0] - self.current_camera.original_center[0]) < 0.1 and abs(self.current_camera.center[1] - self.current_camera.original_center[1]) < 0.1:
-            self.current_camera.game_objects.camera_manager.remove_decorator(self)
-
-class Stop_handeler():#depending on active camera stops, the re centeralisation can be called
+class Stop_handeler():#counts all active stops. It then tells the centraliser to start
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.reset()
-        self.updates = []
 
-    def reset(self):
+    def reset(self):#called when changing the map
         self.stops = {'bottom':0,'top':0,'left':0,'right':0,'center':0}#counds number of active stops, setted in camera stop states
 
-    def update(self):#called from camera, in case the camera needs to be re centeralised
-        for update in self.updates:
-            update()
-
     def add_stop(self,stop):#called from camera stop states
-        self.stops[stop] += 1
-
-        if stop == 'bottom' or stop == 'top' or stop == 'center':
-            self.game_objects.camera_manager.stop_centeralise()
-            #if self.recenteralise_vertical in self.updates:
-             #   self.updates.remove(self.recenteralise_vertical)
-
-        if stop =='right' or stop =='left' or stop == 'center':
-            self.game_objects.camera_manager.stop_centeralise()
-            #if self.recenteralise_horizontal in self.updates:
-             #   self.updates.remove(self.recenteralise_horizontal)
+        self.stops[stop] += 1        
+        self.game_objects.camera_manager.centraliser.handle_input('stop')
 
     def remove_stop(self,stop):#called from camera stop states
         self.stops[stop] -= 1
-        if self.stops['bottom'] == 0 and self.stops['top'] == 0 and self.stops['center'] == 0:
-            self.game_objects.camera_manager.centeralise()
-            #self.updates.append(self.recenteralise_vertical)
-        elif self.stops['left'] == 0 and self.stops['right'] == 0 and self.stops['center'] == 0:
-            self.game_objects.camera_manager.centeralise()
-            #self.updates.append(self.recenteralise_horizontal)
-
-    def recenteralise_horizontal(self):
-        target = self.game_objects.camera_manager.camera.original_center[0]
-
-        if self.game_objects.camera_manager.camera.center[0] - target > 0:
-            self.game_objects.camera_manager.camera.center[0] -= self.game_objects.game.dt*2
-            self.game_objects.camera_manager.camera.center[0] = max(target, self.game_objects.camera_manager.camera.center[0])
-        else:
-            self.game_objects.camera_manager.camera.center[0] += self.game_objects.game.dt*2
-            self.game_objects.camera_manager.camera.center[0] = min(target, self.game_objects.camera_manager.camera.center[0])
-
-        if abs(self.game_objects.camera_manager.camera.center[0] - target) <= 0.1:#if finished
-            self.updates.remove(self.recenteralise_horizontal)
-
-    def recenteralise_vertical(self):
-        target = self.game_objects.camera_manager.camera.original_center[1]
-
-        if self.game_objects.camera_manager.camera.center[1]-target > 0:#camera is below
-            self.game_objects.camera_manager.camera.center[1] -= self.game_objects.game.dt*2
-            self.game_objects.camera_manager.camera.center[1] = max(target, self.game_objects.camera_manager.camera.center[1])
-        else:#camera is above
-            self.game_objects.camera_manager.camera.center[1] += self.game_objects.game.dt*2
-            self.game_objects.camera_manager.camera.center[1] = min(target, self.game_objects.camera_manager.camera.center[1])
-
-        if abs(self.game_objects.camera_manager.camera.center[1] - target) <= 0.1:#if finished
-            self.updates.remove(self.recenteralise_vertical)
+        if sum(self.stops.values()) == 0:
+            self.game_objects.camera_manager.centraliser.handle_input('start')
 
 #cutscene cameras
 class Cutscenes(Camera):
