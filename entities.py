@@ -74,12 +74,16 @@ class BG_Block(Staticentity):
             self.layers.release()
 
 class BG_Fade(BG_Block):
-    def __init__(self, pos, game_objects, img, parallax, positions):
+    def __init__(self, pos, game_objects, img, parallax, positions, ID):
         super().__init__(pos, game_objects, img, parallax)
         self.shader_state = states_shader.Idle(self)
         self.make_hitbox(positions, pos)
         self.interacted = False
         self.sounds = read_files.load_sounds_list('audio/SFX/bg_fade/')
+        self.children = []#will append overlapping bg_fade to make "one unit"
+
+        if self.game_objects.world_state.state[self.game_objects.map.level_name]['breakable_platform'].get(str(ID), False):#if the collision bloack has been destroyed
+            self.interact()
 
     def make_hitbox(self, positions, offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
         x, y = [],[]
@@ -88,20 +92,29 @@ class BG_Fade(BG_Block):
             y.append(pos[1]+offset_position[1])
         width = max(x) - min(x)
         height = max(y) - min(y)
-        self.hitbox = [min(x),min(y),width,height]
+        self.hitbox = pygame.Rect(min(x),min(y),width,height)
 
     def update(self):
         self.shader_state.update()
+
+    def interact(self):
+        self.shader_state.handle_input('alpha')
+        self.interacted = True
+
+    def add_child(self, child):
+        self.children.append(child)
+        if self.interacted: child.interact()
 
     def draw(self, target):#called before draw in group
         self.shader_state.draw()
         super().draw(target)
 
-    def player_collision(self,player):
+    def player_collision(self, player):
         if self.interacted: return
         self.game_objects.sound.play_sfx(self.sounds[0])
-        self.shader_state.handle_input('alpha')
-        self.interacted = True
+        self.interact()
+        for child in self.children:
+            child.interact()
 
 class Conversation_bubbles(Staticentity):
     def __init__(self, pos, game_objects, text, lifetime = 200, size = (32,32)):
@@ -982,7 +995,7 @@ class Player(Character):
 
         self.flags['invincibility'] = True
         self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
-        self.health -= dmg*self.dmg_scale#a omamori can set the dmg_scale to 0.5
+        self.health -= dmg * self.dmg_scale#a omamori can set the dmg_scale to 0.5
         self.game_objects.UI['gameplay'].remove_hearts(dmg*self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
@@ -1584,6 +1597,16 @@ class Wild_swine(Enemy):
         self.attack_distance = [200, 25]
         self.aggro_distance = [250, 25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
         self.attack = Hurt_box
+
+class Rav(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/rav/',game_objects, flip_x = True)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
+        self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
+        self.health = 2
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -3112,6 +3135,19 @@ class Loot(Platform_entity):#
 
     def release_texture(self):#stuff that have pool shuold call this
         pass
+
+    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
+        self.hitbox.top = position
+        self.collision_types['top'] = True
+        self.velocity[1] = -self.velocity[1]
+
+    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
+        self.hitbox.bottom = position
+        self.collision_types['bottom'] = True
+        self.currentstate.handle_input('Ground')
+        self.velocity[0] = 0.5 * self.velocity[0]
+        self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
+        self.bounce_coefficient *= self.bounce_coefficient
 
     #plotfprm collisions
     def top_collision(self,block):

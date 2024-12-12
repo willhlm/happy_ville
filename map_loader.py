@@ -13,7 +13,7 @@ class Level():
         self.biome = Biome(self)
 
     def load_map(self, map_name, spawn):
-        self.references = {'shade':[],'gate':[],'lever':[], 'platforms':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
+        self.references = {'shade':[], 'gate':[], 'lever':[], 'platforms':[], 'bg_fade': []}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.spawned = False#a flag so that we only spawn alia once
         self.level_name = map_name.lower()#biom_room
         self.spawn = spawn
@@ -580,13 +580,13 @@ class Level():
                 self.game_objects.interactables.add(statue)
 
             elif id == 17:
-                state = self.game_objects.world_state.state[self.level_name]['amber_tree'].get(str(loot_container), False)
+                state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
                 amber_tree = entities.Amber_tree(object_position, self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(amber_tree)
                 loot_container += 1
 
             elif id == 18:
-                state = self.game_objects.world_state.state[self.level_name]['amber_rock'].get(str(loot_container), False)
+                state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
                 amber_rock = entities.Amber_rock(object_position, self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(amber_rock)
                 loot_container += 1
@@ -667,10 +667,11 @@ class Level():
             if 'fade' in tile_layer:#add fade blocks
                 for fade in blit_fade_surfaces.keys():
                     if 'fade' in fade:#is needed
-                        bg = entities.BG_Fade(pos, self.game_objects, blit_fade_surfaces[fade],parallax,blit_fade_pos[fade])
+                        bg = entities.BG_Fade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])
                         if self.layer.startswith('bg'): self.game_objects.all_bgs.add(bg)#bg
                         else: self.game_objects.all_fgs.add(bg)
                         self.game_objects.bg_fade.add(bg)
+                        self.references['bg_fade'].append(bg)
 
             elif 'interact' in tile_layer:#the stuff that blits in front of interactables, e.g. grass
                 self.game_objects.bg_interact.add(entities.BG_Block(pos,self.game_objects,blit_compress_surfaces[tile_layer],parallax, live_blur = self.biome.live_blur))#pos,img,parallax
@@ -701,6 +702,12 @@ class Level():
             for platform in self.references['platforms']:
                 if lever.ID_key == platform.ID_key:
                     lever.add_reference(platform)
+
+        for i, bg_fade in enumerate(self.references['bg_fade']):
+            for j in range(i + 1, len(self.references['bg_fade'])):
+                if bg_fade.hitbox.colliderect(self.references['bg_fade'][j].hitbox):
+                    bg_fade.add_child(self.references['bg_fade'][j])
+                    self.references['bg_fade'][j].add_child(bg_fade)
 
 class Biome():
     def __init__(self, level):
@@ -858,6 +865,15 @@ class Light_forest(Biome):
                 new_cocoon = entities.Cocoon_boss(object_position, self.level.game_objects)
                 self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.level.game_objects.interactables.add(new_cocoon)
+
+            elif id == 9:#one side brakable
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID_key = property['value']
+
+                if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
+                    platform = platforms.Breakable_oneside_1(object_position, self.level.game_objects, str(ID_key))
+                    self.level.game_objects.platforms.add(platform)
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):

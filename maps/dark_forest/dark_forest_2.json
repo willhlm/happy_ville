@@ -737,32 +737,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Wild_swine"
+                                 "value":"Rav"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2592,
-                         "y":592
-                        }, 
-                        {
-                         "gid":15,
-                         "height":16,
-                         "id":358,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"direction",
-                                 "type":"string",
-                                 "value":"top"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":688,
-                         "x":2128,
-                         "y":496
+                         "x":1616,
+                         "y":736
                         }],
                  "opacity":1,
                  "type":"objectgroup",

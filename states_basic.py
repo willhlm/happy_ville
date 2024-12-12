@@ -44,8 +44,7 @@ class Idle(Basic_states):
 
 class Death(Basic_states):#idle once
     def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.flags['invincibility'] = True
+        super().__init__(entity)        
 
     def increase_phase(self):
         self.entity.kill()
