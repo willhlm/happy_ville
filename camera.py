@@ -46,6 +46,7 @@ class Camera():#default camera
         #self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
         self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + 30]
         self.original_center = self.center.copy()
+        self.target = [0,0]#is set by camera stop, the target position of center
 
     def update(self):
         self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do

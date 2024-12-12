@@ -174,7 +174,7 @@ class Controller:
             if abs(r_axis_y) > 0.1:
                 self.value["r_stick"][1] = r_axis_y
 
-        self.qdiscrete_inputs_UI()#continious inout are made discrete for UI (UI reliases on input buffer: player movement can read difrectly self.value)
+        self.discrete_inputs_UI()#continious inout are made discrete for UI (UI reliases on input buffer: player movement can read difrectly self.value)
 
     def discrete_inputs_UI(self):#inserts in buffer if there is a big change in input, or if there has been some time since last input
         current_time = time.time()
