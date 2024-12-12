@@ -39,14 +39,14 @@ class Game():
             else:
                 self.game_objects.controller.map_inputs(event)#makes a list of inputs (input buffer)
 
-        inputs = self.game_objects.controller.input_buffer.copy()        
+        self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
+        inputs = self.game_objects.controller.input_buffer.copy()                
         for input in inputs:
             input.update(self.dt)
             self.state_stack[-1].handle_events(input)
 
     def run(self):
         while True:
-
             self.screen.clear(0, 0, 0, 0)
 
             #tick clock
