@@ -1,21 +1,25 @@
 import pygame
 import pygame._sdl2.controller
+import time
 
 class Controller:
     def __init__(self):
         self.keydown = False
         self.keyup = False
         self.key = False
-        self.value = {'l_stick': [0, 0], 'r_stick': [0, 0], 'd_pad': [0, 0], 'l_trigger': 0, 'r_trigger': 0}
+        self.value = {'l_stick': [0, 0], 'r_stick': [0, 0], 'd_pad': [0, 0], 'l_trigger': 0, 'r_trigger': 0}#analogue values
         self.outputs = [self.keydown, self.keyup, self.value, self.key]
 
         self.map_keyboard()
         self.map_joystick()
+        self.map_analogues()
         self.methods = [self.keybord]
         self.input_buffer = set()
 
         pygame._sdl2.controller.init()  # Initialize the SDL2 controller module
-        self.controllers = []
+        self.controllers = []        
+        
+        self.delay = 200
         
     def update_controller(self):#called when adding or removing controlelrs
         self.initiate_controls()
@@ -41,6 +45,16 @@ class Controller:
                 self.controller_type.append('nintendo')
             else:
                 self.controller_type.append('unknown')
+
+    def map_analogues(self):
+        self.last_input_time = {
+            'l_stick_x': 0,
+            'l_stick_y': 0,
+            'r_stick_x': 0,
+            'r_stick_y': 0,
+            'l_trigger': 0,
+            'r_trigger': 0
+        }        
 
     def map_joystick(self):
         self.joystick_map = {
@@ -118,7 +132,7 @@ class Controller:
             self.update_controller()
             self.methods.append(self.joystick)
 
-    def joystick(self, event):
+    def joystick(self, event):        
         if event.type == pygame.CONTROLLERDEVICEREMOVED:
             self.update_controller()
             self.methods.pop()
@@ -133,26 +147,35 @@ class Controller:
             self.key = self.joystick_map.get(event.button, "")
             self.insert_buffer()
 
-        if event.type == pygame.CONTROLLERAXISMOTION:
+        if event.type == pygame.CONTROLLERAXISMOTION:#TODO change to continious checks, I guess but with a delay function
+            self.value = {'l_stick': [0, 0], 'r_stick': [0, 0], 'd_pad': [0, 0], 'l_trigger': 0, 'r_trigger': 0}#analogue values
             if event.axis == pygame.CONTROLLER_AXIS_LEFTX:
-                self.value["l_stick"][0] = self.normalize_axis(event.value)
+                self.value["l_stick"][0] = self.process_input(self.normalize_axis(event.value), 'l_stick_x')
             if event.axis == pygame.CONTROLLER_AXIS_LEFTY:
-                self.value["l_stick"][1] = self.normalize_axis(event.value)
+                self.value["l_stick"][1] = self.process_input(self.normalize_axis(event.value), 'l_stick_y')                
             if event.axis == pygame.CONTROLLER_AXIS_RIGHTX:
-                self.value["r_stick"][0] = self.normalize_axis(event.value)
+                self.value["r_stick"][0] = self.process_input(self.normalize_axis(event.value), 'r_stick_x')     
             if event.axis == pygame.CONTROLLER_AXIS_RIGHTY:
-                self.value["r_stick"][1] = self.normalize_axis(event.value)
+                self.value["r_stick"][1] = self.process_input(self.normalize_axis(event.value), 'r_stick_y')                                     
             if event.axis == pygame.CONTROLLER_AXIS_TRIGGERLEFT:
-                self.value["l_trigger"] = self.normalize_axis(event.value)
+                self.value["l_trigger"] = self.process_input(self.normalize_axis(event.value), 'l_trigger')                     
             if event.axis == pygame.CONTROLLER_AXIS_TRIGGERRIGHT:
-                self.value["r_trigger"] = self.normalize_axis(event.value)
+                self.value["r_trigger"] = self.process_input(self.normalize_axis(event.value), 'r_trigger')                                     
 
             self.insert_buffer()
 
     def normalize_axis(self, value):#value taken from documentation
         return value / 32768.0
 
-    def continuous_input_checks(self):
+    def process_input(self, axis_value, stick_name):
+        current_time = time.time()*1000              
+        if abs(axis_value) > 0.9:             
+            if current_time - self.last_input_time[stick_name] > self.delay:            
+                self.last_input_time[stick_name] = current_time  # Update the last input time                                    
+                return axis_value
+        return 0                    
+
+    def continuous_input_checks(self):#for player movement
         keys = pygame.key.get_pressed()
         value = {"l_stick": [0, 0], 'r_stick': [0, 0]}
         if keys[pygame.K_RIGHT]:
@@ -176,7 +199,7 @@ class Controller:
             if abs(l_axis_y) > 0.1:
                 value["l_stick"][1] = l_axis_y
                 if abs(l_axis_y) > 0.98:
-                    self.value['l_stick'][0] = 0   
+                    value['l_stick'][0] = 0   
 
             if abs(r_axis_x) > 0.1:
                 value["r_stick"][0] = r_axis_x

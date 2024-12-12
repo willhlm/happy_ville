@@ -5,7 +5,7 @@ class Camera_manager():
         self.game_objects = game_objects
         self.camera = Camera(game_objects)# The default camera
         self.decorators = []# List of decorators
-        self.stop_handeler = Stop_handeler(game_objects)#is put here so that it only has to be loaded once
+        self.stop_handeler = Stop_handeler(self)#is put here so that it only has to be loaded once
         self.centraliser = states_centraliser.Idle(self)
 
     def set_camera(self, camera, **kwarg):
@@ -25,7 +25,7 @@ class Camera_manager():
     def zoom(self, scale = 1, center = (0.5, 0.5), rate = 1):
         self.game_objects.shader_render.append_shader('zoom', scale = scale, center = center, rate = rate)
 
-    def camera_shake(self, **kwarg):
+    def camera_shake(self, **kwarg):#shake dat ass
         self.add_decorator(Camera_shake_decorator(self.camera, **kwarg))
         self.game_objects.controller.rumble(duration = 10 * kwarg.get('duration', 100))
 
@@ -104,21 +104,21 @@ class Camera_shake_decorator():
             self.current_camera.game_objects.camera_manager.remove_decorator(self)
 
 class Stop_handeler():#counts all active stops. It then tells the centraliser to start
-    def __init__(self, game_objects):
-        self.game_objects = game_objects
+    def __init__(self, camera_manager):
+        self.camera_manager = camera_manager
         self.reset()
 
-    def reset(self):#called when changing the map
-        self.stops = {'bottom':0,'top':0,'left':0,'right':0,'center':0}#counds number of active stops, setted in camera stop states
+    def reset(self):#called when changing the map from reset_player_center
+        self.stops = {'bottom':0, 'top':0, 'left':0, 'right':0, 'center':0}#counds number of active stops, setted in camera stop states
 
     def add_stop(self,stop):#called from camera stop states
         self.stops[stop] += 1        
-        self.game_objects.camera_manager.centraliser.handle_input('stop')
+        self.camera_manager.centraliser.handle_input('stop')
 
     def remove_stop(self,stop):#called from camera stop states
         self.stops[stop] -= 1
-        if sum(self.stops.values()) == 0:
-            self.game_objects.camera_manager.centraliser.handle_input('start')
+        if sum(self.stops.values()) == 0:#if there are no active camera stops
+            self.camera_manager.centraliser.handle_input('start')
 
 #cutscene cameras
 class Cutscenes(Camera):
