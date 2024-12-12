@@ -31,7 +31,6 @@ class Idle(AI):#do nothing
             else:
                 self.enter_AI('Walk')
 
-
 class Walk(AI):
     def __init__(self, entity, change_dir = False):
         super().__init__(entity)

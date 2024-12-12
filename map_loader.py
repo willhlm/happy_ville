@@ -13,7 +13,7 @@ class Level():
         self.biome = Biome(self)
 
     def load_map(self, map_name, spawn):
-        self.references = {'shade':[],'gate':[],'lever':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
+        self.references = {'shade':[],'gate':[],'lever':[], 'platforms':[]}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.spawned = False#a flag so that we only spawn alia once
         self.level_name = map_name.lower()#biom_room
         self.spawn = spawn
@@ -32,8 +32,8 @@ class Level():
     def check_biome(self):
         self.area_change = self.level_name[:self.level_name.rfind('_')] != self.biome_name
         if self.area_change:#new biome
-            self.biome.clear_biome()
             self.biome_name = self.level_name[:self.level_name.rfind('_')]
+            self.biome.clear_biome()
             self.biome = getattr(sys.modules[__name__], self.biome_name.capitalize(), Biome)(self)#returns Biome (default) if there is no biome class
         room = self.level_name[self.level_name.rfind('_') + 1 :]
         self.biome.room(room)
@@ -121,20 +121,20 @@ class Level():
                 continue
 
             id = obj['gid'] - self.map_data['statics_firstgid']
-            if id == 0:  # Player                
-                if self.spawned: continue#skip if player has already spawned                   
+            if id == 0:  # Player
+                if self.spawned: continue#skip if player has already spawned
                 for property in properties:
-                    if property['name'] == 'spawn':#determine spawn type and set position accordingly                        
+                    if property['name'] == 'spawn':#determine spawn type and set position accordingly
                         if isinstance(self.spawn, str):# Normal load case
                             if property['value'] != self.spawn:
                                 continue
-                            
-                            self.game_objects.player.set_pos(object_position)                          
+
+                            self.game_objects.player.set_pos(object_position)
                         else:#coordinate-based spawn
                             self.game_objects.player.set_pos(self.spawn)
-                        
-                        self.game_objects.player.reset_movement()                                                                                                                                
-                        self.spawned = True#mark as spawned to avoid re-entry                        
+
+                        self.game_objects.player.reset_movement()
+                        self.spawned = True#mark as spawned to avoid re-entry
                         for prop in properties:#handle spawn movement based on direction property
                             if prop['name'] == 'right':
                                 self.game_objects.player.dir[0] = 1
@@ -145,7 +145,7 @@ class Level():
                             if prop['name'] == 'up':
                                 self.game_objects.player.velocity[1] = C.jump_vel_player
                             elif prop['name'] == 'down':
-                                pass                                                                                
+                                pass
 
             elif id == 1:#npcs
                 for property in properties:
@@ -432,8 +432,21 @@ class Level():
                 self.game_objects.cosmetics.add(smoke)
 
             elif id == 33:#upsteam
-                upstream = entities.Up_stream(object_position, self.game_objects, object_size)
-                self.game_objects.interactables.add(upstream)
+                up, down, left, right = 0, 0, 0, 0
+                for property in properties:
+                    if property['name'] == 'up':
+                        up = -int(property['value'])
+                    elif property['name'] == 'down':
+                        down = int(property['value'])
+                    elif property['name'] == 'left':
+                        left = -int(property['value'])
+                    elif property['name'] == 'right':
+                        right = int(property['value'])
+
+                prop['vertical'] = up + down
+                prop['horizontal'] = left + right
+                upstream = entities.Up_stream(object_position, self.game_objects, object_size, **prop)
+                self.game_objects.interactables_fg.add(upstream)
 
             elif id == 34:#reflection object
                 reflection = entities.Waterfall(object_position, self.game_objects, parallax, object_size)
@@ -444,10 +457,8 @@ class Level():
                     self.game_objects.all_bgs.add(reflection)
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
-        chest_int = 1
-        soul_essence_int = 1
-        amber_tree_int = 1
-        amber_rock_int = 1
+        loot_container, soul_essence_int = 1, 1
+
         for obj in data['objects']:
             new_map_diff = [-self.PLAYER_CENTER[0],-self.PLAYER_CENTER[1]]
             object_size = [int(obj['width']),int(obj['height'])]
@@ -468,10 +479,10 @@ class Level():
                 self.game_objects.interactables.add(new_rune)
 
             elif id == 4:#chests
-                state = self.game_objects.world_state.state[self.level_name]['chest'].get(str(chest_int), False)
-                new_interacable = entities.Chest(object_position,self.game_objects, state, str(chest_int))
+                state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
+                new_interacable = entities.Chest_2(object_position,self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(new_interacable)
-                chest_int += 1
+                loot_container += 1
 
             elif id == 5:#fireplace
                 type = 'Fire'#default
@@ -511,10 +522,13 @@ class Level():
                 self.game_objects.interactables.add(runestone)
 
             elif id == 10:#lever
+                kwarg = {}
                 for property in properties:
                     if property['name'] == 'ID':
-                        ID = property['value']
-                lever = entities.Lever(object_position,self.game_objects, ID)
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'on':
+                        kwarg['on'] = property['value']
+                lever = entities.Lever(object_position,self.game_objects, **kwarg)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
 
@@ -566,16 +580,20 @@ class Level():
                 self.game_objects.interactables.add(statue)
 
             elif id == 17:
-                state = self.game_objects.world_state.state[self.level_name]['amber_tree'].get(str(amber_tree_int), False)
-                amber_tree = entities.Amber_tree(object_position, self.game_objects, state, str(amber_tree_int))
-                self.game_objects.interactables.add(amber_tree)     
-                amber_tree_int += 1
+                state = self.game_objects.world_state.state[self.level_name]['amber_tree'].get(str(loot_container), False)
+                amber_tree = entities.Amber_tree(object_position, self.game_objects, state, str(loot_container))
+                self.game_objects.interactables.add(amber_tree)
+                loot_container += 1
 
             elif id == 18:
-                state = self.game_objects.world_state.state[self.level_name]['amber_rock'].get(str(amber_rock_int), False)
-                amber_rock = entities.Amber_rock(object_position, self.game_objects, state, str(amber_rock_int))
-                self.game_objects.interactables.add(amber_rock)     
-                amber_rock_int += 1
+                state = self.game_objects.world_state.state[self.level_name]['amber_rock'].get(str(loot_container), False)
+                amber_rock = entities.Amber_rock(object_position, self.game_objects, state, str(loot_container))
+                self.game_objects.interactables.add(amber_rock)
+                loot_container += 1
+
+            elif id == 19:#collision block that can only brak with charge flag on projectile
+                platform = platforms.Breakable_block_charge_1(object_position, self.game_objects)
+                self.game_objects.platforms.add(platform)
 
     def load_layers(self, data, parallax, offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
@@ -675,16 +693,20 @@ class Level():
         if self.references.get('shade_trigger',False):
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
-        if self.references.get('lever',False):#assume that the gate-lever is on the same map
-            for lever in self.references['lever']:
-                for gate in self.references['gate']:
-                    if lever.ID_key == gate.ID_key:
-                        lever.add_gate(gate)
+        for lever in self.references['lever']:#assume that the gate,platform - lever is on the same map
+            for gate in self.references['gate']:
+                if lever.ID_key == gate.ID_key:
+                    lever.add_reference(gate)
+
+            for platform in self.references['platforms']:
+                if lever.ID_key == platform.ID_key:
+                    lever.add_reference(platform)
 
 class Biome():
     def __init__(self, level):
         self.level = level
         self.live_blur = False#default is false live blurring
+        self.play_music()
 
     def load_objects(self, data, parallax, offset):
         pass
@@ -695,15 +717,15 @@ class Biome():
     def room(self, room):#called wgen a new room is loaded
         pass
 
-    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
-        self.level.game_objects.sound.fade_all_sounds(time = 3000)#but shouldn't fade
-        try:#load next one
-            path = "audio/music/maps/" + 'light_forest' + "/default.mp3"        
-            sound = read_files.load_single_sfx(path)
-            self.channel = self.level.game_objects.sound.play_priority_sound(sound, index = 1, loop = -1, fade = 700)
+    def play_music(self):
+        try:#try laoding bg music
+            sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
+            self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700)
         except FileNotFoundError:
             print("No BG music found")
 
+    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
+        self.level.game_objects.sound.fade_all_sounds(time = 2000)
         self.release_textures()
 
     def release_textures(self):
@@ -743,7 +765,7 @@ class Village_ola2(Biome):
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
                         kwarg['erect'] = property['value']
-                    elif propert['name'] == 'key':
+                    elif property['name'] == 'key':
                         kwarg['key'] = property['value']
                 door = platforms.Door_right_orient(object_position, self.level.game_objects, **kwarg)
                 door_i = entities.Door_inter(object_position, self.level.game_objects, door)
@@ -754,6 +776,11 @@ class Village_ola2(Biome):
 class Light_forest(Biome):
     def __init__(self, level):
         super().__init__(level)
+
+    def play_music(self):
+        #super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/nordveden/')
+        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
         return
@@ -868,6 +895,11 @@ class Light_forest_cave(Biome):
     def __init__(self, level):
         super().__init__(level)
 
+    def play_music(self):
+        #super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/light_forest_cave')
+        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
+
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
         self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
@@ -977,12 +1009,11 @@ class Golden_fields(Biome):
 class Crystal_mines(Biome):
     def __init__(self, level):
         super().__init__(level)
-        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/crystal_mines')
-        self.channel = self.level.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, fade = 1000, vol = 0.2)
 
-    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
-        super().clear_biome()
-        self.level.game_objects.sound.fade_sound(self.channel)
+    def play_music(self):
+        super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/crystal_mines')
+        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
@@ -1110,7 +1141,7 @@ class Dark_forest(Biome):
 
             elif id == 11:#smalltree 1
                 new_block = platforms.Dark_forest_1(object_position, self.level.game_objects)
-                self.level.game_objects.cosmetics.add(new_block)                    
+                self.level.game_objects.cosmetics.add(new_block)
 
             elif id == 12:#shource of shadow_light
                 kwarg = {}
@@ -1119,4 +1150,17 @@ class Dark_forest(Biome):
                         kwarg['on'] = property['value']
 
                 new_lantern = entities.Shadow_light_lantern(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_lantern)                         
+                self.level.game_objects.interactables.add(new_lantern)
+
+            elif id == 13:#shource of shadow_light
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'ID':
+                        kwarg['ID'] = property['value']
+                    elif property['name'] == 'erect':
+                        kwarg['erect'] = property['value']
+
+                new_platform = platforms.Dark_forest_2(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.dynamic_platforms.add(new_platform)
+                self.level.game_objects.platforms.add(new_platform)
+                self.level.references['platforms'].append(new_platform)

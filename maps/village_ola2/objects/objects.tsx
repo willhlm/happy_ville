@@ -9,10 +9,9 @@
  </tile>
  <tile id="2">
   <properties>
-   <property name="ID" value=""/>
    <property name="erect" type="bool" value="false"/>
    <property name="key" value=""/>
   </properties>
-  <image width="32" height="64" source="../../../Sprites/animations/door_right/erect/door_right01.png"/>
+  <image width="48" height="64" source="../../../Sprites/animations/door_right/erect/door_right01.png"/>
  </tile>
 </tileset>

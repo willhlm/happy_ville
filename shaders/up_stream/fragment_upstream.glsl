@@ -1,7 +1,8 @@
 #version 330 core
 
 in vec2 fragmentTexCoord; // top-left is [0, 1] and bottom-right is [1, 0]
-uniform float time; // animate the smoke over time
+uniform float time;       // animate the smoke over time
+uniform vec2 dir;         // direction vector for the smoke
 
 out vec4 color;
 uniform float speed = 0.3;
@@ -51,9 +52,9 @@ float edgeFade(vec2 uv)
 
 void main()
 {
-    // Modify the texture coordinates to animate the smoke and make it scroll upwards
+    // Modify the texture coordinates to animate the smoke and make it move in the specified direction
     vec2 uv = fragmentTexCoord;
-    uv.y -= time * speed; // Vertical motion to simulate rising smoke
+    uv -= vec2(dir.x, -dir.y) * time * speed; // Invert the Y-component of `dir`
 
     // Apply the smoke effect using noise
     float smoke = smokeEffect(uv * 2.0, time); // Adjust scale for effect

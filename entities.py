@@ -15,21 +15,20 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
         self.game_objects = game_objects
         self.rect = pygame.Rect(pos[0], pos[1], 16, 16)
         self.true_pos = list(self.rect.topleft)
+        self.blit_pos = self.true_pos.copy()
 
         self.bounds = [-200, 800, -100, 350]#-x,+x,-y,+y: Boundaries to phase out enteties outside screen
-        self.parallax = [1,1]
         self.shader = None#which shader program to run
         self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
 
     def group_distance(self):
-        blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        if blit_pos[0] < self.bounds[0] or blit_pos[0] > self.bounds[1] or blit_pos[1] < self.bounds[2] or blit_pos[1] > self.bounds[3]:
+        if self.blit_pos[0] < self.bounds[0] or self.blit_pos[0] > self.bounds[1] or self.blit_pos[1] < self.bounds[2] or self.blit_pos[1] > self.bounds[3]:
             self.remove(self.group)#remove from group
             self.add(self.pause_group)#add to pause
 
     def draw(self, target):#called just before draw in group
-        pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
     def kill(self):
         self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
@@ -147,7 +146,7 @@ class Conversation_bubbles(Staticentity):
         texture.release()
 
 #shaders -> should this be here or in enteties_parallx or elsewhere?
-class Portal(Staticentity):#portal to make a small spirit world with challenge rooms
+class Portal_2(Staticentity):#same as portal but masked based. Doesnt work becasue the mask is repeated for some reason
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.currentstate = states_portal.Spawn(self)
@@ -155,6 +154,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.empty_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#TODO
         self.noise_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)
         self.screen_copy = game_objects.game.display.make_layer(self.game_objects.game.window_size)
+        self.mask_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)
 
         self.bg_distort_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#bg
         self.bg_grey_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#entetirs
@@ -163,8 +163,11 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.rect.center = pos
         self.hitbox = pygame.Rect(self.rect.centerx, self.rect.centery, 32, 32)
         self.time = 0
+
         self.radius = 0
         self.thickness = 0
+        self.thickness_limit = 0.1
+        self.radius_limit = 0.4#one is screen size
 
         self.state = kwarg.get('state', None)
 
@@ -190,8 +193,8 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         #noise
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time
-        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
-        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [50,50]
         self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #portal
@@ -199,28 +202,108 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.game_objects.shaders['portal']['noise'] = self.noise_layer.texture
         self.game_objects.shaders['portal']['radius'] = self.radius
         self.game_objects.shaders['portal']['thickness'] = self.thickness
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        blit_pos = [self.rect.topleft[0] - self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty_layer.texture, self.bg_distort_layer, position = blit_pos, shader = self.game_objects.shaders['portal'])
 
+        #mask
+        self.game_objects.shaders['circle_pos']['radius'] = self.radius
+        self.game_objects.shaders['circle_pos']['color'] = [255,255,255,255]
+        self.game_objects.shaders['circle_pos']['gradient'] = 1
+        self.game_objects.game.display.render(self.empty_layer.texture, self.mask_layer, shader = self.game_objects.shaders['circle_pos'])
+
         #noise with scroll
-        self.game_objects.shaders['noise_perlin']['scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #distortion on bg
-        self.game_objects.shaders['distort']['shine'] = False
+        self.game_objects.shaders['distort_2']['TIME'] = self.time
+        self.game_objects.shaders['distort_2']['maskTexture'] = self.mask_layer.texture
+        self.game_objects.shaders['distort_2']['center'] = blit_pos
+        self.game_objects.shaders['distort_2']['noise'] = self.noise_layer.texture
+        self.game_objects.shaders['distort_2']['tint'] = [1,1,1]
+        self.game_objects.game.display.render(self.bg_distort_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['distort_2'])#make a copy of the screen
+
+        #distortion on enteties
+        self.game_objects.shaders['distort']['tint'] = [0.39, 0.78, 1]
+        self.game_objects.game.display.render(self.bg_grey_layer.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['distort_2'])#make them gre
+
+class Portal(Staticentity):#portal to make a small spirit world with challenge rooms
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.currentstate = states_portal.Spawn(self)
+
+        self.empty_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#TODO
+        self.noise_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)
+        self.screen_copy = game_objects.game.display.make_layer(self.game_objects.game.window_size)
+
+        self.bg_distort_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#bg
+        self.bg_grey_layer = game_objects.game.display.make_layer(self.game_objects.game.window_size)#entetirs
+
+        self.rect = pygame.Rect(pos[0], pos[1], self.empty_layer.texture.width, self.empty_layer.texture.height)
+        self.rect.center = pos
+        self.hitbox = pygame.Rect(self.rect.centerx, self.rect.centery, 32, 32)
+        self.time = 0
+
+        self.radius = 0
+        self.thickness = 0
+        self.thickness_limit = 0.1
+        self.radius_limit = 1#one is screen size
+
+        self.state = kwarg.get('state', None)
+
+        game_objects.interactables.add(Place_holder_interacatble(self, game_objects))#add a dummy interactable to the group, since portal cannot be in inetracatles
+        game_objects.render_state.handle_input('portal', portal = self)
+
+    def release_texture(self):
+        self.game_objects.render_state.handle_input('idle')#go back to normal rendering
+        self.empty_layer.release()
+        self.noise_layer.release()
+        self.screen_copy.release()
+        self.bg_grey_layer.release()
+        self.bg_distort_layer.release()
+
+    def interact(self):#when player press T at place holder interactavle
+        self.currentstate.handle_input('grow')
+
+    def update(self):
+        self.currentstate.update()#handles the radius and thickness of portal
+        self.time += self.game_objects.game.dt * 0.01
+
+    def draw(self, target):
+        #noise
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [50,50]
+        self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        #portal
+        self.game_objects.shaders['portal']['TIME'] = self.time*0.1
+        self.game_objects.shaders['portal']['noise'] = self.noise_layer.texture
+        self.game_objects.shaders['portal']['radius'] = self.radius
+        self.game_objects.shaders['portal']['thickness'] = self.thickness
+        blit_pos = [self.rect.topleft[0] - self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.game.display.render(self.empty_layer.texture, self.bg_distort_layer, position = blit_pos, shader = self.game_objects.shaders['portal'])
+
+        #noise with scroll
+        self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        #distortion on bg
         self.game_objects.shaders['distort']['TIME'] = self.time
         self.game_objects.shaders['distort']['u_resolution'] = self.game_objects.game.window_size
         self.game_objects.shaders['distort']['noise'] = self.noise_layer.texture
-        self.game_objects.shaders['distort']['center'] = [self.rect.center[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.center[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['distort']['center'] = [self.rect.center[0] - self.game_objects.camera_manager.camera.scroll[0], self.rect.center[1] - self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.shaders['distort']['radius'] = self.radius
         self.game_objects.shaders['distort']['tint'] = [1,1,1]
         self.game_objects.game.display.render(self.bg_distort_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['distort'])#make a copy of the screen
 
         #distortion on enteties
         self.game_objects.shaders['distort']['tint'] = [0.39, 0.78, 1]
-        self.game_objects.shaders['distort']['shine'] = True
         self.game_objects.game.display.render(self.bg_grey_layer.texture, self.empty_layer, shader = self.game_objects.shaders['distort'])#make them grey
-        self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader=self.game_objects.shaders['bloom'])
+        self.game_objects.shaders['edge_light']['TIME'] = self.time
+        self.game_objects.shaders['edge_light']['textureNoise'] = self.noise_layer.texture
+        self.game_objects.game.display.render(self.empty_layer.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['edge_light'])#make them grey
 
 class Lighitning(Staticentity):#a shader to make lighning barrier
     def __init__(self, pos, game_objects, parallax, size):
@@ -332,22 +415,38 @@ class Sky(Staticentity):
 
 class Waterfall(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
-        super().__init__(pos,game_objects)
+        super().__init__(pos, game_objects)
         self.parallax = parallax
 
         self.size = size
         self.empty = game_objects.game.display.make_layer(size)
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
+        self.blur_layer = game_objects.game.display.make_layer(size)
         self.time = 5#offset the time
+
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/waterfall/')
+        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1)
 
     def release_texture(self):
         self.empty.release()
         self.noise_layer.release()
         self.screen_copy.release()
+        self.blur_layer.release()
+        self.channel.fadeout(300)
+
+    def set_volume(self):
+        width = self.game_objects.game.window_size[0]
+        height = self.game_objects.game.window_size[1]
+        center_blit_pos = [self.true_pos[0] + self.size[0]*0.5-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1]+ self.size[1]*0.5-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        distance_to_screencenter = ((center_blit_pos[0] - width * 0.5)**2 + (center_blit_pos[1]-height * 0.5) ** 2)**0.5
+        max_distance = ((width*0.5)**2 + (height*0.5)**2)**0.5
+        normalized_distance = max(0, min(1, 1 - (distance_to_screencenter / max_distance)))#clamp it to 0, 1
+        self.channel.set_volume(0.5 * normalized_distance)
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
+        self.set_volume()
 
     def draw(self, target):
         #noise
@@ -367,7 +466,14 @@ class Waterfall(Staticentity):
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
-        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
+
+        if self.parallax[0] == 1:#TODO, blue state #don't blur if there is no parallax
+            self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
+        else:
+            self.blur_layer.clear(0, 0, 0, 0)
+            self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
+            self.game_objects.game.display.render(self.empty.texture, self.blur_layer, shader = self.game_objects.shaders['waterfall'])
+            self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['blur'])
 
 class Reflection(Staticentity):#water, e.g. village
     def __init__(self, pos, game_objects, parallax, size, dir, texture_parallax = 1, speed = 0, offset = 10):
@@ -388,11 +494,15 @@ class Reflection(Staticentity):#water, e.g. village
         self.blur_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.colour = (0.39, 0.78, 1, 1)
 
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/river/')
+        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.2)
+
     def release_texture(self):#called when .kill() and empty group
         self.empty.release()
         self.noise_layer.release()
         self.water_noise_layer.release()
         self.blur_layer.release()
+        self.channel.fadeout(300)
 
     def update(self):
         self.time += self.game_objects.game.dt * 0.01
@@ -534,26 +644,37 @@ class TwoD_liquid(Staticentity):
             obj1 = particles.Circle(pos, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
 
-class Up_stream(Staticentity):#a draft that can lift enteties
-    def __init__(self, pos, game_objects, size, **properties):
+class Up_stream(Staticentity):#a draft that can lift enteties along a direction
+    def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
         self.hitbox = pygame.Rect(pos, size)
         self.time = 0
 
+        horizontal = kwarg.get('horizontal', 0)
+        vertical = kwarg.get('vertical', 0)
+        normalise = (horizontal**2 + vertical**2)**0.5
+        self.dir = [horizontal/normalise, vertical/normalise]
+
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/up_stream/')
+        self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
+
     def release_texture(self):
         self.image.release()
+        self.channel.fadeout(300)
 
     def update(self):
         self.time += self.game_objects.game.dt
 
     def draw(self, target):
+        self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
     def player_collision(self, player):#player collision
-        player.velocity[1] -= self.game_objects.game.dt*0.5
+        player.velocity[0] += self.dir[0] * self.game_objects.game.dt
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt*0.5
 
     def player_noncollision(self):
         pass
@@ -608,7 +729,6 @@ class Explosion_shader(Staticentity):#2D explosion
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
-        self.noise_layer = game_objects.game.display.make_layer(size)
 
         self.hitbox = pygame.Rect(pos, size)
         self.time = 0
@@ -621,16 +741,7 @@ class Explosion_shader(Staticentity):#2D explosion
         self.time += self.game_objects.game.dt
 
     def draw(self, target):
-        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time * 0.05
-        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]#[self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.shaders['noise_perlin']['scale'] = [10,10]
-        self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
-
-        self.game_objects.shaders['explosion']['noiseTexture'] = self.noise_layer.texture
-        self.game_objects.shaders['explosion']['time'] = self.time*0.01
-        self.game_objects.shaders['explosion']['textureSize'] = self.size
-
+        self.game_objects.shaders['explosion']['iTime'] = self.time*0.01
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['explosion'])#shader render
 
@@ -762,9 +873,14 @@ class Character(Platform_entity):#enemy, NPC,player
         self.health -= dmg
         self.flags['invincibility'] = True
 
+        try:#TODO add hit sounds to all enteties
+            self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
+        except:
+            pass
+
         if self.health > 0:#check if dead¨
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
-            self.shader_state.handle_input('Hurt')#turn white
+            self.shader_state.handle_input('Hurt')#turn white and shake
             self.AI.handle_input('Hurt')
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
             #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 10)#makes the game freez for few frames
@@ -870,7 +986,7 @@ class Player(Character):
         self.game_objects.UI['gameplay'].remove_hearts(dmg*self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
-            self.shader_state.handle_input('Hurt')#turn white
+            self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             self.hurt_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
@@ -918,16 +1034,15 @@ class Player(Character):
         super().update()
         self.omamoris.update()
         self.update_timers()
-        #print(self.friction)
 
     def draw(self, target):#called in group
         self.shader_state.draw()
-        pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.blit_pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
-        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
+        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
     def update_timers(self):
         for timer in self.timers:
@@ -1110,6 +1225,7 @@ class Mygga(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1161,6 +1277,7 @@ class Mygga_torpedo(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_torpedo/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1209,9 +1326,10 @@ class Mygga_torpedo(Flying_enemy):
         amp = min(abs(self.velocity[0]),0.008)
         self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
-class Mygga_suicide(Flying_enemy):
+class Mygga_suicide(Flying_enemy):#torpedo and explode
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_torpedo/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1327,6 +1445,7 @@ class Mygga_roaming_projectile(Mygga_roaming):
 class Mygga_crystal(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_crystal/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1354,9 +1473,10 @@ class Mygga_crystal(Flying_enemy):
         self.velocity[0] += (position[0]-self.rect.centerx) * 0.002
         self.velocity[1] += (position[1]-self.rect.centery) * 0.002
 
-class Exploding_mygga(Flying_enemy):
+class Mygga_exploding(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga_exploding/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
@@ -1367,6 +1487,7 @@ class Exploding_mygga(Flying_enemy):
         self.currentstate = states_exploding_mygga.Idle(self)
 
     def killed(self):
+        self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)
         self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
@@ -1441,14 +1562,28 @@ class Packun(Enemy):
 class Sandrew(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/sandrew/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/sandrew/', game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
         self.currentstate = states_sandrew.Idle(self)
         self.health = 3
-        self.attack_distance = [200,25]
-        self.aggro_distance = [250,25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.attack_distance = [200, 25]
+        self.aggro_distance = [250, 25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.attack = Hurt_box
+
+class Wild_swine(Enemy):
+    def __init__(self,pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/wild_swine/',game_objects, flip_x = True)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
+        self.currentstate = states_sandrew.Idle(self)
+        self.health = 3
+        self.attack_distance = [200, 25]
+        self.aggro_distance = [250, 25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.attack = Hurt_box
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -2169,9 +2304,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
 class Shade_Screen(Staticentity):#a screen that can be put on each layer to make it e.g. dark or light
     def __init__(self, game_objects, parallax, colour):
         super().__init__([0,0],game_objects)
-        if parallax[0] == 1: self.colour = (colour.g, colour.b, colour.a, 0)
-        else: self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
-
+        self.colour = (colour.g,colour.b,colour.a,15/parallax[0])
         self.shader_state = states_shader.Idle(self)
 
         layer1 = self.game_objects.game.display.make_layer(game_objects.game.window_size)#make an empty later
@@ -2182,13 +2315,11 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
         self.image.release()
 
     def update(self):
-        self.true_pos = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]#this is [0,0]
         self.shader_state.update()
 
     def draw(self, target):
         self.shader_state.draw()
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render
+        self.game_objects.game.display.render(self.image, target, shader = self.shader)#shader render
 
 #Player movement abilities, handles them. Contains also spirit abilities
 class Player_abilities():
@@ -2324,7 +2455,7 @@ class Projectiles(Platform_entity):#projectiels
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.lifetime = kwarg.get('lifetime', 300)
-        self.flags = {'invincibility': False}
+        self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False)}#if they can break special blocks
 
     def update(self):
         super().update()
@@ -2603,8 +2734,8 @@ class Horn_vines(Projectiles):#the reindeer attack
             self.kill()
 
 class Melee(Projectiles):
-    def __init__(self, entity):
-        super().__init__([0,0], entity.game_objects)
+    def __init__(self, entity, **kwarg):
+        super().__init__([0,0], entity.game_objects, **kwarg)
         self.entity = entity#needs entity for making the hitbox follow the player in update hitbox
         self.dir = entity.dir.copy()
         self.direction_mapping = {(0, 0): ('center', 'center'), (1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
@@ -2627,12 +2758,12 @@ class Melee(Projectiles):
         pass
 
 class Hurt_box(Melee):#a hitbox that spawns
-    def __init__(self, entity, size = [64,64], lifetime = 100):
-        super().__init__(entity)
-        self.hitbox = pygame.Rect(entity.rect.topleft, size)
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity, **kwarg)
+        self.hitbox = pygame.Rect(entity.rect.topleft, kwarg.get('size', [64, 64]))
+        self.lifetime = kwarg.get('lifetime', 100)
+        self.dmg = kwarg.get('dmg', 1)
         self.dir = [0, 0]
-        self.lifetime = lifetime
-        self.dmg = 1
 
     def update(self):
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
@@ -2763,7 +2894,7 @@ class Aila_sword(Sword):
             collision_enemy.knock_back(self.dir)
             collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
             self.clash_particles(collision_enemy.hitbox.center)
-            self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0])#should be in states
+            #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
 
         collision_enemy.currentstate.handle_input('sword')
         self.stone_states['enemy_collision'].enemy_collision()
@@ -4039,8 +4170,8 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
     def __init__(self, pos, game_objects, size, colour = pygame.Color(0,0,0,0)):
         super().__init__(pos, game_objects)
         self.new_colour = [colour.g,colour.b,colour.a]
+        self.light_colour = self.game_objects.lights.ambient[0:3]
         self.rect = pygame.Rect(pos,size)
-        self.rect.topleft = pos
         self.hitbox = self.rect.copy()
 
     def draw(self, target):
@@ -4053,10 +4184,12 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
         pass
 
     def player_collision(self, player):#player collision
+        self.game_objects.lights.ambient = self.new_colour + [0.5 * max((self.game_objects.player.hitbox.centerx - self.rect.left)/self.rect[2],0)]
         for layer in self.layers:
             layer.shader_state.handle_input('mix_colour')
 
     def player_noncollision(self):#when player doesn't collide
+        self.game_objects.lights.ambient = self.light_colour + [0.5 * max((self.game_objects.player.hitbox.centerx - self.rect.left)/self.rect[2],0)]
         for layer in self.layers:
             layer.shader_state.handle_input('idle')
 
@@ -4242,6 +4375,7 @@ class Loot_containers(Interactable):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
+        self.shader_state = states_shader.Idle(self)
 
         self.health = 3
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
@@ -4250,6 +4384,14 @@ class Loot_containers(Interactable):
         if state:
             self.currentstate = states_basic.Interacted(self)
             self.flags['invincibility'] = True
+
+    def update(self):
+        super().update()
+        self.shader_state.update()
+
+    def draw(self, target):
+        self.shader_state.draw()
+        super().draw(target)
 
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
@@ -4263,9 +4405,11 @@ class Loot_containers(Interactable):
 
     def take_dmg(self,projectile):
         if self.flags['invincibility']: return
+        self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
         self.flags['invincibility'] = True
+        self.shader_state.handle_input('Hurt', colour = (1,1,1,0), direction = [1,0.5])
         self.hit_loot()
 
         if self.health > 0:
@@ -4273,7 +4417,7 @@ class Loot_containers(Interactable):
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         else:
             self.currentstate.handle_input('Opening')
-            self.game_objects.world_state.state[self.game_objects.map.level_name][type(self).__name__.lower()][self.ID_key] = True#write in the state dict that this has been picked up
+            self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'][self.ID_key] = True#write in the state dict that this has been picked up
 
     def hit_loot(self):
         for i in range(0, random.randint(1,3)):
@@ -4283,7 +4427,14 @@ class Loot_containers(Interactable):
 class Chest(Loot_containers):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
         self.inventory = {'Amber_Droplet':3}
+
+class Chest_2(Loot_containers):
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
+        self.inventory = {'Amber_Droplet':1}
 
     def hit_loot(self):
         pass
@@ -4291,16 +4442,19 @@ class Chest(Loot_containers):
 class Amber_tree(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_tree/')
         self.inventory = {'Amber_Droplet':3}
 
 class Amber_rock(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_rock/')
         self.inventory = {'Amber_Droplet':3}
 
 class Door(Interactable):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/door/')
         self.sprites=read_files.load_sprites_dict('Sprites/animations/Door/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -4308,6 +4462,7 @@ class Door(Interactable):
 
     def interact(self):
         self.currentstate.handle_input('Opening')
+        self.game_objects.sound.play_sfx(self.sounds['open'][0], vol = 0.2)
         try:
             self.game_objects.change_map(collision.next_map)
         except:
@@ -4457,6 +4612,7 @@ class Light_crystal(Interactable):
 class Fireplace(Interactable):
     def __init__(self, pos, game_objects, on = False):
         super().__init__(pos, game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/fireplace/')
         self.sprites = read_files.load_sprites_dict('Sprites/animations/fireplace/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -4570,8 +4726,14 @@ class Door_inter(Interactable): #game object for itneracting with locked door
 
     def interact(self):
         if type(self.door.currentstate).__name__ == 'Erect':
-            self.door.currentstate.handle_input('Transform')
-            if self.sfx: self.play_sfx()
+            if self.game_objects.player.inventory.get(self.door.key, False):
+                self.door.currentstate.handle_input('Transform')
+                if self.sfx: self.play_sfx()
+            else:
+                self.door.shake()
+
+    def player_collision(self, player):#player collision
+        pass
 
     def update(self):
         pass
@@ -4583,22 +4745,23 @@ class Door_inter(Interactable): #game object for itneracting with locked door
         pass
 
 class Lever(Interactable):
-    def __init__(self, pos, game_objects, ID_key):
+    def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/animations/lever/', game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.image = self.sprites['off'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.ID_key = ID_key#an ID to match with the gate and an unique ID key to identify which item that the player is intracting within the world
-
-        if self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'].get(self.ID_key, False):
-            self.currentstate = states_lever.Down(self)
+        self.ID_key = kwarg.get('ID', None)#an ID to match with the reference (gate or platform etc) and an unique ID key to identify which item that the player is intracting within the world
+        self.flags = {'invincibility': False}
+        if self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'].get(self.ID_key, False) or kwarg.get('on', False):
+            self.currentstate = states_lever.On(self)
         else:
-            self.currentstate = states_lever.Idle(self)
-            self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = False
+            self.currentstate = states_lever.Off(self)
 
-    def take_dmg(self,projectile):
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = kwarg.get('on', False)
+
+    def take_dmg(self, projectile):
         if self.flags['invincibility']: return
         self.flags['invincibility'] = True
         self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
@@ -4607,17 +4770,17 @@ class Lever(Interactable):
 
         self.currentstate.handle_input('Transform')
         self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = not self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key]#write in the state dict that this has been picked up
-        self.gate.currentstate.handle_input('Transform')
+        self.reference.currentstate.handle_input('Transform')
 
     def on_invincibility_timeout(self):
         self.flags['invincibility'] = False
 
-    def add_gate(self, gate):#called from map loader
-        self.gate = gate
-        if type(self.currentstate).__name__ == 'Down':
-            self.gate.currentstate.enter_state('Down')
+    def add_reference(self, reference):#called from map loader
+        self.reference = reference
+        if type(self.currentstate).__name__ == 'On':
+            self.reference.currentstate.handle_input('On')#down
         else:
-            self.gate.currentstate.enter_state('Erect')
+            self.reference.currentstate.handle_input('Off')#erect
 
 class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction. Shadow light inetracts with dark forest enemy and platofrm
     def __init__(self, pos, game_objects, **kwarg):

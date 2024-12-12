@@ -43,5 +43,5 @@ void main()
 
     blurredColor.xyz /= max(blurredColor.w, 1e-6);//prevent division by 0
 
-    color = vec4(blurredColor.xyz,blurredColor.w);
+    color = vec4(blurredColor.xyz, blurredColor.w);
 }

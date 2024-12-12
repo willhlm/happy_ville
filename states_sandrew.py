@@ -76,9 +76,14 @@ class Attack_pre(Enemy_states):
 class Attack_main(Enemy_states):
     def __init__(self,entity):
         super().__init__(entity)
+        hitbox = [self.entity.hitbox[2] + 30,self.entity.hitbox[3] + 30]
+        self.attack_box = self.entity.attack(self.entity, size = hitbox, lifetime = 300, charge_blocks = True)
+        self.entity.game_objects.eprojectiles.add(self.attack_box)
 
     def update(self):
         self.entity.velocity[0] += self.entity.dir[0] * 2
+        self.attack_box.hitbox[0] = self.entity.hitbox[0]
+        self.attack_box.hitbox[1] = self.entity.hitbox[1]
 
     def handle_input(self, input):
         if input == 'Wall':
@@ -90,6 +95,7 @@ class Attack_main(Enemy_states):
             self.entity.dir[0] *= -1
 
     def increase_phase(self):
+        self.attack_box.kill()
         self.enter_state('Attack_post')
 
 class Attack_post(Enemy_states):

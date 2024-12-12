@@ -1,5 +1,5 @@
 import pygame
-import entities, states_time_collision, animation, read_files, states_basic, states_gate, states_smacker
+import entities, states_time_collision, animation, read_files, states_basic, states_gate, states_smacker, states_moving_platform, states_shader
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
@@ -244,7 +244,7 @@ class Collision_texture(Platform):#blocks that has tectures
                 self.sprites[state][frame].release()
 
     def draw(self, target):
-        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])))#int seem nicer than round   
+        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])))#int seem nicer than round
 
 class Boulder(Collision_texture):#blocks village cave
     def __init__(self, pos, game_objects):
@@ -280,27 +280,51 @@ class Gate_1(Collision_texture):#a gate. The ones that are owned by the lever wi
         self.currentstate = {'erect': states_gate.Erect, 'down': states_gate.Down}[state](self)
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_1/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gates/gate_1/', self.game_objects)
 
 class Gate_2(Gate_1):#a gate. The ones that are owned by the lever will handle if the gate should be erect or not by it
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 
     def init(self):
-        self.sprites = read_files.load_sprites_dict('Sprites/animations/gate_2/', self.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/gates/gate_2/', self.game_objects)
 
 class Door(Gate_1):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         #self.sfx = ADDSFXHERE
         self.key = kwarg.get('key', 'None')
+        self.shader = None
+        self.shader_state = states_shader.Idle(self)
+
+    def update(self):
+        super().update()
+        self.shader_state.update()
+
+    def draw(self, target):
+        self.shader_state.draw()
+        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])), shader = self.shader)#int seem nicer than round
+
+    def shake(self):
+        self.shader_state.handle_input('Hurt', colour = (1,1,1,0))
 
 class Door_right_orient(Door):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
+        self.shader_state = states_shader.Idle(self)
+        self.hitbox[2] = self.hitbox[2] - 8 
+        self.hitbox.bottomright = self.rect.bottomright
 
     def init(self):
         self.sprites = read_files.load_sprites_dict('Sprites/animations/door_right/', self.game_objects)
+
+class Door_left_orient(Door):
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)
+        self.shader_state = states_shader.Idle(self)
+
+    def init(self):
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/door_left/', self.game_objects)
 
 class Bridge(Collision_texture):#bridge twoards forest path
     def __init__(self, pos, game_objects):
@@ -410,8 +434,8 @@ class Shadow_light(Collision_texture):#parent class: add the subclasses to cosme
         new_platforms = []
         for light in self.game_objects.lights.lights_sources:
             #if not light.shadow_light: continue
-            if not self.hitbox.colliderect(light.hitbox): continue                
-            
+            if not self.hitbox.colliderect(light.hitbox): continue
+
             overlap_rect = self.hitbox.clip(light.hitbox)
             if len(new_platforms) < len(self.platforms):
                 platform = self.platforms[len(new_platforms)]
@@ -422,15 +446,15 @@ class Shadow_light(Collision_texture):#parent class: add the subclasses to cosme
                 self.game_objects.platforms.add(platform)
 
             new_platforms.append(platform)
-        
+
         for platform in self.platforms[len(new_platforms):]:# Remove platforms that are no longer active
             self.game_objects.platforms.remove(platform)
-        
+
         self.platforms = new_platforms# Update the platforms list
 
-    def draw(self, target):        
+    def draw(self, target):
         #copy the light texture
-        blit_pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))        
+        blit_pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))
         self.cut_rect.topleft = blit_pos
         self.game_objects.game.display.render(self.game_objects.lights.layer3.texture, self.lights, flip = [False, True], section = self.cut_rect, shader = self.game_objects.shaders['reverse_y'])#cut out the light texture
 
@@ -455,7 +479,7 @@ class Collision_shadow_light(Shadow_light):#collsion block but only lights and i
         self.rect = pygame.Rect(pos[0], pos[1], size[0], size[1])
         self.cut_rect = self.rect.copy()  # A rectangle used to cut out light sources for shader
         self.hitbox = self.rect.copy()  # The initial hitbox of the platform
-        self.time = 0        
+        self.time = 0
 
         self.game_objects.shaders['rectangle_border']['screenSize'] = self.game_objects.game.window_size
 
@@ -463,9 +487,9 @@ class Collision_shadow_light(Shadow_light):#collsion block but only lights and i
         self.check_light()  # Check if the platform is hit by light
         self.time += self.game_objects.game.dt * 0.01
 
-    def draw(self, target):    
-        self.game_objects.shaders['rectangle_border']['TIME'] = self.time 
-        self.game_objects.game.display.render(self.empty.texture, self.image_layer, shader=self.game_objects.shaders['rectangle_border'])#make the rectangle   
+    def draw(self, target):
+        self.game_objects.shaders['rectangle_border']['TIME'] = self.time
+        self.game_objects.game.display.render(self.empty.texture, self.image_layer, shader=self.game_objects.shaders['rectangle_border'])#make the rectangle
         self.image = self.image_layer.texture
         super().draw(target)
 
@@ -474,7 +498,7 @@ class Collision_shadow_light(Shadow_light):#collsion block but only lights and i
         self.image_layer.release()
         self.empty.release()
         self.lights.release()
-        self.platforms = []    
+        self.platforms = []
 
 class Dark_forest_1(Shadow_light):#a platform which dissapears when there is no light
     def __init__(self, pos, game_objects):
@@ -488,7 +512,7 @@ class Dark_forest_1(Shadow_light):#a platform which dissapears when there is no 
         self.lights = game_objects.game.display.make_layer(self.image.size)
 
     def update(self):
-        self.check_light() 
+        self.check_light()
 
 #timer based
 class Collision_timer(Collision_texture):#collision block that dissapears if aila stands on it
@@ -588,7 +612,6 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
         super().__init__(pos, game_objects)
         self.flags = {'invincibility': False}
         self.health = 3
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#
 
@@ -601,24 +624,36 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
     def take_dmg(self, projectile):
         if self.flags['invincibility']: return
         self.health -= projectile.dmg
-        self.flags['invincibility'] = True 
-        
-        projectile.clash_particles(self.hitbox.center)
-        self.game_objects.camera_manager.camera_shake(3,10)
+        self.flags['invincibility'] = True
+
+        self.game_objects.camera_manager.camera_shake(amplitude = 3, duration = 10)
 
         if self.health > 0:#check if dead¨
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while        
-            self.animation.handle_input('Hurt')#turn white
-        else:#if dead        
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+            #turn white
+        else:#if dead
             self.currentstate.enter_state('Death')#overrite any state and go to deat
 
 class Breakable_block_1(Collision_breakable):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/', game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
+
+class Breakable_block_charge_1(Collision_breakable):#only projectiles that has 'charge' can break these blocks
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/charge_blocks/type1/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.health = 3
+
+    def take_dmg(self, projectile):
+        if not projectile.flags['charge_blocks']: return
+        super().take_dmg(projectile)
 
 #dynamics (moving) ones
 class Collision_dynamic(Collision_texture):
@@ -696,6 +731,21 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def deactivate(self):#called when first timer runs out
         self.kill()
 
+class Dark_forest_2(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
+    def __init__(self, pos, game_objects, **prop):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/moving_platform/dark_forest_2/', game_objects)
+        self.image = self.sprites['off'][0]
+        self.rect[2], self.rect[3] = self.image.width, self.image.height
+        self.hitbox = self.rect.copy()
+        self.ID_key = prop.get('ID', None)
+
+        self.animation = animation.Animation(self)
+        self.currentstate = states_moving_platform.Off(self)#
+
+    def update_vel(self):
+        pass
+
 class Smacker(Collision_dynamic):#trap
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
@@ -723,5 +773,3 @@ class Smacker(Collision_dynamic):#trap
 
     def collide_y(self,entity):#entity moving
         self.currentstate.collide_y(entity)
-
-

@@ -73,14 +73,14 @@ class Game_Objects():
         self.players = groups.Group()#blits on float positions
         self.players.add(self.player)
 
-    def load_map(self, previous_state, map_name, spawn = '1', fade = True):#fade out before loading the map
+    def load_map(self, previous_state, map_name, spawn = '1', fade = True):#called from path_col
         if fade:#for cutscenes
             new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn, fade)#it will call load_map2 after loading
             new_game_state.enter_state()
         else:
             self.load_map2(map_name, spawn, fade)
 
-    def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout
+    def load_map2(self, map_name, spawn = '1', fade = True):#called from fadeout or load_map above
         self.clean_groups()
         t1_start = perf_counter()  
         self.map.load_map(map_name, spawn)#memory leak somwehre here
@@ -163,7 +163,7 @@ class Game_Objects():
         self.lights.update()
         self.shader_render.update()#housld be last
 
-    def draw(self):#need to send in screen becasue, sometimes, we want it rednered on a different layer for shaders stuff
+    def draw(self):#called from render states
         self.lights.clear_normal_map()
         self.all_bgs.draw(self.game.screen)
         self.interactables.draw(self.game.screen)#should be before bg_interact
@@ -228,7 +228,6 @@ class Game_Objects():
                 if type(reflect).__name__ == 'Reflection':
                     pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
                     pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
-                    
 
             tex = self.game.display.surface_to_texture(image)
             self.game.display.render(tex, self.game.screen)#shader render

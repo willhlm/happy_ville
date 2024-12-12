@@ -42,35 +42,38 @@ class Sound():#class for organising sound and music playback
         channel.play(sfx, loops = loop, fade_ms = fade)
         return channel
 
+    def put_in_queue(self,  new_sound, index):#it plays the new sound once without fade after the current one (current as in the one at index)
+        self.channels[index].queue(new_sound)
+
     def fade_sound(self, channel, time = 700):
         channel.fadeout(time) 
 
-    def fade_all_sounds(self, time = 700):#when changing biome
+    def fade_all_sounds(self, time = 700):#when changing biomes
         for i in range(self.reserved_channels):
             channel = self.channels[i]
             self.fade_sound(channel, time)
 
+    def set_volume(self, channel, vol):
+        channel.set_volume(vol * self.volume['SFX'] * 0.1)         
+
     def change_volume(self, category, amount):
-        # Update the volume category and constrain it between 0 and 10
         self.volume[category] += amount
         self.volume[category] = min(self.volume[category], 10)
         self.volume[category] = max(self.volume[category], 0)
 
-        # Apply changes based on the category
         if category == 'music':
-            self.channels[0].set_volume(self.volume['music'] * 0.1)  # Adjust music volume
+            self.channels[0].set_volume(self.volume['music'] * 0.1) 
         elif category == 'SFX':
-            pass  # You can add functionality here if you want to adjust specific SFX channels
+            pass 
         elif category == 'overall':
-            # If 'overall' category is modified, apply the same change to both music and SFX
-            self.intensity_music(amount)  # Adjust music volume
-            self.intensity_SFX(amount)    # Adjust SFX volume
+            self.intensity_music(amount)
+            self.intensity_SFX(amount)
 
     def intensity_music(self, amount):
         self.volume['music'] += amount
         self.volume['music'] = min(self.volume['music'], 10)
         self.volume['music'] = max(self.volume['music'], 0)        
-        self.channels[0].set_volume(self.volume['music'] * 0.1)  # Apply to the music channel
+        self.channels[0].set_volume(self.volume['music'] * 0.1) 
 
     def intensity_SFX(self, amount):
         self.volume['SFX'] += amount

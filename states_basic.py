@@ -1,9 +1,13 @@
 import sys, random
-from states_entity import Entity_States
 
-class Basic_states(Entity_States):
+class Basic_states():
     def __init__(self,entity):
-        super().__init__(entity)
+        self.entity = entity
+        self.entity.state = type(self).__name__.lower()#the name of the class
+        self.entity.animation.reset_timer()
+
+    def update(self):
+        pass       
 
     def enter_state(self,newstate,**kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
@@ -41,7 +45,7 @@ class Idle(Basic_states):
 class Death(Basic_states):#idle once
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.invincibile = True
+        self.entity.flags['invincibility'] = True
 
     def increase_phase(self):
         self.entity.kill()

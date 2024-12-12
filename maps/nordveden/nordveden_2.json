@@ -1070,7 +1070,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"nordveden_x"
+                                 "value":"nordveden_14"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",

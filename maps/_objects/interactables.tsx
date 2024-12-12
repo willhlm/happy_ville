@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="17" columns="0">
+<tileset version="1.10" tiledversion="1.10.1" name="interactables" tilewidth="224" tileheight="288" tilecount="15" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -12,7 +12,7 @@
   <image width="64" height="80" source="../../Sprites/animations/runestones/1/idle/runestone1.png"/>
  </tile>
  <tile id="4">
-  <image width="160" height="137" source="../../Sprites/animations/Chest/idle/chest2.png"/>
+  <image width="60" height="53" source="../../Sprites/animations/chest_2/idle/idle1.png"/>
  </tile>
  <tile id="5">
   <properties>
@@ -76,11 +76,5 @@
  </tile>
  <tile id="16">
   <image width="48" height="80" source="../../Sprites/animations/statues/air_dash_statue/idle/idle.png"/>
- </tile>
- <tile id="17">
-  <image width="64" height="48" source="../../Sprites/animations/amber_tree/idle/idle.png"/>
- </tile>
- <tile id="18">
-  <image width="64" height="80" source="../../Sprites/animations/amber_rock/idle/Sprite-0002.png"/>
  </tile>
 </tileset>

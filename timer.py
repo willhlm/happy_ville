@@ -25,6 +25,7 @@ class Timer():
     def __init__(self, timer_manager, duration, callback, ID):
         self.timer_manager = timer_manager
         self.duration = duration
+        self.original_duration = duration
         self.callback = callback
         self.ID = ID
 
@@ -33,4 +34,7 @@ class Timer():
         if self.duration < 0:
             self.callback()
             self.timer_manager.remove_timer(self)
+
+    def reset(self):
+        self.duration = self.original_duration
 
