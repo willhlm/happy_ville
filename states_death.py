@@ -19,6 +19,7 @@ class Idle(Basic_states):
 
     def die(self):#"normal" gameplay states calls this
         self.entity.currentstate.enter_state('Death_pre')#overrite any state and go to deat
+        self.entity.die()
 
     def handle_input(self, input):
         if input == 'cultist_encounter':
@@ -30,7 +31,7 @@ class Cultist_encounter(Basic_states):#if dying in cultist encounter
 
     def die(self):
         self.entity.game_objects.player.reset_movement()
-        self.entity.game_objects.load_map(self.entity.game_objects.game.state_stack[-1], 'cultist_hideout_1','2')        
+        self.entity.game_objects.load_map(self.entity.game_objects.game.state_stack[-1], 'dark_forest_1','1')        
         self.enter_state('Idle')#go back to normal
 
     def handle_input(self, input):

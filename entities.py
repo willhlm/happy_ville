@@ -1008,11 +1008,11 @@ class Player(Character):
             new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
-            self.die()
+            self.game_objects.quests_events.emit('player_died')#emit a signal that player died
+            self.death_state.die()#depending on gameplay state, different death stuff should happen            
         return True#return truw to show that damage was taken
 
-    def die(self):#also called from vertical acid
-        self.death_state.die()#depending on gameplay state, different death stuff should happen
+    def die(self):#called from idle death_state, also called from vertical acid                
         self.animation.update()#make sure you get the new animation
         self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
 
@@ -1021,6 +1021,11 @@ class Player(Character):
 
         new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
         new_game_state.enter_state()
+
+    def dead(self):#called when death animation is finished
+        self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
+        new_game_state = states.Death(self.game_objects.game)
+        new_game_state.enter_state()        
 
     def heal(self, health = 1):
         self.health += health
@@ -1034,11 +1039,6 @@ class Player(Character):
         self.spirit += spirit
         self.game_objects.UI['gameplay'].update_spirits()#update UI
 
-    def dead(self):#called when death animation is finished
-        self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
-        new_game_state = states.Death(self.game_objects.game)
-        new_game_state.enter_state()
-
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
@@ -1047,6 +1047,7 @@ class Player(Character):
         super().update()
         self.omamoris.update()
         self.update_timers()
+        #print(self.currentstate)
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -1741,6 +1742,10 @@ class Larv_jr(Larv):
         self.patrol_dist = 100
         self.health = 3
 
+    def dead(self):#called when death animation is finished
+        super().dead()
+        self.game_objects.quests_events.emit('larv_jr_killed')#emit this signal
+
 class Larv_poison(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -1845,8 +1850,8 @@ class Egg(Enemy):#change design
             self.game_objects.enemies.add(obj)
 
 class Cultist_rogue(Enemy):
-    def __init__(self, pos, game_objects, gameplay_state = None):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_rogue/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
@@ -1854,32 +1859,30 @@ class Cultist_rogue(Enemy):
         self.health = 3
         self.attack_distance = [80,10]
         self.currentstate = states_rogue_cultist.Idle(self)
-        self.gameplay_state = gameplay_state
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
 
     def dead(self):#called when death animation is finished
         super().dead()
-        if self.gameplay_state: self.gameplay_state.incrase_kill()
+        self.game_objects.quests_events.emit('cultist_killed')
 
 class Cultist_warrior(Enemy):
-    def __init__(self,pos,game_objects,gameplay_state=None):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_warrior/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 3
         self.attack_distance = [80,10]
-        self.gameplay_state = gameplay_state
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
 
     def dead(self):#called when death animation is finished
         super().dead()
-        if self.gameplay_state: self.gameplay_state.incrase_kill()
+        self.game_objects.quests_events.emit('cultist_killed')
 
 class Shadow_enemy(Enemy):#enemies that can onlly take dmg in light -> dark forst
     def __init__(self,pos,game_objects):
@@ -2143,7 +2146,7 @@ class Reindeer(Boss):
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
 class Butterfly(Flying_enemy):
-    def __init__(self, pos, game_objects, quest = None):
+    def __init__(self, pos, game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/butterfly/',game_objects)
         self.image = self.sprites['idle'][0]
@@ -2152,7 +2155,6 @@ class Butterfly(Flying_enemy):
         self.AI = AI_butterfly.Idle(self)
         self.currentstate = states_butterfly.Idle(self)
         self.health =20
-        self.quest = quest
 
     def knock_back(self,dir):
         pass
@@ -2160,9 +2162,9 @@ class Butterfly(Flying_enemy):
     def group_distance(self):
         pass
 
-    def dead(self):#called when death animation is finished
-        self.quest.incrase_kill()
+    def dead(self):#called when death animation is finished        
         super().dead()
+        self.game_objects.quests_events.emit('butterfly_killed')
 
     def right_collision(self,block, type = 'Wall'):
         pass
@@ -2556,8 +2558,6 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.light = game_objects.lights.add_light(self)
         self.velocity = [random.uniform(-10,10),random.uniform(-10,-4)]
 
-        self.quest = kwarg.get('quest', None)
-
     def pool(game_objects):
         Bouncy_balls.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
@@ -2568,11 +2568,11 @@ class Bouncy_balls(Projectiles):#for ball challange room
         super().kill()
         self.game_objects.lights.remove_light(self.light)
 
-    def take_dmg(self):#when hit by aila sword without purple stone
+    def take_dmg(self, dmg):#when hit by aila sword without purple stone
         self.velocity = [0,0]
         self.dmg = 0
         self.currentstate.handle_input('Death')
-        if self.quest: self.quest.increase_kill()
+        self.game_objects.quests_events.emit('ball_killed')        
 
     #platform collisions
     def right_collision(self, block, type = 'Wall'):
@@ -2581,18 +2581,18 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.currentstate.handle_input(type)
         self.velocity[0] = -self.velocity[0]
 
-    def left_collision(self,hitbox, type = 'Wall'):
+    def left_collision(self, block, type = 'Wall'):
         self.hitbox.left = block.hitbox.right
         self.collision_types['left'] = True
         self.currentstate.handle_input(type)
         self.velocity[0] = -self.velocity[0]
 
-    def top_collision(self,hitbox):
+    def top_collision(self, block):
         self.hitbox.top = block.hitbox.bottom
         self.collision_types['top'] = True
         self.velocity[1] = -self.velocity[1]
 
-    def down_collision(self,hitbox):
+    def down_collision(self, block):
         self.hitbox.bottom = block.hitbox.top
         self.collision_types['bottom'] = True
         self.velocity[1] *= -1
@@ -3350,7 +3350,6 @@ class Heal_item(Enemy_drop):
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.quest = kwarg.get('quest', None)#quests can be initated when they are picked up
         if not kwarg.get('entity', None):#if it is spawn in the wild
             velocity = kwarg.get('velocity', [2, -4])
             velocity_range = kwarg.get('velocity_range', [1, 0])#olus minus the velocity
@@ -3372,8 +3371,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         self.game_objects.cosmetics.add(twinkle)
 
     def interact(self, player):#when player press T
-        player.currentstate.enter_state('Pray_pre')
-        if self.quest: self.game_objects.quests_events.initiate_quest(self.quest, item = self)
+        player.currentstate.enter_state('Pray_pre')        
         self.pickup(player)#object specific
         new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
@@ -3423,7 +3421,7 @@ class Omamori(Interactable_item):
         for spr in self.ui_group.sprites():
             spr.update()#the position
             spr.update_uniforms()#the unforms for the draw
-            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)
+            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)     
 
     def pickup(self, player):
         super().pickup(player)
@@ -3476,10 +3474,15 @@ class Loot_magnet(Omamori):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.description = 'Attracts loot ' + '[' + str(self.level) + ']'
+        self.quest = kwarg.get('quest', None)
 
     def equipped(self):#an update that should be called when equppied
         for loot in self.entity.game_objects.loot.sprites():
             loot.attract(self.entity.rect.center)
+
+    def interact(self, player):
+        super().interact(player)   
+        self.game_objects.quests_events.initiate_quest(self.quest.capitalize(), item = 'Loot_magnet')
 
     @classmethod
     def pool(cls, game_objects):
@@ -4002,14 +4005,14 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
 
-        self.quest = quest
         self.item = item
-
+        self.quest = quest
+        
         self.interacted = self.game_objects.world_state.quests.get(quest, False)
         self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say
         self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
 
-    def buisness(self):#enters after conversation
+    def buisness(self):#enters after conversation        
         item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, quest = self.quest)#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)
 
@@ -4253,18 +4256,26 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
         self.group_distance()
 
     def player_collision(self, player):
-        if not self.new_state:
+        #quests: occures continiously until complete
+        if self.event == 'start_larv_party':
+            if self.game_objects.world_state.quests['larv_part']: return#completed, return
+            self.game_objects.quests_events.initiate_quest('larv_party')
+        elif self.event == 'stop_larv_party':    
+            self.game_objects.quests_events.active_quests['larv_party'].pause_quest()
+        
+        #events: occures once
+        elif not self.new_state:
             if self.game_objects.world_state.events.get(self.event, False): return#if event has already been done
-            self.game_objects.quests_events.initiate_event(self.event)#quest or event?
-
-        else:#if it is an event that requires new sttae, e.g. cutscene
-            if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has not been shown before. Shold we kill the object instead?
+            self.game_objects.quests_events.initiate_event(self.event)#event
+            self.kill()#is this a problem in re-spawn?            
+        elif self.new_state:#if it is an event that requires new sttae, e.g. cutscene
+            if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has been shown before, return. Shold we kill the object instead?
             if self.event == 'Butterfly_encounter':
-                if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggrp is not chosen
+                if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
 
             new_game_state = getattr(states, self.event)(self.game_objects.game)
             new_game_state.enter_state()
-        self.kill()#is this a pronlen in re spawn?
+            self.kill()#is this a problem in re-spawn?
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):
