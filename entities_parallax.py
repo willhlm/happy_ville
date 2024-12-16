@@ -336,7 +336,9 @@ class Thor_mtn(Layered_objects):
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.true_pos = self.rect.topleft
+        self.blur_radius = 1/parallax[0]
 
+#general
 class Light_source(Layered_objects):#should we decrease alpha for large parallax?
     def __init__(self, pos, game_objects, parallax, live_blur = False):
         super().__init__(pos, game_objects, parallax, live_blur)

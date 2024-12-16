@@ -33,8 +33,7 @@ class Game_State():
 class Title_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.game_objects = game.game_objects
-        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
+        self.game_objects = game.game_objects        
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
         self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
         self.play_music()
@@ -47,7 +46,7 @@ class Title_Menu(Game_State):
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
-        self.arrow.rect.topleft = self.buttons[self.current_button].rect.topleft
+        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
 
     def initiate_buttons(self):
         buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
@@ -124,9 +123,9 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            self.game.game_objects.load_map(self,'village_ola2_1','1')
-            #self.game.game_objects.load_map(self,'golden_fields_5','2')
-            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'village_ola2_1','1')
+            #self.game.game_objects.load_map(self,'golden_fields_1','2')
+            self.game.game_objects.load_map(self,'light_forest_1','1')
             #self.game.game_objects.load_map(self,'nordveden_13','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'light_forest_1','1')
@@ -151,7 +150,6 @@ class Load_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
         self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
         self.image = self.sprites['idle'][0]
@@ -162,7 +160,7 @@ class Load_Menu(Game_State):
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
-        self.arrow.rect.topleft = self.button_rects[self.buttons[self.current_button]].topleft
+        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
     def define_BG(self):
         size = (90,100)
@@ -205,23 +203,24 @@ class Load_Menu(Game_State):
             self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
-        #self.arrow.draw(self.game.screen)
+        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
+
 
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:
-            if event[-1] == 'up':
-                self.current_button -= 1
-                if self.current_button < 0:
-                    self.current_button = len(self.buttons) - 1
-                self.update_arrow()
-            elif event[-1] == 'down':
-                self.current_button += 1
-                if self.current_button >= len(self.buttons):
-                    self.current_button = 0
-                self.update_arrow()
-            elif event[-1] == 'start':
+        if event[2]['l_stick'][1] < 0:#up
+            self.current_button -= 1
+            if self.current_button < 0:
+                self.current_button = len(self.buttons) - 1
+            self.update_arrow()
+        elif event[2]['l_stick'][1] > 0:#down
+            self.current_button += 1
+            if self.current_button >= len(self.buttons):
+                self.current_button = 0
+            self.update_arrow()
+        elif event[0]:
+            if event[-1] == 'start':
                 self.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.arrow.pressed()
@@ -236,7 +235,6 @@ class Load_Menu(Game_State):
 class Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
 
         #create buttons
@@ -245,7 +243,7 @@ class Option_Menu(Game_State):
             self.buttons += ['Render FPS', 'Render Hitboxes']
         self.current_button = 0
         self.initiate_buttons()
-        self.arrow.rect.topleft = self.button_rects[self.buttons[self.current_button]].topleft
+        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
     def initiate_buttons(self):
         y_pos = 90
@@ -281,18 +279,18 @@ class Option_Menu(Game_State):
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:
-            if event[-1] == 'up':
-                self.current_button -= 1
-                if self.current_button < 0:
-                    self.current_button = len(self.buttons) - 1
-                self.update_arrow()
-            elif event[-1] == 'down':
-                self.current_button += 1
-                if self.current_button >= len(self.buttons):
-                    self.current_button = 0
-                self.update_arrow()
-            elif event[-1] == 'start':
+        if event[2]['l_stick'][1] < 0:#up
+            self.current_button -= 1
+            if self.current_button < 0:
+                self.current_button = len(self.buttons) - 1
+            self.update_arrow()
+        elif event[2]['l_stick'][1] > 0:#down
+            self.current_button += 1
+            if self.current_button >= len(self.buttons):
+                self.current_button = 0
+            self.update_arrow()
+        elif event[0]:
+            if event[-1] == 'start':
                 self.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.arrow.pressed()
@@ -313,7 +311,6 @@ class Option_Menu(Game_State):
 class Option_Menu_sounds(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
         self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
         self.game_settings = read_files.read_json('game_settings.json')
 
@@ -321,6 +318,7 @@ class Option_Menu_sounds(Game_State):
         self.buttons = ['overall', 'SFX','music']
         self.current_button = 0
         self.initiate_buttons()
+        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
     def initiate_buttons(self):
         y_pos = 90
@@ -370,14 +368,18 @@ class Option_Menu_sounds(Game_State):
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:
-            if event[-1] == 'up':
-                self.current_button -= 1
-                self.current_button =  max(self.current_button, 0)
-            elif event[-1] == 'down':
-                self.current_button += 1
-                self.current_button = min(self.current_button, len(self.buttons) - 1)
-            elif event[-1] == 'start':
+        if event[2]['l_stick'][1] < 0:#up
+            self.current_button -= 1
+            if self.current_button < 0:
+                self.current_button = len(self.buttons) - 1
+            self.update_arrow()
+        elif event[2]['l_stick'][1] > 0:#down
+            self.current_button += 1
+            if self.current_button >= len(self.buttons):
+                self.current_button = 0
+            self.update_arrow() 
+        elif event[0]:
+            if event[-1] == 'start':
                 self.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.update_options(1)
@@ -394,8 +396,7 @@ class Option_Menu_sounds(Game_State):
 
 class Option_Menu_display(Game_State):
     def __init__(self,game):
-        super().__init__(game)
-        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
+        super().__init__(game)        
         self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
         self.game_settings = read_files.read_json('game_settings.json')
 
@@ -403,6 +404,7 @@ class Option_Menu_display(Game_State):
         self.buttons = ['vsync', 'fullscreen','resolution']
         self.current_button = 0
         self.initiate_buttons()
+        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
     def initiate_buttons(self):
         y_pos = 90
@@ -447,14 +449,18 @@ class Option_Menu_display(Game_State):
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:
-            if event[-1] == 'up':
-                self.current_button -= 1
-                self.current_button =  max(self.current_button, 0)
-            elif event[-1] == 'down':
-                self.current_button += 1
-                self.current_button = min(self.current_button, len(self.buttons) - 1)
-            elif event[-1] == 'start':
+        if event[2]['l_stick'][1] < 0:#up
+            self.current_button -= 1
+            if self.current_button < 0:
+                self.current_button = len(self.buttons) - 1
+            self.update_arrow()
+        elif event[2]['l_stick'][1] > 0:#down
+            self.current_button += 1
+            if self.current_button >= len(self.buttons):
+                self.current_button = 0
+            self.update_arrow() 
+        elif event[0]:
+            if event[-1] == 'start':
                 self.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.update_options(1)
@@ -549,8 +555,7 @@ class Gameplay(Game_State):
 
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self, game):
-        super().__init__(game)
-        self.arrow = entities_UI.Menu_Arrow(game.game_objects)
+        super().__init__(game)        
         self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
 
         #create buttons
@@ -558,7 +563,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
-        self.arrow.update_pos(self.button_rects[self.buttons[self.current_button]].topleft)
+        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
         #copy the screen
         self.screen_copy = self.game.display.make_layer(self.game.window_size)
@@ -621,21 +626,18 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:
-            if event[-1] == 'up':
-                self.current_button -= 1
-                if self.current_button < 0:
-                    self.current_button = len(self.buttons) - 1
-                self.update_arrow()
-            elif event[-1] == 'down':
-                self.current_button += 1
-                if self.current_button >= len(self.buttons):
-                    self.current_button = 0
-                self.update_arrow()
-            elif event[-1] == 'a':
-                self.arrow.pressed()
-                self.change_state()
-            elif event[-1] == 'return':
+        if event[2]['l_stick'][1] < 0:#up
+            self.current_button -= 1
+            if self.current_button < 0:
+                self.current_button = len(self.buttons) - 1
+            self.update_arrow()
+        elif event[2]['l_stick'][1] > 0:#down
+            self.current_button += 1
+            if self.current_button >= len(self.buttons):
+                self.current_button = 0
+            self.update_arrow()
+        elif event[0]:
+            if event[-1] in ['a', 'return']:
                 self.arrow.pressed()
                 self.change_state()
             elif event[-1] == 'start':
@@ -1074,6 +1076,9 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
         super().render()
         self.cinematic()
 
+    def handle_movement(self):#every frame
+        pass
+
     def cinematic(self):#black box stuff
         self.pos[0] += self.game.dt#the upper balck box
         self.pos[1] -= self.game.dt#the lower balck box
@@ -1310,23 +1315,21 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
         self.game.game_objects.player.death_state.handle_input('cultist_encounter')
-        self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
-        quest = self.game.game_objects.quests_events.active_quests['cultist_encounter']
+        self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)        
 
         #should entity stuff be in quest insted?
         spawn_pos1 = (self.game.game_objects.camera_manager.camera.scroll[0] - 300, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
         spawn_pos2 = (self.game.game_objects.camera_manager.camera.scroll[0] + 50, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        self.entity1 = entities.Cultist_warrior(spawn_pos1, self.game.game_objects, quest)#added to group in cutscene
+        self.entity1 = entities.Cultist_warrior(spawn_pos1, self.game.game_objects)#added to group in cutscene
         self.entity1.dir[0] *= -1
         self.entity1.AI.deactivate()
         self.game.game_objects.enemies.add(self.entity1)
-        self.entity2 = entities.Cultist_rogue(spawn_pos2, self.game.game_objects, quest)#added to group in cutscene
+        self.entity2 = entities.Cultist_rogue(spawn_pos2, self.game.game_objects)#added to group in cutscene
         ##
 
         self.stage = 0
         self.game.game_objects.camera_manager.set_camera('Cultist_encounter')
-        self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
-        self.game.game_objects.player.currentstate.walk()#to force tha walk animation
+        self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
 
     def update(self):
         super().update()
@@ -1339,7 +1342,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
             elif self.timer > 50:
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
                 #self.game.game_objects.player.velocity[0]=0
-                self.game.game_objects.player.acceleration[0]=0
+                self.game.game_objects.player.acceleration[0] = 0
 
                 self.stage = 1
 

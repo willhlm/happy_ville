@@ -17,10 +17,10 @@ class Player_states(Entity_States):
             return True
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
-        pass
+        input.processed()
 
     def handle_release_input(self,input):#all states should inehrent this function, if it should be able to jump
-        pass
+        input.processed()
 
     def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
         value = event['l_stick']#the avlue of the press
@@ -196,7 +196,7 @@ class Run_pre(Player_states):
 
     def handle_movement(self,event):
         super().handle_movement(event)
-        if self.entity.acceleration[0]==0:
+        if self.entity.acceleration[0] == 0:
             self.enter_state('Run_post')
 
     def swing_sword(self):
@@ -1013,9 +1013,11 @@ class Sword_jump1_main(Sword):
 
     def increase_phase(self):
         if self.entity.flags['ground']:
-            self.enter_state('Jump_main', frame = self.entity.animation.frame)
-        else:
-            self.enter_state('Fall_pre')
+            if self.entity.acceleration[0] == 0:
+                self.enter_state('Idle_main')
+            else:
+                self.enter_state('Run_main')
+        self.enter_state('Fall_pre')
 
 class Sword_jump2_main(Sword_jump1_main):
     def __init__(self,entity, **kwarg):

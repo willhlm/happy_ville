@@ -221,11 +221,11 @@ class Movement_hud():#gameplay UI
 
 #utilities
 class Menu_Arrow():
-    def __init__(self, game_objects):
+    def __init__(self, pos, game_objects):
         self.game_objects = game_objects
         self.image = Menu_Arrow.image                
         self.sounds = Menu_Arrow.sounds
-        self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         
     def pool(game_objects):
         Menu_Arrow.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')        

@@ -1974,6 +1974,42 @@
                          "width":16,
                          "x":3232,
                          "y":880
+                        }, 
+                        {
+                         "gid":20,
+                         "height":144,
+                         "id":1057,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"stop_larv_party"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4192,
+                         "y":928
+                        }, 
+                        {
+                         "gid":20,
+                         "height":144,
+                         "id":1058,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"start_larv_part"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4336,
+                         "y":928
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2036,7 +2072,7 @@
          "y":0
         }],
  "nextlayerid":110,
- "nextobjectid":1057,
+ "nextobjectid":1059,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

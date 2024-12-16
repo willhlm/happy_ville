@@ -46,7 +46,7 @@ class Camera():#default camera
         #self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
         self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + 30]
         self.original_center = self.center.copy()
-        self.target = [0,0]#is set by camera stop, the target position of center
+        self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
 
     def update(self):
         self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do
@@ -118,8 +118,12 @@ class Stop_handeler():#counts all active stops. It then tells the centraliser to
 
     def remove_stop(self,stop):#called from camera stop states
         self.stops[stop] -= 1
-        if sum(self.stops.values()) == 0:#if there are no active camera stops
-            self.camera_manager.centraliser.handle_input('start')
+        if self.stops['bottom'] == 0 and self.stops['top'] == 0 and self.stops['center'] == 0:
+            self.camera_manager.camera.target = self.camera_manager.camera.original_center.copy()#sets the target of centrliser
+            self.camera_manager.centraliser.handle_input('start', direction = [0, 1])#veritcal
+        elif self.stops['left'] == 0 and self.stops['right'] == 0 and self.stops['center'] == 0:
+            self.camera_manager.camera.target = self.camera_manager.camera.original_center.copy()#sets the target of centrliser
+            self.camera_manager.centraliser.handle_input('start', direction = [1, 0])#horitocnal
 
 #cutscene cameras
 class Cutscenes(Camera):
