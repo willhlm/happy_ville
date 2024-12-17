@@ -1514,7 +1514,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"nordveden_13"
+                                 "value":"nordveden_12"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1545,6 +1545,18 @@
                          "width":16,
                          "x":2320,
                          "y":304
+                        }, 
+                        {
+                         "gid":8,
+                         "height":47.625,
+                         "id":1780,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":240,
+                         "x":1682,
+                         "y":278
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1789,7 +1801,7 @@
          "y":0
         }],
  "nextlayerid":50,
- "nextobjectid":1780,
+ "nextobjectid":1782,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",

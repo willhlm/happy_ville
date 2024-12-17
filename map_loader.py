@@ -121,20 +121,20 @@ class Level():
                 continue
 
             id = obj['gid'] - self.map_data['statics_firstgid']
-            if id == 0:  # Player                
-                if self.spawned: continue#skip if player has already spawned                   
+            if id == 0:  # Player
+                if self.spawned: continue#skip if player has already spawned
                 for property in properties:
-                    if property['name'] == 'spawn':#determine spawn type and set position accordingly                        
+                    if property['name'] == 'spawn':#determine spawn type and set position accordingly
                         if isinstance(self.spawn, str):# Normal load case
                             if property['value'] != self.spawn:
                                 continue
-                            
-                            self.game_objects.player.set_pos(object_position)                          
+
+                            self.game_objects.player.set_pos(object_position)
                         else:#coordinate-based spawn
                             self.game_objects.player.set_pos(self.spawn)
-                        
-                        self.game_objects.player.reset_movement()                                                                                                                                
-                        self.spawned = True#mark as spawned to avoid re-entry                        
+
+                        self.game_objects.player.reset_movement()
+                        self.spawned = True#mark as spawned to avoid re-entry
                         for prop in properties:#handle spawn movement based on direction property
                             if prop['name'] == 'right':
                                 self.game_objects.player.dir[0] = 1
@@ -145,7 +145,7 @@ class Level():
                             if prop['name'] == 'up':
                                 self.game_objects.player.velocity[1] = C.jump_vel_player
                             elif prop['name'] == 'down':
-                                pass                                                                                
+                                pass
 
             elif id == 1:#npcs
                 for property in properties:
@@ -439,7 +439,7 @@ class Level():
                     elif property['name'] == 'down':
                         down = int(property['value'])
                     elif property['name'] == 'left':
-                        left = -int(property['value'])                        
+                        left = -int(property['value'])
                     elif property['name'] == 'right':
                         right = int(property['value'])
 
@@ -480,7 +480,7 @@ class Level():
 
             elif id == 4:#chests
                 state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
-                new_interacable = entities.Chest(object_position,self.game_objects, state, str(loot_container))
+                new_interacable = entities.Chest_2(object_position,self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(new_interacable)
                 loot_container += 1
 
@@ -527,7 +527,7 @@ class Level():
                     if property['name'] == 'ID':
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'on':
-                        kwarg['on'] = property['value']                        
+                        kwarg['on'] = property['value']
                 lever = entities.Lever(object_position,self.game_objects, **kwarg)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
@@ -582,18 +582,18 @@ class Level():
             elif id == 17:
                 state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
                 amber_tree = entities.Amber_tree(object_position, self.game_objects, state, str(loot_container))
-                self.game_objects.interactables.add(amber_tree)     
+                self.game_objects.interactables.add(amber_tree)
                 loot_container += 1
 
             elif id == 18:
                 state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
                 amber_rock = entities.Amber_rock(object_position, self.game_objects, state, str(loot_container))
-                self.game_objects.interactables.add(amber_rock)     
+                self.game_objects.interactables.add(amber_rock)
                 loot_container += 1
 
             elif id == 19:#collision block that can only brak with charge flag on projectile
                 platform = platforms.Breakable_block_charge_1(object_position, self.game_objects)
-                self.game_objects.platforms.add(platform)     
+                self.game_objects.platforms.add(platform)
 
     def load_layers(self, data, parallax, offset):
         'Tiled design notes: all tile layers and objects need to be in a group (including statics and other object layers).'
@@ -666,7 +666,7 @@ class Level():
 
             if 'fade' in tile_layer:#add fade blocks
                 for fade in blit_fade_surfaces.keys():
-                    if 'fade' in fade:#is needed                        
+                    if 'fade' in fade:#is needed
                         bg = entities.BG_Fade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])
                         if self.layer.startswith('bg'): self.game_objects.all_bgs.add(bg)#bg
                         else: self.game_objects.all_fgs.add(bg)
@@ -701,7 +701,7 @@ class Level():
 
             for platform in self.references['platforms']:
                 if lever.ID_key == platform.ID_key:
-                    lever.add_reference(platform)     
+                    lever.add_reference(platform)
 
         for i, bg_fade in enumerate(self.references['bg_fade']):
             for j in range(i + 1, len(self.references['bg_fade'])):
@@ -729,9 +729,9 @@ class Biome():
             sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
             self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700)
         except FileNotFoundError:
-            print("No BG music found")        
+            print("No BG music found")
 
-    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff        
+    def clear_biome(self):#called when a new biome is about to load. need to clear the old stuff
         self.level.game_objects.sound.fade_all_sounds(time = 2000)
         self.release_textures()
 
@@ -772,7 +772,7 @@ class Village_ola2(Biome):
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
                         kwarg['erect'] = property['value']
-                    elif propert['name'] == 'key':
+                    elif property['name'] == 'key':
                         kwarg['key'] = property['value']
                 door = platforms.Door_right_orient(object_position, self.level.game_objects, **kwarg)
                 door_i = entities.Door_inter(object_position, self.level.game_objects, door)
@@ -786,7 +786,7 @@ class Light_forest(Biome):
 
     def play_music(self):
         #super().play_music()
-        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/nord_veden')
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/nordveden/')
         self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
 
     def room(self, room):#called wgen a new room is loaded
@@ -1157,7 +1157,7 @@ class Dark_forest(Biome):
 
             elif id == 11:#smalltree 1
                 new_block = platforms.Dark_forest_1(object_position, self.level.game_objects)
-                self.level.game_objects.cosmetics.add(new_block)                    
+                self.level.game_objects.cosmetics.add(new_block)
 
             elif id == 12:#shource of shadow_light
                 kwarg = {}
@@ -1166,7 +1166,7 @@ class Dark_forest(Biome):
                         kwarg['on'] = property['value']
 
                 new_lantern = entities.Shadow_light_lantern(object_position, self.level.game_objects, **kwarg)
-                self.level.game_objects.interactables.add(new_lantern)                         
+                self.level.game_objects.interactables.add(new_lantern)
 
             elif id == 13:#shource of shadow_light
                 kwarg = {}
@@ -1174,10 +1174,9 @@ class Dark_forest(Biome):
                     if property['name'] == 'ID':
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'erect':
-                        kwarg['erect'] = property['value']                            
+                        kwarg['erect'] = property['value']
 
                 new_platform = platforms.Dark_forest_2(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.dynamic_platforms.add(new_platform)
-                self.level.game_objects.platforms.add(new_platform)                
+                self.level.game_objects.platforms.add(new_platform)
                 self.level.references['platforms'].append(new_platform)
-                

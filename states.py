@@ -33,7 +33,7 @@ class Game_State():
 class Title_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.game_objects = game.game_objects        
+        self.game_objects = game.game_objects
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
         self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
         self.play_music()
@@ -123,12 +123,12 @@ class Title_Menu(Game_State):
             new_state.enter_state()
 
             #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            #self.game.game_objects.load_map(self,'golden_fields_1','2')
-            self.game.game_objects.load_map(self,'light_forest_1','1')
-            #self.game.game_objects.load_map(self,'nordveden_13','1')
+            #self.game.game_objects.load_map(self,'village_ola2_13','1')
+            #self.game.game_objects.load_map(self,'golden_fields_5','2')
+            #self.game.game_objects.load_map(self,'crystal_mines_1','1')
+            self.game.game_objects.load_map(self,'nordveden_20','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
-            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_24','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -144,7 +144,7 @@ class Title_Menu(Game_State):
 
         elif self.current_button == 3:
             pygame.quit()
-            sys.exit()      
+            sys.exit()
 
 class Load_Menu(Game_State):
     def __init__(self,game):
@@ -377,7 +377,7 @@ class Option_Menu_sounds(Game_State):
             self.current_button += 1
             if self.current_button >= len(self.buttons):
                 self.current_button = 0
-            self.update_arrow() 
+            self.update_arrow()
         elif event[0]:
             if event[-1] == 'start':
                 self.exit_state()
@@ -396,7 +396,7 @@ class Option_Menu_sounds(Game_State):
 
 class Option_Menu_display(Game_State):
     def __init__(self,game):
-        super().__init__(game)        
+        super().__init__(game)
         self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
         self.game_settings = read_files.read_json('game_settings.json')
 
@@ -458,7 +458,7 @@ class Option_Menu_display(Game_State):
             self.current_button += 1
             if self.current_button >= len(self.buttons):
                 self.current_button = 0
-            self.update_arrow() 
+            self.update_arrow()
         elif event[0]:
             if event[-1] == 'start':
                 self.exit_state()
@@ -555,7 +555,7 @@ class Gameplay(Game_State):
 
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self, game):
-        super().__init__(game)        
+        super().__init__(game)
         self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
 
         #create buttons
@@ -1315,7 +1315,7 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
         self.game.game_objects.player.death_state.handle_input('cultist_encounter')
-        self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)        
+        self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
 
         #should entity stuff be in quest insted?
         spawn_pos1 = (self.game.game_objects.camera_manager.camera.scroll[0] - 300, self.game.game_objects.camera_manager.camera.scroll[1] + 100)

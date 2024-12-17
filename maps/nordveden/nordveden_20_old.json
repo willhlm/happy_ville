@@ -1931,19 +1931,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":53122,
-                         "height":137,
-                         "id":506,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":160,
-                         "x":2128,
-                         "y":1312
-                        }, 
-                        {
-                         "gid":53122,
+                         "gid":53121,
                          "height":137,
                          "id":507,
                          "name":"",
@@ -1955,7 +1943,7 @@
                          "y":1760
                         }, 
                         {
-                         "gid":53122,
+                         "gid":53121,
                          "height":137,
                          "id":508,
                          "name":"",
@@ -1965,10 +1953,34 @@
                          "width":160,
                          "x":3104,
                          "y":1584
+                        }, 
+                        {
+                         "gid":53121,
+                         "height":53,
+                         "id":530,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":60,
+                         "x":2175,
+                         "y":1317
+                        }, 
+                        {
+                         "gid":53121,
+                         "height":53,
+                         "id":531,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":60,
+                         "x":3446,
+                         "y":1221
                         }],
                  "opacity":1,
                  "type":"objectgroup",
-                 "visible":false,
+                 "visible":true,
                  "x":0,
                  "y":0
                 }, 
@@ -3879,7 +3891,7 @@
          "y":0
         }],
  "nextlayerid":117,
- "nextobjectid":530,
+ "nextobjectid":532,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
@@ -3998,7 +4010,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":53118,
+         "firstgid":53117,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

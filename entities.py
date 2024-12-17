@@ -103,7 +103,7 @@ class BG_Fade(BG_Block):
 
     def add_child(self, child):
         self.children.append(child)
-        if self.interacted: child.interact()            
+        if self.interacted: child.interact()
 
     def draw(self, target):#called before draw in group
         self.shader_state.draw()
@@ -114,7 +114,7 @@ class BG_Fade(BG_Block):
         self.game_objects.sound.play_sfx(self.sounds[0])
         self.interact()
         for child in self.children:
-            child.interact()            
+            child.interact()
 
 class Conversation_bubbles(Staticentity):
     def __init__(self, pos, game_objects, text, lifetime = 200, size = (32,32)):
@@ -176,7 +176,7 @@ class Portal_2(Staticentity):#same as portal but masked based. Doesnt work becas
         self.rect.center = pos
         self.hitbox = pygame.Rect(self.rect.centerx, self.rect.centery, 32, 32)
         self.time = 0
-        
+
         self.radius = 0
         self.thickness = 0
         self.thickness_limit = 0.1
@@ -223,11 +223,11 @@ class Portal_2(Staticentity):#same as portal but masked based. Doesnt work becas
         self.game_objects.shaders['circle_pos']['color'] = [255,255,255,255]
         self.game_objects.shaders['circle_pos']['gradient'] = 1
         self.game_objects.game.display.render(self.empty_layer.texture, self.mask_layer, shader = self.game_objects.shaders['circle_pos'])
-        
+
         #noise with scroll
         self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty_layer.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])#make perlin noise texture
-        
+
         #distortion on bg
         self.game_objects.shaders['distort_2']['TIME'] = self.time
         self.game_objects.shaders['distort_2']['maskTexture'] = self.mask_layer.texture
@@ -256,7 +256,7 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
         self.rect.center = pos
         self.hitbox = pygame.Rect(self.rect.centerx, self.rect.centery, 32, 32)
         self.time = 0
-        
+
         self.radius = 0
         self.thickness = 0
         self.thickness_limit = 0.1
@@ -437,9 +437,9 @@ class Waterfall(Staticentity):
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.blur_layer = game_objects.game.display.make_layer(size)
         self.time = 5#offset the time
-        
+
         sounds = read_files.load_sounds_dict('audio/SFX/environment/waterfall/')
-        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1) 
+        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1)
 
     def release_texture(self):
         self.empty.release()
@@ -455,10 +455,10 @@ class Waterfall(Staticentity):
         distance_to_screencenter = ((center_blit_pos[0] - width * 0.5)**2 + (center_blit_pos[1]-height * 0.5) ** 2)**0.5
         max_distance = ((width*0.5)**2 + (height*0.5)**2)**0.5
         normalized_distance = max(0, min(1, 1 - (distance_to_screencenter / max_distance)))#clamp it to 0, 1
-        self.channel.set_volume(0.5 * normalized_distance) 
+        self.channel.set_volume(0.5 * normalized_distance)
 
     def update(self):
-        self.time += self.game_objects.game.dt * 0.01        
+        self.time += self.game_objects.game.dt * 0.01
         self.set_volume()
 
     def draw(self, target):
@@ -478,7 +478,7 @@ class Waterfall(Staticentity):
         self.game_objects.shaders['waterfall']['TIME'] = self.time
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]        
+        self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
 
         if self.parallax[0] == 1:#TODO, blue state #don't blur if there is no parallax
             self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['waterfall'])
@@ -508,7 +508,7 @@ class Reflection(Staticentity):#water, e.g. village
         self.colour = (0.39, 0.78, 1, 1)
 
         sounds = read_files.load_sounds_dict('audio/SFX/environment/river/')
-        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.2)            
+        self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.2)
 
     def release_texture(self):#called when .kill() and empty group
         self.empty.release()
@@ -662,7 +662,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
         self.hitbox = pygame.Rect(pos, size)
-        self.time = 0    
+        self.time = 0
 
         horizontal = kwarg.get('horizontal', 0)
         vertical = kwarg.get('vertical', 0)
@@ -686,8 +686,8 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
     def player_collision(self, player):#player collision
-        player.velocity[0] += self.dir[0] * self.game_objects.game.dt    
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt*0.5        
+        player.velocity[0] += self.dir[0] * self.game_objects.game.dt
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt*0.5
 
     def player_noncollision(self):
         pass
@@ -887,7 +887,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.flags['invincibility'] = True
 
         try:#TODO add hit sounds to all enteties
-            self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)    
+            self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
         except:
             pass
 
@@ -1238,7 +1238,7 @@ class Mygga(Flying_enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 30
+        self.health = 3
         self.aggro_distance = [130, 80]
         self.AI = AI_mygga.Patrol(self)
         self.accel = [0.013, 0.008]
@@ -1392,7 +1392,7 @@ class Mygga_suicide(Flying_enemy):#torpedo and explode
 
 class Mygga_roaming(Flying_enemy):
     def __init__(self, pos, game_objects):
-        super().__init__(pos, game_objects)        
+        super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
@@ -1472,7 +1472,7 @@ class Mygga_crystal(Flying_enemy):
         dirs = [[1,1], [-1,1], [1,-1], [-1,-1]]
         for direction in dirs:
             obj = Poisonblobb(self.hitbox.topleft, self.game_objects, dir = direction, amp = [3,3])
-            self.game_objects.eprojectiles.add(obj)                
+            self.game_objects.eprojectiles.add(obj)
 
     def chase(self, direction):#called from AI: when chaising
         self.velocity[0] += direction[0]*0.5
@@ -1740,7 +1740,7 @@ class Larv_jr(Larv):
         self.attack_distance = [0,0]
         self.init_x = self.rect.x
         self.patrol_dist = 100
-        self.health = 15
+        self.health = 3
 
     def dead(self):#called when death animation is finished
         super().dead()
@@ -1899,7 +1899,7 @@ class Shadow_enemy(Enemy):#enemies that can onlly take dmg in light -> dark fors
 
     def no_light(self):
         self.flags['invincibility'] = True
-    
+
     def light(self):
         self.flags['invincibility'] = False
 
@@ -3924,7 +3924,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         super().update()
         self.time += self.game_objects.game.dt
         if self.time > 100:
-            self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.05)        
+            self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.05)
             bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
             self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
@@ -4427,6 +4427,7 @@ class Loot_containers(Interactable):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
+        self.shader_state = states_shader.Idle(self)
 
         self.health = 3
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
@@ -4435,6 +4436,14 @@ class Loot_containers(Interactable):
         if state:
             self.currentstate = states_basic.Interacted(self)
             self.flags['invincibility'] = True
+
+    def update(self):
+        super().update()
+        self.shader_state.update()
+
+    def draw(self, target):
+        self.shader_state.draw()
+        super().draw(target)
 
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
@@ -4448,11 +4457,11 @@ class Loot_containers(Interactable):
 
     def take_dmg(self,projectile):
         if self.flags['invincibility']: return
-        self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)           
-
+        self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
-        self.flags['invincibility'] = True                 
+        self.flags['invincibility'] = True
+        self.shader_state.handle_input('Hurt', colour = (1,1,1,0), direction = [1,0.5])
         self.hit_loot()
 
         if self.health > 0:
@@ -4460,12 +4469,12 @@ class Loot_containers(Interactable):
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         else:
             self.currentstate.handle_input('Opening')
-            self.game_objects.world_state.state[self.game_objects.map.level_name][type(self).__name__.lower()][self.ID_key] = True#write in the state dict that this has been picked up
+            self.game_objects.world_state.state[self.game_objects.map.level_name]['loot_container'][self.ID_key] = True#write in the state dict that this has been picked up
 
     def hit_loot(self):
         for i in range(0, random.randint(1,3)):
             obj = Amber_Droplet(self.hitbox.midtop, self.game_objects)
-            self.game_objects.loot.add(obj)               
+            self.game_objects.loot.add(obj)
 
 class Chest(Loot_containers):
     def __init__(self, pos, game_objects, state, ID_key):
@@ -4473,15 +4482,24 @@ class Chest(Loot_containers):
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
         self.inventory = {'Amber_Droplet':3}
 
+class Chest_2(Loot_containers):
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
+        self.inventory = {'Amber_Droplet':1}
+
+    def hit_loot(self):
+        pass
+
 class Amber_tree(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
-        super().__init__(pos, game_objects, state, ID_key)  
+        super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_tree/')
         self.inventory = {'Amber_Droplet':3}
 
 class Amber_rock(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
-        super().__init__(pos, game_objects, state, ID_key)    
+        super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_rock/')
         self.inventory = {'Amber_Droplet':3}
 
@@ -4496,7 +4514,7 @@ class Door(Interactable):
 
     def interact(self):
         self.currentstate.handle_input('Opening')
-        self.game_objects.sound.play_sfx(self.sounds['open'][0], vol = 0.2)            
+        self.game_objects.sound.play_sfx(self.sounds['open'][0], vol = 0.2)
         try:
             self.game_objects.change_map(collision.next_map)
         except:
@@ -4760,8 +4778,14 @@ class Door_inter(Interactable): #game object for itneracting with locked door
 
     def interact(self):
         if type(self.door.currentstate).__name__ == 'Erect':
-            self.door.currentstate.handle_input('Transform')
-            if self.sfx: self.play_sfx()
+            if self.game_objects.player.inventory.get(self.door.key, False):
+                self.door.currentstate.handle_input('Transform')
+                if self.sfx: self.play_sfx()
+            else:
+                self.door.shake()
+
+    def player_collision(self, player):#player collision
+        pass
 
     def update(self):
         pass
@@ -4786,7 +4810,7 @@ class Lever(Interactable):
             self.currentstate = states_lever.On(self)
         else:
             self.currentstate = states_lever.Off(self)
-            
+
         self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = kwarg.get('on', False)
 
     def take_dmg(self, projectile):
@@ -4817,7 +4841,7 @@ class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction.
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
-        
+
         self.light_sources = []
         if kwarg.get('on', False):
             self.make_light()
@@ -4829,11 +4853,11 @@ class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction.
             for light in self.light_sources:
                 self.game_objects.lights.remove_light(light)
             self.light_sources = []
-            
+
     def make_light(self):
         self.light_sources.append(self.game_objects.lights.add_light(self, shadow_interact = True, colour = [100/255,175/255,255/255,255/255],flicker=True,radius = 300))
         self.light_sources.append(self.game_objects.lights.add_light(self, radius = 250, colour = [100/255,175/255,255/255,255/255],flicker=True))
-        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [100/255,175/255,255/255,255/255],radius = 200))        
+        self.light_sources.append(self.game_objects.lights.add_light(self, colour = [100/255,175/255,255/255,255/255],radius = 200))
 
 #status effects (like wet)
 class Status():#like timers, but there is an effect during update
@@ -4884,7 +4908,7 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
 class Friction_status(Status):#gradually sets the friction to target
     def __init__(self,entity, duration):
         super().__init__(entity, duration)
-        self.target = C.friction_player[0] 
+        self.target = C.friction_player[0]
 
     def deactivate(self):
         self.entity.friction[0] = self.target
@@ -4893,9 +4917,9 @@ class Friction_status(Status):#gradually sets the friction to target
 
     def activate(self, target = C.friction_player[0]):#add timer to the entity timer list
         self.sign = sign(target - self.entity.friction[0])
-        self.target = target        
+        self.target = target
         if self in self.entity.timers: return#do not append if the timer is already inside
-        self.entity.timers.append(self)    
+        self.entity.timers.append(self)
 
     def update(self):
         self.entity.friction[0] += self.sign * self.entity.game_objects.game.dt * 0.001
