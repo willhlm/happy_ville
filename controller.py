@@ -178,7 +178,7 @@ class Controller:
 
     def discrete_inputs_UI(self):#inserts in buffer if there is a big change in input, or if there has been some time since last input
         current_time = time.time()
-        l_stick = self.value["l_stick"]
+        l_stick = self.value['l_stick']
 
         # Check if a significant change occurred in the stick position
         significant_change = (
@@ -188,7 +188,8 @@ class Controller:
 
         if significant_change or (current_time - self.last_input['l_stick']['time'] > self.input_cooldown):
             if abs(l_stick[0]) > 0.5 or abs(l_stick[1]) > 0.5:  # Threshold to consider as input
-                self.insert_buffer()
+                self.keyup, self.keydown, self.key = False, False, None              
+                self.insert_buffer()             
                 self.last_input['l_stick']['time'] = current_time  # Update cooldown timer
                 self.last_input['l_stick']['value'] = l_stick.copy()  # Update last stick position
 

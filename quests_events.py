@@ -198,6 +198,7 @@ class Larv_party(Tasks):#william's larv room
             self.complete()
 
     def initiate_quest(self):
+        self.running = True#a flag to check if the quest is running: needed so that collision only enters here once
         self.game_objects.quests_events.subscribe('larv_jr_killed', self.incrase_kill)
         self.game_objects.quests_events.subscribe('player_died', self.handle_player_death)        
     
@@ -207,7 +208,8 @@ class Larv_party(Tasks):#william's larv room
     def handle_player_death(self):#called when the player dies
         self.cleanup()
 
-    def cleanup(self):
+    def cleanup(self):  
+        self.running = False      
         self.game_objects.quests_events.unsubscribe('larv_jr_killed', self.incrase_kill)
         self.game_objects.quests_events.unsubscribe('player_died', self.handle_player_death)
 

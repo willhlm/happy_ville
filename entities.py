@@ -985,10 +985,6 @@ class Player(Character):
         super().left_collision(block, type)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
 
-    def update_hitbox(self):
-        super().update_hitbox()
-        self.sword.update_hitbox()
-
     def take_dmg(self, dmg = 1, duration = 20):
         if self.tjasolmais_embrace: self.tjasolmais_embrace.take_dmg(dmg)
         if self.flags['invincibility']: return
@@ -1047,7 +1043,6 @@ class Player(Character):
         super().update()
         self.omamoris.update()
         self.update_timers()
-        #print(self.currentstate)
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -1502,7 +1497,7 @@ class Mygga_exploding(Flying_enemy):
 
     def killed(self):
         self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)            
-        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30))
+        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
 class Crab_crystal(Enemy):
@@ -1605,9 +1600,14 @@ class Rav(Enemy):
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/rav/',game_objects, flip_x = True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
+        self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
         self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
+        self.attack_distance = [100,20]
         self.health = 2
+
+    def attack(self):#called from states, attack main
+        attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
+        self.projectiles.add(attack)#add to group but in main phase
 
 class Slime(Enemy):
     def __init__(self,pos,game_objects):
@@ -2760,10 +2760,10 @@ class Melee(Projectiles):
     def __init__(self, entity, **kwarg):
         super().__init__([0,0], entity.game_objects, **kwarg)
         self.entity = entity#needs entity for making the hitbox follow the player in update hitbox
-        self.dir = entity.dir.copy()
+        self.dir = kwarg.get('dir', entity.dir.copy())
         self.direction_mapping = {(0, 0): ('center', 'center'), (1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
 
-    def update_hitbox(self):#cannpt not call in update becasue aila moves after the update call (because of the collision)
+    def update_hitbox(self):#called from update hirbox in plaform entity
         rounded_dir = (sign(self.dir[0]), sign(self.dir[1]))#analogue controls may have none integer values
         hitbox_attr, entity_attr = self.direction_mapping[rounded_dir]
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
@@ -2784,9 +2784,7 @@ class Hurt_box(Melee):#a hitbox that spawns
     def __init__(self, entity, **kwarg):
         super().__init__(entity, **kwarg)
         self.hitbox = pygame.Rect(entity.rect.topleft, kwarg.get('size', [64, 64]))
-        self.lifetime = kwarg.get('lifetime', 100)
         self.dmg = kwarg.get('dmg', 1)
-        self.dir = [0, 0]
 
     def update(self):
         self.lifetime -= self.game_objects.game.dt*self.slow_motion
@@ -2898,7 +2896,7 @@ class Aila_sword(Sword):
             self.currentstate.increase_phase()
             self.kill()#removes from projectiles gruop
 
-    def update_hitbox(self):#called from aila's update_hitbox, every frame
+    def update_hitbox(self):#every frame from collisions
         hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
@@ -4258,9 +4256,16 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
     def player_collision(self, player):
         #quests: occures continiously until complete
         if self.event == 'start_larv_party':
-            if self.game_objects.world_state.quests['larv_part']: return#completed, return
-            self.game_objects.quests_events.initiate_quest('larv_party')
+            if self.game_objects.world_state.quests.get('larv_party', False): return#completed, return      
+            if self.game_objects.quests_events.active_quests.get('larv_party', False):
+                if self.game_objects.quests_events.active_quests['larv_party'].running: return
+                self.game_objects.quests_events.active_quests['larv_party'].initiate_quest()
+            else:
+                self.game_objects.quests_events.initiate_quest('larv_party')
+
         elif self.event == 'stop_larv_party':    
+            if not self.game_objects.quests_events.active_quests.get('larv_party', False): return
+            if not self.game_objects.quests_events.active_quests['larv_party'].running: return#if quest is not running
             self.game_objects.quests_events.active_quests['larv_party'].pause_quest()
         
         #events: occures once
