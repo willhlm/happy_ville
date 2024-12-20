@@ -1131,7 +1131,7 @@ class Dark_forest(Biome):
     def room(self, room = 1):
         #if room == '2':
         self.level.game_objects.lights.ambient = [30/255,30/255,30/255,170/255]
-        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], shadow_interact = True, platform_interact = True, normal_interact = False)
 
     def load_objects(self, data, parallax, offset):
         for obj in data['objects']:

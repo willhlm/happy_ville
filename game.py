@@ -40,6 +40,7 @@ class Game():
                 self.game_objects.controller.map_inputs(event)#makes a list of inputs (input buffer)
 
         self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
+        #self.state_stack[-1].continuous_input_checks()#tdiscrete_inputs_UI is inprinciple not needed for gameplay state
         inputs = self.game_objects.controller.input_buffer.copy()                
         for input in inputs:
             input.update(self.dt)
@@ -50,7 +51,7 @@ class Game():
             self.screen.clear(0, 0, 0, 0)
 
             #tick clock
-            self.clock.tick(60)
+            self.clock.tick(C.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
             
             #handle event

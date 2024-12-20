@@ -3,60 +3,77 @@ import pygame, math, random
 class Lights():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.ambient = [0,0,0,0]#ambient colour
+        self.ambient = [0, 0, 0, 0]#ambient colour
         self.lights_sources = []#append lights
         self.shaders = {'light':game_objects.shaders['light'],'blur':game_objects.shaders['blur'],'blend':game_objects.shaders['blend']}
 
-        self.shaders['light']['resolution'] = self.game_objects.game.window_size
-        self.shaders['blur']['blurRadius'] = 5
+        self.shaders['light']['resolution'] = self.game_objects.game.window_size        
 
         self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
-        #self.vignette = game_objects.game.display.make_layer(game_objects.game.window_size)
 
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
-
+        self.max_light_sources = 20#a valuehard coded in light shader
         self.update()
 
     def new_map(self):#called when loading a new map from map loader
         self.clear_lights()
-        self.ambient = [0,0,0,0]
+        self.ambient = [0, 0, 0, 0]
 
     def clear_normal_map(self):#called at the begning of draw in game objects
         self.normal_map.clear(0, 0, 0, 0)
 
     def update(self):
-        self.normal_interact, self.num_rectangle, self.points, self.positions, self.radius, self.colour, self.start_angle, self.end_angle, self.min_radius = [], [], [], [], [], [], [], [], []
-        for light in self.lights_sources:
-            light.update()
-            self.list_points(light)#sort the collisions points into a ligst
-            self.positions.append((light.position[0], self.game_objects.game.window_size[1] - light.position[1]))#get te positions of the lights
-            self.radius.append(light.radius)
-            self.colour.append(light.colour)
-            self.start_angle.append(light.start_angle)
-            self.end_angle.append(light.end_angle)
-            self.min_radius.append(light.min_radius)
-            self.normal_interact.append(light.normal_interact)
+        self.normal_interact = [0] * self.max_light_sources
+        self.num_rectangle = [0] * self.max_light_sources
+        self.points = []
+        self.positions = [(0, 0)] * self.max_light_sources
+        self.radius = [0] * self.max_light_sources
+        self.colour = [[0, 0, 0, 0]] * self.max_light_sources
+        self.start_angle = [0] * self.max_light_sources
+        self.end_angle = [0] * self.max_light_sources
+        self.min_radius = [0] * self.max_light_sources
 
-    def list_points(self, light):
+        for i, light in enumerate(self.lights_sources):        # Process each light source and update the lists
+            light.update()  # Update the light source            
+            
+            self.positions[i] = (light.position[0], self.game_objects.game.window_size[1] - light.position[1])  # Get the positions of the lights
+            self.radius[i] = light.radius
+            self.colour[i] = light.colour
+            self.start_angle[i] = light.start_angle
+            self.end_angle[i] = light.end_angle
+            self.min_radius[i] = light.min_radius
+            self.normal_interact[i] = light.normal_interact
+            self.list_points(light, i)  # Sort the collision points into a list
+                
+        self.points.extend([(0, 0)] * (self.max_light_sources * 4 - len(self.points)))# Add (0, 0) to the list until it reaches length self.max_light_sources*4
+
+    def list_points(self, light, index):
         if not light.platform_interact: 
-            self.num_rectangle.append(0)
+            self.num_rectangle[index] = 0  # Set num_rectangle[index] to 0 if no platform interaction
+            self.points.extend([(0, 0)] * 4)
         else:
-            platforms = self.game_objects.collisions.sprite_collide(light, self.game_objects.platforms)#collision -> collision occures at coordinates as pe tiled position
-            self.num_rectangle.append(len(platforms))        
-            self.points = self.points + self.get_points(platforms)
+            platforms = self.game_objects.collisions.sprite_collide(light, self.game_objects.platforms)  # Collision -> collision occurs at coordinates as per tiled position
+            self.num_rectangle[index] = len(platforms)  # Set num_rectangle[index] to the number of collided platforms            
+            self.points.extend(self.get_points(platforms))  # Get the collision points and set them at index                       
 
-    def get_points(self,platforms):
+    def get_points(self, platforms):
         l = []
         for rec in platforms:
-            l = l + [(rec.hitbox.topleft[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.topleft[1] - self.game_objects.camera_manager.camera.scroll[1]),(rec.hitbox.topright[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.topright[1] - self.game_objects.camera_manager.camera.scroll[1]),(rec.hitbox.bottomright[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.bottomright[1] - self.game_objects.camera_manager.camera.scroll[1]),(rec.hitbox.bottomleft[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.bottomleft[1] - self.game_objects.camera_manager.camera.scroll[1])]
+            l += [
+                (rec.hitbox.topleft[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.topleft[1] - self.game_objects.camera_manager.camera.scroll[1]),
+                (rec.hitbox.topright[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.topright[1] - self.game_objects.camera_manager.camera.scroll[1]),
+                (rec.hitbox.bottomright[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.bottomright[1] - self.game_objects.camera_manager.camera.scroll[1]),
+                (rec.hitbox.bottomleft[0] - self.game_objects.camera_manager.camera.scroll[0], rec.hitbox.bottomleft[1] - self.game_objects.camera_manager.camera.scroll[1])
+            ]
         return l
 
     def clear_lights(self):
         self.lights_sources = []
 
     def add_light(self, target, **properties):
+        if len(self.lights_sources) == self.max_light_sources: return#maximum 20
         light = Light(self.game_objects, target, **properties)
         self.lights_sources.append(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)  
@@ -66,7 +83,7 @@ class Lights():
         self.lights_sources.remove(light)
         self.shaders['light']['num_lights'] = len(self.lights_sources)
 
-    def draw(self, target):
+    def draw(self, target):    
         self.shaders['light']['rectangleCorners'] = self.points
         self.shaders['light']['lightPositions'] = self.positions
         self.shaders['light']['lightRadii'] = self.radius
@@ -80,6 +97,7 @@ class Lights():
         self.shaders['light']['normal_map'] = self.normal_map.texture
 
         self.shaders['blend']['background'] = self.game_objects.game.screen.texture     
+        self.shaders['blur']['blurRadius'] = 5
 
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])

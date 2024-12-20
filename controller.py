@@ -19,7 +19,8 @@ class Controller:
         self.input_cooldown = 0.2  # Cooldown in seconds (e.g., 200ms)
 
         pygame._sdl2.controller.init()  # Initialize the SDL2 controller module
-        self.controllers = []        
+        self.controllers = []   
+        self.get_controller_type()     
                 
     def update_controller(self):#called when adding or removing controlelrs
         self.initiate_controls()
@@ -34,7 +35,7 @@ class Controller:
             controller.rumble(0, 0.7, duration)  # Low frequency, high frequency, duration
 
     def get_controller_type(self):
-        self.controller_type = []
+        self.controller_type = ['keyboard']
         for controller in self.controllers:
             name = controller.name  # Get the controller's name string
             if 'xbox' in name.lower():

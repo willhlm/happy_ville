@@ -1,9 +1,10 @@
 import sys
-from states_entity import Entity_States
 
-class Basic_states(Entity_States):
+class Basic_states():
     def __init__(self,entity):
-        super().__init__(entity)
+        self.entity = entity
+        self.entity.state = type(self).__name__.lower()#the name of the class
+        self.entity.animation.reset_timer()
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
@@ -91,6 +92,10 @@ class Rb_select(Basic_states):
 
     def increase_phase(self):
         self.enter_state('Rb_press')
+
+    def handle_input(self,input):
+        if input == 'release':
+            self.enter_state('Rb_idle')
 
 class Rb_press(Basic_states):
     def __init__(self,entity):

@@ -19,7 +19,7 @@ class Game_State():
         pass
 
     def handle_events(self, input):
-        pass
+        input.processed()
 
     def enter_state(self):
         self.game.state_stack.append(self)
@@ -126,8 +126,8 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_13','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_20','1')
-            #self.game.game_objects.load_map(self,'dark_forest_2','1')
+            #self.game.game_objects.load_map(self,'nordveden_20','1')
+            self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'light_forest_24','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
@@ -804,9 +804,6 @@ class Fadein(Gameplay):
         self.fade_surface.clear(0,0,0,alpha)
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
-    def handle_events(self, input):
-        input.processed()
-
 class Fadeout(Fadein):
     def __init__(self,game, previous_state, map_name, spawn, fade):
         super().__init__(game)
@@ -836,7 +833,7 @@ class Fadeout(Fadein):
         self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
-class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a whole
+class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
     def __init__(self, game):
         super().__init__(game)
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
@@ -856,9 +853,6 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a whole
         super().render()#gameplay render
         self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
-
-    def handle_events(self, input):
-        input.processed()
 
 class Safe_spawn_2(Gameplay):#fade
     def __init__(self, game):
@@ -882,9 +876,6 @@ class Safe_spawn_2(Gameplay):#fade
         alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
         self.fade_surface.clear(0,0,0,alpha)
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
-
-    def handle_events(self, input):
-        input.processed()
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -977,9 +968,9 @@ class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
         self.state[-1].handle_events(input)
 
 class Facilities(Gameplay):#fast_travel (menu and unlock), ability upgrade (spurit and movement), bank, soul essence, vendor, smith
-    def __init__(self, game,type,*arg):#args could be npc or travel point etc
+    def __init__(self, game,type, *arg):#args could be npc or travel point etc
         super().__init__(game)
-        self.state = [getattr(UI_facilities, type)(self,*arg)]
+        self.state = [getattr(UI_facilities, type)(self, *arg)]#black smith etc
 
     def update(self):
         super().update()

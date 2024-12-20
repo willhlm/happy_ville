@@ -273,7 +273,6 @@ class Button():
 class Controllers():
     def __init__(self, pos, game_objects,type):
         self.game_objects = game_objects#animation need it
-        self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
         self.currentstate =  getattr(states_buttons, type.capitalize() + '_idle')(self)
 
@@ -292,6 +291,14 @@ class Xbox(Controllers):
         self.rect.topleft = pos
 
 class Playstation(Controllers):
+    def __init__(self, pos, game_objects,type):
+        super().__init__(pos, game_objects,type)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
+        self.image = self.sprites['a_idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
+
+class Keyboard(Controllers):
     def __init__(self, pos, game_objects,type):
         super().__init__(pos, game_objects,type)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
