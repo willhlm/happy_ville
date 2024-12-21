@@ -6,9 +6,9 @@ class Cutscene_file():#cutscneens that will run based on file. The name of the f
     def __init__(self,parent_class):
         self.parent_class = parent_class
         self.game_objects = parent_class.game.game_objects
-        self.animation=animation.Animation(self)
+        self.animation = animation.Animation(self)
         self.sprites = {'idle': read_files.load_sprites_list('cutscene/'+type(self).__name__.lower(),parent_class.game.game_objects)}
-        self.image=self.sprites['idle'][0]
+        self.image = self.sprites['idle'][0]
 
     def update(self):
         self.animation.update()
@@ -20,7 +20,7 @@ class Cutscene_file():#cutscneens that will run based on file. The name of the f
         pass
 
     def handle_events(self,input):
-        pass
+        input.processed()
 
 class Rhoutta_encounter(Cutscene_file):#play the first cutscene encountering rhoutta
     def __init__(self,objects):

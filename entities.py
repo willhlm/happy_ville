@@ -4855,7 +4855,7 @@ class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction.
             self.light_sources = []
 
     def make_light(self):
-        self.light_sources.append(self.game_objects.lights.add_light(self, shadow_interact = True, colour = [100/255,175/255,255/255,255/255],flicker=True,radius = 300))
+        self.light_sources.append(self.game_objects.lights.add_light(self, shadow_interact = False, colour = [100/255,175/255,255/255,255/255],flicker=True,radius = 300))
         self.light_sources.append(self.game_objects.lights.add_light(self, radius = 250, colour = [100/255,175/255,255/255,255/255],flicker=True))
         self.light_sources.append(self.game_objects.lights.add_light(self, colour = [100/255,175/255,255/255,255/255],radius = 200))
 

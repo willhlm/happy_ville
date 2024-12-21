@@ -24,7 +24,7 @@ class RenderEngine:
     def __init__(self, screen_width: int, screen_height: int,
                  fullscreen: int or bool = 0, resizable: int or bool = 0,
                  noframe: int or bool = 0, scaled: int or bool = 0,
-                 depth: int = 0, display: int = 0, vsync: int = 1) -> None:
+                 depth: int = 0, display: int = 0, vsync: int = 0) -> None:
         """
         Initialize a rendering engine using Pygame and ModernGL.
 
