@@ -11,7 +11,7 @@ class Game():
     def __init__(self):
         #initiate all screens
         self.window_size = C.window_size.copy()
-        self.scale = self.scale_size()#get the scale according to your display size
+        self.scale = self.scale_size(2)#get the scale according to your display size
         display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
 
@@ -41,7 +41,7 @@ class Game():
 
         self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
         #self.state_stack[-1].continuous_input_checks()#tdiscrete_inputs_UI is inprinciple not needed for gameplay state
-        inputs = self.game_objects.controller.input_buffer.copy()                
+        inputs = self.game_objects.controller.input_buffer.copy()
         for input in inputs:
             input.update(self.dt)
             self.state_stack[-1].handle_events(input)
@@ -53,7 +53,7 @@ class Game():
             #tick clock
             self.clock.tick(C.fps)
             self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-            
+
             #handle event
             self.event_loop()
 
