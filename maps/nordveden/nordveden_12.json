@@ -3300,6 +3300,70 @@
                          "width":96,
                          "x":576,
                          "y":1856
+                        }, 
+                        {
+                         "gid":34,
+                         "height":82,
+                         "id":1853,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"left",
+                                 "type":"bool",
+                                 "value":true
+                                }, 
+                                {
+                                 "name":"up",
+                                 "type":"bool",
+                                 "value":false
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":600,
+                         "x":1056,
+                         "y":2025
+                        }, 
+                        {
+                         "gid":15,
+                         "height":304,
+                         "id":1856,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"right"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1504,
+                         "y":2160
+                        }, 
+                        {
+                         "gid":11,
+                         "height":128,
+                         "id":1857,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"path_to",
+                                 "type":"string",
+                                 "value":"nordveden_25"
+                                }, 
+                                {
+                                 "name":"spawn",
+                                 "type":"string",
+                                 "value":"1"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1504,
+                         "y":2048
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -3466,7 +3530,7 @@
          "y":0
         }],
  "nextlayerid":50,
- "nextobjectid":1853,
+ "nextobjectid":1858,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
