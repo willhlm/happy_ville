@@ -19,14 +19,14 @@ class Controller:
         self.input_cooldown = 0.2  # Cooldown in seconds (e.g., 200ms)
 
         pygame._sdl2.controller.init()  # Initialize the SDL2 controller module
-        self.controllers = []   
-        self.get_controller_type()     
-                
+        self.controllers = []
+        self.get_controller_type()
+
     def update_controller(self):#called when adding or removing controlelrs
         self.initiate_controls()
         self.get_controller_type()
 
-    def initiate_controls(self):        
+    def initiate_controls(self):
         for controller_id in range(pygame._sdl2.controller.get_count()):
             self.controllers.append(pygame._sdl2.controller.Controller(controller_id))
 
@@ -49,11 +49,11 @@ class Controller:
 
     def map_analogues(self):
         self.last_input = {
-            'l_stick': {'value':[0,0],'time':0},            
-            'r_stick': {'value':[0,0],'time':0}, #not used         
-            'l_trigger': 0, #not used         
-            'r_trigger': 0 #not used         
-        }        
+            'l_stick': {'value':[0,0],'time':0},
+            'r_stick': {'value':[0,0],'time':0}, #not used
+            'l_trigger': 0, #not used
+            'r_trigger': 0 #not used
+        }
 
     def map_joystick(self):
         self.joystick_map = {
@@ -105,17 +105,17 @@ class Controller:
             self.keydown = True
             self.key = self.keyboard_map.get(event.key, None)
             if self.key: self.insert_buffer()
-                
+
         elif event.type == pygame.KEYUP:
             self.keyup = True
             self.key = self.keyboard_map.get(event.key, None)
             if self.key: self.insert_buffer()
-                
+
         if event.type == pygame.CONTROLLERDEVICEADDED:
             self.update_controller()
             self.methods.append(self.joystick)
 
-    def joystick(self, event):        
+    def joystick(self, event):
         if event.type == pygame.CONTROLLERDEVICEREMOVED:
             self.update_controller()
             self.methods.pop()
@@ -135,12 +135,12 @@ class Controller:
             if event.axis == pygame.CONTROLLER_AXIS_TRIGGERLEFT:
                 self.value["l_trigger"] = self.normalize_axis(event.value)
             if event.axis == pygame.CONTROLLER_AXIS_TRIGGERRIGHT:
-                self.value["r_trigger"] = self.normalize_axis(event.value)                                     
+                self.value["r_trigger"] = self.normalize_axis(event.value)
             self.insert_buffer()
 
     @staticmethod
     def normalize_axis(value):
-        return value / 32768.0#value taken from documentation              
+        return value / 32768.0#value taken from documentation
 
     def continuous_input_checks(self):#caled every frame
         keys = pygame.key.get_pressed()
@@ -163,12 +163,12 @@ class Controller:
             r_axis_x = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTX))
             r_axis_y = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTY))
 
-            if abs(l_axis_x) > 0.1:
+            if abs(l_axis_x) > 0.2:
                 self.value["l_stick"][0] = l_axis_x
-            if abs(l_axis_y) > 0.1:
+            if abs(l_axis_y) > 0.2:
                 self.value["l_stick"][1] = l_axis_y
-                if abs(l_axis_y) > 0.98:
-                    self.value['l_stick'][0] = 0   
+                #if abs(l_axis_y) > 0.98:
+                #    self.value['l_stick'][0] = 0
 
             if abs(r_axis_x) > 0.1:
                 self.value["r_stick"][0] = r_axis_x
@@ -189,8 +189,8 @@ class Controller:
 
         if significant_change or (current_time - self.last_input['l_stick']['time'] > self.input_cooldown):
             if abs(l_stick[0]) > 0.5 or abs(l_stick[1]) > 0.5:  # Threshold to consider as input
-                self.keyup, self.keydown, self.key = False, False, None              
-                self.insert_buffer()             
+                self.keyup, self.keydown, self.key = False, False, None
+                self.insert_buffer()
                 self.last_input['l_stick']['time'] = current_time  # Update cooldown timer
                 self.last_input['l_stick']['value'] = l_stick.copy()  # Update last stick position
 

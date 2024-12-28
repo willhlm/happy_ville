@@ -3942,24 +3942,6 @@
                         {
                          "gid":3,
                          "height":16,
-                         "id":1044,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":5008,
-                         "y":768
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
                          "id":1045,
                          "name":"",
                          "properties":[
@@ -4010,24 +3992,6 @@
                          "width":16,
                          "x":4144,
                          "y":880
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":1048,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4624,
-                         "y":768
                         }, 
                         {
                          "gid":2,
