@@ -15,10 +15,8 @@ class World_state():
         self.progress += 1
 
     def update_kill_statistics(self,enemy):#called when an enemy is killed
-        if self.statistics['kill'].get(enemy, False):#have killed before
-            self.statistics['kill'][enemy] += 1#add to kill statisics
-        else:#first time killing it
-            self.statistics['kill'][enemy] = 1
+        self.statistics['kill'].setdefault(enemy, 0)
+        self.statistics['kill'][enemy] += 1            
 
     def update_statistcis(self, key):#called when amber is picked up
         self.statistics[key] += 1#increaase total money, deaths etc

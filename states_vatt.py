@@ -1,7 +1,6 @@
 import sys
 from states_entity import Entity_States
 import random
-#from Entities import Vatt
 
 class Vatt_states(Entity_States):
     def __init__(self,entity):
@@ -155,7 +154,7 @@ class Transform(Vatt_states):
     def increase_phase(self):
         self.enter_state('Idle_aggro')
         self.entity.AI.handle_input('Aggro')
-        if not self.entity.aggro:
+        if not self.entity.flags['aggro']:#so that only one vatt calls turn clan
             self.entity.turn_clan()
 
 class Stun(Vatt_states):

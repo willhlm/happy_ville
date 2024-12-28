@@ -28,7 +28,7 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
 
     def draw(self, target):#called just before draw in group
         self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
     def kill(self):
         self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
@@ -424,7 +424,7 @@ class Sky(Staticentity):
         self.game_objects.shaders['cloud']['scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
+        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])     
 
 class Waterfall(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
@@ -1046,12 +1046,12 @@ class Player(Character):
 
     def draw(self, target):#called in group
         self.shader_state.draw()
-        self.blit_pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]),round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.blit_pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]), round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
-        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = bool(max(self.dir[0],0)), shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
+        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
     def update_timers(self):
         for timer in self.timers:
@@ -1581,10 +1581,10 @@ class Sandrew(Enemy):
         self.aggro_distance = [250, 25]#at which distance to the player when you should be aggro. Negative value make it no going aggro
         self.attack = Hurt_box
 
-class Wild_swine(Enemy):
+class Vildswine(Enemy):
     def __init__(self,pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/wild_swine/',game_objects, flip_x = True)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/vildswine/',game_objects, flip_x = True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
@@ -1662,20 +1662,22 @@ class Slime_wall(Enemy):
 class Vatt(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/vatt/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/vatt/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],16,30)
+
         self.health = 3
         self.spirit = 3
         self.flags['aggro'] = False
+
         self.currentstate = states_vatt.Idle(self)
-        self.attack_distance = [60, 30]
         self.AI = AI_vatt.AI(self)
+        self.attack_distance = [60, 30]        
 
     def turn_clan(self):#this is acalled when tranformation is finished
         for enemy in self.game_objects.enemies.sprites():
-            if type(enemy).__name__=='Vatt':
+            if type(enemy).__name__ == 'Vatt':
                 enemy.flags['aggro'] = True
                 enemy.AI.handle_input('Hurt')
 
@@ -2005,7 +2007,7 @@ class Guide(NPC):
     def buisness(self):#enters after conversation
         self.shader_state = states_shader_guide.Teleport(self)
         for i in range(0, 10):#should maybe be the number of abilites Aila can aquire?
-            particle = getattr(particles, 'Circle')(self.hitbox.center,self.game_objects,distance=0,lifetime = -1,vel={'linear':[7,15]},dir='isotropic',scale=5,colour=[100,200,255,255],state = 'Circle_converge',gradient = 1)
+            particle = getattr(particles, 'Circle')(self.hitbox.center, self.game_objects, distance=0, lifetime = -1, vel = {'linear':[7,15]}, dir='isotropic', scale=5, colour=[100,200,255,255], state = 'Circle_converge',gradient = 1)
             light = self.game_objects.lights.add_light(particle, colour = [100/255,200/255,255/255,255/255], radius = 20)
             particle.light = light#add light reference
             self.game_objects.cosmetics.add(particle)
@@ -2017,7 +2019,7 @@ class Guide(NPC):
     def draw(self, target):#called in group
         self.shader_state.draw()
         pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, flip = bool(max(self.dir[0],0)), shader = self.shader)#shader render
+        self.game_objects.game.display.render(self.image, target, position = pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
 class Sahkar(NPC):#deer handler
     def __init__(self, pos,game_objects):
