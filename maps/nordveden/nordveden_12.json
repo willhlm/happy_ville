@@ -3364,6 +3364,78 @@
                          "width":16,
                          "x":1504,
                          "y":2048
+                        }, 
+                        {
+                         "gid":8,
+                         "height":16,
+                         "id":1858,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":432,
+                         "x":1072,
+                         "y":992
+                        }, 
+                        {
+                         "height":0,
+                         "id":1859,
+                         "name":"",
+                         "polygon":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":80,
+                                 "y":-80
+                                }, 
+                                {
+                                 "x":0,
+                                 "y":-80
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
+                         "x":1072,
+                         "y":1072
+                        }, 
+                        {
+                         "height":0,
+                         "id":1860,
+                         "name":"",
+                         "polygon":[
+                                {
+                                 "x":0,
+                                 "y":0
+                                }, 
+                                {
+                                 "x":0,
+                                 "y":-80
+                                }, 
+                                {
+                                 "x":-80,
+                                 "y":-80
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":0,
+                         "x":1504,
+                         "y":1072
+                        }, 
+                        {
+                         "gid":1857,
+                         "height":16,
+                         "id":1862,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1040,
+                         "y":1136
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -3530,7 +3602,7 @@
          "y":0
         }],
  "nextlayerid":50,
- "nextobjectid":1858,
+ "nextobjectid":1863,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
@@ -3556,6 +3628,10 @@
          "tilecount":1800,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "firstgid":1853,
+         "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,
  "type":"map",
