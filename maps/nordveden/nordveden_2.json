@@ -1633,6 +1633,19 @@
          "tilecount":256,
          "tileheight":16,
          "tilewidth":16
+        }, 
+        {
+         "columns":271,
+         "firstgid":4806,
+         "image":"tilesets\/main_tileset.png",
+         "imageheight":528,
+         "imagewidth":4351,
+         "margin":0,
+         "name":"main_tileset",
+         "spacing":0,
+         "tilecount":8943,
+         "tileheight":16,
+         "tilewidth":16
         }],
  "tilewidth":16,
  "type":"map",

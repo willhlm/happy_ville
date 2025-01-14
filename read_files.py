@@ -151,15 +151,61 @@ def generic_sheet_reader(path_to_sheet, w, h, r, c):
             n+=1
     return sprite_dict
 
+def alphabet_reader(path_to_sheet, h, num):
+    """
+    Reads sprites from a sheet, where red dots seperate the sprites in the sheet. Currently only made to read from sprites in a single line.
+    takes, path, height of sprite and number of sprites as input.
+    color_ints:
+    FF0000 = -65536
+    000000 = -16777216
+    00FF00 = -16711936
+    zero alpha & 000000 = 0
+    """
+    sprite_dict = {}
+    sheet = load_sprite(path_to_sheet)
+
+    pxarray = pygame.PixelArray(sheet)
+    row_t = list(pxarray[:,0])
+    row_h1 = list(pxarray[:,-2])
+    row_h2 = list(pxarray[:,-1])
+    pxarray.close()
+
+    indecies = [i for i in range(len(row_t)) if row_t[i] == -65536]
+    indecies_h1 = [i for i in range(len(row_h1)) if row_h1[i] == -16711936]
+    indecies_h2 = [i for i in range(len(row_h2)) if row_h2[i] == -16711936]
+
+    for i, val in enumerate(indecies):
+        try:
+            val2 = indecies[i+1]
+        except IndexError:
+            continue
+        if val in indecies_h1:
+            height = 8
+        elif val in indecies_h2:
+            height = 9
+        else:
+            height = h
+        width = val2 - val - 1
+        rect = pygame.Rect(val+1, 0, width, height)
+        #rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
+        image = pygame.Surface((width, height),pygame.SRCALPHA,32).convert_alpha()
+        image.blit(sheet,(0,0),rect)
+        sprite_dict[i] = image
+    return sprite_dict
+
 #class for reading and rendering fonts
 class Alphabet():
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.char_size = (4,6)
-        self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_','[',']']
-        self.character_lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        self.char_size = (5,7)
+        self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+                                'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+                                '0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_','(',')','[',']']
+        #self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_','[',']']
+        #self.character_lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
         self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
-        sheet = generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))
+        #sheet = generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))
+        sheet = alphabet_reader("Sprites/utils/alpha_new.png", self.char_size[1], len(self.character_order))
 
         self.characters={}
         #map sprites to charactersin dict
@@ -167,8 +213,8 @@ class Alphabet():
             self.characters[c] = sheet[i]
 
         #map lower case to same sprites (change __init__ incase lower case sprites are desired)
-        for i, c in enumerate(self.character_lower):
-            self.characters[c] = sheet[i]
+        #for i, c in enumerate(self.character_lower):
+        #    self.characters[c] = sheet[i]
 
     #returns a surface with size of input, and input text. Automatic line change
     def render(self, surface_size = False, text = "", limit = 1000):

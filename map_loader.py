@@ -725,9 +725,11 @@ class Biome():
         pass
 
     def play_music(self):
+        print(self.level.biome_name)
         try:#try laoding bg music
             sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
-            self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700)
+            self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700, vol = 1.0)
+            print(self.level.biome_name)
         except FileNotFoundError:
             print("No BG music found")
 
@@ -912,9 +914,9 @@ class Light_forest_cave(Biome):
         super().__init__(level)
 
     def play_music(self):
-        #super().play_music()
-        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/light_forest_cave')
-        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
+        super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/light_forest_cave/')
+        #self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
