@@ -126,15 +126,15 @@ class Game_Objects():
         self.collisions.projectile_collision(self.fprojectiles, self.enemies)
         self.collisions.projectile_collision(self.eprojectiles, self.players)
 
-    def platform_collision(self):
-        self.collisions.dynamic_platform_collision(self.players)
-
+    def platform_collision(self):        
         self.collisions.platform_collision(self.players)        
         self.collisions.platform_collision(self.enemies)
         self.collisions.platform_collision(self.eprojectiles)
         self.collisions.platform_collision(self.fprojectiles)
         self.collisions.platform_collision(self.npcs)
         self.collisions.platform_collision(self.loot)
+
+        self.collisions.dynamic_platform_collision(self.players)
 
     def update(self):
         self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll

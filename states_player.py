@@ -432,6 +432,7 @@ class Fall_pre(Player_states):
         event = input.output()
         if event[-1] == 'a':
             if self.entity.flags['ground']:
+                print('fe')
                 input.processed()
                 self.enter_state('Jump_main', wall_dir = self.wall_dir)        
         elif event[-1]=='b':

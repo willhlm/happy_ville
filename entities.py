@@ -738,6 +738,19 @@ class Smoke(Staticentity):#2D smoke
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['smoke'])#shader render
 
+class Rainbow(Staticentity):#2D explosion
+    def __init__(self, pos, game_objects, size, **properties):
+        super().__init__(pos, game_objects)
+        self.image = game_objects.game.display.make_layer(size)
+        self.size = size
+
+    def release_texture(self):
+        self.image.release()
+
+    def draw(self, target):
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['rainbow'])#shader render
+
 class Explosion_shader(Staticentity):#2D explosion
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
@@ -966,6 +979,8 @@ class Player(Character):
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.tjasolmais_embrace = None
+        
+        self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, position):#when colliding with platform beneth
         super().ramp_down_collision(position)
@@ -1042,7 +1057,7 @@ class Player(Character):
     def update(self):
         super().update()
         self.omamoris.update()
-        self.update_timers()
+        self.update_timers()        
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -3909,7 +3924,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
     def __init__(self, pos, game_objects, bubble, **prop):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
-        self.sounds = read_files.load_sounds_list('audio/SFX/enteties/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/bubble_source/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
@@ -3926,7 +3941,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         super().update()
         self.time += self.game_objects.game.dt
         if self.time > 100:
-            self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.05)
+            self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.3)
             bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
             self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)

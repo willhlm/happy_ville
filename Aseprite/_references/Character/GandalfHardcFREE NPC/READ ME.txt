@@ -1,0 +1,3 @@
+Thank you for your purchase/download :)
+
+LICENSE: Permitted uses for the assets include incorporating them into commercial and non-commercial video games and projects, modifying them as needed, and displaying work featuring the assets on designated websites. Restrictions include not reselling, repackaging (selling the edited pixel art), or redistributing the assets, using them for AI training, incorporating them in game tools, NFT projects, or printed materials.
