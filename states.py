@@ -126,9 +126,9 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'nordveden_3','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
-            #self.game.game_objects.load_map(self,'light_forest_1','1')
+            #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -230,7 +230,7 @@ class Load_Menu(Game_State):
                 new_state.enter_state()
                 map = self.game.game_objects.player.spawn_point['map']
                 point=self.game.game_objects.player.spawn_point['point']
-                self.game.game_objects.load_map(self,map,point)
+                self.game.game_objects.load_map(self, map, point)
 
 class Option_Menu(Game_State):
     def __init__(self,game):

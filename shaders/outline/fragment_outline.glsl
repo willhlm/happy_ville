@@ -1,93 +1,62 @@
 #version 330 core
 
-in vec2 fragmentTexCoord;
-uniform sampler2D imageTexture;
+in vec2 fragmentTexCoord; // Texture coordinates of the current fragment
+uniform sampler2D imageTexture; // The base texture
 
-uniform float max_line_width = 20.0;
-uniform float min_line_width = 5.0;
-uniform float freq = 0.000001;
-uniform float block_size = 10.0;
-uniform vec4 starting_colour = vec4(0,0,1,1);
-uniform vec4 ending_colour = vec4(1,1,1,1);
+// Outline customization
+uniform vec4 outlineColor = vec4(1.0, 1.0, 1.0, 1.0); // Default outline color (white)
+uniform float outlineThickness = 5.0; // Thickness of the outline
 
-uniform vec2 screenSize = vec2(360, 640);
-uniform float TIME;
+uniform vec2 resolution = vec2(640, 360); // Screen resolution (for computing pixel size)
+uniform float outlineAlphaFalloff = 0; // Control how quickly the outline alpha fades with distance
 
-const float pi = 3.1415;
-const int ang_res = 16;
-const int grad_res = 8;
-
+// Output color
 out vec4 COLOR;
 
-float hash(vec2 p, float s) {
-    return fract(35.1 * sin(dot(vec3(112.3, 459.2, 753.2), vec3(p, s))));
-}
+// Sobel kernel for edge detection
+float edgeDetection(vec2 uv, float thickness) {
+    // Compute step sizes for neighboring texels
+    float stepX = thickness / resolution.x;
+    float stepY = thickness / resolution.y;
 
-float noise(vec2 p, float s) {
-    vec2 d = vec2(0, 1);
-    vec2 b = floor(p);
-    vec2 f = fract(p);
-    return mix(
-        mix(hash(b + d.xx, s), hash(b + d.yx, s), f.x),
-        mix(hash(b + d.xy, s), hash(b + d.yy, s), f.x), f.y);
-}
+    // Sample neighboring texels, clamp coordinates to the [0.0, 1.0] range
+    float center = texture(imageTexture, uv).a;
 
-float getLineWidth(vec2 p, float s) {
-    p /= block_size;
-    float w = 0.0;
-    float intensity = 1.0;
-    for (int i = 0; i < 3; i++) {
-        w = mix(w, noise(p, s), intensity);
-        p /= 2.0;
-        intensity /= 2.0;
-    }
-    
-    return mix(max_line_width, min_line_width, w);
-}
+    // Only sample neighbors if within bounds
+    float top = texture(imageTexture, clamp(uv + vec2(0.0, stepY), vec2(0.0), vec2(1.0))).a;
+    float bottom = texture(imageTexture, clamp(uv - vec2(0.0, stepY), vec2(0.0), vec2(1.0))).a;
+    float left = texture(imageTexture, clamp(uv - vec2(stepX, 0.0), vec2(0.0), vec2(1.0))).a;
+    float right = texture(imageTexture, clamp(uv + vec2(stepX, 0.0), vec2(0.0), vec2(1.0))).a;
 
-bool pixelInRange(sampler2D text, vec2 uv, vec2 dist) {
-    for (int i = 0; i < ang_res; i++) {
-        float angle = 2.0 * pi * float(i) / float(ang_res);
-        vec2 disp = dist * vec2(cos(angle), sin(angle));
-        if (texture(text, uv + disp).a > 0.0) return true;
-    }
-    return false;
-}
-
-float getClosestDistance(sampler2D text, vec2 uv, vec2 maxDist) {
-    if (!pixelInRange(text, uv, maxDist)) return -1.0;
-    
-    float hi = 1.0; float lo = 0.0;
-    
-    for (int i = 1; i <= grad_res; i++) {
-        float curr = (hi + lo) / 2.0;
-        if (pixelInRange(text, uv, curr * maxDist)) {
-            hi = curr;
-        }
-        else {
-            lo = curr;
-        }
-    }
-    return hi;
+    // Combine to detect edges
+    float edges = max(max(abs(center - top), abs(center - bottom)),
+                      max(abs(center - left), abs(center - right)));
+    return edges;
 }
 
 void main() {
-    float timeStep = freq * TIME; // Continuous time for smooth animation
-    vec2 TEXTURE_PIXEL_SIZE = 1.0 / screenSize;
-    vec2 scaledDist = TEXTURE_PIXEL_SIZE;
-    scaledDist *= getLineWidth(fragmentTexCoord / TEXTURE_PIXEL_SIZE, timeStep);
-    float w = getClosestDistance(imageTexture, fragmentTexCoord, scaledDist);
+    vec2 uv = fragmentTexCoord;
 
-    // Pulse effect for glow
-    float pulse = 0.5 + 0.5 * sin(timeStep * 3.0); // Pulsing factor between 0.5 and 1.0
+    // Base texture color
+    vec4 baseColor = texture(imageTexture, uv);
 
-    // Determine color with glow effect
-    if ((w > 0.0) && (texture(imageTexture, fragmentTexCoord).a < 0.2)) {
-        vec4 glowColor = mix(starting_colour, ending_colour, tanh(3.0 * w)); // Gradient color for outline
-        glowColor.rgb *= pulse; // Apply pulsing to glow color
-        glowColor.rgb += vec3(0.3, 0.3, 0.6) * (1.0 - w); // Add a slight blue halo tint for "magic"
-        COLOR = glowColor;
+    // Edge detection
+    float edgeValue = edgeDetection(uv, outlineThickness);
+
+    // Determine the outline color
+    vec4 finalOutlineColor = outlineColor;
+
+    // Calculate outline position (only draw outline if within bounds)
+    bool insideOutlineBounds = uv.x > outlineThickness / resolution.x && uv.x < 1.0 - outlineThickness / resolution.x &&
+                               uv.y > outlineThickness / resolution.y && uv.y < 1.0 - outlineThickness / resolution.y;
+
+    // Render logic:
+
+    if (baseColor.a > 0.0) {
+        COLOR = baseColor; // Render the base texture color
+    } else if (edgeValue > 0.0 && insideOutlineBounds) {
+        COLOR = vec4(outlineColor.x, outlineColor.y, outlineColor.z, outlineColor.w * (1.0 - edgeValue * outlineAlphaFalloff) ); // Render the outline if inside bounds
     } else {
-        COLOR = texture(imageTexture, fragmentTexCoord);
+        COLOR = vec4(0.0); // Fully transparent
     }
 }

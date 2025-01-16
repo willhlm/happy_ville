@@ -8,7 +8,7 @@ out vec4 COLOR;
 uniform sampler2D imageTexture;  // Texture sampler
 uniform float TIME;  // Time
 
-uniform float cloudscale = 4;
+uniform float cloudscale = 1;
 uniform float speed = 0.01;
 uniform float clouddark = 0.5;
 uniform float cloudlight = 0.3;

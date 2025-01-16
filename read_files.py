@@ -198,6 +198,7 @@ class Alphabet():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.char_size = (5,7)
+        self.max_height = 9
         self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
                                 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
                                 '0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_','(',')','[',']']
@@ -219,7 +220,43 @@ class Alphabet():
     #returns a surface with size of input, and input text. Automatic line change
     def render(self, surface_size = False, text = "", limit = 1000):
         if not surface_size:
-            surface_size = (4*(len(text)+1),5)
+            surface_size = (400,45)
+        text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
+        x, y = 0, 0
+        h = self.max_height
+        w = 0
+        s = 3
+
+        text_l = text.split(" ")
+        for word in text_l:
+            #cache = word
+            new_row = False
+            for c in word:
+                w = self.characters[c].get_width()
+                if x + w > surface_size[0]: #break line if end is reached
+                    x = 0
+                    y += h
+                    new_row = True
+                    break
+                text_surface.blit(self.characters[c], (x, y))
+                x += w + 1
+
+            if y > (surface_size[1] - h):
+                return self.game_objects.game.display.surface_to_texture(text_surface) #spot printing at limit
+            elif new_row:
+                new_row = False
+                for c in word:
+                    text_surface.blit(self.characters[c], (x, y))
+                    x += w
+
+            #add space after each word
+            x += s
+
+        return self.game_objects.game.display.surface_to_texture(text_surface)
+
+    def render_old(self, surface_size = False, text = "", limit = 1000):
+        if not surface_size:
+            surface_size = (7*(len(text)+1),9)
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
         x, y = 0, 0
         x_max = int(surface_size[0]/self.char_size[0])
@@ -232,7 +269,8 @@ class Alphabet():
                 y += 1
 
             for c in word:
-                pos = (x*self.char_size[0],y*self.char_size[1])
+                width = self.characters[c].get_width()
+                pos = (x*width,y*self.char_size[1])
                 text_surface.blit(self.characters[c],pos)
 
                 x += 1

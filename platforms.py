@@ -579,7 +579,7 @@ class Bubble_static(Collision_timer):#static bubble
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
-        lifetime = prop.get('lifetime', 100)
+        self.lifetime = prop.get('lifetime', 100)
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -590,7 +590,7 @@ class Bubble_static(Collision_timer):#static bubble
 
     def collide_y(self,entity):
         if entity.velocity[1] > 0:#going down
-            self.game_objects.timer_manager.start_timer(self.lifeitme, self.deactivate)
+            self.game_objects.timer_manager.start_timer(self.lifetime, self.deactivate)
             entity.down_collision(self)
             entity.limit_y()
         else:#going up
@@ -599,7 +599,7 @@ class Bubble_static(Collision_timer):#static bubble
 
     def deactivate(self):#called when first timer runs out
         self.hitbox = [self.hitbox[0],self.hitbox[1],0,0]
-        self.game_objects.timer_manager.start_timer(self.lifeitme, self.activate)
+        self.game_objects.timer_manager.start_timer(self.lifetime, self.activate)
         self.currentstate.handle_input('Transition_1')
 
     def activate(self):
@@ -704,7 +704,15 @@ class Collision_dynamic(Collision_texture):
             entity.left_collision(self)
         entity.update_rect_x()
 
-    def collide_entity_x(self,entity):  #platofmr miving
+    def collide_y(self,entity):  #entity moving
+        if entity.velocity[1] > self.velocity[1]:#going down
+            entity.down_collision(self)
+            entity.limit_y()
+        else:#going up
+            entity.top_collision(self)
+        entity.update_rect_y()
+
+    def collide_entity_x(self,entity):#platofmr miving
         if self.velocity[0] > 0:#going to the right
             entity.left_collision(self)
         else:#going to the leftx
@@ -716,15 +724,7 @@ class Collision_dynamic(Collision_texture):
             entity.down_collision(self)
         else:#going up
             entity.top_collision(self)
-        entity.update_rect_y()
-
-    def collide_y(self,entity):  #entity moving
-        if entity.velocity[1] > self.velocity[1]:#going down
-            entity.down_collision(self)
-            entity.limit_y()
-        else:#going up
-            entity.top_collision(self)
-        entity.update_rect_y()
+        entity.update_rect_y()        
 
 class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):

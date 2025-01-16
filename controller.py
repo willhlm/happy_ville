@@ -30,7 +30,7 @@ class Controller:
         for controller_id in range(pygame._sdl2.controller.get_count()):
             self.controllers.append(pygame._sdl2.controller.Controller(controller_id))
 
-    def rumble(self, duration=1000):
+    def rumble(self, duration = 1000):
         for controller in self.controllers:
             controller.rumble(0, 0.7, duration)  # Low frequency, high frequency, duration
 
@@ -175,7 +175,7 @@ class Controller:
             if abs(r_axis_y) > 0.1:
                 self.value["r_stick"][1] = r_axis_y
 
-        self.discrete_inputs_UI()#continious inout are made discrete for UI (UI reliases on input buffer: player movement can read difrectly self.value)
+        self.discrete_inputs_UI()#continious inout are made discrete for UI (UI relies on input buffer: player movement can read difrectly self.value)
 
     def discrete_inputs_UI(self):#inserts in buffer if there is a big change in input, or if there has been some time since last input
         current_time = time.time()

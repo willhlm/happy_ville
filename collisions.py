@@ -44,13 +44,10 @@ class Collisions():
             else:
                 interactable.player_noncollision()
 
-    def sprite_collide(self, sprite, group):
-        return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
-
     @staticmethod
     def counter(fprojectiles, eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group
-            collision_epro = pygame.sprite.spritecollideany(projectile,eprojectiles,Collisions.collided)
+            collision_epro = pygame.sprite.spritecollideany(projectile, eprojectiles, Collisions.collided)
             if collision_epro:
                 projectile.collision_projectile(collision_epro)
 
@@ -127,6 +124,9 @@ class Collisions():
             static_entities_y = pygame.sprite.spritecollide(platform, dynamic_Entities, False, Collisions.collided)#returns trhe entity
             for static_entity_y in static_entities_y:
                 platform.collide_entity_y(static_entity_y)    
+
+    def sprite_collide(self, sprite, group):
+        return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
 
     #make the hitbox collide instead of rect
     @staticmethod

@@ -9,7 +9,6 @@ class AI():#parent AI
     def update(self):#the init will run the same frame but its update in the next
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx, self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance
         self.children[-1].update()
-        print(self.children[-1])
 
     def append_child(self, child):#the init will run the same frame but its update in the next
         self.children.append(child)
