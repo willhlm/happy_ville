@@ -751,25 +751,38 @@ class Rainbow(Staticentity):#2D explosion
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['rainbow'])#shader render
 
-class Explosion_shader(Staticentity):#2D explosion
+class Death_fog(Staticentity):#2D explosion
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
+        self.noise_layer = game_objects.game.display.make_layer(size)
 
-        self.hitbox = pygame.Rect(pos, size)
-        self.time = 0
         self.size = size
+        self.time = 0
 
     def release_texture(self):
         self.image.release()
 
     def update(self):
-        self.time += self.game_objects.game.dt
+        super().update()
+        self.time += 1
 
     def draw(self, target):
-        self.game_objects.shaders['explosion']['iTime'] = self.time*0.01
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time * 0.05
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]#[self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
+        self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+        
+
+        self.game_objects.shaders['death_fog']['TIME'] = self.time*0.01
+        self.game_objects.shaders['death_fog']['noise'] = self.noise_layer.texture
+        self.game_objects.shaders['death_fog']['velocity'] = [0, 0]
+        self.game_objects.shaders['death_fog']['fog_color'] = [0, 0, 0, 1]
+
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['explosion'])#shader render
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['death_fog'])#shader render
+
 
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
@@ -809,7 +822,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        self.running_particles = Dust_running_particles#default particles while runing
+        self.collision_platform = None
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -861,7 +874,8 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['left'] = True
         self.currentstate.handle_input(type)
 
-    def down_collision(self, block):
+    def down_collision(self, block):    
+        self.collision_platform = block#save the latest platform
         self.hitbox.bottom = block.hitbox.top
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
@@ -871,7 +885,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
-    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop    
         self.velocity[1] = 1.2/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
@@ -884,7 +898,9 @@ class Character(Platform_entity):#enemy, NPC,player
         self.shader_state = states_shader.Idle(self)
 
     def update(self):
-        self.update_vel()#need to be after update_timers since jump will add velocity in update_timers
+        self.update_vel()
+        self.platform_collision()#shoudl be after update_vel
+
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
         self.animation.update()#need to be after currentstate since animation will animate the current state
         self.shader_state.update()
@@ -1057,7 +1073,7 @@ class Player(Character):
     def update(self):
         super().update()
         self.omamoris.update()
-        self.update_timers()        
+        self.update_timers()  
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -1073,7 +1089,7 @@ class Player(Character):
             timer.update()
 
     def on_cayote_timeout(self):
-        self.flags['ground'] = False
+        self.flags['ground'] = False     
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False
@@ -3020,7 +3036,6 @@ class Shield(Projectiles):#a protection shield
         self.kill()
 
     def update(self):
-        self.update_timers()
         self.time += self.entity.game_objects.game.dt
         self.update_pos()
 
@@ -3943,7 +3958,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         if self.time > 100:
             self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.3)
             bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
-            self.game_objects.dynamic_platforms.add(bubble)
+            #self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
             self.time = random.randint(0, 50)
 

@@ -347,6 +347,10 @@ class Level():
                 self.references['shade_trigger'] = new_interacable
                 self.game_objects.interactables.add(new_interacable)
 
+            elif id == 24:#deadth fog
+                new_fog = entities.Death_fog(object_position, self.game_objects, object_size)
+                self.game_objects.cosmetics.add(new_fog)
+
             elif id  == 25:#light sourde
                 prop = {}
                 for property in properties:
@@ -403,8 +407,8 @@ class Level():
                 platform = platforms.Collision_shadow_light(object_position, self.game_objects, object_size)
                 self.game_objects.cosmetics.add(platform)
 
-            elif id == 31:#explosion
-                explosion = entities.Explosion_shader(object_position, self.game_objects, object_size)
+            elif id == 31:#rainbow
+                explosion = entities.Rainbow(object_position, self.game_objects, object_size)
                 self.game_objects.cosmetics.add(explosion)
 
             elif id == 32:#smoke

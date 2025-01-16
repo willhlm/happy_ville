@@ -755,15 +755,14 @@ class Ability_menu(Gameplay):#when pressing tab
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:#press TODO change to right analogue stick. What should it be on keyboard?
-            if event[-1] == 'right':
-                self.index+=1
-                if self.index>len(self.abilities)-1:
-                    self.index=0
-            elif event[-1] =='left':
-                self.index-=1
-                if self.index<0:
-                    self.index=len(self.abilities)-1
+        if event[2]['l_stick'][1] > 0:#dwpn
+            self.index += 1
+            if self.index > len(self.abilities)-1:
+                self.index = 0
+        elif event[2]['l_stick'][1] < 0:#up
+            self.index-=1
+            if self.index<0:
+                self.index=len(self.abilities)-1
         elif event [1]:#release
             if event[-1]=='rb':
                 self.game.game_objects.player.abilities.equip=self.abilities[self.index]
