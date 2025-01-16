@@ -899,8 +899,6 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def update(self):
         self.update_vel()
-        self.platform_collision()#shoudl be after update_vel
-
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
         self.animation.update()#need to be after currentstate since animation will animate the current state
         self.shader_state.update()

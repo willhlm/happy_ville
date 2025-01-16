@@ -9,7 +9,6 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.rect.topleft = pos
         self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
-
         #self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
 
     def collide_x(self, entity):
@@ -32,7 +31,7 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         super().kill()
 
     def jumped(self):#called from player states jump_main
-        pass
+        return C.air_timer
 
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
@@ -734,6 +733,9 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def jumped(self):#called from player states jump_main
         self.deactivate()
+        scale = 0.5
+        if self.game_objects.player.tjasolmais_embrace: scale = 2            
+        return C.air_timer * scale
 
     def update_vel(self):
         self.velocity[1] -= self.sign * self.game_objects.game.dt*0.01        
