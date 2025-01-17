@@ -742,11 +742,10 @@ class Ability_menu(Gameplay):#when pressing tab
     def render(self):
         super().render()
         self.surface.clear(20,20,20,100)
-
         self.game.display.render(self.surface.texture, self.game.screen)
 
         hud=self.sprites[self.index]
-        for index,ability in enumerate(self.abilities):
+        for index, ability in enumerate(self.abilities):
             pos = [self.coordinates[index][0] + 250, self.coordinates[index][1] + 100]
             self.game.display.render(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites['active_1'][0], self.game.screen,position =pos)
 

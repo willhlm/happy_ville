@@ -764,7 +764,6 @@ class Death_fog(Staticentity):#2D explosion
         self.image.release()
 
     def update(self):
-        super().update()
         self.time += 1
 
     def draw(self, target):
@@ -782,7 +781,6 @@ class Death_fog(Staticentity):#2D explosion
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['death_fog'])#shader render
-
 
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
@@ -822,7 +820,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        self.collision_platform = None
+        self.colliding_platform = None
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -842,12 +840,12 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
 
     def update_true_pos_x(self):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
         self.true_pos[0] += self.slow_motion*self.game_objects.game.dt*self.velocity[0]
-        self.rect.left = int(self.true_pos[0])#should be int
+        self.rect.left = round(self.true_pos[0])#should be int -> round fixes gliding on bubble
         self.update_hitbox()
 
     def update_true_pos_y(self):#called from Engine.platform collision
         self.true_pos[1] += self.slow_motion*self.game_objects.game.dt*self.velocity[1]
-        self.rect.top = int(self.true_pos[1])#should be int
+        self.rect.top = round(self.true_pos[1])#should be int -> round fixes gliding on bubble
         self.update_hitbox()
 
     #ramp collisions
@@ -875,7 +873,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.currentstate.handle_input(type)
 
     def down_collision(self, block):    
-        self.collision_platform = block#save the latest platform
+        self.colliding_platform = block#save the latest platform
         self.hitbox.bottom = block.hitbox.top
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
@@ -1079,7 +1077,7 @@ class Player(Character):
         self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
-        self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]# the normal map shader can invert the normal map depending on direction
+        self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
         self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
     def update_timers(self):
@@ -2419,25 +2417,131 @@ class Player_abilities():
         elif value[1] == -1:#pressed down
             pass
 
-class Movement_abilities():#ailas movement abilities. Contains logic to handle the level ups from save point. Should it do something when used?
+class Player_ability():#aila abilities
     def __init__(self,entity):
         self.entity = entity
-        self.level = 1
+        self.game_objects = entity.game_objects
+        self.level = 1#upgrade pointer
+        self.animation = animation.Animation(self)
+        self.currentstate = states_basic.Idle(self)#
+        self.currentstate.set_animation_name('idle_1')
 
     def upgrade_ability(self):
         self.level += 1
 
-class Dash(Movement_abilities):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def activate(self,level):#for UI of Aila abilities
+        self.currentstate.set_animation_name('active_'+str(level))
+        self.level = level
 
-class Wall_glide(Movement_abilities):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def deactivate(self,level):#for UI of Aila abilities
+        self.currentstate.set_animation_name('idle_'+str(level))
+        self.level = level
 
-class Double_jump(Movement_abilities):
+    def initiate(self):#called when using the ability
+        pass
+
+    def update(self):#called from gameplayHUD
+        self.animation.update()
+        self.currentstate.update()
+
+    def reset_timer(self):
+        pass
+
+class Dash(Player_ability):
     def __init__(self,entity):
         super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/abilities/Dash/',entity.game_objects)
+        self.image = self.sprites['idle_1'][0]
+        self.description = ['dash','free dash','invinsible dash','dash attack']
+
+class Wall_glide(Player_ability):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/abilities/Wall_glide/',entity.game_objects)
+        self.image = self.sprites['idle_1'][0]
+        self.description = ['wall glide','free wall jumps','donno','donno']
+
+class Double_jump(Player_ability):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/abilities/Double_jump/',entity.game_objects)
+        self.image = self.sprites['idle_1'][0]
+        self.description = ['doulbe jump','free double jump','donno','donno']
+
+class Horagalles_rage(Player_ability):#desolate dive:thunder god:
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/horagalles_rage/',entity.game_objects)        
+        self.description = ['thunder','hits one additional target','one additional damage','imba']
+
+    def initiate(self, enemy_rect):
+        thunder = Thunder(enemy_rect, self.entity.game_objects, lifetime =  1000)
+        thunder.rect.midbottom = enemy_rect.midbottom
+        thunder.hitbox = thunder.rect.copy()
+        self.entity.projectiles.add(thunder)#add attack to group
+
+class Tjasolmais_embrace(Player_ability):#makes the shield, water god
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/tjasolmais_embrace/',entity.game_objects)
+        self.description = ['shield','hits one additional target','one additional damage','imba']
+        #-> higher level can reflect projectiles? or maybe hurt enemy?
+
+    def initiate(self):#called when using the abilty
+        shield = Shield(self.entity)
+        self.entity.tjasolmais_embrace = shield
+        self.entity.projectiles.add(shield)
+
+class Maderakkas_reflection(Player_ability):#migawari: woman/mother god
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/maderakkas_reflection/',entity.game_objects)
+        self.health = 1
+        self.description = ['migawari','add extra health to migawari','heals aila when killed','imba']
+
+    def initiate(self):#called when using the ability
+        spawn = Maderakkas_reflection_entity(self.entity.rect.midtop, self.entity.game_objects, lifetime = 1000, health = self.health)
+        self.entity.game_objects.players.add(spawn)
+
+    def upgrade_ability(self):#called from upgrade menu
+        self.level += 1
+        if self.level == 2:
+            self.health = 2
+
+class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
+        self.duration = 200#slow motion duration, in time [whatever units]
+        self.rate = 0.5#slow motion rate
+        self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
+
+    def initiate(self):#called when using the ability from player states
+        new_state = states.Slow_motion_gameplay(self.entity.game_objects.game, rate = self.rate, duration = self.duration)
+        new_state.enter_state()
+
+    def upgrade_ability(self):#called from upgrade menu
+        self.level += 1
+        if self.level == 3:
+            self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila
+            self.duration = 400#slow motion duration, in time [whatever units]
+        elif self.level == 2:
+            self.duration = 400#slow motion duration, in time [whatever units]
+
+class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
+        self.level = 1#upgrade pointer
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
+
+    def initiate(self):#called when using the attack
+        if self.entity.dir[1] == 0:#left or right
+            dir = self.entity.dir.copy()
+        else:#up or down
+            dir = [0,-self.entity.dir[1]]
+
+        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir))
 
 class Omamoris():#omamori handler -> "neckalce"
     def __init__(self, entity):
@@ -3058,85 +3162,6 @@ class Shield(Projectiles):#a protection shield
 
     def collision_platform(self, collision_plat):#collision platform, called from collusoin_block
         pass
-
-#aila abilities
-class Player_ability():#the abilities aila can absorb. Handles upgrades, spawn the ability and UI and stuff
-    def __init__(self, entity):
-        self.entity = entity
-        self.level = 1#upgrade pointer
-
-    def initiate(self):#called when using the ability
-        pass
-
-class Horagalles_rage(Player_ability):#desolate dive:thunder god:
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/horagalles_rage/',entity.game_objects)
-
-    def initiate(self, enemy_rect):
-        thunder = Thunder(enemy_rect, self.entity.game_objects, lifetime =  1000)
-        thunder.rect.midbottom = enemy_rect.midbottom
-        thunder.hitbox = thunder.rect.copy()
-        self.entity.projectiles.add(thunder)#add attack to group
-
-class Tjasolmais_embrace(Player_ability):#makes the shield, water god
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/tjasolmais_embrace/',entity.game_objects)
-        #-> higher level can reflect projectiles? or maybe hurt enemy?
-
-    def initiate(self):#called when using the abilty
-        shield = Shield(self.entity)
-        self.entity.tjasolmais_embrace = shield
-        self.entity.projectiles.add(shield)
-
-class Maderakkas_reflection(Player_ability):#migawari: woman/mother god
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/maderakkas_reflection/',entity.game_objects)
-        self.health = 1
-
-    def initiate(self):#called when using the ability
-        spawn = Maderakkas_reflection_entity(self.entity.rect.midtop, self.entity.game_objects, lifetime = 1000, health = self.health)
-        self.entity.game_objects.players.add(spawn)
-
-    def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
-        if self.level == 2:
-            self.health = 2
-
-class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
-        self.duration = 200#slow motion duration, in time [whatever units]
-        self.rate = 0.5#slow motion rate
-
-    def initiate(self):#called when using the ability from player states
-        new_state = states.Slow_motion_gameplay(self.entity.game_objects.game, rate = self.rate, duration = self.duration)
-        new_state.enter_state()
-
-    def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
-        if self.level == 3:
-            self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila
-            self.duration = 400#slow motion duration, in time [whatever units]
-        elif self.level == 2:
-            self.duration = 400#slow motion duration, in time [whatever units]
-
-class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
-        self.level = 1#upgrade pointer
-
-    def initiate(self):#called when using the attack
-        if self.entity.dir[1] == 0:#left or right
-            dir = self.entity.dir.copy()
-        else:#up or down
-            dir = [0,-self.entity.dir[1]]
-
-        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir))
 
 #things player can pickup
 class Loot(Platform_entity):#
