@@ -994,6 +994,30 @@
                          "width":423.492588762496,
                          "x":2992,
                          "y":1947.90968631506
+                        }, 
+                        {
+                         "gid":4121,
+                         "height":16,
+                         "id":1921,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":5952,
+                         "y":2544
+                        }, 
+                        {
+                         "gid":4121,
+                         "height":16,
+                         "id":1922,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":6065,
+                         "y":2545
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -3150,7 +3174,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_2"
+                                 "value":"hlifblom_2"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -4011,6 +4035,18 @@
                          "width":48,
                          "x":3072,
                          "y":1824
+                        }, 
+                        {
+                         "gid":4121,
+                         "height":48,
+                         "id":1927,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":720,
+                         "x":4768,
+                         "y":1744
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -4251,7 +4287,7 @@
          "y":0
         }],
  "nextlayerid":55,
- "nextobjectid":1920,
+ "nextobjectid":1928,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",

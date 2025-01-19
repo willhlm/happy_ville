@@ -48,7 +48,6 @@ class Game_Objects():
         self.enemies = groups.Group()#enemies
         self.npcs = groups.Group()#npcs
         self.platforms = groups.Group()#platforms
-        self.dynamic_platforms = groups.Group()#movinbg platforms: these stuff should be added to platforms as well (for update and drawing)
         self.special_shaders = groups.Group()#portal use it for the drawing: draw not called normally but in different gameplay state
         self.platforms_ramps = groups.Group()#ramps
         self.all_bgs = groups.LayeredUpdates()#bg from tiled
@@ -96,7 +95,6 @@ class Game_Objects():
         self.enemies.empty()
         self.interactables.empty()
         self.platforms.empty()
-        self.dynamic_platforms.empty()
         self.loot.empty()
         self.platforms_ramps.empty()
         self.entity_pause.empty()
@@ -133,8 +131,6 @@ class Game_Objects():
         self.collisions.platform_collision(self.fprojectiles)
         self.collisions.platform_collision(self.npcs)
         self.collisions.platform_collision(self.loot)
-
-        self.collisions.dynamic_platform_collision(self.players)
 
     def update(self):
         self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll

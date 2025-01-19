@@ -3,12 +3,13 @@ import entities, states_time_collision, animation, read_files, states_basic, sta
 import constants as C
 
 class Platform(pygame.sprite.Sprite):#has hitbox
-    def __init__(self, pos, size = (16,16)):
+    def __init__(self, pos, size = (16,16), run_particle = 'dust'):
         super().__init__()
         self.rect = pygame.Rect(pos, size)
         self.rect.topleft = pos
         self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
+        #self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
 
     def collide_x(self, entity):
         pass
@@ -29,10 +30,12 @@ class Platform(pygame.sprite.Sprite):#has hitbox
         self.release_texture()#before killing, need to release the textures (but not the onces who has a pool)
         super().kill()
 
+    def jumped(self):#called from player states jump_main
+        return C.air_timer
+
 class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
-        super().__init__(pos, size)
-        self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
+        super().__init__(pos, size, run_particle)
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -45,15 +48,13 @@ class Collision_block(Platform):
         if entity.velocity[1] > 0:#going down
             entity.down_collision(self)
             entity.limit_y()
-            entity.running_particles = self.run_particles#save the particles to make
         else:#going up
             entity.top_collision(self)
         entity.update_rect_y()
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
-        super().__init__(pos,size)
-        self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
+        super().__init__(pos, size, run_particle)        
 
     def collide_x(self,entity):
         pass
@@ -64,7 +65,6 @@ class Collision_oneway_up(Platform):
         if entity.hitbox.bottom <= self.hitbox.top + offset:
             entity.down_collision(self)
             entity.limit_y()
-            entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
 
 class Collision_right_angle(Platform):#ramp
@@ -532,7 +532,6 @@ class Collision_timer(Collision_texture):#collision block that dissapears if ail
             self.game_objects.timer_manager.start_timer(60, self.deactivate)
             entity.down_collision(self)
             entity.limit_y()
-            entity.running_particles = self.run_particles#save the particles to make
             entity.update_rect_y()
 
 class Rhoutta_encounter_1(Collision_timer):
@@ -540,7 +539,6 @@ class Rhoutta_encounter_1(Collision_timer):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/rhoutta_encounter_1/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.run_particles = entities.Dust_running_particles
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
 
@@ -558,7 +556,6 @@ class Crystal_mines_1(Collision_timer):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/crystal_mines_1/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.run_particles = entities.Dust_running_particles
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = pygame.Rect(pos[0], pos[1], self.rect[2], self.rect[3]*0.4)
         self.hitbox.center = self.rect.center
@@ -685,7 +682,10 @@ class Collision_dynamic(Collision_texture):
 
     def update(self):
         super().update()
+        self.old_hitbox = self.hitbox.copy()#save old position before moving
         self.update_vel()
+        self.update_true_pos_x()
+        self.update_true_pos_y()
 
     def update_true_pos_x(self):
         self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
@@ -697,34 +697,22 @@ class Collision_dynamic(Collision_texture):
         self.rect.top = int(self.true_pos[1])#should be int
         self.hitbox.top = self.rect.top
 
-    def collide_x(self,entity):#entity moving
-        if entity.velocity[0] > self.velocity[0]:#going to the right
-            entity.right_collision(self)
-        else:#going to the leftx
-            entity.left_collision(self)
+    def collide_x(self, entity):  # Handles horizontal collision
+        if entity.hitbox.right >= self.hitbox.left and entity.old_hitbox.right <= self.old_hitbox.left:
+            entity.right_collision(self)  
+        if entity.hitbox.left <= self.hitbox.right and entity.old_hitbox.left >= self.old_hitbox.right:
+            entity.left_collision(self)  
         entity.update_rect_x()
 
-    def collide_y(self,entity):  #entity moving
-        if entity.velocity[1] > self.velocity[1]:#going down
-            entity.down_collision(self)
+    def collide_y(self, entity):  # Handles vertical collision
+        if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
+            entity.down_collision(self)  
             entity.limit_y()
-        else:#going up
-            entity.top_collision(self)
-        entity.update_rect_y()
-
-    def collide_entity_x(self,entity):#platofmr miving
-        if self.velocity[0] > 0:#going to the right
-            entity.left_collision(self)
-        else:#going to the leftx
-            entity.right_collision(self)
-        entity.update_rect_x()
-
-    def collide_entity_y(self,entity):  #platofmr miving
-        if self.velocity[1] < 0:#going up
-            entity.down_collision(self)
-        else:#going up
-            entity.top_collision(self)
-        entity.update_rect_y()        
+            self.sign = -3
+            #self.velocity[1] = 1
+        if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
+            entity.top_collision(self)  
+        entity.update_rect_y()  # Update player’s vertical position    
 
 class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):
@@ -733,16 +721,24 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.image = self.sprites['idle'][0]
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
+        self.old_hitbox = self.hitbox.copy()
 
-        lifetime = prop.get('lifetime', 300)
+        lifetime = 1000#prop.get('lifetime', 300)
         self.game_objects.timer_manager.start_timer(lifetime, self.deactivate)
         #TODO horitoxntal or veritcal moment
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
         self.animation = animation.Animation(self)
-        self.currentstate = states_time_collision.Idle(self)#
+        self.currentstate = states_time_collision.Idle(self)#s
+        self.sign = 1
+
+    def jumped(self):#called from player states jump_main
+        self.deactivate()
+        scale = 0.5
+        if self.game_objects.player.tjasolmais_embrace: scale = 2            
+        return C.air_timer * scale
 
     def update_vel(self):
-        self.velocity[1] -= self.game_objects.game.dt*0.01
+        self.velocity[1] -= self.sign * self.game_objects.game.dt*0.01        
 
     def release_texture(self):
         pass

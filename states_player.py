@@ -101,8 +101,8 @@ class Walk_main(Player_states):
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
 
     def running_particles(self):
-        particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
-        self.entity.game_objects.cosmetics.add(particle)
+        #particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
+        #self.entity.game_objects.cosmetics.add(particle)
         self.particle_timer = 10
 
     def handle_press_input(self,input):
@@ -164,8 +164,8 @@ class Run_pre(Player_states):
         self.enter_state('Run_main')
 
     def running_particles(self):
-        particle = self.entity.running_particles(self.entity.hitbox.midbottom, self.entity.game_objects)
-        self.entity.game_objects.cosmetics.add(particle)
+        #particle = self.entity.running_particles(self.entity.hitbox.midbottom, self.entity.game_objects)
+        #self.entity.game_objects.cosmetics.add(particle)
         self.particle_timer = 10
 
     def handle_press_input(self,input):
@@ -235,8 +235,8 @@ class Run_main(Player_states):
         super().enter_state(new_state)
 
     def running_particles(self):
-        particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
-        self.entity.game_objects.cosmetics.add(particle)
+        #particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
+        #self.entity.game_objects.cosmetics.add(particle)
         self.particle_timer = 10
 
     def handle_press_input(self,input):
@@ -339,10 +339,11 @@ class Jump_main(Player_states):
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.velocity[1] = C.jump_vel_player
-        self.air_timer = C.air_timer 
+        
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
+        self.air_timer = self.entity.collision_platform.jumped()#jump charactereistics is set from the platform
 
     def update(self):
         self.jump_dash_timer -= self.entity.game_objects.game.dt
@@ -395,9 +396,6 @@ class Jump_main(Player_states):
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
 
-    def increase_phase(self):#called when an animation is finihed for that state
-        pass
-
 class Double_jump_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -432,7 +430,6 @@ class Fall_pre(Player_states):
         event = input.output()
         if event[-1] == 'a':
             if self.entity.flags['ground']:
-                print('fe')
                 input.processed()
                 self.enter_state('Jump_main', wall_dir = self.wall_dir)        
         elif event[-1]=='b':
@@ -458,7 +455,7 @@ class Fall_pre(Player_states):
             self.enter_state('Wall_glide_main')
         elif input == 'belt':
             self.enter_state('Belt_glide_main')            
-        elif input == 'Ground':
+        elif input == 'Ground':            
             if self.entity.acceleration[0] != 0:
                 self.enter_state('Run_main')
             else:

@@ -126,9 +126,10 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_3','1')
+            #self.game.game_objects.load_map(self,'nordveden_3','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
+            self.game.game_objects.load_map(self,'hlifblom_2','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -755,15 +756,14 @@ class Ability_menu(Gameplay):#when pressing tab
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[0]:#press TODO change to right analogue stick. What should it be on keyboard?
-            if event[-1] == 'right':
-                self.index+=1
-                if self.index>len(self.abilities)-1:
-                    self.index=0
-            elif event[-1] =='left':
-                self.index-=1
-                if self.index<0:
-                    self.index=len(self.abilities)-1
+        if event[2]['l_stick'][1] > 0:#dwpn
+            self.index += 1
+            if self.index > len(self.abilities)-1:
+                self.index = 0
+        elif event[2]['l_stick'][1] < 0:#up
+            self.index-=1
+            if self.index<0:
+                self.index=len(self.abilities)-1
         elif event [1]:#release
             if event[-1]=='rb':
                 self.game.game_objects.player.abilities.equip=self.abilities[self.index]

@@ -89,9 +89,10 @@ class Collisions():
     #collisions between entities-groups: a dynamic and a static one
     def platform_collision(self,dynamic_Entities):
         for entity in dynamic_Entities.sprites():
-            entity.collision_types = {'top':False, 'bottom':False, 'right':False, 'left':False}
+            entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False, 'standing_platform': None}
             
             #move in x every dynamic sprite
+            entity.old_hitbox = entity.hitbox.copy()#save old position
             entity.update_true_pos_x()
             static_entities_x = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
             for static_entity_x in static_entities_x:
@@ -108,22 +109,7 @@ class Collisions():
                 for ramp in ramps:
                     ramp.collide(entity)
             else:
-                entity.go_through['ramp'] = False
-
-    def dynamic_platform_collision(self, dynamic_Entities):#for moving platorms
-        for platform in self.game_objects.dynamic_platforms.sprites():
-
-            #move in x every dynamic sprite
-            platform.update_true_pos_x()
-            static_entities_x = pygame.sprite.spritecollide(platform, dynamic_Entities, False, Collisions.collided)#returns trhe entity
-            for static_entity_x in static_entities_x:
-                platform.collide_entity_x(static_entity_x)      
-
-            #move in x every dynamic sprite
-            platform.update_true_pos_y()
-            static_entities_y = pygame.sprite.spritecollide(platform, dynamic_Entities, False, Collisions.collided)#returns trhe entity
-            for static_entity_y in static_entities_y:
-                platform.collide_entity_y(static_entity_y)    
+                entity.go_through['ramp'] = False       
 
     def sprite_collide(self, sprite, group):
         return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
