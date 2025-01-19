@@ -37,7 +37,7 @@ class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos, size, run_particle)
 
-    def collide_x(self,entity):        
+    def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
             entity.right_collision(self)
         else:#going to the leftx
@@ -54,7 +54,7 @@ class Collision_block(Platform):
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
-        super().__init__(pos, size, run_particle)        
+        super().__init__(pos, size, run_particle)
 
     def collide_x(self,entity):
         pass
@@ -699,20 +699,21 @@ class Collision_dynamic(Collision_texture):
 
     def collide_x(self, entity):  # Handles horizontal collision
         if entity.hitbox.right >= self.hitbox.left and entity.old_hitbox.right <= self.old_hitbox.left:
-            entity.right_collision(self)  
+            entity.right_collision(self)
         if entity.hitbox.left <= self.hitbox.right and entity.old_hitbox.left >= self.old_hitbox.right:
-            entity.left_collision(self)  
+            entity.left_collision(self)
         entity.update_rect_x()
 
     def collide_y(self, entity):  # Handles vertical collision
         if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
-            entity.down_collision(self)  
+            entity.down_collision(self)
             entity.limit_y()
-            self.sign = -3
             #self.velocity[1] = 1
+            self.collided = True
+
         if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
-            entity.top_collision(self)  
-        entity.update_rect_y()  # Update player’s vertical position    
+            entity.top_collision(self)
+        entity.update_rect_y()  # Update player’s vertical position
 
 class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):
@@ -722,6 +723,10 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
         self.old_hitbox = self.hitbox.copy()
+        self.max_down_vel = 0.6
+        self.max_up_vel = -1.3
+        self.accel = 3
+        self.collided = False
 
         lifetime = 1000#prop.get('lifetime', 300)
         self.game_objects.timer_manager.start_timer(lifetime, self.deactivate)
@@ -734,11 +739,18 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def jumped(self):#called from player states jump_main
         self.deactivate()
         scale = 0.5
-        if self.game_objects.player.tjasolmais_embrace: scale = 2            
+        if self.game_objects.player.tjasolmais_embrace: scale = 2
         return C.air_timer * scale
 
     def update_vel(self):
-        self.velocity[1] -= self.sign * self.game_objects.game.dt*0.01        
+        if self.collided:
+            self.sign = -1
+            self.accel = 40
+            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            self.velocity[1] = min(self.velocity[1], self.max_down_vel)
+        else:
+            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            self.velocity[1] = max(self.velocity[1], self.max_up_vel)
 
     def release_texture(self):
         pass

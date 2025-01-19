@@ -3959,7 +3959,7 @@ class Place_holder_interacatble(Interactable):
     def release_texture(self):
         pass
 
-class Bubble_source(Interactable):#the thng that spits out bubbles in cave
+class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK TUAH!
     def __init__(self, pos, game_objects, bubble, **prop):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
@@ -3968,6 +3968,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()
+        self.spawn_timer = 150
 
         self.bubble = bubble#the bubble is in platform, so the reference is sent in init
         self.prop = prop
@@ -3976,15 +3977,18 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
     def group_distance(self):
         pass
 
+    def draw(self, target):
+        pass
+
     def update(self):
         super().update()
         self.time += self.game_objects.game.dt
-        if self.time > 100:
+        if self.time > self.spawn_timer:
             self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.3)
-            bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
+            bubble = self.bubble([self.rect.centerx, self.rect.top], self.game_objects, **self.prop)
             #self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
-            self.time = random.randint(0, 50)
+            self.time = random.randint(0, 20)
 
 class Crystal_source(Interactable):#the thng that spits out crystals in crystal mines
     def __init__(self, pos, game_objects, **kwarg):
