@@ -343,7 +343,7 @@ class Jump_main(Player_states):
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
-        self.air_timer = self.entity.collision_platform.jumped()#jump charactereistics is set from the platform
+        self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
 
     def update(self):
         self.jump_dash_timer -= self.entity.game_objects.game.dt

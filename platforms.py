@@ -37,7 +37,7 @@ class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos, size, run_particle)
 
-    def collide_x(self,entity):
+    def collide_x(self,entity):        
         if entity.velocity[0] > 0:#going to the right
             entity.right_collision(self)
         else:#going to the leftx

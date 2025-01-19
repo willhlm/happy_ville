@@ -37,7 +37,7 @@ void main() {
     vec4 baseColor = mix(vec4(0, 0, 0, 0), fog_color, rand(UV + motion)); 
     
     // Apply the transparency modifier based on the y-position
-    COLOR = vec4(baseColor.rgb, baseColor.a * (1-UV.y));
+    COLOR = vec4(baseColor.rgb, baseColor.a * (1-UV.y*UV.y));
 
 
 }

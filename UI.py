@@ -29,7 +29,7 @@ class Gameplay_UI():
 
         self.abilities = []
         for key in self.game_objects.player.abilities.movement_dict.keys():
-            self.abilities.append(getattr(entities_UI, key)([0,0],self.game_objects))
+            self.abilities.append(self.game_objects.player.abilities.movement_dict[key])#the ability object
             if len(self.abilities) == len(self.ability_hud):
                 break
 
