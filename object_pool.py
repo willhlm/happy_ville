@@ -49,6 +49,8 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Maderakkas_reflection_entity.pool(game_objects)
 
         entities_UI.Menu_Arrow.pool(game_objects)
+        entities.Arrow_UI.pool(game_objects)
+
 
         entities_parallax.Leaves.pool(game_objects)
         entities_parallax.Droplet.pool(game_objects)

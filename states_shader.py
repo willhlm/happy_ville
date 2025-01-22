@@ -248,23 +248,3 @@ class Outline(Shader_states):
     def handle_input(self, input, **kwarg):
         if input == 'idle':
             self.enter_state('Idle')
-
-class Aura(Shader_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['aura']
-        self.time = 0
-
-    def update(self):
-        self.time +=1
-
-    def draw(self):       
-        self.entity.shader['time'] = self.time*0.01
-
-        #self.entity.shader['color_gradiant'] = self.entity.image
-        #self.entity.shader['AuraProgres'] = self.time*0.01
-
-    def handle_input(self, input, **kwarg):
-        if input == 'idle':
-            self.enter_state('Idle')
-

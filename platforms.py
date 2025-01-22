@@ -733,8 +733,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def jumped(self):#called from player states jump_main
         self.deactivate()
-        scale = 0.5
-        if self.game_objects.player.tjasolmais_embrace: scale = 2            
+        scale = self.game_objects.player.player_modifier.bubble_jump()
         return C.air_timer * scale
 
     def update_vel(self):

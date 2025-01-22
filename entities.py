@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, states, groups
+import read_files, particles, animation, dialogue, states, groups, player_modifier
 import states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 import AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
 import constants as C
@@ -645,7 +645,7 @@ class TwoD_liquid(Staticentity):
 
     def player_noncollision(self):
         if not self.interacted: return
-        self.game_objects.player.friction = C.friction_player.copy()
+        self.game_objects.player.friction = [self.game_objects.player.friction[0] * 0.5, self.game_objects.player.friction[1] * 0.5]
         self.game_objects.player.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
         vel_scale = abs(self.game_objects.player.velocity[1] / C.max_vel[1])
         self.splash(self.game_objects.player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
@@ -687,7 +687,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         player.velocity[0] += self.dir[0] * self.game_objects.game.dt
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt*0.5
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * player.player_modifier.up_stream()
 
     def player_noncollision(self):
         pass
@@ -764,7 +764,7 @@ class Death_fog(Staticentity):#2D explosion
         self.image.release()
 
     def update(self):
-        self.time += 1
+        self.time += self.game_objects.game.dt
 
     def draw(self, target):
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
@@ -781,6 +781,30 @@ class Death_fog(Staticentity):#2D explosion
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['death_fog'])#shader render
+
+class Arrow_UI(Staticentity):#2D explosion
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.image = Arrow_UI.image
+        self.time = 0
+        self.dir = [0, -1]#default direction
+
+    def release_texture(self):
+        pass
+
+    def update(self):
+        self.time += self.game_objects.game.dt
+
+    def pool(game_objects):
+        size = (200,100)#to make the arrow more uniform when roated
+        Arrow_UI.image = game_objects.game.display.make_layer(size)
+
+    def draw(self, target):
+        self.game_objects.shaders['arrow']['TIME'] = self.time*0.01
+        self.game_objects.shaders['arrow']['moonDirection'] = self.dir
+
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['arrow'])#shader render
 
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
@@ -990,19 +1014,17 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
-        self.tjasolmais_embrace = None
+        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc 
         
-        self.shader_state = states_shader.Aura(self)
-
     def ramp_down_collision(self, position):#when colliding with platform beneth
         super().ramp_down_collision(position)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
@@ -1013,13 +1035,13 @@ class Player(Character):
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
 
     def take_dmg(self, dmg = 1, duration = 20):
-        if self.tjasolmais_embrace: self.tjasolmais_embrace.take_dmg(dmg)
+        self.player_modifier.take_dmg(dmg)#Tjasolmais_embrace can set player in invinsible
         if self.flags['invincibility']: return
 
         self.flags['invincibility'] = True
         self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.health -= dmg * self.dmg_scale#a omamori can set the dmg_scale to 0.5
-        self.game_objects.UI['gameplay'].remove_hearts(dmg*self.dmg_scale)#update UI
+        self.game_objects.UI['gameplay'].remove_hearts(dmg * self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
             self.shader_state.handle_input('Hurt')#turn white and shake
@@ -1039,7 +1061,7 @@ class Player(Character):
         self.animation.update()#make sure you get the new animation
         self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
 
-        new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)#pause the game for a while with an optional shake
+        new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)
         new_game_state.enter_state()
 
         new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
@@ -2489,7 +2511,7 @@ class Tjasolmais_embrace(Player_ability):#makes the shield, water god
 
     def initiate(self):#called when using the abilty
         shield = Shield(self.entity)
-        self.entity.tjasolmais_embrace = shield
+        self.entity.player_modifier.enter_state('Tjasolmais_embrace', shield = shield)
         self.entity.projectiles.add(shield)
 
 class Maderakkas_reflection(Player_ability):#migawari: woman/mother god
@@ -3018,7 +3040,7 @@ class Aila_sword(Sword):
         self.tungsten_cost = 1#the cost to level up to next level
         self.stones = {}#{'red': Red_infinity_stone([0,0], entity.game_objects, entity = self), 'green': Green_infinity_stone([0,0], entity.game_objects, entity = self), 'blue': Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange': Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple': Purple_infinity_stone([0,0], entity.game_objects, entity = self)}#gets filled in when pick up stone. used also for inventory
         self.swing = 0#a flag to check which swing we are at (0 or 1)
-        self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#stones can change these to do specific things
+        self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#infinity stones can change these to do specific things
 
     def init(self):
         self.sprites = read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
@@ -3119,8 +3141,9 @@ class Shield(Projectiles):#a protection shield
         self.image = Shield.image
         self.rect = pygame.Rect(entity.hitbox.centerx, entity.hitbox.centery, self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
+        
         self.time = 0
-        self.entity.invincibile = True
+        self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
 
     def take_dmg(self, dmg):#called when entity takes damage
@@ -3154,8 +3177,8 @@ class Shield(Projectiles):#a protection shield
 
     def kill(self):
         super().kill()
-        self.entity.invincibile = False
-        self.entity.tjasolmais_embrace = None
+        self.entity.flags['invincibility'] = False
+        self.entity.player_modifier.enter_state('Player_modifier')
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         pass
