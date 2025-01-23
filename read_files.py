@@ -170,9 +170,11 @@ def alphabet_reader(path_to_sheet, h, num):
     row_h2 = list(pxarray.extract(pygame.Color(0, 255 ,0))[:,-1])
     pxarray.close()
 
-    indecies = [i for i in range(len(row_t)) if row_t[i] == -1]
-    indecies_h1 = [i for i in range(len(row_h1)) if row_h1[i] == -1]
-    indecies_h2 = [i for i in range(len(row_h2)) if row_h2[i] == -1]
+    mask = [-1, 4294967295]
+
+    indecies = [i for i in range(len(row_t)) if row_t[i] in mask]
+    indecies_h1 = [i for i in range(len(row_h1)) if row_h1[i] in mask]
+    indecies_h2 = [i for i in range(len(row_h2)) if row_h2[i] in mask]
 
     for i, val in enumerate(indecies):
         try:
