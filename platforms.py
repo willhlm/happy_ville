@@ -752,6 +752,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
             self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
 
+
     def release_texture(self):
         pass
 

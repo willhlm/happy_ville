@@ -165,14 +165,14 @@ def alphabet_reader(path_to_sheet, h, num):
     sheet = load_sprite(path_to_sheet)
 
     pxarray = pygame.PixelArray(sheet)
-    row_t = list(pxarray[:,0])
-    row_h1 = list(pxarray[:,-2])
-    row_h2 = list(pxarray[:,-1])
+    row_t = list(pxarray.extract(pygame.Color(255, 0 ,0))[:,0])
+    row_h1 = list(pxarray.extract(pygame.Color(0, 255 ,0))[:,-2])
+    row_h2 = list(pxarray.extract(pygame.Color(0, 255 ,0))[:,-1])
     pxarray.close()
 
-    indecies = [i for i in range(len(row_t)) if row_t[i] == -65536]
-    indecies_h1 = [i for i in range(len(row_h1)) if row_h1[i] == -16711936]
-    indecies_h2 = [i for i in range(len(row_h2)) if row_h2[i] == -16711936]
+    indecies = [i for i in range(len(row_t)) if row_t[i] == -1]
+    indecies_h1 = [i for i in range(len(row_h1)) if row_h1[i] == -1]
+    indecies_h2 = [i for i in range(len(row_h2)) if row_h2[i] == -1]
 
     for i, val in enumerate(indecies):
         try:
