@@ -729,9 +729,11 @@ class Biome():
         pass
 
     def play_music(self):
+        print(self.level.biome_name)
         try:#try laoding bg music
             sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
-            self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700)
+            self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700, vol = 1.0)
+            print(self.level.biome_name)
         except FileNotFoundError:
             print("No BG music found")
 
@@ -916,9 +918,99 @@ class Light_forest_cave(Biome):
         super().__init__(level)
 
     def play_music(self):
-        #super().play_music()
-        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/light_forest_cave')
-        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
+        super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/light_forest_cave/')
+        #self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
+
+    def room(self, room = 1):
+        self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)
+        self.level.game_objects.lights.ambient = (30/255,30/255,30/255,170/255)
+
+    def load_objects(self,data,parallax,offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 0:#cave grass
+                if parallax == [1,1]:#if BG1 layer
+                    new_grass = entities.Cave_grass(object_position, self.level.game_objects)
+                    self.level.game_objects.interactables.add(new_grass)
+                else:#if in parallax layers
+                    new_grass = entities_parallax.Cave_grass(object_position, self.level.game_objects, parallax)
+                    if self.level.layer.startswith('fg'):
+                        self.level.game_objects.all_fgs.add(new_grass)
+                    else:
+                        self.level.game_objects.all_bgs.add(new_grass)
+
+            elif id == 1:#ljusmaksar
+                new_grass = entities_parallax.Ljusmaskar(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_grass)
+                else:
+                    self.level.game_objects.all_bgs.add(new_grass)
+
+            elif id == 2:#droplet
+                if self.level.layer.startswith('fg'):
+                    group = self.level.game_objects.all_fgs
+                else:
+                    group = self.level.game_objects.all_bgs
+
+                new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, group)
+                group.add(new_drop)
+
+            elif id == 3:#falling rock trap
+                new_rock = entities_parallax.Falling_rock_source(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_rock)
+                else:
+                    self.level.game_objects.all_bgs.add(new_rock)
+
+            elif id == 4:#vines
+                new_vine = entities_parallax.Vines_2(object_position, self.level.game_objects, parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_vine)
+                else:
+                    self.level.game_objects.all_bgs.add(new_vine)
+
+            elif id == 5:#bubble source
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'lifetime':
+                        prop['lifetime'] = property['value']
+                    elif property['name'] == 'state':
+                        state = property['value']#horizontal or vertical movement #TODO
+
+                bubble_source = entities.Bubble_source(object_position, self.level.game_objects, platforms.Bubble, **prop)
+                self.level.game_objects.interactables.add(bubble_source)
+
+            elif id == 6:#spieks
+                spikes = entities.Spikes(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(spikes)
+
+            elif id == 7:#bubble
+                prop = {}
+                for property in properties:
+                    if property['name'] == 'lifetime':
+                        prop['lifetime'] = property['value']
+
+                new_bubble = platforms.Bubble_static(object_position, self.level.game_objects, **prop)
+                self.level.game_objects.platforms.add(new_bubble)
+
+            elif id == 8:#ball challange
+                new_challange = entities.Challenge_ball(object_position, self.level.game_objects)
+                self.level.game_objects.interactables.add(new_challange)
+
+class Hlifblom(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+
+    def play_music(self):
+        super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/light_forest_cave/')
+        #self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.1)
 
     def room(self, room = 1):
         self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [255/255,255/255,255/255,255/255], normal_interact = False)

@@ -424,7 +424,7 @@ class Sky(Staticentity):
         self.game_objects.shaders['cloud']['scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])     
+        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
 
 class Waterfall(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
@@ -772,7 +772,7 @@ class Death_fog(Staticentity):#2D explosion
         self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]#[self.game_objects.camera_manager.camera.scroll[0],self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
         self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
-        
+
 
         self.game_objects.shaders['death_fog']['TIME'] = self.time*0.01
         self.game_objects.shaders['death_fog']['noise'] = self.noise_layer.texture
@@ -896,7 +896,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['left'] = True
         self.currentstate.handle_input(type)
 
-    def down_collision(self, block):    
+    def down_collision(self, block):
         self.colliding_platform = block#save the latest platform
         self.hitbox.bottom = block.hitbox.top
         self.collision_types['bottom'] = True
@@ -907,7 +907,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
-    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop    
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
         self.velocity[1] = 1.2/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
@@ -1054,10 +1054,10 @@ class Player(Character):
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
             self.game_objects.quests_events.emit('player_died')#emit a signal that player died
-            self.death_state.die()#depending on gameplay state, different death stuff should happen            
+            self.death_state.die()#depending on gameplay state, different death stuff should happen
         return True#return truw to show that damage was taken
 
-    def die(self):#called from idle death_state, also called from vertical acid                
+    def die(self):#called from idle death_state, also called from vertical acid
         self.animation.update()#make sure you get the new animation
         self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
 
@@ -1070,7 +1070,7 @@ class Player(Character):
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
         new_game_state = states.Death(self.game_objects.game)
-        new_game_state.enter_state()        
+        new_game_state.enter_state()
 
     def heal(self, health = 1):
         self.health += health
@@ -1091,7 +1091,7 @@ class Player(Character):
     def update(self):
         super().update()
         self.omamoris.update()
-        self.update_timers()  
+        self.update_timers()
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -1107,7 +1107,7 @@ class Player(Character):
             timer.update()
 
     def on_cayote_timeout(self):
-        self.flags['ground'] = False     
+        self.flags['ground'] = False
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False
@@ -1266,6 +1266,7 @@ class Flower_butterfly(Flying_enemy):#peaceful ones
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/flower_butterfly/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/flower_butterfly/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
@@ -1545,7 +1546,7 @@ class Mygga_exploding(Flying_enemy):
         self.currentstate = states_exploding_mygga.Idle(self)
 
     def killed(self):
-        self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)            
+        self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)
         self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
         self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
@@ -1722,7 +1723,7 @@ class Vatt(Enemy):
 
         self.currentstate = states_vatt.Idle(self)
         self.AI = AI_vatt.AI(self)
-        self.attack_distance = [60, 30]        
+        self.attack_distance = [60, 30]
 
     def turn_clan(self):#this is acalled when tranformation is finished
         for enemy in self.game_objects.enemies.sprites():
@@ -2213,7 +2214,7 @@ class Butterfly(Flying_enemy):
     def group_distance(self):
         pass
 
-    def dead(self):#called when death animation is finished        
+    def dead(self):#called when death animation is finished
         super().dead()
         self.game_objects.quests_events.emit('butterfly_killed')
 
@@ -2493,7 +2494,7 @@ class Double_jump(Player_ability):
 class Horagalles_rage(Player_ability):#desolate dive:thunder god:
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/horagalles_rage/',entity.game_objects)        
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/horagalles_rage/',entity.game_objects)
         self.description = ['thunder','hits one additional target','one additional damage','imba']
 
     def initiate(self, enemy_rect):
@@ -2729,7 +2730,7 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.velocity = [0,0]
         self.dmg = 0
         self.currentstate.handle_input('Death')
-        self.game_objects.quests_events.emit('ball_killed')        
+        self.game_objects.quests_events.emit('ball_killed')
 
     #platform collisions
     def right_collision(self, block, type = 'Wall'):
@@ -3447,7 +3448,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         self.game_objects.cosmetics.add(twinkle)
 
     def interact(self, player):#when player press T
-        player.currentstate.enter_state('Pray_pre')        
+        player.currentstate.enter_state('Pray_pre')
         self.pickup(player)#object specific
         new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
@@ -3497,7 +3498,7 @@ class Omamori(Interactable_item):
         for spr in self.ui_group.sprites():
             spr.update()#the position
             spr.update_uniforms()#the unforms for the draw
-            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)     
+            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)
 
     def pickup(self, player):
         super().pickup(player)
@@ -3557,7 +3558,7 @@ class Loot_magnet(Omamori):
             loot.attract(self.entity.rect.center)
 
     def interact(self, player):
-        super().interact(player)   
+        super().interact(player)
         self.game_objects.quests_events.initiate_quest(self.quest.capitalize(), item = 'Loot_magnet')
 
     @classmethod
@@ -3981,7 +3982,7 @@ class Place_holder_interacatble(Interactable):
     def release_texture(self):
         pass
 
-class Bubble_source(Interactable):#the thng that spits out bubbles in cave
+class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK TUAH!
     def __init__(self, pos, game_objects, bubble, **prop):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/animations/bubble_source/', game_objects)
@@ -3990,6 +3991,7 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()
+        self.spawn_timer = 150
 
         self.bubble = bubble#the bubble is in platform, so the reference is sent in init
         self.prop = prop
@@ -3998,15 +4000,18 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave
     def group_distance(self):
         pass
 
+    def draw(self, target):
+        pass
+
     def update(self):
         super().update()
         self.time += self.game_objects.game.dt
-        if self.time > 100:
+        if self.time > self.spawn_timer:
             self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.3)
-            bubble = self.bubble([self.rect.centerx +  random.randint(-50, 50), self.rect.top], self.game_objects, **self.prop)
+            bubble = self.bubble([self.rect.centerx, self.rect.top], self.game_objects, **self.prop)
             #self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
-            self.time = random.randint(0, 50)
+            self.time = random.randint(0, 20)
 
 class Crystal_source(Interactable):#the thng that spits out crystals in crystal mines
     def __init__(self, pos, game_objects, **kwarg):
@@ -4083,12 +4088,12 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
 
         self.item = item
         self.quest = quest
-        
+
         self.interacted = self.game_objects.world_state.quests.get(quest, False)
         self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say
         self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
 
-    def buisness(self):#enters after conversation        
+    def buisness(self):#enters after conversation
         item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, quest = self.quest)#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)
 
@@ -4334,23 +4339,23 @@ class Event_trigger(Interactable):#cutscene (state) or event/quest
     def player_collision(self, player):
         #quests: occures continiously until complete
         if self.event == 'start_larv_party':
-            if self.game_objects.world_state.quests.get('larv_party', False): return#completed, return      
+            if self.game_objects.world_state.quests.get('larv_party', False): return#completed, return
             if self.game_objects.quests_events.active_quests.get('larv_party', False):
                 if self.game_objects.quests_events.active_quests['larv_party'].running: return
                 self.game_objects.quests_events.active_quests['larv_party'].initiate_quest()
             else:
                 self.game_objects.quests_events.initiate_quest('larv_party')
 
-        elif self.event == 'stop_larv_party':    
+        elif self.event == 'stop_larv_party':
             if not self.game_objects.quests_events.active_quests.get('larv_party', False): return
             if not self.game_objects.quests_events.active_quests['larv_party'].running: return#if quest is not running
             self.game_objects.quests_events.active_quests['larv_party'].pause_quest()
-        
+
         #events: occures once
         elif not self.new_state:
             if self.game_objects.world_state.events.get(self.event, False): return#if event has already been done
             self.game_objects.quests_events.initiate_event(self.event)#event
-            self.kill()#is this a problem in re-spawn?            
+            self.kill()#is this a problem in re-spawn?
         elif self.new_state:#if it is an event that requires new sttae, e.g. cutscene
             if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has been shown before, return. Shold we kill the object instead?
             if self.event == 'Butterfly_encounter':

@@ -11,7 +11,7 @@ class Game():
     def __init__(self):
         #initiate all screens
         self.window_size = C.window_size.copy()
-        self.scale = self.scale_size()#get the scale according to your display size
+        self.scale = self.scale_size(2)#get the scale according to your display size
         display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
 

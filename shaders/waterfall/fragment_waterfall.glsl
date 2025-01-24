@@ -35,30 +35,30 @@ void main()
     vec2 UV = fragmentTexCoord;
 	vec2 refraction_offset = texture(refraction_map, vec2(UV.x, UV.y + -TIME * speed * 0.5) * scale * refraction_stretch).xy;//looks maybe better without * refraction_strength * zoom
 	vec2 gap_mask = texture(water_mask, vec2(UV.x, UV.y + -TIME * speed) * scale * gap_stretch).xy;
-	
+
 	// Set values between -0.5 and 0.5 (instead of 0 and 1). Otherwise the reflection will move whith increased refraction_strength
-	//refraction_offset -= 0.5; 
-	
+	//refraction_offset -= 0.5;
+
     vec2 normalizedSectionPos = vec2(section.x ,section.y)/u_resolution;
 	vec2 normalizedSectionSize = vec2(section.z ,section.w)/u_resolution;
 	vec2 screenUV = UV * normalizedSectionSize + vec2(normalizedSectionPos.x, 1 - normalizedSectionPos.y - normalizedSectionSize.y);
-	
+
 	// Get the screen texture and distort it
 	vec4 refraction = texture(SCREEN_TEXTURE, screenUV + refraction_offset * refraction_strength * zoom);//looks maybe better without * refraction_strength * zoom
 	//can remove the flixking by removing + refraction_offset * refraction_strength * zoom
-	
+
 	// Use the grayscale value of the color to adjust the speed
 	float adjustedSpeed = 0.5/(pow(gap_mask.x,0.2)); // Adjust the speed based on the grayscale value
 	// Apply the adjusted speed to the gap_mask offset
 	gap_mask = texture(water_mask, vec2(UV.x, UV.y + TIME * adjustedSpeed) * scale * gap_stretch).xy;
-	
 
-	// Create holes and apply colors and textures //	
+
+	// Create holes and apply colors and textures //
 	vec4 color = vec4(1,1,1,1);
-	
+
 	// Define what values will be the water highlight color (the gap border)
 	float inner_edge = 1 * (flow_gaps + highlight_width);
-	
+
     // Check if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
 	if (gap_mask.x < 0.2*inner_edge)
     {
@@ -77,24 +77,24 @@ void main()
         color.rgb = mix(refraction.rgb, water_tint.rgb, water_tint.a);
     }
 	// Crate Edge Shape //
-	
-	// Set the shape for the top and bottom edges. Use water_mask as shape but with other values to flatten it out horizontally. 
+
+	// Set the shape for the top and bottom edges. Use water_mask as shape but with other values to flatten it out horizontally.
 	vec2 water_edge = texture(water_mask, vec2(UV.x, UV.y + -TIME * 0.1) * scale * vec2(0.15, 0.6)).xy;
 	water_edge -= 0.5;
-	
+
 	// Use the same mask as for the gaps for left and right edge.
 	vec2 vertical_edge_mask = gap_mask - 0.5;
-	
+
 	// Apply the new masks to the edges. This will make the wobble effect.
 	color.a = mix(0.0, color.a, step(UV.x + vertical_edge_mask.x * 0.2, 0.92)); // Right edge
 	color.a = mix(color.a, 0.0, step(UV.x - vertical_edge_mask.x * 0.2, 0.08)); // Left edge
-	
+
 	color.a = mix(0.0, color.a, step(UV.y + water_edge.y * 0.03, 0.95));  //top edge
 	color.a = mix(color.a, 0.0, step(UV.y - water_edge.y * 0.05, 0.05)); // ottom edge
-	
-	// Calculate brightness adjustment based on y-coordinate    
-	vec3 adjustedColor = color.rgb /pow(1-fragmentTexCoord.y,0.4);
-        
+
+	// Calculate brightness adjustment based on y-coordinate
+	vec3 adjustedColor = color.rgb /pow(1-fragmentTexCoord.y,0);
+
 	// Assign the adjusted color to the final color
 	color.rgb =  clamp(adjustedColor, 0.0, 1.0);
 
