@@ -708,9 +708,6 @@ class Collision_dynamic(Collision_texture):
         if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
             entity.down_collision(self)
             entity.limit_y()
-            #self.velocity[1] = 1
-            self.collided = True
-
         if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
             entity.top_collision(self)
         entity.update_rect_y()  # Update player’s vertical position
@@ -723,15 +720,16 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
         self.old_hitbox = self.hitbox.copy()
+
         self.max_down_vel = 0.6
         self.max_up_vel = -1.3
         self.accel = 3
         self.collided = False
 
-        lifetime = 1000#prop.get('lifetime', 300)
+        lifetime = prop.get('lifetime', 300)
         self.game_objects.timer_manager.start_timer(lifetime, self.deactivate)
         #TODO horitoxntal or veritcal moment
-        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+
         self.animation = animation.Animation(self)
         self.currentstate = states_time_collision.Idle(self)#s
         self.sign = 1
@@ -751,6 +749,14 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
             self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
 
+    def collide_y(self, entity):  # Handles vertical collision
+        if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
+            entity.down_collision(self)
+            entity.limit_y()
+            self.collided = True
+        if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
+            entity.top_collision(self)
+        entity.update_rect_y()  # Update player’s vertical position
 
     def release_texture(self):
         pass
@@ -760,6 +766,35 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def deactivate(self):#called when first timer runs out
         self.kill()
+
+    def update(self):
+        super().update()
+        self.platfrom_collisions()
+
+    def platfrom_collisions(self):#check collisions with static and dynamic platforms
+        for platform in self.game_objects.platforms:
+            if platform is self: continue#skip self
+            if self.hitbox.colliderect(platform.hitbox):
+                self.platform_collision(platform)
+
+    def platform_collision(self, platform):# Determine the direction of collision based on velocity and relative positions    
+        if self.velocity[1] > 0:  # Moving down
+            if self.hitbox.bottom > platform.hitbox.top and self.hitbox.top < platform.hitbox.bottom:# Collision from the top of the platform            
+            # self.rect.bottom = platform.hitbox.top  # Resolve collision
+                self.deactivate()  # Call your method or logic for deactivating
+        elif self.velocity[1] < 0:  # Moving up
+            if self.hitbox.top < platform.hitbox.bottom and self.hitbox.bottom > platform.hitbox.top:# Collision from the bottom of the platform            
+                #self.rect.top = platform.hitbox.bottom  # Resolve collision
+                self.deactivate()
+
+        if self.velocity[0] > 0:  # Moving right
+            if self.hitbox.right > platform.hitbox.left and self.hitbox.left < platform.hitbox.right:# Collision from the left side of the platform            
+                #self.rect.right = platform.hitbox.left  # Resolve collision
+                pass
+        elif self.velocity[0] < 0:  # Moving left
+            if self.hitbox.left < platform.hitbox.right and self.hitbox.right > platform.hitbox.left:# Collision from the right side of the platform
+                pass
+                #self.rect.left = platform.hitbox.right  # Resolve collision
 
 class Dark_forest_2(Collision_dynamic):#dynamic one: #shoudl be added to platforms and dynamic_platforms groups
     def __init__(self, pos, game_objects, **prop):
