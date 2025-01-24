@@ -190,7 +190,7 @@ def alphabet_reader(path_to_sheet, h, num):
         #rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
         image = pygame.Surface((width, height),pygame.SRCALPHA,32).convert_alpha()
         image.blit(sheet,(0,0),rect)
-        sprite_dict[i] = image
+        sprite_dict[i] = image        
     return sprite_dict
 
 #class for reading and rendering fonts
