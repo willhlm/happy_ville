@@ -155,11 +155,6 @@ def alphabet_reader(path_to_sheet, h, num):
     """
     Reads sprites from a sheet, where red dots seperate the sprites in the sheet. Currently only made to read from sprites in a single line.
     takes, path, height of sprite and number of sprites as input.
-    color_ints:
-    FF0000 = -65536
-    000000 = -16777216
-    00FF00 = -16711936
-    zero alpha & 000000 = 0
     """
     sprite_dict = {}
     sheet = load_sprite(path_to_sheet)
