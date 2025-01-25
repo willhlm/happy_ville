@@ -685,7 +685,7 @@ class Pause_gameplay(Gameplay):#a pause screen with optional shake. = when entet
     def render(self):
         self.game.state_stack[-2].render()
 
-class Slow_gameplay(Gameplay):#called from aila when heal < 0
+class Slow_gameplay(Gameplay):#called from aila when health < 0
     def __init__(self, game, **kwarg):
         super().__init__(game)
         self.rate = kwarg.get('rate', 0.5)#determines the rate of slow motion, between 0 and 1
@@ -701,7 +701,7 @@ class Slow_gameplay(Gameplay):#called from aila when heal < 0
         if self.duration < 0:
             self.exit_state()
 
-class Slow_motion_gameplay(Slow_gameplay):#called from aila ability
+class Slow_motion_gameplay(Slow_gameplay):#aila's ability
     def __init__(self, game, **kwarg):
         super().__init__(game, **kwarg)
         self.bar = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites['bar'][0]
@@ -732,7 +732,7 @@ class Ability_menu(Gameplay):#when pressing tab
         self.abilities = list(self.game.game_objects.player.abilities.spirit_abilities.keys())
         self.index = self.abilities.index(self.game.game_objects.player.abilities.equip)
 
-        self.sprites = read_files.load_sprites_list('Sprites/UI/ability_HUD/',game.game_objects)#TODO
+        self.sprites = read_files.load_sprites_list('Sprites/UI/ability_HUD/', game.game_objects)#TODO
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
         self.surface = self.game.display.make_layer(self.game.window_size)#TODO
 

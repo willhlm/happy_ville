@@ -424,7 +424,7 @@ class Double_jump_main(Double_jump_pre):
 class Fall_pre(Player_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.wall_dir = kwarg.get('wall_dir', False)
+        self.wall_dir = kwarg.get('wall_dir', False)        
 
     def handle_press_input(self,input):
         event = input.output()
@@ -949,7 +949,7 @@ class Sword(Player_states):#main phases shold inheret this
         super().__init__(entity)
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)        
-        #self.entity.timer_jobs['sword'].activate()
+        self.entity.player_modifier.sword()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.entity.sword.stone_states['slash'].slash_speed()
@@ -1073,16 +1073,31 @@ class Plant_bone_main(Player_states):
 class Thunder_pre(Player_states):
     def __init__(self, entity):
         super().__init__(entity)
+        self.duration = 100
+        self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects)
+        self.entity.game_objects.cosmetics.add(self.arrow)    
 
     def update(self):
+        self.duration -= self.entity.game_objects.game.dt
         self.entity.velocity = [0, 0]
 
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
-        self.dir = event['l_stick']#the avlue of the press, right, left, up down
+        if self.duration < 0:
+            self.exit_state()
 
-    def increase_phase(self):#called when an animation is finihed for that state
-        if self.dir == [0,0]: self.dir = [0, 1]
-        self.enter_state('Thunder_main', dir = self.dir)
+    def exit_state(self):
+        self.arrow.kill()
+        self.enter_state('Thunder_main', dir = [self.arrow.dir[0],-self.arrow.dir[1]])
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='b':
+            input.processed()  
+            self.exit_state() 
+
+    def handle_movement(self, event):
+        value = event['l_stick']#the avlue of the press
+        if value[0] != 0 or value[1] != 0:
+            self.arrow.dir = [value[0],-value[1]]
 
 class Thunder_main(Player_states):
     def __init__(self,entity, **kwarg):
@@ -1098,9 +1113,6 @@ class Thunder_main(Player_states):
             self.enter_state('Thunder_post')
 
     def handle_movement(self,event):
-        pass
-
-    def increase_phase(self):#called when an animation is finihed for that state
         pass
     
     def handle_input(self, input):
