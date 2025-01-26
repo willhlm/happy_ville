@@ -1,8 +1,11 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, states, groups, player_modifier
-import states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_blur, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_shader, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_basic, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
-import AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
+import read_files, particles, animation, dialogue, game_states, groups, player_modifier
 import constants as C
+import states_basic, states_blur, states_shader
+
+#from folders
+from ai import AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
+from entity_states import states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
 
 def sign(number):
     if number > 0: return 1
@@ -645,7 +648,7 @@ class TwoD_liquid(Staticentity):
 
     def player_noncollision(self):
         if not self.interacted: return
-        self.game_objects.player.friction = [self.game_objects.player.friction[0] * 0.5, self.game_objects.player.friction[1] * 0.5]
+        self.game_objects.player.friction = C.friction_player.copy()
         self.game_objects.player.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
         vel_scale = abs(self.game_objects.player.velocity[1] / C.max_vel[1])
         self.splash(self.game_objects.player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
@@ -1049,7 +1052,7 @@ class Player(Character):
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             self.hurt_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            new_game_state = states.Pause_gameplay(self.game_objects.game, duration = duration, amplitude = 10)#pause the game for a while with an optional shake
+            new_game_state = game_states.Pause_gameplay(self.game_objects.game, duration = duration, amplitude = 10)#pause the game for a while with an optional shake
             new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
@@ -1061,15 +1064,15 @@ class Player(Character):
         self.animation.update()#make sure you get the new animation
         self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
 
-        new_game_state = states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)
+        new_game_state = game_states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)
         new_game_state.enter_state()
 
-        new_game_state = states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
+        new_game_state = game_states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
         new_game_state.enter_state()
 
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
-        new_game_state = states.Death(self.game_objects.game)
+        new_game_state = game_states.Death(self.game_objects.game)
         new_game_state.enter_state()
 
     def heal(self, health = 1):
@@ -2023,7 +2026,7 @@ class NPC(Character):
         self.game_objects.game.display.render(self.portrait, terget, position = (50,100))#shader render
 
     def interact(self):#when plater press t
-        new_state = states.Conversation(self.game_objects.game, self)
+        new_state = game_states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
 
     def random_conversation(self, text):#can say stuff through a text bubble
@@ -2040,7 +2043,7 @@ class Aslat(NPC):
     def buisness(self):#enters after conversation
         if self.game_objects.world_state.state.get('reindeer', False):#if player has deafated the reindeer
             if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet (so it only enters once)
-                new_game_state = states.Blit_image_text(self.game_objects.game,self.game.game_objects.player.sprites[Wall_glide][0].copy())
+                new_game_state = game_states.Blit_image_text(self.game_objects.game,self.game.game_objects.player.sprites[Wall_glide][0].copy())
                 new_game_state.enter_state()
                 self.game_objects.player.states['Wall_glide'] = True
 
@@ -2087,7 +2090,7 @@ class Astrid(NPC):#vendor
         self.random_conversation(text)
 
     def buisness(self):#enters after conversation
-        new_state = states.Facilities(self.game_objects.game,'Vendor',self)
+        new_state = game_states.Facilities(self.game_objects.game,'Vendor',self)
         new_state.enter_state()
 
 class MrSmith(NPC):#balck smith
@@ -2095,7 +2098,7 @@ class MrSmith(NPC):#balck smith
         super().__init__(pos,game_objects)
 
     def buisness(self):#enters after conversation
-        new_state = states.Facilities(self.game_objects.game,'Smith',self)
+        new_state = game_states.Facilities(self.game_objects.game,'Smith',self)
         new_state.enter_state()
 
 class MrMine(NPC):#balck smith
@@ -2122,7 +2125,7 @@ class MrBanks(NPC):#bank
         self.ammount = 0
 
     def buisness(self):#enters after conversation
-        new_state = states.Facilities(self.game_objects.game,'Bank',self)
+        new_state = game_states.Facilities(self.game_objects.game,'Bank',self)
         new_state.enter_state()
 
 class MsButterfly(NPC):#lumber jack
@@ -2143,7 +2146,7 @@ class MrWood(NPC):#lumber jack
         self.quest = ['lumberjack_omamori']#quest stuff to say
 
     def interact(self):#when plater press t
-        new_state = states.Conversation(self.game_objects.game, self)
+        new_state = game_states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
         if self.game_objects.world_state.quests.get('lumberjack_omamori', False):#if the quest is running
             self.game_objects.quests_events.active_quests['lumberjack_omamori'].complete()
@@ -2159,9 +2162,9 @@ class Boss(Enemy):
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
         self.game_objects.world_state.update_event(str(type(self).__name__).lower())
-        new_game_state = states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites[self.ability][0],self.ability)
+        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites[self.ability][0],self.ability)
         new_game_state.enter_state()
-        new_game_state = states.Defeated_boss(self.game_objects.game)
+        new_game_state = game_states.Defeated_boss(self.game_objects.game)
         new_game_state.enter_state()
 
     def health_bar(self):#called from omamori Boss_HP
@@ -2245,7 +2248,7 @@ class Rhoutta_encounter(Boss):
     def dead(self):
         self.game_objects.game.state_stack[-1].exit_state()
         self.game_objects.player.reset_movement()
-        new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
+        new_game_state = game_states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
         new_game_state.enter_state()
 
 #stuff
@@ -2449,7 +2452,7 @@ class Player_ability():#aila abilities
         self.currentstate = states_basic.Idle(self)#
         self.currentstate.set_animation_name('idle_1')
 
-    def upgrade_ability(self):
+    def level_up(self):
         self.level += 1
 
     def activate(self,level):#for UI of Aila abilities
@@ -2540,7 +2543,7 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
         self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
 
     def initiate(self):#called when using the ability from player states
-        new_state = states.Slow_motion_gameplay(self.entity.game_objects.game, rate = self.rate, duration = self.duration)
+        new_state = game_states.Slow_motion_gameplay(self.entity.game_objects.game, rate = self.rate, duration = self.duration)
         new_state.enter_state()
 
     def upgrade_ability(self):#called from upgrade menu
@@ -3450,7 +3453,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
     def interact(self, player):#when player press T
         player.currentstate.enter_state('Pray_pre')
         self.pickup(player)#object specific
-        new_game_state = states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
+        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
         new_game_state.enter_state()
         self.kill()
 
@@ -4048,7 +4051,7 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
 
     def interact(self):#when plater press t
         if self.interacted: return
-        new_state = states.Conversation(self.game_objects.game, self)
+        new_state = game_states.Conversation(self.game_objects.game, self)
         new_state.enter_state()
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
@@ -4121,8 +4124,42 @@ class Air_dash_statue(Interactable):#interact with it to get air dash
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 
-        new_game_state = states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['air_dash_main'][0], self.text)
+        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['air_dash_main'][0], self.text, on_exit = self.on_exit)
         new_game_state.enter_state()
+
+    def on_exit(self):#called when eiting the blit_image_text state
+        self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
+
+class Thunder_dive_statue(Interactable):#interact with it to upgrade horagalles rage
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/animations/statues/thunder_dive_statue/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+
+        ability = self.game_objects.player.abilities.spirit_abilities.get('Thunder', False)
+        self.interacted = ability and ability.level == 2#if level 2, inteeracted = True
+
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self, colour = [0, 0, 0, 100])
+        self.text = 'thunder dive in directions'
+
+    def draw(self, target):
+        self.shader_state.draw()
+        super().draw(target)
+
+    def interact(self):#when player press t/y
+        if self.interacted: return
+        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        ability = self.game_objects.player.abilities.spirit_abilities['Thunder'].level_up()        
+        self.shader_state.handle_input('tint', colour = [0,0,0,100])
+        self.interacted = True
+
+        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['thunder_main'][0], self.text, on_exit = self.on_exit)
+        new_game_state.enter_state()  
+
+    def on_exit(self):#called when eiting the blit_image_text state
+        self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
 
 class Safe_spawn(Interactable):#area which gives the coordinates which will make aila respawn at after falling into a hole
     def __init__(self, pos, game_objects, size, position):
@@ -4170,7 +4207,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
 
     def player_transport(self, player):#transports the player to safe position
         if player.health > 1:#if about to die, don't transport to safe point
-            new_state = states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
+            new_state = game_states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
             new_state.enter_state()
             self.game_objects.player.currentstate.enter_state('Invisible_main')
         else:
@@ -4612,25 +4649,17 @@ class Savepoint(Interactable):#save point
         self.hitbox = self.rect.copy()
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
+        self.currentstate = states_savepoint.Idle(self)
 
     def player_collision(self, player):#player collision
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
-        if type(self.currentstate).__name__ == 'Outline':#single click
-            self.game_objects.player.currentstate.enter_state('Pray_pre')
-            self.game_objects.player.spawn_point['map'] = self.map
-            self.game_objects.player.spawn_point['point'] = self.init_cord
-            self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
-            self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
-        else:#odoulbe click
-            self.game_objects.player.currentstate.handle_input('special')
-            new_state = states.Facilities(self.game_objects.game,'Spirit_upgrade_menu')
-            new_state.enter_state()
-
-    def reset_timer(self):#when animation finished
-        super().reset_timer()
-        self.game_objects.player.currentstate.handle_input('Pray_post')
+        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        self.game_objects.player.spawn_point['map'] = self.map
+        self.game_objects.player.spawn_point['point'] = self.init_cord
+        self.currentstate.handle_input('active')
+        self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
 
 class Inorinoki(Interactable):#the place where you trade soul essence for spirit or heart contrainer
     def __init__(self,pos,game_objects):
@@ -4641,7 +4670,7 @@ class Inorinoki(Interactable):#the place where you trade soul essence for spirit
         self.hitbox = self.rect.copy()
 
     def interact(self):#when player press t/y
-        new_state = states.Facilities(self.game_objects.game, 'Soul_essence')
+        new_state = game_states.Facilities(self.game_objects.game, 'Soul_essence')
         new_state.enter_state()
 
 class Fast_travel(Interactable):
@@ -4674,11 +4703,11 @@ class Fast_travel(Interactable):
     def interact(self):#when player press t/y
         if self.locked:
             type = 'Fast_travel_unlock'
-            new_state = states.Facilities(self.game_objects.game,type,self)
+            new_state = game_states.Facilities(self.game_objects.game,type,self)
         else:
             type = 'Fast_travel_menu'
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
-            new_state = states.Facilities(self.game_objects.game,type)
+            new_state = game_states.Facilities(self.game_objects.game,type)
         new_state.enter_state()
 
 class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginning
@@ -4694,7 +4723,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
 
     def interact(self):#when player press t/y
         self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
-        new_game_state = states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
+        new_game_state = game_states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
         new_game_state.enter_state()
 
     def reset_timer(self):

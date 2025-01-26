@@ -1,5 +1,5 @@
 import pygame, sys
-import states
+import game_states
 import game_objects
 import constants as C
 import read_files
@@ -21,7 +21,7 @@ class Game():
         #initiate game related values
         self.clock = pygame.time.Clock()
         self.game_objects = game_objects.Game_Objects(self)
-        self.state_stack = [states.Title_Menu(self)]
+        self.state_stack = [game_states.Title_Menu(self)]
 
         #debug flags
         self.DEBUG_MODE = True

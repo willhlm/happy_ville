@@ -67,12 +67,7 @@ void main()
         new_liquid_tint = liquid_tint;
     }
 
-    vec2 refraction_offset = texture(
-        refraction_map, 
-        vec2(
-            mod(uv.x * refraction_stretch.x + TIME * speed, 1.0), 
-            mod(uv.y * refraction_stretch.y + TIME * speed, 1.0))
-    ).xy;
+    vec2 refraction_offset = texture(refraction_map, vec2(mod(uv.x * refraction_stretch.x + TIME * speed, 1.0), mod(uv.y * refraction_stretch.y + TIME * speed, 1.0))).xy;
 
     refraction_offset -= 0.5; // Set values between -0.5 and 0.5 (instead of 0 and 1).
 

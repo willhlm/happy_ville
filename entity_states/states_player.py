@@ -867,9 +867,8 @@ class Stand_up_main(Player_states):
         self.enter_state('Idle_main')
 
 class Pray_pre(Player_states):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
-        self.special = False#a flag to chekc when the animation should finish (after interaction with e.g. rune stone, or when ability upgrade screen is exited)
         effect = entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
@@ -881,31 +880,20 @@ class Pray_pre(Player_states):
 
     def increase_phase(self):
         self.enter_state('Pray_main')
-        self.entity.currentstate.special = self.special#set the Pray_main flag
-
-    def handle_input(self,input):
-        if input == 'special':
-            self.special = True
 
 class Pray_main(Player_states):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
-        self.special = False
 
     def handle_movement(self,event):
         pass
 
-    def handle_input(self,input):#called from either when the ability scnreen is exited (special), or when the saving point/runestone animation is finshed
+    def handle_input(self,input):
         if input == 'Pray_post':
-            if not self.special:
-                self.enter_state('Pray_post')
-        elif input == 'Pray_spe_post':
-                self.enter_state('Pray_post')
-        elif input == 'special':
-            self.special = True
+            self.enter_state('Pray_post')
 
 class Pray_post(Player_states):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
 
     def handle_movement(self,event):
@@ -1074,8 +1062,9 @@ class Thunder_pre(Player_states):
     def __init__(self, entity):
         super().__init__(entity)
         self.duration = 100
-        self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects)
-        self.entity.game_objects.cosmetics.add(self.arrow)    
+        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+            self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects)
+            self.entity.game_objects.cosmetics.add(self.arrow)    
 
     def update(self):
         self.duration -= self.entity.game_objects.game.dt
@@ -1084,9 +1073,12 @@ class Thunder_pre(Player_states):
         if self.duration < 0:
             self.exit_state()
 
-    def exit_state(self):
-        self.arrow.kill()
-        self.enter_state('Thunder_main', dir = [self.arrow.dir[0],-self.arrow.dir[1]])
+    def exit_state(self):        
+        if self.entity.abilities.spirit_abilities['Thunder'].level == 1:
+            self.enter_state('Thunder_main', dir = [0,1])
+        else:
+            self.arrow.kill()
+            self.enter_state('Thunder_main', dir = [self.arrow.dir[0],-self.arrow.dir[1]])
 
     def handle_release_input(self, input):
         event = input.output()
@@ -1095,9 +1087,10 @@ class Thunder_pre(Player_states):
             self.exit_state() 
 
     def handle_movement(self, event):
-        value = event['l_stick']#the avlue of the press
-        if value[0] != 0 or value[1] != 0:
-            self.arrow.dir = [value[0],-value[1]]
+        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+            value = event['l_stick']#the avlue of the press
+            if value[0] != 0 or value[1] != 0:
+                self.arrow.dir = [value[0],-value[1]]
 
 class Thunder_main(Player_states):
     def __init__(self,entity, **kwarg):
