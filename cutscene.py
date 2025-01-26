@@ -1,6 +1,6 @@
 import read_files
 import animation
-import states#maybe can code it so that we don't import states
+import game_states#maybe can code it so that we don't import states
 
 class Cutscene_file():#cutscneens that will run based on file. The name of the file should be the same as the class name
     def __init__(self,parent_class):
@@ -29,5 +29,5 @@ class Rhoutta_encounter(Cutscene_file):#play the first cutscene encountering rho
 
     def reset_timer(self):#called when cutscene is finshed
         self.parent_class.exit_state()
-        new_state = states.Title_screen(self.parent_class.game)
+        new_state = game_states.Title_screen(self.parent_class.game)
         new_state.enter_state()

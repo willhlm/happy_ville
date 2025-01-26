@@ -60,22 +60,21 @@ void main()
 	float inner_edge = 1 * (flow_gaps + highlight_width);
 
     // Check if the pixel is within the edges range and use the water colors alpha to blend between showing color or refraction texture.
-	if (gap_mask.x < 0.2*inner_edge)
-    {
-        color.rgb = mix(refraction.rgb, water_highlight1.rgb, water_highlight1.a);
-    }
-    else if (gap_mask.x < 0.7*inner_edge ) // Example condition for using water_highlight2
-    {
-        color.rgb = mix(refraction.rgb, water_highlight2.rgb, water_highlight2.a);
-    }
-     else if (gap_mask.x < 0.8*inner_edge ) // Example condition for using water_highlight2
-    {
-        color.rgb = mix(refraction.rgb, water_highlight3.rgb, water_highlight3.a);
-    }
-    else
-    {
-        color.rgb = mix(refraction.rgb, water_tint.rgb, water_tint.a);
-    }
+	// Compute weights for each range based on gap_mask.x and inner_edge
+	float w1 = step(gap_mask.x, 0.2 * inner_edge);
+	float w2 = step(0.2 * inner_edge, gap_mask.x) * step(gap_mask.x, 0.7 * inner_edge);
+	float w3 = step(0.7 * inner_edge, gap_mask.x) * step(gap_mask.x, 0.8 * inner_edge);
+	float w4 = step(0.8 * inner_edge, gap_mask.x);
+
+	// Normalize weights to ensure only one range is active
+	vec3 highlightColor = 
+		w1 * mix(refraction.rgb, water_highlight1.rgb, water_highlight1.a) +
+		w2 * mix(refraction.rgb, water_highlight2.rgb, water_highlight2.a) +
+		w3 * mix(refraction.rgb, water_highlight3.rgb, water_highlight3.a) +
+		w4 * mix(refraction.rgb, water_tint.rgb, water_tint.a);
+
+	// Assign the resulting color
+	color.rgb = highlightColor;
 	// Crate Edge Shape //
 
 	// Set the shape for the top and bottom edges. Use water_mask as shape but with other values to flatten it out horizontally.

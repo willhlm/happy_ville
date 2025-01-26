@@ -1,5 +1,5 @@
 import pygame, math, sys
-import entities, read_files, weather, entities_parallax, states, platforms
+import entities, read_files, weather, entities_parallax, game_states, platforms
 import constants as C
 
 class Level():
@@ -583,11 +583,9 @@ class Level():
                 statue = entities.Air_dash_statue(object_position, self.game_objects)
                 self.game_objects.interactables.add(statue)
 
-            elif id == 17:
-                state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
-                amber_tree = entities.Amber_tree(object_position, self.game_objects, state, str(loot_container))
-                self.game_objects.interactables.add(amber_tree)
-                loot_container += 1
+            elif id == 17:#thunder dive statue
+                statue = entities.Thunder_dive_statue(object_position, self.game_objects)
+                self.game_objects.interactables.add(statue)
 
             elif id == 18:
                 state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
@@ -893,7 +891,7 @@ class Rhoutta_encounter(Biome):
 
     def set_camera(self):
         if self.level.level_name == 'rhoutta_encounter_1' and self.level.spawn == '1':#if it a new game
-            new_state = states.New_game(self.level.game_objects.game)
+            new_state = game_states.New_game(self.level.game_objects.game)
             new_state.enter_state()
 
     def load_objects(self,data,parallax,offset):

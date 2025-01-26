@@ -885,8 +885,8 @@ class Conversation(Gameplay):
         self.print_frame_rate = C.animation_framerate
         self.text_window_size = (352, 96)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
-        self.background = self.game.display.make_layer(self.text_window_size)#make a layer ("surface")
-        self.conv_screen = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
+        self.background = self.game.display.make_layer(self.text_window_size)#TODO
+        self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
 
         self.clean_slate()
         self.conv = self.npc.dialogue.get_conversation()
@@ -997,7 +997,7 @@ class Cutscenes(Gameplay):
         self.current_scene.handle_events(input)
 
 class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
-    def __init__(self, game, img, text = ''):
+    def __init__(self, game, img, text = '', on_exit = None):
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
@@ -1010,6 +1010,10 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
 
         self.surface = game.display.make_layer(game.window_size)#TODO
         self.fade = [0,0]
+        self.on_exit = on_exit#a function to call when exiting
+
+    def handle_movement(self):#every frame
+        pass
 
     def render(self):
         super().render()
@@ -1033,11 +1037,12 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
     def render_out(self):
         self.fade[0] -= 1
         self.fade[1] -= 1
-        self.fade[0] = max(self.fade[0],0)
-        self.fade[1] = max(self.fade[1],0)
+        self.fade[0] = max(self.fade[0], 0)
+        self.fade[1] = max(self.fade[1], 0)
 
         if self.fade[0] == 0:
-            self.game.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
+            if self.on_exit:
+                self.on_exit()            
             self.exit_state()
 
     def handle_events(self,input):

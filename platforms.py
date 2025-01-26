@@ -3,7 +3,7 @@ import entities, states_time_collision, animation, read_files, states_basic, sta
 import constants as C
 import math
 
-class Platform(pygame.sprite.Sprite):#has hitbox
+class Platform(pygame.sprite.Sprite):
     def __init__(self, pos, size = (16,16), run_particle = 'dust'):
         super().__init__()
         self.rect = pygame.Rect(pos, size)

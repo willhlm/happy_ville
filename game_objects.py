@@ -4,7 +4,7 @@ import collisions
 import entities
 import map_loader
 import sound
-import states
+import game_states
 import camera
 import weather
 import constants as C
@@ -74,7 +74,7 @@ class Game_Objects():
 
     def load_map(self, previous_state, map_name, spawn = '1', fade = True):#called from path_col
         if fade:#for cutscenes
-            new_game_state = states.Fadeout(self.game, previous_state, map_name, spawn, fade)#it will call load_map2 after loading
+            new_game_state = game_states.Fadeout(self.game, previous_state, map_name, spawn, fade)#it will call load_map2 after loading
             new_game_state.enter_state()
         else:
             self.load_map2(map_name, spawn, fade)
@@ -87,7 +87,7 @@ class Game_Objects():
         print(t1_stop-t1_start)
 
         if fade:#for cutscenes
-            new_game_state = states.Fadein(self.game)#when this state is finished, it will set aila to idle
+            new_game_state = game_states.Fadein(self.game)#when this state is finished, it will set aila to idle
             new_game_state.enter_state()
 
     def clean_groups(self):#called wgen changing map
