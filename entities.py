@@ -1014,8 +1014,8 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
-        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc 
-        
+        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
+
     def ramp_down_collision(self, position):#when colliding with platform beneth
         super().ramp_down_collision(position)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
@@ -3142,7 +3142,7 @@ class Shield(Projectiles):#a protection shield
         self.image = Shield.image
         self.rect = pygame.Rect(entity.hitbox.centerx, entity.hitbox.centery, self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
-        
+
         self.time = 0
         self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
@@ -3991,11 +3991,12 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK 
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()
-        self.spawn_timer = 150
+        self.spawn_timer = 180
 
         self.bubble = bubble#the bubble is in platform, so the reference is sent in init
         self.prop = prop
-        self.time = random.randint(0, 10)
+        #self.time = random.randint(0, 10)
+        self.time = -1 * prop.get('init_delay', 0)
 
     def group_distance(self):
         pass

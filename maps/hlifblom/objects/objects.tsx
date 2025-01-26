@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="objects" tilewidth="80" tileheight="112" tilecount="8" columns="0">
+<tileset version="1.10" tiledversion="1.10.1" name="objects" tilewidth="80" tileheight="112" tilecount="8" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="80" height="64" source="../../../Sprites/animations/bushes/cave_grass/idle/idle01.png"/>
@@ -18,6 +18,7 @@
  </tile>
  <tile id="5">
   <properties>
+   <property name="init_delay" type="int" value="0"/>
    <property name="lifetime" value=""/>
    <property name="state" value=""/>
   </properties>
