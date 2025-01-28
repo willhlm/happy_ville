@@ -37,20 +37,29 @@ class Collision_block(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):
         super().__init__(pos, size, run_particle)
 
-    def collide_x(self,entity):
-        if entity.velocity[0] > 0:#going to the right
-            entity.right_collision(self)
-        else:#going to the leftx
-            entity.left_collision(self)
+    def collide_x(self, entity):
+        # Calculate penetration depth and normal for x-axis
+        if entity.velocity[0] > 0:  # Going to the right
+            penetration_depth = entity.hitbox.right - self.hitbox.left
+            normal = pygame.Vector2(-1, 0)
+            entity.right_collision(self, penetration_depth, normal)
+        else:  # Going to the left
+            penetration_depth = self.hitbox.right - entity.hitbox.left
+            normal = pygame.Vector2(1, 0)
+            entity.left_collision(self, penetration_depth, normal)
         entity.update_rect_x()
 
-    def collide_y(self,entity):
-        if entity.velocity[1] > 0:#going down
-            entity.down_collision(self)
-            entity.limit_y()
-        else:#going up
-            entity.top_collision(self)
-        entity.update_rect_y()
+    def collide_y(self, entity):
+        # Calculate penetration depth and normal for y-axis
+        if entity.velocity[1] > 0:  # Going down
+            penetration_depth = entity.hitbox.bottom - self.hitbox.top
+            normal = pygame.Vector2(0, -1)
+            entity.down_collision(self, penetration_depth, normal)
+        else:  # Going up
+            penetration_depth = self.hitbox.bottom - entity.hitbox.top
+            normal = pygame.Vector2(0, 1)
+            entity.top_collision(self, penetration_depth, normal)
+        entity.update_rect_y()    
 
 class Collision_oneway_up(Platform):
     def __init__(self, pos, size, run_particle = 'dust'):

@@ -849,6 +849,19 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity = [0,0]
         self.colliding_platform = None
 
+    def resolve_collision(self, normal):#  """Adjust velocity based on collision normal."""
+        velocity = pygame.Vector2(self.velocity)
+        normal = pygame.Vector2(normal)
+        
+        normal_velocity = velocity.dot(normal)# Compute the velocity along the normal
+
+        velocity -= normal * normal_velocity# Subtract the normal component to stop movement along the collision axis
+
+        # Optionally: Apply restitution for bounciness
+        restitution = 0.0  # Adjust as needed
+        velocity -= normal * normal_velocity * restitution
+        self.velocity = [velocity.x, velocity.y]# Update the entity's velocity
+
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
 
@@ -889,28 +902,42 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation: The extra gravity on ramp
 
     #pltform collisions.
-    def right_collision(self, block, type = 'Wall'):
-        self.hitbox.right = block.hitbox.left
+    def right_collision(self, block, penetration_depth, normal, type = 'Wall'):
+        self.hitbox.right -= penetration_depth
         self.collision_types['right'] = True
+        self.resolve_collision(normal)
         self.currentstate.handle_input(type)
 
-    def left_collision(self, block, type = 'Wall'):
-        self.hitbox.left = block.hitbox.right
+    def left_collision(self, block, penetration_depth, normal, type = 'Wall'):
+        self.hitbox.left += penetration_depth
         self.collision_types['left'] = True
+        self.resolve_collision(normal)
         self.currentstate.handle_input(type)
 
-    def down_collision(self, block):
-        self.colliding_platform = block#save the latest platform
-        self.hitbox.bottom = block.hitbox.top
+    def down_collision(self, block, penetration_depth, normal):
+        max_penetration = 10  # Maximum correction allowed
+        penetration_depth = min(penetration_depth, max_penetration)
+
+        self.colliding_platform = block
+        self.hitbox.bottom -= penetration_depth
+
+        # Snap to the platform
+        self.true_pos[1] = block.hitbox.top - (self.hitbox.height)
+        self.rect.top = round(self.true_pos[1])
+
         self.collision_types['bottom'] = True
+
+        # Apply small "resting" gravity
+        self.resolve_collision(normal)
         self.currentstate.handle_input('Ground')
 
-    def top_collision(self, block):
-        self.hitbox.top = block.hitbox.bottom
+    def top_collision(self, block, penetration_depth, normal):
+        self.hitbox.top += penetration_depth
         self.collision_types['top'] = True
-        self.velocity[1] = 0
+        self.resolve_collision(normal)
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
+        return
         self.velocity[1] = 1.2/self.game_objects.game.dt
 
 class Character(Platform_entity):#enemy, NPC,player
@@ -1024,17 +1051,17 @@ class Player(Character):
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
 
-    def down_collision(self, block):#when colliding with platform beneth
-        super().down_collision(block)
+    def down_collision(self, block, penetration_depth, normal):#when colliding with platform beneth
+        super().down_collision(block, penetration_depth, normal)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
 
-    def right_collision(self, block, type = 'Wall'):
-        super().right_collision(block, type)
+    def right_collision(self, block, penetration_depth, normal, type = 'Wall'):
+        super().right_collision(block, penetration_depth, normal, type)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
 
-    def left_collision(self, block, type = 'Wall'):
-        super().left_collision(block, type)
+    def left_collision(self, block, penetration_depth, normal, type = 'Wall'):
+        super().left_collision(block, penetration_depth, normal, type)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
 
     def take_dmg(self, dmg = 1, duration = 20):
@@ -1095,6 +1122,7 @@ class Player(Character):
         super().update()
         self.omamoris.update()
         self.update_timers()
+        print(self.velocity)
 
     def draw(self, target):#called in group
         self.shader_state.draw()
