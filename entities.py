@@ -4942,9 +4942,9 @@ class Lever(Interactable):
     def add_reference(self, reference):#called from map loader
         self.reference = reference
         if type(self.currentstate).__name__ == 'On':
-            self.reference.currentstate.handle_input('On')#down
+            self.reference.currentstate.handle_input('On')#erect
         else:
-            self.reference.currentstate.handle_input('Off')#erect
+            self.reference.currentstate.handle_input('Off')#down
 
 class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction. Shadow light inetracts with dark forest enemy and platofrm
     def __init__(self, pos, game_objects, **kwarg):
