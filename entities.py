@@ -3134,7 +3134,7 @@ class Shield(Projectiles):#a protection shield
         self.image = Shield.image
         self.rect = pygame.Rect(entity.hitbox.centerx, entity.hitbox.centery, self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
-        
+
         self.time = 0
         self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
@@ -3983,11 +3983,12 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK 
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()
-        self.spawn_timer = 150
+        self.spawn_timer = 180
 
         self.bubble = bubble#the bubble is in platform, so the reference is sent in init
         self.prop = prop
-        self.time = random.randint(0, 10)
+        #self.time = random.randint(0, 10)
+        self.time = -1 * prop.get('init_delay', 0)
 
     def group_distance(self):
         pass

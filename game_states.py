@@ -1042,7 +1042,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
 
         if self.fade[0] == 0:
             if self.on_exit:
-                self.on_exit()            
+                self.on_exit()
             self.exit_state()
 
     def handle_events(self,input):

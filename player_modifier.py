@@ -13,7 +13,7 @@ class Player_modifier():
         pass
 
     def bubble_jump(self):#called from bubble platform
-        return 0.5
+        return 0.8
 
     def up_stream(self):#called from up stream collisions
         return 1
@@ -31,10 +31,10 @@ class Tjasolmais_embrace(Player_modifier):#enters this state when using the shie
         self.shield.take_dmg(dmg)
 
     def bubble_jump(self):
-        return 2     
+        return 2
 
     def up_stream(self):
-        return 2   
+        return 2
 
     def sword(self):
         self.shield.kill()
