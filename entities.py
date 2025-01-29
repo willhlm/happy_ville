@@ -3147,6 +3147,7 @@ class Shield(Projectiles):#a protection shield
         self.hitbox = self.rect.copy()
 
         self.time = 0
+        self.lifetime = 360
         self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
 
@@ -3166,6 +3167,8 @@ class Shield(Projectiles):#a protection shield
 
     def update(self):
         self.time += self.entity.game_objects.game.dt
+        if self.time > self.lifetime:
+            self.kill()
         self.update_pos()
 
     def update_pos(self):
@@ -4152,12 +4155,12 @@ class Thunder_dive_statue(Interactable):#interact with it to upgrade horagalles 
     def interact(self):#when player press t/y
         if self.interacted: return
         self.game_objects.player.currentstate.enter_state('Pray_pre')
-        ability = self.game_objects.player.abilities.spirit_abilities['Thunder'].level_up()        
+        ability = self.game_objects.player.abilities.spirit_abilities['Thunder'].level_up()
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 
         new_game_state = game_states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['thunder_main'][0], self.text, on_exit = self.on_exit)
-        new_game_state.enter_state()  
+        new_game_state.enter_state()
 
     def on_exit(self):#called when eiting the blit_image_text state
         self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item

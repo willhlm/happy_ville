@@ -1388,7 +1388,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"hlifblom_1"
+                                 "value":"hlifblom_2"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1805,7 +1805,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":320,
+                         "height":368,
                          "id":1820,
                          "name":"",
                          "rotation":0,
@@ -1825,7 +1825,7 @@
                          "visible":true,
                          "width":128,
                          "x":1280,
-                         "y":688
+                         "y":640
                         }, 
                         {
                          "gid":8,
@@ -1985,7 +1985,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":224,
+                         "height":176,
                          "id":1836,
                          "name":"",
                          "rotation":0,
@@ -1993,7 +1993,7 @@
                          "visible":true,
                          "width":432,
                          "x":752,
-                         "y":592
+                         "y":544
                         }, 
                         {
                          "gid":8,
@@ -2033,7 +2033,7 @@
                         }, 
                         {
                          "gid":8,
-                         "height":160,
+                         "height":208,
                          "id":1841,
                          "name":"",
                          "rotation":0,

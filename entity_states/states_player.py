@@ -425,6 +425,7 @@ class Fall_pre(Player_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.wall_dir = kwarg.get('wall_dir', False)
+        self.entity.friction[1] = self.entity.player_modifier.falling()
 
     def handle_press_input(self,input):
         event = input.output()
@@ -449,6 +450,10 @@ class Fall_pre(Player_states):
         event = input.output()
         if event[-1]=='a':
             input.processed()
+
+    def enter_state(self, state, **kwargs):
+        self.entity.friction[1] = C.friction_player[1]
+        super().enter_state(state, **kwargs)
 
     def handle_input(self,input):
         if input == 'Wall':
