@@ -753,7 +753,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
             self.sin_time += self.game_objects.game.dt
             self.velocity[0] = math.sin(self.sin_time/30)/8
-            
+
     def collide_y(self, entity):  # Handles vertical collision
         if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
             entity.down_collision(self)

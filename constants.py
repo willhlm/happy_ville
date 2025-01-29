@@ -4,11 +4,11 @@ window_size = [640, 360]#[int(640*1.2), int(360*1.2)]
 tile_size = 16
 
 #physics
-acceleration = [0.8,0.32]
+acceleration = [0.75,0.32]
 friction = [0.5,0]#need to be less than 1
 friction_player = [0.24,0.01]
 jump_vel_player = -5
-dash_jump_vel_player = -6.2
+dash_jump_vel_player = -6.4
 max_vel = [30,5]#[30,6]
 pogo_vel = -6
 dash_length = 7#how long  Aila dashes
