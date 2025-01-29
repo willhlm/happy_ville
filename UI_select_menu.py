@@ -1,7 +1,7 @@
 import pygame, sys
 import UI_loader
 import entities#to load the inventory -> entities_UI?
-import states_inventory
+from states import states_inventory
 
 class Select_menu():
     def __init__(self, game_state, **kwarg):

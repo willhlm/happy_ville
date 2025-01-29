@@ -16,7 +16,7 @@ import object_pool
 import controller
 import lights
 import shader_render
-import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
+from states import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
 import quests_events
 import timer
 

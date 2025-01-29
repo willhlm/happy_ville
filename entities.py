@@ -1,11 +1,10 @@
 import pygame, random, sys, math
 import read_files, particles, animation, dialogue, game_states, groups, player_modifier
 import constants as C
-import states_basic, states_blur, states_shader
 
 #from folders
 from ai import AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
-from entity_states import states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew
+from states import states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic
 
 def sign(number):
     if number > 0: return 1
@@ -916,7 +915,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.acceleration = [0,C.acceleration[1]]
+        self.acceleration = [0, C.acceleration[1]]
         self.friction = C.friction.copy()
         self.max_vel = C.max_vel.copy()
 
@@ -1004,8 +1003,8 @@ class Player(Character):
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
-                     'Thunder':True,'Shield':True,'Migawari':True,'Slow_motion':True,
-                     'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True}
+                     'Thunder':True,'Shield':True, 'Slow_motion':True,
+                     'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True}
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
@@ -1018,6 +1017,7 @@ class Player(Character):
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc 
+        #self.shader_state = states_shader.MB(self)
         
     def ramp_down_collision(self, position):#when colliding with platform beneth
         super().ramp_down_collision(position)
@@ -1114,47 +1114,6 @@ class Player(Character):
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False
-
-class Maderakkas_reflection_entity(Character):#player double ganger
-    def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects)
-        self.sprites = Maderakkas_reflection_entity.sprites
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1]-5,16,16)#add a smalll ofset in y to avoid collision
-        self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
-        self.flags = {'invincibility': False}
-        self.health = kwarg.get('health', 1)
-        self.lifetime = kwarg.get('lifetime', 1000)
-
-    def update(self):
-        super().update()
-        self.lifetime -= self.game_objects.game.dt*self.slow_motion
-        self.destroy()
-
-    def take_dmg(self,dmg):
-        if self.flags['invincibility']: return
-        self.health -= dmg
-        self.flags['invincibility'] = True
-
-        if self.health > 0:#check if dead¨
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
-            #self.shader_state.handle_input('Hurt')#turn white
-            #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-        else:#if dead
-            self.currentstate.enter_state('Death')#overrite any state and go to deat
-            if self.game_objects.player.abilities.spirit_abilities['Migawari'].level == 3:
-                self.game_objects.player.heal(1)
-
-    def destroy(self):
-        if self.lifetime < 0:
-            self.currentstate.handle_input('Death')
-
-    def release_texture(self):
-        pass
-
-    def pool(game_objects):
-        Maderakkas_reflection_entity.sprites = read_files.load_sprites_dict('Sprites/attack/migawari/', game_objects)
 
 class Enemy(Character):
     def __init__(self, pos, game_objects):
@@ -2405,7 +2364,7 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
 class Player_abilities():
     def __init__(self,entity):
         self.entity = entity
-        self.spirit_abilities = {'Thunder': Horagalles_rage(entity),'Shield': Tjasolmais_embrace(entity),'Bow': Juksakkas_blessing(entity),'Migawari': Maderakkas_reflection(entity),'Slow_motion': Beaivis_time(entity)}#abilities aila has
+        self.spirit_abilities = {'Thunder': Horagalles_rage(entity),'Shield': Tjasolmais_embrace(entity),'Bow': Juksakkas_blessing(entity),'Wind': Bieggs_breath(entity),'Slow_motion': Beaivis_time(entity)}#abilities aila has
         self.equip = 'Thunder'#spirit ability pointer
         self.movement_dict = {'Dash':Dash(entity),'Wall_glide':Wall_glide(entity),'Double_jump':Double_jump(entity)}#abilities the player has
         self.movement_abilities = list(self.movement_dict.values())#make it a list
@@ -2518,16 +2477,21 @@ class Tjasolmais_embrace(Player_ability):#makes the shield, water god
         self.entity.player_modifier.enter_state('Tjasolmais_embrace', shield = shield)
         self.entity.projectiles.add(shield)
 
-class Maderakkas_reflection(Player_ability):#migawari: woman/mother god
+class Bieggs_breath(Player_ability):#migawari: woman/mother god
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/maderakkas_reflection/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/bieggs_breath/',entity.game_objects)
         self.health = 1
-        self.description = ['migawari','add extra health to migawari','heals aila when killed','imba']
+        self.description = ['wind','hard wind']
 
     def initiate(self):#called when using the ability
-        spawn = Maderakkas_reflection_entity(self.entity.rect.midtop, self.entity.game_objects, lifetime = 1000, health = self.health)
-        self.entity.game_objects.players.add(spawn)
+        if self.entity.dir[1] == 0:#left or right
+            dir = self.entity.dir.copy()
+        else:#up or down
+            dir = [0,-self.entity.dir[1]]
+
+        spawn = Wind(self.entity.rect.center, self.entity.game_objects, dir = dir)
+        self.entity.game_objects.fprojectiles.add(spawn)
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
@@ -2567,7 +2531,7 @@ class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
         else:#up or down
             dir = [0,-self.entity.dir[1]]
 
-        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir))
+        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50))
 
 class Omamoris():#omamori handler -> "neckalce"
     def __init__(self, entity):
@@ -3137,6 +3101,31 @@ class Arrow(Projectiles):
     def collision_platform(self, platform):
         self.velocity = [0,0]
         self.dmg = 0
+
+class Wind(Projectiles):
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        self.image = Wind.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+        self.dmg = 0
+
+        self.dir = kwarg.get('dir', [1,0])
+        self.velocity = [self.dir[0] * 10, self.dir[1] * 10]
+
+    def collision_platform(self, platform):
+        self.animation.reset_timer()
+        self.currentstate.handle_input('Death')
+        self.velocity = [0,0]
+
+    def collision_enemy(self, collision_enemy):#if hit something
+        self.velocity = [0,0]
+        collision_enemy.velocity[0] = self.dir[0]*40#abs(push_strength[0])
+        collision_enemy.velocity[1] = -1
+        self.kill()
+
+    def pool(game_objects):
+        Wind.sprites = read_files.load_sprites_dict('Sprites/attack/wind/', game_objects)
 
 class Shield(Projectiles):#a protection shield
     def __init__(self, entity, **kwarg):

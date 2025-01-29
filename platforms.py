@@ -1,5 +1,6 @@
 import pygame
-import entities, states_time_collision, animation, read_files, states_basic, states_gate, states_smacker, states_moving_platform, states_shader
+import entities, animation, read_files
+from states import states_time_collision, states_gate, states_smacker, states_moving_platform, states_shader, states_basic
 import constants as C
 
 class Platform(pygame.sprite.Sprite):
@@ -728,7 +729,6 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
         lifetime = prop.get('lifetime', 300)
         self.game_objects.timer_manager.start_timer(lifetime, self.deactivate)
-        #TODO horitoxntal or veritcal moment
 
         self.animation = animation.Animation(self)
         self.currentstate = states_time_collision.Idle(self)#s
@@ -748,6 +748,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         else:
             self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
+            self.velocity[0] += self.game_objects.game.dt*(0 - 0.1*self.velocity[0])
 
     def collide_y(self, entity):  # Handles vertical collision
         if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
@@ -769,13 +770,20 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
 
     def update(self):
         super().update()
-        self.platfrom_collisions()
+        self.collisions()
 
-    def platfrom_collisions(self):#check collisions with static and dynamic platforms
+    def collisions(self):#check collisions with static and dynamic platforms
         for platform in self.game_objects.platforms:
             if platform is self: continue#skip self
             if self.hitbox.colliderect(platform.hitbox):
                 self.platform_collision(platform)
+
+        for interactable in self.game_objects.interactables_fg:
+            if type(interactable).__name__ == 'Up_stream':
+                if self.hitbox.colliderect(interactable.hitbox):
+                    dir = interactable.dir.copy()
+                    self.velocity[0] += dir[0] * 0.1
+                    self.velocity[1] += dir[1] * 0.1
 
     def platform_collision(self, platform):# Determine the direction of collision based on velocity and relative positions    
         if self.velocity[1] > 0:  # Moving down

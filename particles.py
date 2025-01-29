@@ -1,5 +1,6 @@
 import pygame, math, random
-import states_particles, animation, read_files
+import animation, read_files
+from states import states_particles
 
 class Particles(pygame.sprite.Sprite):
     def __init__(self, pos, game_objects, **kwarg):

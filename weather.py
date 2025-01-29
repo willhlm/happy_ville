@@ -1,6 +1,7 @@
 import pygame, math, random
-import read_files, states_weather
+import read_files
 from entities import Animatedentity
+from states import states_weather
 
 class Weather():
     def __init__(self, game_objects):

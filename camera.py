@@ -1,4 +1,5 @@
-import random, sys, states_centraliser
+import random, sys
+from states import states_centraliser
 
 class Camera_manager():
     def __init__(self, game_objects):
