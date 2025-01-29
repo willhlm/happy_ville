@@ -2,9 +2,9 @@ import pygame
 import math
 
 # Constants
-GRAVITY = 0
+GRAVITY = 100
 FRICTION = 0.98
-ELASTICITY = 0.8  # Coefficient of restitution for bouncy collisions
+ELASTICITY = 0.1  # Coefficient of restitution for bouncy collisions
 
 class Rigidbody():
     def __init__(self, x, y, width, height, mass=1):
@@ -113,6 +113,19 @@ class Circle(Rigidbody):
     def draw(self, screen):
         pygame.draw.circle(screen, (255, 0, 0), (int(self.position.x), int(self.position.y)), self.radius)
 
+class Platform(Rigidbody):
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height, mass=math.inf)  # Infinite mass to make it static
+
+    def apply_gravity(self):
+        pass  # Platforms do not experience gravity
+
+    def update(self, dt):
+        pass  # Platforms do not update their position
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, (100, 100, 255), self.rect)  # Draw platform in blue
+
 class CharacterBody2D():
     def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
@@ -135,7 +148,22 @@ class CharacterBody2D():
         # Simulate collisions
         for other in objects:
             if other is not self and self.rect.colliderect(other.rect):
+                if isinstance(other, Rigidbody) and other.mass < math.inf:
+                    self.push_rigidbody(other)  # Apply force to the rigidbody
                 self.resolve_collision(other)
+
+    def push_rigidbody(self, rigidbody):
+        """ Apply force to move a Rigidbody when pushing it. """
+        push_direction = pygame.Vector2(0, 0)
+
+        # Check if pushing from the sides
+        if self.velocity.x > 0 and self.rect.right > rigidbody.rect.left:  # Pushing right
+            push_direction = pygame.Vector2(1, 0)
+        elif self.velocity.x < 0 and self.rect.left < rigidbody.rect.right:  # Pushing left
+            push_direction = pygame.Vector2(-1, 0)
+
+        force_magnitude = 100  # Adjust this value for stronger pushing force
+        rigidbody.apply_force(push_direction * force_magnitude)
 
     def resolve_collision(self, other):
         penetration_vector = self.resolve_penetration(self.rect, other.rect)
@@ -158,15 +186,14 @@ class CharacterBody2D():
         self.normal = normal            
 
     def resolve_penetration(self, rect1, rect2):
-        # Calculate overlap distances on each axis
         dx = min(rect1.right - rect2.left, rect2.right - rect1.left)
         dy = min(rect1.bottom - rect2.top, rect2.bottom - rect1.top)
 
-        # Ensure penetration vector points in the correct direction (from `self` to `other`)
         if abs(dx) < abs(dy):  # Horizontal collision
             return pygame.Vector2(-dx if rect1.centerx > rect2.centerx else dx, 0)
         else:  # Vertical collision
             return pygame.Vector2(0, -dy if rect1.centery > rect2.centery else dy)
+
 
     def draw(self, screen):
         pygame.draw.rect(screen, (0, 255, 0), self.rect)
@@ -177,10 +204,11 @@ screen = pygame.display.set_mode((800, 600))
 clock = pygame.time.Clock()
 
 # Create objects
-ball1 = Circle(200, 100, 20, mass=2)
+ball1 = Circle(420, 150, 20, mass=2)
 ball2 = Circle(400, 100, 20, mass=3)
 box1 = Rigidbody(300, 300, 50, 50, mass=5)
-floor = Rigidbody(0, 550, 800, 50, mass=math.inf)  # Static floor
+
+floor = Platform(0, 550, 800, 50)
 character = CharacterBody2D(100, 500, 40, 40)
 
 objects = [ball1, ball2, box1, floor]
@@ -205,7 +233,7 @@ while running:
     if keys[pygame.K_DOWN]:
         move_velocity.y = 300 * dt
     # Apply gravity to character
-    move_velocity.y += GRAVITY
+    move_velocity.y += GRAVITY*0.01
 
     # Move and slide character
     character.move_and_slide(move_velocity)

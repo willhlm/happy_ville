@@ -29,8 +29,8 @@ class Portal(Basic_states):
         self.game_objects.all_bgs.draw(self.portal.bg_distort_layer)
         self.game_objects.interactables.draw(self.portal.bg_distort_layer)#should be before bg_interact
         self.game_objects.bg_interact.draw(self.portal.bg_distort_layer)
-        #we want the stuff above to be distored and grey
-
+        #we want the stuff above to be distored and grey 
+        
         self.game_objects.enemies.draw(self.portal.bg_grey_layer)
         self.game_objects.npcs.draw(self.portal.bg_grey_layer)
         self.game_objects.fprojectiles.draw(self.portal.bg_grey_layer)

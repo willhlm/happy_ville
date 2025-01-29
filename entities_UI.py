@@ -1,6 +1,7 @@
 import pygame
-import read_files, animation, states_health, states_basic, states_buttons
+import read_files, animation
 from sys import platform
+from states import states_buttons, states_health, states_basic
 from entities import Animatedentity
 
 #for map UI
