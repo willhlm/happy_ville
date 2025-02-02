@@ -726,13 +726,15 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.max_down_vel = 0.5
         self.max_up_vel = -1
         self.accel = 3
-        self.collided = False
+        self.collided_y = False
+        self.collided_right = False
+        self.collided_left = False
 
         lifetime = prop.get('lifetime', 100000)
         self.game_objects.timer_manager.start_timer(lifetime, self.deactivate)
 
         self.animation = animation.Animation(self)
-        self.currentstate = states_time_collision.Idle(self)#s
+        self.currentstate = states_basic.Idle(self)#s
         self.sign = 1
         self.sin_time = 0
 
@@ -742,25 +744,49 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         return C.air_timer * scale
 
     def update_vel(self):
-        if self.collided:
+        x_col_vel = 2
+        self.sign = 1
+        if self.collided_y:
             self.sign = -1
-            self.accel = 40
-            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            #self.accel = 40
+            self.velocity[1] -= self.sign * self.accel * 10 * self.game_objects.game.dt*0.01
             self.velocity[1] = min(self.velocity[1], self.max_down_vel)
             self.velocity[0] = 0
+        elif self.collided_right:
+            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            self.velocity[1] = max(self.velocity[1], self.max_up_vel)
+            self.velocity[0] = x_col_vel
+        elif self.collided_left:
+            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            self.velocity[1] = max(self.velocity[1], self.max_up_vel)
+            self.velocity[0] = -1 * x_col_vel
         else:
             self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
             self.sin_time += self.game_objects.game.dt
-            self.velocity[0] = math.sin(self.sin_time/30)/8
+            sin_vel = math.sin(self.sin_time/30)/40
+            self.velocity[0] += sin_vel
+            self.velocity[0] += self.game_objects.game.dt*(0 - 0.06*self.velocity[0])
+        #self.velocity[0] += self.game_objects.game.dt*(0 - 0.1*self.velocity[0])
+
+    def collide_x(self, entity):  # Handles horizontal collision
+        if entity.hitbox.right >= self.hitbox.left and entity.old_hitbox.right <= self.old_hitbox.left:
+            entity.right_collision(self)
+            self.collided_right = True
+        if entity.hitbox.left <= self.hitbox.right and entity.old_hitbox.left >= self.old_hitbox.right:
+            entity.left_collision(self)
+            self.collided_left = True
+
+        entity.update_rect_x()
 
     def collide_y(self, entity):  # Handles vertical collision
         if entity.hitbox.bottom >= self.hitbox.top and entity.old_hitbox.bottom <= self.old_hitbox.top:
             entity.down_collision(self)
             entity.limit_y()
-            self.collided = True
+            self.collided_y = True
         if entity.hitbox.top <= self.hitbox.bottom and entity.old_hitbox.top >= self.old_hitbox.bottom:
             entity.top_collision(self)
+            self.deactivate()
         entity.update_rect_y()  # Update player’s vertical position
 
     def release_texture(self):
@@ -769,11 +795,17 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def pool(game_objects):#all things that should be saved in object pool
         Bubble.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
 
-    def deactivate(self):
+    def take_dmg(self, projectile):
+        self.deactivate()
+
+    def deactivate(self):#called when first timer runs out
         self.kill()
 
     def update(self):
         super().update()
+        self.collided_y = False
+        self.collided_right = False
+        self.collided_left = False
         self.collisions()
 
     def collisions(self):#check collisions with static and dynamic platforms
@@ -789,7 +821,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
                     self.velocity[0] += dir[0] * 0.1
                     self.velocity[1] += dir[1] * 0.1
 
-    def platform_collision(self, platform):# Determine the direction of collision based on velocity and relative positions    
+    def platform_collision(self, platform):# Determine the direction of collision based on velocity and relative positions
         if self.velocity[1] > 0:  # Moving down
             if self.hitbox.bottom > platform.hitbox.top and self.hitbox.top < platform.hitbox.bottom:# Collision from the top of the platform
             # self.rect.bottom = platform.hitbox.top  # Resolve collision

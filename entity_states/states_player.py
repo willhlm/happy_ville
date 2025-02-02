@@ -31,7 +31,7 @@ class Player_states(Entity_States):
             self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        if self.entity.abilities.equip == 'Thunder' or self.entity.abilities.equip == 'Slow_motion':
+        if self.entity.abilities.equip == 'Thunder' or self.entity.abilities.equip == 'Slow_motion' or self.entity.abilities.equip == 'Migawari':
             self.enter_state(self.entity.abilities.equip + '_pre')
         else:
             self.enter_state(self.entity.abilities.equip + '_main')
@@ -1144,13 +1144,26 @@ class Shield_main(Player_states):
         else:
             self.enter_state('Run_main')
 
-class Wind_main(Player_states):
+class Migawari_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.consume_spirit()
-        self.entity.abilities.spirit_abilities['Wind'].initiate()
+
+    def handle_release_input(self,input):
+        event = input.output()
+        if event[-1]=='b':#when release the botton
+            self.enter_state('Idle_main')
+            input.processed()
 
     def increase_phase(self):
+        self.enter_state('Migawari_main')
+
+class Migawari_main(Migawari_pre):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.abilities.spirit_abilities['Migawari'].initiate()
+
+    def increase_phase(self):
+        self.entity.consume_spirit()
         self.enter_state('Idle_main')
 
 class Slow_motion_pre(Player_states):
