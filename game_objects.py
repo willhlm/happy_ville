@@ -19,6 +19,7 @@ import shader_render
 from states import states_gameplay#handles the rendering protocols: better suited in game_play state perhaos. But need to be here because the nheritance of states wouild break
 import quests_events
 import timer
+import signals
 
 from time import perf_counter
 
@@ -43,6 +44,7 @@ class Game_Objects():
         self.render_state = states_gameplay.Idle(self)
         self.quests_events = quests_events.Quests_events(self)
         self.timer_manager = timer.Timer_manager(self)
+        self.signals = signals.Signals()
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies
@@ -168,11 +170,12 @@ class Game_Objects():
         
         self.enemies.draw(self.game.screen)
         self.npcs.draw(self.game.screen)
-        self.fprojectiles.draw(self.game.screen)
-        self.eprojectiles.draw(self.game.screen)
         self.loot.draw(self.game.screen)
-        self.platforms.draw(self.game.screen)
         self.players.draw(self.game.screen)
+        self.platforms.draw(self.game.screen)
+        self.fprojectiles.draw(self.game.screen)
+        self.eprojectiles.draw(self.game.screen)        
+        
         self.interactables_fg.draw(self.game.screen)#shoud be after player
         self.cosmetics.draw(self.game.screen)#Should be before fgs
         self.cosmetics_no_clear.draw(self.game.screen)#Should be before fgs

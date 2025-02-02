@@ -6,7 +6,6 @@ class Quests_events():#quest and event handlere
         self.game_objects = game_objects
         self.active_quests = {}#quests the player has picked up. the object is only initiated when picking it up
         self.active_events = {}#events that occur during gameplay. New object is always initiated.
-        self.listeners = {}#signals
 
     def initiate_quest(self, quest, **kwarg):
         if not self.active_quests.get(quest, False):#if it is the first time getting the quest
@@ -14,20 +13,7 @@ class Quests_events():#quest and event handlere
         self.active_quests[quest].initiate_quest()#if it alraedy exits, re initate it
        
     def initiate_event(self, event, **kwarg):#events e.g. encounters: probably don't need to save all of them?
-        self.active_events[event] = getattr(sys.modules[__name__], event.capitalize())(self.game_objects, **kwarg)#make a class based on the name of the newstate: need to import sys
-
-    #signal handeling
-    def subscribe(self, event_type, listener):
-        self.listeners.setdefault(event_type, []).append(listener)
-
-    def emit(self, event_type, **kwargs):
-        for listener in self.listeners.get(event_type, []):
-            listener(**kwargs)
-
-    def unsubscribe(self, event_type, listener):
-        self.listeners[event_type].remove(listener)                
-        if not self.listeners[event_type]:#remove event type if no listeners remain
-            del self.listeners[event_type]                
+        self.active_events[event] = getattr(sys.modules[__name__], event.capitalize())(self.game_objects, **kwarg)#make a class based on the name of the newstate: need to import sys        
 
 class Tasks():#events and quests
     def __init__(self, game_objects):
@@ -56,8 +42,8 @@ class Butterfly_encounter(Tasks):#called from cutscene if aggro path is chosen: 
         self.game_objects.interactables.add(self.gate)
         butterfly.AI.activate()
 
-        self.game_objects.quests_events.subscribe('butterfly_killed', self.complete)
-        self.game_objects.quests_events.subscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.subscribe('butterfly_killed', self.complete)
+        self.game_objects.signals.subscribe('player_died', self.handle_player_death)
 
     def complete(self):#called when butterfly is dead
         self.game_objects.world_state.cutscenes_complete[type(self).__name__.lower()] = True
@@ -69,15 +55,15 @@ class Butterfly_encounter(Tasks):#called from cutscene if aggro path is chosen: 
         self.cleanup()
 
     def cleanup(self):
-        self.game_objects.quests_events.unsubscribe('butterfly_killed', self.incrase_kill)
-        self.game_objects.quests_events.unsubscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.unsubscribe('butterfly_killed', self.incrase_kill)
+        self.game_objects.signals.unsubscribe('player_died', self.handle_player_death)
 
 class Cultist_encounter(Tasks):#called from cutscene when meeting the cultist across the bridgr the first time: initiated from cutscene
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
         self.kill = kwarg['kill']
-        self.game_objects.quests_events.subscribe('cultist_killed', self.incrase_kill)
-        self.game_objects.quests_events.subscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.subscribe('cultist_killed', self.incrase_kill)
+        self.game_objects.signals.subscribe('player_died', self.handle_player_death)
         #self.gate = platforms.Gate((self.game_objects.camera_manager.camera.scroll[0] - 250,self.game_objects.camera_manager.camera.scroll[1] + 100), self.game_objects, erect = True)#added to group in cutscene
 
     def incrase_kill(self):#called when entity1 and 2 are killed
@@ -96,8 +82,8 @@ class Cultist_encounter(Tasks):#called from cutscene when meeting the cultist ac
         self.cleanup()
 
     def cleanup(self):
-        self.game_objects.quests_events.unsubscribe('cultist_killed', self.incrase_kill)
-        self.game_objects.quests_events.unsubscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.unsubscribe('cultist_killed', self.incrase_kill)
+        self.game_objects.signals.unsubscribe('player_died', self.handle_player_death)
 
 class Acid_escape(Tasks):#called in golden fields "last room"
     def __init__(self, game_objects, **kwarg):
@@ -116,8 +102,8 @@ class Golden_fields_encounter_1(Tasks):#called from golden fields room event_tri
         super().__init__(game_objects)
         self.get_gates()
         self.spawn_enemy()
-        self.game_objects.quests_events.subscribe('cultist_killed', self.incrase_kill)
-        self.game_objects.quests_events.subscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.subscribe('cultist_killed', self.incrase_kill)
+        self.game_objects.signals.subscribe('player_died', self.handle_player_death)
 
     def spawn_enemy(self):
         self.number = 1
@@ -139,8 +125,8 @@ class Golden_fields_encounter_1(Tasks):#called from golden fields room event_tri
         self.cleanup()
 
     def cleanup(self):
-        self.game_objects.quests_events.unsubscribe('cultist_killed', self.incrase_kill)
-        self.game_objects.quests_events.unsubscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.unsubscribe('cultist_killed', self.incrase_kill)
+        self.game_objects.signals.unsubscribe('player_died', self.handle_player_death)
 
     def incrase_kill(self):#called when enemy is called
         self.number -= 1
@@ -199,8 +185,8 @@ class Larv_party(Tasks):#william's larv room
 
     def initiate_quest(self):
         self.running = True#a flag to check if the quest is running: needed so that collision only enters here once
-        self.game_objects.quests_events.subscribe('larv_jr_killed', self.incrase_kill)
-        self.game_objects.quests_events.subscribe('player_died', self.handle_player_death)        
+        self.game_objects.signals.subscribe('larv_jr_killed', self.incrase_kill)
+        self.game_objects.signals.subscribe('player_died', self.handle_player_death)        
     
     def pause_quest(self):
         self.cleanup()
@@ -210,8 +196,8 @@ class Larv_party(Tasks):#william's larv room
 
     def cleanup(self):  
         self.running = False      
-        self.game_objects.quests_events.unsubscribe('larv_jr_killed', self.incrase_kill)
-        self.game_objects.quests_events.unsubscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.unsubscribe('larv_jr_killed', self.incrase_kill)
+        self.game_objects.signals.unsubscribe('player_died', self.handle_player_death)
 
     def complete(self):
         self.game_objects.world_state.quests[type(self).__name__.lower()] = True  
@@ -233,8 +219,8 @@ class Ball_room(Tasks):#the room with ball in light forest cavee
         self.spawn_balls(pos)
         self.get_gates()       
 
-        self.game_objects.quests_events.subscribe('ball_killed', self.increase_kill)
-        self.game_objects.quests_events.subscribe('player_died', self.handle_player_death)         
+        self.game_objects.signals.subscribe('ball_killed', self.increase_kill)
+        self.game_objects.signals.subscribe('player_died', self.handle_player_death)         
     
     def spawn_balls(self, pos):
         for i in range(0, self.number):
@@ -273,8 +259,8 @@ class Ball_room(Tasks):#the room with ball in light forest cavee
         self.cleanup()
 
     def cleanup(self): 
-        self.game_objects.quests_events.unsubscribe('ball_killed', self.increase_kill)
-        self.game_objects.quests_events.unsubscribe('player_died', self.handle_player_death)
+        self.game_objects.signals.unsubscribe('ball_killed', self.increase_kill)
+        self.game_objects.signals.unsubscribe('player_died', self.handle_player_death)
 
 class Portal_rooms(Tasks):#challanges with portals
     def __init__(self, game_objects, **kwarg):
@@ -285,7 +271,7 @@ class Portal_rooms(Tasks):#challanges with portals
         pass        
 
     def initiate_quest(self):
-        self.game_objects.quests_events.subscribe('player_died', self.handle_player_death)           
+        self.game_objects.signals.subscribe('player_died', self.handle_player_death)           
         pos = self.monument.rect.center                        
         self.portal = entities.Portal([pos[0] + 100, pos[1] - 20], self.game_objects, state = self)        
         self.game_objects.special_shaders.add(self.portal) 
@@ -313,7 +299,7 @@ class Portal_rooms(Tasks):#challanges with portals
         self.cleanup()
 
     def cleanup(self): 
-        self.game_objects.quests_events.unsubscribe('player_died', self.handle_player_death)           
+        self.game_objects.signals.unsubscribe('player_died', self.handle_player_death)           
 
 class Room_0(Tasks):
     def __init__(self, game_objects, **kwarg):
@@ -327,8 +313,8 @@ class Room_0(Tasks):
             enemy = entities.Cultist_rogue(pos, self.game_objects, self)
             self.game_objects.enemies.add(enemy)     
 
-        self.game_objects.quests_events.subscribe('cultist_killed', self.incrase_kill)                         
+        self.game_objects.signals.subscribe('cultist_killed', self.incrase_kill)                         
         
     def cleanup(self): 
         super().cleanup()
-        self.game_objects.quests_events.unsubscribe('cultist_killed', self.increase_kill)
+        self.game_objects.signals.unsubscribe('cultist_killed', self.increase_kill)

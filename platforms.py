@@ -769,7 +769,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def pool(game_objects):#all things that should be saved in object pool
         Bubble.sprites = read_files.load_sprites_dict('Sprites/block/collision_time/bubble/', game_objects)
 
-    def deactivate(self):#called when first timer runs out
+    def deactivate(self):
         self.kill()
 
     def update(self):
@@ -782,7 +782,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
             if self.hitbox.colliderect(platform.hitbox):
                 self.platform_collision(platform)
 
-        for interactable in self.game_objects.interactables_fg:
+        for interactable in self.game_objects.interactables_fg:#check for upstream collisions
             if type(interactable).__name__ == 'Up_stream':
                 if self.hitbox.colliderect(interactable.hitbox):
                     dir = interactable.dir.copy()
