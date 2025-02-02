@@ -3144,17 +3144,18 @@ class Shield(Projectiles):#a protection shield
     def __init__(self, entity, **kwarg):
         super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity
-        self.size = [90, 90]
-        self.empty = entity.game_objects.game.display.make_layer(self.size)
-        self.noise_layer = entity.game_objects.game.display.make_layer(self.size)
-        self.screen_layer = entity.game_objects.game.display.make_layer(self.size)
+        
+        self.size = Shield.size
+        self.empty = Shield.empty
+        self.noise_layer = Shield.noise_layer
+        self.screen_layer = Shield.screen_layer
 
-        self.rect = pygame.Rect(entity.hitbox.centerx, entity.hitbox.centery, 90, 90)
+        self.rect = pygame.Rect(entity.hitbox.center, self.size)
         self.hitbox = self.rect.copy()
         self.reflect_rect = self.hitbox.copy()
 
         self.time = 0
-        self.lifetime = 360
+        self.lifetime = kwarg.get('lifetime', 100)
         self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
 
@@ -3173,7 +3174,7 @@ class Shield(Projectiles):#a protection shield
         self.kill()
 
     def update(self):
-        self.time += self.entity.game_objects.game.dt
+        self.time += self.entity.game_objects.game.dt*0.001
         if self.time > self.lifetime:
             self.kill()
         self.update_pos()
@@ -3184,24 +3185,25 @@ class Shield(Projectiles):#a protection shield
 
     def draw(self, target):
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
-        self.game_objects.shaders['noise_perlin']['scroll'] = [0,0]#[self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.shaders['noise_perlin']['scale'] = [3,3]#"standard"
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0, 0]
+        self.game_objects.shaders['noise_perlin']['scale'] = [3, 3]
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
+        #cut out the screen
         self.reflect_rect.bottomleft = [self.hitbox.topleft[0], 640 - self.hitbox.topleft[1] + 90 - 10]
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_layer, section = self.reflect_rect)
 
-        self.game_objects.shaders['shield']['TIME'] = self.time*0.001
+        self.game_objects.shaders['shield']['TIME'] = self.time
         self.game_objects.shaders['shield']['noise_texture'] = self.noise_layer.texture
         self.game_objects.shaders['shield']['screen_tex'] = self.screen_layer.texture
-
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = self.hitbox.topleft, shader = self.game_objects.shaders['shield'])#shader render
 
     def pool(game_objects):
-        return
-        size = [90, 90]    
-        Shield.image = game_objects.game.display.make_layer(size).texture
+        Shield.size = [90, 90]
+        Shield.empty = game_objects.game.display.make_layer(Shield.size)
+        Shield.noise_layer = game_objects.game.display.make_layer(Shield.size)
+        Shield.screen_layer = game_objects.game.display.make_layer(Shield.size)
 
     def kill(self):
         super().kill()
