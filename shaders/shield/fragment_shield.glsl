@@ -4,6 +4,8 @@ in vec2 fragmentTexCoord;// holds the Vertex position <-1,+1> !!!
 uniform sampler2D imageTexture;// used texture unit
 out vec4 COLOR;
 
+//https://godotshaders.com/shader/shield-with-impact-waves/
+
 const float MPI = 1.5707966326;
 const int STEPS = 20;
 const float LOWER_LIMIT = 0.01;
@@ -23,7 +25,6 @@ uniform float noise_speed = 3.;
 uniform float noise_amplitude  = 0.89;
 uniform float noise_deformation  = 6.;
 uniform float TIME;
-uniform vec2 SCREEN_size = vec2(640,360);
 
 float compute_z_radius(vec2 pos, float r) {
 	vec3 o = vec3(pos, -1.);
@@ -94,6 +95,6 @@ void main() {
 	vec2 SCREEN_UV = fragmentTexCoord; // Since both textures share the same UV space
 
 	vec4 screen_color = texture(screen_tex, SCREEN_UV + (noise_deformation * deformation_mask * SCREEN_PIXEL_SIZE));
-	COLOR = vec4(mix(screen_color.rgb, shield_color.rgb, shield_color.a), 1.0);
+	COLOR = vec4(mix(screen_color.rgb, shield_color.rgb, shield_color.a),  1);
 	
 }
