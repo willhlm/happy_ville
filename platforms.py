@@ -815,7 +815,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
             if self.hitbox.colliderect(platform.hitbox):
                 self.platform_collision(platform)
 
-        for interactable in self.game_objects.interactables_fg:
+        for interactable in self.game_objects.interactables_fg:#check for upstream collisions
             if type(interactable).__name__ == 'Up_stream':
                 if self.hitbox.colliderect(interactable.hitbox):
                     dir = interactable.dir.copy()

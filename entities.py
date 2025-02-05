@@ -1056,7 +1056,7 @@ class Player(Character):
             new_game_state.enter_state()
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
-            self.game_objects.quests_events.emit('player_died')#emit a signal that player died
+            self.game_objects.signals.emit('player_died')#emit a signal that player died
             self.death_state.die()#depending on gameplay state, different death stuff should happen
         return True#return truw to show that damage was taken
 
@@ -1758,7 +1758,7 @@ class Larv_jr(Larv):
 
     def dead(self):#called when death animation is finished
         super().dead()
-        self.game_objects.quests_events.emit('larv_jr_killed')#emit this signal
+        self.game_objects.signals.emit('larv_jr_killed')#emit this signal
 
 class Larv_poison(Enemy):
     def __init__(self, pos, game_objects):
@@ -1879,7 +1879,7 @@ class Cultist_rogue(Enemy):
 
     def dead(self):#called when death animation is finished
         super().dead()
-        self.game_objects.quests_events.emit('cultist_killed')
+        self.game_objects.signals.emit('cultist_killed')
 
 class Cultist_warrior(Enemy):
     def __init__(self, pos, game_objects):
@@ -1896,7 +1896,7 @@ class Cultist_warrior(Enemy):
 
     def dead(self):#called when death animation is finished
         super().dead()
-        self.game_objects.quests_events.emit('cultist_killed')
+        self.game_objects.signals.emit('cultist_killed')
 
 class Shadow_enemy(Enemy):#enemies that can onlly take dmg in light -> dark forst
     def __init__(self,pos,game_objects):
@@ -2178,7 +2178,7 @@ class Butterfly(Flying_enemy):
 
     def dead(self):#called when death animation is finished
         super().dead()
-        self.game_objects.quests_events.emit('butterfly_killed')
+        self.game_objects.signals.emit('butterfly_killed')
 
     def right_collision(self,block, type = 'Wall'):
         pass
@@ -2697,7 +2697,7 @@ class Bouncy_balls(Projectiles):#for ball challange room
         self.velocity = [0,0]
         self.dmg = 0
         self.currentstate.handle_input('Death')
-        self.game_objects.quests_events.emit('ball_killed')
+        self.game_objects.signals.emit('ball_killed')
 
     #platform collisions
     def right_collision(self, block, type = 'Wall'):
@@ -3105,18 +3105,23 @@ class Arrow(Projectiles):
 class Wind(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        self.image = Wind.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.image = Wind.image
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.texture.width, self.image.texture.height)
         self.hitbox = self.rect.copy()
         self.dmg = 0
+
+        self.time = 0
 
         self.dir = kwarg.get('dir', [1,0])
         self.velocity = [self.dir[0] * 10, self.dir[1] * 10]
 
     def collision_platform(self, platform):
-        self.animation.reset_timer()
-        self.currentstate.handle_input('Death')
         self.velocity = [0,0]
+        self.kill()
+
+    def pool(game_objects):
+        size = [64, 64]
+        Wind.image = game_objects.game.display.make_layer(size)
 
     def collision_enemy(self, collision_enemy):#if hit something
         self.velocity = [0,0]
@@ -3124,21 +3129,38 @@ class Wind(Projectiles):
         collision_enemy.velocity[1] = -1
         self.kill()
 
-    def pool(game_objects):
-        Wind.sprites = read_files.load_sprites_dict('Sprites/attack/wind/', game_objects)
+    def update(self):
+        self.time += self.game_objects.game.dt
+        self.lifetime -= self.game_objects.game.dt
+        self.destroy()
+
+    def draw(self, target):
+        self.game_objects.shaders['up_stream']['dir'] = self.dir
+        self.game_objects.shaders['up_stream']['time'] = self.time*0.1
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
 class Shield(Projectiles):#a protection shield
     def __init__(self, entity, **kwarg):
         super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity
+        
+        self.size = Shield.size
+        self.empty = Shield.empty
+        self.noise_layer = Shield.noise_layer
+        self.screen_layer = Shield.screen_layer
         self.image = Shield.image
-        self.rect = pygame.Rect(entity.hitbox.centerx, entity.hitbox.centery, self.image.width, self.image.height)
+
+        self.rect = pygame.Rect(entity.hitbox.center, self.size)
         self.hitbox = self.rect.copy()
+        self.reflect_rect = self.hitbox.copy()
 
         self.time = 0
-        self.lifetime = 360
         self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
+        self.lifetime = kwarg.get('lifetime', 100)
+        self.die = False
+        self.progress = 0
 
     def take_dmg(self, dmg):#called when entity takes damage
         if self.flags['invincibility']: return
@@ -3157,19 +3179,49 @@ class Shield(Projectiles):#a protection shield
     def update(self):
         self.time += self.entity.game_objects.game.dt
         if self.time > self.lifetime:
-            self.kill()
+            self.die = True
+            self.progress += self.entity.game_objects.game.dt*0.01
+            if self.progress == 1:
+                self.kill()
         self.update_pos()
 
     def update_pos(self):
-        self.true_pos = [int(self.entity.hitbox.center[0] - self.game_objects.camera_manager.camera.scroll[0] - self.image.width*0.5),int(self.entity.hitbox.center[1] - self.game_objects.camera_manager.camera.scroll[1]- self.image.height*0.5)]
+        self.true_pos = [int(self.entity.hitbox.center[0] - self.game_objects.camera_manager.camera.scroll[0] - 90*0.5),int(self.entity.hitbox.center[1] - self.game_objects.camera_manager.camera.scroll[1]- 90*0.5)]
+        self.rect.topleft = self.hitbox.center
 
     def draw(self, target):
-        self.game_objects.shaders['shield']['time'] = self.time*0.1
-        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = self.hitbox.topleft, shader = self.game_objects.shaders['shield'])#shader render
+        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
+        self.game_objects.shaders['noise_perlin']['scroll'] = [0, 0]
+        self.game_objects.shaders['noise_perlin']['scale'] = [3, 3]
+        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        #cut out the screen
+        self.reflect_rect.bottomleft = [self.hitbox.topleft[0], 640 - self.hitbox.topleft[1] + 90 - 10]
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_layer, section = self.reflect_rect)
+
+        self.game_objects.shaders['shield']['TIME'] = self.time*0.001        
+        self.game_objects.shaders['shield']['noise_texture'] = self.noise_layer.texture
+        self.game_objects.shaders['shield']['screen_tex'] = self.screen_layer.texture
+        
+        if not self.die:            
+            self.game_objects.game.display.render(self.empty.texture, self.image, shader = self.game_objects.shaders['shield'])#shader render
+            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft)#shader render            
+        else:
+            self.game_objects.shaders['dissolve']['dissolve_texture'] = self.noise_layer.texture
+            self.game_objects.shaders['dissolve']['dissolve_value'] = max(1 - self.progress,0)
+            self.game_objects.shaders['dissolve']['burn_size'] = 0.0
+            self.game_objects.shaders['dissolve']['burn_color'] = [0.39, 0.78, 1,0.7]
+
+            self.game_objects.game.display.render(self.empty.texture, self.image, shader = self.game_objects.shaders['shield'])#shader render
+            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft, shader = self.game_objects.shaders['dissolve'])#shader render
 
     def pool(game_objects):
-        size = [90, 90]
-        Shield.image = game_objects.game.display.make_layer(size).texture
+        Shield.size = [90, 90]
+        Shield.empty = game_objects.game.display.make_layer(Shield.size)
+        Shield.noise_layer = game_objects.game.display.make_layer(Shield.size)
+        Shield.screen_layer = game_objects.game.display.make_layer(Shield.size)
+        Shield.image = game_objects.game.display.make_layer(Shield.size)
 
     def kill(self):
         super().kill()
