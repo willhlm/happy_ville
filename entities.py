@@ -1002,7 +1002,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':False,'Double_jump':False,
                      'Thunder':True,'Shield':True, 'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True}
         self.currentstate = states_player.Idle_main(self)
@@ -1016,9 +1016,9 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
-        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc 
+        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
         #self.shader_state = states_shader.MB(self)
-        
+
     def ramp_down_collision(self, position):#when colliding with platform beneth
         super().ramp_down_collision(position)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
@@ -3986,12 +3986,13 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK 
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()
-        self.spawn_timer = 180
+        self.spawn_timer = prop.get('spawnrate', 180)
+        #self.spawn_timer = 180
 
         self.bubble = bubble#the bubble is in platform, so the reference is sent in init
         self.prop = prop
         #self.time = random.randint(0, 10)
-        self.time = -1 * prop.get('init_delay', 0)
+        self.time = -1 * prop.get('init_delay', random.randint(0, 50))
 
     def group_distance(self):
         pass
@@ -4007,7 +4008,8 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK 
             bubble = self.bubble([self.rect.centerx, self.rect.top], self.game_objects, **self.prop)
             #self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
-            self.time = random.randint(0, 20)
+            #self.time = random.randint(0, 10)
+            self.time = 0
 
 class Crystal_source(Interactable):#the thng that spits out crystals in crystal mines
     def __init__(self, pos, game_objects, **kwarg):

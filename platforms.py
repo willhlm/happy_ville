@@ -2,7 +2,7 @@ import pygame
 import entities, animation, read_files
 from states import states_time_collision, states_gate, states_smacker, states_moving_platform, states_shader, states_basic
 import constants as C
-import math
+import math, random
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, pos, size = (16,16), run_particle = 'dust'):
@@ -722,6 +722,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.rect[2], self.rect[3] = self.image.width, self.image.height
         self.hitbox = self.rect.copy()
         self.old_hitbox = self.hitbox.copy()
+        self.cos_amp_scaler = prop.get('cos_amp_scaler', 1) #hould be between 0 and 1
 
         self.max_down_vel = 0.5
         self.max_up_vel = -1
@@ -736,7 +737,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#s
         self.sign = 1
-        self.sin_time = 0
+        self.sin_time = random.randint(0, 180)
 
     def jumped(self):#called from player states jump_main
         self.deactivate()
@@ -765,7 +766,7 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
             self.sin_time += self.game_objects.game.dt
             sin_vel = math.sin(self.sin_time/30)/40
-            self.velocity[0] += sin_vel
+            self.velocity[0] += sin_vel * self.cos_amp_scaler
             self.velocity[0] += self.game_objects.game.dt*(0 - 0.06*self.velocity[0])
         #self.velocity[0] += self.game_objects.game.dt*(0 - 0.1*self.velocity[0])
 
