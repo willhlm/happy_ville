@@ -1262,7 +1262,7 @@
                  "name":"front",
                  "objects":[
                         {
-                         "gid":43309,
+                         "gid":43312,
                          "height":32,
                          "id":2012,
                          "name":"",
@@ -1274,7 +1274,7 @@
                          "y":1392
                         }, 
                         {
-                         "gid":43309,
+                         "gid":43312,
                          "height":32,
                          "id":2013,
                          "name":"",
@@ -1286,7 +1286,7 @@
                          "y":1376
                         }, 
                         {
-                         "gid":43309,
+                         "gid":43312,
                          "height":32,
                          "id":2014,
                          "name":"",
@@ -1298,7 +1298,7 @@
                          "y":832
                         }, 
                         {
-                         "gid":43309,
+                         "gid":43312,
                          "height":32,
                          "id":2015,
                          "name":"",
@@ -1310,7 +1310,7 @@
                          "y":832
                         }, 
                         {
-                         "gid":43309,
+                         "gid":43312,
                          "height":32,
                          "id":2016,
                          "name":"",
@@ -1474,7 +1474,7 @@
          "source":"..\/_objects\/interactables.tsx"
         }, 
         {
-         "firstgid":43302,
+         "firstgid":43305,
          "source":"objects\/objects.tsx"
         }],
  "tilewidth":16,
