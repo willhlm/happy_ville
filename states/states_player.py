@@ -10,6 +10,9 @@ class Player_states(Entity_States):
     def __init__(self,entity):
         super().__init__(entity)
 
+    def handle_input(self, input, **kwarg):
+        pass
+
     def enter_state(self, newstate, **kwarg):
         state = newstate[:newstate.rfind('_')]#get the name up to last _ (remove pre, main, post)
         if self.entity.states[state]:
@@ -19,7 +22,7 @@ class Player_states(Entity_States):
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
 
-    def handle_release_input(self,input):#all states should inehrent this function, if it should be able to jump
+    def handle_release_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
 
     def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
@@ -65,7 +68,7 @@ class Idle_main(Player_states):
         if event[-1]=='a':
             input.processed()
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'jump':#caööed from jump buffer timer
             self.enter_state('Jump_main')
         elif input == 'dash':#called from dash buffer timer
@@ -125,7 +128,7 @@ class Walk_main(Player_states):
         if event[-1]=='a':
             input.processed()
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'jump':#caööed from jump buffer timer
             self.enter_state('Jump_main')
         elif input == 'dash':#called from dash buffer timer
@@ -188,7 +191,7 @@ class Run_pre(Player_states):
         if event[-1]=='a':
             input.processed()
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'jump':#caööed from jump buffer timer
             self.enter_state('Jump_main')
         elif input == 'dash':#called from dash buffer timer
@@ -254,7 +257,7 @@ class Run_main(Player_states):
             input.processed()
             self.do_ability()
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'jump':#caööed from jump buffer timer
             self.enter_state('Jump_main')
         elif input == 'dash':#called from dash buffer timer
@@ -303,7 +306,7 @@ class Run_post(Player_states):
             input.processed()
             self.do_ability()
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'jump':#caööed from jump buffer timer
             self.enter_state('Jump_main')
         elif input == 'dash':#called from dash buffer timer
@@ -343,7 +346,7 @@ class Jump_main(Player_states):
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
-        self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        if self.entity.colliding_platform: self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform    
 
     def update(self):
         self.jump_dash_timer -= self.entity.game_objects.game.dt
@@ -381,7 +384,7 @@ class Jump_main(Player_states):
             self.entity.velocity[1] = 0.5*self.entity.velocity[1]
             self.enter_state('Fall_pre')
 
-    def handle_input(self, input):
+    def handle_input(self, input, **kwarg):
         if input == 'belt':
             self.enter_state('Belt_glide_main')
 
@@ -455,9 +458,9 @@ class Fall_pre(Player_states):
         self.entity.friction[1] = C.friction_player[1]
         super().enter_state(state, **kwargs)
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'Wall':
-            self.enter_state('Wall_glide_main')
+            self.enter_state('Wall_glide_main', **kwarg)
         elif input == 'belt':
             self.enter_state('Belt_glide_main')
         elif input == 'Ground':
@@ -487,9 +490,11 @@ class Fall_main(Fall_pre):
         pass
 
 class Wall_glide_main(Player_states):
-    def __init__(self, entity):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
+        self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
+        self.entity.colliding_platform = kwarg.get('colliding_platform', None)#save the latest platform
         self.entity.friction[1] = 0.4
         if self.entity.collision_types['right']:
             self.dir = [1,0]
@@ -537,7 +542,7 @@ class Wall_glide_main(Player_states):
             self.enter_state('Fall_pre', wall_dir = self.dir)
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
 
-    def handle_input(self,input):#when hit the ground
+    def handle_input(self, input, **kwarg):
         if input == 'Ground':
             self.enter_state('Run_main')
 
@@ -546,7 +551,7 @@ class Wall_glide_main(Player_states):
         super().enter_state(input, **kwarg)
 
 class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_glide has been unlocked
-    def __init__(self, entity):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
         self.entity.friction[1] = 0.4
@@ -594,7 +599,7 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
             if self.entity.states['Wall_glide']:
                 self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
 
-    def handle_input(self,input):#when hit the ground
+    def handle_input(self, input, **kwarg):
         if input == 'Ground':
             self.enter_state('Run_main')
 
@@ -622,11 +627,11 @@ class Air_dash_pre(Player_states):
         if self.dash_length < 0:
             self.increase_phase()
 
-    def handle_input(self,input):#if hit wall
+    def handle_input(self, input, **kwarg):
         if input == 'Wall' or input == 'belt':
             if self.entity.acceleration[0] != 0:
                 state = input.capitalize() + '_glide_main'
-                self.enter_state(state)
+                self.enter_state(state, **kwarg)
             else:
                 self.enter_state('Idle_main')
         elif input == 'interrupt':
@@ -681,7 +686,7 @@ class Ground_dash_pre(Air_dash_pre):
             input.processed()
             self.enter_state('Dash_jump_main')
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'jump':
             if self.time >0:
                 self.enter_state('Dash_jump_main')
@@ -732,13 +737,13 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
     def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay states
         pass
 
-    def handle_input(self,input):#if hit wall
+    def handle_input(self, input, **kwarg):
         if input == 'Wall' or input =='belt':
             if self.entity.collision_types['right'] and self.entity.dir[0] > 0 or self.entity.collision_types['left'] and self.entity.dir[0] < 0:
                 if self.entity.acceleration[0] != 0:
                     if self.buffer_time < 0:
                         state = input.capitalize() + '_glide_main'
-                        self.enter_state(state)
+                        self.enter_state(state, **kwarg)
         elif input == 'interrupt':
             self.enter_state('Idle_main')
 
@@ -764,13 +769,13 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
         self.buffer_time -= self.entity.game_objects.game.dt
         self.exit_state()
 
-    def handle_input(self,input):#if hit wall
+    def handle_input(self, input, **kwarg):
         if input == 'Wall' or input == 'belt':
             if self.entity.collision_types['right'] and self.entity.dir[0] > 0 or self.entity.collision_types['left'] and self.entity.dir[0] < 0:
                 if self.entity.acceleration[0] != 0:
                     if self.buffer_time < 0:
                         state = input.capitalize() + '_glide_main'
-                        self.enter_state(state)
+                        self.enter_state(state, **kwarg)
         elif input == 'interrupt':
             self.enter_state('Idle_main')
 
@@ -823,7 +828,7 @@ class Death_charge(Player_states):
     def handle_movement(self,event):
         pass
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'Ground':#if hit ground
             self.enter_state('Death_main')
 
@@ -893,7 +898,7 @@ class Pray_main(Player_states):
     def handle_movement(self,event):
         pass
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'Pray_post':
             self.enter_state('Pray_post')
 
@@ -983,7 +988,7 @@ class Sword_fall_main(Sword):
     def increase_phase(self):
         self.enter_state('Fall_main')
 
-    def handle_input(self,input):
+    def handle_input(self, input, **kwarg):
         if input == 'Ground':
             if self.entity.acceleration[0] != 0:
                 self.enter_state('Run_main')
@@ -1113,7 +1118,7 @@ class Thunder_main(Player_states):
     def handle_movement(self,event):
         pass
 
-    def handle_input(self, input):
+    def handle_input(self, input, **kwarg):
         if input in ['Ground', 'Wall', 'belt']:
             self.entity.game_objects.camera_manager.camera_shake()
             self.enter_state('Thunder_post')

@@ -846,7 +846,6 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
-        self.colliding_platform = None
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -875,14 +874,14 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.update_hitbox()
 
     #ramp collisions
-    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
-        self.hitbox.top = position
+    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
+        self.hitbox.top = ramp.target
         self.collision_types['top'] = True
         self.velocity[1] = 2#need to have a value to avoid "dragin in air" while running
         self.velocity[0] = 0#need to have a value to avoid "dragin in air" while running
 
-    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
-        self.hitbox.bottom = position
+    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
+        self.hitbox.bottom = ramp.target
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
         self.velocity[1] = C.max_vel[1] + 10#make aila sticj to ground to avoid falling animation: The extra gravity on ramp
@@ -891,15 +890,14 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
     def right_collision(self, block, type = 'Wall'):
         self.hitbox.right = block.hitbox.left
         self.collision_types['right'] = True
-        self.currentstate.handle_input(type)
+        self.currentstate.handle_input(type, colliding_platform = block)
 
     def left_collision(self, block, type = 'Wall'):
         self.hitbox.left = block.hitbox.right
         self.collision_types['left'] = True
-        self.currentstate.handle_input(type)
+        self.currentstate.handle_input(type, colliding_platform = block)
 
     def down_collision(self, block):
-        self.colliding_platform = block#save the latest platform
         self.hitbox.bottom = block.hitbox.top
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
@@ -1017,25 +1015,20 @@ class Player(Character):
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
+        self.colliding_platform = None#save the last collising platform
         #self.shader_state = states_shader.MB(self)
 
-    def ramp_down_collision(self, position):#when colliding with platform beneth
-        super().ramp_down_collision(position)
+    def ramp_down_collision(self, ramp):#when colliding with platform beneth
+        super().ramp_down_collision(ramp)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+        self.colliding_platform = ramp#save the latest platform
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
         self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
-
-    def right_collision(self, block, type = 'Wall'):
-        super().right_collision(block, type)
-        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-
-    def left_collision(self, block, type = 'Wall'):
-        super().left_collision(block, type)
-        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
+        self.colliding_platform = block#save the latest platform
 
     def take_dmg(self, dmg = 1, duration = 20):
         self.player_modifier.take_dmg(dmg)#Tjasolmais_embrace can set player in invinsible
@@ -1111,6 +1104,7 @@ class Player(Character):
 
     def on_cayote_timeout(self):
         self.flags['ground'] = False
+        self.colliding_platform = None
 
     def on_shroomjump_timout(self):
         self.flags['shroompoline'] = False
@@ -1394,12 +1388,12 @@ class Mygga_suicide(Flying_enemy):#torpedo and explode
         super().top_collision(block)
         self.currentstate.handle_input('collision')#for suicide
 
-    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
-        super().ramp_down_collision(position)
+    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
+        super().ramp_down_collision(ramp)
         self.currentstate.handle_input('collision')#for suicide
 
-    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
-        super().ramp_top_collision(position)
+    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
+        super().ramp_top_collision(ramp)
         self.currentstate.handle_input('collision')#for suicide
 
 class Mygga_roaming(Flying_enemy):
@@ -1422,13 +1416,13 @@ class Mygga_roaming(Flying_enemy):
         pass
 
     #ramp collisions
-    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
-        self.hitbox.top = position
+    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
+        self.hitbox.top = ramp.target
         self.collision_types['top'] = True
         self.velocity[1] *= -1
 
-    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
-        self.hitbox.bottom = position
+    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
+        self.hitbox.bottom = ramp.target
         self.collision_types['bottom'] = True
         self.velocity[1] *= -1
 
@@ -2644,10 +2638,10 @@ class Projectiles(Platform_entity):#projectiels
         pass
 
     #pltform, ramp collisions.
-    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
+    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
         pass
 
-    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
+    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
         pass
 
     def right_collision(self, block, type = 'Wall'):
@@ -2798,10 +2792,10 @@ class Projectile_1(Projectiles):
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
-    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
+    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
         self.collision_platform(None)
 
-    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
+    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
         self.collision_platform(None)
 
 class Falling_rock(Projectiles):#things that can be placed in cave, the source makes this and can hurt player
@@ -3144,7 +3138,7 @@ class Shield(Projectiles):#a protection shield
     def __init__(self, entity, **kwarg):
         super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity
-        
+
         self.size = Shield.size
         self.empty = Shield.empty
         self.noise_layer = Shield.noise_layer
@@ -3180,8 +3174,8 @@ class Shield(Projectiles):#a protection shield
         self.time += self.entity.game_objects.game.dt
         if self.time > self.lifetime:
             self.die = True
-            self.progress += self.entity.game_objects.game.dt*0.01
-            if self.progress == 1:
+            self.progress += self.entity.game_objects.game.dt*0.005
+            if self.progress >= 1:
                 self.kill()
         self.update_pos()
 
@@ -3193,20 +3187,20 @@ class Shield(Projectiles):#a protection shield
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
         self.game_objects.shaders['noise_perlin']['scroll'] = [0, 0]
-        self.game_objects.shaders['noise_perlin']['scale'] = [3, 3]
+        self.game_objects.shaders['noise_perlin']['scale'] = [3,3]
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #cut out the screen
         self.reflect_rect.bottomleft = [self.hitbox.topleft[0], 640 - self.hitbox.topleft[1] + 90 - 10]
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_layer, section = self.reflect_rect)
 
-        self.game_objects.shaders['shield']['TIME'] = self.time*0.001        
+        self.game_objects.shaders['shield']['TIME'] = self.time*0.001
         self.game_objects.shaders['shield']['noise_texture'] = self.noise_layer.texture
         self.game_objects.shaders['shield']['screen_tex'] = self.screen_layer.texture
-        
-        if not self.die:            
+
+        if not self.die:#TODO
             self.game_objects.game.display.render(self.empty.texture, self.image, shader = self.game_objects.shaders['shield'])#shader render
-            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft)#shader render            
+            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft)#shader render
         else:
             self.game_objects.shaders['dissolve']['dissolve_texture'] = self.noise_layer.texture
             self.game_objects.shaders['dissolve']['dissolve_value'] = max(1 - self.progress,0)
@@ -3260,13 +3254,13 @@ class Loot(Platform_entity):#
     def release_texture(self):#stuff that have pool shuold call this
         pass
 
-    def ramp_top_collision(self, position):#called from collusion in clollision_ramp
-        self.hitbox.top = position
+    def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
+        self.hitbox.top = ramp.target
         self.collision_types['top'] = True
         self.velocity[1] = -self.velocity[1]
 
-    def ramp_down_collision(self, position):#called from collusion in clollision_ramp
-        self.hitbox.bottom = position
+    def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
+        self.hitbox.bottom = ramp.target
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
         self.velocity[0] = 0.5 * self.velocity[0]

@@ -16,11 +16,18 @@ void main() {
     vec4 main_texture = texture(imageTexture, fragmentTexCoord);
     vec4 noise_texture = texture(dissolve_texture, fragmentTexCoord);
 
-    // Calculate dissolve threshold and border
+    // Ensure burn effect applies properly, avoiding zero burn_size_step
     float burn_size_step = burn_size * step(0.001, dissolve_value) * step(dissolve_value, 0.999);
-  	float threshold = smoothstep(noise_texture.x-burn_size_step, noise_texture.x, dissolve_value);
-  	float border = smoothstep(noise_texture.x, noise_texture.x + burn_size_step, dissolve_value);
 
-  	COLOR.a = threshold*main_texture.a;
-  	COLOR.rgb = mix(burn_color.rgb, main_texture.rgb, border);
-  }
+    // Adjust threshold calculation
+    float threshold = smoothstep(noise_texture.x - burn_size_step, noise_texture.x, dissolve_value);
+
+    // Force smooth fade-out when approaching zero
+    threshold *= smoothstep(0.0, 0.05, dissolve_value); // Ensures a gradual fade-out at low values
+
+    float border = smoothstep(noise_texture.x, noise_texture.x + burn_size_step, dissolve_value);
+
+    // Apply dissolve effect
+    COLOR.a = threshold * main_texture.a;
+    COLOR.rgb = mix(burn_color.rgb, main_texture.rgb, border);
+}

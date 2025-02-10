@@ -409,30 +409,6 @@
                         }, 
                         {
                          "height":0,
-                         "id":82,
-                         "name":"",
-                         "polygon":[
-                                {
-                                 "x":0,
-                                 "y":0
-                                }, 
-                                {
-                                 "x":64,
-                                 "y":32
-                                }, 
-                                {
-                                 "x":0,
-                                 "y":32
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":0,
-                         "x":2560,
-                         "y":1760
-                        }, 
-                        {
-                         "height":0,
                          "id":83,
                          "name":"",
                          "polygon":[

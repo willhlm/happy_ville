@@ -174,7 +174,7 @@ class Collision_right_angle(Platform):#ramp
 
     def shift_down(self,entity):
         if entity.hitbox.top < self.target:
-            entity.ramp_top_collision(self.target)
+            entity.ramp_top_collision(self)
             entity.update_rect_y()
 
     def shift_up(self, other_side, entity, benethe):
@@ -183,7 +183,7 @@ class Collision_right_angle(Platform):#ramp
         elif other_side > 0 or benethe > 0:
             entity.go_through['ramp'] = True
         elif not entity.go_through['ramp']: #need to be elif
-            entity.ramp_down_collision(self.target)
+            entity.ramp_down_collision(self)
             entity.update_rect_y()
 
 class Collision_dmg(Platform):#"spikes"

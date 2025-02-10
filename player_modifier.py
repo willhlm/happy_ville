@@ -12,7 +12,7 @@ class Player_modifier():
     def take_dmg(self, dmg):
         pass
 
-    def falling(self):
+    def falling(self):#called from falling, only want to change the friction in down direction
         return C.friction_player[1]
 
     def bubble_jump(self):#called from bubble platform
@@ -28,7 +28,6 @@ class Tjasolmais_embrace(Player_modifier):#enters this state when using the shie
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.shield = kwarg['shield']
-        #self.entity.friction[1] = 0.4
 
     def take_dmg(self, dmg):
         self.shield.take_dmg(dmg)
@@ -39,7 +38,7 @@ class Tjasolmais_embrace(Player_modifier):#enters this state when using the shie
     def up_stream(self):
         return 2
 
-    def falling(self):
+    def falling(self):#called from falling, only want to change the friction in down direction
         return 0.2
 
     def sword(self):
