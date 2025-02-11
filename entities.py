@@ -1000,7 +1000,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':False,'Double_jump':False,
                      'Thunder':True,'Shield':True, 'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True}
         
@@ -1015,10 +1015,10 @@ class Player(Character):
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
-        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc 
+        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
         self.colliding_platform = None#save the last collising platform
         #self.shader_state = states_shader.MB(self)
-        
+
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
         self.colliding_platform = ramp#save the latest platform
@@ -3143,7 +3143,7 @@ class Shield(Projectiles):#a protection shield
     def __init__(self, entity, **kwarg):
         super().__init__(entity.hitbox.topleft, entity.game_objects)
         self.entity = entity
-        
+
         self.size = Shield.size
         self.empty = Shield.empty
         self.noise_layer = Shield.noise_layer
@@ -3190,7 +3190,7 @@ class Shield(Projectiles):#a protection shield
 
     def draw(self, target):
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001 
+        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.001
         self.game_objects.shaders['noise_perlin']['scroll'] = [0, 0]
         self.game_objects.shaders['noise_perlin']['scale'] = [3,3]
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
@@ -3199,13 +3199,13 @@ class Shield(Projectiles):#a protection shield
         self.reflect_rect.bottomleft = [self.hitbox.topleft[0], 640 - self.hitbox.topleft[1] + 90 - 10]
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_layer, section = self.reflect_rect)
 
-        self.game_objects.shaders['shield']['TIME'] = self.time*0.001        
+        self.game_objects.shaders['shield']['TIME'] = self.time*0.001
         self.game_objects.shaders['shield']['noise_texture'] = self.noise_layer.texture
         self.game_objects.shaders['shield']['screen_tex'] = self.screen_layer.texture
-        
+
         if not self.die:#TODO
             self.game_objects.game.display.render(self.empty.texture, self.image, shader = self.game_objects.shaders['shield'])#shader render
-            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft)#shader render            
+            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft)#shader render
         else:
             self.game_objects.shaders['dissolve']['dissolve_texture'] = self.noise_layer.texture
             self.game_objects.shaders['dissolve']['dissolve_value'] = max(1 - self.progress,0)
@@ -4037,12 +4037,13 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK 
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
         self.hitbox = self.rect.copy()
-        self.spawn_timer = 180
+        self.spawn_timer = prop.get('spawnrate', 180)
+        #self.spawn_timer = 180
 
         self.bubble = bubble#the bubble is in platform, so the reference is sent in init
         self.prop = prop
         #self.time = random.randint(0, 10)
-        self.time = -1 * prop.get('init_delay', 0)
+        self.time = -1 * prop.get('init_delay', random.randint(0, 50))
 
     def group_distance(self):
         pass
@@ -4058,7 +4059,8 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK 
             bubble = self.bubble([self.rect.centerx, self.rect.top], self.game_objects, **self.prop)
             #self.game_objects.dynamic_platforms.add(bubble)
             self.game_objects.platforms.add(bubble)
-            self.time = random.randint(0, 20)
+            #self.time = random.randint(0, 10)
+            self.time = 0
 
 class Crystal_source(Interactable):#the thng that spits out crystals in crystal mines
     def __init__(self, pos, game_objects, **kwarg):

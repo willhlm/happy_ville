@@ -1166,6 +1166,10 @@ class Hlifblom(Biome):
                         prop['lifetime'] = property['value']
                     elif property['name'] == 'init_delay':
                         prop['init_delay'] = property['value']
+                    elif property['name'] == 'spawnrate':
+                        prop['spawnrate'] = property['value']
+                    elif property['name'] == 'cos_amp_scaler':
+                        prop['cos_amp_scaler'] = property['value']
                     elif property['name'] == 'state':
                         state = property['value']#horizontal or vertical movement #TODO
 

@@ -18,8 +18,10 @@
  </tile>
  <tile id="5">
   <properties>
+   <property name="cos_amp_scaler" type="float" value="0"/>
    <property name="init_delay" type="int" value="0"/>
-   <property name="lifetime" value=""/>
+   <property name="lifetime" type="int" value="0"/>
+   <property name="spawnrate" type="int" value="0"/>
    <property name="state" value=""/>
   </properties>
   <image width="32" height="32" source="../../../Sprites/animations/bubble_source/idle/idle.png"/>
