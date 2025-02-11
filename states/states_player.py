@@ -40,13 +40,15 @@ class Player_states(Entity_States):
             self.enter_state(self.entity.abilities.equip + '_main')
 
 class Idle_main(Player_states):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
+        self.entity.flags['ground'] = True
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
 
     def update(self):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_pre')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
         event = input.output()
@@ -92,6 +94,8 @@ class Walk_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.particle_timer = 0
+        self.entity.flags['ground'] = True
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
 
     def update(self):
         self.particle_timer -= self.entity.game_objects.game.dt
@@ -101,7 +105,7 @@ class Walk_main(Player_states):
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_pre')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout,ID = 'cayote')
 
     def running_particles(self):
         #particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
@@ -152,6 +156,8 @@ class Run_pre(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.particle_timer = 0
+        self.entity.flags['ground'] = True
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
 
     def update(self):
         self.particle_timer -= self.entity.game_objects.game.dt
@@ -161,7 +167,7 @@ class Run_pre(Player_states):
 
         if not self.entity.collision_types['bottom']:#disable this one while on ramp
             self.enter_state('Fall_pre')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def increase_phase(self):
         self.enter_state('Run_main')
@@ -231,7 +237,7 @@ class Run_main(Player_states):
 
         if not self.entity.collision_types['bottom']:#TODO disable this one while entering ramp
             self.enter_state('Fall_pre')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def enter_state(self, new_state):
         #self.sfx_channel.stop()
@@ -289,7 +295,7 @@ class Run_post(Player_states):
     def update(self):
         if not self.entity.collision_types['bottom']:
             self.enter_state('Fall_pre')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
         event = input.output()
@@ -494,7 +500,7 @@ class Wall_glide_main(Player_states):
         super().__init__(entity)
         self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
         self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        self.entity.colliding_platform = kwarg.get('colliding_platform', None)#save the latest platform
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.friction[1] = 0.4
         if self.entity.collision_types['right']:
             self.dir = [1,0]
@@ -504,7 +510,7 @@ class Wall_glide_main(Player_states):
     def update(self):#is needed
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
             self.enter_state('Fall_pre', wall_dir = self.dir)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
         event = input.output()
@@ -536,11 +542,11 @@ class Wall_glide_main(Player_states):
         if value[0] * curr_dir < 0:#change sign
             self.entity.velocity[0] = self.entity.dir[0]*2
             self.enter_state('Fall_pre', wall_dir = self.dir)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
         elif abs(value[0]) == 0:#release
             self.entity.velocity[0] = -self.entity.dir[0]*2
             self.enter_state('Fall_pre', wall_dir = self.dir)
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_input(self, input, **kwarg):
         if input == 'Ground':
@@ -555,12 +561,15 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
         super().__init__(entity)
         self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
         self.entity.friction[1] = 0.4
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
+        if self.entity.states['Wall_glide']:
+            self.entity.flags['ground'] = True
 
     def update(self):#is needed
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
             self.enter_state('Fall_pre')
             if self.entity.states['Wall_glide']:
-                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
         event = input.output()
@@ -592,12 +601,12 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
             self.entity.velocity[0] = self.entity.dir[0]*2
             self.enter_state('Fall_pre')
             if self.entity.states['Wall_glide']:
-                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
         elif value[0] == 0:#release
             self.entity.velocity[0] = -self.entity.dir[0]*2
             self.enter_state('Fall_pre')
             if self.entity.states['Wall_glide']:
-                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout)
+                self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_input(self, input, **kwarg):
         if input == 'Ground':
@@ -670,6 +679,8 @@ class Air_dash_post(Air_dash_pre):
 class Ground_dash_pre(Air_dash_pre):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
+        self.entity.flags['ground'] = True
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.time = C.jump_dash_timer
         wall_dir = kwarg.get('wall_dir', False)
         if wall_dir:
@@ -915,16 +926,22 @@ class Pray_post(Player_states):
 class Hurt_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
-        self.next_state = 'Idle_main'
+        if entity.collision_types['bottom']:
+            self.next_state = 'Idle_main'            
+        else:
+            self.next_state = 'Fall_pre'
 
     def increase_phase(self):
         self.enter_state(self.next_state)
 
     def update(self):
-        if self.entity.acceleration[0] == 0:
-            self.next_state = 'Idle_main'
+        if entity.collision_types['bottom']:
+            if self.entity.acceleration[0] == 0:
+                self.next_state = 'Idle_main'
+            else:
+                self.next_state ='Run_pre'          
         else:
-            self.next_state ='Run_main'
+            self.next_state = 'Fall_pre'
 
 class Spawn_main(Player_states):#enters when aila respawn after death
     def __init__(self,entity):

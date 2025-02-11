@@ -32,6 +32,7 @@ class Game_Objects():
         self.object_pool = object_pool.Object_pool(self)
         self.sound = sound.Sound()
         self.lights = lights.Lights(self)
+        self.timer_manager = timer.Timer_manager(self)
         self.create_groups()
         self.weather = weather.Weather(self)#initiate weather
         self.collisions = collisions.Collisions(self)
@@ -42,8 +43,7 @@ class Game_Objects():
         self.save_load = save_load.Save_load(self)#contains save and load attributes to load and save game
         self.shader_render = shader_render.Screen_shader(self, 'vignette')     
         self.render_state = states_gameplay.Idle(self)
-        self.quests_events = quests_events.Quests_events(self)
-        self.timer_manager = timer.Timer_manager(self)
+        self.quests_events = quests_events.Quests_events(self)        
         self.signals = signals.Signals()
 
     def create_groups(self):#define all sprite groups

@@ -879,6 +879,102 @@ class Light_forest(Biome):
                     platform = platforms.Breakable_oneside_1(object_position, self.level.game_objects, str(ID_key))
                     self.level.game_objects.platforms.add(platform)
 
+class Nordveden(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+
+    def play_music(self):
+        #super().play_music()
+        sounds = read_files.load_sounds_dict('audio/SFX/environment/ambient/nordveden/')
+        self.level.game_objects.sound.play_priority_sound(sounds['idle'][0], index = 1, loop = -1, fade = 1000, vol = 0.2)
+
+    def room(self, room):#called wgen a new room is loaded
+        return
+        if room in ['11', '8', '7', '6', '5']:
+            self.level.game_objects.lights.ambient = (100/255,100/255,100/255,255/255)
+            self.level.game_objects.lights.add_light(self.level.game_objects.player, colour = [200/255,200/255,200/255,200/255], interact = False)
+
+    def load_objects(self, data, parallax, offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+            if id == 2:#light forest tree tree
+                new_tree = entities_parallax.Tree_1(object_position,self.level.game_objects,parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.level.game_objects.all_bgs.add(new_tree)
+
+            elif id == 3:#light forest tree tree
+                new_tree = entities_parallax.Tree_2(object_position,self.level.game_objects,parallax)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_tree)
+                else:
+                    self.level.game_objects.all_bgs.add(new_tree)
+
+            elif id == 4:#light forest breakable collisio block
+                new_plarform = platforms.Breakable_block_1(object_position,self.level.game_objects)
+                if self.level.layer.startswith('fg'):
+                    self.level.game_objects.platforms.add(new_plarform)
+                else:
+                    self.level.game_objects.platforms.add(new_plarform)
+
+            elif id == 5:#grind
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'frequency':
+                        kwarg['frequency'] = property['value']
+                    elif property['name'] == 'direction':
+                        kwarg['direction'] = property['value']
+                    elif property['name'] == 'distance':
+                        kwarg['distance'] = property['value']
+                    elif property['name'] == 'speed':
+                        kwarg['speed'] = property['value']
+
+                new_grind = entities.Grind(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.interactables.add(new_grind)
+
+            elif id == 6:#stone wood
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'quest':
+                        kwarg['quest'] = property['value']
+                    elif property['name'] == 'item':
+                        kwarg['item'] = property['value']
+
+                new_stone_wood = entities.Stone_wood(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.interactables.add(new_stone_wood)
+
+            elif id == 7:#cocoon
+                if parallax == [1,1]:#if BG1 layer
+                    new_cocoon = entities.Cocoon(object_position, self.level.game_objects)
+                    self.level.game_objects.interactables.add(new_cocoon)
+                else:#if in parallax layers
+                    new_cocoon = entities_parallax.Cocoon(object_position, self.level.game_objects, parallax)
+                    if self.level.layer.startswith('fg'):
+                        self.level.game_objects.all_fgs.add(new_cocoon)
+                    else:
+                        self.level.game_objects.all_bgs.add(new_cocoon)
+
+            elif id == 8:#cocoon
+                new_cocoon = entities.Cocoon_boss(object_position, self.level.game_objects)
+                self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
+                self.level.game_objects.interactables.add(new_cocoon)
+
+            elif id == 9:#one side brakable
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID_key = property['value']
+
+                if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
+                    platform = platforms.Breakable_oneside_1(object_position, self.level.game_objects, str(ID_key))
+                    self.level.game_objects.platforms.add(platform)
+
+
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
         super().__init__(level)

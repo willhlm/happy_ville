@@ -476,7 +476,7 @@ class Waterfall(Staticentity):
         #water
         self.game_objects.shaders['waterfall']['refraction_map'] = self.noise_layer.texture
         self.game_objects.shaders['waterfall']['water_mask'] = self.noise_layer.texture
-        self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.screen_copy.texture#for some reason, the water fall there, making it flicker. offsetting the cutout part, the flickering appears when the waterfall enetrs
+        self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.screen_copy.texture
         self.game_objects.shaders['waterfall']['TIME'] = self.time
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
@@ -663,7 +663,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
-        self.hitbox = pygame.Rect(pos, size)
+        self.hitbox = pygame.Rect(pos[0] + size[0]* 0.2 * 0.5, pos[1], size[0] * 0.8, size[1])#adjust the hitbox size based on texture 
         self.time = 0
 
         horizontal = kwarg.get('horizontal', 0)
@@ -689,7 +689,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         player.velocity[0] += self.dir[0] * self.game_objects.game.dt
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * player.player_modifier.up_stream()
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * player.player_modifier.up_stream() - int(player.collision_types['bottom'])#a small inital boost if on ground
 
     def player_noncollision(self):
         pass
@@ -890,12 +890,12 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
     def right_collision(self, block, type = 'Wall'):
         self.hitbox.right = block.hitbox.left
         self.collision_types['right'] = True
-        self.currentstate.handle_input(type, colliding_platform = block)
+        self.currentstate.handle_input(type)
 
     def left_collision(self, block, type = 'Wall'):
         self.hitbox.left = block.hitbox.right
         self.collision_types['left'] = True
-        self.currentstate.handle_input(type, colliding_platform = block)
+        self.currentstate.handle_input(type)
 
     def down_collision(self, block):
         self.hitbox.bottom = block.hitbox.top
@@ -1003,13 +1003,14 @@ class Player(Character):
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True, 'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True}
+        
+        self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False                     
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.inventory = {'Amber_Droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
-        self.omamoris = Omamoris(self)#
-        self.flags = {'ground': True, 'sword_swinging': False, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
+        self.omamoris = Omamoris(self)#        
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
@@ -1020,14 +1021,18 @@ class Player(Character):
         
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
-        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
         self.colliding_platform = ramp#save the latest platform
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)        
-        self.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
-        #self.friction = C.friction_player.copy()#water liquid slow works if this is commented
+        self.colliding_platform = block#save the latest platform
+
+    def right_collision(self, block, type = 'Wall'):
+        super().right_collision(block, type)
+        self.colliding_platform = block#save the latest platform
+
+    def left_collision(self, block, type = 'Wall'):
+        super().left_collision(block, type)
         self.colliding_platform = block#save the latest platform
 
     def take_dmg(self, dmg = 1, duration = 20):
