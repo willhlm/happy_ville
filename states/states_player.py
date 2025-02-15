@@ -792,7 +792,7 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
 
     def increase_phase(self):
         #self.entity.friction = C.friction_player.copy()
-        if self.entity.flags['ground']:
+        if self.entity.collision_types['bottom']:
             if self.entity.acceleration[0] == 0:
                 self.enter_state('Idle_main')
             else:

@@ -689,7 +689,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         player.velocity[0] += self.dir[0] * self.game_objects.game.dt
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * player.player_modifier.up_stream() - int(player.collision_types['bottom'])#a small inital boost if on ground
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * player.player_modifier.up_stream() + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
 
     def player_noncollision(self):
         pass
@@ -1000,7 +1000,7 @@ class Player(Character):
                      'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
                      'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':False,'Double_jump':False,
+                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True, 'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True}
         
@@ -4401,52 +4401,6 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
         for layer in layers:
             layer.new_colour = self.new_colour + [layer.colour[-1]]
             layer.bounds = self.rect
-
-class Event_trigger(Interactable):#cutscene (state) or event/quest
-    def __init__(self, pos, game_objects, size, **kwarg):
-        super().__init__(pos, game_objects)
-        self.rect = pygame.Rect(pos, size)
-        self.hitbox = self.rect.copy()
-        self.event = kwarg.get('event', False)
-        self.new_state = kwarg.get('new_state', False)#if it is an event that requires new sttae, e.g. cutscene
-
-    def release_texture(self):
-        pass
-
-    def draw(self, target):
-        pass
-
-    def update(self):
-        self.group_distance()
-
-    def player_collision(self, player):
-        #quests: occures continiously until complete
-        if self.event == 'start_larv_party':
-            if self.game_objects.world_state.quests.get('larv_party', False): return#completed, return
-            if self.game_objects.quests_events.active_quests.get('larv_party', False):
-                if self.game_objects.quests_events.active_quests['larv_party'].running: return
-                self.game_objects.quests_events.active_quests['larv_party'].initiate_quest()
-            else:
-                self.game_objects.quests_events.initiate_quest('larv_party')
-
-        elif self.event == 'stop_larv_party':
-            if not self.game_objects.quests_events.active_quests.get('larv_party', False): return
-            if not self.game_objects.quests_events.active_quests['larv_party'].running: return#if quest is not running
-            self.game_objects.quests_events.active_quests['larv_party'].pause_quest()
-
-        #events: occures once
-        elif not self.new_state:
-            if self.game_objects.world_state.events.get(self.event, False): return#if event has already been done
-            self.game_objects.quests_events.initiate_event(self.event)#event
-            self.kill()#is this a problem in re-spawn?
-        elif self.new_state:#if it is an event that requires new sttae, e.g. cutscene
-            if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has been shown before, return. Shold we kill the object instead?
-            if self.event == 'Butterfly_encounter':
-                if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
-
-            new_game_state = getattr(states, self.event)(self.game_objects.game)
-            new_game_state.enter_state()
-            self.kill()#is this a problem in re-spawn?
 
 class Interactable_bushes(Interactable):
     def __init__(self,pos,game_objects):

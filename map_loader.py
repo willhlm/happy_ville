@@ -1,5 +1,5 @@
 import pygame, math, sys
-import entities, read_files, weather, entities_parallax, game_states, platforms
+import entities, read_files, weather, entities_parallax, game_states, platforms, event_triggers
 import constants as C
 
 class Level():
@@ -309,7 +309,8 @@ class Level():
                         kwarg['event'] = property['value']
                     elif property['name'] == 'new_state':
                         kwarg['new_state'] = property['value']
-                new_trigger = entities.Event_trigger(object_position, self.game_objects, object_size, **kwarg)
+                
+                new_trigger = getattr(event_triggers, kwarg['event'].capitalize(), 'Event_trigger')(object_position, self.game_objects, object_size, **kwarg)#returns Biome (default) if there is no biome class
                 self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object
@@ -973,7 +974,6 @@ class Nordveden(Biome):
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
                     platform = platforms.Breakable_oneside_1(object_position, self.level.game_objects, str(ID_key))
                     self.level.game_objects.platforms.add(platform)
-
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
