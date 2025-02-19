@@ -626,7 +626,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_6"
+                                 "value":"nordveden_1"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1432,7 +1432,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",

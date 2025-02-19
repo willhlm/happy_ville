@@ -260,7 +260,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -278,12 +278,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_24"
+                                 "value":"nordveden_17"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"5"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -319,7 +319,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -337,12 +337,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_23"
+                                 "value":"nordveden_11"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -368,114 +368,6 @@
                          "width":16,
                          "x":2672,
                          "y":1728
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":479,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Larv_simple"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3536,
-                         "y":1184
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":480,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Larv_simple"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2816,
-                         "y":1328
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":481,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Larv_simple"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3152,
-                         "y":1696
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":482,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Larv_simple"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3696,
-                         "y":1440
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":483,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4336,
-                         "y":1280
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":484,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3232,
-                         "y":1376
                         }, 
                         {
                          "gid":8,

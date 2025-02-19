@@ -577,7 +577,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"4"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -601,7 +601,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":1456,
+                         "x":480,
                          "y":848
                         }, 
                         {

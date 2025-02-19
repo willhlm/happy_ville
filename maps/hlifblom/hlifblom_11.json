@@ -262,7 +262,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_19"
+                                 "value":"nordveden_7"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -291,8 +291,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":4432,
-                         "y":1344
+                         "x":4480,
+                         "y":1312
                         }, 
                         {
                          "gid":8207,

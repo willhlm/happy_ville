@@ -178,7 +178,7 @@ class Larv_party(Tasks):#william's larv room
         super().__init__(game_objects)    
         self.number = 20#number of larvs on the map
 
-    def incrase_kill(self):#called when larv_jr is killed
+    def incrase_kill(self):#called when larv_jr is killed: signal
         self.number -= 1
         if self.number < 0:
             self.complete()

@@ -1,0 +1,56 @@
+import pygame
+from entities import Interactable
+import game_states
+
+class Event_trigger(Interactable):#based
+    def __init__(self, pos, game_objects, size, **kwarg):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos, size)
+        self.hitbox = self.rect.copy()
+        self.event = kwarg.get('event', False).lower()
+        self.new_state = kwarg.get('new_state', False)#if it is an event that requires new sttae, e.g. cutscene
+
+    def release_texture(self):
+        pass
+
+    def draw(self, target):
+        pass
+
+    def update(self):
+        self.group_distance()
+
+    def player_collision(self, player):
+        if self.new_state:#if it is an event that requires new sttae, e.g. cutscene
+            if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has been shown before, return. Shold we kill the object instead?
+            if self.event == 'Butterfly_encounter':
+                if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
+
+            new_game_state = getattr(game_states, self.event)(self.game_objects.game)
+            new_game_state.enter_state()        
+
+        else:
+            if self.game_objects.world_state.events.get(self.event, False): return#if event has already been done
+            self.game_objects.quests_events.initiate_event(self.event)#event
+        
+        self.kill()#is this a problem in re-spawn?
+
+class Start_larv_party(Event_trigger):
+    def __init__(self, pos, game_objects, size, **kwarg):
+        super().__init__(pos, game_objects, size, **kwarg)
+
+    def player_collision(self, player):
+        if self.game_objects.world_state.quests.get('larv_party', False): return#completed, return
+        if self.game_objects.quests_events.active_quests.get('larv_party', False):
+            if self.game_objects.quests_events.active_quests['larv_party'].running: return
+            self.game_objects.quests_events.active_quests['larv_party'].initiate_quest()
+        else:
+            self.game_objects.quests_events.initiate_quest('larv_party')        
+
+class Stop_larv_party(Event_trigger):
+    def __init__(self, pos, game_objects, size, **kwarg):
+        super().__init__(pos, game_objects, size, **kwarg)
+
+    def player_collision(self, player):
+        if not self.game_objects.quests_events.active_quests.get('larv_party', False): return
+        if not self.game_objects.quests_events.active_quests['larv_party'].running: return#if quest is not running
+        self.game_objects.quests_events.active_quests['larv_party'].pause_quest()

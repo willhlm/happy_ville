@@ -653,7 +653,7 @@
                          "visible":true,
                          "width":16,
                          "x":2496,
-                         "y":976
+                         "y":912
                         }, 
                         {
                          "gid":11,
@@ -664,7 +664,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_cave_1"
+                                 "value":"hlifblom_1"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -705,7 +705,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_9"
+                                 "value":"nordveden_4"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -728,7 +728,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_19"
+                                 "value":"nordveden_7"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -751,7 +751,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -941,12 +941,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_24"
+                                 "value":"nordveden_20"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -987,13 +987,13 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3760,
+                         "x":3904,
                          "y":1168
                         }, 
                         {
@@ -1291,7 +1291,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":37195,
+         "firstgid":37194,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,

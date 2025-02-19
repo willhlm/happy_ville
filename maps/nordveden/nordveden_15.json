@@ -297,79 +297,7 @@
                  "draworder":"topdown",
                  "id":94,
                  "name":"back",
-                 "objects":[
-                        {
-                         "gid":45089,
-                         "height":96,
-                         "id":502,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":4768,
-                         "y":1472
-                        }, 
-                        {
-                         "gid":45090,
-                         "height":80,
-                         "id":504,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":80,
-                         "x":3888,
-                         "y":1424
-                        }, 
-                        {
-                         "gid":45089,
-                         "height":96,
-                         "id":505,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":4672,
-                         "y":1632
-                        }, 
-                        {
-                         "gid":45089,
-                         "height":96,
-                         "id":506,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":4416,
-                         "y":1664
-                        }, 
-                        {
-                         "gid":45089,
-                         "height":96,
-                         "id":507,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":4448,
-                         "y":1504
-                        }, 
-                        {
-                         "gid":45089,
-                         "height":96,
-                         "id":509,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":3872,
-                         "y":1328
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -380,19 +308,7 @@
                  "draworder":"topdown",
                  "id":73,
                  "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":44043,
-                         "height":137,
-                         "id":489,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":160,
-                         "x":4352,
-                         "y":1360
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -425,7 +341,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -443,12 +359,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_24"
+                                 "value":"nordveden_17"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"4"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -484,12 +400,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"light_forest_23"
+                                 "value":"nordveden_11"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"3"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -525,7 +441,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -533,96 +449,6 @@
                          "width":16,
                          "x":2400,
                          "y":1424
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":466,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3136,
-                         "y":1360
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":467,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Packun"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3520,
-                         "y":1344
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":468,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Larv_simple"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3824,
-                         "y":1648
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":469,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Larv_simple"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4144,
-                         "y":1328
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":470,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":4704,
-                         "y":1664
                         }, 
                         {
                          "gid":8,

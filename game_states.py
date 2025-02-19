@@ -126,7 +126,7 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_2','1')
+            self.game.game_objects.load_map(self,'nordveden_9','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
