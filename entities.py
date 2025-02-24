@@ -960,7 +960,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0] * amp_x * (1 - abs(dir[1]))
         self.velocity[1] = -dir[1] * 10
 
-    def hurt_particles(self, type = 'Circle', number_particles = 20, **kwarg):
+    def emit_particles(self, type = 'Circle', number_particles = 20, **kwarg):
         for i in range(0, number_particles):
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
@@ -1048,7 +1048,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            self.hurt_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
+            self.emit_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
             new_game_state = game_states.Pause_gameplay(self.game_objects.game, duration = duration, amplitude = 10)#pause the game for a while with an optional shake
             new_game_state.enter_state()
@@ -2270,8 +2270,8 @@ class Fade_effect(Staticentity):#fade effect
         self.rect.center = entity.rect.center
         self.alpha = alpha
 
-        self.shader = entity.game_objects.shaders['alpha']
-        self.shader['alpha'] = alpha
+        self.image_copy = self.game_objects.game.display.make_layer((entity.image.width, entity.image.height))
+        self.game_objects.shaders['alpha']['alpha'] = alpha
         self.true_pos = self.rect.topleft
         self.dir = entity.dir.copy()
 
@@ -2280,8 +2280,15 @@ class Fade_effect(Staticentity):#fade effect
         self.destroy()
 
     def draw(self, target):
-        self.shader['alpha'] = self.alpha
-        super().draw(target)
+        self.image_copy.clear(0,0,0,0)
+        self.game_objects.shaders['alpha']['alpha'] = self.alpha
+
+        blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        
+        self.game_objects.shaders['motion_blur']['dir'] = [0.05, 0]
+        self.game_objects.game.display.render(self.image, self.image_copy, shader = self.game_objects.shaders['motion_blur'])#shader render
+        self.game_objects.game.display.render(self.image_copy.texture, target, position = blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['alpha'])#shader render
+
 
     def destroy(self):
         if self.alpha < 5:
@@ -2981,7 +2988,7 @@ class Sword(Melee):
         if collision_enemy.flags['invincibility']: return
         collision_enemy.take_dmg(self.dmg)
         collision_enemy.knock_back(self.dir)
-        collision_enemy.hurt_particles(dir = self.dir)
+        collision_enemy.emit_particles(dir = self.dir)
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
 
@@ -3037,7 +3044,7 @@ class Aila_sword(Sword):
         self.sword_jump()
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
             collision_enemy.knock_back(self.dir)
-            collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
+            collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
             self.clash_particles(collision_enemy.hitbox.center)
             #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
 

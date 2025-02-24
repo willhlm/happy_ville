@@ -182,7 +182,7 @@ def alphabet_reader(path_to_sheet, h, num):
             height = 9
         else:
             height = h
-        width = val2 - val - 1
+        width = val2 - val - 1        
         rect = pygame.Rect(val+1, 0, width, height)
         #rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
         image = pygame.Surface((width, height),pygame.SRCALPHA,32).convert_alpha()
@@ -215,39 +215,60 @@ class Alphabet():
         #    self.characters[c] = sheet[i]
 
     #returns a surface with size of input, and input text. Automatic line change
-    def render(self, surface_size = False, text = "", limit = 1000):
+    def render(self, surface_size=False, text="", letter_frame=1000, alignment='left'):
         if not surface_size:
-            surface_size = (400,45)
+            surface_size = (len(text) * self.max_height, 45)
+        
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
-        x, y = 0, 0
+        #pygame.draw.rect(text_surface, [200, 200, 200, 100], (0, 0, surface_size[0], surface_size[1]))
+
         h = self.max_height
-        w = 0
-        s = 3
+        s = 3  # Space between words
 
-        text_l = text.split(" ")
-        for word in text_l:
-            #cache = word
-            new_row = False
-            for c in word:
-                w = self.characters[c].get_width()
-                if x + w > surface_size[0]: #break line if end is reached
-                    x = 0
-                    y += h
-                    new_row = True
+        # Limit the text to letter_frame characters for gradual expansion
+        visible_text = text[:letter_frame]
+        words = visible_text.split(" ")
+
+        lines = []
+        current_line = []
+        line_width = 0
+        x, y = 0, 0
+
+        # First, split text into lines
+        for word in words:
+            word_width = sum(self.characters[c].get_width() + 1 for c in word)  # Calculate word width
+
+            if line_width + word_width > surface_size[0]:  # Break line if needed
+                lines.append((current_line, line_width - 1))  # Store completed line
+                current_line = []
+                line_width = 0
+                y += h  # Move to next row
+
+                if y > surface_size[1] - h:  # Stop if exceeding surface
                     break
-                text_surface.blit(self.characters[c], (x, y))
-                x += w + 1
 
-            if y > (surface_size[1] - h):
-                return self.game_objects.game.display.surface_to_texture(text_surface) #spot printing at limit
-            elif new_row:
-                new_row = False
+            current_line.append(word)
+            line_width += word_width + s  # Add word and space
+
+        if current_line:  # Store the last line
+            lines.append((current_line, line_width - s))
+
+        # Now, render the lines with proper alignment
+        y = 0
+        for line, line_width in lines:
+            if alignment == 'center':
+                x = (surface_size[0] - line_width) // 2  # Center alignment
+            else:
+                x = 0  # Default to left alignment
+
+            for word in line:
                 for c in word:
                     text_surface.blit(self.characters[c], (x, y))
-                    x += w
+                    x += self.characters[c].get_width() + 1  # Move right for next char
 
-            #add space after each word
-            x += s
+                x += s  # Add space after each word
+
+            y += h  # Move down for the next line
 
         return self.game_objects.game.display.surface_to_texture(text_surface)
 

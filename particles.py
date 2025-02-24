@@ -42,7 +42,7 @@ class Particles(pygame.sprite.Sprite):
         self.velocity[1] += self.game_objects.game.dt *  self.gravity_scale
 
     def wave(self):
-        self.velocity  = [0.5*math.sin(self.lifetime*0.1 + self.angle + self.phase),-1]
+        self.velocity  = [0.5*math.sin(self.lifetime*0.1 + self.angle + self.phase),-self.gravity_scale]
 
     def linear(self):
         self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)

@@ -54,13 +54,13 @@ class Title_Menu(Game_State):
         y_pos = 200
         for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
-            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [100,y_pos]))
+            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [80,y_pos]))
             y_pos += 20
 
     def define_BG(self):
         size = (90,100)
         bg = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()
-        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
+        pygame.draw.rect(bg,[200,200,200,150],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
 
     def reset_timer(self):
@@ -126,7 +126,7 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_9','1')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_2','1')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'hlifblom_7','1')
@@ -557,7 +557,7 @@ class Gameplay(Game_State):
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self, game):
         super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
+        self.title = self.game.game_objects.font.render(text = 'Pause menu', alignment = 'center') #temporary
 
         #create buttons
         self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
@@ -566,34 +566,29 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.define_BG()
         self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
-        #copy the screen
-        self.screen_copy = self.game.display.make_layer(self.game.window_size)
-        self.render()#need to render everything first
-        self.game.game_objects.shaders['blur']['blurRadius'] = 1
-        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#shader render
+        self.screen_copy = self.game.display.make_layer(self.game.window_size)     
 
     def define_BG(self):
         size = (100,120)
-        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
+        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
+        pygame.draw.rect(bg,[200,200,200,220],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
-        self.background = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
-        self.background.clear(50,50,50,30)
+        self.background = self.game.display.make_layer(self.game.window_size)        
 
     def initiate_buttons(self):
         y_pos = 140
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b))
+            text = (self.game.game_objects.font.render(text = b, alignment = 'center'))
             #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
     def update_arrow(self):
-        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        pos = self.button_rects[self.buttons[self.current_button]].topleft
+        self.arrow.update_pos(pos)
         self.arrow.play_SFX()
 
     def update(self):
@@ -601,10 +596,13 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
 
     def render(self):
         super().render()
-        self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]/2 - self.bg.width/2,100))#shader render
+        self.background.clear(50,50,50,30)
+        self.game.game_objects.shaders['blur']['blurRadius'] = 0.1
+        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#blur screen
+        self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]*0.5 - self.bg.width*0.5,100))#shader render
 
         #blit title
-        self.game.display.render(self.title, self.background, position = (self.game.window_size[0]/2 - self.title.width/2,110))#shader render
+        self.game.display.render(self.title, self.background, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,110))#shader render
 
         #blit buttons
         for b in self.buttons:
@@ -621,6 +619,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.title.release()
         self.bg.release()
         self.background.release()
+        self.screen_copy.release()
         for key in self.button_surfaces.keys():
             self.button_surfaces[key].release()
 
