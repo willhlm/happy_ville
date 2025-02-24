@@ -914,6 +914,18 @@
                          "width":32,
                          "x":1168,
                          "y":416
+                        }, 
+                        {
+                         "gid":1839,
+                         "height":48,
+                         "id":1771,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":448,
+                         "y":288
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1024,15 +1036,21 @@
                         }, 
                         {
                          "gid":1815,
-                         "height":48,
+                         "height":32,
                          "id":1715,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"direction",
+                                 "type":"string",
+                                 "value":"bottom"
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":456,
-                         "x":256,
-                         "y":784
+                         "x":736,
+                         "y":800
                         }, 
                         {
                          "gid":1811,
@@ -1066,7 +1084,7 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"hlifblom_4"
+                                 "value":"hlifblom_40"
                                 }, 
                                 {
                                  "name":"spawn",
@@ -1587,7 +1605,7 @@
          "y":0
         }],
  "nextlayerid":50,
- "nextobjectid":1771,
+ "nextobjectid":1772,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",
