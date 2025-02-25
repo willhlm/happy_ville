@@ -631,7 +631,7 @@ class Air_dash_pre(Player_states):
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
-        self.entity.emit_particles(lifetime = 40, scale=3, colour=[255*0.39, 255*0.78, 255,255], gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
+        self.entity.emit_particles(lifetime = 40, scale=3, colour=[255*0.39, 255*0.78, 255, 255], gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.exit_state()
 
     def exit_state(self):
@@ -640,12 +640,14 @@ class Air_dash_pre(Player_states):
 
     def handle_input(self, input, **kwarg):
         if input == 'Wall' or input == 'belt':
+            self.entity.shader_state.handle_input('idle')
             if self.entity.acceleration[0] != 0:
                 state = input.capitalize() + '_glide_main'
                 self.enter_state(state, **kwarg)
             else:
-                self.enter_state('Idle_main')
+                self.enter_state('Idle_main')            
         elif input == 'interrupt':
+            self.entity.shader_state.handle_input('idle')
             self.enter_state('Idle_main')
 
     def increase_phase(self):
@@ -757,6 +759,7 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
             if self.entity.collision_types['right'] and self.entity.dir[0] > 0 or self.entity.collision_types['left'] and self.entity.dir[0] < 0:
                 if self.entity.acceleration[0] != 0:
                     if self.buffer_time < 0:
+                        self.entity.shader_state.handle_input('idle')
                         state = input.capitalize() + '_glide_main'
                         self.enter_state(state, **kwarg)
         elif input == 'interrupt':
@@ -790,11 +793,14 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
                 if self.entity.acceleration[0] != 0:
                     if self.buffer_time < 0:
                         state = input.capitalize() + '_glide_main'
+                        self.entity.shader_state.handle_input('idle')
                         self.enter_state(state, **kwarg)
         elif input == 'interrupt':
+            self.entity.shader_state.handle_input('idle')
             self.enter_state('Idle_main')
 
     def increase_phase(self):
+        self.entity.shader_state.handle_input('idle')
         #self.entity.friction = C.friction_player.copy()
         if self.entity.collision_types['bottom']:
             if self.entity.acceleration[0] == 0:

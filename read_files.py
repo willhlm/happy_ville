@@ -198,11 +198,8 @@ class Alphabet():
         self.max_height = 9
         self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
                                 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-                                '1','2','3','4','5','6','7','8','9','0',',','.','\'','!','?','_','(',')','[',']']
-        #self.character_order = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',',','.','\'','!','?','_','[',']']
-        #self.character_lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+                                '1','2','3','4','5','6','7','8','9','0','!','?','_','.',',',"'",'(',')','[',']']
         self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
-        #sheet = generic_sheet_reader("Sprites/utils/alphabet_low.png",self.char_size[0],self.char_size[1],1,len(self.character_order))
         sheet = alphabet_reader("Sprites/utils/alpha_new.png", self.char_size[1], len(self.character_order))
 
         self.characters={}
@@ -210,91 +207,63 @@ class Alphabet():
         for i, c in enumerate(self.character_order):
             self.characters[c] = sheet[i]
 
-        #map lower case to same sprites (change __init__ incase lower case sprites are desired)
-        #for i, c in enumerate(self.character_lower):
-        #    self.characters[c] = sheet[i]
-
     #returns a surface with size of input, and input text. Automatic line change
-    def render(self, surface_size=False, text="", letter_frame=1000, alignment='left'):
+    def render(self, surface_size = False, text="", letter_frame=1000, alignment='left'):
         if not surface_size:
-            surface_size = (len(text) * self.max_height, 45)
+            total_width = sum(self.characters[c].get_width() + 1 for c in text if c in self.characters)
+            total_width += text.count(" ") * 4  # Adjusting for spaces
+            surface_size = (total_width, self.max_height + 2)
         
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
         #pygame.draw.rect(text_surface, [200, 200, 200, 100], (0, 0, surface_size[0], surface_size[1]))
 
         h = self.max_height
         s = 3  # Space between words
-
-        # Limit the text to letter_frame characters for gradual expansion
         visible_text = text[:letter_frame]
         words = visible_text.split(" ")
 
         lines = []
         current_line = []
         line_width = 0
+        max_width = surface_size[0]
         x, y = 0, 0
 
-        # First, split text into lines
         for word in words:
-            word_width = sum(self.characters[c].get_width() + 1 for c in word)  # Calculate word width
-
-            if line_width + word_width > surface_size[0]:  # Break line if needed
-                lines.append((current_line, line_width - 1))  # Store completed line
+            word_width = 0
+            for c in word:
+                if c in self.characters:
+                    word_width += self.characters[c].get_width() + 1
+            #word_width = sum(self.characters[c].get_width() + 1 for c in word if c in self.characters)
+            
+            if line_width + word_width > max_width:
+                lines.append((current_line, line_width - 1))
                 current_line = []
                 line_width = 0
-                y += h  # Move to next row
-
-                if y > surface_size[1] - h:  # Stop if exceeding surface
+                y += h
+                if y > surface_size[1] - h:
                     break
 
             current_line.append(word)
-            line_width += word_width + s  # Add word and space
+            line_width += word_width + s
 
-        if current_line:  # Store the last line
+        if current_line:
             lines.append((current_line, line_width - s))
 
-        # Now, render the lines with proper alignment
         y = 0
         for line, line_width in lines:
             if alignment == 'center':
-                x = (surface_size[0] - line_width) // 2  # Center alignment
+                x = (surface_size[0] - line_width) // 2
             else:
-                x = 0  # Default to left alignment
+                x = 0
 
             for word in line:
                 for c in word:
-                    text_surface.blit(self.characters[c], (x, y))
-                    x += self.characters[c].get_width() + 1  # Move right for next char
+                    if c in self.characters:
+                        text_surface.blit(self.characters[c], (x, y))
+                        x += self.characters[c].get_width() + 1
+                x += s
+            y += h
 
-                x += s  # Add space after each word
-
-            y += h  # Move down for the next line
-
-        return self.game_objects.game.display.surface_to_texture(text_surface)
-
-    def render_old(self, surface_size = False, text = "", limit = 1000):
-        if not surface_size:
-            surface_size = (7*(len(text)+1),9)
-        text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
-        x, y = 0, 0
-        x_max = int(surface_size[0]/self.char_size[0])
-        y_max = int(surface_size[1]/self.char_size[1])
-        text_l = text.split(" ")
-        for word in text_l:
-            #check if we need to switch line
-            if len(word) + x > x_max:
-                x = 0
-                y += 1
-
-            for c in word:
-                width = self.characters[c].get_width()
-                pos = (x*width,y*self.char_size[1])
-                text_surface.blit(self.characters[c],pos)
-
-                x += 1
-                if x_max * y + x > limit: return self.game_objects.game.display.surface_to_texture(text_surface) #spot printing at limit
-
-            x += 1      #add space after each word
         return self.game_objects.game.display.surface_to_texture(text_surface)
 
     #returns a surface with menu/text background as per size input.

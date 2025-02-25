@@ -26,5 +26,5 @@ class World_state():
             self.travel_points[map] = cord
 
     def init_state_file(self, level_name):#make a state file if it is the first time loading this map, state of different interactables
-        self.state[level_name] = {'loot_container': {}, 'lever': {}, 'soul_essence': {}, 'runestone': {}, 'interactable_items': {}, 'breakable_platform': {}}#a place holder for things that should depend on map state
+        self.state[level_name] = {'loot_container': {}, 'lever': {}, 'soul_essence': {}, 'runestone': {}, 'interactable_items': {}, 'breakable_platform': {}, 'bg_fade': {}}#a place holder for things that should depend on map state
         self.state.pop('placeholder_level', 0)#removes the placeholder tag

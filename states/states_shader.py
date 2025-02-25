@@ -255,17 +255,20 @@ class MB(Shader_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['motion_blur']
-        self.dir = [0.05, 0]
+        self.dir = [0.04, 0]
 
     def update(self):
         pass
 
     def draw(self):        
         self.entity.shader['dir'] = self.dir
+        self.entity.shader['quality'] = 6
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':
             self.enter_state('Idle')
+        elif input == 'Hurt':
+            self.enter_state('Hurt')
 
 class Slash(Shader_states):#not used
     def __init__(self, entity, **kwarg):

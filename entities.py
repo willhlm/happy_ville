@@ -83,8 +83,9 @@ class BG_Fade(BG_Block):
         self.interacted = False
         self.sounds = read_files.load_sounds_list('audio/SFX/bg_fade/')
         self.children = []#will append overlapping bg_fade to make "one unit"
+        self.id = str(ID)
 
-        if self.game_objects.world_state.state[self.game_objects.map.level_name]['breakable_platform'].get(str(ID), False):#if the collision bloack has been destroyed
+        if self.game_objects.world_state.state[self.game_objects.map.level_name]['bg_fade'].get(self.id, False):#if it has been interacted with already
             self.interact()
 
     def make_hitbox(self, positions, offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
@@ -102,6 +103,7 @@ class BG_Fade(BG_Block):
     def interact(self):
         self.shader_state.handle_input('alpha')
         self.interacted = True
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['bg_fade'][self.id] = True
 
     def add_child(self, child):
         self.children.append(child)
@@ -2264,37 +2266,40 @@ class Spawner(Staticentity):#an entity spawner
 
 class Fade_effect(Staticentity):#fade effect
     def __init__(self, entity, alpha = 255):
-        super().__init__(entity.rect.center,entity.game_objects)
+        super().__init__(entity.rect.center, entity.game_objects)
         self.image = entity.image
+        self.image_copy = Fade_effect.image_copy
+
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.center = entity.rect.center
         self.alpha = alpha
 
-        self.image_copy = self.game_objects.game.display.make_layer((entity.image.width, entity.image.height))
-        self.game_objects.shaders['alpha']['alpha'] = alpha
         self.true_pos = self.rect.topleft
         self.dir = entity.dir.copy()
 
     def update(self):
-        self.alpha *= 0.95
+        self.alpha *= 0.9
         self.destroy()
 
     def draw(self, target):
         self.image_copy.clear(0,0,0,0)
-        self.game_objects.shaders['alpha']['alpha'] = self.alpha
-
-        blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
-        
         self.game_objects.shaders['motion_blur']['dir'] = [0.05, 0]
+        self.game_objects.shaders['motion_blur']['quality'] = 3
         self.game_objects.game.display.render(self.image, self.image_copy, shader = self.game_objects.shaders['motion_blur'])#shader render
+          
+        self.game_objects.shaders['alpha']['alpha'] = self.alpha
+        blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
         self.game_objects.game.display.render(self.image_copy.texture, target, position = blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['alpha'])#shader render
 
+    def pool(game_objects):
+        size = (96, 64)#player canvas size
+        Fade_effect.image_copy = game_objects.game.display.make_layer(size)
 
     def destroy(self):
-        if self.alpha < 5:
+        if self.alpha < 10:
             self.kill()
 
-    def release_texture(self):#don't release it becase it seems like it is conencted in memoery to player
+    def release_texture(self):
         pass
 
 class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the appropriate directions

@@ -728,11 +728,9 @@ class Biome():
         pass
 
     def play_music(self):
-        print(self.level.biome_name)
         try:#try laoding bg music
             sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
             self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700, vol = 1.0)
-            print(self.level.biome_name)
         except FileNotFoundError:
             print("No BG music found")
 

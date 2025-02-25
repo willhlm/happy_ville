@@ -49,7 +49,7 @@ class Title_Menu(Game_State):
         self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
 
     def initiate_buttons(self):
-        buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
+        buttons = ['NEW GAME++','LOAD GAME','OPTIONS','QUIT']
         self.buttons = []
         y_pos = 200
         for b in buttons:
@@ -88,7 +88,7 @@ class Title_Menu(Game_State):
 
     def update_arrow(self):
         ref_pos = self.buttons[self.current_button].rect.topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.update_pos((ref_pos[0], ref_pos[1]))
         self.arrow.play_SFX()
 
     def handle_events(self, input):
@@ -426,7 +426,7 @@ class Option_Menu_display(Game_State):
         for b in self.buttons:
             self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
-            settig_string = self.game.game_objects.font.render((60,12), str(self.game_settings['display'][b]))
+            settig_string = self.game.game_objects.font.render((60,12), str(self.game_settings['display'][b]))            
             self.game.game_objects.shaders['colour']['colour'] = (0,0,0,255)
             self.game.display.render(settig_string, self.game.screen, position = [self.button_rects[b].centerx + 50,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
             settig_string.release()
