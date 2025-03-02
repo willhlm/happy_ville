@@ -716,6 +716,7 @@ class Smoke(Staticentity):#2D smoke
 
     def release_texture(self):
         self.image.release()
+        self.noise_layer.release()
 
     def update(self):
         self.time += self.game_objects.game.dt
@@ -766,6 +767,7 @@ class Death_fog(Staticentity):#2D explosion
 
     def release_texture(self):
         self.image.release()
+        self.noise_layer.release()
 
     def update(self):
         self.time += self.game_objects.game.dt
@@ -777,7 +779,6 @@ class Death_fog(Staticentity):#2D explosion
         self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
         self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-
         self.game_objects.shaders['death_fog']['TIME'] = self.time*0.01
         self.game_objects.shaders['death_fog']['noise'] = self.noise_layer.texture
         self.game_objects.shaders['death_fog']['velocity'] = [0, 0]
@@ -786,7 +787,7 @@ class Death_fog(Staticentity):#2D explosion
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['death_fog'])#shader render
 
-class Arrow_UI(Staticentity):#2D explosion
+class Arrow_UI(Staticentity):#for thuder charge state
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.image = Arrow_UI.image

@@ -1193,7 +1193,7 @@
                         }, 
                         {
                          "gid":15,
-                         "height":1296,
+                         "height":1136,
                          "id":1946,
                          "name":"",
                          "properties":[
@@ -1206,12 +1206,12 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2098,
-                         "y":2016
+                         "x":2096,
+                         "y":1888
                         }, 
                         {
                          "gid":15,
-                         "height":1120,
+                         "height":1104,
                          "id":1947,
                          "name":"",
                          "properties":[
@@ -1225,7 +1225,7 @@
                          "visible":true,
                          "width":16,
                          "x":1709,
-                         "y":1936
+                         "y":1856
                         }, 
                         {
                          "gid":8,
@@ -1732,9 +1732,9 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":272,
-                         "x":1776,
-                         "y":719.272727272727
+                         "width":400,
+                         "x":1712,
+                         "y":752
                         }, 
                         {
                          "gid":1,
