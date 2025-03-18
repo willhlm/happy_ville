@@ -38,7 +38,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Bouncy_balls.pool(game_objects)
         entities.Explosion.pool(game_objects)
         entities.Poisoncloud.pool(game_objects)
-        entities.Horn_vines.pool(game_objects)
         entities.Falling_rock.pool(game_objects)
         entities.Projectile_1.pool(game_objects)
         entities.Poisonblobb.pool(game_objects)

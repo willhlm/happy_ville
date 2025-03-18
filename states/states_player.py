@@ -621,7 +621,7 @@ class Air_dash_pre(Player_states):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
         self.dash_length = C.dash_length
-        self.entity.shader_state.handle_input('mb')
+        self.entity.shader_state.handle_input('motion_blur')
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
         pass

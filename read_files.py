@@ -208,7 +208,7 @@ class Alphabet():
             self.characters[c] = sheet[i]
 
     #returns a surface with size of input, and input text. Automatic line change
-    def render(self, surface_size = False, text="", letter_frame=1000, alignment='left'):
+    def render(self, surface_size = False, text="", letter_frame = 1000, alignment='left'):
         if not surface_size:
             total_width = sum(self.characters[c].get_width() + 1 for c in text if c in self.characters)
             total_width += text.count(" ") * 4  # Adjusting for spaces

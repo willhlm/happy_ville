@@ -33,7 +33,7 @@ class Idle(Shader_states):
             self.enter_state('Tint', **kwarg)
         elif input == 'blur':
             self.enter_state('Blur')
-        elif input == 'mb':
+        elif input == 'motion_blur':
             self.enter_state('MB')
 
 class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
@@ -43,10 +43,10 @@ class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
         self.entity.shader = self.entity.game_objects.shaders['shock_damage']
         self.next_animation = 'Idle'
         self.time = 0
-        self.amplitude = kwarg.get('amplitude', 1) * 0.05
-        self.frequency = kwarg.get('frequency', 100)
+        self.amplitude = kwarg.get('amplitude', 1) * 0.08
+        self.frequency = kwarg.get('frequency', 50)
         self.colour = kwarg.get('colour', [1, 1, 1, 1])
-        self.decay_rate = kwarg.get('decay_rate', 10)
+        self.decay_rate = kwarg.get('decay_rate', 5)
         self.direction = kwarg.get('direction', [1,0])
 
     def draw(self):
@@ -56,7 +56,6 @@ class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
         self.entity.shader['colour'] = self.colour
         self.entity.shader['decay_rate'] = self.decay_rate
         self.entity.shader['direction'] = self.direction
-
 
     def update(self):
         self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
@@ -251,7 +250,7 @@ class Outline(Shader_states):
         if input == 'idle':
             self.enter_state('Idle')
 
-class MB(Shader_states):
+class MB(Shader_states):#motion blur
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['motion_blur']

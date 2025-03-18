@@ -20,6 +20,7 @@ from states import states_gameplay#handles the rendering protocols: better suite
 import quests_events
 import timer
 import signals
+import time_manager
 
 from time import perf_counter
 
@@ -45,6 +46,7 @@ class Game_Objects():
         self.render_state = states_gameplay.Idle(self)
         self.quests_events = quests_events.Quests_events(self)        
         self.signals = signals.Signals()
+        self.time_manager = time_manager.Time_manager(self)
 
     def create_groups(self):#define all sprite groups
         self.enemies = groups.Group()#enemies

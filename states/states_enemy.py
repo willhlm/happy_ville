@@ -64,6 +64,7 @@ class Hurt(Enemy_states):
 
     def increase_phase(self):
         self.enter_state('Idle')
+        self.entity.knock_back()
 
 class Stun(Enemy_states):
     def __init__(self,entity,duration):

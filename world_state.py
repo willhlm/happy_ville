@@ -11,6 +11,9 @@ class World_state():
         self.quests = {}#true means completed, false means still active -> tasks
         self.cutscenes_complete = {}#when a cutscenne has been played, its name gets appended here
 
+    def update_event(self, event):
+        self.events[event] = True
+
     def increase_progress(self):#called when e.g. a boss dies. It is the happinies degree of the world
         self.progress += 1
 

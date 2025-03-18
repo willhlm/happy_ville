@@ -7,7 +7,7 @@ class Event_trigger(Interactable):#based
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)
         self.hitbox = self.rect.copy()
-        self.event = kwarg.get('event', False).lower()
+        self.event = kwarg.get('event', False)
         self.new_state = kwarg.get('new_state', False)#if it is an event that requires new sttae, e.g. cutscene
 
     def release_texture(self):

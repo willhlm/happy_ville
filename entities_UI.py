@@ -190,9 +190,8 @@ class Button():
         self.image = kwarg.get('image', None)
         self.rect = pygame.Rect(self.position, [self.image.width, self.image.height])
 
-        #img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()
-        #self.rect = img.get_rect(topleft = self.position)
-        #self.image = game_objects.game.display.surface_to_texture(img)
+    def hoover(self):
+        pass
 
     def pressed(self):
         pass
