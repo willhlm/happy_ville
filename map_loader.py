@@ -311,6 +311,9 @@ class Level():
                     elif property['name'] == 'new_state':
                         kwarg['new_state'] = property['value']
 
+                if self.game_objects.world_state.cutscenes_complete.get(kwarg['event'], False): continue#if the cutscene has been shown before, return.
+                if self.game_objects.world_state.events.get(kwarg['event'], False): continue#if event has already been done
+                
                 new_trigger = getattr(event_triggers, kwarg['event'].capitalize(), event_triggers.Event_trigger)(object_position, self.game_objects, object_size, **kwarg)#returns Event_trigger (default) if there is no Event_trigger class
                 self.game_objects.interactables.add(new_trigger)
 

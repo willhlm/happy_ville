@@ -1,4 +1,5 @@
 import sys
+import constants as C
 
 def sign(num):
     if num > 0: return 1
@@ -19,10 +20,13 @@ class Basic_states():#states for aila sword
     def handle_input(self,input):
         pass
 
-    def update(self):#called every frame
+    def update(self):
         pass
 
     def update_rect(self):
+        pass
+
+    def sword_jump(self):
         pass
 
 class Slash_1(Basic_states):
@@ -56,6 +60,9 @@ class Slash_down(Basic_states):
 
     def update_rect(self):
         self.entity.rect.center = [self.entity.hitbox.center[0] + self.offset, self.entity.hitbox.center[1] - 4]
+
+    def sword_jump(self):
+        self.entity.entity.velocity[1] = C.pogo_vel
 
 class Slash_up(Slash_down):#not implemented
     def __init__(self,entity):

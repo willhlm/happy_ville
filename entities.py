@@ -2155,10 +2155,6 @@ class Boss(Enemy):
     def knock_back(self,dir):
         pass
 
-    def take_dmg(self,dmg):
-        super().take_dmg(dmg)
-        #self.health_bar.resize()
-
 class Reindeer(Boss):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -2177,6 +2173,7 @@ class Reindeer(Boss):
         self.chase_speed = 2
 
     def give_abillity(self):#called when reindeer dies
+        self.game_objects.world_state.cutscenes_complete['Boss_deer_encounter'] = True#so not to trigger the cutscene again
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
 class Butterfly(Flying_enemy):
@@ -2655,8 +2652,8 @@ class Projectiles(Platform_entity):#projectiels
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         collision_enemy.take_dmg(self.dmg)
 
-    def collision_inetractables(self,interactable):#collusion interactables
-        pass
+    def collision_interactables(self,interactable):#collusion interactables
+        interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
 
     def reflect(self, dir, pos, clamp_value = 10):#projectile collision when purple infinity stone is equipped: pos, dir are aila sword
         dy = max(-clamp_value, min(clamp_value, self.rect.centery - pos[1]))
@@ -2988,18 +2985,12 @@ class Sword(Melee):
         self.lifetime = 10
 
     def collision_enemy(self, collision_enemy):
-        self.sword_jump()
         if collision_enemy.flags['invincibility']: return
         collision_enemy.take_dmg(self.dmg)
         collision_enemy.knock_back(self.dir)
         collision_enemy.emit_particles(dir = self.dir)
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
-
-    def sword_jump(self):
-        #print(self.dir[1])
-        if math.floor(self.dir[1]) == -1:
-            self.entity.velocity[1] = C.pogo_vel
 
     def clash_particles(self, pos, number_particles = 12, **kwarg):
         for i in range(0, number_particles):
@@ -3009,27 +3000,22 @@ class Sword(Melee):
     def collision_inetractables(self,interactable):#called when projectile hits interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
 
-class Aila_sword(Sword):
+class Aila_sword(Melee):
     def __init__(self, entity):
         super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/projectiles/aila_sword/')
+        self.image = self.sprites['slash_1'][0]
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
         self.currentstate = states_sword.Slash_1(self)
+
+        self.dmg = 1
 
         self.tungsten_cost = 1#the cost to level up to next level
         self.stones = {}#{'red': Red_infinity_stone([0,0], entity.game_objects, entity = self), 'green': Green_infinity_stone([0,0], entity.game_objects, entity = self), 'blue': Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange': Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple': Purple_infinity_stone([0,0], entity.game_objects, entity = self)}#gets filled in when pick up stone. used also for inventory
         self.swing = 0#a flag to check which swing we are at (0 or 1)
         self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#infinity stones can change these to do specific things
-
-    def init(self):
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
-        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/projectiles/aila_sword/')
-        self.image = self.sprites['slash_1'][0]
-        self.dmg = 1
-
-    def destroy(self):
-        if self.lifetime < 0:
-            self.currentstate.increase_phase()
-            self.kill()#removes from projectiles gruop
 
     def update_hitbox(self):#every frame from collisions
         hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
@@ -3044,7 +3030,7 @@ class Aila_sword(Sword):
         self.stone_states['projectile_collision'].projectile_collision(eprojectile)
 
     def collision_enemy(self, collision_enemy):
-        self.sword_jump()
+        self.currentstate.sword_jump()#only down sword will give velocity up
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = 5)#hitstop to sword vielder
             collision_enemy.hitstop_states.enter_state('Stop', lifetime = 10, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop                        
@@ -3052,15 +3038,15 @@ class Aila_sword(Sword):
             self.clash_particles(collision_enemy.hitbox.center)
             #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
 
-        collision_enemy.currentstate.handle_input('sword')
-        self.stone_states['enemy_collision'].enemy_collision()
+            collision_enemy.currentstate.handle_input('sword')
+            self.stone_states['enemy_collision'].enemy_collision()
 
     def clash_particles(self, pos, number_particles=12):
         angle = random.randint(-180, 180)#the erection anglex
         color = [255, 255, 255, 255]
         for i in range(0,number_particles):
             obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 40, vel = {'linear':[7,14]}, dir = angle, scale = 1.2, fade_scale = 5, colour = color, state = 'Idle')
-            self.entity.game_objects.cosmetics.add(obj1)
+            self.entity.game_objects.cosmetics.add(obj1)       
 
     def level_up(self):#called when the smith imporoves the sword
         self.entity.inventory['Tungsten'] -= self.tungsten_cost

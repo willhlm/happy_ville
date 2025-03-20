@@ -18,10 +18,12 @@ class Stop(Idle):
         super().__init__(entity)
         self.lifetime = kwarg.get('lifetime', 100)
         self.call_back = kwarg.get('call_back', None)
+        self.original_velocity = self.entity.velocity.copy()
 
     def update(self):
         self.entity.velocity = [0,0]
         self.lifetime -= self.entity.game_objects.game.dt
         if self.lifetime < 0:
-            if self.call_back: self.call_back()
+            self.entity.velocity = self.original_velocity.copy()
+            if self.call_back: self.call_back()            
             self.enter_state('Idle')

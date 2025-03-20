@@ -186,10 +186,9 @@ class Controller:
             abs(l_stick[0] - self.last_input['l_stick']['value'][0]) > 0.5 or
             abs(l_stick[1] - self.last_input['l_stick']['value'][1]) > 0.5
         )
-
+        
         if significant_change or (current_time - self.last_input['l_stick']['time'] > self.input_cooldown):
             if abs(l_stick[0]) > 0.5 or abs(l_stick[1]) > 0.5:  # Threshold to consider as input
-                self.keyup, self.keydown, self.key = False, False, None
                 self.insert_buffer()
                 self.last_input['l_stick']['time'] = current_time  # Update cooldown timer
                 self.last_input['l_stick']['value'] = l_stick.copy()  # Update last stick position

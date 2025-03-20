@@ -125,10 +125,10 @@ class Title_Menu(Game_State):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            #self.game.game_objects.load_map(self,'golden_fields_5','2')
+            #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            #self.game.game_objects.load_map(self,'nordveden_1','1')
-            self.game.game_objects.load_map(self,'dark_forest_1','5')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
+            #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
@@ -628,17 +628,18 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
-            self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.buttons):
-                self.current_button = 0
-            self.update_arrow()
-        elif event[0]:
+        if not input.key:#if it is a directinal input     
+            if event[2]['l_stick'][1] < 0:#up
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.buttons) - 1
+                self.update_arrow()
+            elif event[2]['l_stick'][1] > 0:#down
+                self.current_button += 1
+                if self.current_button >= len(self.buttons):
+                    self.current_button = 0
+                self.update_arrow()
+        if event[0]:
             if event[-1] in ['a', 'return']:
                 self.arrow.pressed()
                 self.change_state()
@@ -1144,7 +1145,9 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.entity.AI.deactivate()
         self.stage = 0
-        self.game.game_objects.player.acceleration[0]  = 1        
+        
+        self.game.game_objects.player.acceleration[0]  = 1#start walking
+        self.game.game_objects.player.shader_state.handle_input('idle')
 
     def update(self):#write how you want the player/group to act
         super().update()
