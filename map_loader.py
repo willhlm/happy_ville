@@ -9,10 +9,11 @@ class Level():
         self.TILE_SIZE = C.tile_size
         self.level_name = ''
         self.biome_name = ''
-        self.area_change = True#a flag to chenge if we change area
+        self.area_change = True#a flag to chenge if we change area/biome
         self.biome = Biome(self)
 
     def load_map(self, map_name, spawn):
+        self.game_objects.player.shader_state.handle_input('idle')#reset any shaders that might be on
         self.references = {'shade':[], 'gate':[], 'lever':[], 'platforms':[], 'bg_fade': []}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.spawned = False#a flag so that we only spawn alia once
         self.level_name = map_name.lower()#biom_room
@@ -309,8 +310,8 @@ class Level():
                         kwarg['event'] = property['value']
                     elif property['name'] == 'new_state':
                         kwarg['new_state'] = property['value']
-                
-                new_trigger = getattr(event_triggers, kwarg['event'].capitalize(), 'Event_trigger')(object_position, self.game_objects, object_size, **kwarg)#returns Biome (default) if there is no biome class
+
+                new_trigger = getattr(event_triggers, kwarg['event'].capitalize(), event_triggers.Event_trigger)(object_position, self.game_objects, object_size, **kwarg)#returns Event_trigger (default) if there is no Event_trigger class
                 self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object
@@ -728,11 +729,9 @@ class Biome():
         pass
 
     def play_music(self):
-        print(self.level.biome_name)
         try:#try laoding bg music
             sound = read_files.load_single_sfx("audio/music/maps/" + self.level.biome_name + "/default.mp3" )
             self.level.game_objects.sound.play_priority_sound(sound, index = 0, loop = -1, fade = 700, vol = 1.0)
-            print(self.level.biome_name)
         except FileNotFoundError:
             print("No BG music found")
 

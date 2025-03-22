@@ -369,7 +369,7 @@ class Dynamic_layered_objects(Layered_objects):
         self.boundary()
 
     def update_pos(self):
-        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.parallax[0], self.true_pos[1] + self.velocity[1]*self.parallax[1]]
+        self.true_pos = [self.true_pos[0] + self.game_objects.game.dt * self.velocity[0]*self.parallax[0], self.true_pos[1] + self.game_objects.game.dt * self.velocity[1]*self.parallax[1]]
         self.rect.topleft = self.true_pos.copy()
 
     def boundary(self):

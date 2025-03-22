@@ -49,18 +49,18 @@ class Title_Menu(Game_State):
         self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
 
     def initiate_buttons(self):
-        buttons = ['NEW GAME','LOAD GAME','OPTIONS','QUIT']
+        buttons = ['New Game++','Load Game','Options','Quit']
         self.buttons = []
         y_pos = 200
         for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
-            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [100,y_pos]))
+            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [80,y_pos]))
             y_pos += 20
 
     def define_BG(self):
         size = (90,100)
         bg = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()
-        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
+        pygame.draw.rect(bg,[200,200,200,150],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
 
     def reset_timer(self):
@@ -73,6 +73,7 @@ class Title_Menu(Game_State):
         self.update()
 
     def render(self):
+        self.buttons[self.current_button].hoover()
         self.game.display.render(self.image, self.game.screen)#shader render
 
         #blit title
@@ -88,7 +89,7 @@ class Title_Menu(Game_State):
 
     def update_arrow(self):
         ref_pos = self.buttons[self.current_button].rect.topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        self.arrow.update_pos((ref_pos[0], ref_pos[1]))
         self.arrow.play_SFX()
 
     def handle_events(self, input):
@@ -126,10 +127,10 @@ class Title_Menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_5','2')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            #self.game.game_objects.load_map(self,'nordveden_9','1')
-            #self.game.game_objects.load_map(self,'dark_forest_2','1')
+            #self.game.game_objects.load_map(self,'nordveden_2','1')
+            #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
-            self.game.game_objects.load_map(self,'hlifblom_43','1')
+            self.game.game_objects.load_map(self,'hlifblom_40','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -486,6 +487,7 @@ class Gameplay(Game_State):
 
     def update(self):
         self.handle_movement()
+        self.game.game_objects.time_manager.update()
         self.game.game_objects.update()
         self.game.game_objects.collide_all()
         self.game.game_objects.UI['gameplay'].update()
@@ -557,7 +559,7 @@ class Gameplay(Game_State):
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self, game):
         super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
+        self.title = self.game.game_objects.font.render(text = 'Pause menu', alignment = 'center') #temporary
 
         #create buttons
         self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
@@ -566,34 +568,29 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.define_BG()
         self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
-        #copy the screen
         self.screen_copy = self.game.display.make_layer(self.game.window_size)
-        self.render()#need to render everything first
-        self.game.game_objects.shaders['blur']['blurRadius'] = 1
-        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#shader render
 
     def define_BG(self):
         size = (100,120)
-        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
+        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
+        pygame.draw.rect(bg,[200,200,200,220],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
-        self.background = self.game.display.make_layer(self.game.window_size)#make a layer ("surface")
-        self.background.clear(50,50,50,30)
+        self.background = self.game.display.make_layer(self.game.window_size)
 
     def initiate_buttons(self):
         y_pos = 140
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b))
+            text = (self.game.game_objects.font.render(text = b, alignment = 'center'))
             #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
     def update_arrow(self):
-        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
+        pos = self.button_rects[self.buttons[self.current_button]].topleft
+        self.arrow.update_pos(pos)
         self.arrow.play_SFX()
 
     def update(self):
@@ -601,10 +598,13 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
 
     def render(self):
         super().render()
-        self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]/2 - self.bg.width/2,100))#shader render
+        self.background.clear(50,50,50,30)
+        self.game.game_objects.shaders['blur']['blurRadius'] = 0.1
+        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#blur screen
+        self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]*0.5 - self.bg.width*0.5,100))#shader render
 
         #blit title
-        self.game.display.render(self.title, self.background, position = (self.game.window_size[0]/2 - self.title.width/2,110))#shader render
+        self.game.display.render(self.title, self.background, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,110))#shader render
 
         #blit buttons
         for b in self.buttons:
@@ -621,6 +621,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.title.release()
         self.bg.release()
         self.background.release()
+        self.screen_copy.release()
         for key in self.button_surfaces.keys():
             self.button_surfaces[key].release()
 
@@ -665,66 +666,6 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         elif self.current_button == 3:
             pygame.quit()
             sys.exit()
-
-class Pause_gameplay(Gameplay):#a pause screen with optional shake. = when enteties takes dmg
-    def __init__(self,game, **kwarg):
-        super().__init__(game)
-        self.duration = kwarg.get('duration', 12)
-        amp = kwarg.get('amplitude', 0)
-        scale = kwarg.get('scale', 0.9)
-        self.game.game_objects.camera_manager.camera_shake(amplitude = amp, duration = self.duration, scale = scale)
-
-    def update(self):
-        self.game.game_objects.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
-        self.game.game_objects.camera_manager.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
-
-        self.duration -= self.game.dt
-        if self.duration < 0:
-            self.exit_state()
-
-    def render(self):
-        self.game.state_stack[-2].render()
-
-class Slow_gameplay(Gameplay):#called from aila when health < 0
-    def __init__(self, game, **kwarg):
-        super().__init__(game)
-        self.rate = kwarg.get('rate', 0.5)#determines the rate of slow motion, between 0 and 1
-        self.duration = kwarg.get('duration', 100)
-
-    def update(self):
-        self.duration -= self.game.dt
-        self.game.dt *= self.rate#slow motion
-        super().update()
-        self.exit()
-
-    def exit(self):
-        if self.duration < 0:
-            self.exit_state()
-
-class Slow_motion_gameplay(Slow_gameplay):#aila's ability
-    def __init__(self, game, **kwarg):
-        super().__init__(game, **kwarg)
-        self.bar = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites['bar'][0]
-        self.meter = self.game.game_objects.player.abilities.spirit_abilities['Slow_motion'].sprites['meter'][0]
-        self.width = self.meter.width
-
-        self.pos = [self.game.window_size[0]*0.5 - self.width*0.5,3]
-        self.bar_rate =self.width/self.duration
-
-        self.surface = self.game.display.make_layer(self.game.window_size)#TODO
-
-    def render(self):
-        super().render()
-        self.surface.clear(20,20,20,100)
-        self.game.display.render(self.surface.texture, self.game.screen)
-
-        self.width -= self.game.dt*self.bar_rate
-        self.width = max(self.width,0)
-
-    def exit_state(self):
-        super().exit_state()
-        self.surface.release()
-        self.game.game_objects.player.slow_motion = 1
 
 class Ability_menu(Gameplay):#when pressing tab
     def __init__(self, game):
@@ -1199,33 +1140,34 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         pos = (self.game.game_objects.camera_manager.camera.scroll[0] + 900,self.game.game_objects.camera_manager.camera.scroll[1] + 100)
         self.entity = entities.Reindeer(pos, self.game.game_objects)#make the boss
         self.game.game_objects.enemies.add(self.entity)
-        self.entity.dir[0]=-1
+        self.entity.dir[0] = -1
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.entity.AI.deactivate()
         self.stage = 0
-        self.game.game_objects.player.currentstate.enter_state('Walk_main')
-        self.game.game_objects.player.currentstate.walk()#to force tha walk animation
+        self.game.game_objects.player.acceleration[0]  = 1
 
     def update(self):#write how you want the player/group to act
         super().update()
         self.timer += self.game.dt
         if self.stage == 0:
-            self.game.game_objects.player.velocity[0]  = 4
-
             if self.timer >120:
-                self.stage=1
+                self.stage = 1
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
                 self.game.game_objects.player.acceleration[0] = 0
 
-        elif self.stage==1:
+        elif self.stage==1:#transform
             if self.timer>200:
                 self.entity.currentstate.enter_state('Transform')
                 self.game.game_objects.player.velocity[0] = -20
-                self.game.game_objects.camera_manager.camera_shake(amp=3,duration=100)#amplitude, duration
-                self.stage=2
+                self.stage = 2
 
-        elif self.stage==2:
-            if self.timer > 400:
+        elif self.stage==2:#roar
+            if self.timer > 300:
+                self.entity.currentstate.enter_state('Roar_pre')
+                self.stage = 3
+
+        elif self.stage==3:
+            if self.timer > 600:
                 self.game.game_objects.camera_manager.camera.exit_state()#exsiting deer encounter camera
                 self.entity.AI.activate()
                 self.exit_state()

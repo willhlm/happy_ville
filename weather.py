@@ -133,7 +133,7 @@ class Fog(Screen_shader):
         self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])
         self.shader['noise'] = self.noise_layer.texture
         self.shader['TIME'] = self.time*0.001
-        self.shader['fog_color'] = (0, 0, 0, 1)
+        self.shader['fog_color'] = (1,1,1, 1)
         self.shader['scroll'] = [self.game_objects.camera_manager.camera.scroll[0]*self.parallax[0],self.game_objects.camera_manager.camera.scroll[1]*self.parallax[1]]
         super().draw(target)
 

@@ -1,215 +1,96 @@
-import random
-import behaviour_tree
+import math, sys, random
 
-class Select_target(behaviour_tree.Leaf):#selects the one that is the closest in players group (so aila or migawari)
-    def __init__(self,entity):
-        super().__init__(entity)
+def sign(number):
+    if number > 0: return 1
+    elif number < 0: return -1
+    else: return 0
 
+class AI():
+    def __init__(self, entity):
+        self.entity = entity
+        self.player_distance = [0,0]
+    
+    def enter_AI(self, newAI, **kwarg):        
+        self.entity.AI = getattr(sys.modules[__name__], newAI.capitalize())(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
+    
     def update(self):
-        min_disatnce = 1000000
-        target = None
-        for player in self.entity.game_objects.players:
-            distance = abs(self.entity.rect.centerx - player.rect.centerx)
-            if distance < min_disatnce:
-                min_distance = distance
-                target = player
-        self.entity.AI.black_board['target'] = target
-        return 'SUCCESS'
+        self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx, self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance
+    
+    def deactivate(self):
+        self.enter_AI('idle') 
 
-class Look_player(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def handle_input(self, input):#input is hurt when taking dmg
+        pass
 
-    def update(self):
-        self.entity.AI.black_board['player_distance'] = [self.entity.AI.black_board['target'].rect.centerx-self.entity.rect.centerx,self.entity.AI.black_board['target'].rect.centery-self.entity.rect.centery]#check plater distance
-        if self.entity.AI.black_board['player_distance'][0] > 0 and self.entity.dir[0] == -1 or self.entity.AI.black_board['player_distance'][0] < 0 and self.entity.dir[0] == 1:#e.g. player jumpt over entity
-            return 'FAILURE'
-        return 'SUCCESS'
+class Idle(AI):#do nothing
+    def __init__(self, entity):
+        super().__init__(entity)   
 
-class Turn_around(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def activate(self):
+        self.enter_AI('Chase')  
 
-    def update(self):
-        self.entity.dir[0] = -self.entity.dir[0]
-        return 'SUCCESS'
+class Wait(AI):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)   
+        self.time = kwarg.get('duration',50)
+        self.next_AI = kwarg.get('next_AI','Chase')
 
-class Check_sight(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def update(self):   
+        self.time -= self.entity.game_objects.game.dt  
+        if self.time < 0:
+            self.enter_AI(self.next_AI)
 
-    def update(self):
-        if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance and abs(self.entity.AI.black_board['player_distance'][1])<self.entity.attack_distance:#within aggro distance
-            return 'SUCCESS'
-        return 'FAILURE'
+class Chase(AI):            
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)   
+        self.chase_direction = 0    
+        self.timer = self.entity.game_objects.timer_manager.start_timer(200, self.out_of_range, 'reindeer_range')       
 
-class Chase(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def update(self):   
+        super().update()#get player distance   
+        self.chase_direction = sign(self.player_distance[0])        
+        self.check_sight()
+        self.entity.chase(self.chase_direction)
 
-    def update(self):
-        self.entity.velocity[0] += self.entity.dir[0]*0.3#*abs(math.sin(self.init_time))
-        if abs(self.entity.AI.black_board['player_distance'][0]) < self.entity.attack_distance and abs(self.entity.AI.black_board['player_distance'][1]) < self.entity.attack_distance:
-            return 'SUCCESS'
-        else:
-            return 'FAILURE'
+    def look_target(self):
+        self.entity.dir[0] = self.chase_direction
 
-class Wait(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.duration = 100
+    def check_sight(self):               
+        if self.player_distance[0] > 0 and self.entity.dir[0] == -1 or self.player_distance[0] < 0 and self.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right
+            self.enter_AI('wait', duration = 20)  
+            #turn around          
+            #wait
 
-    def update(self):
-        self.duration -= 1
-        if self.duration < 0:
-            self.duration = 100#reset
-            return 'SUCCESS'
-        else:
-            return 'RUNNING'
+        elif abs(self.player_distance[0]) < self.entity.attack_distance[0] and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close             
+            if self.entity.flags['attack_able']:
+                self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_attack_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+                self.enter_AI('attack')
 
-class Init_attack(behaviour_tree.Leaf):#run once
-    def __init__(self,entity):
-        super().__init__(entity)
+        elif abs(self.player_distance[0]) > self.entity.aggro_distance[0] or abs(self.player_distance[1]) > self.entity.aggro_distance[1]:#player far away                 
+            pass
+        elif abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:#player within aggro range                           
+            self.timer.reset()
 
-    def update(self):
-        self.entity.currentstate.enter_state('Attack_pre')
-        self.entity.AI.black_board['attack'] = 'RUNNING'
-        return 'SUCCESS'
+    def out_of_range(self):
+        self.enter_AI('charge')
 
-class Attack(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
+class Attack(AI):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)   
+        self.entity.currentstate.handle_input('attack')
+        self.next_AI = kwarg.get('next_AI', 'Chase')
+        self.entity.flags['attack_able'] = False
+        
+    def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
+        if input == 'finish_attack':
+            self.enter_AI('Wait', duration = 30, next_AI = self.next_AI)          
 
-    def update(self):
-        return self.entity.AI.black_board['attack']
+class Charge(AI):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)   
+        self.entity.currentstate.handle_input('charge')
+        self.next_AI = kwarg.get('next_AI', 'Chase')
 
-    def handle_input(self,input):
-        if input == 'Attack':
-            self.entity.AI.black_board['attack'] = 'SUCCESS'
-
-class Init_jump(behaviour_tree.Leaf):#run once
-    def __init__(self,entity,sign = 1):
-        super().__init__(entity)
-        self.sign = sign
-
-    def update(self):
-        self.entity.AI.black_board['jump_direction'] = self.sign
-        self.entity.currentstate.enter_state('Jump_pre')
-        self.entity.AI.black_board['jump'] = 'RUNNING'
-        return 'SUCCESS'
-
-class Jumping(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.counter = 1
-
-    def update(self):
-        return self.entity.AI.black_board['jump']
-
-    def handle_input(self,input):#when it finished attack, called when attack animation finished
-        if input == 'Landed':#jump animation finsihed
-            self.counter -= 1
-            if self.counter > 0:
-                self.entity.dir[0] = -self.entity.dir[0]
-                self.entity.currentstate.enter_state('Jump_pre')
-            else:
-                self.counter = 1
-                self.entity.AI.black_board['jump_direction'] = 1#reset
-                self.entity.AI.black_board['jump'] = 'SUCCESS'
-
-class Init_rangeattack(behaviour_tree.Leaf):#run once
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        self.entity.currentstate.enter_state('Special_attack_pre')
-        self.entity.AI.black_board['range'] = 'RUNNING'
-        return 'SUCCESS'
-
-class Range_attack(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        return self.entity.AI.black_board['range']
-
-    def handle_input(self,input):#when it finished attack, called when attack animation finished
-        if input == 'Attack':#attack animation finished
-            self.entity.AI.black_board['range'] = 'SUCCESS'
-
-class Init_dash(behaviour_tree.Leaf):#run once
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        self.entity.currentstate.enter_state('Dash_pre')
-        self.entity.AI.black_board['range'] = 'RUNNING'
-        return 'SUCCESS'
-
-class Dash_attack(behaviour_tree.Leaf):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
-        return self.entity.AI.black_board['range']
-
-    def handle_input(self,input):#when it finished attack, called when attack animation finished
-        if input == 'Dash':#attack animation finished
-            self.entity.AI.black_board['range'] = 'SUCCESS'
-
-def build_tree(entity):
-    entity.AI = behaviour_tree.Treenode()
-    entity.AI.black_board['jump_direction'] = 1#add reindeer specific information ot the BB
-
-    aggro = behaviour_tree.Sequence()
-    aggro.add_child(Select_target(entity))
-    selector = behaviour_tree.Selector()
-    selector.add_child(Look_player(entity))
-    selector.add_child(Turn_around(entity))
-    aggro.add_child(selector)
-    selector = behaviour_tree.Selector()
-    aggro.add_child(selector)
-    selector.add_child(Check_sight(entity))
-
-    Random_selector = behaviour_tree.Random_selector()
-
-    sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_jump(entity))
-    sequence.add_child(Jumping(entity))
-    sequence.add_child(Wait(entity))
-    Random_selector.add_child(sequence)
-
-    sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_dash(entity))
-    sequence.add_child(Dash_attack(entity))
-    sequence.add_child(Wait(entity))
-    Random_selector.add_child(sequence)
-
-    sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_rangeattack(entity))
-    sequence.add_child(Range_attack(entity))
-    sequence.add_child(Wait(entity))
-    Random_selector.add_child(sequence)
-
-    inverter = behaviour_tree.Inverter()
-    inverter.add_child(Random_selector)
-    selector.add_child(inverter)
-
-    random_selector = behaviour_tree.Random_selector()
-
-    sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_attack(entity))
-    sequence.add_child(Attack(entity))
-    sequence.add_child(Wait(entity))
-    random_selector.add_child(sequence)
-
-    sequence = behaviour_tree.Sequence()
-    sequence.add_child(Init_jump(entity,-1))#reverse jumping
-    sequence.add_child(Jumping(entity))
-    sequence.add_child(Wait(entity))
-    random_selector.add_child(sequence)
-
-    aggro.add_child(random_selector)
-    entity.AI.add_child(aggro)
-
-    entity.AI.print_tree()
+    def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
+        if input == 'finish_attack':
+            self.enter_AI('Wait', duration = 80, next_AI = self.next_AI)    

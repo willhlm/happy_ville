@@ -3,8 +3,8 @@ import read_files, particles, animation, dialogue, game_states, groups, player_m
 import constants as C
 
 #from folders
-from ai import AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_reindeer, AI_mygga, AI_larv
-from states import states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, states_reindeer, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic
+from ai import reindeer_ai, AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_mygga, AI_larv
+from states import hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic
 
 def sign(number):
     if number > 0: return 1
@@ -72,7 +72,7 @@ class BG_Block(Staticentity):
 
     def release_texture(self):  # Called when .kill() and when emptying the group
         self.image.release()
-        if self.layers:  # Release layer if it exists
+        if self.layers:  # Release layer if it exists, used for thre blurring
             self.layers.release()
 
 class BG_Fade(BG_Block):
@@ -83,8 +83,9 @@ class BG_Fade(BG_Block):
         self.interacted = False
         self.sounds = read_files.load_sounds_list('audio/SFX/bg_fade/')
         self.children = []#will append overlapping bg_fade to make "one unit"
+        self.id = str(ID)
 
-        if self.game_objects.world_state.state[self.game_objects.map.level_name]['breakable_platform'].get(str(ID), False):#if the collision bloack has been destroyed
+        if self.game_objects.world_state.state[self.game_objects.map.level_name]['bg_fade'].get(self.id, False):#if it has been interacted with already
             self.interact()
 
     def make_hitbox(self, positions, offset_position):#the rect is the whole screen, need to make it correctly cover the surface part, some how
@@ -102,6 +103,7 @@ class BG_Fade(BG_Block):
     def interact(self):
         self.shader_state.handle_input('alpha')
         self.interacted = True
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['bg_fade'][self.id] = True
 
     def add_child(self, child):
         self.children.append(child)
@@ -714,6 +716,7 @@ class Smoke(Staticentity):#2D smoke
 
     def release_texture(self):
         self.image.release()
+        self.noise_layer.release()
 
     def update(self):
         self.time += self.game_objects.game.dt
@@ -764,6 +767,7 @@ class Death_fog(Staticentity):#2D explosion
 
     def release_texture(self):
         self.image.release()
+        self.noise_layer.release()
 
     def update(self):
         self.time += self.game_objects.game.dt
@@ -775,7 +779,6 @@ class Death_fog(Staticentity):#2D explosion
         self.game_objects.shaders['noise_perlin']['scale'] = [20,20]
         self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-
         self.game_objects.shaders['death_fog']['TIME'] = self.time*0.01
         self.game_objects.shaders['death_fog']['noise'] = self.noise_layer.texture
         self.game_objects.shaders['death_fog']['velocity'] = [0, 0]
@@ -784,7 +787,7 @@ class Death_fog(Staticentity):#2D explosion
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['death_fog'])#shader render
 
-class Arrow_UI(Staticentity):#2D explosion
+class Arrow_UI(Staticentity):#for thuder charge state
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.image = Arrow_UI.image
@@ -918,38 +921,37 @@ class Character(Platform_entity):#enemy, NPC,player
         self.max_vel = C.max_vel.copy()
 
         self.shader_state = states_shader.Idle(self)
+        self.hitstop_states = hitstop_states.Idle(self)
 
     def update(self):
         self.update_vel()
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
-        self.animation.update()#need to be after currentstate since animation will animate the current state
-        self.shader_state.update()
+        self.animation.update()#need to be after currentstate since animation will animate the current state        
+        self.shader_state.update()#need to be after animation    
 
-    def update_vel(self):
+    def update_vel(self):#called from hitsop_states
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1],self.max_vel[1]/self.game_objects.game.dt)#set a y max speed#
+        self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
-    def take_dmg(self,dmg):
+    def take_dmg(self, dmg):
         if self.flags['invincibility']: return
         self.health -= dmg
-        self.flags['invincibility'] = True
+        self.flags['invincibility'] = True        
 
         try:#TODO add hit sounds to all enteties
             self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
         except:
             pass
 
-        if self.health > 0:#check if dead¨
+        if self.health > 0:#check if dead
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.AI.handle_input('Hurt')
-            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
-            #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 10)#makes the game freez for few frames
+            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state -> can handle hitstop if we want
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
         else:#if dead
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
-            #self.game_objects.game.state_stack[-1].handle_input('dmg', duration = 15, amplitude = 30)#makes the game freez for few frames
             self.flags['aggro'] = False
             self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
@@ -960,7 +962,7 @@ class Character(Platform_entity):#enemy, NPC,player
         self.velocity[0] = dir[0] * amp_x * (1 - abs(dir[1]))
         self.velocity[1] = -dir[1] * 10
 
-    def hurt_particles(self, type = 'Circle', number_particles = 20, **kwarg):
+    def emit_particles(self, type = 'Circle', number_particles = 20, **kwarg):
         for i in range(0, number_particles):
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
@@ -986,7 +988,7 @@ class Player(Character):
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
-        self.max_health = 100
+        self.max_health = 10
         self.max_spirit = 4
         self.health = 10
         self.spirit = 2
@@ -1048,10 +1050,12 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            self.hurt_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
+            self.emit_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            new_game_state = game_states.Pause_gameplay(self.game_objects.game, duration = duration, amplitude = 10)#pause the game for a while with an optional shake
-            new_game_state.enter_state()
+            
+            self.game_objects.time_manager.modify_time(time_scale = 0, duration = duration)
+            self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = duration, scale = 0.9)
+            
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
             self.game_objects.signals.emit('player_died')#emit a signal that player died
@@ -1060,13 +1064,9 @@ class Player(Character):
 
     def die(self):#called from idle death_state, also called from vertical acid
         self.animation.update()#make sure you get the new animation
-        self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))
-
-        new_game_state = game_states.Slow_gameplay(self.game_objects.game, duration = 100, rate = 0.4)
-        new_game_state.enter_state()
-
-        new_game_state = game_states.Pause_gameplay(self.game_objects.game, duration = 50)#pause the game for a while with an optional shake
-        new_game_state.enter_state()
+        self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))#pause first, then slow motion
+        self.game_objects.time_manager.modify_time(time_scale = 0.4, duration = 100)#sow motion
+        self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)#freeze  
 
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
@@ -1090,7 +1090,7 @@ class Player(Character):
         self.friction = C.friction_player.copy()
 
     def update(self):
-        super().update()
+        self.hitstop_states.update()
         self.omamoris.update()
         self.update_timers()
 
@@ -1135,12 +1135,13 @@ class Enemy(Character):
 
         self.attack_distance = [0,0]#at which distance to the player to attack
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
+        self.chase_speed = 0.6
 
     def update(self):
-        super().update()
-        self.AI.update()#tell what the entity should do
+        self.AI.update()#tell what the entity should do -> shuold be first in upate loop     
+        self.hitstop_states.update()#need to be after update_vel and animation, and AI        
         self.group_distance()
-
+        
     def player_collision(self, player):#when player collides with enemy
         if type(player.currentstate).__name__ in ['Thunder_main', 'Thunder_post']:
             self.take_dmg(1)
@@ -1173,7 +1174,7 @@ class Enemy(Character):
         pass
 
     def chase(self, position = [0,0]):#called from AI: when chaising
-        self.velocity[0] += self.dir[0]*0.6
+        self.velocity[0] += self.dir[0] * self.chase_speed
 
     def patrol(self, position = [0,0]):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
@@ -1193,7 +1194,7 @@ class Flying_enemy(Enemy):
         self.hitbox.center = self.rect.center
 
     def knock_back(self,dir):
-        amp = [30,30]
+        amp = [20,20]
         self.velocity[0] = dir[0]*amp[0]
         self.velocity[1] = -dir[1]*amp[1]
 
@@ -1202,8 +1203,8 @@ class Flying_enemy(Enemy):
         self.velocity[1] += (target_distance[1])*0.002 + sign(target_distance[1])*0.1
 
     def patrol(self, position):#called from AI: when patroling
-        self.velocity[0] += 0.001*(position[0]-self.rect.centerx)
-        self.velocity[1] += 0.001*(position[1]-self.rect.centery)
+        self.velocity[0] += 0.005*(position[0]-self.rect.centerx)
+        self.velocity[1] += 0.005*(position[1]-self.rect.centery)        
 
     def walk(self, time):#called from walk state
         amp = min(abs(self.velocity[0]),0.3)
@@ -1241,7 +1242,18 @@ class Flower_butterfly(Flying_enemy):#peaceful ones
         obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,-1]}, dir = 'isotropic')
         self.game_objects.cosmetics2.add(obj1)
 
-class Mygga(Flying_enemy):
+class Mygga(Flying_enemy):#a non aggro mygga that roams around
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.health = 3
+        self.aggro_distance = [0, 0]
+
+class Mygga_chase(Flying_enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -1401,7 +1413,7 @@ class Mygga_suicide(Flying_enemy):#torpedo and explode
         super().ramp_top_collision(ramp)
         self.currentstate.handle_input('collision')#for suicide
 
-class Mygga_roaming(Flying_enemy):
+class Mygga_colliding(Flying_enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -1451,7 +1463,7 @@ class Mygga_roaming(Flying_enemy):
         self.collision_types['top'] = True
         self.velocity[1] *= -1
 
-class Mygga_roaming_projectile(Mygga_roaming):
+class Mygga_roaming_projectile(Mygga_colliding):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.AI.enter_AI('roaming_attack', frequency = 150)
@@ -1613,8 +1625,9 @@ class Rav(Enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
         self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
-        self.attack_distance = [100,20]
-        self.health = 2
+        self.attack_distance = [50,20]
+        self.health = 3
+        self.chase_speed = 1
 
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
@@ -1652,23 +1665,6 @@ class Slime_giant(Enemy):
             obj = Slime(pos,self.game_objects)
             obj.velocity = [random.randint(-10, 10),random.randint(-10, -5)]
             self.game_objects.enemies.add(obj)
-
-class Slime_wall(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_wall/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
-        self.currentstate.enter_state('Walk')
-        self.AI = AI_wall_slime.Peace(self)
-
-    def knock_back(self,dir):
-        pass
-
-    def update_vel(self):
-        self.velocity[1] = self.acceleration[1]-self.dir[1]
-        self.velocity[0] = self.acceleration[0]+self.dir[0]
 
 class Vatt(Enemy):
     def __init__(self,pos,game_objects):
@@ -1710,7 +1706,7 @@ class Maggot(Enemy):
         self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.friction[0] = C.friction[0]*2
 
-class Larv(Enemy):
+class Larv_base(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.AI = AI_larv.Idle(self)
@@ -1733,17 +1729,24 @@ class Larv(Enemy):
         if self.dir[0] < 0:
             self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
 
-class Larv_simple(Enemy):
+class Larv(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/', game_objects)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/larv/')
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
         self.attack_distance = [0,0]
 
-class Larv_jr(Larv):
+    def loots(self):#spawn minions
+        pos = [self.hitbox.centerx,self.hitbox.centery-10]
+        for i in range(0,self.number):
+            obj = Larv_jr(pos,self.game_objects)
+            obj.velocity = [random.randint(-10, 10),random.randint(-10, -5)]
+            self.game_objects.enemies.add(obj)
+
+class Larv_jr(Larv_base):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects,True)
@@ -1772,6 +1775,23 @@ class Larv_poison(Enemy):
     def attack(self):#called from states, attack main
         attack = Poisonblobb(self.rect.topleft, self.game_objects, dir = self.dir)#make the object
         self.projectiles.add(attack)#add to group but in main phase
+
+class Larv_wall(Enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_wall/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
+        self.currentstate.enter_state('Walk')
+        self.AI = AI_wall_slime.Peace(self)
+
+    def knock_back(self,dir):
+        pass
+
+    def update_vel(self):
+        self.velocity[1] = self.acceleration[1]-self.dir[1]
+        self.velocity[0] = self.acceleration[0]+self.dir[0]
 
 class Shroompoline(Enemy):#an enemy or interactable?
     def __init__(self,pos,game_objects):
@@ -2140,20 +2160,21 @@ class Boss(Enemy):
         #self.health_bar.resize()
 
 class Reindeer(Boss):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
         self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
-        self.rect.center = self.hitbox.center#match the positions of hitboxes
-        self.currentstate = states_reindeer.Idle(self)
-        AI_reindeer.build_tree(self)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
+        
+        self.currentstate = reindeer_states.Idle_nice(self)
+        self.AI = reindeer_ai.AI(self)
 
         self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
-        self.attack = Sword
-        self.special_attack = Horn_vines
-        self.attack_distance = [50,10]
+        self.attack_distance = [50, 10]
+        self.attack = Hurt_box
+        self.game_objects.lights.add_light(self, radius = 150)  
+        self.chase_speed = 2
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
@@ -2264,30 +2285,40 @@ class Spawner(Staticentity):#an entity spawner
 
 class Fade_effect(Staticentity):#fade effect
     def __init__(self, entity, alpha = 255):
-        super().__init__(entity.rect.center,entity.game_objects)
+        super().__init__(entity.rect.center, entity.game_objects)
         self.image = entity.image
+        self.image_copy = Fade_effect.image_copy
+
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.center = entity.rect.center
         self.alpha = alpha
 
-        self.shader = entity.game_objects.shaders['alpha']
-        self.shader['alpha'] = alpha
         self.true_pos = self.rect.topleft
         self.dir = entity.dir.copy()
 
     def update(self):
-        self.alpha *= 0.95
+        self.alpha *= 0.9
         self.destroy()
 
     def draw(self, target):
-        self.shader['alpha'] = self.alpha
-        super().draw(target)
+        self.image_copy.clear(0,0,0,0)
+        self.game_objects.shaders['motion_blur']['dir'] = [0.05, 0]
+        self.game_objects.shaders['motion_blur']['quality'] = 3
+        self.game_objects.game.display.render(self.image, self.image_copy, shader = self.game_objects.shaders['motion_blur'])#shader render
+          
+        self.game_objects.shaders['alpha']['alpha'] = self.alpha
+        blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.game_objects.game.display.render(self.image_copy.texture, target, position = blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['alpha'])#shader render
+
+    def pool(game_objects):
+        size = (96, 64)#player canvas size
+        Fade_effect.image_copy = game_objects.game.display.make_layer(size)
 
     def destroy(self):
-        if self.alpha < 5:
+        if self.alpha < 10:
             self.kill()
 
-    def release_texture(self):#don't release it becase it seems like it is conencted in memoery to player
+    def release_texture(self):
         pass
 
 class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the appropriate directions
@@ -2476,7 +2507,7 @@ class Tjasolmais_embrace(Player_ability):#makes the shield, water god
         self.entity.player_modifier.enter_state('Tjasolmais_embrace', shield = shield)
         self.entity.projectiles.add(shield)
 
-class Bieggs_breath(Player_ability):#migawari: woman/mother god
+class Bieggs_breath(Player_ability):#force push
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/bieggs_breath/',entity.game_objects)
@@ -2506,13 +2537,12 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
         self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
 
     def initiate(self):#called when using the ability from player states
-        new_state = game_states.Slow_motion_gameplay(self.entity.game_objects.game, rate = self.rate, duration = self.duration)
-        new_state.enter_state()
+        self.game_objects.time_manager.modify_time(time_scale = self.rate, duration = self.duration)#sow motion
 
     def upgrade_ability(self):#called from upgrade menu
         self.level += 1
         if self.level == 3:
-            self.entity.slow_motion = 1/self.rate#counteract slowmotion for aila
+            self.entity.slow_motion = 1/self.rate#can make aila move normal speed
             self.duration = 400#slow motion duration, in time [whatever units]
         elif self.level == 2:
             self.duration = 400#slow motion duration, in time [whatever units]
@@ -2608,7 +2638,7 @@ class Projectiles(Platform_entity):#projectiels
 
     def update(self):
         super().update()
-        self.lifetime -= self.game_objects.game.dt*self.slow_motion
+        self.lifetime -= self.game_objects.game.dt
         self.destroy()
 
     def destroy(self):
@@ -2763,7 +2793,7 @@ class Poisonblobb(Projectiles):
         self.update_vel()
 
     def update_vel(self):
-        self.velocity[1] += 0.1 * self.game_objects.game.dt * self.slow_motion#graivity
+        self.velocity[1] += 0.1 * self.game_objects.game.dt#graivity
 
     def take_dmg(self, dmg):#aila sword without purple stone
         self.velocity = [0,0]
@@ -2861,25 +2891,6 @@ class Droplet(Projectiles):#droplet that can be placed, the source makes this an
         self.shader_state.draw()
         super().draw(target)
 
-class Horn_vines(Projectiles):#the reindeer attack
-    def __init__(self, pos, game_objects):
-        super().__init__(pos, game_objects)
-        self.sprites = Horn_vines.sprites
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],0,0)#
-        self.currentstate = states_horn_vines.Idle(self)#
-        self.dmg = 1
-        self.lifetime = 500
-
-    def pool(game_objects):
-        Horn_vines.sprites = read_files.load_sprites_dict('Sprites/attack/horn_vines/',game_objects)
-
-    def destroy(self):
-        if self.lifetime < 0:
-            self.entity.currentstate.handle_input('Horn_vines')
-            self.kill()
-
 class Melee(Projectiles):
     def __init__(self, entity, **kwarg):
         super().__init__([0,0], entity.game_objects, **kwarg)
@@ -2911,7 +2922,7 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.dmg = kwarg.get('dmg', 1)
 
     def update(self):
-        self.lifetime -= self.game_objects.game.dt*self.slow_motion
+        self.lifetime -= self.game_objects.game.dt
         self.destroy()
 
     def draw(self, target):
@@ -2981,7 +2992,7 @@ class Sword(Melee):
         if collision_enemy.flags['invincibility']: return
         collision_enemy.take_dmg(self.dmg)
         collision_enemy.knock_back(self.dir)
-        collision_enemy.hurt_particles(dir = self.dir)
+        collision_enemy.emit_particles(dir = self.dir)
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
 
@@ -3030,14 +3041,14 @@ class Aila_sword(Sword):
         if eprojectile.flags['invincibility']: return
         eprojectile.flags['invincibility'] = True
         self.entity.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, eprojectile.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
-
         self.stone_states['projectile_collision'].projectile_collision(eprojectile)
 
     def collision_enemy(self, collision_enemy):
         self.sword_jump()
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
-            collision_enemy.knock_back(self.dir)
-            collision_enemy.hurt_particles(dir = self.dir)#, colour=[255,255,255,255])
+            self.entity.hitstop_states.enter_state('Stop', lifetime = 5)#hitstop to sword vielder
+            collision_enemy.hitstop_states.enter_state('Stop', lifetime = 10, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop                        
+            collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
             self.clash_particles(collision_enemy.hitbox.center)
             #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
 
@@ -3241,7 +3252,7 @@ class Loot(Platform_entity):#
         self.bounce_coefficient = 0.6
 
     def update_vel(self):#add gravity
-        self.velocity[1] += 0.3*self.game_objects.game.dt*self.slow_motion
+        self.velocity[1] += 0.3*self.game_objects.game.dt
 
     def update(self):
         super().update()
@@ -3306,7 +3317,7 @@ class Heart_container(Loot):
         self.description = 'A heart container'
 
     def update_vel(self):
-        self.velocity[1] = 3*self.game_objects.game.dt*self.slow_motion
+        self.velocity[1] = 3*self.game_objects.game.dt
 
     def player_collision(self, player):
         player.max_health += 1
@@ -3323,7 +3334,7 @@ class Spirit_container(Loot):
         self.description = 'A spirit container'
 
     def update_vel(self):
-        self.velocity[1]=3*self.game_objects.game.dt*self.slow_motion
+        self.velocity[1]=3*self.game_objects.game.dt
 
     def player_collision(self,player):
         player.max_spirit += 1
@@ -3377,7 +3388,7 @@ class Enemy_drop(Loot):
 
     def update(self):
         super().update()
-        self.lifetime -= self.game_objects.game.dt*self.slow_motion
+        self.lifetime -= self.game_objects.game.dt
         self.destory()
 
     def attract(self,pos):#the omamori calls on this in loot group
@@ -3829,7 +3840,7 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def update(self):
         super().update()
         self.update_pos()
-        self.timer += self.game_objects.game.dt*self.slow_motion
+        self.timer += self.game_objects.game.dt
         if self.timer > 100:#fly to sky
             self.velocity[1] = -20
         elif self.timer>200:
