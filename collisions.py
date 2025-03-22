@@ -59,7 +59,7 @@ class Collisions():
 
             #if hit chest, bushes
             if collision_interactables:
-                projectile.collision_interactables(collision_inetractables)#go through the projecticle in case there are projectile that should do dmg to interactable
+                projectile.collision_interactables(collision_interactables)#go through the projecticle in case there are projectile that should do dmg to interactable
 
             #if hit enemy
             if collision_enemy:

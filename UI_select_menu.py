@@ -97,7 +97,7 @@ class Inventory(Select_menu):
         for index, item in enumerate(self.items['items'] + self.items['key_items']):#items we can use
             item.animation.update()
             self.game_objects.game.display.render(item.image, self.game_state.screen, position = item.rect.topleft)#shader render
-            number = self.game_objects.font.render(text = str(item.number))
+            number = self.game_objects.font.render(text = ' ' + str(item.number))
             self.game_objects.game.display.render(number, self.game_state.screen, position = item.rect.center)#shader render
             number.release()
 

@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, game_states, groups, player_modifier
+import read_files, particles, animation, dialogue, game_states, groups, player_modifier, backpack
 import constants as C
 
 #from folders
@@ -743,17 +743,18 @@ class Smoke(Staticentity):#2D smoke
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['smoke'])#shader render
 
-class Rainbow(Staticentity):#2D explosion
-    def __init__(self, pos, game_objects, size, **properties):
+class Rainbow(Staticentity):
+    def __init__(self, pos, game_objects, size, parallax, **properties):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
         self.size = size
+        self.parallax = parallax
 
     def release_texture(self):
         self.image.release()
 
     def draw(self, target):
-        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.parallax[1] * self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['rainbow'])#shader render
 
 class Death_fog(Staticentity):#2D explosion
@@ -1010,8 +1011,9 @@ class Player(Character):
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
+        self.backpack = backpack.Backpack(self)
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
-        self.inventory = {'Amber_Droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
+        self.inventory = {'Amber_droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#        
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
@@ -1019,7 +1021,6 @@ class Player(Character):
         self.reset_movement()
         self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
         self.colliding_platform = None#save the last collising platform
-        #self.shader_state = states_shader.MB(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -1126,7 +1127,7 @@ class Enemy(Character):
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.AI(self)
 
-        self.inventory = {'Amber_Droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
+        self.inventory = {'Amber_droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
         self.health = 3
 
@@ -1162,7 +1163,7 @@ class Enemy(Character):
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key: need to import sys
+                obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0
 
@@ -1565,7 +1566,7 @@ class Froggy(Enemy):
         self.currentstate = states_froggy.Idle(self)
         self.shader_state = states_shader.Idle(self)
         self.AI = AI_froggy.AI(self)
-        self.inventory = {'Amber_Droplet':random.randint(5,15)}#thigs to drop wgen killed
+        self.inventory = {'Amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
 
     def knock_back(self,dir):
         pass
@@ -2063,7 +2064,7 @@ class Busty_baker(NPC):#bartender
 class Astrid(NPC):#vendor
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
-        self.inventory={'Bone':10,'Amber_Droplet':1}#itam+price
+        self.inventory={'Bone':10,'Amber_droplet':1}#itam+price
         text = self.dialogue.get_comment()
         self.random_conversation(text)
 
@@ -2134,6 +2135,9 @@ class Boss(Enemy):
         super().__init__(pos,game_objects)
         self.health = 10
         self.health_bar = Health_bar(self)
+
+    def group_distance(self):
+        pass
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -2997,9 +3001,6 @@ class Sword(Melee):
             obj1 = getattr(particles, 'Spark')(pos, self.game_objects, **kwarg)
             self.entity.game_objects.cosmetics.add(obj1)
 
-    def collision_inetractables(self,interactable):#called when projectile hits interactables
-        interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
-
 class Aila_sword(Melee):
     def __init__(self, entity):
         super().__init__(entity)
@@ -3395,11 +3396,11 @@ class Enemy_drop(Loot):
             self.game_objects.player.inventory[obj] = 1
         self.currentstate.handle_input('Death')
 
-class Amber_Droplet(Enemy_drop):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Amber_Droplet.sprites
-        self.sounds = Amber_Droplet.sounds
+class Amber_droplet(Enemy_drop):
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = Amber_droplet.sprites
+        self.sounds = Amber_droplet.sounds
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.hitbox = pygame.Rect(0,0,16,16)
@@ -3413,8 +3414,8 @@ class Amber_Droplet(Enemy_drop):
         self.game_objects.world_state.update_statistcis('amber_droplet')
 
     def pool(game_objects):#all things that should be saved in object pool
-        Amber_Droplet.sprites = read_files.load_sprites_dict('Sprites/enteties/items/amber_droplet/',game_objects)
-        Amber_Droplet.sounds = read_files.load_sounds_dict('audio/SFX/enteties/items/amber_droplet/')
+        Amber_droplet.sprites = read_files.load_sprites_dict('Sprites/enteties/items/amber_droplet/',game_objects)
+        Amber_droplet.sounds = read_files.load_sounds_dict('audio/SFX/enteties/items/amber_droplet/')
 
 class Bone(Enemy_drop):
     def __init__(self,pos,game_objects):
@@ -4590,20 +4591,20 @@ class Loot_containers(Interactable):
 
     def hit_loot(self):
         for i in range(0, random.randint(1,3)):
-            obj = Amber_Droplet(self.hitbox.midtop, self.game_objects)
+            obj = Amber_droplet(self.hitbox.midtop, self.game_objects)
             self.game_objects.loot.add(obj)
 
 class Chest(Loot_containers):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
-        self.inventory = {'Amber_Droplet':3}
+        self.inventory = {'Amber_droplet':3}
 
 class Chest_2(Loot_containers):
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
-        self.inventory = {'Amber_Droplet':1}
+        self.inventory = {'Amber_droplet':1}
 
     def hit_loot(self):
         pass
@@ -4612,13 +4613,13 @@ class Amber_tree(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_tree/')
-        self.inventory = {'Amber_Droplet':3}
+        self.inventory = {'Amber_droplet':3}
 
 class Amber_rock(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):
         super().__init__(pos, game_objects, state, ID_key)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/amber_rock/')
-        self.inventory = {'Amber_Droplet':3}
+        self.inventory = {'Amber_droplet':3}
 
 class Door(Interactable):
     def __init__(self,pos,game_objects):
@@ -4688,8 +4689,8 @@ class Fast_travel(Interactable):
             self.locked = True#starts locked. After paying some ambers, it unlocks and fast travel is open
 
     def unlock(self):#called from Fast_travel_unlock
-        if self.game_objects.player.inventory['Amber_Droplet'] > self.cost:
-            self.game_objects.player.inventory['Amber_Droplet'] -= self.cost
+        if self.game_objects.player.inventory['Amber_droplet'] > self.cost:
+            self.game_objects.player.inventory['Amber_droplet'] -= self.cost
             self.locked = False
             Fast_travel.cost *= 5#increase by 5 for every unlock
             self.game_objects.world_state.save_travelpoint(self.map,self.init_cord)#self.game_objects.player.abs_dist)

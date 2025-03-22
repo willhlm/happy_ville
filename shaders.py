@@ -147,6 +147,40 @@ class Zoom(Shaders):#only zoom in?
         self.renderer.game_objects.game.display.render(self.renderer.layer.texture, self.renderer.game_objects.game.screen, flip = [False, True])#shader render
         return self.renderer.game_objects.game.screen
 
+class Speed_lines(Shaders):#only zoom in?
+    def __init__(self, renderer, **kwarg):
+        super().__init__(renderer)
+        self.noise_layer = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
+        self.empty = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
+
+        self.colour = kwarg.get('colour', (1,1,1,1))
+        size = renderer.game_objects.game.screen.size
+        center = kwarg.get('center', (size[0] * 0.5, size[1] * 0.5))
+        self.center = [center[0]/size[0], center[1]/size[1]]
+        self.number = kwarg.get('number', 1)
+        self.time = 0
+
+    def update(self):
+        self.time += self.renderer.game_objects.game.dt * 0.1
+
+    def set_uniforms(self):
+        self.renderer.game_objects.shaders['speed_lines']['TIME'] = self.time
+        self.renderer.game_objects.shaders['speed_lines']['noise'] = self.noise_layer.texture
+        self.renderer.game_objects.shaders['speed_lines']['line_color'] = self.colour
+        self.renderer.game_objects.shaders['speed_lines']['center'] = self.center
+        self.renderer.game_objects.shaders['speed_lines']['line_count'] = self.number
+
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.renderer.game_objects.shaders['noise_perlin']['u_resolution'] = self.renderer.game_objects.game.screen.size
+        self.renderer.game_objects.shaders['noise_perlin']['u_time'] = self.time 
+        self.renderer.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
+        self.renderer.game_objects.shaders['noise_perlin']['scale'] = [70,70]
+        self.renderer.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.renderer.game_objects.shaders['noise_perlin'])#make perlin noise texture
+
+        self.set_uniforms()
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, shader = self.renderer.game_objects.shaders['speed_lines'])#shader render
+        return self.renderer.game_objects.game.screen
+
 #not used below
 class Idle(Shaders):#enteties use it
     def __init__(self, renderer, **kwarg):

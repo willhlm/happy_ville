@@ -45,6 +45,22 @@ class Slash_2(Slash_1):
     def __init__(self,entity):
         super().__init__(entity)
 
+class Slash_up(Basic_states):#not implemented
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.entity.lifetime = 10#swrod hitbox duration
+        self.entity.hitbox[2] = 40
+        self.entity.hitbox[3] = 35                        
+        self.entity.dir = [sign(self.entity.dir[0]), 1]#sword dir
+
+        if self.entity.dir[0] > 0:
+            self.offset = 45
+        else:
+            self.offset = 36
+
+    def update_rect(self):
+        self.entity.rect.center = [self.entity.hitbox.center[0] + self.offset, self.entity.hitbox.center[1] + 10]
+
 class Slash_down(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
@@ -63,15 +79,6 @@ class Slash_down(Basic_states):
 
     def sword_jump(self):
         self.entity.entity.velocity[1] = C.pogo_vel
-
-class Slash_up(Slash_down):#not implemented
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.lifetime = 10#swrod hitbox duration                
-        self.entity.dir = [sign(self.entity.dir[0]), 1]#sword dir
-
-    def update_rect(self):
-        self.entity.rect.center = [self.entity.hitbox.center[0] + self.offset, self.entity.hitbox.center[1] + 10]
 
 #states for the stones (the stones alters the sword properties)
 class Stone_states():
