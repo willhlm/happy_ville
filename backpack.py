@@ -2,13 +2,27 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
     def __init__(self, entity):
         self.holdings = {'map': Map(), 'inventory': Inventory(), 'necklace': Necklace(entity), 'journal': Journal()}
         
-class Inventory():          
-    def __init__(self):
-        self.items = {'amber_droplet': 403, 'bone': 2, 'soul_essence': 10, 'tungsten': 10}#the keys need to have the same name as their respective classes
+    @property
+    def inventory(self):
+        return self.holdings['inventory']
 
-    def add(self, item):#called everytime an item is picked up
+    @property
+    def map(self):
+        return self.holdings['map']
+
+class Inventory():
+    def __init__(self):
+        self.items = {}  # Stores items and their quantities
+
+    def add(self, item, quantity = 1):#called everytime an item is picked up
         self.items.setdefault(item, 0)
         self.items[item] += 1
+
+    def remove(self, item, quantity = 1):#called everytime an item is picked up
+        self.items[item] -= 1
+
+    def get_quantity(self, item):
+        return self.items[item]
 
 class Map():        
     def __init__(self):
@@ -23,11 +37,11 @@ class Map():
         self.spawn_point['map'] = map
         self.spawn_point['point'] = point
 
-    def safe_spawn(self, coordinate):#called wheb collliding with safe spawn
+    def save_safespawn(self, coordinate):#called wheb collliding with safe spawn
         self.spawn_point['safe_spawn'] = coordinate
 
-    def append_bone(self):#called when plaiting a bone
-        pass
+    def save_bone(self, map, point):#called when plaiting a bone
+        self.spawn_point['bone'] = {'map':self.game_objects.map.level_name, 'point':self.game_objects.camera_manager.camera.scroll}     
 
     def save_travelpoint(self, map, cord):#called when inetracted with fast travel
         if not self.travel_points.get(map, False):#if first time intercted with it

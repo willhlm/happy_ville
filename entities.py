@@ -1012,8 +1012,8 @@ class Player(Character):
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
         self.backpack = backpack.Backpack(self)
-        self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
-        self.inventory = {'Amber_droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
+        #self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
+        #self.inventory = {'Amber_droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
         self.omamoris = Omamoris(self)#        
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
@@ -1731,8 +1731,8 @@ class Larv_base(Enemy):
             self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
 
 class Larv(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv/', game_objects)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/larv/')
         self.image = self.sprites['idle'][0]
@@ -1741,8 +1741,9 @@ class Larv(Enemy):
         self.attack_distance = [0,0]
 
     def loots(self):#spawn minions
-        pos = [self.hitbox.centerx,self.hitbox.centery-10]
-        for i in range(0,self.number):
+        pos = [self.hitbox.centerx,self.hitbox.centery - 10]
+        number = random.randint(2, 4)
+        for i in range(0, number):
             obj = Larv_jr(pos,self.game_objects)
             obj.velocity = [random.randint(-10, 10),random.randint(-10, -5)]
             self.game_objects.enemies.add(obj)
@@ -2175,6 +2176,7 @@ class Reindeer(Boss):
         self.attack = Hurt_box
         self.game_objects.lights.add_light(self, radius = 150)  
         self.chase_speed = 2
+        self.animation.framerate = 1/6
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.world_state.cutscenes_complete['Boss_deer_encounter'] = True#so not to trigger the cutscene again
@@ -3339,7 +3341,7 @@ class Soul_essence(Loot):#genkidama
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
     def player_collision(self, player):
-        player.inventory['Soul_essence'] += 1
+        player.backpack.inventory.add('soul_essence')
         self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = True#write in the state file that this has been picked up
         #make a cutscene?TODO
         self.kill()
@@ -3389,11 +3391,8 @@ class Enemy_drop(Loot):
     def player_collision(self, player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
-        obj = (self.__class__.__name__)#get the string in question
-        if player.inventory.get(obj, False):#not the first time
-          self.game_objects.player.inventory[obj] += 1
-        else: #first time
-            self.game_objects.player.inventory[obj] = 1
+        obj = (self.__class__.__name__)#get the string in question                
+        player.backpack.inventory.add(obj)
         self.currentstate.handle_input('Death')
 
 class Amber_droplet(Enemy_drop):
@@ -3431,9 +3430,9 @@ class Bone(Enemy_drop):
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
     def use_item(self):
-        if self.game_objects.player.inventory['Bone'] <= 0: return#if we don't have bones
-        self.game_objects.player.inventory['Bone'] -= 1
-        self.game_objects.player.spawn_point['bone'] = {'map':self.game_objects.map.level_name, 'point':self.game_objects.camera_manager.camera.scroll}
+        if self.game_objects.player.backpack.inventory.get_quantity('bone') <= 0: return#if we don't have bones
+        self.game_objects.player.backpack.inventory.remove('bone')
+        self.game_objects.player.backpack.map.save_bone(map = self.game_objects.map.level_name, point = self.game_objects.camera_manager.camera.scroll)
         self.game_objects.player.currentstate.enter_state('Plant_bone_main')
 
     def pool(game_objects):#all things that should be saved in object pool
@@ -3457,8 +3456,8 @@ class Heal_item(Enemy_drop):
         self.description = 'Use it to heal'
 
     def use_item(self):
-        if self.game_objects.player.inventory['Heal_item'] < 0: return
-        self.game_objects.player.inventory['Heal_item'] -= 1
+        if self.game_objects.player.backpack.inventory.get_quantity('heal_item') < 0: return
+        self.game_objects.player.backpack.inventory.remove('heal_item')
         self.game_objects.player.heal(1)
 
     def pool(game_objects):#all things that should be saved in object pool: #obj = cls.__new__(cls)#creatate without runing initmethod
@@ -3517,7 +3516,7 @@ class Tungsten(Interactable_item):
 
     def pickup(self, player):
         super().pickup(player)
-        player.inventory['Tungsten'] += 1
+        player.backpack.inventory.add('tungsten')
 
     @classmethod
     def pool(cls, game_objects):
@@ -4223,7 +4222,7 @@ class Safe_spawn(Interactable):#area which gives the coordinates which will make
         self.group_distance()
 
     def player_collision(self, player):
-        player.spawn_point['safe_spawn'] = self.position
+        player.backpack.map.save_safespawn(self.position)
 
 class Hole(Interactable):#area which will make aila spawn to safe_point if collided
     def __init__(self, pos, game_objects, size):
@@ -4654,8 +4653,7 @@ class Savepoint(Interactable):#save point
 
     def interact(self):#when player press t/y
         self.game_objects.player.currentstate.enter_state('Pray_pre')
-        self.game_objects.player.spawn_point['map'] = self.map
-        self.game_objects.player.spawn_point['point'] = self.init_cord
+        self.game_objects.player.backpack.map.save_savepoint(map =  self.map, point = self.init_cord)
         self.currentstate.handle_input('active')
         self.game_objects.cosmetics.add(Logo_loading(self.game_objects))
 
