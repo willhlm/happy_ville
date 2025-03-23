@@ -20,16 +20,13 @@ class Event_trigger(Interactable):#based
         self.group_distance()
 
     def player_collision(self, player):
-        if self.new_state:#if it is an event that requires new sttae, e.g. cutscene
-            if self.game_objects.world_state.cutscenes_complete.get(self.event.lower(), False): return#if the cutscene has been shown before, return. Shold we kill the object instead?
+        if self.new_state:#if it is an event that requires new sttae, e.g. cutscene            
             if self.event == 'Butterfly_encounter':
                 if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
 
             new_game_state = getattr(game_states, self.event)(self.game_objects.game)
             new_game_state.enter_state()        
-
-        else:
-            if self.game_objects.world_state.events.get(self.event, False): return#if event has already been done
+        else:            
             self.game_objects.quests_events.initiate_event(self.event)#event
         
         self.kill()#is this a problem in re-spawn?

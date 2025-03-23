@@ -125,7 +125,7 @@ class Title_Menu(Game_State):
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            #self.game.game_objects.load_map(self,'golden_fields_5','2')
+            #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_2','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
@@ -628,17 +628,18 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
-            self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.buttons):
-                self.current_button = 0
-            self.update_arrow()
-        elif event[0]:
+        if not input.key:#if it is a directinal input
+            if event[2]['l_stick'][1] < 0:#up
+                self.current_button -= 1
+                if self.current_button < 0:
+                    self.current_button = len(self.buttons) - 1
+                self.update_arrow()
+            elif event[2]['l_stick'][1] > 0:#down
+                self.current_button += 1
+                if self.current_button >= len(self.buttons):
+                    self.current_button = 0
+                self.update_arrow()
+        if event[0]:
             if event[-1] in ['a', 'return']:
                 self.arrow.pressed()
                 self.change_state()
@@ -1137,26 +1138,29 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
-        pos = (self.game.game_objects.camera_manager.camera.scroll[0] + 900,self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        self.entity = entities.Reindeer(pos, self.game.game_objects)#make the boss
-        self.game.game_objects.enemies.add(self.entity)
+        for enemy in self.game.game_objects.enemies.sprites():#get the reindeer reference
+            if type(enemy).__name__ == 'Reindeer':
+                self.entity = enemy
+                break
+
         self.entity.dir[0] = -1
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
-        self.entity.AI.deactivate()
         self.stage = 0
-        self.game.game_objects.player.acceleration[0]  = 1
+
+        self.game.game_objects.player.shader_state.handle_input('idle')
+        self.game.game_objects.player.acceleration[0]  = 1#start walking
 
     def update(self):#write how you want the player/group to act
         super().update()
         self.timer += self.game.dt
         if self.stage == 0:
-            if self.timer >120:
+            if self.timer > 120:
                 self.stage = 1
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
                 self.game.game_objects.player.acceleration[0] = 0
 
         elif self.stage==1:#transform
-            if self.timer>200:
+            if self.timer > 200:
                 self.entity.currentstate.enter_state('Transform')
                 self.game.game_objects.player.velocity[0] = -20
                 self.stage = 2

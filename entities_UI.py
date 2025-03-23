@@ -69,7 +69,7 @@ class Infinity_stone(Animatedentity):
         self.rect.topleft = pos
         self.description = ''
 
-class Amber_Droplet(Animatedentity):
+class Amber_droplet(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/amber_droplet/',game_objects)#for inventory

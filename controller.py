@@ -2,7 +2,7 @@ import pygame
 import pygame._sdl2.controller
 import time
 
-class Controller:
+class Controller():
     def __init__(self):
         self.keydown = False
         self.keyup = False
@@ -186,7 +186,7 @@ class Controller:
             abs(l_stick[0] - self.last_input['l_stick']['value'][0]) > 0.5 or
             abs(l_stick[1] - self.last_input['l_stick']['value'][1]) > 0.5
         )
-
+        
         if significant_change or (current_time - self.last_input['l_stick']['time'] > self.input_cooldown):
             if abs(l_stick[0]) > 0.5 or abs(l_stick[1]) > 0.5:  # Threshold to consider as input
                 self.keyup, self.keydown, self.key = False, False, None
@@ -197,7 +197,7 @@ class Controller:
     def insert_buffer(self):
         self.input_buffer.add(Inputs(self, self.key, self.keydown, self.keyup, self.value))
 
-class Inputs:
+class Inputs():
     def __init__(self, controller, key, keydown, keyup, value, lifetime = 10):
         self.controller = controller
         self.lifetime = lifetime

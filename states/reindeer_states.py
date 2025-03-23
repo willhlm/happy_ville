@@ -86,11 +86,15 @@ class Roar_main(Reindeer_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.game_objects.camera_manager.camera_shake(amp = 3, duration = 100)#amplitude, duration
-        self.cycles = 4
+        center = [self.entity.rect.centerx-self.entity.game_objects.camera_manager.camera.scroll[0],self.entity.rect.centery-self.entity.game_objects.camera_manager.camera.scroll[1]]
+        self.entity.game_objects.shader_render.append_shader('Speed_lines', center = center)
+        self.cycles = 7
 
     def increase_phase(self):
         self.cycles -= 1
-        if self.cycles == 0: self.enter_state('Roar_post')        
+        if self.cycles == 0: 
+            self.enter_state('Roar_post')        
+            self.entity.game_objects.shader_render.remove_shader('Speed_lines')
 
 class Roar_post(Reindeer_states):
     def __init__(self,entity):

@@ -55,11 +55,11 @@ class Collisions():
         for projectile in projectiles.sprites():#go through the group
             #projectile collision?            
             collision_enemy = pygame.sprite.spritecollideany(projectile, enemies, Collisions.collided)
-            collision_inetractables = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables, Collisions.collided)
+            collision_interactables = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables, Collisions.collided)
 
             #if hit chest, bushes
-            if collision_inetractables:
-                projectile.collision_inetractables(collision_inetractables)#go through the projecticle in case there are projectile that should do dmg to interactable
+            if collision_interactables:
+                projectile.collision_interactables(collision_interactables)#go through the projecticle in case there are projectile that should do dmg to interactable
 
             #if hit enemy
             if collision_enemy:

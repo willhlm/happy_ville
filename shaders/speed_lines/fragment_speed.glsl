@@ -7,8 +7,8 @@ out vec4 COLOR;
 uniform float TIME;
 uniform sampler2D noise;
 
-uniform float line_count = 1;
-uniform float line_density = 0.5;
+uniform float line_count = 3;
+uniform float line_density = 0.4;
 uniform float line_faloff = 0.25;
 uniform float mask_size = 0.04;
 uniform float mask_edge = 0.5;
@@ -40,10 +40,11 @@ vec2 rotate_uv(vec2 uv, vec2 pivot, float rotation) {
 
 void main(){
     vec2 UV = fragmentTexCoord;
-    vec2 polar_uv = polar_coordinates(rotate_uv(UV, center, floor(fract(TIME) * animation_speed) ) , center, 0.01, line_count); // Use center as reference position
+    vec2 center_screen = vec2(center.x, 1- center.y);
+    vec2 polar_uv = polar_coordinates(rotate_uv(UV, center_screen, floor(fract(TIME) * animation_speed) ) , center_screen, 0.01, line_count); // Use center as reference position
     vec3 lines = texture(noise, polar_uv).rgb;
     
-    float mask_value = length(UV - center); // Use center as reference position
+    float mask_value = length(UV - center_screen); // Use center as reference position
     float mask = inv_lerp(mask_size, mask_edge, mask_value);
     float result = 1.0 - (mask * line_density);
     

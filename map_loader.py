@@ -311,6 +311,9 @@ class Level():
                     elif property['name'] == 'new_state':
                         kwarg['new_state'] = property['value']
 
+                if self.game_objects.world_state.cutscenes_complete.get(kwarg['event'], False): continue#if the cutscene has been shown before, return.
+                if self.game_objects.world_state.events.get(kwarg['event'], False): continue#if event has already been done
+                
                 new_trigger = getattr(event_triggers, kwarg['event'].capitalize(), event_triggers.Event_trigger)(object_position, self.game_objects, object_size, **kwarg)#returns Event_trigger (default) if there is no Event_trigger class
                 self.game_objects.interactables.add(new_trigger)
 
@@ -410,8 +413,8 @@ class Level():
                 self.game_objects.cosmetics.add(platform)
 
             elif id == 31:#rainbow
-                explosion = entities.Rainbow(object_position, self.game_objects, object_size)
-                self.game_objects.cosmetics.add(explosion)
+                explosion = entities.Rainbow(object_position, self.game_objects, object_size, parallax)
+                self.game_objects.all_bgs.add(explosion)
 
             elif id == 32:#smoke
                 prop = {}
@@ -1363,7 +1366,7 @@ class Dark_forest(Biome):
                 new_lantern = entities.Shadow_light_lantern(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.interactables.add(new_lantern)
 
-            elif id == 13:#shource of shadow_light
+            elif id == 13:
                 kwarg = {}
                 for property in properties:
                     if property['name'] == 'ID':
@@ -1375,3 +1378,7 @@ class Dark_forest(Biome):
                 self.level.game_objects.dynamic_platforms.add(new_platform)
                 self.level.game_objects.platforms.add(new_platform)
                 self.level.references['platforms'].append(new_platform)
+
+            elif id == 14:
+                new_boss = entities.Reindeer(object_position, self.level.game_objects)
+                self.level.game_objects.enemies.add(new_boss)
