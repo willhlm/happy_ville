@@ -1075,15 +1075,15 @@ class Player(Character):
 
     def heal(self, health = 1):
         self.health += health
-        self.game_objects.UI['gameplay'].update_hearts()#update UI
+        self.game_objects.UI.hud.update_hearts()#update UI
 
     def consume_spirit(self, spirit = 1):
         self.spirit -= spirit
-        self.game_objects.UI['gameplay'].remove_spirits(spirit)#update UI
+        self.game_objects.UI.hud.remove_spirits(spirit)#update UI
 
     def add_spirit(self, spirit = 1):
         self.spirit += spirit
-        self.game_objects.UI['gameplay'].update_spirits()#update UI
+        self.game_objects.UI.hud.update_spirits()#update UI
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
