@@ -215,7 +215,6 @@ class Xbox(Controllers):
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/xbox/',game_objects)
         self.image = self.sprites['a_idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
 
 class Playstation(Controllers):
     def __init__(self, pos, game_objects,type):
@@ -223,7 +222,6 @@ class Playstation(Controllers):
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
 
 class Keyboard(Controllers):
     def __init__(self, pos, game_objects,type):
@@ -231,4 +229,3 @@ class Keyboard(Controllers):
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos

@@ -308,12 +308,18 @@ class Alphabet():
             'text_bubble': pygame.image.load("Sprites/utils/text_bg6.png")
         }
     
-    def render(self, surface_size=False, text='', letter_frame=1000, color = (255, 255, 255), alignment = 'left'):
+    def render(self, surface_size=False, text='', letter_frame=1000, color=(255, 255, 255), alignment='left'):
         # Limit text to `letter_frame`
-        visible_text = text[:letter_frame]  
+        visible_text = text[:letter_frame]
+
+        # **If text is empty or only spaces, return an empty transparent texture**
+        if not visible_text.strip():
+            empty_surface = pygame.Surface(surface_size if surface_size else (1, 1), pygame.SRCALPHA, 32).convert_alpha()
+            empty_surface.fill((0, 0, 0, 0))  # Transparent
+            return self.game_objects.game.display.surface_to_texture(empty_surface)
 
         # Initialize
-        words = visible_text.split(" ")  # Split AFTER truncating
+        words = visible_text.split(" ")
         max_width = surface_size[0] if surface_size else self.font.size(visible_text)[0]
         line_height = self.font.get_height()
         lines, line_widths = [], []
@@ -323,7 +329,7 @@ class Alphabet():
         # Word wrapping based on visible text
         for word in words:
             test_line = (current_line + " " + word).strip()
-            
+
             # If new word exceeds width, wrap it
             if self.font.size(test_line)[0] > max_width and current_line:
                 lines.append(current_line)
@@ -342,7 +348,7 @@ class Alphabet():
 
         # Create transparent surface
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
-        text_surface.fill((0, 0, 0, 0))#background colour
+        text_surface.fill((0, 0, 0, 0))  # Transparent background
 
         # Render each line correctly
         for i, line in enumerate(lines):
@@ -356,6 +362,7 @@ class Alphabet():
             y += line_height  # Move to next line
 
         return self.game_objects.game.display.surface_to_texture(text_surface)
+
     
     def fill_text_bg(self, surface_size, type='default'):
         col = surface_size[0] // 16

@@ -1,12 +1,9 @@
-import pygame, sys, random
+import pygame, sys
 import read_files
 import entities_UI
 import cutscene
 import constants as C
 import animation
-import UI_select_menu, UI_facilities
-import entities
-import particles
 
 class Game_State():
     def __init__(self,game):
@@ -19,18 +16,18 @@ class Game_State():
         pass
 
     def handle_events(self, input):
-        input.processed()
+        input.processed()        
 
-    def enter_state(self):
-        self.game.state_stack.append(self)
-
-    def exit_state(self):
-        self.game.state_stack.pop()
-
-    def release_texture(self):
+    def on_exit(self):
         pass
 
-class Title_Menu(Game_State):
+    def on_resume(self):
+        pass     
+
+    def release_texture(self):#in the final version, this should not be needed sinec we wil not dynamically make layers
+        pass
+
+class Title_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
@@ -120,8 +117,7 @@ class Title_Menu(Game_State):
     def change_state(self):
         if self.current_button == 0:#new game
             self.arrow.pressed('new')#if we want to make it e.g. glow or something
-            new_state = Gameplay(self.game)
-            new_state.enter_state()
+            self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
@@ -136,19 +132,17 @@ class Title_Menu(Game_State):
 
         elif self.current_button == 1:
             self.arrow.pressed()
-            new_state = Load_Menu(self.game)
-            new_state.enter_state()
+            self.game.state_manager.enter_state('Load_menu')
 
         elif self.current_button == 2:
             self.arrow.pressed()
-            new_state = Option_Menu(self.game)
-            new_state.enter_state()
+            self.game.state_manager.enter_state('Option_menu')
 
         elif self.current_button == 3:
             pygame.quit()
             sys.exit()
 
-class Load_Menu(Game_State):
+class Load_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
@@ -223,18 +217,17 @@ class Load_Menu(Game_State):
             self.update_arrow()
         elif event[0]:
             if event[-1] == 'start':
-                self.exit_state()
+                self.game.state_manager.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.arrow.pressed()
                 self.game.game_objects.load_game()#load saved game data
-
-                new_state = Gameplay(self.game)
-                new_state.enter_state()
-                map = self.game.game_objects.player.spawn_point['map']
-                point=self.game.game_objects.player.spawn_point['point']
+                self.game.state_manager.enter_state('Gameplay')
+                
+                map = self.game.game_objects.player.backpak.map.spawn_point['map']
+                point=self.game.game_objects.player.backpak.map.spawn_point['point']
                 self.game.game_objects.load_map(self, map, point)
 
-class Option_Menu(Game_State):
+class Option_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.title = self.game.game_objects.font.render(text = 'Options', color = (0,0,0)) #temporary
@@ -293,24 +286,22 @@ class Option_Menu(Game_State):
             self.update_arrow()
         elif event[0]:
             if event[-1] == 'start':
-                self.exit_state()
+                self.game.state_manager.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.arrow.pressed()
                 self.update_options()
 
     def update_options(self):
         if self.current_button == 0:#resolution
-            new_state = Option_Menu_display(self.game)
-            new_state.enter_state()
+            self.game.state_manager.enter_state('Option_menu_display')
         elif self.current_button == 1:#sounds
-            new_state = Option_Menu_sounds(self.game)
-            new_state.enter_state()
+            self.game.state_manager.enter_state('Option_menu_sounds')        
         if self.current_button == 2:
             self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
         elif self.current_button == 3:
             self.game.RENDER_HITBOX_FLAG = not self.game.RENDER_HITBOX_FLAG
 
-class Option_Menu_sounds(Game_State):
+class Option_menu_sounds(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
@@ -362,8 +353,8 @@ class Option_Menu_sounds(Game_State):
 
         #self.arrow.draw(self.game.screen)
 
-    def exit_state(self):
-        super().exit_state()
+    def on_exit(self):
+        super().on_exit()
         self.game_settings['sounds'] = self.game.game_objects.sound.volume
         read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
 
@@ -382,7 +373,7 @@ class Option_Menu_sounds(Game_State):
             self.update_arrow()
         elif event[0]:
             if event[-1] == 'start':
-                self.exit_state()
+                self.game.state_manager.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.update_options(1)
             elif event[-1] in ('b'):
@@ -396,7 +387,7 @@ class Option_Menu_sounds(Game_State):
         elif self.current_button == 2:#music
             self.game.game_objects.sound.change_volume('music', int)
 
-class Option_Menu_display(Game_State):
+class Option_menu_display(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
@@ -463,14 +454,14 @@ class Option_Menu_display(Game_State):
             self.update_arrow()
         elif event[0]:
             if event[-1] == 'start':
-                self.exit_state()
+                self.game.state_manager.exit_state()
             elif event[-1] in ('return', 'a'):
                 self.update_options(1)
             elif event[-1] in ('b'):
                 self.update_options(-1)
 
-    def exit_state(self):
-        super().exit_state()
+    def on_exit(self):
+        super().on_exit()
         read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
 
     def update_options(self, int):
@@ -490,16 +481,16 @@ class Gameplay(Game_State):
         self.game.game_objects.time_manager.update()
         self.game.game_objects.update()
         self.game.game_objects.collide_all()
-        self.game.game_objects.UI['gameplay'].update()
+        self.game.game_objects.UI.hud.update()
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.game.game_objects.update()
         self.game.game_objects.platform_collision()
-        self.game.game_objects.UI['gameplay'].update()
+        self.game.game_objects.UI.hud.update()
 
     def render(self):
         self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
-        self.game.game_objects.UI['gameplay'].render()
+        self.game.game_objects.UI.hud.render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
 
@@ -521,13 +512,11 @@ class Gameplay(Game_State):
         if event[0]:#press
             if event[-1]=='start':#escape button
                 input.processed()
-                new_state = Pause_Menu(self.game)
-                new_state.enter_state()
+                self.game.state_manager.enter_state('Pause_menu')        
 
             elif event[-1]=='rb':
                 input.processed()
-                new_state = Ability_menu(self.game)
-                new_state.enter_state()
+                self.game.state_manager.enter_state('Ability_menu')        
 
             elif event[-1] == 'y':
                 input.processed()
@@ -535,8 +524,7 @@ class Gameplay(Game_State):
 
             elif event[-1] == 'select':
                 input.processed()
-                new_state = Select_menu(self.game)
-                new_state.enter_state()
+                self.game.state_manager.enter_state('UIs', page = 'backpack')        
 
             elif event[-1] == 'down':
                 input.processed()#should it be processed here or when passed through?
@@ -556,10 +544,10 @@ class Gameplay(Game_State):
             input.processed()#should it be processed here or when passed through?
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
-class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
+class Pause_menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self, game):
         super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
+        self.title = self.game.game_objects.font.render(text = 'Pause menu') #TODO
 
         #create buttons
         self.buttons = ['Resume','Options','Quit to main menu','Quit game']
@@ -644,25 +632,23 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
                 self.arrow.pressed()
                 self.change_state()
             elif event[-1] == 'start':
-                self.exit_state()
+                self.game.state_manager.exit_state()
 
-    def exit_state(self):
-        super().exit_state()
+    def on_exit(self):
         self.release_texture()
 
     def change_state(self):
         if self.current_button == 0:
-            self.exit_state()
+            self.game.state_manager.exit_state()
 
         elif self.current_button == 1:
-            new_state = Option_Menu(self.game)
-            new_state.enter_state()
+            self.game.state_manager.enter_state('Option_menu')        
 
         elif self.current_button == 2:#exit to main menu
-            for state in self.game.state_stack[1:]:#except the first one
+            for state in self.game.state_manager.state_stack[1:]:#except the first one
                 state.release_texture()
-            self.game.state_stack = [self.game.state_stack[0]]
-            self.game.state_stack[-1].play_music()
+            self.game.state_manager.state_stack = [self.game.state_manager.state_stack[0]]
+            self.game.state_manager.state_stack[-1].play_music()
 
         elif self.current_button == 3:
             pygame.quit()
@@ -708,7 +694,7 @@ class Ability_menu(Gameplay):#when pressing tab
         elif event [1]:#release
             if event[-1]=='rb':
                 self.game.game_objects.player.abilities.equip=self.abilities[self.index]
-                self.exit_state()
+                self.game.state_manager.exit_state()                
 
 class Fadein(Gameplay):
     def __init__(self, game):
@@ -721,7 +707,7 @@ class Fadein(Gameplay):
 
     def init(self):
         self.aila_state = 'Idle_main'#for respawn after death
-        for state in self.game.state_stack:
+        for state in self.game.state_manager.state_stack:
             if 'Death' == type(state).__name__:
                 self.aila_state = 'Invisible_main'
                 self.game.game_objects.player.currentstate.enter_state('Invisible_main')
@@ -737,7 +723,7 @@ class Fadein(Gameplay):
         self.game.game_objects.player.reset_movement()
         self.game.game_objects.player.currentstate.enter_state(self.aila_state)
         self.fade_surface.release()
-        self.exit_state()
+        self.game.state_manager.exit_state()
 
     def render(self):
         super().render()#gameplay render
@@ -766,7 +752,7 @@ class Fadeout(Fadein):
 
     def exit(self):
         self.fade_surface.release()
-        self.exit_state()#has to be before loadmap
+        self.game.state_manager.exit_state()#has to be before loadmap
         self.game.game_objects.load_map2(self.map_name, self.spawn, self.fade)
 
     def render(self):
@@ -786,9 +772,8 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
         super().update()
         self.count += self.game.dt
         if self.count > self.fade_length:
-            self.exit_state()
-            new_state = Safe_spawn_2(self.game)
-            new_state.enter_state()
+            self.game.state_manager.exit_state()
+            self.game.state_manager.enter_state('Safe_spawn_2')        
 
     def render(self):
         super().render()#gameplay render
@@ -803,14 +788,14 @@ class Safe_spawn_2(Gameplay):#fade
         self.fade_length = 20
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.fade_surface.clear(0,0,0,255)
-        self.game.game_objects.player.set_pos(self.game.game_objects.player.spawn_point['safe_spawn'])
+        self.game.game_objects.player.set_pos(self.game.game_objects.player.backpack.map.spawn_point['safe_spawn'])
         self.game.game_objects.player.currentstate.enter_state('Stand_up_main')
 
     def update(self):
         super().update()
         self.count += self.game.dt
         if self.count > self.fade_length*2:
-            self.exit_state()
+            self.game.state_manager.exit_state()
 
     def render(self):
         super().render()#gameplay render
@@ -846,7 +831,7 @@ class Conversation(Gameplay):
         self.alpha += self.sign * self.game.dt*5
         self.alpha = min(self.alpha,230)
         if self.alpha < 10:
-            self.exit_state()
+            self.game.state_manager.exit_state()
 
     def render(self):
         super().render()
@@ -884,59 +869,26 @@ class Conversation(Gameplay):
     def fade_back(self):
         self.sign = -1
 
-    def exit_state(self):
-        super().exit_state()
+    def on_exit(self):
         self.conv_screen.release()
         self.background.release()
         self.npc.buisness()
 
-class Select_menu(Gameplay):#pressing i: map, inventory, omamori, journal
-    def __init__(self, game):
+class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
+    def __init__(self, game, page, **kwarg):
         super().__init__(game)
-        self.screen = self.game.display.make_layer(self.game.window_size)#TODO
-        self.shader = game.game_objects.shaders['alpha']
-        self.state = [getattr(UI_select_menu, 'Inventory')(self)]#should it alway go to inventory be default?
+        self.game.game_objects.UI.set_ui(page, **kwarg)
 
     def update(self):
         super().update()
-        self.state[-1].update()
-
+        self.game.game_objects.UI.update()
+    
     def render(self):
         super().render()
-        self.state[-1].render()
+        self.game.game_objects.UI.render()    
 
     def handle_events(self,input):
-        self.state[-1].handle_events(input)
-
-class Facilities(Gameplay):#fast_travel (menu and unlock), ability upgrade (spurit and movement), bank, soul essence, vendor, smith
-    def __init__(self, game,type, *arg):#args could be npc or travel point etc
-        super().__init__(game)
-        self.state = [getattr(UI_facilities, type)(self, *arg)]#black smith etc
-
-    def update(self):
-        super().update()
-        self.state[-1].update()
-
-    def render(self):
-        super().render()
-        self.state[-1].render()
-
-    def handle_events(self,input):
-        self.state[-1].handle_events(input)
-
-class Cutscenes(Gameplay):
-    def __init__(self, game,scene):
-        super().__init__(game)
-        self.current_scene = getattr(cutscene, scene)(self)#make an object based on string
-
-    def update(self):
-        self.current_scene.update()
-
-    def render(self):
-        self.current_scene.render()
-
-    def handle_events(self, input):
-        self.current_scene.handle_events(input)
+        self.game.game_objects.UI.handle_events(input)
 
 class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
     def __init__(self, game, img, text = '', on_exit = None):
@@ -985,7 +937,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
         if self.fade[0] == 0:
             if self.on_exit:
                 self.on_exit()
-            self.exit_state()
+            self.game.state_manager.exit_state()
 
     def handle_events(self,input):
         event = input.output()
@@ -995,358 +947,3 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
                 self.page = 1
             elif event[-1] == 'a':
                 self.page = 1
-
-#engine cutscenes
-class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
-    def __init__(self,game):
-        super().__init__(game)
-        self.timer = 0
-        self.pos = [-self.game.window_size[1],self.game.window_size[1]]
-        self.const = [0.8,0.8]#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
-        self.rect1 = game.display.make_layer(self.game.window_size)#TODO
-        self.rect2 = game.display.make_layer(self.game.window_size)#TODO
-
-        self.rect2.clear(0,0,0,255)
-        self.rect1.clear(0,0,0,255)
-
-    def render(self):
-        super().render()
-        self.cinematic()
-
-    def handle_movement(self):#every frame
-        pass
-
-    def cinematic(self):#black box stuff
-        self.pos[0] += self.game.dt#the upper balck box
-        self.pos[1] -= self.game.dt#the lower balck box
-
-        self.pos[0] = min(-self.game.window_size[1]*self.const[0], self.pos[0])
-        self.pos[1] = max(self.game.window_size[1]*self.const[1], self.pos[1])
-
-        self.game.display.render(self.rect1.texture, self.game.screen, position = [0,self.pos[0]])
-        self.game.display.render(self.rect2.texture, self.game.screen, position = [0,self.pos[1]])
-
-    def handle_events(self,input):
-        event = input.output()
-        input.processed()
-        if event[0]:#press
-            if event[-1] == 'start':
-                self.exit_state()
-            elif event[-1] == 'a':
-                self.press = True
-
-class New_game(Cutscene_engine):#first screen to be played when starying a new game -> needs to be called after that the map has loaded
-    def __init__(self,game):
-        super().__init__(game)
-        self.game.game_objects.camera_manager.set_camera('New_game')#when starting a new game, should be a cutscene
-        self.camera_stops = []#temporary remove the came stops
-        for camera_stop in self.game.game_objects.camera_blocks:
-            self.camera_stops.append(camera_stop)
-        self.game.game_objects.camera_blocks.empty()
-
-    def cinematic(self):
-        pass
-
-    def update(self):
-        super().update()
-        self.timer += self.game.dt
-        if self.timer > 500:
-            self.exit_state()
-
-    def exit_state(self):
-        for camera_stop in self.camera_stops:
-            self.game.game_objects.camera_blocks.add(camera_stop)
-        self.game.game_objects.camera_manager.camera.exit_state()
-        super().exit_state()
-
-class Title_screen(Cutscene_engine):#screen played after waking up from boss dream
-    def __init__(self,game):
-        super().__init__(game)
-        self.title_name = self.game.game_objects.font.render(text = 'Happy Ville')
-        self.text1 = self.game.game_objects.font.render(text = 'A game by Hjortron games')
-        self.game.game_objects.player.reset_movement()
-        self.game.game_objects.cosmetics.empty()
-
-    def update(self):
-        super().update()
-        self.timer += self.game.dt
-
-    def render(self):
-        super().render()
-        if self.timer>250:
-            self.game.display.render(self.title_name,self.game.screen,position = (190,150))
-
-        if self.timer>500:
-            self.game.display.render(self.text1,self.game.screen,position = (190,170))
-
-        if self.timer >700:
-            self.game.game_objects.player.acceleration[0] *= 2#bacl to normal speed
-            self.exit_state()
-
-    def handle_events(self,input):
-        event = input.output()
-        input.processed()
-        if event[0]:#press
-            if event[-1] == 'start':
-                self.exit_state()
-            elif event[-1] == 'a':
-                self.press = True
-
-        if event[-1]=='right' or event[-1]=='left' or event[-1] == None or event[-1]=='down' or event[-1]=='up':#left stick and arrow keys
-            if event[2]['l_stick'][0] > 0: return#can only go left
-            event[2]['l_stick'][0] *= 0.5#half the speed
-            self.game.game_objects.player.currentstate.handle_movement(event)
-
-class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
-    def __init__(self,game):
-        super().__init__(game)
-        spawn_pos=(2920,900)
-        self.entity = entities.Reindeer(spawn_pos, self.game.game_objects)
-        self.entity.AI.deactivate()
-
-        self.game.game_objects.enemies.add(self.entity)
-        self.game.game_objects.camera_manager.set_camera('Deer_encounter')
-        self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
-        self.stage = 0
-
-    def update(self):#write how you want things to act
-        super().update()
-        self.timer+=self.game.dt
-        if self.stage == 0:
-
-            if self.timer < 50:
-                self.game.game_objects.player.velocity[0]=4
-
-            elif self.timer>50:
-                self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                self.game.game_objects.player.acceleration[0] = 0
-                self.stage  = 1
-                self.entity.dir[0] *= -1
-
-        elif self.stage ==1:
-            if self.timer > 100:
-                self.entity.velocity[0] = 5
-
-        if self.timer>200:
-            self.exit_state()
-
-    def exit_state(self):
-        self.game.game_objects.camera_manager.camera.exit_state()
-        self.entity.kill()
-        super().exit_state()
-
-class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
-    def __init__(self,objects):
-        super().__init__(objects)
-        for enemy in self.game.game_objects.enemies.sprites():#get the reindeer reference
-            if type(enemy).__name__ == 'Reindeer':
-                self.entity = enemy
-                break
-
-        self.entity.dir[0] = -1
-        self.game.game_objects.camera_manager.set_camera('Deer_encounter')
-        self.stage = 0
-        
-        self.game.game_objects.player.shader_state.handle_input('idle')        
-        self.game.game_objects.player.acceleration[0]  = 1#start walking        
-
-    def update(self):#write how you want the player/group to act
-        super().update()
-        self.timer += self.game.dt
-        if self.stage == 0:
-            if self.timer > 120:
-                self.stage = 1
-                self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                self.game.game_objects.player.acceleration[0] = 0
-
-        elif self.stage==1:#transform
-            if self.timer > 200:
-                self.entity.currentstate.enter_state('Transform')
-                self.game.game_objects.player.velocity[0] = -20
-                self.stage = 2
-
-        elif self.stage==2:#roar
-            if self.timer > 300:
-                self.entity.currentstate.enter_state('Roar_pre')
-                self.stage = 3
-
-        elif self.stage==3:
-            if self.timer > 600:
-                self.game.game_objects.camera_manager.camera.exit_state()#exsiting deer encounter camera
-                self.entity.AI.activate()
-                self.exit_state()                
-
-class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
-    def __init__(self,objects):
-        super().__init__(objects)
-        self.step1 = False
-        self.const = [0.5,0.5]#value that determines where the black boxes finish: 0.8 is 20% of screen is covered
-        self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-
-    def update(self):
-        super().update()
-        self.timer+=self.game.dt
-        if self.timer < 75:
-            self.game.game_objects.player.velocity[1] = -2
-        elif self.timer > 75:
-            self.game.game_objects.player.velocity[1] = -1#compensates for gravity, levitates
-            self.step1 = True
-
-        if self.timer > 250:
-            self.game.game_objects.player.velocity[1] = 2#go down again
-            if self.game.game_objects.player.collision_types['bottom']:
-                self.exit_state()
-
-    def render(self):
-        super().render()
-        if self.step1:
-            particle = getattr(particles, 'Spark')(self.game.game_objects.player.rect.center, self.game.game_objects, distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255])
-            self.game.game_objects.cosmetics.add(particle)
-
-            self.game.game_objects.cosmetics.draw(self.game.game_objects.game.screen)
-            self.game.game_objects.players.draw(self.game.game_objects.game.screen)
-
-class Death(Cutscene_engine):#when aila dies
-    def __init__(self,game):
-        super().__init__(game)
-        self.stage = 0
-
-    def update(self):
-        super().update()
-        if self.game.state_stack[-1] != self: return#needed
-        self.timer += self.game.dt
-        if self.stage == 0:
-
-            if self.timer > 120:
-                self.state1()
-
-        elif self.stage == 1:
-                #spawn effect
-                pos = (0,0)#
-                offset = 100#depends on the effect animation
-                self.spawneffect = entities.Spawneffect(pos,self.game.game_objects)
-                self.spawneffect.rect.midbottom=self.game.game_objects.player.rect.midbottom
-                self.spawneffect.rect.bottom += offset
-                self.game.game_objects.cosmetics.add(self.spawneffect)
-                self.stage = 2
-
-        elif self.stage == 2:
-            if self.spawneffect.finish:#when the cosmetic effetc finishes
-                self.game.game_objects.player.currentstate.enter_state('Spawn_main')
-                self.exit_state()
-
-    def state1(self):
-        if self.game.game_objects.player.spawn_point.get('bone', False):#respawn by bone
-            map = self.game.game_objects.player.spawn_point['bone']['map']
-            point = self.game.game_objects.player.spawn_point['bone']['point']
-            del self.game.game_objects.player.spawn_point['bone']
-        else:#normal resawn
-            map = self.game.game_objects.player.spawn_point['map']
-            point =  self.game.game_objects.player.spawn_point['point']
-        self.game.game_objects.load_map(self, map, point)
-        self.stage = 1
-
-    def handle_events(self,input):
-        input.processed()
-
-    def cinematic(self):
-        pass
-
-class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
-    def __init__(self,game):
-        super().__init__(game)
-        self.game.game_objects.player.death_state.handle_input('cultist_encounter')
-        self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
-
-        #should entity stuff be in quest insted?
-        spawn_pos1 = (self.game.game_objects.camera_manager.camera.scroll[0] - 300, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        spawn_pos2 = (self.game.game_objects.camera_manager.camera.scroll[0] + 50, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        self.entity1 = entities.Cultist_warrior(spawn_pos1, self.game.game_objects)#added to group in cutscene
-        self.entity1.dir[0] *= -1
-        self.entity1.AI.deactivate()
-        self.game.game_objects.enemies.add(self.entity1)
-        self.entity2 = entities.Cultist_rogue(spawn_pos2, self.game.game_objects)#added to group in cutscene
-        ##
-
-        self.stage = 0
-        self.game.game_objects.camera_manager.set_camera('Cultist_encounter')
-        self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
-
-    def update(self):
-        super().update()
-        self.timer+=self.game.dt
-        if self.stage==0:#encounter Cultist_warrior
-            if self.timer<50:
-                self.game.game_objects.player.velocity[0]=-4
-                self.game.game_objects.player.acceleration[0]=1
-
-            elif self.timer > 50:
-                self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
-                #self.game.game_objects.player.velocity[0]=0
-                self.game.game_objects.player.acceleration[0] = 0
-
-                self.stage = 1
-
-        elif self.stage == 1:
-            if self.timer > 200:#sapawn cultist_rogue
-                spawn_pos = self.game.game_objects.player.rect.topright
-                self.entity2.AI.deactivate()
-                self.entity2.dir[0] = -1
-                self.entity2.currentstate.enter_state('Ambush_pre')
-                self.game.game_objects.enemies.add(self.entity2)
-
-                self.stage=2
-                self.timer=0
-
-        elif self.stage==2:
-            if self.timer>100:
-                self.exit_state()
-
-    def exit_state(self):
-        self.entity1.AI.activate()
-        self.entity2.AI.activate()
-        self.game.game_objects.camera_manager.camera.exit_state()
-        super().exit_state()
-
-class Rhoutta_encounter(Gameplay):#called from trigger before first rhoutta: shuold spawn lightning and a gap spawns, or something -> TODO make a cutsene
-    def __init__(self, game):
-        super().__init__(game)
-        spawn_pos = (1520-40,416-336)#topleft position in tiled - 40 to spawn it behind aila
-        lightning = entities.Lighitning(spawn_pos,self.game.game_objects, parallax = [1,1], size = [64,336])
-        effect = entities.Spawneffect(spawn_pos,self.game.game_objects)
-        effect.rect.midbottom = lightning.rect.midbottom
-        self.game.game_objects.interactables.add(lightning)
-        self.game.game_objects.cosmetics.add(effect)
-        self.game.game_objects.weather.flash()
-
-class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
-    def __init__(self,game):
-        super().__init__(game)
-        self.stage = 0
-        self.cocoon = self.game.game_objects.map.references['cocoon_boss']
-        self.const[1] = 0.9
-
-    def update(self):
-        super().update()
-        self.timer+=self.game.dt
-        if self.stage ==0:#approch
-            if self.timer<50:
-                self.game.game_objects.player.velocity[0]=-4
-                self.game.game_objects.player.acceleration[0] = 1
-
-            elif self.timer > 50:#stay
-                self.game.game_objects.player.currentstate.enter_state('Idle_main')
-                self.game.game_objects.player.acceleration[0]=0
-                self.stage = 1
-
-        elif self.stage == 1:#aggro
-
-            if self.timer > 200:
-                self.game.game_objects.camera_manager.camera_shake(duration = 200)
-                self.stage = 2
-
-        elif self.stage == 2:#spawn
-            self.cocoon.particle_release()
-            if self.timer > 400:
-                self.game_objects.quests_events.initiate_quest('butterfly_encounter')
-                self.exit_state()

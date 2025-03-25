@@ -9,6 +9,9 @@ class Basic_states():
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
+    def handle_input(self,input):
+        pass
+
 class A_idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)

@@ -1,33 +1,10 @@
 import pygame, sys
 import UI_loader
+from game_states import Gameplay
 import entities_UI, entities
 
-class Facility_states():
-    def __init__(self, game_state):
-        self.game_state = game_state
-        self.game_objects = game_state.game.game_objects
-
-    def enter_state(self,newstate):
-         self.game_state.state = getattr(sys.modules[__name__], newstate)(self.game_state)#make a class based on the name of the newstate: need to import sys
-
-    def update(self):
-        pass
-
-    def render(self):
-        pass
-
-    def handle_events(self,input):
-        input.processed()  
-
-    def exit_state(self):
-        self.release_texture()
-        self.game_state.exit_state()
-
-    def release_texture(self):
-        pass    
-
 #ability upgrade
-class Spirit_upgrade_menu(Facility_states):
+class Spirit_upgrade_menu(Gameplay):
     def __init__(self, game_state):
         super().__init__(game_state)
         self.define_UI()
@@ -152,8 +129,8 @@ class Movement_upgrades_menu(Spirit_upgrade_menu):#when double clicking the save
         self.game_objects.game.screen.blit(title,[250,50])
 
 #fast travel, smith, bank, souls essence, vendor
-class Fast_travel_unlock(Facility_states):
-    def __init__(self, game_state,fast_travel):
+class Fast_travel_unlock(Gameplay):
+    def __init__(self, game_state, fast_travel):
         super().__init__(game_state)
         self.fast_travel = fast_travel
         self.index = [0,0]
@@ -220,7 +197,7 @@ class Fast_travel_unlock(Facility_states):
                     else:#not enout money
                         pass
 
-class Fast_travel_menu(Facility_states):
+class Fast_travel_menu(Gameplay):
     def __init__(self, game_state):
         super().__init__(game_state)
         self.travel_UI = UI_loader.UI_loader(self.game_objects,'fast_travel')
@@ -271,7 +248,7 @@ class Fast_travel_menu(Facility_states):
                 cord = self.game_objects.world_state.travel_points[level]
                 self.game_objects.load_map(self,level,cord)
 
-class Smith(Facility_states):#called from mr smith
+class Smith(Gameplay):#called from mr smith
     def __init__(self, game_state, npc):
         super().__init__(game_state)
         self.npc = npc
@@ -338,36 +315,36 @@ class Smith(Facility_states):#called from mr smith
         else:#not enough tungsten
             self.set_response('You do not have enough heavy rocks')
 
-class Bank(Facility_states):#caled from mr banks
-    def __init__(self, game_state, npc):
-        super().__init__(game_state)
+class Bank(Gameplay):#caled from mr banks
+    def __init__(self, game, npc):
+        super().__init__(game)
         self.npc = npc
-        self.pointer = entities_UI.Menu_Arrow(self.game_objects)
-        self.init()#depends on frame
+        self.pointer = entities_UI.Menu_Arrow([0,0], self.game.game_objects)        
+        self.pointer_index = [0,0]#position of box        
+        self.surf = Bank.surf
+        self.bg = Bank.bg
 
-    def init(self):
-        self.pointer_index = [0,0]#position of box
-        self.actions = ['withdraw','deposit','cancel']
-        self.init_canvas()#specific for each facility
-        self.set_response('Welcome')
-
-    def init_canvas(self,size=[120,64]):
-        self.surf=[]
-        self.bg = self.game_objects.font.fill_text_bg(size)
-        for string in self.actions:
-            self.surf.append(self.game_objects.font.render(text = string))
+    def pool(game_objects):
+        size = [120,64]
+        surf = []
+        Bank.bg = game_objects.font.fill_text_bg(size)
+        actions = ['withdraw','deposit','cancel']
+        for string in actions:
+            surf.append(game_objects.font.render(text = string))
+        Bank.surf = surf
 
     def render(self):
+        super().render()
         self.blit_text()
         self.blit_pointer()
 
     def blit_text(self):
-        self.game_objects.game.display.render(self.bg, self.game_objects.game.screen, position = (190,150))#shader render        
+        self.game.game_objects.game.display.render(self.bg, self.game.game_objects.game.screen, position = (190,150))#shader render        
         for index, surf in enumerate(self.surf):
-            self.game_objects.game.display.render(surf, self.game_objects.game.screen, position = (300,160+index*10))#shader render
+            self.game.game_objects.game.display.render(surf, self.game.game_objects.game.screen, position = (300,160+index*10))#shader render
 
     def blit_pointer(self):
-        self.game_objects.game.display.render(self.pointer.image, self.game_objects.game.screen, position =(300,130+10*self.pointer_index[1]))#shader render              
+        self.game.game_objects.game.display.render(self.pointer.image, self.game.game_objects.game.screen, position =(300,130+10*self.pointer_index[1]))#shader render              
 
     def handle_events(self,input):
         event = input.output()
@@ -389,9 +366,9 @@ class Bank(Facility_states):#caled from mr banks
             self.exit_state()
         else:#widthdraw or deposit
             if self.pointer_index[1]==0:#widthdraw
-                self.game_state.state.append(Bank_withdraw(self.game_state,self.npc))#go to next frame
+                self.game.game_objects.UI.set_ui('Bank_withdraw', self.npc)
             else:#deposite
-                self.game_state.state.append(Bank_deposite(self.game_state,self.npc))#go to next frame
+                self.game.game_objects.UI.set_ui('Bank_deposite', self.npc)            
 
 class Bank_withdraw(Bank):#caled from mr banks
     def __init__(self, game_state, npc):
@@ -467,7 +444,7 @@ class Bank_deposite(Bank):#caled from mr banks
             elif event[-1]=='a' or event[-1]=='return':
                 self.select()
 
-class Soul_essence(Facility_states):#called from inorinoki
+class Soul_essence(Gameplay):#called from inorinoki
     def __init__(self, game_state):
         super().__init__(game_state)
         self.actions=['health','spirit','cancel']
@@ -526,7 +503,7 @@ class Soul_essence(Facility_states):#called from inorinoki
         else:#select cancel
             self.exit_state()
 
-class Vendor(Facility_states):#called from Astrid
+class Vendor(Gameplay):#called from Astrid
     def __init__(self, game_state, npc):
         super().__init__(game_state)
         self.npc = npc

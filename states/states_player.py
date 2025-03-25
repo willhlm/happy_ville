@@ -964,8 +964,8 @@ class Spawn_main(Player_states):#enters when aila respawn after death
     def increase_phase(self):#when animation finishes
         self.entity.health = max(self.entity.health,0)#if negative, set it to 0
         self.entity.heal(self.entity.max_health)
-        if len(self.entity.spawn_point) == 2:#if the respawn was a bone
-            self.entity.spawn_point.pop()
+        if self.entity.backpack.map.spawn_point.get('bone', False):#if bone, remove it        
+            self.entity.backpack.map.spawn_point.pop()
 
         self.enter_state('Idle_main')
 
