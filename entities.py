@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, game_states, groups, player_modifier, backpack
+import read_files, particles, animation, dialogue, groups, player_modifier, backpack
 import constants as C
 
 #from folders
@@ -991,7 +991,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 4
-        self.health = 10
+        self.health = 2
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1014,7 +1014,7 @@ class Player(Character):
         self.backpack = backpack.Backpack(self)
         #self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         #self.inventory = {'Amber_droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
-        self.omamoris = Omamoris(self)#        
+        #self.omamoris = Omamoris(self)#        
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
@@ -1045,7 +1045,7 @@ class Player(Character):
         self.flags['invincibility'] = True
         self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.health -= dmg * self.dmg_scale#a omamori can set the dmg_scale to 0.5
-        self.game_objects.UI['gameplay'].remove_hearts(dmg * self.dmg_scale)#update UI
+        self.game_objects.UI.hud.remove_hearts(dmg * self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
             self.shader_state.handle_input('Hurt')#turn white and shake
@@ -1071,20 +1071,19 @@ class Player(Character):
 
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
-        new_game_state = game_states.Death(self.game_objects.game)
-        new_game_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'death')
 
     def heal(self, health = 1):
         self.health += health
-        self.game_objects.UI['gameplay'].update_hearts()#update UI
+        self.game_objects.UI.hud.update_hearts()#update UI
 
     def consume_spirit(self, spirit = 1):
         self.spirit -= spirit
-        self.game_objects.UI['gameplay'].remove_spirits(spirit)#update UI
+        self.game_objects.UI.hud.remove_spirits(spirit)#update UI
 
     def add_spirit(self, spirit = 1):
         self.spirit += spirit
-        self.game_objects.UI['gameplay'].update_spirits()#update UI
+        self.game_objects.UI.hud.update_spirits()#update UI
 
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
@@ -1092,7 +1091,7 @@ class Player(Character):
 
     def update(self):
         self.hitstop_states.update()
-        self.omamoris.update()
+        self.backpack.necklace.update()
         self.update_timers()
 
     def draw(self, target):#called in group
@@ -1634,39 +1633,6 @@ class Rav(Enemy):
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
         self.projectiles.add(attack)#add to group but in main phase
 
-class Slime(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = Slime.sprites
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
-        self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
-        self.health = 2
-
-    def release_texture(self):
-        pass
-
-    def pool(game_objects):#spawned in mid game by sline giant
-        Slime.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-
-class Slime_giant(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_giant/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],48,48)
-        self.number = random.randint(2, 6)#number of minions
-        self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
-
-    def loots(self):#spawn minions
-        pos = [self.hitbox.centerx,self.hitbox.centery-10]
-        for i in range(0,self.number):
-            obj = Slime(pos,self.game_objects)
-            obj.velocity = [random.randint(-10, 10),random.randint(-10, -5)]
-            self.game_objects.enemies.add(obj)
-
 class Vatt(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
@@ -2006,8 +1972,7 @@ class NPC(Character):
         self.game_objects.game.display.render(self.portrait, terget, position = (50,100))#shader render
 
     def interact(self):#when plater press t
-        new_state = game_states.Conversation(self.game_objects.game, self)
-        new_state.enter_state()
+        self.game_objects.game.state_manager.enter_state('Conversation', npc = self)        
 
     def random_conversation(self, text):#can say stuff through a text bubble
         random_conv = Conversation_bubbles(self.rect.topright,self.game_objects, text)
@@ -2023,8 +1988,7 @@ class Aslat(NPC):
     def buisness(self):#enters after conversation
         if self.game_objects.world_state.state.get('reindeer', False):#if player has deafated the reindeer
             if not self.game_objects.player.states['Wall_glide']:#if player doesn't have wall yet (so it only enters once)
-                new_game_state = game_states.Blit_image_text(self.game_objects.game,self.game.game_objects.player.sprites[Wall_glide][0].copy())
-                new_game_state.enter_state()
+                self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game.game_objects.player.sprites[Wall_glide][0].copy())
                 self.game_objects.player.states['Wall_glide'] = True
 
 class Guide(NPC):
@@ -2070,16 +2034,14 @@ class Astrid(NPC):#vendor
         self.random_conversation(text)
 
     def buisness(self):#enters after conversation
-        new_state = game_states.Facilities(self.game_objects.game,'Vendor',self)
-        new_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Vendor', category = 'game_states_facilities', npc = self)
 
 class MrSmith(NPC):#balck smith
     def __init__(self, pos,game_objects):
         super().__init__(pos,game_objects)
 
     def buisness(self):#enters after conversation
-        new_state = game_states.Facilities(self.game_objects.game,'Smith',self)
-        new_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Smith', category = 'game_states_facilities', npc = self)    
 
 class MrMine(NPC):#balck smith
     def __init__(self, pos,game_objects):
@@ -2105,8 +2067,7 @@ class MrBanks(NPC):#bank
         self.ammount = 0
 
     def buisness(self):#enters after conversation
-        new_state = game_states.Facilities(self.game_objects.game,'Bank',self)
-        new_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Bank', category = 'game_states_facilities', npc = self)  
 
 class MsButterfly(NPC):#lumber jack
     def __init__(self,pos,game_objects):
@@ -2126,8 +2087,7 @@ class MrWood(NPC):#lumber jack
         self.quest = ['lumberjack_omamori']#quest stuff to say
 
     def interact(self):#when plater press t
-        new_state = game_states.Conversation(self.game_objects.game, self)
-        new_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Conversation', npc = self)  
         if self.game_objects.world_state.quests.get('lumberjack_omamori', False):#if the quest is running
             self.game_objects.quests_events.active_quests['lumberjack_omamori'].complete()
 
@@ -2145,10 +2105,9 @@ class Boss(Enemy):
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
         self.game_objects.world_state.update_event(str(type(self).__name__).lower())
-        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites[self.ability][0],self.ability)
-        new_game_state.enter_state()
-        new_game_state = game_states.Defeated_boss(self.game_objects.game)
-        new_game_state.enter_state()
+
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites[self.ability][0], text = self.ability)          
+        self.game_objects.game.state_manager.enter_state(state_name = 'Defeated_boss', category = 'game_states_cutscenes')
 
     def health_bar(self):#called from omamori Boss_HP
         self.health_bar.max_health = self.health
@@ -2230,8 +2189,7 @@ class Rhoutta_encounter(Boss):
     def dead(self):
         self.game_objects.game.state_stack[-1].exit_state()
         self.game_objects.player.reset_movement()
-        new_game_state = game_states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
-        new_game_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Defeated_boss', category = cutscenes, page = 'Rhoutta_encounter')
 
 #stuff
 class Timer_display(Staticentity):#to display a timer on screen
@@ -2564,73 +2522,6 @@ class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
             dir = [0,-self.entity.dir[1]]
 
         self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50))
-
-class Omamoris():#omamori handler -> "neckalce"
-    def __init__(self, entity):
-        self.entity = entity
-        self.equipped = {'0':[],'1':[],'2':[]}#equiped omamoris
-        self.inventory = {}#omamoris in inventory.: 'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)
-        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)
-        self.level = 1#can be leveld up at black smith
-
-    def level_up(self):#shuold be called from black smith. bot implement yet
-        self.level += 1
-
-    def update(self):
-        for omamoris in self.equipped.values():
-            for omamori in omamoris:
-                omamori.equipped()
-
-    def handle_press_input(self,input):
-        for omamoris in self.equipped.values():
-            for omamori in omamoris:
-                omamori.handle_press_input(input)
-
-    def equip_omamori(self, omamori_string, list_of_places):
-        new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0], self.entity.game_objects, entity = self.entity)
-
-        if self.inventory[omamori_string].state != 'equip':#if not alrady equiped
-            number_equipped = len(self.equipped['0']) + len(self.equipped['1']) + len(self.equipped['2'])
-            if number_equipped >= 7: return [False, 'no avilable slots']
-
-            if new_omamori.level == 2:
-                if self.level == 0: return [False, 'no avilable slots']
-                if len(self.equipped['2']) != 0: return [False, 'no avilable slots']
-
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[-1].rect.topleft)
-                self.equipped['2'].append(new_omamori)
-
-            elif new_omamori.level == 1:
-                if len(self.equipped['1']) + len(self.equipped['2']) >= self.level: return [False, 'no avilable slots']
-
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[7 - self.level + len(self.equipped['1'])].rect.topleft)
-                if 7 - self.level + len(self.equipped['1']) == 6:
-                    self.equipped['2'].append(new_omamori)
-                else:
-                    self.equipped['1'].append(new_omamori)
-
-            elif new_omamori.level == 0:
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[len(self.equipped['0'])].rect.topleft)
-                self.equipped['0'].append(new_omamori)
-
-        else:# If already equipped, remove the omamori
-            self.inventory[omamori_string].currentstate.set_animation_name('idle')
-            self.inventory[omamori_string].ui_group.empty()
-
-            for key in self.equipped.keys():
-                for omamori in self.equipped[key]:
-                    if type(omamori).__name__ != omamori_string: continue
-                    omamori.detach()
-                    self.equipped[key].remove(omamori)
-                    break
-
-        return [True]
 
 #projectiles
 class Projectiles(Platform_entity):#projectiels
@@ -3335,13 +3226,14 @@ class Soul_essence(Loot):#genkidama
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/items/soul_essence/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox=self.rect.copy()
         self.description = 'An essence container'#for shops
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
     def player_collision(self, player):
-        player.backpack.inventory.add('soul_essence')
+        obj = self.__class__([0,0], self.game_objects)
+        player.backpack.inventory.add(obj)
         self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = True#write in the state file that this has been picked up
         #make a cutscene?TODO
         self.kill()
@@ -3391,7 +3283,7 @@ class Enemy_drop(Loot):
     def player_collision(self, player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
-        obj = (self.__class__.__name__)#get the string in question                
+        obj = self.__class__([0,0], self.game_objects)                
         player.backpack.inventory.add(obj)
         self.currentstate.handle_input('Death')
 
@@ -3493,8 +3385,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
     def interact(self, player):#when player press T
         player.currentstate.enter_state('Pray_pre')
         self.pickup(player)#object specific
-        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.sprites['idle'][0], self.description)
-        new_game_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.sprites['idle'][0], text = self.description)
         self.kill()
 
     def kill(self):
@@ -3516,7 +3407,8 @@ class Tungsten(Interactable_item):
 
     def pickup(self, player):
         super().pickup(player)
-        player.backpack.inventory.add('tungsten')
+        obj = self.__class__([0,0], self.game_objects)
+        player.backpack.inventory.add(obj)
 
     @classmethod
     def pool(cls, game_objects):
@@ -3545,7 +3437,7 @@ class Omamori(Interactable_item):
 
     def pickup(self, player):
         super().pickup(player)
-        player.omamoris.inventory[type(self).__name__] = self
+        player.backpack.necklace.inventory[type(self).__name__] = self
         self.entity = player
 
     def handle_press_input(self,input):
@@ -4094,8 +3986,8 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
 
     def interact(self):#when plater press t
         if self.interacted: return
-        new_state = game_states.Conversation(self.game_objects.game, self)
-        new_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Conversation', npc = self)
+
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 
@@ -4167,8 +4059,7 @@ class Air_dash_statue(Interactable):#interact with it to get air dash
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 
-        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['air_dash_main'][0], self.text, on_exit = self.on_exit)
-        new_game_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites['air_dash_main'][0], text = self.text, callback = self.on_exit)
 
     def on_exit(self):#called when eiting the blit_image_text state
         self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
@@ -4198,8 +4089,7 @@ class Thunder_dive_statue(Interactable):#interact with it to upgrade horagalles 
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 
-        new_game_state = game_states.Blit_image_text(self.game_objects.game, self.game_objects.player.sprites['thunder_main'][0], self.text, on_exit = self.on_exit)
-        new_game_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites['thunder_main'][0], text = self.text, callback = self.on_exit)
 
     def on_exit(self):#called when eiting the blit_image_text state
         self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
@@ -4250,8 +4140,8 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
 
     def player_transport(self, player):#transports the player to safe position
         if player.health > 1:#if about to die, don't transport to safe point
-            new_state = game_states.Safe_spawn_1(self.game_objects.game)#should be before take_dmg
-            new_state.enter_state()
+            self.game_objects.game.state_manager.enter_state(state_name = 'Safe_spawn_1')
+
             self.game_objects.player.currentstate.enter_state('Invisible_main')
         else:
             self.game_objects.player.invincibile = False
@@ -4666,8 +4556,7 @@ class Inorinoki(Interactable):#the place where you trade soul essence for spirit
         self.hitbox = self.rect.copy()
 
     def interact(self):#when player press t/y
-        new_state = game_states.Facilities(self.game_objects.game, 'Soul_essence')
-        new_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Soul_essence', category = 'game_states_facilities')
 
 class Fast_travel(Interactable):
     cost = 50
@@ -4691,20 +4580,17 @@ class Fast_travel(Interactable):
             self.game_objects.player.inventory['Amber_droplet'] -= self.cost
             self.locked = False
             Fast_travel.cost *= 5#increase by 5 for every unlock
-            self.game_objects.world_state.save_travelpoint(self.map,self.init_cord)#self.game_objects.player.abs_dist)
+            self.game_objects.backpack.map.save_travelpoint(self.map,self.init_cord)
             return True
         else:
             return False
 
     def interact(self):#when player press t/y
         if self.locked:
-            type = 'Fast_travel_unlock'
-            new_state = game_states.Facilities(self.game_objects.game,type,self)
+            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', npc = self)            
         else:
-            type = 'Fast_travel_menu'
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
-            new_state = game_states.Facilities(self.game_objects.game,type)
-        new_state.enter_state()
+            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_menu', category = 'game_states_facilities')                        
 
 class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginning
     def __init__(self,pos,game_objects):
@@ -4719,8 +4605,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
 
     def interact(self):#when player press t/y
         self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
-        new_game_state = game_states.Cutscenes(self.game_objects.game,'Rhoutta_encounter')
-        new_game_state.enter_state()
+        self.game_objects.game.state_manager.enter_state(state_name = 'Rhoutta_encounter', category = 'cutscenes')                                
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')

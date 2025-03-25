@@ -14,7 +14,7 @@ class Inventory_states():
 class Items(Inventory_states):
     def __init__(self, inventory):
         super().__init__(inventory)
-        self.inventory.define_pointer()
+       # self.inventory.define_pointer()
 
     def handle_input(self,input):
         event = input.output()

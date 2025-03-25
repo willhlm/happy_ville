@@ -3,6 +3,7 @@ import game_states
 import game_objects
 import constants as C
 import read_files
+import state_manager
 from pygame_render import RenderEngine
 
 #pygame.print_debug_info()
@@ -20,8 +21,9 @@ class Game():
 
         #initiate game related values
         self.clock = pygame.time.Clock()
+        self.dt = 0
         self.game_objects = game_objects.Game_Objects(self)
-        self.state_stack = [game_states.Title_Menu(self)]
+        self.state_manager = state_manager.State_manager(self, 'Title_menu')        
 
         #debug flags
         self.DEBUG_MODE = True
@@ -44,7 +46,7 @@ class Game():
         inputs = self.game_objects.controller.input_buffer.copy()
         for input in inputs:
             input.update(self.dt)
-            self.state_stack[-1].handle_events(input)
+            self.state_manager.handle_events(input)
 
     def run(self):
         while True:
@@ -58,10 +60,10 @@ class Game():
             self.event_loop()
 
             #update
-            self.state_stack[-1].update()
+            self.state_manager.update()
 
             #render
-            self.state_stack[-1].render()#render onto self.screeen
+            self.state_manager.render()#render onto self.screeen
             self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
 
             #update display

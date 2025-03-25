@@ -10,30 +10,39 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
     def map(self):
         return self.holdings['map']
 
+    @property
+    def necklace(self):
+        return self.holdings['necklace']        
+
+    @property
+    def journal(self):
+        return self.holdings['journal']    
+
 class Inventory():
     def __init__(self):
         self.items = {}  # Stores items and their quantities
 
-    def add(self, item, quantity = 1):#called everytime an item is picked up
-        self.items.setdefault(item, 0)
-        self.items[item] += 1
+    def add(self, item, quantity = 1):  # Allow adding multiple at once
+        item_name = type(item).__name__.lower()
+        self.items.setdefault(item_name, {'item': item, 'quantity': 0})
+        self.items[item_name]['quantity'] += quantity
 
-    def remove(self, item, quantity = 1):#called everytime an item is picked up
-        self.items[item] -= 1
+    def remove(self, item_name, quantity = 1):
+        self.items[item_name]['quantity'] -= quantity
 
-    def get_quantity(self, item):
-        return self.items[item]
+    def get_quantity(self, item_name):
+        return self.items[item_name]['quantity']
 
 class Map():        
     def __init__(self):
         self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
-        self.visited_bioms = {}#should 
+        self.visited_bioms = {}#should be filled when nwe biome is visited
 
     def new_biome(self, biome):#called when a new biome is visited
         self.visited_bioms[biome] = True
 
-    def savepoint(self, map, point):#called when interact with savepoint
+    def save_savepoint(self, map, point):#called when interact with savepoint
         self.spawn_point['map'] = map
         self.spawn_point['point'] = point
 
@@ -50,12 +59,12 @@ class Map():
 class Necklace():        
     def __init__(self, entity):
         self.entity = entity
-        self.equipped = {'0':[],'1':[],'2':[]}#equiped omamoris
+        self.equipped = {'0':[], '1':[], '2':[]}#equiped omamoris
         self.inventory = {}#omamoris in inventory.: 'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)
         entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)
         self.level = 1#can be leveld up at black smith
 
-    def level_up(self):#shuold be called from black smith. bot implement yet
+    def level_up(self):#shuold be called from e.g. black smith. bot implement yet
         self.level += 1
 
     def update(self):

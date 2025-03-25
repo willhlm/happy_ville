@@ -1,6 +1,5 @@
 import pygame
 from entities import Interactable
-import game_states
 
 class Event_trigger(Interactable):#based
     def __init__(self, pos, game_objects, size, **kwarg):
@@ -24,8 +23,7 @@ class Event_trigger(Interactable):#based
             if self.event == 'Butterfly_encounter':
                 if not self.game_objects.world_state.statistics['kill'].get('maggot',False): return#don't do cutscene if aggro path is not chosen
 
-            new_game_state = getattr(game_states, self.event)(self.game_objects.game)
-            new_game_state.enter_state()        
+            self.game_objects.game.state_manager.enter_state(self.event, category = 'game_states_cutscenes')              
         else:            
             self.game_objects.quests_events.initiate_event(self.event)#event
         

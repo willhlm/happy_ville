@@ -894,19 +894,7 @@
                  "draworder":"topdown",
                  "id":86,
                  "name":"interactables",
-                 "objects":[
-                        {
-                         "gid":30989,
-                         "height":96,
-                         "id":1084,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":144,
-                         "x":3664,
-                         "y":928
-                        }],
+                 "objects":[],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1830,6 +1818,24 @@
                          "width":16,
                          "x":2224,
                          "y":784
+                        }, 
+                        {
+                         "gid":2,
+                         "height":16,
+                         "id":1085,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"MrBanks"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3648,
+                         "y":880
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1880,7 +1886,7 @@
          "y":0
         }],
  "nextlayerid":109,
- "nextobjectid":1085,
+ "nextobjectid":1087,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

@@ -303,17 +303,21 @@ class Alphabet():
         self.game_objects = game_objects
         pygame.font.init()
         self.font = pygame.font.Font('Sprites/utils/fonts/alagard' + '.ttf', font_size)
-        self.text_bg_dict = {
-            'default': pygame.image.load("Sprites/utils/text_bg5.png"),
-            'text_bubble': pygame.image.load("Sprites/utils/text_bg6.png")
-        }
-    
-    def render(self, surface_size=False, text='', letter_frame=1000, color = (255, 255, 255), alignment = 'left'):
+
+        self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
+
+    def render(self, surface_size=False, text='', letter_frame=1000, color=(255, 255, 255), alignment='left'):
         # Limit text to `letter_frame`
-        visible_text = text[:letter_frame]  
+        visible_text = text[:letter_frame]
+
+        # **If text is empty or only spaces, return an empty transparent texture**
+        if not visible_text.strip():
+            empty_surface = pygame.Surface(surface_size if surface_size else (1, 1), pygame.SRCALPHA, 32).convert_alpha()
+            empty_surface.fill((0, 0, 0, 0))  # Transparent
+            return self.game_objects.game.display.surface_to_texture(empty_surface)
 
         # Initialize
-        words = visible_text.split(" ")  # Split AFTER truncating
+        words = visible_text.split(" ")
         max_width = surface_size[0] if surface_size else self.font.size(visible_text)[0]
         line_height = self.font.get_height()
         lines, line_widths = [], []
@@ -323,7 +327,7 @@ class Alphabet():
         # Word wrapping based on visible text
         for word in words:
             test_line = (current_line + " " + word).strip()
-            
+
             # If new word exceeds width, wrap it
             if self.font.size(test_line)[0] > max_width and current_line:
                 lines.append(current_line)
@@ -342,7 +346,7 @@ class Alphabet():
 
         # Create transparent surface
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
-        text_surface.fill((0, 0, 0, 0))#background colour
+        text_surface.fill((0, 0, 0, 0))  # Transparent background
 
         # Render each line correctly
         for i, line in enumerate(lines):
@@ -356,14 +360,34 @@ class Alphabet():
             y += line_height  # Move to next line
 
         return self.game_objects.game.display.surface_to_texture(text_surface)
+
     
-    def fill_text_bg(self, surface_size, type='default'):
-        col = surface_size[0] // 16
-        row = surface_size[1] // 16
+    def fill_text_bg(self, surface_size, type = 'default'):
+        col = int(surface_size[0]/16)
+        row = int(surface_size[1]/16)
         surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
-        
-        for r in range(row):
-            for c in range(col):
-                surface.blit(self.text_bg_dict[type], (c * 16, r * 16))
-        
+
+        for r in range(0,row):
+            for c in range(0,col):
+                if r==0:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[type][0],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[type][2],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[type][1],(c*16,r*16))
+                elif r==row-1:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[type][6],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[type][8],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[type][7],(c*16,r*16))
+                else:
+                    if c==0:
+                        surface.blit(self.text_bg_dict[type][3],(c*16,r*16))
+                    elif c==col-1:
+                        surface.blit(self.text_bg_dict[type][5],(c*16,r*16))
+                    else:
+                        surface.blit(self.text_bg_dict[type][4],(c*16,r*16))
         return self.game_objects.game.display.surface_to_texture(surface)
