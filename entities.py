@@ -1045,7 +1045,7 @@ class Player(Character):
         self.flags['invincibility'] = True
         self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
         self.health -= dmg * self.dmg_scale#a omamori can set the dmg_scale to 0.5
-        self.game_objects.UI['gameplay'].remove_hearts(dmg * self.dmg_scale)#update UI
+        self.game_objects.UI.hud.remove_hearts(dmg * self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
             self.shader_state.handle_input('Hurt')#turn white and shake
@@ -2105,8 +2105,9 @@ class Boss(Enemy):
         self.give_abillity()
         self.game_objects.world_state.increase_progress()
         self.game_objects.world_state.update_event(str(type(self).__name__).lower())
-        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites[self.ability][0],ability = self.ability)          
-        self.game_objects.game.state_manager.enter_state(state_name = 'Defeated_boss')
+
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites[self.ability][0], text = self.ability)          
+        self.game_objects.game.state_manager.enter_state(state_name = 'Defeated_boss', category = 'game_states_cutscenes')
 
     def health_bar(self):#called from omamori Boss_HP
         self.health_bar.max_health = self.health
@@ -3282,7 +3283,7 @@ class Enemy_drop(Loot):
     def player_collision(self, player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
-        obj = self.__class__([0,0], self.game_objects)
+        obj = self.__class__([0,0], self.game_objects)                
         player.backpack.inventory.add(obj)
         self.currentstate.handle_input('Death')
 
@@ -4058,7 +4059,7 @@ class Air_dash_statue(Interactable):#interact with it to get air dash
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 
-        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites['air_dash_main'][0], text = self.text, on_exit = self.on_exit)
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites['air_dash_main'][0], text = self.text, callback = self.on_exit)
 
     def on_exit(self):#called when eiting the blit_image_text state
         self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
@@ -4088,7 +4089,7 @@ class Thunder_dive_statue(Interactable):#interact with it to upgrade horagalles 
         self.shader_state.handle_input('tint', colour = [0,0,0,100])
         self.interacted = True
 
-        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites['thunder_main'][0], text = self.text, on_exit = self.on_exit)
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites['thunder_main'][0], text = self.text, callback = self.on_exit)
 
     def on_exit(self):#called when eiting the blit_image_text state
         self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item

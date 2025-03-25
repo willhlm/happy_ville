@@ -73,13 +73,13 @@ class InventoryUI(BaseUI):
         key_items = self.iventory_UI.key_items#a dict of empty key items
         index = 0
         for key in self.game_objects.player.backpack.inventory.items.keys():#crease the object in inventory and sepeerate between useable items and key items
-            item = getattr(sys.modules[entities.__name__], key.capitalize())([0,0],self.game_objects)#make the object based on the string
-            if hasattr(item, 'use_item'):
+            item = self.game_objects.player.backpack.inventory.items[key]['item']
+            if hasattr(item, 'use_item'):#usable items
                 item.rect.topleft = items[index].rect.topleft
                 item.number = self.game_objects.player.backpack.inventory.get_quantity(key)#number of items euirepped
                 items[index] = item
                 index += 1
-            else:
+            else:#key items
                 item.rect.topleft = key_items[key.capitalize()].rect.topleft
                 item.number = self.game_objects.player.backpack.inventory.get_quantity(key)#number of items euirepped
                 key_items[key.capitalize()] = item
@@ -244,7 +244,7 @@ class NecklaseUI(BaseUI):
         input.processed()              
         if event[0]:#press
             if event[-1] == 'select':
-                self.exit_state()
+                self.game_objects.game.state_manager.exit_state()  
             elif event[-1] == 'rb':#nezt page
                 if self.game_objects.world_state.statistics['kill']:#if we have killed something
                     new_ui = JournalUI(self.game_objects, screen_alpha = 230)
@@ -328,7 +328,7 @@ class JournalUI(BaseUI):
         self.enemies = []
         self.enemy_index = self.journal_index.copy()
         self.number = 8 #number of enemies per page
-
+            
         for enemy in self.game_objects.world_state.statistics['kill']:
             self.enemies.append(getattr(sys.modules[entities.__name__], enemy.capitalize())([0,0],self.game_objects))#make the object based on the string
 
@@ -475,7 +475,7 @@ class MapUI(BaseUI):
 
         if event[0]:#press
             if event[-1] == 'select':
-                self.exit_state()
+                self.exit_state()                
             elif event[-1] == 'rb':#nezt page
                 new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)               
@@ -495,6 +495,6 @@ class MapUI(BaseUI):
                 self.map_UI.objects[self.index].activate()#open the local map. I guess it should be a new state
 
     def exit_state(self):
-        super().exit_state()
+        self.game_objects.game.state_manager.exit_state()  
         for object in self.map_UI.objects:
             object.revert()

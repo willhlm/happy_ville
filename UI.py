@@ -14,7 +14,8 @@ class UI_manager():#initialised in game_objects, keep certain UIs in memory
     def handle_events(self, input):                
         self.active_ui.handle_events(input)
 
-    def set_ui(self, ui, **kwarg):        
+    def set_ui(self, ui, **kwarg):     
+        #self.uis[ui].on_enter(**kwarg)   
         self.active_ui = self.uis[ui] 
 
     @property

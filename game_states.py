@@ -891,20 +891,20 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
         self.game.game_objects.UI.handle_events(input)
 
 class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
-    def __init__(self, game, img, text = '', on_exit = None):
+    def __init__(self, game, image, text = '', callback = None):
         super().__init__(game)
         self.page = 0
         self.render_fade = [self.render_in, self.render_out]
 
-        self.image = game.display.make_layer(img.size)#TODO
-        self.game.display.render(img, self.image)#make a copy of the image
+        self.image = game.display.make_layer(image.size)#TODO
+        self.game.display.render(image, self.image)#make a copy of the image
         self.text = self.game.game_objects.font.render((140,80), text)
 
         self.game.game_objects.player.reset_movement()
 
         self.surface = game.display.make_layer(game.window_size)#TODO
         self.fade = [0,0]
-        self.on_exit = on_exit#a function to call when exiting
+        self.callback = callback#a function to call when exiting
 
     def handle_movement(self):#every frame
         pass
@@ -935,8 +935,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
         self.fade[1] = max(self.fade[1], 0)
 
         if self.fade[0] == 0:
-            if self.on_exit:
-                self.on_exit()
+            if self.callback: self.callback()                
             self.game.state_manager.exit_state()
 
     def handle_events(self,input):

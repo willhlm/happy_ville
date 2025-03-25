@@ -2,6 +2,7 @@ from game_states import Gameplay
 import entities
 import read_files
 import animation
+import particles
 
 #file based
 class Cutscene_file():#cutscneens that will run based on file. The name of the file should be the same as the class name
