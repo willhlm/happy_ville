@@ -49,7 +49,7 @@ class Title_Menu(Game_State):
         self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
 
     def initiate_buttons(self):
-        buttons = ['New Game++','Load Game','Options','Quit']
+        buttons = ['New game','Load game','Option','Quit']
         self.buttons = []
         y_pos = 200
         for b in buttons:
@@ -237,7 +237,7 @@ class Load_Menu(Game_State):
 class Option_Menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'OPTIONS') #temporary
+        self.title = self.game.game_objects.font.render(text = 'Options', color = (0,0,0)) #temporary
 
         #create buttons
         self.buttons = ['Display','Sounds']
@@ -252,7 +252,7 @@ class Option_Menu(Game_State):
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
+            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b, color = (0,0,0)))
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
 
@@ -559,10 +559,10 @@ class Gameplay(Game_State):
 class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
     def __init__(self, game):
         super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Pause menu', alignment = 'center') #temporary
+        self.title = self.game.game_objects.font.render(text = 'Pause menu') #temporary
 
         #create buttons
-        self.buttons = ['RESUME','OPTIONS','QUIT TO MAIN MENU','QUIT GAME']
+        self.buttons = ['Resume','Options','Quit to main menu','Quit game']
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
@@ -582,7 +582,7 @@ class Pause_Menu(Gameplay):#when pressing ESC duing gameplay
         self.button_surfaces = {}
         self.button_rects = {}
         for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b, alignment = 'center'))
+            text = (self.game.game_objects.font.render(text = b))
             #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
@@ -857,7 +857,7 @@ class Conversation(Gameplay):
         self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)#shader render
         self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
         self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
-
+        text.release()
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
         self.game.display.render(self.conv_screen.texture,self.game.screen,shader = self.game.game_objects.shaders['alpha'])#shader render
 

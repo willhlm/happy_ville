@@ -191,7 +191,7 @@ def alphabet_reader(path_to_sheet, h, num):
     return sprite_dict
 
 #class for reading and rendering fonts
-class Alphabet():
+class Alphabet2():
     def __init__(self, game_objects):
         self.game_objects = game_objects
         self.char_size = (5,7)
@@ -296,4 +296,74 @@ class Alphabet():
                         surface.blit(self.text_bg_dict[type][5],(c*16,r*16))
                     else:
                         surface.blit(self.text_bg_dict[type][4],(c*16,r*16))
+        return self.game_objects.game.display.surface_to_texture(surface)
+
+class Alphabet():
+    def __init__(self, game_objects, font_name = None, font_size = 14):
+        self.game_objects = game_objects
+        pygame.font.init()
+        self.font = pygame.font.Font('Sprites/utils/fonts/alagard' + '.ttf', font_size)
+        self.text_bg_dict = {
+            'default': pygame.image.load("Sprites/utils/text_bg5.png"),
+            'text_bubble': pygame.image.load("Sprites/utils/text_bg6.png")
+        }
+    
+    def render(self, surface_size=False, text='', letter_frame=1000, color = (255, 255, 255), alignment = 'left'):
+        # Limit text to `letter_frame`
+        visible_text = text[:letter_frame]  
+
+        # Initialize
+        words = visible_text.split(" ")  # Split AFTER truncating
+        max_width = surface_size[0] if surface_size else self.font.size(visible_text)[0]
+        line_height = self.font.get_height()
+        lines, line_widths = [], []
+        current_line = ""
+        x, y = 0, 0
+
+        # Word wrapping based on visible text
+        for word in words:
+            test_line = (current_line + " " + word).strip()
+            
+            # If new word exceeds width, wrap it
+            if self.font.size(test_line)[0] > max_width and current_line:
+                lines.append(current_line)
+                line_widths.append(self.font.size(current_line)[0])
+                current_line = word  # Start new line
+            else:
+                current_line = test_line
+
+        if current_line:
+            lines.append(current_line)
+            line_widths.append(self.font.size(current_line)[0])
+
+        # **Ensure surface is large enough**
+        total_height = len(lines) * line_height
+        surface_size = (max_width, total_height) if not surface_size else surface_size
+
+        # Create transparent surface
+        text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
+        text_surface.fill((0, 0, 0, 0))#background colour
+
+        # Render each line correctly
+        for i, line in enumerate(lines):
+            rendered_text = self.font.render(line, False, color)
+            if alignment == 'center':
+                x = (surface_size[0] - line_widths[i]) // 2  # Centering
+            else:
+                x = 0  # Left alignment
+
+            text_surface.blit(rendered_text, (x, y))
+            y += line_height  # Move to next line
+
+        return self.game_objects.game.display.surface_to_texture(text_surface)
+    
+    def fill_text_bg(self, surface_size, type='default'):
+        col = surface_size[0] // 16
+        row = surface_size[1] // 16
+        surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
+        
+        for r in range(row):
+            for c in range(col):
+                surface.blit(self.text_bg_dict[type], (c * 16, r * 16))
+        
         return self.game_objects.game.display.surface_to_texture(surface)
