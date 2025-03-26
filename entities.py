@@ -2187,7 +2187,7 @@ class Rhoutta_encounter(Boss):
         self.dmg = 0
 
     def dead(self):
-        self.game_objects.game.state_stack[-1].exit_state()
+        self.game_objects.game.state_manager.exit_state()
         self.game_objects.player.reset_movement()
         self.game_objects.game.state_manager.enter_state(state_name = 'Defeated_boss', category = cutscenes, page = 'Rhoutta_encounter')
 
@@ -3283,7 +3283,7 @@ class Enemy_drop(Loot):
     def player_collision(self, player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
-        obj = self.__class__([0,0], self.game_objects)                
+        obj = self.__class__([0,0], self.game_objects) #TODO maybe not needed to make an object if it is already in the inventory               
         player.backpack.inventory.add(obj)
         self.currentstate.handle_input('Death')
 
@@ -4228,7 +4228,7 @@ class Path_col(Interactable):
 
     def player_collision(self, player):
         self.player_movement(player)
-        self.game_objects.load_map(self.game_objects.game.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
+        self.game_objects.load_map(self.game_objects.game.state_manager.state_stack[-1], self.destination, self.spawn)#nned to send previous state so that we can update and render for exampe gameplay or title screeen while fading
         self.kill()#so that aila only collides once
 
 class Path_inter(Interactable):
@@ -4254,7 +4254,7 @@ class Path_inter(Interactable):
         if self.sfx: self.play_sfx()
         self.game_objects.player.reset_movement()
         self.game_objects.player.currentstate.enter_state('Idle_main')#infstaed of idle, should make her move a little dependeing on the direction
-        self.game_objects.load_map(self.game_objects.game.state_stack[-1],self.destination, self.spawn)
+        self.game_objects.load_map(self.game_objects.game.state_manager.state_stack[-1],self.destination, self.spawn)
 
 class Shade_trigger(Interactable):#it changes the colourof shade screen to a new colour specified by self.new_colour
     def __init__(self, pos, game_objects, size, colour = pygame.Color(0,0,0,0)):
