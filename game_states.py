@@ -44,7 +44,9 @@ class Title_menu(Game_State):
         self.initiate_buttons()
         self.define_BG()
         #self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
-        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-10, -3])
+        offset = [-10, -2]
+        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-8, -1], animate = True)
+        self.arrow_2 = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midright, game.game_objects, offset = [-8, -1], mirrored = True, animate = True)
 
     def initiate_buttons(self):
         buttons = ['New game','Load game','Option','Quit']
@@ -67,6 +69,8 @@ class Title_menu(Game_State):
 
     def update(self):#update menu arrow position
         self.animation.update()
+        self.arrow.animate()
+        self.arrow_2.animate()
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.update()
@@ -85,10 +89,13 @@ class Title_menu(Game_State):
 
         #blit arrow
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
+        self.game.display.render(self.arrow_2.image, self.game.screen, position = self.arrow_2.rect.topleft, flip = True)
 
     def update_arrow(self):
         ref_pos = self.buttons[self.current_button].rect.midleft
+        ref_pos2 = self.buttons[self.current_button].rect.midright
         self.arrow.update_pos((ref_pos[0], ref_pos[1]))
+        self.arrow_2.update_pos((ref_pos2[0], ref_pos2[1]))
         self.arrow.play_SFX()
 
     def handle_events(self, input):
