@@ -12,7 +12,7 @@ ref_screen = engine.make_layer((640,360))
 
 positions = []
 screens = []
-layers_number = 2#change here to 0
+layers_number = 10#change here to 0
 for i in range(layers_number):
     screens.append(engine.make_layer((640,360)))
     positions.append([random.randint(0, 342),random.randint(0, 180)])
@@ -30,19 +30,19 @@ while running:
     ref_screen.clear(255, 255, 255, 255)#white to highlight the outlines
 
     if layers_number > 0:
-                
         for screen in screens:#clear the layer screens
             screen.clear(0, 0, 0, 0)#make it whie to show the issue clearer
         
         for index, screen in enumerate(screens):#render a texture
-        
-            engine.use_alpha_blending(False)#remove thr black outline
-            engine.render(blur_bg_texture.texture, screen, position = positions[index])
-            engine.use_alpha_blending(True)#remove thr black outline
+            if index < 0.5 * layers_number:
+                engine.use_alpha_blending(False)
+                engine.render(blur_bg_texture.texture, screen, position = positions[index])
+                engine.use_alpha_blending(True)
+            else:
+                engine.render(bg_texture, screen, position = positions[index])
 
         for screen in screens:#render to ref screen
             engine.render(screen.texture, ref_screen)
-
     else:
         #render directly to ref screen
         engine.render(blur_bg_texture.texture, ref_screen, position = (100,100))

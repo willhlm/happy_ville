@@ -193,7 +193,7 @@ class Game_Objects():
         self.interactables_fg.draw(player_layer_screen)#shoud be after player
         self.cosmetics.draw(player_layer_screen)#Should be before fgs
         self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs
-
+        
         for index_fg, fg in enumerate(self.all_fgs):
             screen = list(self.game.screens)[index_bg + index_fg + 1]
             fg.draw(self.game.screens[screen].layer)      
