@@ -182,7 +182,7 @@ def alphabet_reader(path_to_sheet, h, num):
             height = 9
         else:
             height = h
-        width = val2 - val - 1        
+        width = val2 - val - 1
         rect = pygame.Rect(val+1, 0, width, height)
         #rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
         image = pygame.Surface((width, height),pygame.SRCALPHA,32).convert_alpha()
@@ -213,7 +213,7 @@ class Alphabet2():
             total_width = sum(self.characters[c].get_width() + 1 for c in text if c in self.characters)
             total_width += text.count(" ") * 4  # Adjusting for spaces
             surface_size = (total_width, self.max_height + 2)
-        
+
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
         #pygame.draw.rect(text_surface, [200, 200, 200, 100], (0, 0, surface_size[0], surface_size[1]))
 
@@ -234,7 +234,7 @@ class Alphabet2():
                 if c in self.characters:
                     word_width += self.characters[c].get_width() + 1
             #word_width = sum(self.characters[c].get_width() + 1 for c in word if c in self.characters)
-            
+
             if line_width + word_width > max_width:
                 lines.append((current_line, line_width - 1))
                 current_line = []
@@ -299,7 +299,7 @@ class Alphabet2():
         return self.game_objects.game.display.surface_to_texture(surface)
 
 class Alphabet():
-    def __init__(self, game_objects, font_name = None, font_size = 14):
+    def __init__(self, game_objects, font_name = None, font_size = 16):
         self.game_objects = game_objects
         pygame.font.init()
         self.font = pygame.font.Font('Sprites/utils/fonts/alagard' + '.ttf', font_size)
@@ -361,7 +361,7 @@ class Alphabet():
 
         return self.game_objects.game.display.surface_to_texture(text_surface)
 
-    
+
     def fill_text_bg(self, surface_size, type = 'default'):
         col = int(surface_size[0]/16)
         row = int(surface_size[1]/16)
