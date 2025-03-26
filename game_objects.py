@@ -169,11 +169,13 @@ class Game_Objects():
 
     def draw(self):#called from render states
         self.lights.clear_normal_map()        
+        #self.game.display.use_alpha_blending(False)
         
         for index_bg, bg in enumerate(self.all_bgs):
             screen = list(self.game.screens)[index_bg]  
             bg.draw(self.game.screens[screen].layer)           
         
+        #self.game.display.use_alpha_blending(True)
         player_layer_screen = self.game.screens[screen].layer
         self.interactables.draw(player_layer_screen)#should be before bg_interact
         self.bg_interact.draw(player_layer_screen)
@@ -183,10 +185,11 @@ class Game_Objects():
         self.npcs.draw(player_layer_screen)
         self.loot.draw(player_layer_screen)
         self.players.draw(player_layer_screen)
+                
         self.platforms.draw(player_layer_screen)
         self.fprojectiles.draw(player_layer_screen)
         self.eprojectiles.draw(player_layer_screen)        
-
+        
         self.interactables_fg.draw(player_layer_screen)#shoud be after player
         self.cosmetics.draw(player_layer_screen)#Should be before fgs
         self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs

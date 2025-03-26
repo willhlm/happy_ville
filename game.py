@@ -67,7 +67,7 @@ class Game():
             #render
             self.state_manager.render()#render onto
             self.merge_screens()
-            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
+            #self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
 
             #update display
             pygame.display.flip()
@@ -83,16 +83,17 @@ class Game():
         self.screens[key] = screen
 
     def merge_screens(self):                    
-        for key in self.screens.keys():   
+        for index, key in enumerate(self.screens.keys()):  
             screen = self.screens[key]   
             screen.update()
             #self.game_objects.shaders['pp']['parallax'] = screen.parallax
-            #self.game_objects.shaders['pp']['camera_offset'] = self.game_objects.camera_manager.camera.scroll
+            #self.game_objects.shaders['pp']['camera_offset'] = screen.offset            
             #self.display.render(screen.layer.texture, self.screen, shader = self.game_objects.shaders['pp'])#shader render        
-            self.display.render(screen.layer.texture, self.display.screen, scale = self.scale, position = screen.offset)#shader render        
+            self.display.render(screen.layer.texture, self.display.screen, position = screen.offset, scale = self.scale)#shader render        
             #TODO use a shader instead, but doesn't work
-            #TODO there is also an issue that eveyrthing seems to have a black outline. Something with alpha blending
-
+            #TODO there is also an issue that eveyrthing seems to have a black outline. Something with alpha blending         
+            #everything works if we don't blur the BG... 
+            
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
     pygame.init()#initilise

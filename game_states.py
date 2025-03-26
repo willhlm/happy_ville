@@ -491,7 +491,8 @@ class Gameplay(Game_State):
         self.game.game_objects.UI.hud.update()
 
     def render(self):
-        self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
+        self.game.game_objects.draw()
+        #self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
         self.game.game_objects.UI.hud.render()
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()

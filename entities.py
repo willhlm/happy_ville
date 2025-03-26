@@ -66,7 +66,7 @@ class BG_Block(Staticentity):
             self.image = self.layers.texture  # Get the texture of the layer
 
     def draw(self, target):
-        self.blurstate.set_uniform()#sets the blur radius
+        self.blurstate.set_uniform()#zsets the blur radius
         #self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
