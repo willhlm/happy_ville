@@ -91,6 +91,7 @@ class Game():
             #self.display.render(screen.layer.texture, self.screen, shader = self.game_objects.shaders['pp'])#shader render        
             self.display.render(screen.layer.texture, self.display.screen, scale = self.scale, position = screen.offset)#shader render        
             #TODO use a shader instead, but doesn't work
+            #TODO there is also an issue that eveyrthing seems to have a black outline. Something with alpha blending
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
