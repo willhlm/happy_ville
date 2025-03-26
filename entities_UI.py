@@ -107,7 +107,7 @@ class Necklace(Animatedentity):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
-    
+
     def set_level(self,level):
         self.currentstate.set_animation_name('level_'+str(level))
 
@@ -149,28 +149,30 @@ class Movement_hud():#gameplay UI
 
 #utilities
 class Menu_Arrow():
-    def __init__(self, pos, game_objects):
+    def __init__(self, pos, game_objects, offset = [0,0]):
         self.game_objects = game_objects
-        self.image = Menu_Arrow.image                
+        self.image = Menu_Arrow.image
         self.sounds = Menu_Arrow.sounds
+        self.offset = offset
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        
+        self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
+
     def pool(game_objects):
-        Menu_Arrow.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')        
-        img = pygame.image.load("Sprites/utils/arrow.png").convert_alpha()    
+        Menu_Arrow.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')
+        img = pygame.image.load("Sprites/utils/arrow_elf_mid.png").convert_alpha()
         Menu_Arrow.image = game_objects.game.display.surface_to_texture(img)
 
     def update(self):#note: sets pos to input, doesn't update with an increment of pos like other entities
         pass
 
     def play_SFX(self, state = 'idle', frame = 0, vol = 0.8):
-        self.game_objects.sound.play_sfx(self.sounds[state][frame], vol = vol)                
+        self.game_objects.sound.play_sfx(self.sounds[state][frame], vol = vol)
 
-    def update_pos(self, pos):        
-        self.rect.topleft = pos
+    def update_pos(self, pos):
+        self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
 
     def pressed(self, state = 'select'):#when pressing a button
-        self.play_SFX(state) 
+        self.play_SFX(state)
 
 class Menu_Box():
     def __init__(self, game_objects):
@@ -182,13 +184,15 @@ class Menu_Box():
         pass
 
     def draw(self,screen):
-        pass    
+        pass
 
 class Button():
     def __init__(self, game_objects, **kwarg):
         self.position = kwarg.get('position', (0,0))
         self.image = kwarg.get('image', None)
         self.rect = pygame.Rect(self.position, [self.image.width, self.image.height])
+        if kwarg.get('center', None):
+            self.rect.center = self.position
 
     def hoover(self):
         pass

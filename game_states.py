@@ -16,13 +16,13 @@ class Game_State():
         pass
 
     def handle_events(self, input):
-        input.processed()        
+        input.processed()
 
     def on_exit(self):
         pass
 
     def on_resume(self):
-        pass     
+        pass
 
     def release_texture(self):#in the final version, this should not be needed sinec we wil not dynamically make layers
         pass
@@ -43,15 +43,17 @@ class Title_menu(Game_State):
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
-        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
+        #self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
+        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-10, -3])
 
     def initiate_buttons(self):
         buttons = ['New game','Load game','Option','Quit']
         self.buttons = []
         y_pos = 200
+        x_pos = 320
         for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
-            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [80,y_pos]))
+            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [x_pos, y_pos], center = True))
             y_pos += 20
 
     def define_BG(self):
@@ -75,7 +77,7 @@ class Title_menu(Game_State):
 
         #blit title
         self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
-        self.game.display.render(self.bg, self.game.screen, position = (70,180))
+        #self.game.display.render(self.bg, self.game.screen, position = (70,180))
 
         #blit buttons
         for b in self.buttons:
@@ -85,7 +87,7 @@ class Title_menu(Game_State):
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
 
     def update_arrow(self):
-        ref_pos = self.buttons[self.current_button].rect.topleft
+        ref_pos = self.buttons[self.current_button].rect.midleft
         self.arrow.update_pos((ref_pos[0], ref_pos[1]))
         self.arrow.play_SFX()
 
@@ -123,10 +125,10 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_1','1')
+            #self.game.game_objects.load_map(self,'nordveden_2','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
-            #self.game.game_objects.load_map(self,'hlifblom_40','1')
+            self.game.game_objects.load_map(self,'hlifblom_40','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -222,7 +224,7 @@ class Load_menu(Game_State):
                 self.arrow.pressed()
                 self.game.game_objects.load_game()#load saved game data
                 self.game.state_manager.enter_state('Gameplay')
-                
+
                 map = self.game.game_objects.player.backpak.map.spawn_point['map']
                 point=self.game.game_objects.player.backpak.map.spawn_point['point']
                 self.game.game_objects.load_map(self, map, point)
@@ -295,7 +297,7 @@ class Option_menu(Game_State):
         if self.current_button == 0:#resolution
             self.game.state_manager.enter_state('Option_menu_display')
         elif self.current_button == 1:#sounds
-            self.game.state_manager.enter_state('Option_menu_sounds')        
+            self.game.state_manager.enter_state('Option_menu_sounds')
         if self.current_button == 2:
             self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
         elif self.current_button == 3:
@@ -418,7 +420,7 @@ class Option_menu_display(Game_State):
         for b in self.buttons:
             self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
 
-            settig_string = self.game.game_objects.font.render((60,12), str(self.game_settings['display'][b]))            
+            settig_string = self.game.game_objects.font.render((60,12), str(self.game_settings['display'][b]))
             self.game.game_objects.shaders['colour']['colour'] = (0,0,0,255)
             self.game.display.render(settig_string, self.game.screen, position = [self.button_rects[b].centerx + 50,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
             settig_string.release()
@@ -512,11 +514,11 @@ class Gameplay(Game_State):
         if event[0]:#press
             if event[-1]=='start':#escape button
                 input.processed()
-                self.game.state_manager.enter_state('Pause_menu')        
+                self.game.state_manager.enter_state('Pause_menu')
 
             elif event[-1]=='rb':
                 input.processed()
-                self.game.state_manager.enter_state('Ability_menu')        
+                self.game.state_manager.enter_state('Ability_menu')
 
             elif event[-1] == 'y':
                 input.processed()
@@ -524,7 +526,7 @@ class Gameplay(Game_State):
 
             elif event[-1] == 'select':
                 input.processed()
-                self.game.state_manager.enter_state('UIs', page = 'backpack')        
+                self.game.state_manager.enter_state('UIs', page = 'backpack')
 
             elif event[-1] == 'down':
                 input.processed()#should it be processed here or when passed through?
@@ -556,14 +558,14 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.define_BG()
         self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
-        self.screen_copy = self.game.display.make_layer(self.game.window_size)     
+        self.screen_copy = self.game.display.make_layer(self.game.window_size)
 
     def define_BG(self):
         size = (100,120)
         bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
         pygame.draw.rect(bg,[200,200,200,220],(0,0,size[0],size[1]),border_radius=10)
         self.bg = self.game.display.surface_to_texture(bg)
-        self.background = self.game.display.make_layer(self.game.window_size)        
+        self.background = self.game.display.make_layer(self.game.window_size)
 
     def initiate_buttons(self):
         y_pos = 140
@@ -616,7 +618,7 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if not input.key:#if it is a directinal input     
+        if not input.key:#if it is a directinal input
             if event[2]['l_stick'][1] < 0:#up
                 self.current_button -= 1
                 if self.current_button < 0:
@@ -642,7 +644,7 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
             self.game.state_manager.exit_state()
 
         elif self.current_button == 1:
-            self.game.state_manager.enter_state('Option_menu')        
+            self.game.state_manager.enter_state('Option_menu')
 
         elif self.current_button == 2:#exit to main menu
             for state in self.game.state_manager.state_stack[1:]:#except the first one
@@ -694,7 +696,7 @@ class Ability_menu(Gameplay):#when pressing tab
         elif event [1]:#release
             if event[-1]=='rb':
                 self.game.game_objects.player.abilities.equip=self.abilities[self.index]
-                self.game.state_manager.exit_state()                
+                self.game.state_manager.exit_state()
 
 class Fadein(Gameplay):
     def __init__(self, game):
@@ -773,7 +775,7 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
         self.count += self.game.dt
         if self.count > self.fade_length:
             self.game.state_manager.exit_state()
-            self.game.state_manager.enter_state('Safe_spawn_2')        
+            self.game.state_manager.enter_state('Safe_spawn_2')
 
     def render(self):
         super().render()#gameplay render
@@ -882,10 +884,10 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
     def update(self):
         super().update()
         self.game.game_objects.UI.update()
-    
+
     def render(self):
         super().render()
-        self.game.game_objects.UI.render()    
+        self.game.game_objects.UI.render()
 
     def handle_events(self,input):
         self.game.game_objects.UI.handle_events(input)
@@ -935,7 +937,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
         self.fade[1] = max(self.fade[1], 0)
 
         if self.fade[0] == 0:
-            if self.callback: self.callback()                
+            if self.callback: self.callback()
             self.game.state_manager.exit_state()
 
     def handle_events(self,input):
