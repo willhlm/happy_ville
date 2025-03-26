@@ -196,35 +196,6 @@ class Menu_Arrow():
     def pressed(self, state = 'select'):#when pressing a button
         self.play_SFX(state)
 
-class Menu_arrow_anime(Animatedentity):
-    def __init__(self, pos, game_objects, offset = [0,0], mirrored = False):
-        super().__init__([0,0],game_objects)
-        self.sprite = Menu_arrow_anime.sprites
-        self.image = self.sprites['idle'][0]
-        self.offset = offset
-        self.mirrored = mirrored
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
-        if mirrored: self.rect.midleft = [pos[0] - self.offset[0], pos[1] + self.offset[1]]
-
-    def pool(game_objects):
-        Menu_arrow_anime.sprites = read_files.load_sprites_dict('Sprites/utils/arrow/',game_objects)
-        Menu_arrow_anime.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')
-
-    def update(self):#note: sets pos to input, doesn't update with an increment of pos like other entities
-        pass
-
-    def play_SFX(self, state = 'idle', frame = 0, vol = 0.8):
-        self.game_objects.sound.play_sfx(self.sounds[state][frame], vol = vol)
-
-    def update_pos(self, pos):
-        if self.mirrored:
-            self.rect.midleft = [pos[0] - self.offset[0], pos[1] + self.offset[1]]
-        else:
-            self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
-
-    def pressed(self, state = 'select'):#when pressing a button
-        self.play_SFX(state)
 
 class Menu_Box():
     def __init__(self, game_objects):
