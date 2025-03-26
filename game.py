@@ -90,6 +90,7 @@ class Game():
             #self.game_objects.shaders['pp']['camera_offset'] = self.game_objects.camera_manager.camera.scroll
             #self.display.render(screen.layer.texture, self.screen, shader = self.game_objects.shaders['pp'])#shader render        
             self.display.render(screen.layer.texture, self.display.screen, scale = self.scale, position = screen.offset)#shader render        
+            #TODO use a shader instead, but doesn't work
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
