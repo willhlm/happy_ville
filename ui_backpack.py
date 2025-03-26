@@ -21,6 +21,9 @@ class BackpackUI():#initialised in UI.py
     def enter_page(self, page):
         self.current_page.on_exit()
         self.current_page = page
+    
+    def on_enter(self):#called first time entering the backpack
+        self.current_page.on_enter()
 
 class BaseUI():
     def __init__(self, game_objects, **kwarg):
@@ -31,7 +34,7 @@ class BaseUI():
     def update(self):
         self.letter_frame += self.game_objects.game.dt
         self.screen_alpha += self.game_objects.game.dt*4
-        self.screen_alpha = min(self.screen_alpha,230)
+        self.screen_alpha = min(self.screen_alpha, 230)
 
     def render(self):
         pass
@@ -40,7 +43,10 @@ class BaseUI():
         input.processed()        
 
     def on_exit(self, **kwarg):
-        pass        
+        pass   
+
+    def on_enter(self):
+        pass    
 
     def blit_screen(self):#blits everything first to self.game_state.screen. Then blit it to the game screen at the end
         self.game_objects.shaders['alpha']['alpha'] = self.screen_alpha
@@ -50,9 +56,12 @@ class InventoryUI(BaseUI):
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state, **kwarg)
         self.state = states_inventory.Items(self)
-        self.item_index = [0,0]
+        self.item_index = [0, 0]
         self.iventory_UI = InventoryUI.iventory_UI
         self.texts = InventoryUI.texts
+        self.define_blit_positions()
+
+    def on_enter(self):
         self.define_blit_positions()
 
     def pool(game_objects):
@@ -180,6 +189,9 @@ class NecklaseUI(BaseUI):
         self.define_blit_positions()        
         self.omamori_index = kwarg.get('omamori_index', 0)
         self.omamori_UI.necklace.set_level(self.game_objects.player.backpack.necklace.level)
+
+    def on_enter(self):
+        self.define_blit_positions()
 
     def pool(game_objects):
         NecklaseUI.omamori_UI = getattr(UI_loader, 'Omamori')(game_objects)
@@ -329,10 +341,16 @@ class JournalUI(BaseUI):
         self.enemy_index = self.journal_index.copy()
         self.number = 8 #number of enemies per page
             
+        self.define_enemies()
+        self.select_enemies()
+
+    def on_enter(self):
+        self.define_enemies()
+        self.select_enemies()
+
+    def define_enemies(self):
         for enemy in self.game_objects.world_state.statistics['kill']:
             self.enemies.append(getattr(sys.modules[entities.__name__], enemy.capitalize())([0,0],self.game_objects))#make the object based on the string
-
-        self.select_enemies()
 
     def pool(game_objects):
         JournalUI.journal_UI = getattr(UI_loader, 'Journal')(game_objects)

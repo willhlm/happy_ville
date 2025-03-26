@@ -1,5 +1,4 @@
 import pygame, sys
-import game_states
 import game_objects
 import constants as C
 import read_files

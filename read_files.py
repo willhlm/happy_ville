@@ -303,7 +303,6 @@ class Alphabet():
         self.game_objects = game_objects
         pygame.font.init()
         self.font = pygame.font.Font('Sprites/utils/fonts/alagard' + '.ttf', font_size)
-
         self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
 
     def render(self, surface_size=False, text='', letter_frame=1000, color=(255, 255, 255), alignment='left'):
@@ -361,7 +360,6 @@ class Alphabet():
 
         return self.game_objects.game.display.surface_to_texture(text_surface)
 
-    
     def fill_text_bg(self, surface_size, type = 'default'):
         col = int(surface_size[0]/16)
         row = int(surface_size[1]/16)
@@ -390,4 +388,5 @@ class Alphabet():
                         surface.blit(self.text_bg_dict[type][5],(c*16,r*16))
                     else:
                         surface.blit(self.text_bg_dict[type][4],(c*16,r*16))
+
         return self.game_objects.game.display.surface_to_texture(surface)
