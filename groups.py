@@ -45,14 +45,15 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
         if pos[0] < s.bounds[0] or pos[0] > s.bounds[1] or pos[1] < s.bounds[2] or pos[1] > s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             pass
         else:#manually add to a specific layer
-            sprites = s.game_objects.all_bgs.sprites()
-            bg = s.game_objects.all_bgs.reference[tuple(s.parallax)]
+            return
+            sprites = s.game_objects.all_bgs[-1].sprites()
+            bg = s.game_objects.all_bgs[-1].reference[tuple(s.parallax)]
             index = sprites.index(bg)#find the index in which the static layer is located
 
-            s.game_objects.all_bgs.spritedict[s] = s.game_objects.all_bgs._init_rect#in add internal
-            s.game_objects.all_bgs._spritelayers[s] = 0
-            s.game_objects.all_bgs._spritelist.insert(index,s)#it goes behind the static layer of reference
-            s.add_internal(s.game_objects.all_bgs)
+            s.game_objects.all_bgs[-1].spritedict[s] = s.game_objects.all_bgs[-1]._init_rect#in add internal
+            s.game_objects.all_bgs[-1]._spritelayers[s] = 0
+            s.game_objects.all_bgs[-1]._spritelist.insert(index,s)#it goes behind the static layer of reference
+            s.add_internal(s.game_objects.all_bgs[-1])
             s.remove(s.pause_group)#remove from pause
 
 class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries

@@ -16,17 +16,6 @@
                  "width":500,
                  "x":0,
                  "y":0
-                }, 
-                {
-                 "draworder":"topdown",
-                 "id":77,
-                 "name":"statics",
-                 "objects":[],
-                 "opacity":1,
-                 "type":"objectgroup",
-                 "visible":true,
-                 "x":0,
-                 "y":0
                 }],
          "name":"bg10",
          "offsetx":-400,

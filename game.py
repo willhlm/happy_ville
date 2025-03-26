@@ -17,6 +17,7 @@ class Game():
 
         self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])
         self.screen = self.display.make_layer(self.window_size)
+        self.screens = {}
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -50,6 +51,8 @@ class Game():
     def run(self):
         while True:
             self.screen.clear(0, 0, 0, 0)
+            for screen in list(self.screens.values()):
+                screen.layer.clear(0, 0, 0, 0)
 
             #tick clock
             self.clock.tick(C.fps)
@@ -62,7 +65,8 @@ class Game():
             self.state_manager.update()
 
             #render
-            self.state_manager.render()#render onto self.screeen
+            self.state_manager.render()#render onto
+            self.merge_screens()
             self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
 
             #update display
@@ -74,6 +78,18 @@ class Game():
             scale_h = pygame.display.Info().current_h/self.window_size[1]
             return min(scale_w, scale_h)
         return scale
+
+    def new_screen(self, key, screen):
+        self.screens[key] = screen
+
+    def merge_screens(self):                    
+        for key in self.screens.keys():   
+            screen = self.screens[key]   
+            screen.update()
+            #self.game_objects.shaders['pp']['parallax'] = screen.parallax
+            #self.game_objects.shaders['pp']['camera_offset'] = self.game_objects.camera_manager.camera.scroll
+            #self.display.render(screen.layer.texture, self.screen, shader = self.game_objects.shaders['pp'])#shader render        
+            self.display.render(screen.layer.texture, self.display.screen, scale = self.scale, position = screen.offset)#shader render        
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

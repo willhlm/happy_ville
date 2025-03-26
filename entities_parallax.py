@@ -66,7 +66,7 @@ class Trees(Layered_objects):
     def create_leaves(self,number_particles = 3):#should we have colour as an argument?
         for i in range(0,number_particles):
             obj = Leaves(self.spawn_box[0],self.game_objects,self.parallax,self.spawn_box[1])
-            self.game_objects.all_bgs.add(obj)       
+            self.game_objects.all_bgs[-1].add(obj)       
 
     def blowing(self):#called when in wind state
         return

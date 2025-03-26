@@ -629,7 +629,7 @@ class Air_dash_pre(Player_states):
     def update(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity))
         self.dash_length -= self.entity.game_objects.game.dt
         self.entity.emit_particles(lifetime = 40, scale=3, colour=[255*0.39, 255*0.78, 255, 255], gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.exit_state()

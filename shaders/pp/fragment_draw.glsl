@@ -1,26 +1,27 @@
-
 #version 330 core
 
-uniform sampler2D tex;          // The rendered game scene
-uniform vec2 screen_size;       // Screen resolution
-uniform float pixel_size;       // Size of each snapped pixel
-uniform vec2 parallax;          // Parallax factors for X and Y directions
+uniform vec2 screen_size = vec2(640, 360);  // Screen resolution
+uniform vec2 parallax = vec2(1.0, 1.0);     // Parallax factors for X and Y directions
+uniform vec2 camera_offset = vec2(0.0, 0.0); // Camera scroll offset
 
-in vec2 fragmentTexCoord;// top-left is [0, 1] and bottom-right is [1, 0]
-uniform sampler2D imageTexture;// texture in location 0
+in vec2 fragmentTexCoord;  // UV coordinates (0 to 1 range)
+uniform sampler2D imageTexture;  // Texture sampler
 
 out vec4 fragColor;
 
 void main() {
-    // Convert UV coordinates to screen-space position
-    vec2 screen_pos = fragmentTexCoord * screen_size * parallax;
+    // Compute the per-pixel size in UV space
+    vec2 pixel_size = 1.0 / screen_size;  
 
-    // Snap the position to the nearest grid based on the pixel size
-    screen_pos = floor(screen_pos / pixel_size) * pixel_size;
+    // Compute world-space position (adjusted for parallax)
+    vec2 world_pos = (fragmentTexCoord * screen_size) + (camera_offset * parallax);
 
-    // Convert the snapped position back to normalized UV coordinates
-    vec2 snapped_uv = screen_pos / (screen_size * parallax);
+    // Snap to a **global pixel grid**, ensuring all layers align
+    vec2 snapped_world_pos = floor(world_pos / pixel_size) * pixel_size;
 
-    // Sample the texture at the snapped coordinates
-    fragColor = texture(tex, snapped_uv);
+    // Convert back to UV space for texture sampling
+    vec2 snapped_uv = (snapped_world_pos - (camera_offset * parallax)) / screen_size;
+
+    // Sample the texture at the snapped UV coordinates
+    fragColor = texture(imageTexture, snapped_uv);
 }
