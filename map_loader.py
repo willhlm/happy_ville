@@ -89,10 +89,10 @@ class Level():
                        
             self.game_objects.game.new_screen(group, screen_layer.Screen_layer(self.game_objects.game, parallax))#make a screen for eahcl ayer in tiled
             if group.startswith('bg'):
-                self.game_objects.all_bgs.append(groups.Group())#make a new pygame group for each layer in tiled
+                self.game_objects.all_bgs.append(groups.Group_BG())#make a new pygame group for each layer in tiled
                 self.game_objects.all_bgs[-1].reference = {}#to store the reference positions of each static bg layer or other information
             else:
-                self.game_objects.all_fgs.append(groups.Group())#make a new pygame group for each layer in tiled
+                self.game_objects.all_fgs.append(groups.Group_BG())#make a new pygame group for each layer in tiled
             self.layer = group#name of the folder in tiled
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'back')#objects behind layers

@@ -30,6 +30,7 @@ while running:
     ref_screen.clear(255, 255, 255, 255)#white to highlight the outlines
 
     if layers_number > 0:
+                
         for screen in screens:#clear the layer screens
             screen.clear(0, 0, 0, 0)#make it whie to show the issue clearer
         
@@ -43,6 +44,7 @@ while running:
 
         for screen in screens:#render to ref screen
             engine.render(screen.texture, ref_screen)
+
     else:
         #render directly to ref screen
         engine.render(blur_bg_texture.texture, ref_screen, position = (100,100))

@@ -33,6 +33,7 @@ class Screen_shader(pygame.sprite.Sprite):#make a layer on screen, then use shad
         self.time += self.game_objects.game.dt
 
     def draw(self, target):
+        self.game_objects.game.display.use_alpha_blending(True)
         self.game_objects.game.display.render(self.image.texture, target, shader = self.shader)#shader render
 
     @classmethod

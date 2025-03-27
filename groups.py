@@ -13,6 +13,22 @@ class Group(pygame.sprite.Group):#normal
             spr.release_texture()   
         super().empty()
 
+
+class Group_BG(pygame.sprite.Group):#normal
+    def __init__(self):
+        super().__init__()
+
+    def draw(self, target):
+        for spr in self.sprites():
+            #spr.game_objects.game.display.use_alpha_blending(False)
+            spr.draw(target)
+            #spr.game_objects.game.display.use_alpha_blending(True)
+
+    def empty(self):    
+        for spr in self.sprites():
+            spr.release_texture()   
+        super().empty()
+
 class LayeredUpdates(pygame.sprite.LayeredUpdates):#layered rendering
     def __init__(self):
         super().__init__()
