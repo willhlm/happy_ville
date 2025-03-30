@@ -31,7 +31,7 @@ class Title_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
+        self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE', surface_size=[100, 100])
         self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
         self.play_music()
 
@@ -56,7 +56,7 @@ class Title_menu(Game_State):
         for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
             self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [x_pos, y_pos], center = True))
-            y_pos += 20
+            y_pos += self.game.game_objects.font.get_height() + 3
 
     def define_BG(self):
         size = (90,100)
@@ -819,7 +819,7 @@ class Conversation(Gameplay):
         self.game.game_objects.player.velocity = [0,0]
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
-        self.text_window_size = (352, 96)
+        self.text_window_size = (528, 160)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
         self.background = self.game.display.make_layer(self.text_window_size)#TODO
         self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
@@ -831,7 +831,11 @@ class Conversation(Gameplay):
 
     def clean_slate(self):
         self.letter_frame = 0
-        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
+        #self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
+        self.text_window = pygame.image.load('Sprites/utils/text_box3.png').convert_alpha()
+        self.text_window = self.game.display.surface_to_texture(self.text_window)
+        self.text_win_size = self.text_window.size
+        print(self.text_win_size)
         self.game.display.render(self.text_window, self.background)#shader render
 
     def update(self):
@@ -845,15 +849,19 @@ class Conversation(Gameplay):
     def render(self):
         super().render()
         self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
+        self.background.clear(10,10,10,0)#needed to make the self.background semi trasnaprant
+
+        self.game.display.render(self.text_window, self.background)#shader render
 
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)#shader render
-        self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
-        self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
+        self.game.display.render(text, self.background, position = (144,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
+        self.npc.render_potrait(self.background)#some conversation target may not have potraits
         text.release()
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
-        self.game.display.render(self.conv_screen.texture,self.game.screen,shader = self.game.game_objects.shaders['alpha'])#shader render
+        self.game.display.render(self.background.texture,self.conv_screen,position = [(640 - self.text_win_size[0])/2, 50],shader = self.game.game_objects.shaders['alpha'])
+        self.game.display.render(self.conv_screen.texture,self.game.screen)#shader render
 
     def handle_events(self, input):
         event = input.output()

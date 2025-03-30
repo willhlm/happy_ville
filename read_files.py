@@ -299,11 +299,14 @@ class Alphabet2():
         return self.game_objects.game.display.surface_to_texture(surface)
 
 class Alphabet():
-    def __init__(self, game_objects, font_name = None, font_size = 16):
+    def __init__(self, game_objects, font_name = None, font_size = 12):
         self.game_objects = game_objects
         pygame.font.init()
-        self.font = pygame.font.Font('Sprites/utils/fonts/alagard' + '.ttf', font_size)
+        self.font = pygame.font.Font('Sprites/utils/fonts/8BitSnobbery' + '.ttf', font_size)
         self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
+
+    def get_height(self):
+        return self.font.get_height()
 
     def render(self, surface_size=False, text='', letter_frame=1000, color=(255, 255, 255), alignment='left'):
         # Limit text to `letter_frame`

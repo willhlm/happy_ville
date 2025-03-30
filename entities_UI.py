@@ -177,7 +177,6 @@ class Menu_Arrow():
             self.time += self.game_objects.game.dt
             _T = 0.08
             d = amp*math.pow(math.sin(self.time * _T) + 1, 0.5)
-            print(d)
             if self.mirrored:
                 self.rect.center = [self.pos_ref[0] + d, self.pos_ref[1]]
             else:
