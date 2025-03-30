@@ -29,13 +29,13 @@ class Inventory():
 
     def remove(self, item_name, quantity = 1):
         self.items[item_name]['quantity'] -= quantity
-
-    def get_quantity(self, item_name):
-        return self.items[item_name]['quantity']
+    
+    def get_quantity(self, item_name):#return quantity. If item doesn't exist, return 0
+        return self.items.get(item_name, {}).get('quantity', 0)
 
 class Map():        
     def __init__(self):
-        self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
+        self.spawn_point = {'map': 'nordveden_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
         self.visited_bioms = {}#should be filled when nwe biome is visited
 

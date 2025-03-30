@@ -334,3 +334,42 @@ class Slash(Shader_states):#not used
         self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render
 
          
+
+class Aura(Shader_states):#not used
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks                
+        self.color_Lookup = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+                
+        self.entity.shader = self.entity.game_objects.shaders['aura']
+        self.time = 0
+
+    def update(self):
+        self.time += self.entity.game_objects.game.dt*0.01
+
+    def draw(self):
+        self.empty.clear(0,0,0,0)   
+        self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
+        self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.entity.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
+        self.entity.game_objects.shaders['noise_perlin']['scale'] = [100,100]#"standard"
+        self.entity.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
+                
+
+        self.entity.game_objects.shaders['gradient']['numStops'] = 3
+        self.entity.game_objects.shaders['gradient']['colors'] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
+        self.entity.game_objects.shaders['gradient']['offsets'] = [0.2, 0.5, 0.52]
+
+        self.entity.game_objects.game.display.render(self.empty.texture, self.color_Lookup, shader = self.entity.game_objects.shaders['gradient'])#shader render
+
+        #self.entity.game_objects.shaders['aura']['AuraProgres'] = 1
+        self.entity.game_objects.shaders['aura']['TIME'] = self.time
+        #self.entity.game_objects.shaders['aura']['color_gradiant'] = self.color_Lookup.texture
+        self.entity.game_objects.shaders['aura']['textureNoise'] = self.noise_layer.texture
+
+
+        #blit_pos = (round(self.entity.true_pos[0]-self.entity.game_objects.camera_manager.camera.true_scroll[0]), round(self.entity.true_pos[1]-self.entity.game_objects.camera_manager.camera.true_scroll[1]))
+        #self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render
+
+                  

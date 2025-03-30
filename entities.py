@@ -1021,6 +1021,7 @@ class Player(Character):
         self.reset_movement()
         self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
         self.colliding_platform = None#save the last collising platform
+        self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -1042,12 +1043,12 @@ class Player(Character):
         self.player_modifier.take_dmg(dmg)#Tjasolmais_embrace can set player in invinsible
         if self.flags['invincibility']: return
 
-        self.flags['invincibility'] = True
-        self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+        self.flags['invincibility'] = True        
         self.health -= dmg * self.dmg_scale#a omamori can set the dmg_scale to 0.5
         self.game_objects.UI.hud.remove_hearts(dmg * self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
@@ -1071,7 +1072,7 @@ class Player(Character):
 
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
-        self.game_objects.game.state_manager.enter_state(state_name = 'death')
+        self.game_objects.game.state_manager.enter_state(state_name = 'Death', category = 'game_states_cutscenes')
 
     def heal(self, health = 1):
         self.health += health
@@ -3521,6 +3522,30 @@ class Boss_HP(Omamori):
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/boss_HP/',game_objects)#for inventor
         super().pool(game_objects)
 
+class Indincibillity(Omamori):#extends the invincibillity time
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)    
+
+class Runspeed(Omamori):#increase the runs speed
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)  
+
+class Dashpeed(Omamori):#decrease the dash cooldown?
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+
+class Shields(Omamori):#autoamtic shield that negates one damage, if have been outside combat for a while?
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+
+class Wallglue(Omamori):#to make aila stick to wall, insead of gliding?
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+
+class Hover(Omamori):#If holding jump button, make a small hover
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+
 class Infinity_stones(Interactable_item):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
@@ -4576,8 +4601,8 @@ class Fast_travel(Interactable):
             self.locked = True#starts locked. After paying some ambers, it unlocks and fast travel is open
 
     def unlock(self):#called from Fast_travel_unlock
-        if self.game_objects.player.inventory['Amber_droplet'] > self.cost:
-            self.game_objects.player.inventory['Amber_droplet'] -= self.cost
+        if self.game_objects.player.backpack.inventory.get_quantity('amber_droplet') > self.cost:
+            self.game_objects.player.backpack.inventory.remove('amber_droplet', self.cost)
             self.locked = False
             Fast_travel.cost *= 5#increase by 5 for every unlock
             self.game_objects.backpack.map.save_travelpoint(self.map,self.init_cord)
@@ -4587,7 +4612,7 @@ class Fast_travel(Interactable):
 
     def interact(self):#when player press t/y
         if self.locked:
-            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', npc = self)            
+            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', fast_travel = self)            
         else:
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
             self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_menu', category = 'game_states_facilities')                        
@@ -4771,7 +4796,7 @@ class Door_inter(Interactable): #game object for itneracting with locked door
 
     def interact(self):
         if type(self.door.currentstate).__name__ == 'Erect':
-            if self.game_objects.player.inventory.get(self.door.key, False):
+            if self.game_objects.player.backpack.inventory.get_quantity(self.door.key):
                 self.door.currentstate.handle_input('Transform')
                 if self.sfx: self.play_sfx()
             else:

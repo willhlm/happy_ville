@@ -1822,19 +1822,19 @@
                         {
                          "gid":2,
                          "height":16,
-                         "id":1085,
+                         "id":1087,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"MrBanks"
+                                 "value":"Astrid"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":3648,
+                         "x":3712,
                          "y":880
                         }],
                  "opacity":1,
@@ -1886,7 +1886,7 @@
          "y":0
         }],
  "nextlayerid":109,
- "nextobjectid":1087,
+ "nextobjectid":1094,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
