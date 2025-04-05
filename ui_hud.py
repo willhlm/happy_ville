@@ -4,7 +4,7 @@ import entities_UI
 class HUD():
     def __init__(self,game_objects):
         self.game_objects = game_objects
-        self.screen = self.game_objects.game.display.make_layer((200,100))
+        self.screen = self.game_objects.game.display.make_layer((200,150))
 
         self.init_hearts()
         self.init_spirits()
@@ -24,8 +24,8 @@ class HUD():
 
     def init_ability(self):
         self.ability_hud=[]#the hud
-        for i in range(0,self.game_objects.player.abilities.number):
-            self.ability_hud.append(entities_UI.Movement_hud(self.game_objects.player))#the ability object
+        #for i in range(0,self.game_objects.player.abilities.number):
+        self.ability_hud.append(entities_UI.Movement_hud(self.game_objects.player))#the ability object
 
         self.abilities = []
         for key in self.game_objects.player.abilities.movement_dict.keys():
@@ -53,8 +53,8 @@ class HUD():
         for index,ability_hud in enumerate(self.ability_hud):#draw movement ability_hud
             self.game_objects.game.display.render(ability_hud.image,self.screen, position = (32*index,60))
 
-        for index,ability in enumerate(self.abilities):#draw ability symbols
-            self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))
+        #for index,ability in enumerate(self.abilities):#draw ability symbols
+        #    self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))
 
         self.game_objects.game.display.render(self.screen.texture,self.game_objects.game.screen,position = (20, 10))
 
