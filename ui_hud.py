@@ -4,7 +4,7 @@ import entities_UI
 class HUD():
     def __init__(self,game_objects):
         self.game_objects = game_objects
-        self.screen = self.game_objects.game.display.make_layer((200,100))
+        self.screen = self.game_objects.game.display.make_layer((500,300))
 
         self.init_hearts()
         self.init_spirits()
@@ -12,20 +12,24 @@ class HUD():
 
     def init_hearts(self):
         self.hearts = []
-        for i in range(0,self.game_objects.player.max_health):#make hearts
+        self.hearts.append(entities_UI.Health_frame(self.game_objects))
+        for i in range(0,self.game_objects.player.max_health - 1):#make hearts
             self.hearts.append(entities_UI.Health(self.game_objects))
         self.update_hearts()
 
     def init_spirits(self):
         self.spirits = []
-        for i in range(0,self.game_objects.player.max_spirit):#make hearts
+        self.spirits.append(entities_UI.Spirit_frame(self.game_objects))
+        for i in range(0,self.game_objects.player.max_spirit - 1):#make hearts
             self.spirits.append(entities_UI.Spirit(self.game_objects))
         self.update_spirits()
 
     def init_ability(self):
         self.ability_hud=[]#the hud
-        for i in range(0,self.game_objects.player.abilities.number):
-            self.ability_hud.append(entities_UI.Movement_hud(self.game_objects.player))#the ability object
+        #for i in range(0,self.game_objects.player.abilities.number):
+        self.ability_hud.append(entities_UI.Movement_hud(self.game_objects.player))#the ability object
+
+        #self.ability_hud = entities_UI.Movement_hud(self.game_objects.player)
 
         self.abilities = []
         for key in self.game_objects.player.abilities.movement_dict.keys():
@@ -44,19 +48,35 @@ class HUD():
             ability.update()
 
     def render(self):
-        for index, heart in enumerate(self.hearts):#draw health
-            self.game_objects.game.display.render(heart.image,self.screen, position = (16*index,0))
 
-        for index, spirit in enumerate(self.spirits):#draw spirit
-            self.game_objects.game.display.render(spirit.image,self.screen, position = (16*index,16))
+        h_pos = (14, 12)
+        s_pos = (12, 12)
+        frame_width = self.ability_hud[0].rect.width
+        self.screen.clear(0,0,0,0)
+
+        #self.game_objects.game.display.render(ability_frame.image, heart.image, self.screen, position=(16 * index, 0))
 
         for index,ability_hud in enumerate(self.ability_hud):#draw movement ability_hud
-            self.game_objects.game.display.render(ability_hud.image,self.screen, position = (32*index,60))
+            self.game_objects.game.display.render(ability_hud.image,self.screen, position = (0, 0))
 
-        for index,ability in enumerate(self.abilities):#draw ability symbols
-            self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))
+        for index, heart in enumerate(self.hearts):#draw health
+            if index == 0:
+                pos = (h_pos[0]*index + frame_width - 3, 7)
+            else:
+                pos = (h_pos[0]*index + frame_width - 5, h_pos[1])
+            self.game_objects.game.display.render(heart.image,self.screen, position = pos)
 
-        self.game_objects.game.display.render(self.screen.texture,self.game_objects.game.screen,position = (20, 10))
+        for index, spirit in enumerate(self.spirits):#draw spirit
+            if index == 0:
+                pos = (5, s_pos[1] * index + frame_width - 3)
+            else:
+                pos = (s_pos[0], s_pos[1] * index + frame_width - 5)
+            self.game_objects.game.display.render(spirit.image,self.screen, position = pos)
+
+        #for index,ability in enumerate(self.abilities):#draw ability symbols
+        #    self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))
+
+        self.game_objects.game.display.render(self.screen.texture,self.game_objects.game.screen,position = (20, 20))
 
     def remove_hearts(self,dmg):#dmg is 0.5, 1 or 2. Will set the rellavant to hurt
         index = int(self.game_objects.player.health)-1

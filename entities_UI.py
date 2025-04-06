@@ -114,9 +114,9 @@ class Necklace(Animatedentity):
 
 #gameplay HUD
 class Health(Animatedentity):#gameplay UI
-    def __init__(self,game_objects):
+    def __init__(self,game_objects, path = 'Sprites/UI/gameplay/health/'):
         super().__init__([0,0],game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/gameplay/health/',game_objects)
+        self.sprites = read_files.load_sprites_dict(path,game_objects)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_health.Death(self)
@@ -127,21 +127,29 @@ class Health(Animatedentity):#gameplay UI
         self.health = max(0,self.health)#so that it doesn't go negative, inprinciple not needed
         self.currentstate.handle_input('Hurt')#make heart go white
 
-class Spirit(Animatedentity):#gameplay UI
+class Health_frame(Health):#gameplay UI
     def __init__(self,game_objects):
+        super().__init__(game_objects, 'Sprites/UI/gameplay/health_frame/')
+
+class Spirit(Animatedentity):#gameplay UI
+    def __init__(self,game_objects, path = 'Sprites/UI/gameplay/spirit/'):
         super().__init__([0,0],game_objects)
-        self.sprites=read_files.load_sprites_dict('Sprites/UI/gameplay/spirit/',game_objects)
+        self.sprites=read_files.load_sprites_dict(path, game_objects)
         self.image = self.sprites['death'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_health.Death(self)
         self.health = 0
 
+class Spirit_frame(Spirit):#gameplay UI
+    def __init__(self,game_objects):
+        super().__init__(game_objects, 'Sprites/UI/gameplay/spirit_frame/')
+
 class Movement_hud():#gameplay UI
     def __init__(self,entity):
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/gameplay/movement/hud/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/gameplay/ability/frame/',entity.game_objects)
         self.entity = entity
         self.game_objects = entity.game_objects#animation need it
-        self.image = self.sprites['idle_1'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
 
