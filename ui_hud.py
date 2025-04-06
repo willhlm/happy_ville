@@ -44,6 +44,7 @@ class HUD():
             ability.update()
 
     def render(self):
+        self.screen.clear(0,0,0,0)
         for index, heart in enumerate(self.hearts):#draw health
             self.game_objects.game.display.render(heart.image,self.screen, position = (16*index,0))
 
