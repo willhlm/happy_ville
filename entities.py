@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, groups, player_modifier, backpack
+import read_files, particles, animation, dialogue, groups, backpack, modifier_damage, modifier_movement
 import constants as C
 
 #from folders
@@ -665,7 +665,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
-        self.hitbox = pygame.Rect(pos[0] + size[0]* 0.2 * 0.5, pos[1], size[0] * 0.8, size[1])#adjust the hitbox size based on texture 
+        self.hitbox = pygame.Rect(pos[0] + size[0]* 0.2 * 0.5, pos[1], size[0] * 0.8, size[1])#adjust the hitbox size based on texture
         self.time = 0
 
         horizontal = kwarg.get('horizontal', 0)
@@ -691,7 +691,8 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         player.velocity[0] += self.dir[0] * self.game_objects.game.dt
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * player.player_modifier.up_stream() + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
+        context = player.movement_manager.resolve()
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
 
     def player_noncollision(self):
         pass
@@ -927,8 +928,8 @@ class Character(Platform_entity):#enemy, NPC,player
     def update(self):
         self.update_vel()
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
-        self.animation.update()#need to be after currentstate since animation will animate the current state        
-        self.shader_state.update()#need to be after animation    
+        self.animation.update()#need to be after currentstate since animation will animate the current state
+        self.shader_state.update()#need to be after animation
 
     def update_vel(self):#called from hitsop_states
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
@@ -938,7 +939,7 @@ class Character(Platform_entity):#enemy, NPC,player
     def take_dmg(self, dmg):
         if self.flags['invincibility']: return
         self.health -= dmg
-        self.flags['invincibility'] = True        
+        self.flags['invincibility'] = True
 
         try:#TODO add hit sounds to all enteties
             self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
@@ -991,7 +992,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 4
-        self.health = 2
+        self.health = 10
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1006,29 +1007,29 @@ class Player(Character):
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True, 'Slow_motion':True,
                      'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True}
-        
-        self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False                     
+
+        self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
-        self.backpack = backpack.Backpack(self)
-        #self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
-        #self.inventory = {'Amber_droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
-        #self.omamoris = Omamoris(self)#        
+        self.backpack = backpack.Backpack(self)        
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
-        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
+        
+        self.damage_manager = modifier_damage.Damage_manager(self)
+        self.movement_manager = modifier_movement.Movement_manager()
+
         self.colliding_platform = None#save the last collising platform
-        self.shader_state = states_shader.Aura(self)
+        #self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
         self.colliding_platform = ramp#save the latest platform
 
     def down_collision(self, block):#when colliding with platform beneth
-        super().down_collision(block)        
+        super().down_collision(block)
         self.colliding_platform = block#save the latest platform
 
     def right_collision(self, block, type = 'Wall'):
@@ -1039,13 +1040,19 @@ class Player(Character):
         super().left_collision(block, type)
         self.colliding_platform = block#save the latest platform
 
-    def take_dmg(self, dmg = 1, duration = 20):
-        self.player_modifier.take_dmg(dmg)#Tjasolmais_embrace can set player in invinsible
-        if self.flags['invincibility']: return
+    def update_vel(self):#called from hitsop_states
+        context = self.movement_manager.resolve()         
+        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*context.friction[1])#gravity
+        self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
+        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
 
+    def take_dmg(self, dmg = 1):#called from collisions
+        return self.damage_manager.take_damage(dmg)
+
+    def apply_damage(self, dmg):#called from damage_manager
         self.flags['invincibility'] = True        
-        self.health -= dmg * self.dmg_scale#a omamori can set the dmg_scale to 0.5
-        self.game_objects.UI.hud.remove_hearts(dmg * self.dmg_scale)#update UI
+        self.health -= dmg# * self.dmg_scale#a omamori can set the dmg_scale to 0.5
+        self.game_objects.UI.hud.remove_hearts(dmg)# * self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
@@ -1054,21 +1061,20 @@ class Player(Character):
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             self.emit_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            
-            self.game_objects.time_manager.modify_time(time_scale = 0, duration = duration)
-            self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = duration, scale = 0.9)
-            
+
+            self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)
+            self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
+
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
             self.game_objects.signals.emit('player_died')#emit a signal that player died
             self.death_state.die()#depending on gameplay state, different death stuff should happen
-        return True#return truw to show that damage was taken
 
     def die(self):#called from idle death_state, also called from vertical acid
         self.animation.update()#make sure you get the new animation
         self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))#pause first, then slow motion
         self.game_objects.time_manager.modify_time(time_scale = 0.4, duration = 100)#sow motion
-        self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)#freeze  
+        self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)#freeze
 
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
@@ -1139,10 +1145,10 @@ class Enemy(Character):
         self.chase_speed = 0.6
 
     def update(self):
-        self.AI.update()#tell what the entity should do -> shuold be first in upate loop     
-        self.hitstop_states.update()#need to be after update_vel and animation, and AI        
+        self.AI.update()#tell what the entity should do -> shuold be first in upate loop
+        self.hitstop_states.update()#need to be after update_vel and animation, and AI
         self.group_distance()
-        
+
     def player_collision(self, player):#when player collides with enemy
         if type(player.currentstate).__name__ in ['Thunder_main', 'Thunder_post']:
             self.take_dmg(1)
@@ -1205,7 +1211,7 @@ class Flying_enemy(Enemy):
 
     def patrol(self, position):#called from AI: when patroling
         self.velocity[0] += 0.005*(position[0]-self.rect.centerx)
-        self.velocity[1] += 0.005*(position[1]-self.rect.centery)        
+        self.velocity[1] += 0.005*(position[1]-self.rect.centery)
 
     def walk(self, time):#called from walk state
         amp = min(abs(self.velocity[0]),0.3)
@@ -1970,10 +1976,10 @@ class NPC(Character):
         #self.group_distance()
 
     def render_potrait(self, terget):
-        self.game_objects.game.display.render(self.portrait, terget, position = (50,100))#shader render
+        self.game_objects.game.display.render(self.portrait, terget, position = (32,32))#shader render
 
     def interact(self):#when plater press t
-        self.game_objects.game.state_manager.enter_state('Conversation', npc = self)        
+        self.game_objects.game.state_manager.enter_state('Conversation', npc = self)
 
     def random_conversation(self, text):#can say stuff through a text bubble
         random_conv = Conversation_bubbles(self.rect.topright,self.game_objects, text)
@@ -2042,7 +2048,7 @@ class MrSmith(NPC):#balck smith
         super().__init__(pos,game_objects)
 
     def buisness(self):#enters after conversation
-        self.game_objects.game.state_manager.enter_state(state_name = 'Smith', category = 'game_states_facilities', npc = self)    
+        self.game_objects.game.state_manager.enter_state(state_name = 'Smith', category = 'game_states_facilities', npc = self)
 
 class MrMine(NPC):#balck smith
     def __init__(self, pos,game_objects):
@@ -2068,7 +2074,7 @@ class MrBanks(NPC):#bank
         self.ammount = 0
 
     def buisness(self):#enters after conversation
-        self.game_objects.game.state_manager.enter_state(state_name = 'Bank', category = 'game_states_facilities', npc = self)  
+        self.game_objects.game.state_manager.enter_state(state_name = 'Bank', category = 'game_states_facilities', npc = self)
 
 class MsButterfly(NPC):#lumber jack
     def __init__(self,pos,game_objects):
@@ -2088,7 +2094,7 @@ class MrWood(NPC):#lumber jack
         self.quest = ['lumberjack_omamori']#quest stuff to say
 
     def interact(self):#when plater press t
-        self.game_objects.game.state_manager.enter_state(state_name = 'Conversation', npc = self)  
+        self.game_objects.game.state_manager.enter_state(state_name = 'Conversation', npc = self)
         if self.game_objects.world_state.quests.get('lumberjack_omamori', False):#if the quest is running
             self.game_objects.quests_events.active_quests['lumberjack_omamori'].complete()
 
@@ -2107,7 +2113,7 @@ class Boss(Enemy):
         self.game_objects.world_state.increase_progress()
         self.game_objects.world_state.update_event(str(type(self).__name__).lower())
 
-        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites[self.ability][0], text = self.ability)          
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.game_objects.player.sprites[self.ability][0], text = self.ability)
         self.game_objects.game.state_manager.enter_state(state_name = 'Defeated_boss', category = 'game_states_cutscenes')
 
     def health_bar(self):#called from omamori Boss_HP
@@ -2127,14 +2133,14 @@ class Reindeer(Boss):
         self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
-        
+
         self.currentstate = reindeer_states.Idle_nice(self)
         self.AI = reindeer_ai.AI(self)
 
         self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
         self.attack_distance = [50, 10]
         self.attack = Hurt_box
-        self.game_objects.lights.add_light(self, radius = 150)  
+        self.game_objects.lights.add_light(self, radius = 150)
         self.chase_speed = 2
         self.animation.framerate = 1/6
 
@@ -2267,7 +2273,7 @@ class Fade_effect(Staticentity):#fade effect
         self.game_objects.shaders['motion_blur']['dir'] = [0.05, 0]
         self.game_objects.shaders['motion_blur']['quality'] = 3
         self.game_objects.game.display.render(self.image, self.image_copy, shader = self.game_objects.shaders['motion_blur'])#shader render
-          
+
         self.game_objects.shaders['alpha']['alpha'] = self.alpha
         blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
         self.game_objects.game.display.render(self.image_copy.texture, target, position = blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['alpha'])#shader render
@@ -2462,12 +2468,23 @@ class Tjasolmais_embrace(Player_ability):#makes the shield, water god
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/tjasolmais_embrace/',entity.game_objects)
         self.description = ['shield','hits one additional target','one additional damage','imba']
-        #-> higher level can reflect projectiles? or maybe hurt enemy?
+        self.shield = None#-> higher level can reflect projectiles? or maybe hurt enemy?        
+
+    def shield_expire(self):#called when the shield is destroyed
+        self.entity.movement_manager.remove_modifier('Tjasolmais_embrace')
+        self.entity.damage_manager.remove_modifier('Tjasolmais_embrace')                
+        self.shield = None
+
+    def sword(self):#called when aila swings the sword
+        if self.shield: self.shield.kill()    
 
     def initiate(self):#called when using the abilty
-        shield = Shield(self.entity)
-        self.entity.player_modifier.enter_state('Tjasolmais_embrace', shield = shield)
-        self.entity.projectiles.add(shield)
+        if self.shield: self.shield.kill()    #kill the old one
+        self.shield = Shield(self.entity)
+        self.entity.movement_manager.add_modifier('Tjasolmais_embrace', entity = self.entity)
+        self.entity.damage_manager.add_modifier('Tjasolmais_embrace', entity = self.entity)
+
+        self.entity.projectiles.add(self.shield)
 
 class Bieggs_breath(Player_ability):#force push
     def __init__(self, entity):
@@ -2928,7 +2945,7 @@ class Aila_sword(Melee):
         self.currentstate.sword_jump()#only down sword will give velocity up
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = 5)#hitstop to sword vielder
-            collision_enemy.hitstop_states.enter_state('Stop', lifetime = 10, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop                        
+            collision_enemy.hitstop_states.enter_state('Stop', lifetime = 10, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
             collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
             self.clash_particles(collision_enemy.hitbox.center)
             #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
@@ -2941,7 +2958,7 @@ class Aila_sword(Melee):
         color = [255, 255, 255, 255]
         for i in range(0,number_particles):
             obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 40, vel = {'linear':[7,14]}, dir = angle, scale = 1.2, fade_scale = 5, colour = color, state = 'Idle')
-            self.entity.game_objects.cosmetics.add(obj1)       
+            self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
@@ -3047,13 +3064,12 @@ class Shield(Projectiles):#a protection shield
         self.reflect_rect = self.hitbox.copy()
 
         self.time = 0
-        self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
         self.lifetime = kwarg.get('lifetime', 100)
         self.die = False
         self.progress = 0
 
-    def take_dmg(self, dmg):#called when entity takes damage
+    def take_damage(self, dmg):#called when entity takes damage
         if self.flags['invincibility']: return
         self.health -= dmg
 
@@ -3116,8 +3132,7 @@ class Shield(Projectiles):#a protection shield
 
     def kill(self):
         super().kill()
-        self.entity.flags['invincibility'] = False
-        self.entity.player_modifier.enter_state('Player_modifier')
+        self.entity.abilities.spirit_abilities['Shield'].shield_expire()
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         pass
@@ -3284,7 +3299,7 @@ class Enemy_drop(Loot):
     def player_collision(self, player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
-        obj = self.__class__([0,0], self.game_objects) #TODO maybe not needed to make an object if it is already in the inventory               
+        obj = self.__class__([0,0], self.game_objects) #TODO maybe not needed to make an object if it is already in the inventory
         player.backpack.inventory.add(obj)
         self.currentstate.handle_input('Death')
 
@@ -3468,11 +3483,11 @@ class Half_dmg(Omamori):
 
     def attach(self):
         super().attach()
-        self.entity.dmg_scale = 0.5
+        self.entity.damage_manager.add_modifier('Half_dmg')
 
     def detach(self):
         super().detach()
-        self.entity.dmg_scale = 1
+        self.entity.damage_manager.remove_modifier('Half_dmg')
 
     @classmethod
     def pool(cls, game_objects):
@@ -4615,7 +4630,7 @@ class Fast_travel(Interactable):
             self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', fast_travel = self)            
         else:
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
-            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_menu', category = 'game_states_facilities')                        
+            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_menu', category = 'game_states_facilities')
 
 class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginning
     def __init__(self,pos,game_objects):
@@ -4630,7 +4645,7 @@ class Rhoutta_altar(Interactable):#altar to trigger the cutscane at the beginnin
 
     def interact(self):#when player press t/y
         self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
-        self.game_objects.game.state_manager.enter_state(state_name = 'Rhoutta_encounter', category = 'cutscenes')                                
+        self.game_objects.game.state_manager.enter_state(state_name = 'Rhoutta_encounter', category = 'cutscenes')
 
     def reset_timer(self):
         self.currentstate.handle_input('Idle')

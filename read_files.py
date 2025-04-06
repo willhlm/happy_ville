@@ -182,7 +182,7 @@ def alphabet_reader(path_to_sheet, h, num):
             height = 9
         else:
             height = h
-        width = val2 - val - 1        
+        width = val2 - val - 1
         rect = pygame.Rect(val+1, 0, width, height)
         #rect = pygame.Rect(j*sprite_size[0], i*sprite_size[1], j*sprite_size[0] + sprite_size[0], i*sprite_size[1] + sprite_size[1])
         image = pygame.Surface((width, height),pygame.SRCALPHA,32).convert_alpha()
@@ -213,7 +213,7 @@ class Alphabet2():
             total_width = sum(self.characters[c].get_width() + 1 for c in text if c in self.characters)
             total_width += text.count(" ") * 4  # Adjusting for spaces
             surface_size = (total_width, self.max_height + 2)
-        
+
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()
         #pygame.draw.rect(text_surface, [200, 200, 200, 100], (0, 0, surface_size[0], surface_size[1]))
 
@@ -234,7 +234,7 @@ class Alphabet2():
                 if c in self.characters:
                     word_width += self.characters[c].get_width() + 1
             #word_width = sum(self.characters[c].get_width() + 1 for c in word if c in self.characters)
-            
+
             if line_width + word_width > max_width:
                 lines.append((current_line, line_width - 1))
                 current_line = []
@@ -299,11 +299,14 @@ class Alphabet2():
         return self.game_objects.game.display.surface_to_texture(surface)
 
 class Alphabet():
-    def __init__(self, game_objects, font_name = None, font_size = 14):
+    def __init__(self, game_objects, font_name = None, font_size = 12):
         self.game_objects = game_objects
         pygame.font.init()
-        self.font = pygame.font.Font('Sprites/utils/fonts/alagard' + '.ttf', font_size)
+        self.font = pygame.font.Font('Sprites/utils/fonts/8BitSnobbery' + '.ttf', font_size)
         self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
+
+    def get_height(self):
+        return self.font.get_height()
 
     def render(self, surface_size=False, text='', letter_frame=1000, color=(255, 255, 255), alignment='left'):
         # Limit text to `letter_frame`
@@ -311,13 +314,21 @@ class Alphabet():
 
         # **If text is empty or only spaces, return an empty transparent texture**
         if not visible_text.strip():
-            empty_surface = pygame.Surface(surface_size if surface_size else (1, 1), pygame.SRCALPHA, 32).convert_alpha()
+            if surface_size:
+                size = surface_size
+            else:
+                size = (1,1)
+            empty_surface = pygame.Surface(size, pygame.SRCALPHA, 32).convert_alpha()
             empty_surface.fill((0, 0, 0, 0))  # Transparent
             return self.game_objects.game.display.surface_to_texture(empty_surface)
 
         # Initialize
-        words = visible_text.split(" ")
-        max_width = surface_size[0] if surface_size else self.font.size(visible_text)[0]
+        words = visible_text.split(" ")        
+        if surface_size:
+            max_width = surface_size[0]
+        else:
+            max_width = self.font.size(visible_text)[0] + 1
+
         line_height = self.font.get_height()
         lines, line_widths = [], []
         current_line = ""
@@ -339,9 +350,10 @@ class Alphabet():
             lines.append(current_line)
             line_widths.append(self.font.size(current_line)[0])
 
-        # **Ensure surface is large enough**
-        total_height = len(lines) * line_height
-        surface_size = (max_width, total_height) if not surface_size else surface_size
+        # **Ensure surface is large enough**        
+        if not surface_size:
+            total_height = len(lines) * line_height
+            surface_size = (max_width, total_height)
 
         # Create transparent surface
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()

@@ -434,7 +434,6 @@ class Fall_pre(Player_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.wall_dir = kwarg.get('wall_dir', False)
-        self.entity.friction[1] = self.entity.player_modifier.falling()
 
     def handle_press_input(self,input):
         event = input.output()
@@ -459,10 +458,6 @@ class Fall_pre(Player_states):
         event = input.output()
         if event[-1]=='a':
             input.processed()
-
-    def enter_state(self, state, **kwargs):
-        self.entity.friction[1] = C.friction_player[1]
-        super().enter_state(state, **kwargs)
 
     def handle_input(self, input, **kwarg):
         if input == 'Wall':
@@ -631,7 +626,7 @@ class Air_dash_pre(Player_states):
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
         self.dash_length -= self.entity.game_objects.game.dt
-        self.entity.emit_particles(lifetime = 40, scale=3, colour=[255*0.39, 255*0.78, 255, 255], gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
+        self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.exit_state()
 
     def exit_state(self):
@@ -974,7 +969,7 @@ class Sword(Player_states):#main phases shold inheret this
         super().__init__(entity)
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
-        self.entity.player_modifier.sword()
+        self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.entity.sword.stone_states['slash'].slash_speed()

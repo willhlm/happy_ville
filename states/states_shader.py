@@ -332,17 +332,15 @@ class Slash(Shader_states):#not used
 
         blit_pos = (round(self.entity.true_pos[0]-self.entity.game_objects.camera_manager.camera.true_scroll[0]), round(self.entity.true_pos[1]-self.entity.game_objects.camera_manager.camera.true_scroll[1]))
         self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render
-
          
-
-class Aura(Shader_states):#not used
+class Noise_border(Shader_states):#not used
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
         self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks                
         self.color_Lookup = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
                 
-        self.entity.shader = self.entity.game_objects.shaders['aura']
+        self.entity.shader = self.entity.game_objects.shaders['noise_border']
         self.time = 0
 
     def update(self):
@@ -364,12 +362,22 @@ class Aura(Shader_states):#not used
         self.entity.game_objects.game.display.render(self.empty.texture, self.color_Lookup, shader = self.entity.game_objects.shaders['gradient'])#shader render
 
         #self.entity.game_objects.shaders['aura']['AuraProgres'] = 1
-        self.entity.game_objects.shaders['aura']['TIME'] = self.time
+        self.entity.game_objects.shaders['noise_border']['TIME'] = self.time
         #self.entity.game_objects.shaders['aura']['color_gradiant'] = self.color_Lookup.texture
-        self.entity.game_objects.shaders['aura']['textureNoise'] = self.noise_layer.texture
+        self.entity.game_objects.shaders['noise_border']['textureNoise'] = self.noise_layer.texture
 
 
         #blit_pos = (round(self.entity.true_pos[0]-self.entity.game_objects.camera_manager.camera.true_scroll[0]), round(self.entity.true_pos[1]-self.entity.game_objects.camera_manager.camera.true_scroll[1]))
         #self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render
 
-                  
+class Aura(Shader_states):#not used
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)        
+        self.entity.shader = self.entity.game_objects.shaders['aura']
+        self.time = 0
+
+    def update(self):
+        self.time += self.entity.game_objects.game.dt*0.1
+
+    def draw(self):
+        self.entity.game_objects.shaders['aura']['TIME'] = self.time

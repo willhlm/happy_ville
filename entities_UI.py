@@ -1,5 +1,6 @@
 import pygame
 import read_files, animation
+import math
 from sys import platform
 from states import states_buttons, states_health, states_basic
 from entities import Animatedentity
@@ -149,30 +150,51 @@ class Movement_hud():#gameplay UI
 
 #utilities
 class Menu_Arrow():
-    def __init__(self, pos, game_objects, offset = [0,0]):
+    def __init__(self, pos, game_objects, offset = [0,0], mirrored = False, animate = False):
         self.game_objects = game_objects
         self.image = Menu_Arrow.image
         self.sounds = Menu_Arrow.sounds
         self.offset = offset
+        self.mirrored = mirrored
+        self.time = 0
+        self.aniamte = animate
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
+        if mirrored: self.rect.midleft = [pos[0] - self.offset[0], pos[1] + self.offset[1]]
+        self.pos_ref = self.rect.center
 
     def pool(game_objects):
         Menu_Arrow.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')
-        img = pygame.image.load("Sprites/utils/arrow_elf_mid.png").convert_alpha()
+        img = pygame.image.load("Sprites/utils/arrow_elf.png").convert_alpha()
         Menu_Arrow.image = game_objects.game.display.surface_to_texture(img)
 
     def update(self):#note: sets pos to input, doesn't update with an increment of pos like other entities
         pass
 
+    def animate(self):
+        if self.animate:
+            amp = 5
+            self.time += self.game_objects.game.dt
+            _T = 0.08
+            d = amp*math.pow(math.sin(self.time * _T) + 1, 0.5)
+            if self.mirrored:
+                self.rect.center = [self.pos_ref[0] + d, self.pos_ref[1]]
+            else:
+                self.rect.center = [self.pos_ref[0] - d, self.pos_ref[1]]
+
     def play_SFX(self, state = 'idle', frame = 0, vol = 0.8):
         self.game_objects.sound.play_sfx(self.sounds[state][frame], vol = vol)
 
     def update_pos(self, pos):
-        self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
+        if self.mirrored:
+            self.rect.midleft = [pos[0] - self.offset[0], pos[1] + self.offset[1]]
+        else:
+            self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
+        self.pos_ref = self.rect.center
 
     def pressed(self, state = 'select'):#when pressing a button
         self.play_SFX(state)
+
 
 class Menu_Box():
     def __init__(self, game_objects):

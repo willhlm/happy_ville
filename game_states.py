@@ -44,7 +44,9 @@ class Title_menu(Game_State):
         self.initiate_buttons()
         self.define_BG()
         #self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
-        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-10, -3])
+        offset = [-10, -2]
+        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-8, -1], animate = True)
+        self.arrow_2 = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midright, game.game_objects, offset = [-8, -1], mirrored = True, animate = True)
 
     def initiate_buttons(self):
         buttons = ['New game','Load game','Option','Quit']
@@ -54,7 +56,7 @@ class Title_menu(Game_State):
         for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
             self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [x_pos, y_pos], center = True))
-            y_pos += 20
+            y_pos += self.game.game_objects.font.get_height() + 3
 
     def define_BG(self):
         size = (90,100)
@@ -67,6 +69,8 @@ class Title_menu(Game_State):
 
     def update(self):#update menu arrow position
         self.animation.update()
+        self.arrow.animate()
+        self.arrow_2.animate()
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.update()
@@ -85,10 +89,13 @@ class Title_menu(Game_State):
 
         #blit arrow
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
+        self.game.display.render(self.arrow_2.image, self.game.screen, position = self.arrow_2.rect.topleft, flip = True)
 
     def update_arrow(self):
         ref_pos = self.buttons[self.current_button].rect.midleft
+        ref_pos2 = self.buttons[self.current_button].rect.midright
         self.arrow.update_pos((ref_pos[0], ref_pos[1]))
+        self.arrow_2.update_pos((ref_pos2[0], ref_pos2[1]))
         self.arrow.play_SFX()
 
     def handle_events(self, input):
@@ -125,10 +132,10 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'nordveden_2','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
-            #self.game.game_objects.load_map(self,'hlifblom_1','1')
+            #self.game.game_objects.load_map(self,'hlifblom_40','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
@@ -812,7 +819,7 @@ class Conversation(Gameplay):
         self.game.game_objects.player.velocity = [0,0]
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
-        self.text_window_size = (352, 96)
+        self.text_window_size = (528, 160)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
         self.background = self.game.display.make_layer(self.text_window_size)#TODO
         self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
@@ -824,7 +831,11 @@ class Conversation(Gameplay):
 
     def clean_slate(self):
         self.letter_frame = 0
-        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
+        #self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
+        self.text_window = pygame.image.load('Sprites/utils/text_box3.png').convert_alpha()
+        self.text_window = self.game.display.surface_to_texture(self.text_window)
+        self.text_win_size = self.text_window.size
+        print(self.text_win_size)
         self.game.display.render(self.text_window, self.background)#shader render
 
     def update(self):
@@ -838,15 +849,19 @@ class Conversation(Gameplay):
     def render(self):
         super().render()
         self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
+        self.background.clear(10,10,10,0)#needed to make the self.background semi trasnaprant
+
+        self.game.display.render(self.text_window, self.background)#shader render
 
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)#shader render
-        self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
-        self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
+        self.game.display.render(text, self.background, position = (144,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
+        self.npc.render_potrait(self.background)#some conversation target may not have potraits
         text.release()
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
-        self.game.display.render(self.conv_screen.texture,self.game.screen,shader = self.game.game_objects.shaders['alpha'])#shader render
+        self.game.display.render(self.background.texture,self.conv_screen,position = [(640 - self.text_win_size[0])/2, 50],shader = self.game.game_objects.shaders['alpha'])
+        self.game.display.render(self.conv_screen.texture,self.game.screen)#shader render
 
     def handle_events(self, input):
         event = input.output()
