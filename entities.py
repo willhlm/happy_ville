@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, groups, player_modifier, backpack
+import read_files, particles, animation, dialogue, groups, backpack, modifier_damage, modifier_movement
 import constants as C
 
 #from folders
@@ -691,7 +691,8 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         player.velocity[0] += self.dir[0] * self.game_objects.game.dt
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * player.player_modifier.up_stream() + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
+        context = player.movement_manager.resolve()
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * 0.5 * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
 
     def player_noncollision(self):
         pass
@@ -991,7 +992,7 @@ class Player(Character):
 
         self.max_health = 10
         self.max_spirit = 4
-        self.health = 2
+        self.health = 10
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1011,16 +1012,17 @@ class Player(Character):
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
-        self.backpack = backpack.Backpack(self)
-        #self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
-        #self.inventory = {'Amber_droplet': 403, 'Bone': 2, 'Soul_essence': 10, 'Tungsten': 10}#the keys need to have the same name as their respective classes
-        #self.omamoris = Omamoris(self)#
+        self.backpack = backpack.Backpack(self)        
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
-        self.player_modifier = player_modifier.Player_modifier(self)#can modify friction, damage etc
+        
+        self.damage_manager = modifier_damage.Damage_manager(self)
+        self.movement_manager = modifier_movement.Movement_manager()
+
         self.colliding_platform = None#save the last collising platform
+        #self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -1038,30 +1040,35 @@ class Player(Character):
         super().left_collision(block, type)
         self.colliding_platform = block#save the latest platform
 
-    def take_dmg(self, dmg = 1, duration = 20):
-        self.player_modifier.take_dmg(dmg)#Tjasolmais_embrace can set player in invinsible
-        if self.flags['invincibility']: return
+    def update_vel(self):#called from hitsop_states
+        context = self.movement_manager.resolve()         
+        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*context.friction[1])#gravity
+        self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
+        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
 
-        self.flags['invincibility'] = True
-        self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
-        self.health -= dmg * self.dmg_scale#a omamori can set the dmg_scale to 0.5
-        self.game_objects.UI.hud.remove_hearts(dmg * self.dmg_scale)#update UI
+    def take_dmg(self, dmg = 1):#called from collisions
+        return self.damage_manager.take_damage(dmg)
+
+    def apply_damage(self, dmg):#called from damage_manager
+        self.flags['invincibility'] = True        
+        self.health -= dmg# * self.dmg_scale#a omamori can set the dmg_scale to 0.5
+        self.game_objects.UI.hud.remove_hearts(dmg)# * self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
             self.emit_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 
-            self.game_objects.time_manager.modify_time(time_scale = 0, duration = duration)
-            self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = duration, scale = 0.9)
+            self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)
+            self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
 
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
         else:#if health < 0
             self.game_objects.signals.emit('player_died')#emit a signal that player died
             self.death_state.die()#depending on gameplay state, different death stuff should happen
-        return True#return truw to show that damage was taken
 
     def die(self):#called from idle death_state, also called from vertical acid
         self.animation.update()#make sure you get the new animation
@@ -1071,7 +1078,7 @@ class Player(Character):
 
     def dead(self):#called when death animation is finished
         self.game_objects.world_state.update_statistcis('death')#count the number of times aila has died
-        self.game_objects.game.state_manager.enter_state(state_name = 'death')
+        self.game_objects.game.state_manager.enter_state(state_name = 'Death', category = 'game_states_cutscenes')
 
     def heal(self, health = 1):
         self.health += health
@@ -2461,12 +2468,23 @@ class Tjasolmais_embrace(Player_ability):#makes the shield, water god
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/tjasolmais_embrace/',entity.game_objects)
         self.description = ['shield','hits one additional target','one additional damage','imba']
-        #-> higher level can reflect projectiles? or maybe hurt enemy?
+        self.shield = None#-> higher level can reflect projectiles? or maybe hurt enemy?        
+
+    def shield_expire(self):#called when the shield is destroyed
+        self.entity.movement_manager.remove_modifier('Tjasolmais_embrace')
+        self.entity.damage_manager.remove_modifier('Tjasolmais_embrace')                
+        self.shield = None
+
+    def sword(self):#called when aila swings the sword
+        if self.shield: self.shield.kill()    
 
     def initiate(self):#called when using the abilty
-        shield = Shield(self.entity)
-        self.entity.player_modifier.enter_state('Tjasolmais_embrace', shield = shield)
-        self.entity.projectiles.add(shield)
+        if self.shield: self.shield.kill()    #kill the old one
+        self.shield = Shield(self.entity)
+        self.entity.movement_manager.add_modifier('Tjasolmais_embrace', entity = self.entity)
+        self.entity.damage_manager.add_modifier('Tjasolmais_embrace', entity = self.entity)
+
+        self.entity.projectiles.add(self.shield)
 
 class Bieggs_breath(Player_ability):#force push
     def __init__(self, entity):
@@ -3046,13 +3064,12 @@ class Shield(Projectiles):#a protection shield
         self.reflect_rect = self.hitbox.copy()
 
         self.time = 0
-        self.entity.flags['invincibility'] = True
         self.health = kwarg.get('health', 1)
         self.lifetime = kwarg.get('lifetime', 100)
         self.die = False
         self.progress = 0
 
-    def take_dmg(self, dmg):#called when entity takes damage
+    def take_damage(self, dmg):#called when entity takes damage
         if self.flags['invincibility']: return
         self.health -= dmg
 
@@ -3115,8 +3132,7 @@ class Shield(Projectiles):#a protection shield
 
     def kill(self):
         super().kill()
-        self.entity.flags['invincibility'] = False
-        self.entity.player_modifier.enter_state('Player_modifier')
+        self.entity.abilities.spirit_abilities['Shield'].shield_expire()
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         pass
@@ -3467,11 +3483,11 @@ class Half_dmg(Omamori):
 
     def attach(self):
         super().attach()
-        self.entity.dmg_scale = 0.5
+        self.entity.damage_manager.add_modifier('Half_dmg')
 
     def detach(self):
         super().detach()
-        self.entity.dmg_scale = 1
+        self.entity.damage_manager.remove_modifier('Half_dmg')
 
     @classmethod
     def pool(cls, game_objects):
@@ -3520,6 +3536,30 @@ class Boss_HP(Omamori):
     def pool(cls, game_objects):
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/boss_HP/',game_objects)#for inventor
         super().pool(game_objects)
+
+class Indincibillity(Omamori):#extends the invincibillity time
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)    
+
+class Runspeed(Omamori):#increase the runs speed
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)  
+
+class Dashpeed(Omamori):#decrease the dash cooldown?
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+
+class Shields(Omamori):#autoamtic shield that negates one damage, if have been outside combat for a while?
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+
+class Wallglue(Omamori):#to make aila stick to wall, insead of gliding?
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+
+class Hover(Omamori):#If holding jump button, make a small hover
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
 
 class Infinity_stones(Interactable_item):
     def __init__(self, pos, game_objects, **kwarg):
@@ -4576,8 +4616,8 @@ class Fast_travel(Interactable):
             self.locked = True#starts locked. After paying some ambers, it unlocks and fast travel is open
 
     def unlock(self):#called from Fast_travel_unlock
-        if self.game_objects.player.inventory['Amber_droplet'] > self.cost:
-            self.game_objects.player.inventory['Amber_droplet'] -= self.cost
+        if self.game_objects.player.backpack.inventory.get_quantity('amber_droplet') > self.cost:
+            self.game_objects.player.backpack.inventory.remove('amber_droplet', self.cost)
             self.locked = False
             Fast_travel.cost *= 5#increase by 5 for every unlock
             self.game_objects.backpack.map.save_travelpoint(self.map,self.init_cord)
@@ -4587,7 +4627,7 @@ class Fast_travel(Interactable):
 
     def interact(self):#when player press t/y
         if self.locked:
-            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', npc = self)
+            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', fast_travel = self)            
         else:
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
             self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_menu', category = 'game_states_facilities')
@@ -4771,7 +4811,7 @@ class Door_inter(Interactable): #game object for itneracting with locked door
 
     def interact(self):
         if type(self.door.currentstate).__name__ == 'Erect':
-            if self.game_objects.player.inventory.get(self.door.key, False):
+            if self.game_objects.player.backpack.inventory.get_quantity(self.door.key):
                 self.door.currentstate.handle_input('Transform')
                 if self.sfx: self.play_sfx()
             else:

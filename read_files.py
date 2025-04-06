@@ -314,13 +314,21 @@ class Alphabet():
 
         # **If text is empty or only spaces, return an empty transparent texture**
         if not visible_text.strip():
-            empty_surface = pygame.Surface(surface_size if surface_size else (1, 1), pygame.SRCALPHA, 32).convert_alpha()
+            if surface_size:
+                size = surface_size
+            else:
+                size = (1,1)
+            empty_surface = pygame.Surface(size, pygame.SRCALPHA, 32).convert_alpha()
             empty_surface.fill((0, 0, 0, 0))  # Transparent
             return self.game_objects.game.display.surface_to_texture(empty_surface)
 
         # Initialize
-        words = visible_text.split(" ")
-        max_width = surface_size[0] if surface_size else self.font.size(visible_text)[0]
+        words = visible_text.split(" ")        
+        if surface_size:
+            max_width = surface_size[0]
+        else:
+            max_width = self.font.size(visible_text)[0] + 1
+
         line_height = self.font.get_height()
         lines, line_widths = [], []
         current_line = ""
@@ -342,9 +350,10 @@ class Alphabet():
             lines.append(current_line)
             line_widths.append(self.font.size(current_line)[0])
 
-        # **Ensure surface is large enough**
-        total_height = len(lines) * line_height
-        surface_size = (max_width, total_height) if not surface_size else surface_size
+        # **Ensure surface is large enough**        
+        if not surface_size:
+            total_height = len(lines) * line_height
+            surface_size = (max_width, total_height)
 
         # Create transparent surface
         text_surface = pygame.Surface(surface_size, pygame.SRCALPHA, 32).convert_alpha()

@@ -50,7 +50,7 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
         super().render()
         self.cinematic()
 
-    def handle_movement(self):#every frame
+    def handle_movement(self):
         pass
 
     def cinematic(self):#black box stuff
@@ -250,7 +250,7 @@ class Death(Cutscene_engine):#when aila dies
 
     def update(self):
         super().update()
-        if self.game.state_stack[-1] != self: return#needed
+        #if self.game.state_manager.state_stack[-1] != self: return#needed
         self.timer += self.game.dt
         if self.stage == 0:
 
