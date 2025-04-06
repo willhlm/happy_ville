@@ -49,34 +49,49 @@ class HUD():
 
     def render(self):
 
+        #self.temp_screen = self.game_objects.game.display.make_layer((500,300))
+        #self.temp_screen.clear(0,0,0,0)
+
         h_pos = (14, 12)
         s_pos = (12, 12)
         frame_width = self.ability_hud[0].rect.width
         self.screen.clear(0,0,0,0)
+        offset = 5
 
         #self.game_objects.game.display.render(ability_frame.image, heart.image, self.screen, position=(16 * index, 0))
 
         for index,ability_hud in enumerate(self.ability_hud):#draw movement ability_hud
-            self.game_objects.game.display.render(ability_hud.image,self.screen, position = (0, 0))
+            self.game_objects.game.display.render(ability_hud.image,self.screen, position = (offset, offset))
 
         for index, heart in enumerate(self.hearts):#draw health
             if index == 0:
-                pos = (h_pos[0]*index + frame_width - 3, 7)
+                pos = (h_pos[0]*index + frame_width-3+offset, 7+offset)
             else:
-                pos = (h_pos[0]*index + frame_width - 5, h_pos[1])
+                pos = (h_pos[0]*index + frame_width-5+offset, h_pos[1]+offset)
             self.game_objects.game.display.render(heart.image,self.screen, position = pos)
 
         for index, spirit in enumerate(self.spirits):#draw spirit
             if index == 0:
-                pos = (5, s_pos[1] * index + frame_width - 3)
+                pos = (5+offset, s_pos[1] * index + frame_width - 3+offset)
             else:
-                pos = (s_pos[0], s_pos[1] * index + frame_width - 5)
+                pos = (s_pos[0]+offset, s_pos[1] * index + frame_width - 5+offset)
             self.game_objects.game.display.render(spirit.image,self.screen, position = pos)
 
         #for index,ability in enumerate(self.abilities):#draw ability symbols
         #    self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))
 
+        self.blur()
+
         self.game_objects.game.display.render(self.screen.texture,self.game_objects.game.screen,position = (20, 20))
+
+    def blur(self):#
+        shader = self.game_objects.shaders['blur_outline']
+        shader['blurRadius'] = 1
+        self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
+        empty_layer = self.game_objects.game.display.make_layer(self.screen.size)#need to be inside the loop to make new layers for each frame
+        self.game_objects.game.display.render(self.screen.texture, empty_layer, shader = shader)
+        self.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
+        self.screen = empty_layer
 
     def remove_hearts(self,dmg):#dmg is 0.5, 1 or 2. Will set the rellavant to hurt
         index = int(self.game_objects.player.health)-1
