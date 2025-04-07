@@ -24,6 +24,11 @@ class Movement_manager():
             mod.apply(context)
         return context
 
+    def update(self):
+        modifiers = self._sorted_modifiers.copy()
+        for mod in modifiers:
+            mod.update()
+
     def _sort_modifiers(self):
         self._sorted_modifiers = sorted(self.modifiers.values(), key = lambda m: m.priority, reverse = True)        
 
@@ -39,15 +44,35 @@ class Movement_modifier():
         self.priority = priority
 
     def apply(self, context):
-        pass        
+        pass      
 
-class Slippery(Movement_modifier):#if we want e.g. ice
-    def __init__(self, priority, multiplier = 0.5):
+    def update(self):
+        pass  
+
+class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
+    def __init__(self, priority):
         super().__init__(priority)
-        self.multiplier = multiplier
 
     def apply(self, context):
-        context.friction[0] *= self.multiplier
+        context.friction[1] = 0.4
+
+class Dash_jump(Movement_modifier):#should it instead be a general driction modifier?
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.entity = kwarg['entity']
+        self.friction = [0.15,0.01]  
+        self.target = Movement_context().friction[0]
+
+    def set_friction(self, friction):
+        self.friction = friction
+
+    def apply(self, context):
+        context.friction = self.friction.copy()
+
+    def update(self):
+        self.friction[0] += self.entity.game_objects.game.dt * 0.001
+        if abs(self.friction[0] - self.target) < 0.01:
+            self.entity.movement_manager.remove_modifier('Dash_jump')        
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):

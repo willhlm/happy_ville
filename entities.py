@@ -991,7 +991,7 @@ class Player(Character):
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
         self.max_health = 10
-        self.max_spirit = 4
+        self.max_spirit = 8
         self.health = 10
         self.spirit = 2
 
@@ -1015,7 +1015,7 @@ class Player(Character):
         self.backpack = backpack.Backpack(self)        
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
-        self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
         
         self.damage_manager = modifier_damage.Damage_manager(self)
@@ -1043,7 +1043,7 @@ class Player(Character):
     def update_vel(self):#called from hitsop_states
         context = self.movement_manager.resolve()         
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*context.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
+        self.velocity[1] = min(self.velocity[1], self.max_vel[1] * self.game_objects.game.dt)#set a y max speed#
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
 
     def take_dmg(self, dmg = 1):#called from collisions
@@ -1097,6 +1097,7 @@ class Player(Character):
         self.friction = C.friction_player.copy()
 
     def update(self):
+        self.movement_manager.update()#update the movement manager
         self.hitstop_states.update()
         self.backpack.necklace.update()
         self.update_timers()
@@ -4937,24 +4938,3 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
         pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
         obj1 = particles.Circle(pos, self.entity.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
         self.entity.game_objects.cosmetics.add(obj1)
-
-class Friction_status(Status):#gradually sets the friction to target
-    def __init__(self,entity, duration):
-        super().__init__(entity, duration)
-        self.target = C.friction_player[0]
-
-    def deactivate(self):
-        self.entity.friction[0] = self.target
-        if self not in self.entity.timers: return#do not remove if the timer is not inside
-        self.entity.timers.remove(self)
-
-    def activate(self, target = C.friction_player[0]):#add timer to the entity timer list
-        self.sign = sign(target - self.entity.friction[0])
-        self.target = target
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.entity.timers.append(self)
-
-    def update(self):
-        self.entity.friction[0] += self.sign * self.entity.game_objects.game.dt * 0.001
-        if abs(self.entity.friction[0] - self.target) < 0.01:
-            self.deactivate()

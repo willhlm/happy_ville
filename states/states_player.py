@@ -493,10 +493,9 @@ class Fall_main(Fall_pre):
 class Wall_glide_main(Player_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
         self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        self.entity.friction[1] = 0.4
+        self.entity.movement_manager.add_modifier('Wall_glide')        
         if self.entity.collision_types['right']:
             self.dir = [1,0]
         else:
@@ -548,14 +547,13 @@ class Wall_glide_main(Player_states):
             self.enter_state('Run_main')
 
     def enter_state(self, input, **kwarg):#reset friction before exiting this state
-        self.entity.friction[1] = C.friction_player[1]
+        self.entity.movement_manager.remove_modifier('Wall_glide')  
         super().enter_state(input, **kwarg)
 
 class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.timer_jobs['friction'].deactivate()#if there is a friction function applied, cancel it
-        self.entity.friction[1] = 0.4
+        self.entity.movement_manager.add_modifier('Wall_glide')  
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         if self.entity.states['Wall_glide']:
             self.entity.flags['ground'] = True
@@ -608,7 +606,7 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
             self.enter_state('Run_main')
 
     def enter_state(self,input):#reset friction before exiting this state
-        self.entity.friction[1] = C.friction_player[1]
+        self.entity.movement_manager.remove_modifier('Wall_glide')  
         super().enter_state(input)
 
 class Air_dash_pre(Player_states):
@@ -741,7 +739,7 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
-        self.entity.friction = [0.15,0.01]
+        self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)  
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.dash_jump_vel_player
         self.buffer_time = C.jump_dash_wall_timer
@@ -803,7 +801,6 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
             else:
                 self.enter_state('Run_main')
         else:
-            self.entity.timer_jobs['friction'].activate()
             self.enter_state('Fall_pre')
 
 class Death_pre(Player_states):
