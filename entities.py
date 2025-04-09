@@ -640,7 +640,7 @@ class TwoD_liquid(Staticentity):
 
     def player_collision(self, player):#player collision
         if self.interacted: return
-        player.friction = [player.friction[0] * 2, player.friction[1] * 2]
+        player.movement_manager.add_modifier('TwoD_liquid')
         vel_scale = player.velocity[1] / C.max_vel[1]
         self.splash(player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
         player.timer_jobs['wet'].deactivate()#stop dropping if inside the water again
@@ -649,7 +649,7 @@ class TwoD_liquid(Staticentity):
 
     def player_noncollision(self):
         if not self.interacted: return
-        self.game_objects.player.friction = C.friction_player.copy()
+        self.game_objects.player.movement_manager.remove_modifier('TwoD_liquid')
         self.game_objects.player.timer_jobs['wet'].activate(self.currentstate.liquid_tint)#water when player leaves
         vel_scale = abs(self.game_objects.player.velocity[1] / C.max_vel[1])
         self.splash(self.game_objects.player.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [10 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
@@ -1015,7 +1015,7 @@ class Player(Character):
         self.backpack = backpack.Backpack(self)
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
-        self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
+        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
 
         self.damage_manager = modifier_damage.Damage_manager(self)
@@ -1043,7 +1043,7 @@ class Player(Character):
     def update_vel(self):#called from hitsop_states
         context = self.movement_manager.resolve()
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*context.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
+        self.velocity[1] = min(self.velocity[1], self.max_vel[1] )#set a y max speed#
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
 
     def take_dmg(self, dmg = 1):#called from collisions
@@ -1097,6 +1097,7 @@ class Player(Character):
         self.friction = C.friction_player.copy()
 
     def update(self):
+        self.movement_manager.update()#update the movement manager
         self.hitstop_states.update()
         self.backpack.necklace.update()
         self.update_timers()
@@ -2511,20 +2512,47 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
-        self.duration = 200#slow motion duration, in time [whatever units]
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/projectiles/beaivis_time/')
+        self.duration = 10#slow motion duration, in time [whatever units]
         self.rate = 0.5#slow motion rate
-        self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
+        self.description = ['slow motion','slow motion but aila']
+        self.channels = []
 
     def initiate(self):#called when using the ability from player states
+        self.entity.game_objects.fprojectiles.add(Counter(self.entity, dir = (0,0), lifetime = self.duration))
+
+    def counter(self):#called from counter if sucsesfully countered
+        self.channels.append(self.entity.game_objects.sound.play_sfx(self.sounds['counter'][0], loop = -1, vol = 0.5))
+        self.channels.append(self.entity.game_objects.sound.play_sfx(self.sounds['woosh'][0], vol = 0.5))
+
         self.game_objects.time_manager.modify_time(time_scale = self.rate, duration = self.duration)#sow motion
+        self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)#freeze
+        self.entity.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
+        self.entity.emit_particles(lifetime = 40, scale=3, colour=C.spirit_colour, fade_scale = 7,  number_particles = 60 , gradient = 1)
+        self.entity.game_objects.cosmetics.add(Slash(self.entity.hitbox.center,self.game_objects))#make a slash animation
+
+        self.entity.currentstate.enter_state('Air_dash_pre')#what should the player do?
+
+        self.game_objects.shader_render.append_shader('white_balance', temperature = 0.2)#change the tone of screen
+        #self.game_objects.shader_render.append_shader('zoom', scale = 0.8)
+
+        #maybe make attacks double the damage?
+        #get spirit?
+        #add particles, screen shaske, bloom? zoom in?
+        #add echo FX, heart beat, slow pitch drop
+        # ability symbol pulses
+        #reposigion behind the enemy/projectile?
+        #give free dash?
+        #summon a phantom copy that repeats your last attack when time resumes.
+        #upgrade, freeze enemy?
+
+    def exit(self):
+        self.game_objects.shader_render.remove_shader('white_balance')
+        for channel in self.channels:
+            self.entity.game_objects.sound.fade_sound(channel)
 
     def upgrade_ability(self):#called from upgrade menu
-        self.level += 1
-        if self.level == 3:
-            self.entity.slow_motion = 1/self.rate#can make aila move normal speed
-            self.duration = 400#slow motion duration, in time [whatever units]
-        elif self.level == 2:
-            self.duration = 400#slow motion duration, in time [whatever units]
+        self.entity.slow_motion = 1/self.rate#can make aila move normal speed
 
 class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
     def __init__(self, entity):
@@ -2857,31 +2885,35 @@ class Explosion(Melee):
     def reset_timer(self):
         self.kill()
 
-class Reflect(Melee):#pressing k
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/hurt_box/',entity.game_objects)
-        self.image = self.sprites['idle'][0]
-        self.rect = self.entity.hitbox.copy()#pygame.Rect(self.entity.rect[0],self.entity.rect[1],20,40)
-        self.hitbox = self.rect.copy()
+class Counter(Melee):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity, **kwarg)
+        self.hitbox = self.entity.hitbox.copy()
         self.dmg = 0
-        self.lifetime = 25
+        self.entity.flags['invincibility'] = True#make the player invincible
 
-    def update_hitbox(self):
-        if self.dir[0] > 0:#right
-            self.hitbox.midleft=self.entity.hitbox.midright
-        elif self.dir[0] < 0:#left
-            self.hitbox.midright=self.entity.hitbox.midleft
-        self.rect.center=self.hitbox.center#match the positions of hitboxes
+    def update(self):
+        self.lifetime -= self.game_objects.game.dt
+        self.destroy()
 
-    def collision_enemy(self,collision_enemy):
-        collision_enemy.countered()
-        self.kill()
+    def collision_enemy(self, collision_enemy):
+        self.counter()
 
-    def collision_projectile(self,eprojectile):
-        return
-        self.entity.projectiles.add(eprojectile)#add the projectilce to Ailas projectile group
-        eprojectile.countered(self.dir,self.rect.center)
+    def collision_projectile(self, eprojectile):
+        self.counter()
+
+    def counter(self):
+        if self.flags['invincibility']: return#such that it only collides ones
+        self.flags['invincibility'] = True
+        self.entity.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.entity.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
+        self.entity.abilities.spirit_abilities['Slow_motion'].counter()#slow motion
+
+    def kill(self):
+        super().kill()
+        self.entity.abilities.spirit_abilities['Slow_motion'].exit()
+
+    def draw(self, target):
+        pass
 
 class Sword(Melee):
     def __init__(self,entity):
@@ -4937,24 +4969,3 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
         pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
         obj1 = particles.Circle(pos, self.entity.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
         self.entity.game_objects.cosmetics.add(obj1)
-
-class Friction_status(Status):#gradually sets the friction to target
-    def __init__(self,entity, duration):
-        super().__init__(entity, duration)
-        self.target = C.friction_player[0]
-
-    def deactivate(self):
-        self.entity.friction[0] = self.target
-        if self not in self.entity.timers: return#do not remove if the timer is not inside
-        self.entity.timers.remove(self)
-
-    def activate(self, target = C.friction_player[0]):#add timer to the entity timer list
-        self.sign = sign(target - self.entity.friction[0])
-        self.target = target
-        if self in self.entity.timers: return#do not append if the timer is already inside
-        self.entity.timers.append(self)
-
-    def update(self):
-        self.entity.friction[0] += self.sign * self.entity.game_objects.game.dt * 0.001
-        if abs(self.entity.friction[0] - self.target) < 0.01:
-            self.deactivate()

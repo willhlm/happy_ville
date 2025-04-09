@@ -78,38 +78,20 @@ class Bloom(Shaders):
 class White_balance(Shaders):
     def __init__(self, renderer, **kwarg):
         super().__init__(renderer)
+        self.temperature = kwarg.get('temperature', 0.2)
+        self.init_temperature = 0
+
+    def update(self):
+        self.init_temperature += self.renderer.game_objects.game.dt*0.01
+        self.init_temperature = min(self.init_temperature, self.temperature)
 
     def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.renderer.game_objects.shaders['white_balance']['temperature'] = self.init_temperature
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['white_balance'])#shader render
         return self.renderer.layer.texture
 
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
-
-class Speed_lines(Shaders):
-    def __init__(self, renderer, **kwarg):
-        super().__init__(renderer)
-        self.time = 0
-
-    def update(self):
-        self.time += self.renderer.game_objects.game.dt*0.1
-
-    def set_uniforms(self):
-        self.renderer.game_objects.shaders['noise_perlin']['u_resolution'] = self.renderer.game_objects.game.window_size
-        self.renderer.game_objects.shaders['noise_perlin']['u_time'] = self.time
-        self.renderer.game_objects.shaders['noise_perlin']['scroll'] = [0,0]# [self.parallax[0]*self.game_objects.camera.scroll[0],self.parallax[1]*self.game_objects.camera.scroll[1]]
-        self.renderer.game_objects.shaders['noise_perlin']['scale'] = [70,200]
-
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
-        self.set_uniforms()
-        self.renderer.game_objects.game.display.render(self.renderer.layer.texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['noise_perlin'])#make perlin noise texture
-
-        self.renderer.game_objects.shaders['speed_lines']['TIME'] = self.time
-        self.renderer.game_objects.shaders['speed_lines']['noise'] = self.renderer.layer.texture
-
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, shader = self.renderer.game_objects.shaders['speed_lines'])#shader render
-
-        return self.renderer.game_objects.game.screen
 
 class Zoom(Shaders):#only zoom in?
     def __init__(self, renderer, **kwarg):
@@ -145,9 +127,12 @@ class Zoom(Shaders):#only zoom in?
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, shader = self.renderer.game_objects.shaders['zoom'])#makes a zoomed copy of the screen
         self.renderer.game_objects.game.display.render(self.renderer.layer.texture, self.renderer.game_objects.game.screen, flip = [False, True])#shader render
-        return self.renderer.game_objects.game.screen
+        return self.renderer.game_objects.game.screen.texture
 
-class Speed_lines(Shaders):#only zoom in?
+    def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
+        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
+
+class Speed_lines(Shaders):
     def __init__(self, renderer, **kwarg):
         super().__init__(renderer)
         self.noise_layer = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
