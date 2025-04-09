@@ -299,10 +299,10 @@ class Alphabet2():
         return self.game_objects.game.display.surface_to_texture(surface)
 
 class Alphabet():
-    def __init__(self, game_objects, font_name = None, font_size = 12):
+    def __init__(self, game_objects, font_name = None, font_size = 16):
         self.game_objects = game_objects
         pygame.font.init()
-        self.font = pygame.font.Font('Sprites/utils/fonts/8BitSnobbery' + '.ttf', font_size)
+        self.font = pygame.font.Font('Sprites/utils/fonts/Arpegius' + '.ttf', font_size)
         self.text_bg_dict = {'default':generic_sheet_reader("Sprites/utils/text_bg5.png",16,16,3,3), 'text_bubble':generic_sheet_reader("Sprites/utils/text_bg6.png",16,16,3,3)}
 
     def get_height(self):
@@ -323,7 +323,7 @@ class Alphabet():
             return self.game_objects.game.display.surface_to_texture(empty_surface)
 
         # Initialize
-        words = visible_text.split(" ")        
+        words = visible_text.split(" ")
         if surface_size:
             max_width = surface_size[0]
         else:
@@ -350,7 +350,7 @@ class Alphabet():
             lines.append(current_line)
             line_widths.append(self.font.size(current_line)[0])
 
-        # **Ensure surface is large enough**        
+        # **Ensure surface is large enough**
         if not surface_size:
             total_height = len(lines) * line_height
             surface_size = (max_width, total_height)

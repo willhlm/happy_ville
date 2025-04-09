@@ -990,9 +990,9 @@ class Player(Character):
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
 
-        self.max_health = 10
+        self.max_health = 15
         self.max_spirit = 4
-        self.health = 10
+        self.health = 5
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1012,12 +1012,12 @@ class Player(Character):
         self.currentstate = states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
-        self.backpack = backpack.Backpack(self)        
+        self.backpack = backpack.Backpack(self)
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
         self.timer_jobs = {'wet': Wet_status(self, 60), 'friction': Friction_status(self, 1)}#these timers are activated when promt and a job is appeneded to self.timer.
         self.reset_movement()
-        
+
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
 
@@ -1041,7 +1041,7 @@ class Player(Character):
         self.colliding_platform = block#save the latest platform
 
     def update_vel(self):#called from hitsop_states
-        context = self.movement_manager.resolve()         
+        context = self.movement_manager.resolve()
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*context.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
@@ -1050,7 +1050,7 @@ class Player(Character):
         return self.damage_manager.take_damage(dmg)
 
     def apply_damage(self, dmg):#called from damage_manager
-        self.flags['invincibility'] = True        
+        self.flags['invincibility'] = True
         self.health -= dmg# * self.dmg_scale#a omamori can set the dmg_scale to 0.5
         self.game_objects.UI.hud.remove_hearts(dmg)# * self.dmg_scale)#update UI
 
@@ -2468,15 +2468,15 @@ class Tjasolmais_embrace(Player_ability):#makes the shield, water god
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/tjasolmais_embrace/',entity.game_objects)
         self.description = ['shield','hits one additional target','one additional damage','imba']
-        self.shield = None#-> higher level can reflect projectiles? or maybe hurt enemy?        
+        self.shield = None#-> higher level can reflect projectiles? or maybe hurt enemy?
 
     def shield_expire(self):#called when the shield is destroyed
         self.entity.movement_manager.remove_modifier('Tjasolmais_embrace')
-        self.entity.damage_manager.remove_modifier('Tjasolmais_embrace')                
+        self.entity.damage_manager.remove_modifier('Tjasolmais_embrace')
         self.shield = None
 
     def sword(self):#called when aila swings the sword
-        if self.shield: self.shield.kill()    
+        if self.shield: self.shield.kill()
 
     def initiate(self):#called when using the abilty
         if self.shield: self.shield.kill()    #kill the old one
@@ -3539,27 +3539,27 @@ class Boss_HP(Omamori):
 
 class Indincibillity(Omamori):#extends the invincibillity time
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)    
+        super().__init__(pos, game_objects, **kwarg)
 
 class Runspeed(Omamori):#increase the runs speed
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)  
+        super().__init__(pos, game_objects, **kwarg)
 
 class Dashpeed(Omamori):#decrease the dash cooldown?
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg) 
+        super().__init__(pos, game_objects, **kwarg)
 
 class Shields(Omamori):#autoamtic shield that negates one damage, if have been outside combat for a while?
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg) 
+        super().__init__(pos, game_objects, **kwarg)
 
 class Wallglue(Omamori):#to make aila stick to wall, insead of gliding?
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg) 
+        super().__init__(pos, game_objects, **kwarg)
 
 class Hover(Omamori):#If holding jump button, make a small hover
     def __init__(self,pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg) 
+        super().__init__(pos, game_objects, **kwarg)
 
 class Infinity_stones(Interactable_item):
     def __init__(self, pos, game_objects, **kwarg):
@@ -4627,7 +4627,7 @@ class Fast_travel(Interactable):
 
     def interact(self):#when player press t/y
         if self.locked:
-            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', fast_travel = self)            
+            self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_unlock', category = 'game_states_facilities', fast_travel = self)
         else:
             self.currentstate.handle_input('Once',animation_name = 'once',next_state='Idle')
             self.game_objects.game.state_manager.enter_state(state_name = 'Fast_travel_menu', category = 'game_states_facilities')
