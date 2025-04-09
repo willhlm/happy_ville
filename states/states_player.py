@@ -50,7 +50,7 @@ class Idle_main(Player_states):
             self.enter_state('Fall_pre')
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
-    def handle_press_input(self,input):
+    def handle_press_input(self, input):
         event = input.output()
         if event[-1] == 'a':
             input.processed()
@@ -614,7 +614,7 @@ class Air_dash_pre(Player_states):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
         self.dash_length = C.dash_length
-        self.entity.shader_state.handle_input('motion_blur')
+        self.entity.shader_state.handle_input('motion_blur')        
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
         pass
@@ -650,7 +650,7 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
     def __init__(self, entity):
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
-        self.entity.consume_spirit(1)
+        self.entity.consume_spirit(1)        
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
 
     def exit_state(self):
@@ -714,7 +714,7 @@ class Ground_dash_main(Air_dash_pre):#level one dash: normal
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][1])
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
 
     def increase_phase(self):
         self.enter_state('Ground_dash_post')

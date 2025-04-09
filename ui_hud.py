@@ -25,7 +25,7 @@ class HUD():
         self.update_spirits()
 
     def init_ability(self):
-        self.ability_hud=[]#the hud
+        self.ability_hud = []#the hud
         #for i in range(0,self.game_objects.player.abilities.number):
         self.ability_hud.append(entities_UI.Movement_hud(self.game_objects.player))#the ability object
 
@@ -80,18 +80,8 @@ class HUD():
         #for index,ability in enumerate(self.abilities):#draw ability symbols
         #    self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))
 
-        self.blur()
-
-        self.game_objects.game.display.render(self.screen.texture,self.game_objects.game.screen,position = (20, 20))
-
-    def blur(self):#
-        shader = self.game_objects.shaders['blur_outline']
-        shader['blurRadius'] = 1
-        self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
-        empty_layer = self.game_objects.game.display.make_layer(self.screen.size)#need to be inside the loop to make new layers for each frame
-        self.game_objects.game.display.render(self.screen.texture, empty_layer, shader = shader)
-        self.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
-        self.screen = empty_layer
+        self.game_objects.shaders['blur_outline']['blurRadius'] = 1
+        self.game_objects.game.display.render(self.screen.texture, self.game_objects.game.screen, position = (20, 20), shader = self.game_objects.shaders['blur_outline'])
 
     def remove_hearts(self,dmg):#dmg is 0.5, 1 or 2. Will set the rellavant to hurt
         index = int(self.game_objects.player.health)-1

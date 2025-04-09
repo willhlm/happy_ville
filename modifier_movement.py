@@ -46,7 +46,7 @@ class Movement_modifier():
     def apply(self, context):
         pass      
 
-    def update(self):
+    def update(self):#called from aila update
         pass  
 
 class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
@@ -56,22 +56,30 @@ class Wall_glide(Movement_modifier):#should it instead be a general driction mod
     def apply(self, context):
         context.friction[1] = 0.4
 
+class TwoD_liquid(Movement_modifier):#should it instead be a general driction modifier?
+    def __init__(self, priority):
+        super().__init__(priority)
+
+    def apply(self, context):
+        context.friction[0] *= 2
+        context.friction[1] *= 2
+
 class Dash_jump(Movement_modifier):#should it instead be a general driction modifier?
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
-        self.friction = [0.15,0.01]  
+        self.friction = 0.15  
         self.target = Movement_context().friction[0]
 
     def set_friction(self, friction):
         self.friction = friction
 
     def apply(self, context):
-        context.friction = self.friction.copy()
+        context.friction[0] = self.friction
 
     def update(self):
-        self.friction[0] += self.entity.game_objects.game.dt * 0.001
-        if abs(self.friction[0] - self.target) < 0.01:
+        self.friction += self.entity.game_objects.game.dt * 0.001
+        if abs(self.friction - self.target) < 0.01:
             self.entity.movement_manager.remove_modifier('Dash_jump')        
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
