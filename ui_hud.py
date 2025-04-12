@@ -45,11 +45,15 @@ class HUD():
     def init_money(self):
         self.money_frame = entities_UI.Money_frame(self.game_objects.player)
 
-        string = '9'
+        string = '0'
         self.money_image = self.game_objects.font.render((50,20),string)
 
         self.money_pos = (self.offset, 50)
-        self.number_pos = (self.offset + 23, 55)
+        self.number_pos = (self.offset + 24, 55)
+
+    def update_money(self, num):
+        string = str(num)
+        self.money_image = self.game_objects.font.render((50,20), string)
 
     def update(self):
         for heart in self.hearts:

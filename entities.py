@@ -815,7 +815,7 @@ class Arrow_UI(Staticentity):#for thuder charge state
 
 class Thunder_ball(Staticentity):#not used
     def __init__(self, pos, game_objects, size):
-        super().__init__(pos, game_objects)        
+        super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
         self.size = size
         self.time = 0
@@ -1153,7 +1153,7 @@ class Enemy(Character):
         self.currentstate = states_enemy.Idle(self)
         self.AI = AI_enemy.AI(self)
 
-        self.inventory = {'Amber_droplet':random.randint(0,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
+        self.inventory = {'Amber_droplet':random.randint(5,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
         self.health = 3
 
@@ -2546,11 +2546,11 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
 
         self.game_objects.time_manager.modify_time(time_scale = self.rate, duration = self.duration)#sow motion
         self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)#freeze
-        self.entity.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)        
+        self.entity.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
         self.entity.emit_particles(lifetime = 40, scale=3, colour=C.spirit_colour, fade_scale = 7, number_particles = 60 , gradient = 1)
         self.entity.game_objects.cosmetics.add(Slash(self.entity.hitbox.center,self.game_objects))#make a slash animation
-        
-        self.entity.currentstate.enter_state('Air_dash_pre')#what should the player do?        
+
+        self.entity.currentstate.enter_state('Air_dash_pre')#what should the player do?
         self.game_objects.shader_render.append_shader('white_balance', temperature = 0.2)#change the tone of screen
         #self.game_objects.shader_render.append_shader('zoom', scale = 0.8)
 
@@ -3368,6 +3368,9 @@ class Amber_droplet(Enemy_drop):
     def player_collision(self,player):#when the player collides with this object
         super().player_collision(player)
         self.game_objects.world_state.update_statistcis('amber_droplet')
+        name = self.__class__.__name__.lower()
+        tot_amber = player.backpack.inventory.get_quantity(name)
+        self.game_objects.UI.hud.update_money(tot_amber)
 
     def pool(game_objects):#all things that should be saved in object pool
         Amber_droplet.sprites = read_files.load_sprites_dict('Sprites/enteties/items/amber_droplet/',game_objects)
@@ -3471,7 +3474,7 @@ class Tungsten(Interactable_item):
         self.description = 'A heavy rock'
 
     def pickup(self, player):
-        super().pickup(player)        
+        super().pickup(player)
         player.backpack.inventory.add('tungsten')
 
     @classmethod
