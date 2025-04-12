@@ -20,18 +20,17 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
 
 class Inventory():
     def __init__(self):
-        self.items = {}  # Stores items and their quantities
+        self.items = {}# { "healthpotion": 3, "amber": 1 }
 
-    def add(self, item, quantity = 1):  # Allow adding multiple at once
-        item_name = type(item).__name__.lower()
-        self.items.setdefault(item_name, {'item': item, 'quantity': 0})
-        self.items[item_name]['quantity'] += quantity
+    def add(self, item_name, quantity = 1):  # Allow adding multiple at once
+        self.items.setdefault(item_name, 0)
+        self.items[item_name] += quantity
 
     def remove(self, item_name, quantity = 1):
-        self.items[item_name]['quantity'] -= quantity
+        self.items[item_name] -= quantity
     
     def get_quantity(self, item_name):#return quantity. If item doesn't exist, return 0
-        return self.items.get(item_name, {}).get('quantity', 0)
+        return self.items.get(item_name, 0)
 
 class Map():        
     def __init__(self):

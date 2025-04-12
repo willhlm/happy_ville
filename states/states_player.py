@@ -1,4 +1,4 @@
-import sound, entities, sys, random, math, particles
+import entities, sys, random, math
 from states_entity import Entity_States
 import constants as C
 
@@ -63,7 +63,10 @@ class Idle_main(Player_states):
             self.swing_sword()
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
-            self.do_ability()
+            self.do_ability()        
+        elif event[-1]=='rt':#depends on if the abillities have pre or main animation
+            input.processed()
+            self.enter_state('Heal_pre')              
 
     def handle_release_input(self, input):
         event = input.output()
@@ -348,7 +351,7 @@ class Jump_main(Player_states):
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
         self.entity.velocity[1] = C.jump_vel_player
-
+        #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
@@ -404,31 +407,6 @@ class Jump_main(Player_states):
             state = 'Sword_jump' + str(int(self.entity.sword.swing)+1)+'_main'
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
-
-class Double_jump_pre(Player_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.init()
-
-    def init(self):
-        self.entity.velocity[1] = C.jump_vel_player
-
-    def update(self):
-        if self.entity.velocity[1] > 0:#falling down
-            self.enter_state('Fall_pre')
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        self.enter_state('Double_jump_main')
-
-class Double_jump_main(Double_jump_pre):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def init(self):
-        pass
-
-    def increase_phase(self):#called when an animation is finihed for that state
-        pass
 
 class Fall_pre(Player_states):
     def __init__(self, entity, **kwarg):
@@ -489,6 +467,41 @@ class Fall_main(Fall_pre):
 
     def increase_phase(self):#called when an animation is finihed for that state
         pass
+
+class Heal_pre(Player_states):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+
+    def handle_release_input(self, input):
+        event = input.output()  
+        if event[-1] == 'rt':#if releasing the button
+            input.processed()   
+            self.enter_state('Idle_main')
+
+    def handle_movement(self, event):
+        pass
+
+    def increase_phase(self):
+        self.enter_state('Heal_main')    
+
+class Heal_main(Player_states):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)     
+        self.heal_cost = 1   
+
+    def handle_release_input(self, input):
+        event = input.output()        
+        if event[-1] == 'rt':#if releasing the button
+            input.processed()   
+            self.enter_state('Idle_main')
+
+    def handle_movement(self, event):
+        pass
+
+    def increase_phase(self):
+        self.entity.heal()
+        self.entity.backpack.inventory.remove('amber_droplet', self.heal_cost)
+        self.enter_state('Heal_main')   
 
 class Wall_glide_main(Player_states):
     def __init__(self, entity, **kwarg):
@@ -555,7 +568,7 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
         super().__init__(entity)
         self.entity.movement_manager.add_modifier('Wall_glide')  
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        if self.entity.states['Wall_glide']:
+        if self.entity.states['Wall_glide']:#can jump if wall glide has been unlocked
             self.entity.flags['ground'] = True
 
     def update(self):#is needed
@@ -693,14 +706,15 @@ class Ground_dash_pre(Air_dash_pre):
         event = input.output()
         if event[-1] == 'a':
             input.processed()
-            self.enter_state('Dash_jump_main')
+            if self.time >0: self.enter_state('Dash_jump_main')
 
-    def handle_input(self, input, **kwarg):
-        if input == 'jump':
-            if self.time >0:
-                self.enter_state('Dash_jump_main')
-        elif input == 'interrupt':
-            self.enter_state('Idle_main')
+    #def handle_input(self, input, **kwarg):
+    #    print(input)
+    #    if input == 'jump':
+    #        if self.time >0:
+    #            self.enter_state('Dash_jump_main')
+    #    elif input == 'interrupt':
+    #        self.enter_state('Idle_main')
 
     def exit_state(self):
         if self.dash_length < 0:

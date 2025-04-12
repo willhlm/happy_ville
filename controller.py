@@ -51,8 +51,8 @@ class Controller():
         self.last_input = {
             'l_stick': {'value':[0,0],'time':0},
             'r_stick': {'value':[0,0],'time':0}, #not used
-            'l_trigger': 0, #not used
-            'r_trigger': 0 #not used
+            'l_trigger': 0, 
+            'r_trigger': 0
         }
 
     def map_joystick(self):
@@ -90,7 +90,7 @@ class Controller():
             pygame.K_i: "select",
             pygame.K_LSHIFT: "lb",
             pygame.K_RETURN: "return",
-            pygame.K_k: "rt",
+            #pygame.K_h: "rt",
         }
 
     def map_inputs(self, event):
@@ -129,39 +129,53 @@ class Controller():
             self.keyup = True
             self.key = self.joystick_map.get(event.button, None)
             if self.key: self.insert_buffer()
-
+        
         if event.type == pygame.CONTROLLERAXISMOTION:
-            return
             if event.axis == pygame.CONTROLLER_AXIS_TRIGGERLEFT:
                 self.value["l_trigger"] = self.normalize_axis(event.value)
-            if event.axis == pygame.CONTROLLER_AXIS_TRIGGERRIGHT:
-                self.value["r_trigger"] = self.normalize_axis(event.value)
-            self.insert_buffer()
+                self.insert_buffer()                
+                
+            if event.axis == pygame.CONTROLLER_AXIS_TRIGGERRIGHT:            
+                self.value["r_trigger"] = self.normalize_axis(event.value)   
+                if self.value["r_trigger"] - self.last_input["r_trigger"] > 0:#pressing
+                    if self.value["r_trigger"] > 0.5:
+                        self.keydown = True
+                        self.key = 'rt'
+                        self.insert_buffer()
+                        self.last_input["r_trigger"] = self.value["r_trigger"]
+                else:#releasing
+                    if self.value["r_trigger"] < 0.5:
+                        self.keyup = True
+                        self.key = 'rt'
+                        self.insert_buffer()  
+                        self.last_input["r_trigger"] = self.value["r_trigger"]                      
 
     @staticmethod
     def normalize_axis(value):
         return value / 32768.0#value taken from documentation
 
-    def continuous_input_checks(self):#caled every frame
+    def continuous_input_checks(self):#caled every frame from game
         keys = pygame.key.get_pressed()
         self.value['l_stick'] = [0,0]
         self.value['r_stick'] = [0,0]
+        self.value['r_trigger'] = 0
 
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT]:#keyboard
             self.value["l_stick"][0] = 1
         if keys[pygame.K_LEFT]:
             self.value["l_stick"][0] = -1
         if keys[pygame.K_UP]:
             self.value["l_stick"][1] = -1
         if keys[pygame.K_DOWN]:
-            self.value["l_stick"][1] = 1
+            self.value["l_stick"][1] = 1      
 
-        for controller in self.controllers:
+        for controller in self.controllers:#controller
             l_axis_x = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_LEFTX))
             l_axis_y = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_LEFTY))
 
             r_axis_x = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTX))
             r_axis_y = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTY))
+
 
             if abs(l_axis_x) > 0.2:
                 self.value["l_stick"][0] = l_axis_x
@@ -173,7 +187,7 @@ class Controller():
             if abs(r_axis_x) > 0.1:
                 self.value["r_stick"][0] = r_axis_x
             if abs(r_axis_y) > 0.1:
-                self.value["r_stick"][1] = r_axis_y
+                self.value["r_stick"][1] = r_axis_y                
 
         self.discrete_inputs_UI()#continious inout are made discrete for UI (UI relies on input buffer: player movement can read difrectly self.value)
 
@@ -183,17 +197,17 @@ class Controller():
 
         # Check if a significant change occurred in the stick position
         significant_change = (
-            abs(l_stick[0] - self.last_input['l_stick']['value'][0]) > 0.5 or
-            abs(l_stick[1] - self.last_input['l_stick']['value'][1]) > 0.5
+            abs(l_stick[0] - self.last_input['l_stick']['value'][0]) > 0.9 or
+            abs(l_stick[1] - self.last_input['l_stick']['value'][1]) > 0.9
         )
         
         if significant_change or (current_time - self.last_input['l_stick']['time'] > self.input_cooldown):
-            if abs(l_stick[0]) > 0.5 or abs(l_stick[1]) > 0.5:  # Threshold to consider as input
+            if abs(l_stick[0]) > 0.9 or abs(l_stick[1]) > 0.9:  # Threshold to consider as input
                 self.keyup, self.keydown, self.key = False, False, None
                 self.insert_buffer()
                 self.last_input['l_stick']['time'] = current_time  # Update cooldown timer
                 self.last_input['l_stick']['value'] = l_stick.copy()  # Update last stick position
-
+                
     def insert_buffer(self):
         self.input_buffer.add(Inputs(self, self.key, self.keydown, self.keyup, self.value))
 

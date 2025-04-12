@@ -82,7 +82,7 @@ class InventoryUI(BaseUI):
         key_items = self.iventory_UI.key_items#a dict of empty key items
         index = 0
         for key in self.game_objects.player.backpack.inventory.items.keys():#crease the object in inventory and sepeerate between useable items and key items
-            item = self.game_objects.player.backpack.inventory.items[key]['item']
+            item = getattr(entities, key.capitalize())([0,0], self.game_objects)            
             if hasattr(item, 'use_item'):#usable items
                 item.rect.topleft = items[index].rect.topleft
                 item.number = self.game_objects.player.backpack.inventory.get_quantity(key)#number of items euirepped
