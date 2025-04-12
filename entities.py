@@ -813,6 +813,23 @@ class Arrow_UI(Staticentity):#for thuder charge state
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['arrow'])#shader render
 
+class Thunder_ball(Staticentity):#not used
+    def __init__(self, pos, game_objects, size):
+        super().__init__(pos, game_objects)        
+        self.image = game_objects.game.display.make_layer(size)
+        self.size = size
+        self.time = 0
+
+    def update(self):
+        self.time += self.entity.game_objects.game.dt*0.01
+
+    def draw(self, target):
+        self.entity.game_objects.shaders['thunder_ball']['iTime'] = self.time
+        self.entity.game_objects.shaders['thunder_ball']['iResolution'] = self.size
+
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['thunder_ball'])#shader render
+
 #normal animation
 class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
     def __init__(self,pos,game_objects):
@@ -1006,7 +1023,8 @@ class Player(Character):
                      'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
                      'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
                      'Thunder':True,'Shield':True, 'Slow_motion':True,
-                     'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True}
+                     'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True,
+                     'Heal': True}
 
         self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
         self.currentstate = states_player.Idle_main(self)
@@ -1022,7 +1040,7 @@ class Player(Character):
         self.movement_manager = modifier_movement.Movement_manager()
 
         self.colliding_platform = None#save the last collising platform
-        #self.shader_state = states_shader.Aura(self)
+        #self.shader_state = states_shader.Thunder_ball(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -1043,7 +1061,7 @@ class Player(Character):
     def update_vel(self):#called from hitsop_states
         context = self.movement_manager.resolve()
         self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*context.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1], self.max_vel[1] )#set a y max speed#
+        self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
 
     def take_dmg(self, dmg = 1):#called from collisions
@@ -1095,6 +1113,7 @@ class Player(Character):
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
+        self.time = 0
 
     def update(self):
         self.movement_manager.update()#update the movement manager
@@ -2527,12 +2546,11 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
 
         self.game_objects.time_manager.modify_time(time_scale = self.rate, duration = self.duration)#sow motion
         self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)#freeze
-        self.entity.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
-        self.entity.emit_particles(lifetime = 40, scale=3, colour=C.spirit_colour, fade_scale = 7,  number_particles = 60 , gradient = 1)
+        self.entity.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)        
+        self.entity.emit_particles(lifetime = 40, scale=3, colour=C.spirit_colour, fade_scale = 7, number_particles = 60 , gradient = 1)
         self.entity.game_objects.cosmetics.add(Slash(self.entity.hitbox.center,self.game_objects))#make a slash animation
-
-        self.entity.currentstate.enter_state('Air_dash_pre')#what should the player do?
-
+        
+        self.entity.currentstate.enter_state('Air_dash_pre')#what should the player do?        
         self.game_objects.shader_render.append_shader('white_balance', temperature = 0.2)#change the tone of screen
         #self.game_objects.shader_render.append_shader('zoom', scale = 0.8)
 
@@ -3280,8 +3298,7 @@ class Soul_essence(Loot):#genkidama
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
     def player_collision(self, player):
-        obj = self.__class__([0,0], self.game_objects)
-        player.backpack.inventory.add(obj)
+        player.backpack.inventory.add('soul_essence')
         self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = True#write in the state file that this has been picked up
         #make a cutscene?TODO
         self.kill()
@@ -3331,8 +3348,8 @@ class Enemy_drop(Loot):
     def player_collision(self, player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
-        obj = self.__class__([0,0], self.game_objects) #TODO maybe not needed to make an object if it is already in the inventory
-        player.backpack.inventory.add(obj)
+        name = self.__class__.__name__.lower()
+        player.backpack.inventory.add(name)
         self.currentstate.handle_input('Death')
 
 class Amber_droplet(Enemy_drop):
@@ -3454,9 +3471,8 @@ class Tungsten(Interactable_item):
         self.description = 'A heavy rock'
 
     def pickup(self, player):
-        super().pickup(player)
-        obj = self.__class__([0,0], self.game_objects)
-        player.backpack.inventory.add(obj)
+        super().pickup(player)        
+        player.backpack.inventory.add('tungsten')
 
     @classmethod
     def pool(cls, game_objects):

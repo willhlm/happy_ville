@@ -100,7 +100,7 @@ class Title_menu(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()
+        input.processed()        
         if event[2]['l_stick'][1] < 0:#up
             self.current_button -= 1
             if self.current_button < 0:
