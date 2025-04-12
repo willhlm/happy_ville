@@ -156,6 +156,18 @@ class Movement_hud():#gameplay UI
     def update(self):
         pass
 
+class Money_frame(): #HJORTRON!!!!
+    def __init__(self,entity):
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/gameplay/money/',entity.game_objects)
+        self.entity = entity
+        self.game_objects = entity.game_objects#animation need it
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
+        self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
+
+    def update(self):
+        pass
+
 #utilities
 class Menu_Arrow():
     def __init__(self, pos, game_objects, offset = [0,0], mirrored = False, animate = False):
