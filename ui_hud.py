@@ -6,9 +6,14 @@ class HUD():
         self.game_objects = game_objects
         self.screen = self.game_objects.game.display.make_layer((500,300))
 
+        self.offset = 5
+
         self.init_hearts()
         self.init_spirits()
         self.init_ability()
+        self.init_money()
+
+
 
     def init_hearts(self):
         self.hearts = []
@@ -37,6 +42,19 @@ class HUD():
             if len(self.abilities) == len(self.ability_hud):
                 break
 
+    def init_money(self):
+        self.money_frame = entities_UI.Money_frame(self.game_objects.player)
+
+        string = '0'
+        self.money_image = self.game_objects.font.render((50,20),string)
+
+        self.money_pos = (self.offset, 50)
+        self.number_pos = (self.offset + 24, 55)
+
+    def update_money(self, num):
+        string = str(num)
+        self.money_image = self.game_objects.font.render((50,20), string)
+
     def update(self):
         for heart in self.hearts:
             heart.update()
@@ -56,26 +74,29 @@ class HUD():
         s_pos = (12, 12)
         frame_width = self.ability_hud[0].rect.width
         self.screen.clear(0,0,0,0)
-        offset = 5
 
         #self.game_objects.game.display.render(ability_frame.image, heart.image, self.screen, position=(16 * index, 0))
 
         for index,ability_hud in enumerate(self.ability_hud):#draw movement ability_hud
-            self.game_objects.game.display.render(ability_hud.image,self.screen, position = (offset, offset))
+            self.game_objects.game.display.render(ability_hud.image,self.screen, position = (self.offset, self.offset))
 
         for index, heart in enumerate(self.hearts):#draw health
             if index == 0:
-                pos = (h_pos[0]*index + frame_width-3+offset, 7+offset)
+                pos = (h_pos[0]*index + frame_width-3+self.offset, 7+self.offset)
             else:
-                pos = (h_pos[0]*index + frame_width-5+offset, h_pos[1]+offset)
+                pos = (h_pos[0]*index + frame_width-5+self.offset, h_pos[1]+self.offset)
             self.game_objects.game.display.render(heart.image,self.screen, position = pos)
 
         for index, spirit in enumerate(self.spirits):#draw spirit
+            continue
             if index == 0:
-                pos = (5+offset, s_pos[1] * index + frame_width - 3+offset)
+                pos = (5+self.offset, s_pos[1] * index + frame_width - 3+self.offset)
             else:
-                pos = (s_pos[0]+offset, s_pos[1] * index + frame_width - 5+offset)
+                pos = (s_pos[0]+self.offset, s_pos[1] * index + frame_width - 5+self.offset)
             self.game_objects.game.display.render(spirit.image,self.screen, position = pos)
+
+        self.game_objects.game.display.render(self.money_frame.image,self.screen, position = self.money_pos)
+        self.game_objects.game.display.render(self.money_image,self.screen, position = self.number_pos)
 
         #for index,ability in enumerate(self.abilities):#draw ability symbols
         #    self.game_objects.game.display.render(ability.image,self.screen, position = (32*index,60))
@@ -97,6 +118,7 @@ class HUD():
         if self.game_objects.player.health - i - 1 == 0.5:
             self.hearts[i+1].currentstate.enter_state('Idle')
             self.hearts[i+1].take_dmg(0.5)
+
 
     def remove_spirits(self,spirit):
         index = self.game_objects.player.spirit + spirit - 1
