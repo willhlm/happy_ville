@@ -34,7 +34,7 @@ class Player_states(Entity_States):
             self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        if self.entity.abilities.equip == 'Thunder' or self.entity.abilities.equip == 'Slow_motion':
+        if self.entity.abilities.equip == 'Thunder' or self.entity.abilities.equip == 'Slow_motion' or self.entity.abilities.equip == 'Bow':
             self.enter_state(self.entity.abilities.equip + '_pre')
         else:
             self.enter_state(self.entity.abilities.equip + '_main')
@@ -1206,11 +1206,40 @@ class Slow_motion_main(Slow_motion_pre):
     def increase_phase(self):
         self.enter_state('Idle_main')
 
-class Bow_main(Player_states):
-    def __init__(self,entity):
+class Bow_pre(Player_states):
+    def __init__(self, entity):
         super().__init__(entity)
-        self.entity.consume_spirit()
-        self.entity.abilities.spirit_abilities['Bow'].initiate()
+        self.duration = 100
+        self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects, dir = self.entity.dir.copy())
+        self.entity.game_objects.cosmetics.add(self.arrow)
+
+    def update(self):
+        self.duration -= self.entity.game_objects.game.dt
+        self.entity.velocity = [0, 0]
+
+        if self.duration < 0:
+            self.exit_state()
+
+    def exit_state(self):
+        self.arrow.kill()
+        self.enter_state('Bow_main', dir = [self.arrow.dir[0], -self.arrow.dir[1]])
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='b':
+            input.processed()
+            self.exit_state()
+
+    def handle_movement(self, event):
+        value = event['l_stick']#the avlue of the press
+        if value[0] != 0 or value[1] != 0:
+            self.arrow.dir = [value[0],-value[1]]
+
+class Bow_main(Player_states):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.consume_spirit()        
+        self.entity.abilities.spirit_abilities['Bow'].initiate(dir = kwarg['dir'])
 
     def increase_phase(self):
         self.enter_state('Idle_main')

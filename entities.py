@@ -413,7 +413,7 @@ class Sky(Staticentity):
         self.noise_layer.release()
 
     def update(self):
-        self.time += self.game_objects.game.dt * 0.01
+        self.time += self.game_objects.game.dt * 0.1
 
     def draw(self, target):
         #noise
@@ -423,9 +423,9 @@ class Sky(Staticentity):
         self.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        self.game_objects.shaders['cloud']['TIME'] = self.time
-        self.game_objects.shaders['cloud']['noise_texture'] = self.noise_layer.texture
-        self.game_objects.shaders['cloud']['scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        self.game_objects.shaders['cloud']['time'] = self.time
+        #self.game_objects.shaders['cloud']['iChannel0'] = self.noise_layer.texture
+        #self.game_objects.shaders['cloud']['scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
@@ -790,11 +790,11 @@ class Death_fog(Staticentity):#2D explosion
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['death_fog'])#shader render
 
 class Arrow_UI(Staticentity):#for thuder charge state
-    def __init__(self, pos, game_objects):
+    def __init__(self, pos, game_objects, dir = [0, -1]):
         super().__init__(pos, game_objects)
         self.image = Arrow_UI.image
         self.time = 0
-        self.dir = [0, -1]#default direction
+        self.dir = dir#default direction
 
     def release_texture(self):
         pass
@@ -2577,14 +2577,9 @@ class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
         self.level = 1#upgrade pointer
-        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba'] 
 
-    def initiate(self):#called when using the attack
-        if self.entity.dir[1] == 0:#left or right
-            dir = self.entity.dir.copy()
-        else:#up or down
-            dir = [0,-self.entity.dir[1]]
-
+    def initiate(self, dir):#called when using the attack
         self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50))
 
 #projectiles
@@ -3045,8 +3040,9 @@ class Arrow(Projectiles):
         self.dmg = 1
         self.lifetime = 100
 
-        self.dir = kwarg.get('dir', [1,0])
+        self.dir = kwarg.get('dir', [1, 0])
         self.velocity=[self.dir[0] * 20, self.dir[1] * 20]
+        self.once = False
 
     def pool(game_objects):
         Arrow.sprites = read_files.load_sprites_dict('Sprites/attack/arrow/', game_objects)
@@ -3056,9 +3052,75 @@ class Arrow(Projectiles):
         self.velocity = [0,0]
         self.kill()
 
-    def collision_platform(self, platform):
-        self.velocity = [0,0]
-        self.dmg = 0
+    def right_collision(self, block, type = 'Wall'):
+        self.collision_platform([1, 0])
+
+    def left_collision(self, block, type = 'Wall'):
+        self.collision_platform([-1, 0])
+
+    def down_collision(self, block):
+        self.collision_platform([0, -1])
+
+    def top_collision(self, block):
+        self.collision_platform([0, 1])
+
+    def collision_platform(self, dir):        
+        if not self.once:
+            self.velocity = [0,0]
+            self.dmg = 0
+            
+            #depends on the seed equipped
+            if dir == [-1, 0]:#left
+                position = self.hitbox.midleft
+                size = [64, 16]
+                platform = Seed_platform(position, self.game_objects, size)    
+                platform.rect.midleft = self.hitbox.midleft     
+                platform.hitbox = platform.rect.copy()                   
+            elif dir == [0, -1]:
+                position = self.hitbox.midbottom
+                size = [16, 64]
+                platform = Seed_platform(position, self.game_objects, size)            
+                platform.rect.midbottom = self.hitbox.midbottom
+                platform.hitbox = platform.rect.copy()
+            
+            self.game_objects.platforms.add(platform)   
+            self.once = True
+
+class Seed_platform(Staticentity):
+    def __init__(self, pos, game_objects, size):
+        super().__init__(pos, game_objects)
+        self.rect = pygame.Rect(pos, size)
+        self.hitbox = self.rect.copy()
+        self.lifetime = 200
+
+    def update(self):
+        self.lifetime -= 1
+        if self.lifetime <= 0:
+            self.kill()
+
+    def jumped(self):
+        return C.air_timer
+
+    def collide_x(self,entity):
+        if entity.velocity[0] > 0:#going to the right
+            entity.right_collision(self)
+        else:#going to the leftx
+            entity.left_collision(self)
+        entity.update_rect_x()
+
+    def collide_y(self,entity):
+        if entity.velocity[1] > 0:#going down
+            entity.down_collision(self)
+            entity.limit_y()
+        else:#going up
+            entity.top_collision(self)
+        entity.update_rect_y()
+
+    def draw(self, target):
+        pass
+
+    def release_texture(self):
+        pass              
 
 class Wind(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
