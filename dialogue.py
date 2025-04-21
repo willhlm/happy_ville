@@ -1,4 +1,5 @@
-import read_files, random
+import read_files, random, math
+from entities_core import Staticentity
 
 class Conversation():
     def __init__(self,entity):
@@ -66,3 +67,45 @@ class Dialogue_interactable(Conversation):#interactables
         if self.finish(event):
             return None
         return self.dialoages['conversation'][event][str(self.conv_index)]
+
+class Conversation_bubbles(Staticentity):
+    def __init__(self, pos, game_objects, text, lifetime = 200, size = (32,32)):
+        super().__init__(pos, game_objects)
+        self.render_text(text)
+
+        self.lifetime = lifetime
+        self.rect.bottomleft = pos
+        self.true_pos = self.rect.topleft
+
+        self.time = 0
+        self.velocity = [0,0]
+
+    def pool(game_objects):
+        size = (32,32)
+        Conversation_bubbles.layer = game_objects.game.display.make_layer(size)
+        Conversation_bubbles.bg = game_objects.font.fill_text_bg(size, 'text_bubble')
+
+    def release_texture(self):
+        pass
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.1
+        self.update_vel()
+        self.update_pos()
+        self.lifetime -= self.game_objects.game.dt
+        if self.lifetime < 0:
+            self.kill()
+
+    def update_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt,self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
+        self.rect.topleft = self.true_pos
+
+    def update_vel(self):
+        self.velocity[1] = 0.25*math.sin(self.time)
+
+    def render_text(self, text):
+        texture = self.game_objects.font.render(text = text)
+        self.game_objects.game.display.render(self.bg, self.layer)#shader render
+        self.game_objects.game.display.render(texture, self.layer, position = [10, self.rect[3]])#shader render
+        self.image = self.layer.texture
+        texture.release()        
