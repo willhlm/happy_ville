@@ -1447,21 +1447,30 @@ class Larv_poison(Enemy):
         self.projectiles.add(attack)#add to group but in main phase
 
 class Larv_wall(Enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_wall/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_wall/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox=self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
-        self.currentstate.enter_state('Walk')
-        self.AI = AI_wall_slime.Peace(self)
+        self.rect = pygame.Rect(pos[0],pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
+        
+        self.angle = 0
+        #self.dir[0] *=-1
+        self.friction = [0.1,0.1]
+        self.clockwise = -1#1 is clockqise, -1 is counter clockwise
+        self.AI = AI_wall_slime.Floor(self)
+
+
+    def update_vel(self):#called from hitsop_states
+        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1] - self.velocity[1]*self.friction[1])#gravity        
+        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[0] - self.friction[0]*self.velocity[0])
 
     def knock_back(self,dir):
         pass
 
-    def update_vel(self):
-        self.velocity[1] = self.acceleration[1]-self.dir[1]
-        self.velocity[0] = self.acceleration[0]+self.dir[0]
+    def draw(self, target):#called just before draw in group
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, angle = self.angle, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
 class Shroompoline(Enemy):#an enemy or interactable?
     def __init__(self,pos,game_objects):
