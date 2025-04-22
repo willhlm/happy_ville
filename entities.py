@@ -1455,15 +1455,14 @@ class Larv_wall(Enemy):
         self.hitbox = self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
         
         self.angle = 0
-        #self.dir[0] *=-1
-        self.friction = [0.1,0.1]
+        self.friction = [0.1, 0.1]
         self.clockwise = -1#1 is clockqise, -1 is counter clockwise
         self.AI = AI_wall_slime.Floor(self)
-
+        self.dir[0] = self.clockwise
 
     def update_vel(self):#called from hitsop_states
-        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1] - self.velocity[1]*self.friction[1])#gravity        
-        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[0] - self.friction[0]*self.velocity[0])
+        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[0] - self.friction[0] * self.velocity[0]) 
+        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.friction[1] * self.velocity[1])        
 
     def knock_back(self,dir):
         pass

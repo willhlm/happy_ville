@@ -13,6 +13,7 @@ class Idle(Enemy_states):
         super().__init__(entity)
 
     def update(self):
+        return
         if abs(self.entity.velocity[0]) > 0.2:
             self.enter_state('Walk')
 
@@ -30,6 +31,7 @@ class Walk(Enemy_states):
         self.time = 0
 
     def update(self):
+        return
         self.play_sfx()
         if abs(self.entity.velocity[0]) <= 0.2:
             self.enter_state('Idle')
