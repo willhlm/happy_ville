@@ -403,3 +403,5 @@ class Interactable(Animatedentity):#interactables
     def take_dmg(self, projectile):#when player hits with e.g. sword
         pass
 
+    def seed_collision(self, seed):#if seed hits
+        pass

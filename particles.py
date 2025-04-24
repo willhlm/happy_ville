@@ -97,16 +97,17 @@ class Circle(Particles):
         self.rect.center = self.true_pos
         self.hitbox = self.rect.copy()
 
-        self.shader = game_objects.shaders['circle']#draws a circle
-        self.shader['size'] = self.image.size
-        self.shader['gradient'] = kwarg.get('gradient', 0)#one means gradient, 0 is without
+        self.shader = game_objects.shaders['circle']#draws a circle        
+        self.gradient = kwarg.get('gradient', 0)#one means gradient, 0 is without
 
     def draw(self, target):#his called just before the draw
         self.shader['color'] = self.colour
         self.shader['radius'] = self.radius
+        self.shader['gradient'] = self.gradient
+        self.shader['size'] = self.image.size
         super().draw(target)
 
-    def pool(game_objects):#save the stuff in memory for later use
+    def pool(game_objects):#save the stuff in memory for later use    
         Circle.image = game_objects.game.display.make_layer((50,50)).texture
 
 class Goop(Particles):#circles that "distorts" due to noise

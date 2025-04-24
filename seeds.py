@@ -4,13 +4,14 @@ class SeedSpawner():
     def __init__(self, arrow):
         self.arrow = arrow
 
-    def spawn_ground(self, dir, block):
+    def spawn_ground(self, dir, block):#default
         pos, size = self.get_seed_placement(dir, [64, 16])
         platform = Seed_platform(pos, size, self.arrow.game_objects)
         self.arrow.game_objects.platforms.add(platform)
 
-    def spawn_water(self, dir, block):
-        pass
+    def spawn_bubble(self):#called from twoDliquid collisions with arrow
+        platform = platforms.Bubble(self.arrow.hitbox.midbottom, self.arrow.game_objects, lifetime = 200)
+        self.arrow.game_objects.platforms.add(platform)
 
     def spawn_mushroom(self, dir, block):
         pass
@@ -30,7 +31,7 @@ class SeedSpawner():
             pos = self.arrow.hitbox.midtop
         return pos, size
 
-    def spawn_seed(self, dir, block):
+    def spawn_seed(self, block, dir = None):
         material = getattr(block, 'type', 'ground')
         spawn_method = getattr(self, f"spawn_{material}", self.spawn_ground)  # Default to ground
         spawn_method(dir, block)           
@@ -44,4 +45,3 @@ class Seed_platform(platforms.Collision_block):
         self.lifetime -= 1
         if self.lifetime <= 0:
             self.kill()
-

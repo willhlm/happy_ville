@@ -524,7 +524,7 @@ class God_rays(Staticentity):
         pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
-class TwoD_liquid(Staticentity):
+class TwoD_liquid(Staticentity):#inside interactables_fg group. fg because in front of player
     def __init__(self, pos, game_objects, size, **properties):
         super().__init__(pos, game_objects)
         self.empty = game_objects.game.display.make_layer(size)
@@ -598,6 +598,11 @@ class TwoD_liquid(Staticentity):
         for i in range(0, number_particles):
             obj1 = particles.Circle(pos, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
+
+    def seed_collision(self, seed):
+        vel_scale = max(abs(seed.velocity[0]),abs(seed.velocity[1]))/ 20
+        self.splash(seed.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
+        seed.seed_spawner.spawn_bubble() 
 
 class Up_stream(Staticentity):#a draft that can lift enteties along a direction
     def __init__(self, pos, game_objects, size, **kwarg):
@@ -2550,7 +2555,7 @@ class Thunder(Projectiles):
         self.dmg = 1
         self.kill()
 
-class Arrow(Projectiles):
+class Arrow(Projectiles):#should it be called seed?
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.image = Arrow.sprites['idle'][0]
@@ -2603,6 +2608,12 @@ class Arrow(Projectiles):
     def collision_interactables(self,interactable):#collusion interactables
         pass
 
+    def collision_interactables_fg(self, interactable):#collusion interactables_fg: e.g. twoDliquid        
+        if self.once: return                 
+        self.once = True            
+        interactable.seed_collision(self)
+        self.velocity = [0,0]
+
     def collision_enemy(self,collision_enemy):
         self.kill()
 
@@ -2622,7 +2633,7 @@ class Arrow(Projectiles):
         self.velocity = [0,0]
         if self.once: return                 
         self.once = True    
-        self.seed_spawner.spawn_seed(dir, block)         
+        self.seed_spawner.spawn_seed(block, dir)         
 
 class Wind(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
