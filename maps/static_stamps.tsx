@@ -99,7 +99,7 @@
  </tile>
  <tile id="20">
   <properties>
-   <property name="direction" value=""/>
+   <property name="offset" value=""/>
    <property name="speed" value=""/>
   </properties>
  </tile>

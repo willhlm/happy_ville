@@ -1,8 +1,9 @@
-import pygame, random, sys, math
+import pygame, random,  math
 import read_files, dialogue
 import constants as C
 
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
+import entities
 
 from states import states_enemy, states_enemy_flying, states_NPC
 from ai import AI_enemy, AI_enemy_flying
@@ -60,7 +61,7 @@ class Enemy(Character):
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(sys.modules[__name__], key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key
+                obj = getattr(entities, key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0
 
@@ -188,7 +189,7 @@ class Boss(Enemy):
         self.game_objects.cosmetics.add(self.health_bar)
 
     def give_abillity(self):
-        self.game_objects.player.abilities.spirit_abilities[self.ability] = getattr(sys.modules[__name__], self.ability)(self.game_objects.player)
+        self.game_objects.player.abilities.spirit_abilities[self.ability] = getattr(entities, self.ability)(self.game_objects.player)
 
     def knock_back(self,dir):
         pass
@@ -374,6 +375,46 @@ class Enemy_drop(Loot):
         name = self.__class__.__name__.lower()
         player.backpack.inventory.add(name)
         self.currentstate.handle_input('Death')
+
+class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects)
+        if not kwarg.get('entity', None):#if it is spawn in the wild
+            velocity = kwarg.get('velocity', [2, -4])
+            velocity_range = kwarg.get('velocity_range', [1, 0])#olus minus the velocity
+            self.velocity = [random.uniform(velocity[0] - velocity_range[0], velocity[0] + velocity_range[0]),random.uniform(velocity[1] - velocity_range[1], velocity[1] + velocity_range[1])]
+            self.hitbox = pygame.Rect([pos[0], pos[1]],(16,16))#light need hitbox
+            self.light = self.game_objects.lights.add_light(self, radius = 50)
+            self.state = 'wild'
+
+    def update(self):
+        super().update()
+        self.twinkle()
+
+    def pickup(self, player):
+        self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'][type(self).__name__] = True#save in state file that the items on this map has picked up (assume that only one interactable item on each room)
+
+    def twinkle(self):
+        pos = [self.hitbox.centerx + random.randint(-50, 50), self.hitbox.centery + random.randint(-50, 50)]
+        twinkle = entities.Twinkle(pos, self.game_objects)#twinkle.animation.frame = random.randint(0, len(twinkle.sprites['idle']) - 1)
+        self.game_objects.cosmetics.add(twinkle)
+
+    def interact(self, player):#when player press T
+        player.currentstate.enter_state('Pray_pre')
+        self.pickup(player)#object specific
+        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.sprites['idle'][0], text = self.description, callback = self.on_exit)
+        self.kill()
+
+    def on_exit(self):#called when eiting the blit_image_text state
+        self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
+
+    def kill(self):
+        super().kill()
+        self.game_objects.lights.remove_light(self.light)
+
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites['wild'] = read_files.load_sprites_list('Sprites/enteties/items/interactables_items/',game_objects)#the sprite to render when they are in the wild
 
 class Interactable(Animatedentity):#interactables
     def __init__(self, pos, game_objects, sfx = None):

@@ -2,7 +2,7 @@ import pygame, random, sys, math
 import read_files, particles, animation, dialogue, groups, backpack, modifier_damage, modifier_movement, seeds
 import constants as C
 
-from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Loot, Enemy_drop, Interactable
+from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Loot, Enemy_drop, Interactable, Interactable_item
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
 #from folders
@@ -349,24 +349,22 @@ class Sky(Staticentity):
         self.noise_layer.release()
 
     def update(self):
-        self.time += self.game_objects.game.dt  * 0.1
+        self.time += self.game_objects.game.dt * 0.1
  
     def draw(self, target):
         #noise
-        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
-        self.game_objects.shaders['noise_perlin']['u_time'] =self.time * 0.01
-        self.game_objects.shaders['noise_perlin']['scroll'] =[0,0]# [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.shaders['noise_perlin']['scale'] = [2,2]#"standard"
-        self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
+        #self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
+        #self.game_objects.shaders['noise_perlin']['u_time'] =self.time * 0.01
+        #self.game_objects.shaders['noise_perlin']['scroll'] =[0,0]# [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        #self.game_objects.shaders['noise_perlin']['scale'] = [2,2]#"standard"
+        #self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        self.game_objects.shaders['cloud']['time'] = self.time        
         #self.game_objects.shaders['cloud']['noise_texture'] = self.noise_layer.texture    
-
+        self.game_objects.shaders['cloud']['time'] = self.time        
         self.game_objects.shaders['cloud']['camera_scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        print([self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]])
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos,shader = self.game_objects.shaders['cloud'])
+        self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['cloud'])
 
 class Waterfall(Staticentity):
     def __init__(self, pos, game_objects, parallax, size):
@@ -431,21 +429,22 @@ class Waterfall(Staticentity):
             self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['blur'])
 
 class Reflection(Staticentity):#water, e.g. village
-    def __init__(self, pos, game_objects, parallax, size, dir, texture_parallax = 1, speed = 0, offset = 10):
+    def __init__(self, pos, game_objects, parallax, size, **kwarg):
         super().__init__(pos, game_objects)
         self.parallax = parallax
-        self.offset = offset
-        self.squeeze = 1#the water flickers if it is not 1
+        self.offset = int(kwarg.get('offset', 10))
+        self.squeeze = 1
         self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, size[0], size[1]/self.squeeze)
-
+        
         self.empty = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.water_noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         #self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
-        self.texture_parallax = texture_parallax#0 means no parallax on the texture
+        self.texture_parallax = kwarg.get('texture_parallax', 1)#0 means no parallax on the texture
 
         self.time = 0
-        self.water_speed = speed
+        self.water_speed = kwarg.get('speed', 0)
         self.blur_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.colour = (0.39, 0.78, 1, 1)
 
@@ -457,6 +456,7 @@ class Reflection(Staticentity):#water, e.g. village
         self.noise_layer.release()
         self.water_noise_layer.release()
         self.blur_layer.release()
+        self.screen_copy.release()
         self.channel.fadeout(300)
 
     def update(self):
@@ -473,11 +473,13 @@ class Reflection(Staticentity):#water, e.g. village
         self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y
         self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
+        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy)#stuff to reflect
+        
         #water
         self.game_objects.shaders['water_perspective']['noise_texture'] = self.noise_layer.texture
         self.game_objects.shaders['water_perspective']['noise_texture2'] = self.water_noise_layer.texture
         self.game_objects.shaders['water_perspective']['TIME'] = self.time
-        self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = self.game_objects.game.screen.texture#stuff to reflect
+        self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = self.screen_copy.texture#stuff to reflect
         self.game_objects.shaders['water_perspective']['water_speed'] = self.water_speed
         self.game_objects.shaders['water_perspective']['water_albedo'] = self.colour
         self.game_objects.shaders['water_perspective']['texture_parallax'] =self.texture_parallax
@@ -600,8 +602,8 @@ class TwoD_liquid(Staticentity):#inside interactables_fg group. fg because in fr
             self.game_objects.cosmetics.add(obj1)
 
     def seed_collision(self, seed):
-        vel_scale = max(abs(seed.velocity[0]),abs(seed.velocity[1]))/ 20
-        self.splash(seed.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [7 * vel_scale, 14 * vel_scale]}, fade_scale = 0.3, gradient=0)
+        vel_scale = [abs(seed.velocity[0])/20,abs(seed.velocity[1])/ 20]
+        self.splash(seed.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [14 * vel_scale[0], 7 * vel_scale[0]]}, fade_scale = 0.3, gradient=0, scale = 2)
         seed.seed_spawner.spawn_bubble() 
 
 class Up_stream(Staticentity):#a draft that can lift enteties along a direction
@@ -2914,46 +2916,6 @@ class Heal_item(Enemy_drop):
     def release_texture(self):#stuff that have pool shuold call this
         pass
 
-class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
-    def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects)
-        if not kwarg.get('entity', None):#if it is spawn in the wild
-            velocity = kwarg.get('velocity', [2, -4])
-            velocity_range = kwarg.get('velocity_range', [1, 0])#olus minus the velocity
-            self.velocity = [random.uniform(velocity[0] - velocity_range[0], velocity[0] + velocity_range[0]),random.uniform(velocity[1] - velocity_range[1], velocity[1] + velocity_range[1])]
-            self.hitbox = pygame.Rect([pos[0], pos[1]],(16,16))#light need hitbox
-            self.light = self.game_objects.lights.add_light(self, radius = 50)
-            self.state = 'wild'
-
-    def update(self):
-        super().update()
-        self.twinkle()
-
-    def pickup(self, player):
-        self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'][type(self).__name__] = True#save in state file that the items on this map has picked up (assume that only one interactable item on each room)
-
-    def twinkle(self):
-        pos = [self.hitbox.centerx + random.randint(-50, 50), self.hitbox.centery + random.randint(-50, 50)]
-        twinkle = Twinkle(pos, self.game_objects)#twinkle.animation.frame = random.randint(0, len(twinkle.sprites['idle']) - 1)
-        self.game_objects.cosmetics.add(twinkle)
-
-    def interact(self, player):#when player press T
-        player.currentstate.enter_state('Pray_pre')
-        self.pickup(player)#object specific
-        self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.sprites['idle'][0], text = self.description, callback = self.on_exit)
-        self.kill()
-
-    def on_exit(self):#called when eiting the blit_image_text state
-        self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
-
-    def kill(self):
-        super().kill()
-        self.game_objects.lights.remove_light(self.light)
-
-    @classmethod
-    def pool(cls, game_objects):
-        cls.sprites['wild'] = read_files.load_sprites_list('Sprites/enteties/items/interactables_items/',game_objects)#the sprite to render when they are in the wild
-
 class Tungsten(Interactable_item):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
@@ -3707,7 +3669,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
     def player_collision(self, player):
         if self.interacted: return#enter only once
         self.player_transport(player)
-        player.take_dmg(duration = 0)
+        player.take_dmg()
         self.interacted = True
 
     def player_transport(self, player):#transports the player to safe position

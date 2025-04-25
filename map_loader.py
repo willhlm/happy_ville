@@ -318,11 +318,16 @@ class Level():
                 self.game_objects.interactables.add(new_trigger)
 
             elif id == 20:#reflection object
+                prop = {}
                 for property in properties:
-                    if property['name'] == 'direction':
-                        dir = property['value']
-                dir = 'up'
-                reflection = entities.Reflection(object_position, self.game_objects, parallax, object_size, dir)
+                    if property['name'] == 'offset':
+                        prop['offset'] = property['value']
+                    elif property['name'] == 'speed':
+                        prop['speed'] = property['value']
+                    elif property['name'] == 'texture_parallax':
+                        prop['texture_parallax'] = property['value']                        
+
+                reflection = entities.Reflection(object_position, self.game_objects, parallax, object_size, **prop)
 
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(reflection)
@@ -441,6 +446,7 @@ class Level():
                 self.game_objects.cosmetics.add(smoke)
 
             elif id == 33:#upsteam
+                prop = {}
                 up, down, left, right = 0, 0, 0, 0
                 for property in properties:
                     if property['name'] == 'up':
@@ -457,13 +463,13 @@ class Level():
                 upstream = entities.Up_stream(object_position, self.game_objects, object_size, **prop)
                 self.game_objects.interactables_fg.add(upstream)
 
-            elif id == 34:#reflection object
-                reflection = entities.Waterfall(object_position, self.game_objects, parallax, object_size)
+            elif id == 34:#waterfall object
+                waterfall = entities.Waterfall(object_position, self.game_objects, parallax, object_size)
 
                 if self.layer.startswith('fg'):
-                    self.game_objects.all_fgs.add(reflection)
+                    self.game_objects.all_fgs.add(waterfall)
                 else:
-                    self.game_objects.all_bgs.add(reflection)
+                    self.game_objects.all_bgs.add(waterfall)
 
     def load_interactables_objects(self,data,parallax,offset):#load object infront of layers
         loot_container, soul_essence_int = 1, 1

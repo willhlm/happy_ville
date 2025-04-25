@@ -9,7 +9,7 @@ uniform vec4 cloud_color = vec4(1); // Color of the clouds (including transparen
 uniform float cloud_opacity = 0.7; // Opacity of the clouds
 uniform float time;        // Time variable for animation
 uniform vec2 camera_scroll; // 
-uniform vec2 u_resolution = vec2(640,360); // Camera scroll position
+uniform vec2 u_resolution = vec2(640,360); 
 
 // Function to interpolate (fade) used in Perlin noise
 float fade(float t) {
@@ -64,7 +64,7 @@ float parallax_strength = mix(0.2, 1.0, perspective);
 
 vec2 warped_uv = vec2(uv.x, perspective);
 
-vec2 normalized_scroll = vec2(camera_scroll.x * fragmentTexCoord.y , camera_scroll.y) / u_resolution;
+vec2 normalized_scroll = vec2(camera_scroll.x * fragmentTexCoord.y , 0 * camera_scroll.y) / u_resolution;
 
 vec2 parallax_uv = warped_uv + normalized_scroll * parallax_strength;
 
@@ -73,22 +73,17 @@ float speed = mix(0.002, 0.02, perspective );//moving speed
 
 vec2 animated_offset = vec2(0.0, -time * speed * 0.3);
 
-
 float base_scale = mix(5.0, 1.5, perspective);
 float final_noise = 0.0;
 
-
 for (int i = 0; i < 10; i++) {
-    vec2 cloud_center = vec2(fract(sin(float(i) * 0.1) * 43758.5453), fract(cos(float(i) * 0.1) * 43758.5453));
-    
+    vec2 cloud_center = vec2(fract(sin(float(i) * 0.1) * 43758.5453), fract(cos(float(i) * 0.1) * 43758.5453));    
     vec2 offset = vec2(0.0, float(i) * 0.07); // vertical shift
-
     vec2 cloud_uv = (parallax_uv - (cloud_center + offset + animated_offset)) * base_scale;
-
 
     float noise = layered_perlin_noise(cloud_uv, 1.0, 1.0);
     noise = smoothstep(0.3, 0.7, noise);
-    final_noise = max(final_noise, noise);
+    final_noise += noise;// max(final_noise, noise);
 }
 
 float fade = smoothstep(0.1, 0.9, uv.y); // visibility fade near horizon/top
