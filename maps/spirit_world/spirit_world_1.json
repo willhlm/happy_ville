@@ -284,19 +284,35 @@
                          "visible":true,
                          "width":1151,
                          "x":448,
-                         "y":336
+                         "y":304
                         }, 
                         {
                          "gid":21,
-                         "height":144,
+                         "height":304,
                          "id":1719,
                          "name":"",
+                         "properties":[
+                                {
+                                 "name":"offset",
+                                 "type":"string",
+                                 "value":"10"
+                                }, 
+                                {
+                                 "name":"self.water_texture_on",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"water_texture_on",
+                                 "type":"bool",
+                                 "value":false
+                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":1408,
                          "x":448,
-                         "y":528
+                         "y":672
                         }],
                  "offsetx":0,
                  "offsety":-64,
@@ -335,21 +351,31 @@
                  "objects":[
                         {
                          "gid":21,
-                         "height":288,
+                         "height":232,
                          "id":1717,
                          "name":"",
                          "properties":[
                                 {
                                  "name":"offset",
                                  "type":"string",
-                                 "value":"-48"
+                                 "value":"-16"
+                                }, 
+                                {
+                                 "name":"self.water_texture_on",
+                                 "type":"bool",
+                                 "value":false
+                                }, 
+                                {
+                                 "name":"water_texture_on",
+                                 "type":"bool",
+                                 "value":true
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":1408,
                          "x":448,
-                         "y":664
+                         "y":624
                         }],
                  "opacity":1,
                  "type":"objectgroup",

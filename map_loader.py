@@ -325,7 +325,9 @@ class Level():
                     elif property['name'] == 'speed':
                         prop['speed'] = property['value']
                     elif property['name'] == 'texture_parallax':
-                        prop['texture_parallax'] = property['value']                        
+                        prop['texture_parallax'] = property['value']              
+                    elif property['name'] == 'water_texture_on':
+                        prop['water_texture_on'] = property['value']                                      
 
                 reflection = entities.Reflection(object_position, self.game_objects, parallax, object_size, **prop)
 

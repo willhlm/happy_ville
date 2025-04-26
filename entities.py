@@ -349,7 +349,7 @@ class Sky(Staticentity):
         self.noise_layer.release()
 
     def update(self):
-        self.time += self.game_objects.game.dt * 0.1
+        self.time += self.game_objects.game.dt 
  
     def draw(self, target):
         #noise
@@ -441,7 +441,8 @@ class Reflection(Staticentity):#water, e.g. village
         self.water_noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         #self.game_objects.shaders['water']['u_resolution'] = game_objects.game.window_size
-        self.texture_parallax = kwarg.get('texture_parallax', 1)#0 means no parallax on the texture
+        self.texture_parallax = int(kwarg.get('texture_parallax', 1))#0 means no parallax on the texture
+        self.water_texture_on = kwarg.get('water_texture_on', True)
 
         self.time = 0
         self.water_speed = kwarg.get('speed', 0)
@@ -482,7 +483,9 @@ class Reflection(Staticentity):#water, e.g. village
         self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = self.screen_copy.texture#stuff to reflect
         self.game_objects.shaders['water_perspective']['water_speed'] = self.water_speed
         self.game_objects.shaders['water_perspective']['water_albedo'] = self.colour
-        self.game_objects.shaders['water_perspective']['texture_parallax'] =self.texture_parallax
+        self.game_objects.shaders['water_perspective']['texture_parallax'] = self.texture_parallax
+        self.game_objects.shaders['water_perspective']['water_texture_on'] = self.water_texture_on
+        
 
         self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]# the part to cut
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
