@@ -777,7 +777,6 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         if entity.hitbox.left <= self.hitbox.right and entity.old_hitbox.left >= self.old_hitbox.right:
             entity.left_collision(self)
             self.collided_left = True
-
         entity.update_rect_x()
 
     def collide_y(self, entity):  # Handles vertical collision

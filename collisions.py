@@ -56,10 +56,15 @@ class Collisions():
             #projectile collision?            
             collision_enemy = pygame.sprite.spritecollideany(projectile, enemies, Collisions.collided)
             collision_interactables = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables, Collisions.collided)
-
+            collision_interactables_fg = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables_fg, Collisions.collided)
+            
             #if hit chest, bushes
             if collision_interactables:
                 projectile.collision_interactables(collision_interactables)#go through the projecticle in case there are projectile that should do dmg to interactable
+
+            #if hit e.g. twoDliquid
+            if collision_interactables_fg:
+                projectile.collision_interactables_fg(collision_interactables_fg)
 
             #if hit enemy
             if collision_enemy:

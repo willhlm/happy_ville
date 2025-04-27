@@ -15,9 +15,9 @@ uniform float cloudlight = 0.3;
 uniform float cloudcover = 0.2;
 uniform float cloudalpha = 3.0;
 uniform float skytint = 0.5;
-uniform vec4 skycolour1 = vec4(0.2, 0.4, 0.6,1);//top
-uniform vec4 skycolour2 = vec4(0.2, 0.3, 0.3,1);//bottom
-uniform mat2 m = mat2(vec2(1.6,1.2),vec2(-1.2,1.6)); // Transformation matrix
+uniform vec4 skycolour1 = vec4(0.2, 0.4, 0.6, 0); // top
+uniform vec4 skycolour2 = vec4(0.2, 0.3, 0.3, 0); // bottom
+uniform mat2 m = mat2(vec2(1.6, 1.2), vec2(-1.2, 1.6)); // Transformation matrix
 
 // Functions
 
@@ -51,27 +51,35 @@ float fbm(vec2 n) {
 
 void main() {
     vec2 uv = fragmentTexCoord; // Use fragmentTexCoord directly
-    float time = TIME * speed*10;
+    float time = TIME * speed * 10.0;
 
-    // Generate cloud density
-    float q = fbm(uv * cloudscale * 0.5*fragmentTexCoord.y);
+    // Perspective effect based on the y-coordinate (depth effect)
+    float perspective = pow(uv.y, 5); // Increase the exponent for a more exaggerated effect
+    float parallax_strength = mix(0.2, 1.0, perspective); // Cloud movement based on perspective
+    
+    // Apply perspective and parallax
+    vec2 warped_uv = vec2(uv.x, perspective); 
+    warped_uv += vec2(sin(time * 0.1) * 0.1, cos(time * 0.1) * 0.1); // Adding animated turbulence
+    
+    // Generate cloud density with perspective-based scale
+    float q = fbm(warped_uv * cloudscale * 0.5 * fragmentTexCoord.y);
     float r = 0.0;
     float weight = 0.8;
     for (int i = 0; i < 8; i++) {
-        r += abs(weight * noise(uv*fragmentTexCoord.y));
-        uv = m * uv + time;
+        r += abs(weight * noise(warped_uv * fragmentTexCoord.y));
+        warped_uv = m * warped_uv + time;
         weight *= 0.7;
     }
 
-    // Generate cloud shape
+    // Generate cloud shape with perspective-based scale
     float f = 0.0;
-    uv = fragmentTexCoord;
-    uv *= cloudscale*fragmentTexCoord.y;
-    uv += q - time;
+    warped_uv = fragmentTexCoord;
+    warped_uv *= cloudscale * fragmentTexCoord.y;  // Adjusting for perspective-based size
+    warped_uv += q - time;
     weight = 0.7;
     for (int i = 0; i < 8; i++) {
-        f += weight * noise(uv*fragmentTexCoord.y);
-        uv = m * uv + time;
+        f += weight * noise(warped_uv * fragmentTexCoord.y);
+        warped_uv = m * warped_uv + time;
         weight *= 0.6;
     }
 
@@ -80,25 +88,25 @@ void main() {
     // Generate cloud color
     float c = 0.0;
     time = TIME * speed * 2.0;
-    uv = fragmentTexCoord;
-    uv *= cloudscale * 2.0*fragmentTexCoord.y;
-    uv += q - time;
+    warped_uv = fragmentTexCoord;
+    warped_uv *= cloudscale * 2.0 * fragmentTexCoord.y;
+    warped_uv += q - time;
     weight = 0.4;
     for (int i = 0; i < 7; i++) {
-        c += weight * noise(uv*fragmentTexCoord.y);
-        uv = m * uv + time;
+        c += weight * noise(warped_uv * fragmentTexCoord.y);
+        warped_uv = m * warped_uv + time;
         weight *= 0.6;
     }
 
     float c1 = 0.0;
     time = TIME * speed * 3.0;
-    uv = fragmentTexCoord;
-    uv *= cloudscale * 3.0*fragmentTexCoord.y;
-    uv += q - time;
+    warped_uv = fragmentTexCoord;
+    warped_uv *= cloudscale * 3.0 * fragmentTexCoord.y;
+    warped_uv += q - time;
     weight = 0.4;
     for (int i = 0; i < 7; i++) {
-        c1 += abs(weight * noise(uv*fragmentTexCoord.y));
-        uv = m * uv + time;
+        c1 += abs(weight * noise(warped_uv * fragmentTexCoord.y));
+        warped_uv = m * warped_uv + time;
         weight *= 0.6;
     }
 
@@ -106,10 +114,10 @@ void main() {
 
     // Mix sky and cloud colors
     vec4 skycolour = mix(skycolour2, skycolour1, fragmentTexCoord.y);
-    vec4 cloudcolour = vec4(1.1, 1.1, 0.9,1) * clamp((clouddark + cloudlight * c), 0.0, 1.0);
+    vec4 cloudcolour = vec4(1.1, 1.1, 0.9, 1) * clamp((clouddark + cloudlight * c), 0.0, 1.0);
     f = cloudcover + cloudalpha * f * r;
     vec4 result = mix(skycolour, clamp(skytint * skycolour + cloudcolour, 0.0, 1.0), clamp(f + c, 0.0, 1.0));
 
     COLOR.rgb = result.rgb;
-    COLOR.a=result.a;
+    COLOR.a = result.a;
 }

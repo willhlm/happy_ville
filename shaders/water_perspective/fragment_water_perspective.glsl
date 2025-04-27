@@ -34,7 +34,7 @@ void main() {
     float noise = texture(noise_texture, vec2(water_uv.x + TIME * water_speed, water_uv.y)).x * wave_distortion;
 
     if (water_texture_on) {
-        vec2 water_texture_coord = (vec2(fragmentTexCoord.x * pow(normalizedTexCoord2.y,texture_parallax), fragmentTexCoord.y) + vec2(TIME * water_speed, 0.0));
+        vec2 water_texture_coord = (vec2(fragmentTexCoord.x * pow(normalizedTexCoord2.y, texture_parallax), fragmentTexCoord.y) + vec2(TIME * water_speed, 0.0));
         vec4 water_texture = texture(noise_texture2, water_texture_coord);
         float water_texture_value = (water_texture.x < water_texture_limit) ? 0.0 : 1.0;
         COLOR.xyz = vec3(1.0) * water_texture_value;
