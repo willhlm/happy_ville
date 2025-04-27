@@ -100,7 +100,7 @@ class Title_menu(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()        
+        input.processed()
         if event[2]['l_stick'][1] < 0:#up
             self.current_button -= 1
             if self.current_button < 0:
@@ -155,7 +155,7 @@ class Load_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
+        self.title = self.game.game_objects.font.render(text = 'Inventory') #temporary
         self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
