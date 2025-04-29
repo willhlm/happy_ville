@@ -1,12 +1,12 @@
 import pygame
 import read_files
 import entities_UI
-       
+
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
         self.game_objects = game_objects
         type = self.__class__.__name__.lower()
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/' + type + '/BG.png').convert_alpha())                
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/' + type + '/BG.png').convert_alpha())
         self.load_UI_data(type)
         self.load_data()
 
@@ -23,8 +23,8 @@ class Vendor(UI_loader):
         super().__init__(game_objects)
 
     def load_data(self):
-        self.objects = []   
-        self.next_items = []     
+        self.objects = []
+        self.next_items = []
         for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
@@ -38,7 +38,7 @@ class Vendor(UI_loader):
                 new_item = entities_UI.Item(topleft_object_position,self.game_objects)
                 self.objects.append(new_item)
             elif id == 2:#the description box posiiton
-                self.description = {'position': topleft_object_position, 'size' : object_size} 
+                self.description = {'position': topleft_object_position, 'size' : object_size}
             elif id == 3:#the items showing what's next
                 new_item = entities_UI.Item(topleft_object_position,self.game_objects)
                 self.next_items.append(new_item)
@@ -63,7 +63,7 @@ class Map(UI_loader):
                 self.objects.append(new_banner)
             elif id == 2:
                 new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(3),properties[0]['value'])
-                self.objects.append(new_banner)            
+                self.objects.append(new_banner)
 
 class Omamori(UI_loader):
     def __init__(self, game_objects):
@@ -79,7 +79,7 @@ class Omamori(UI_loader):
             id = obj['gid'] - self.map_data['UI_firstgid']
 
             if id == 0:#inventory
-                if properties:                    
+                if properties:
                     name = properties[0]['value']#the name of omamori
                 else:
                     name = str(index)
@@ -90,8 +90,8 @@ class Omamori(UI_loader):
                 self.equipped.append(new_omamori)
             elif id == 2:#necklace
                 self.necklace = entities_UI.Necklace(topleft_object_position,self.game_objects)
-        
-        self.equipped.sort(key = lambda x: x.rect.centery)#sort the order according to left to right   
+
+        self.equipped.sort(key = lambda x: x.rect.centery)#sort the order according to left to right
 
 class Journal(UI_loader):
     def __init__(self, game_objects):
@@ -167,6 +167,10 @@ class Inventory(UI_loader):
             elif id == 7:#rb button
                 new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'rb')
                 self.buttons['rb'] = new_button
+            elif id == 8:#item
+                name = properties[0]['value']#the name of item
+                new_item = entities_UI.Item_new(topleft_object_position,self.game_objects)
+                self.items.append(new_item)
 
 class Ability_movement_upgrade(UI_loader):
     def __init__(self, game_objects):
@@ -192,11 +196,11 @@ class Ability_movement_upgrade(UI_loader):
             elif id == 2:#wall_glide
                 new_ability = entities_UI.Wall_glide(topleft_object_position,self.game_objects)
                 self.abilities[2].append(new_ability)
-                self.rows['Wall_glide'] = 2        
+                self.rows['Wall_glide'] = 2
 
 class Ability_spirit_upgrade(UI_loader):
     def __init__(self, game_objects):
-        super().__init__(game_objects)         
+        super().__init__(game_objects)
 
     def load_data(self):
         self.abilities = [[],[],[],[],[]]#orginise them accotding to the grid in tiled
@@ -226,4 +230,4 @@ class Ability_spirit_upgrade(UI_loader):
             elif id == 4:#thunder
                 new_ability = entities_UI.Thunder(topleft_object_position,self.game_objects)
                 self.abilities[4].append(new_ability)
-                self.rows['Thunder'] = 4        
+                self.rows['Thunder'] = 4
