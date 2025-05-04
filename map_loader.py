@@ -985,6 +985,15 @@ class Nordveden(Biome):
                     platform = platforms.Breakable_oneside_1(object_position, self.level.game_objects, str(ID_key))
                     self.level.game_objects.platforms.add(platform)
 
+            elif id == 10:#dissapera when standing on it
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID_key = property['value']
+
+                if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
+                    platform = platforms.Nordveden_1(object_position, self.level.game_objects, str(ID_key))
+                    self.level.game_objects.platforms.add(platform)                    
+
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
         super().__init__(level)

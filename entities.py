@@ -2641,6 +2641,7 @@ class Arrow(Projectiles):#should it be called seed?
         if self.once: return
         self.once = True
         self.seed_spawner.spawn_seed(block, dir)
+        self.kill()
 
 class Wind(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
