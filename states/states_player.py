@@ -350,7 +350,7 @@ class Jump_main(Player_states):
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['jump'][random.randint(0,2)], vol = 0.1)
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.velocity[1] = C.jump_vel_player
+        #self.entity.velocity[1] = C.jump_vel_player
         #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)

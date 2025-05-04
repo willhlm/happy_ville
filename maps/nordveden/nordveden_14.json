@@ -301,12 +301,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"nordveden_22"
+                                 "value":"nordveden_21"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"3"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",

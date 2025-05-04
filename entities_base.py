@@ -222,6 +222,9 @@ class Projectiles(Platform_entity):#projectiels
     def collision_interactables(self,interactable):#collusion interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
 
+    def collision_interactables_fg(self,interactable):#collusion interactables
+        pass
+
     def reflect(self, dir, pos, clamp_value = 10):#projectile collision when purple infinity stone is equipped: pos, dir are aila sword
         dy = max(-clamp_value, min(clamp_value, self.rect.centery - pos[1]))
         dx = max(-clamp_value, min(clamp_value, self.rect.centerx - pos[0]))

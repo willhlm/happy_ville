@@ -362,6 +362,7 @@ class Sky(Staticentity):
         #self.game_objects.shaders['cloud']['noise_texture'] = self.noise_layer.texture    
         self.game_objects.shaders['cloud']['time'] = self.time        
         self.game_objects.shaders['cloud']['camera_scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        #self.game_objects.shaders['cloud']['texture_size'] = self.size
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['cloud'])
@@ -1459,7 +1460,7 @@ class Larv_poison(Enemy):
 class Larv_wall(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_wall/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/slime_wall/', game_objects, flip_x = True)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
@@ -2618,6 +2619,7 @@ class Arrow(Projectiles):#should it be called seed?
         self.once = True            
         interactable.seed_collision(self)
         self.velocity = [0,0]
+        self.kill()
 
     def collision_enemy(self,collision_enemy):
         self.kill()

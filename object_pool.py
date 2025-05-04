@@ -1,4 +1,4 @@
-import entities, particles, entities_parallax, weather, platforms, entities_UI, ui_backpack, game_states_facilities, dialogue
+import entities, particles, entities_parallax, weather, platforms, entities_UI, ui_backpack, game_states_facilities, dialogue, seeds
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self, game_objects):
@@ -70,6 +70,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         weather.Wind.pool(game_objects)
 
         platforms.Bubble.pool(game_objects)
+        seeds.Seed_platform.pool(game_objects)
 
         #UI backpack
         ui_backpack.InventoryUI.pool(game_objects)
