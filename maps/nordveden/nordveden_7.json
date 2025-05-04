@@ -613,15 +613,15 @@
                         }, 
                         {
                          "gid":8,
-                         "height":80,
+                         "height":96,
                          "id":299,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1136,
+                         "width":944,
                          "x":256,
-                         "y":1056
+                         "y":1072
                         }, 
                         {
                          "gid":8,
@@ -811,21 +811,21 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":160,
-                         "x":1328,
+                         "width":320,
+                         "x":1168,
                          "y":1216
                         }, 
                         {
                          "gid":8,
-                         "height":112,
+                         "height":96,
                          "id":372,
                          "name":"",
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":32,
-                         "x":1296,
-                         "y":1168
+                         "width":96,
+                         "x":1200,
+                         "y":1152
                         }, 
                         {
                          "gid":8,
@@ -922,18 +922,6 @@
                          "width":736,
                          "x":416,
                          "y":1472
-                        }, 
-                        {
-                         "gid":8,
-                         "height":32,
-                         "id":383,
-                         "name":"",
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":176,
-                         "x":1120,
-                         "y":1168
                         }, 
                         {
                          "gid":8,
@@ -1556,7 +1544,7 @@
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":1312,
+                         "width":1008,
                          "x":192,
                          "y":1088
                         }, 

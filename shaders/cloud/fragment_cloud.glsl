@@ -64,14 +64,9 @@ float parallax_strength = mix(0.2, 1.0, perspective);
 
 vec2 warped_uv = vec2(uv.x, perspective);
 
-vec2 normalized_scroll = vec2(camera_scroll.x * fragmentTexCoord.y , 0 * camera_scroll.y) / u_resolution;
+vec2 normalized_scroll = vec2(camera_scroll.x * perspective , 0 * camera_scroll.y) / u_resolution;
 
 vec2 parallax_uv = warped_uv + normalized_scroll * parallax_strength;
-
-//float speed = mix(0.002, 0.02, perspective );//moving speed
-//vec2 animated_uv = parallax_uv + vec2(time * speed * 0, -time * speed * 0.3);
-
-//vec2 animated_offset = vec2(0.0, -time * speed * 0.3);
 
 float base_scale = mix(5, 0.7, perspective);
 
@@ -80,20 +75,14 @@ vec2 scroll_speed = vec2(0.0, 0.01);
 float noise = 0;
 for (int i = 0; i < 5; i++) {
     vec2 cloud_center = vec2(1);//vec2(fract(sin(float(i) * 0.1) * 43758.5453), fract(cos(float(i) * 0.1) * 43758.5453));    
-//    vec2 noise_uv = (parallax_uv * base_scale - time * scroll_speed)*cloud_center ;
-    vec2 noise_uv = (parallax_uv * base_scale - time * scroll_speed + vec2(0.0, 2.0)) * cloud_center;
 
-
-    //vec2 offset = vec2(0.0, float(i) * 0.07); // vertical shift
-    //vec2 cloud_uv = (parallax_uv - ( offset + animated_offset)) * base_scale;
+    vec2 noise_uv = (parallax_uv * base_scale - time * scroll_speed ) * cloud_center;
 
     float noise1 = layered_perlin_noise(noise_uv, 1.0, 1.0);
     noise += noise1;// max(final_noise, noise);
 }
 
-
-
-float fade = smoothstep(0, 0.9, uv.y); // fade near top/bottom
+float fade = smoothstep(0, 0.9, perspective); // fade near top/bottom
 vec4 cloudColor = vec4(cloud_color.rgb, cloud_color.a * noise * cloud_opacity * fade);
 
 color = cloudColor;
