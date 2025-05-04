@@ -21,7 +21,7 @@ class BackpackUI():#initialised in UI.py
     def enter_page(self, page):
         self.current_page.on_exit()
         self.current_page = page
-    
+
     def on_enter(self):#called first time entering the backpack
         self.current_page.on_enter()
 
@@ -40,13 +40,13 @@ class BaseUI():
         pass
 
     def handle_events(self,input):
-        input.processed()        
+        input.processed()
 
     def on_exit(self, **kwarg):
-        pass   
+        pass
 
     def on_enter(self):
-        pass    
+        pass
 
     def blit_screen(self):#blits everything first to self.game_state.screen. Then blit it to the game screen at the end
         self.game_objects.shaders['alpha']['alpha'] = self.screen_alpha
@@ -82,7 +82,7 @@ class InventoryUI(BaseUI):
         key_items = self.iventory_UI.key_items#a dict of empty key items
         index = 0
         for key in self.game_objects.player.backpack.inventory.items.keys():#crease the object in inventory and sepeerate between useable items and key items
-            item = getattr(entities, key.capitalize())([0,0], self.game_objects)            
+            item = getattr(entities, key.capitalize())([0,0], self.game_objects)
             if hasattr(item, 'use_item'):#usable items
                 item.rect.topleft = items[index].rect.topleft
                 item.number = self.game_objects.player.backpack.inventory.get_quantity(key)#number of items euirepped
@@ -154,21 +154,23 @@ class InventoryUI(BaseUI):
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()        
+        input.processed()
         if event[0]:#press
             if event[-1] == 'select':
-                self.game_objects.game.state_manager.exit_state()            
+                self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 self.iventory_UI.buttons['rb'].currentstate.handle_input('press')
                 new_ui = NecklaseUI(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)
-            elif event[-1] == 'lb':#previouse 
+            elif event[-1] == 'lb':#previouse
                 self.iventory_UI.buttons['lb'].currentstate.handle_input('press')
                 new_ui = MapUI(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)
-            elif event[-1]=='a' or event[-1]=='return':                
+            elif event[-1]=='a' or event[-1]=='return':
                 self.iventory_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
+            elif event[-1] == 'down':#navigate
+                pass
             self.state.handle_input(input)
             self.letter_frame = 0
         elif event[1]:#release
@@ -183,10 +185,10 @@ class InventoryUI(BaseUI):
 
 class NecklaseUI(BaseUI):
     def __init__(self, game_state, **kwarg):
-        super().__init__(game_state, **kwarg)        
+        super().__init__(game_state, **kwarg)
         self.omamori_UI = NecklaseUI.omamori_UI
         self.pointer = NecklaseUI.pointer
-        self.define_blit_positions()        
+        self.define_blit_positions()
         self.omamori_index = kwarg.get('omamori_index', 0)
         self.omamori_UI.necklace.set_level(self.game_objects.player.backpack.necklace.level)
 
@@ -253,17 +255,17 @@ class NecklaseUI(BaseUI):
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()              
+        input.processed()
         if event[0]:#press
             if event[-1] == 'select':
-                self.game_objects.game.state_manager.exit_state()  
+                self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 if self.game_objects.world_state.statistics['kill']:#if we have killed something
                     new_ui = JournalUI(self.game_objects, screen_alpha = 230)
-                    self.game_objects.UI.backpack.enter_page(new_ui)                
+                    self.game_objects.UI.backpack.enter_page(new_ui)
             elif event[-1] == 'lb':#previouse page
                 new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)                            
+                self.game_objects.UI.backpack.enter_page(new_ui)
             elif event[-1]=='a' or event[-1]=='return':
                 self.choose_omamori()
 
@@ -293,16 +295,16 @@ class NecklaseUI(BaseUI):
         response = self.game_objects.player.backpack.necklace.equip_omamori(name, self.omamori_UI.equipped)
         if not response[0]:#if couldn't eqiup
             new_ui = NecklaseUI_2(self.game_objects, response = response[1], screen_alpha = 230, omamori_index = self.omamori_index)
-            self.game_objects.UI.backpack.enter_page(new_ui)    
+            self.game_objects.UI.backpack.enter_page(new_ui)
 
 class NecklaseUI_2(NecklaseUI):#blit potential response from action
     def __init__(self, game_state, **kwarg):
-        super().__init__(game_state, **kwarg) 
-        self.response = kwarg.get('response', 'No')  
-        self.text_window_size = (200, 100) 
+        super().__init__(game_state, **kwarg)
+        self.response = kwarg.get('response', 'No')
+        self.text_window_size = (200, 100)
         self.text_window = self.game_objects.font.fill_text_bg(self.text_window_size)#TODO
         self.layer = self.game_objects.game.display.make_layer(self.game_objects.game.window_size)#TODO
-    
+
     def render(self):
         self.blit_omamori_BG()
         self.blit_necklace()
@@ -319,17 +321,17 @@ class NecklaseUI_2(NecklaseUI):#blit potential response from action
     def blit_message(self):
         text = self.game_objects.font.render(self.text_window_size, self.response, int(self.letter_frame//2))
         self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-        self.game_objects.game.display.render(self.text_window, self.game_objects.game.screen, position = (280,120))#shader render            
+        self.game_objects.game.display.render(self.text_window, self.game_objects.game.screen, position = (280,120))#shader render
         self.game_objects.game.display.render(text, self.game_objects.game.screen, position = (300,170), shader = self.game_objects.shaders['colour'])
-        text.release()        
+        text.release()
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()             
-        if event[0]:#press 
+        input.processed()
+        if event[0]:#press
             if event[-1]=='a' or event[-1]=='return':
                 new_ui = NecklaseUI(self.game_objects)
-                self.game_objects.UI.backpack.enter_page(new_ui)                 
+                self.game_objects.UI.backpack.enter_page(new_ui)
 
 class JournalUI(BaseUI):
     def __init__(self, game_sate, **kwarg):
@@ -340,7 +342,7 @@ class JournalUI(BaseUI):
         self.enemies = []
         self.enemy_index = self.journal_index.copy()
         self.number = 8 #number of enemies per page
-            
+
         self.define_enemies()
         self.select_enemies()
 
@@ -405,15 +407,15 @@ class JournalUI(BaseUI):
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()            
+        input.processed()
         if event[0]:#press
             if event[-1] == 'select':
-                self.game_objects.game.state_manager.exit_state()        
+                self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 pass
             elif event[-1] == 'lb':#previouse page
                 new_ui = NecklaseUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)                 
+                self.game_objects.UI.backpack.enter_page(new_ui)
             elif event[-1] =='down':
                 self.letter_frame = 0
                 self.journal_index[0] += 1
@@ -488,15 +490,15 @@ class MapUI(BaseUI):
 
     def handle_events(self,input):
         event = input.output()
-        input.processed()             
+        input.processed()
         self.scroll = [-2*event[2]['r_stick'][0], -2*event[2]['r_stick'][1]]#right analog stick
 
         if event[0]:#press
             if event[-1] == 'select':
-                self.exit_state()                
+                self.exit_state()
             elif event[-1] == 'rb':#nezt page
                 new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)               
+                self.game_objects.UI.backpack.enter_page(new_ui)
             elif event[-1] == 'right':#should it be left analogue stick?
                 self.map_UI.objects[self.index].currentstate.set_animation_name('idle')
                 self.index += 1
@@ -513,6 +515,6 @@ class MapUI(BaseUI):
                 self.map_UI.objects[self.index].activate()#open the local map. I guess it should be a new state
 
     def exit_state(self):
-        self.game_objects.game.state_manager.exit_state()  
+        self.game_objects.game.state_manager.exit_state()
         for object in self.map_UI.objects:
             object.revert()

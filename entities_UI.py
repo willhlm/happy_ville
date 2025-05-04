@@ -4,6 +4,7 @@ import math
 from sys import platform
 from states import states_buttons, states_health, states_basic
 from entities import Animatedentity
+from entities_core import Staticentity
 
 #for map UI
 class Banner(Animatedentity):
@@ -44,6 +45,16 @@ class Item(Animatedentity):#for invenotry, an empty item
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/item/empty/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
+        self.description = ''
+        self.number = ''#to bilt the number of items player has. THis class is an empty object so no number
+
+class Item_new(Animatedentity):#for invenotry, an empty item
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('UI/inventory/images/item/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
