@@ -349,8 +349,8 @@ class Sky(Staticentity):
         self.noise_layer.release()
 
     def update(self):
-        self.time += self.game_objects.game.dt 
- 
+        self.time += self.game_objects.game.dt
+
     def draw(self, target):
         #noise
         #self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
@@ -359,8 +359,8 @@ class Sky(Staticentity):
         #self.game_objects.shaders['noise_perlin']['scale'] = [2,2]#"standard"
         #self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        #self.game_objects.shaders['cloud']['noise_texture'] = self.noise_layer.texture    
-        self.game_objects.shaders['cloud']['time'] = self.time        
+        #self.game_objects.shaders['cloud']['noise_texture'] = self.noise_layer.texture
+        self.game_objects.shaders['cloud']['time'] = self.time
         self.game_objects.shaders['cloud']['camera_scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
@@ -435,7 +435,7 @@ class Reflection(Staticentity):#water, e.g. village
         self.offset = int(kwarg.get('offset', 10))
         self.squeeze = 1
         self.reflect_rect = pygame.Rect(self.rect.left, self.rect.top, size[0], size[1]/self.squeeze)
-        
+
         self.empty = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.water_noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
@@ -475,7 +475,7 @@ class Reflection(Staticentity):#water, e.g. village
         self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy)#stuff to reflect
-        
+
         #water
         self.game_objects.shaders['water_perspective']['noise_texture'] = self.noise_layer.texture
         self.game_objects.shaders['water_perspective']['noise_texture2'] = self.water_noise_layer.texture
@@ -485,7 +485,7 @@ class Reflection(Staticentity):#water, e.g. village
         self.game_objects.shaders['water_perspective']['water_albedo'] = self.colour
         self.game_objects.shaders['water_perspective']['texture_parallax'] = self.texture_parallax
         self.game_objects.shaders['water_perspective']['water_texture_on'] = self.water_texture_on
-        
+
 
         self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]# the part to cut
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
@@ -607,7 +607,7 @@ class TwoD_liquid(Staticentity):#inside interactables_fg group. fg because in fr
     def seed_collision(self, seed):
         vel_scale = [abs(seed.velocity[0])/20,abs(seed.velocity[1])/ 20]
         self.splash(seed.hitbox.midbottom, lifetime = 100, dir = [0,1], colour = [self.currentstate.liquid_tint[0]*255, self.currentstate.liquid_tint[1]*255, self.currentstate.liquid_tint[2]*255, 255], vel = {'gravity': [14 * vel_scale[0], 7 * vel_scale[0]]}, fade_scale = 0.3, gradient=0, scale = 2)
-        seed.seed_spawner.spawn_bubble() 
+        seed.seed_spawner.spawn_bubble()
 
 class Up_stream(Staticentity):#a draft that can lift enteties along a direction
     def __init__(self, pos, game_objects, size, **kwarg):
@@ -804,7 +804,7 @@ class Player(Character):
 
         self.max_health = 15
         self.max_spirit = 4
-        self.health = 5
+        self.health = 14
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1463,7 +1463,7 @@ class Larv_wall(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()#pygame.Rect(pos[0],pos[1],16,16)
-        
+
         self.angle = 0
         self.friction = [0.1, 0.1]
         self.clockwise = -1#1 is clockqise, -1 is counter clockwise
@@ -1471,8 +1471,8 @@ class Larv_wall(Enemy):
         self.dir[0] = self.clockwise
 
     def update_vel(self):#called from hitsop_states
-        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[0] - self.friction[0] * self.velocity[0]) 
-        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.friction[1] * self.velocity[1])        
+        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[0] - self.friction[0] * self.velocity[0])
+        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.friction[1] * self.velocity[1])
 
     def knock_back(self,dir):
         pass
@@ -2200,7 +2200,7 @@ class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
         self.level = 1#upgrade pointer
-        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba'] 
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
 
     def initiate(self, dir, time):#called when relasing the button
         self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50, time = time))#add attack to group
@@ -2569,7 +2569,7 @@ class Arrow(Projectiles):#should it be called seed?
         self.lifetime = 100
 
         self.dir = kwarg.get('dir', [1, 0])
-        normalise = (self.dir[0] ** 2 + self.dir[1] ** 2)**0.5        
+        normalise = (self.dir[0] ** 2 + self.dir[1] ** 2)**0.5
         amp = kwarg.get('time', 0)/50#50 is the charge duration, how long one sohuld press to reach max speed
         amp = min(amp, 1)#limit the max charge to 1
 
@@ -2613,9 +2613,9 @@ class Arrow(Projectiles):#should it be called seed?
     def collision_interactables(self,interactable):#collusion interactables
         pass
 
-    def collision_interactables_fg(self, interactable):#collusion interactables_fg: e.g. twoDliquid        
-        if self.once: return                 
-        self.once = True            
+    def collision_interactables_fg(self, interactable):#collusion interactables_fg: e.g. twoDliquid
+        if self.once: return
+        self.once = True
         interactable.seed_collision(self)
         self.velocity = [0,0]
 
@@ -2634,11 +2634,11 @@ class Arrow(Projectiles):#should it be called seed?
     def top_collision(self, block):
         self.collision_platform([0, 1], block)
 
-    def collision_platform(self, dir, block):   
+    def collision_platform(self, dir, block):
         self.velocity = [0,0]
-        if self.once: return                 
-        self.once = True    
-        self.seed_spawner.spawn_seed(block, dir)         
+        if self.once: return
+        self.once = True
+        self.seed_spawner.spawn_seed(block, dir)
 
 class Wind(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
@@ -3202,7 +3202,7 @@ class Dusts(Animatedentity):#dust particles when doing things
         super().__init__(pos, game_objects)
         self.sprites = Dusts.sprites
         self.state = state
-        self.image = self.sprites[state][0]        
+        self.image = self.sprites[state][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.dir = dir
         self.rect.center = pos
@@ -3214,7 +3214,7 @@ class Dusts(Animatedentity):#dust particles when doing things
         Dusts.sprites = read_files.load_sprites_dict('Sprites/GFX/dusts/', game_objects, flip_x = True)
 
     def release_texture(self):#stuff that have pool shuold call this
-        pass        
+        pass
 
 class Water_running_particles(Animatedentity):#should make for grass, dust, water etc
     def __init__(self,pos,game_objects):

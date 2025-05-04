@@ -63,10 +63,10 @@ class Idle_main(Player_states):
             self.swing_sword()
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
-            self.do_ability()        
+            self.do_ability()
         elif event[-1]=='rt':#depends on if the abillities have pre or main animation
             input.processed()
-            self.enter_state('Heal_pre')              
+            self.enter_state('Heal_pre')
 
     def handle_release_input(self, input):
         event = input.output()
@@ -350,18 +350,18 @@ class Jump_main(Player_states):
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['jump'][random.randint(0,2)], vol = 0.1)
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
-        self.entity.velocity[1] = C.jump_vel_player
+        #self.entity.velocity[1] = C.jump_vel_player
         #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
-        if self.entity.colliding_platform: self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform    
+        if self.entity.colliding_platform: self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
         self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.dir, state = 'two'))#dust
 
     def update(self):
         self.jump_dash_timer -= self.entity.game_objects.game.dt
         self.air_timer -= self.entity.game_objects.game.dt
-        if self.air_timer > 0:
+        if self.air_timer >= 0:
             self.entity.velocity[1] = C.jump_vel_player * self.shroomboost
         if self.entity.velocity[1] > 0.7:
             self.enter_state('Fall_pre')
@@ -474,26 +474,26 @@ class Heal_pre(Player_states):
         super().__init__(entity)
 
     def handle_release_input(self, input):
-        event = input.output()  
+        event = input.output()
         if event[-1] == 'rt':#if releasing the button
-            input.processed()   
+            input.processed()
             self.enter_state('Idle_main')
 
     def handle_movement(self, event):
         pass
 
     def increase_phase(self):
-        self.enter_state('Heal_main')    
+        self.enter_state('Heal_main')
 
 class Heal_main(Player_states):
     def __init__(self, entity, **kwarg):
-        super().__init__(entity)     
-        self.heal_cost = 1   
+        super().__init__(entity)
+        self.heal_cost = 1
 
     def handle_release_input(self, input):
-        event = input.output()        
+        event = input.output()
         if event[-1] == 'rt':#if releasing the button
-            input.processed()   
+            input.processed()
             self.enter_state('Idle_main')
 
     def handle_movement(self, event):
@@ -502,14 +502,14 @@ class Heal_main(Player_states):
     def increase_phase(self):
         self.entity.heal()
         self.entity.backpack.inventory.remove('amber_droplet', self.heal_cost)
-        self.enter_state('Heal_main')   
+        self.enter_state('Heal_main')
 
 class Wall_glide_main(Player_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        self.entity.movement_manager.add_modifier('Wall_glide')        
+        self.entity.movement_manager.add_modifier('Wall_glide')
         if self.entity.collision_types['right']:
             self.dir = [1,0]
         else:
@@ -561,13 +561,13 @@ class Wall_glide_main(Player_states):
             self.enter_state('Run_main')
 
     def enter_state(self, input, **kwarg):#reset friction before exiting this state
-        self.entity.movement_manager.remove_modifier('Wall_glide')  
+        self.entity.movement_manager.remove_modifier('Wall_glide')
         super().enter_state(input, **kwarg)
 
 class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.movement_manager.add_modifier('Wall_glide')  
+        self.entity.movement_manager.add_modifier('Wall_glide')
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         if self.entity.states['Wall_glide']:#can jump if wall glide has been unlocked
             self.entity.flags['ground'] = True
@@ -620,7 +620,7 @@ class Belt_glide_main(Player_states):#same as wall glide but only jump if wall_g
             self.enter_state('Run_main')
 
     def enter_state(self,input):#reset friction before exiting this state
-        self.entity.movement_manager.remove_modifier('Wall_glide')  
+        self.entity.movement_manager.remove_modifier('Wall_glide')
         super().enter_state(input)
 
 class Air_dash_pre(Player_states):
@@ -628,7 +628,7 @@ class Air_dash_pre(Player_states):
         super().__init__(entity)
         self.dir = self.entity.dir.copy()
         self.dash_length = C.dash_length
-        self.entity.shader_state.handle_input('motion_blur')        
+        self.entity.shader_state.handle_input('motion_blur')
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
         pass
@@ -642,7 +642,7 @@ class Air_dash_pre(Player_states):
         self.exit_state()
 
     def exit_state(self):
-        if self.dash_length < 0:            
+        if self.dash_length < 0:
             self.increase_phase()
 
     def handle_input(self, input, **kwarg):
@@ -652,7 +652,7 @@ class Air_dash_pre(Player_states):
                 state = input.capitalize() + '_glide_main'
                 self.enter_state(state, **kwarg)
             else:
-                self.enter_state('Idle_main')            
+                self.enter_state('Idle_main')
         elif input == 'interrupt':
             self.entity.shader_state.handle_input('idle')
             self.enter_state('Idle_main')
@@ -664,7 +664,7 @@ class Air_dash_main(Air_dash_pre):#level one dash: normal
     def __init__(self, entity):
         super().__init__(entity)
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
-        self.entity.consume_spirit(1)        
+        self.entity.consume_spirit(1)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
 
     def exit_state(self):
@@ -700,8 +700,8 @@ class Ground_dash_pre(Air_dash_pre):
             self.dir[0] = -wall_dir[0]
 
     def update(self):
-        super().update()        
-        self.time -= self.entity.game_objects.game.dt    
+        super().update()
+        self.time -= self.entity.game_objects.game.dt
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         event = input.output()
@@ -755,7 +755,7 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
         self.entity.velocity[0] = C.dash_vel*self.dir[0]
         self.entity.consume_spirit(1)
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
-        self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)  
+        self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.dash_jump_vel_player
         self.buffer_time = C.jump_dash_wall_timer
@@ -945,7 +945,7 @@ class Hurt_main(Player_states):
     def __init__(self,entity):
         super().__init__(entity)
         if entity.collision_types['bottom']:
-            self.next_state = 'Idle_main'            
+            self.next_state = 'Idle_main'
         else:
             self.next_state = 'Fall_pre'
 
@@ -957,7 +957,7 @@ class Hurt_main(Player_states):
             if self.entity.acceleration[0] == 0:
                 self.next_state = 'Idle_main'
             else:
-                self.next_state ='Run_pre'          
+                self.next_state ='Run_pre'
         else:
             self.next_state = 'Fall_pre'
 
@@ -972,7 +972,7 @@ class Spawn_main(Player_states):#enters when aila respawn after death
     def increase_phase(self):#when animation finishes
         self.entity.health = max(self.entity.health,0)#if negative, set it to 0
         self.entity.heal(self.entity.max_health)
-        if self.entity.backpack.map.spawn_point.get('bone', False):#if bone, remove it        
+        if self.entity.backpack.map.spawn_point.get('bone', False):#if bone, remove it
             self.entity.backpack.map.spawn_point.pop()
 
         self.enter_state('Idle_main')
@@ -1214,12 +1214,12 @@ class Bow_pre(Player_states):
         self.duration = 100#charge times
         self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects, dir = self.entity.dir.copy())
         self.entity.game_objects.cosmetics.add(self.arrow)
-        self.time = 0    
+        self.time = 0
 
     def update(self):
         self.duration -= self.entity.game_objects.game.dt
         self.time += self.entity.game_objects.game.dt
-        self.entity.velocity = [0, 0]        
+        self.entity.velocity = [0, 0]
 
         if self.duration < 0:
             self.exit_state()
@@ -1242,7 +1242,7 @@ class Bow_pre(Player_states):
 class Bow_main(Player_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.consume_spirit()        
+        self.entity.consume_spirit()
         self.entity.abilities.spirit_abilities['Bow'].initiate(dir = kwarg['dir'], time = kwarg['time'])
 
     def increase_phase(self):
