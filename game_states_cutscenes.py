@@ -368,10 +368,10 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.timer+=self.game.dt
         if self.stage ==0:#approch
             if self.timer<50:
-                self.game.game_objects.player.velocity[0]=-4
+                self.game.game_objects.player.velocity[0]=4
                 self.game.game_objects.player.acceleration[0] = 1
 
-            elif self.timer > 50:#stay
+            elif self.timer > 150:#stay
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')
                 self.game.game_objects.player.acceleration[0]=0
                 self.stage = 1

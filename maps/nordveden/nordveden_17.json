@@ -217,7 +217,19 @@
                  "draworder":"topdown",
                  "id":91,
                  "name":"back",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":45087,
+                         "height":128,
+                         "id":581,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":80,
+                         "x":3632,
+                         "y":992
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1120,7 +1132,7 @@
          "y":0
         }],
  "nextlayerid":94,
- "nextobjectid":581,
+ "nextobjectid":582,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

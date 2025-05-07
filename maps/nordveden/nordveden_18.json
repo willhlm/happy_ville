@@ -442,6 +442,29 @@
                          "width":16,
                          "x":1648,
                          "y":1104
+                        }, 
+                        {
+                         "gid":20,
+                         "height":112,
+                         "id":590,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"event",
+                                 "type":"string",
+                                 "value":"Butterfly_encounter"
+                                }, 
+                                {
+                                 "name":"new_state",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":2128,
+                         "y":1296
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -469,7 +492,7 @@
          "y":0
         }],
  "nextlayerid":94,
- "nextobjectid":590,
+ "nextobjectid":591,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

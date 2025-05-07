@@ -3917,8 +3917,8 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
             self.game_objects.cosmetics.add(obj1)
 
     def take_dmg(self,projectile):
-        if self.invincibile: return
-        self.invincibile = True
+        if self.flags['invincibility']: return
+        self.flags['invincibility'] = True
         self.game_objects.quests_events.initiate_quest('butterfly_encounter')
 
 class Runestones(Interactable):
