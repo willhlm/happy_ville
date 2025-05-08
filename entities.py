@@ -1337,8 +1337,8 @@ class Rav(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
-        self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
-        self.attack_distance = [50,20]
+        self.aggro_distance = [200, 20]#at which distance to the player when you should be aggro -> negative means no
+        self.attack_distance = [50, 20]
         self.health = 3
         self.chase_speed = 1
 

@@ -5,7 +5,7 @@ def sign(number):
     elif number < 0: return -1
     else: return 0
 
-class AI():
+class AI():#manager
     def __init__(self, entity):
         self.entity = entity
         self.task_queue = []  # Tasks to execute in order
