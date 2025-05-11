@@ -3,9 +3,8 @@ import sys, math, entities
 class Reindeer_states():
     def __init__(self,entity):
         self.entity = entity
-        self.entity.state = type(self).__name__.lower()#the name of the class
+        self.entity.animation.play(type(self).__name__.lower())
         self.dir = self.entity.dir.copy()
-        self.entity.animation.reset_timer()
 
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate.capitalize())(self.entity)#make a class based on the name of the newstate: need to import sys

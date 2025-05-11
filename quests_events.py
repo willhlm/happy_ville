@@ -34,11 +34,11 @@ class Butterfly_encounter(Tasks):#called from cutscene if aggro path is chosen: 
         super().__init__(game_objects)
         spawn_pos = self.game_objects.map.references['cocoon_boss'].rect.topleft
         self.game_objects.weather.flash()
-        butterfly = entities.Butterfly(spawn_pos, self.game.game_objects, self)
+        butterfly = entities.Butterfly(spawn_pos, self.game_objects)
         self.game_objects.enemies.add(butterfly)
         self.game_objects.map.references['cocoon_boss'].currentstate.handle_input('Hurt')
         spawn_pos = [2576, 1320]
-        self.gate = entities.Lighitning(spawn_pos,self.game.game_objects,[1,1],[32,96])
+        self.gate = entities.Lighitning(spawn_pos,self.game_objects,[1,1],[32,96])
         self.game_objects.interactables.add(self.gate)
         butterfly.AI.activate()
 

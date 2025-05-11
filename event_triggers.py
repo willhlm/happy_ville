@@ -1,7 +1,7 @@
 import pygame
 from entities import Interactable
 
-class Event_trigger(Interactable):#based
+class Event_trigger(Interactable):
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.rect = pygame.Rect(pos, size)

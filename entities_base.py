@@ -23,7 +23,7 @@ class Enemy(Character):
         self.original_pos = pos
 
         self.currentstate = states_enemy.Idle(self)
-        self.AI = AI_enemy.AI(self)
+        #self.AI = AI_enemy.AI(self)
 
         self.inventory = {'Amber_droplet':random.randint(5,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -37,7 +37,7 @@ class Enemy(Character):
         self.chase_speed = 0.6
 
     def update(self):
-        self.AI.update()#tell what the entity should do -> shuold be first in upate loop
+        #self.AI.update()#tell what the entity should do -> shuold be first in upate loop
         self.hitstop_states.update()#need to be after update_vel and animation, and AI
         self.group_distance()
 
@@ -170,7 +170,7 @@ class Boss(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.health = 10
-        self.health_bar = Health_bar(self)
+        self.health_bar = entities.Health_bar(self)
 
     def group_distance(self):
         pass

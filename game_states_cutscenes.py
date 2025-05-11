@@ -137,34 +137,41 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,game):
         super().__init__(game)
-        spawn_pos=(2920,900)
-        self.entity = entities.Reindeer(spawn_pos, self.game.game_objects)
-        self.entity.AI.deactivate()
+        for enemy in self.game.game_objects.enemies.sprites():#get the reindeer reference
+            if type(enemy).__name__ == 'Reindeer':
+                self.entity = enemy
+                break
 
-        self.game.game_objects.enemies.add(self.entity)
+        #self.entity.AI.deactivate()
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
-        self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
+        self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
         self.stage = 0
 
     def update(self):#write how you want things to act
         super().update()
-        self.timer+=self.game.dt
+        self.timer += self.game.dt
         if self.stage == 0:
 
             if self.timer < 50:
-                self.game.game_objects.player.velocity[0]=4
+                self.game.game_objects.player.velocity[0] = 4
 
-            elif self.timer>50:
+            elif self.timer > 50:
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
                 self.game.game_objects.player.acceleration[0] = 0
                 self.stage  = 1
-                self.entity.dir[0] *= -1
-
+                
         elif self.stage ==1:
-            if self.timer > 100:
+            if self.timer > 200:
+                self.entity.currentstate.enter_state('Walk_nice')       
+                self.entity.velocity[0] = 5      
+                self.entity.dir[0] *= -1
+                self.stage = 2
+
+        elif self.stage ==2:
+            if self.timer > 200:                   
                 self.entity.velocity[0] = 5
 
-        if self.timer>200:
+        if self.timer>300:
             self.game.state_manager.exit_state()
 
     def on_exit(self):
@@ -368,10 +375,10 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.timer+=self.game.dt
         if self.stage ==0:#approch
             if self.timer<50:
-                self.game.game_objects.player.velocity[0]=-4
+                self.game.game_objects.player.velocity[0]=4
                 self.game.game_objects.player.acceleration[0] = 1
 
-            elif self.timer > 50:#stay
+            elif self.timer > 150:#stay
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')
                 self.game.game_objects.player.acceleration[0]=0
                 self.stage = 1

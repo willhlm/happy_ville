@@ -3,8 +3,7 @@ import sys
 class Basic_states():
     def __init__(self,entity):
         self.entity = entity
-        self.entity.state = type(self).__name__.lower()#the name of the class
-        self.entity.animation.reset_timer()        
+        self.entity.animation.play(type(self).__name__.lower())#the name of the class        
 
     def enter_state(self,newstate,**kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys

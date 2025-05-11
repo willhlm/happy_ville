@@ -4,7 +4,7 @@ class Collisions():
     def __init__(self,game_objects):
         self.game_objects = game_objects
 
-    def check_ground(self,point):#called from AI
+    def check_ground(self, point):#called from AI
         for platform in self.game_objects.platforms:
             if platform.hitbox.collidepoint(point):
                 return True

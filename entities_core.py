@@ -36,7 +36,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
         self.currentstate = states_basic.Idle(self)#
 
     def update(self):
-        self.currentstate.update()
+        self.currentstate.update()        
         self.animation.update()
 
     def reset_timer(self):#called from aniumation when the animation is finished
@@ -115,7 +115,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
-        self.velocity[1] = 1.2/self.game_objects.game.dt
+        self.velocity[1] = 1.2/max(self.game_objects.game.dt, 1)#assume at least 60 fps -> 1
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):

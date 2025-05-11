@@ -7,7 +7,7 @@ from entities_core import Staticentity, Animatedentity, Platform_entity, Charact
 
 #from folders
 from ai import reindeer_ai, AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_mygga, AI_larv, AI_rav
-from states import hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic
+from states import hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states
 
 def sign(number):
     if number > 0: return 1
@@ -924,7 +924,7 @@ class Player(Character):
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
-        self.game_objects.game.display.render(self.normal_maps[self.state][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
+        self.game_objects.game.display.render(self.normal_maps[self.animation.animation_name][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
     def update_timers(self):
         for timer in self.timers:
@@ -1341,10 +1341,10 @@ class Rav(Enemy):
         self.attack_distance = [50,20]
         self.health = 3
         self.chase_speed = 1.6
-        self.patrol_speed = 0.6
+        self.patrol_speed = 0.4
         self.patrol_timer = 220
-        self.AI = AI_rav.Patrol(self)
         self.animation.framerate = 0.2
+        self.currentstate = rav_states.Patrol(self)
 
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
@@ -1778,7 +1778,8 @@ class Reindeer(Boss):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
-        self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.image = self.sprites['idle_nice'][0]
+        self.animation.play('idle_nice')
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
 
@@ -1833,7 +1834,7 @@ class Rhoutta_encounter(Boss):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = Read_files.load_sprites_dict('Sprites/enteties/boss/rhoutta/',game_objects)
-        self.image = self.sprites['idle'][0]#pygame.image.load("Sprites/Enteties/boss/cut_reindeer/main/idle/Reindeer walk cycle1.png").convert_alpha()
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,50)
         self.health = 3
@@ -2055,17 +2056,17 @@ class Player_ability():#aila abilities
         self.level = 1#upgrade pointer
         self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#
-        self.currentstate.set_animation_name('idle_1')
+        self.animation.play('idle_1')
 
     def level_up(self):
         self.level += 1
 
     def activate(self,level):#for UI of Aila abilities
-        self.currentstate.set_animation_name('active_'+str(level))
+        self.animation.play('active_' + str(level))
         self.level = level
 
     def deactivate(self,level):#for UI of Aila abilities
-        self.currentstate.set_animation_name('idle_'+str(level))
+        self.animation.play('idle_' + str(level))
         self.level = level
 
     def initiate(self):#called when using the ability
@@ -2497,6 +2498,7 @@ class Aila_sword(Melee):
         self.sprites = read_files.load_sprites_dict('Sprites/attack/aila_slash/',self.entity.game_objects)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/projectiles/aila_sword/')
         self.image = self.sprites['slash_1'][0]
+        self.animation.play('slash_1')
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
         self.currentstate = states_sword.Slash_1(self)
@@ -2856,10 +2858,12 @@ class Amber_droplet(Enemy_drop):
         super().__init__(pos, game_objects)
         self.sprites = Amber_droplet.sprites
         self.sounds = Amber_droplet.sounds
+
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.hitbox = pygame.Rect(0,0,16,16)
         self.hitbox.center = pos
+
         self.rect.midbottom = self.hitbox.midbottom
         self.true_pos = list(self.rect.topleft)
         self.description = 'moneyy'
@@ -2973,10 +2977,10 @@ class Omamori(Interactable_item):
         pass
 
     def detach(self):
-        self.currentstate.set_animation_name('idle')
+        self.animation.play('idle')
 
     def attach(self):
-        self.currentstate.set_animation_name('equip')
+        self.animation.play('equip')
 
     def reset_timer(self):
         pass
@@ -3208,8 +3212,8 @@ class Dusts(Animatedentity):#dust particles when doing things
     def __init__(self, pos, game_objects, dir = [1,0], state = 'one'):
         super().__init__(pos, game_objects)
         self.sprites = Dusts.sprites
-        self.state = state
         self.image = self.sprites[state][0]
+        self.animation.play(state)
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.dir = dir
         self.rect.center = pos
@@ -3320,7 +3324,7 @@ class Slash(Animatedentity):#thing that pop ups when take dmg or give dmg: GFX
         super().__init__(pos,game_objects)
         self.sprites = Slash.sprites
         state = str(random.randint(1, 3))
-        self.currentstate.set_animation_name('slash_' + state)
+        self.animation.play('slash_' + state)
         self.image = self.sprites['slash_' + state][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.center = pos
@@ -3921,8 +3925,8 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
             self.game_objects.cosmetics.add(obj1)
 
     def take_dmg(self,projectile):
-        if self.invincibile: return
-        self.invincibile = True
+        if self.flags['invincibility']: return
+        self.flags['invincibility'] = True
         self.game_objects.quests_events.initiate_quest('butterfly_encounter')
 
 class Runestones(Interactable):
