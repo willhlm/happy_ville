@@ -712,6 +712,7 @@ class RenderEngine:
         if shader is None:
             shader = self._shader_draw_multiple  # fallback to default
 
+        shader.program["screenSize"].value = self._screen_res
         # Vertex data for a quad (2D)
         quad_vertices = np.array([
             [-0.5, -0.5], [0.5, -0.5], [0.5, 0.5],
@@ -744,7 +745,7 @@ class RenderEngine:
         shader.bind_sampler2D_uniforms()
 
         # Draw instanced
-        vao.render(mode=moderngl.TRIANGLES, instances=len(instances))
+        vao.render(mode=moderngl.TRIANGLES, instances=len(instances))        
 
         # Cleanup
         shader.clear_sampler2D_uniforms()

@@ -3,8 +3,7 @@ import sys, random
 class Basic_states():
     def __init__(self,entity):
         self.entity = entity
-        self.entity.state = type(self).__name__.lower()#the name of the class
-        self.entity.animation.reset_timer()
+        self.entity.animation.play(type(self).__name__.lower())#the name of the class
 
     def update(self):
         pass       

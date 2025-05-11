@@ -147,6 +147,7 @@ class Spirit(Animatedentity):#gameplay UI
         super().__init__([0,0],game_objects)
         self.sprites=read_files.load_sprites_dict(path, game_objects)
         self.image = self.sprites['death'][0]
+        self.animation.play('death')
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_health.Death(self)
         self.health = 0
@@ -225,7 +226,6 @@ class Menu_Arrow():
 
     def pressed(self, state = 'select'):#when pressing a button
         self.play_SFX(state)
-
 
 class Menu_Box():
     def __init__(self, game_objects):

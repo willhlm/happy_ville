@@ -1,13 +1,13 @@
 import entities, sys, random, math
-from states_entity import Entity_States
 import constants as C
+from states_entity import Entity_States
 
 def sign(number):
     if number > 0: return 1
     else: return -1
 
 class Player_states(Entity_States):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
 
     def handle_input(self, input, **kwarg):
@@ -91,68 +91,6 @@ class Idle_main(Player_states):
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0:
-            self.enter_state('Sword_up_main')
-
-class Walk_main(Player_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.particle_timer = 0
-        self.entity.flags['ground'] = True
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-
-    def update(self):
-        self.particle_timer -= self.entity.game_objects.game.dt
-        if self.particle_timer < 0:
-            self.running_particles()
-            self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
-
-        if not self.entity.collision_types['bottom']:#disable this one while on ramp
-            self.enter_state('Fall_pre')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout,ID = 'cayote')
-
-    def running_particles(self):
-        #particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
-        #self.entity.game_objects.cosmetics.add(particle)
-        self.particle_timer = 10
-
-    def handle_press_input(self,input):
-        event = input.output()
-        if event[-1] == 'a':
-            input.processed()
-            self.enter_state('Jump_main')
-        elif event[-1]=='lb':
-            input.processed()
-            self.enter_state('Ground_dash_pre')
-        elif event[-1]=='x':
-            input.processed()
-            self.swing_sword()
-        elif event[-1]=='b':#depends on if the abillities have pre or main animation
-            input.processed()
-            self.do_ability()
-
-    def handle_release_input(self, input):
-        event = input.output()
-        if event[-1]=='a':
-            input.processed()
-
-    def handle_input(self, input, **kwarg):
-        if input == 'jump':#caööed from jump buffer timer
-            self.enter_state('Jump_main')
-        elif input == 'dash':#called from dash buffer timer
-            self.enter_state('Ground_dash_pre')
-
-    def handle_movement(self,event):
-        super().handle_movement(event)
-        if self.entity.acceleration[0] == 0:
-            self.enter_state('Idle_main')
-
-    def swing_sword(self):
-        if not self.entity.flags['attack_able']: return
-        if abs(self.entity.dir[1])<0.8:
-            state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
-            self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
-        elif self.entity.dir[1]>0.8:
             self.enter_state('Sword_up_main')
 
 class Run_pre(Player_states):
@@ -1016,7 +954,7 @@ class Sword_fall_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.sword.currentstate.enter_state('Slash_' + str(int(self.entity.sword.swing)+1))#slash 1 and 2
-        self.entity.state = 'fall_main'#animation name
+        self.entity.animation.play('fall_main')#animation name
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
@@ -1034,7 +972,7 @@ class Sword_jump1_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.sword.currentstate.enter_state('Slash_1')
-        self.entity.state = 'jump_main'
+        self.entity.animation.play('fall_main')#animation name
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 

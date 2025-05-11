@@ -170,7 +170,7 @@ class Boss(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.health = 10
-        self.health_bar = Health_bar(self)
+        self.health_bar = entities.Health_bar(self)
 
     def group_distance(self):
         pass
