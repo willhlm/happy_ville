@@ -351,7 +351,7 @@ class Loot(Platform_entity):#
 
     def limit_y(self):
         if self.bounce_coefficient < 0.1:#to avoid falling through one way collisiosn
-            self.velocity[1] = max(self.velocity[1],0.6)                        
+            self.velocity[1] = max(self.velocity[1],0.6)
 
 class Enemy_drop(Loot):
     def __init__(self, pos, game_objects):

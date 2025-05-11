@@ -6,7 +6,7 @@ from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Lo
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
 #from folders
-from ai import reindeer_ai, AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_mygga, AI_larv
+from ai import reindeer_ai, AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_mygga, AI_larv, AI_rav
 from states import hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic
 
 def sign(number):
@@ -1337,10 +1337,14 @@ class Rav(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
-        self.aggro_distance = [200,20]#at which distance to the player when you should be aggro -> negative means no
+        self.aggro_distance = [-200,20]#at which distance to the player when you should be aggro -> negative means no
         self.attack_distance = [50,20]
         self.health = 3
-        self.chase_speed = 1
+        self.chase_speed = 1.6
+        self.patrol_speed = 0.6
+        self.patrol_timer = 220
+        self.AI = AI_rav.Patrol(self)
+        self.animation.framerate = 0.2
 
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
