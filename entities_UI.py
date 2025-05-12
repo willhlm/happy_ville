@@ -271,6 +271,7 @@ class Xbox(Controllers):
         super().__init__(pos, game_objects,type)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/xbox/',game_objects)
         self.image = self.sprites['a_idle'][0]
+        self.animation.play('a_idle')
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
 
 class Playstation(Controllers):
@@ -278,6 +279,7 @@ class Playstation(Controllers):
         super().__init__(pos, game_objects,type)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
+        self.animation.play('a_idle')
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
 
 class Keyboard(Controllers):
@@ -285,4 +287,5 @@ class Keyboard(Controllers):
         super().__init__(pos, game_objects,type)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
+        self.animation.play('a_idle')
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
