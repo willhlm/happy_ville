@@ -14,8 +14,6 @@ class Timer_manager():
             del self.timers[ID]
 
     def remove_timer(self, timer):# Remove the specific timer from its ID category
-        print('heej')
-        print(timer.ID)
         self.timers[timer.ID].remove(timer)
         if not self.timers[timer.ID]:  # Clean up if there are no more timers under this ID
             del self.timers[timer.ID]

@@ -670,7 +670,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":352,
+                         "x":224,
                          "y":896
                         }, 
                         {
@@ -693,7 +693,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":272,
+                         "x":160,
                          "y":976
                         }, 
                         {
@@ -775,7 +775,7 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":256,
+                         "x":144,
                          "y":1088
                         }, 
                         {
@@ -1318,14 +1318,14 @@
                                 {
                                  "name":"class",
                                  "type":"string",
-                                 "value":"Mygga"
+                                 "value":"Bird"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":595.428775182742,
-                         "y":940.434302014619
+                         "x":992,
+                         "y":992
                         }, 
                         {
                          "gid":3,
@@ -1457,6 +1457,60 @@
                          "width":16,
                          "x":2992,
                          "y":848
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":566,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Froggy"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":480,
+                         "y":944
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":567,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":1040,
+                         "y":1008
+                        }, 
+                        {
+                         "gid":3,
+                         "height":16,
+                         "id":568,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"class",
+                                 "type":"string",
+                                 "value":"Bird"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":960,
+                         "y":992
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -1472,7 +1526,7 @@
          "y":0
         }],
  "nextlayerid":117,
- "nextobjectid":562,
+ "nextobjectid":569,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

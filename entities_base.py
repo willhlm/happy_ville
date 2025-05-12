@@ -6,7 +6,6 @@ from entities_core import Staticentity, Animatedentity, Platform_entity, Charact
 import entities
 
 from states import states_enemy, states_enemy_flying, states_NPC
-#from ai import AI_enemy, AI_enemy_flying
 
 def sign(number):
     if number > 0: return 1
@@ -23,7 +22,6 @@ class Enemy(Character):
         self.original_pos = pos
 
         self.currentstate = states_enemy.Idle(self)
-        #self.AI = AI_enemy.AI(self)
 
         self.inventory = {'Amber_droplet':random.randint(5,10),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
@@ -37,7 +35,6 @@ class Enemy(Character):
         self.chase_speed = 0.6
 
     def update(self):
-        #self.AI.update()#tell what the entity should do -> shuold be first in upate loop
         self.hitstop_states.update()#need to be after update_vel and animation, and AI
         self.group_distance()
 
@@ -67,7 +64,7 @@ class Enemy(Character):
 
     def countered(self):#purple infifite stone
         self.velocity[0] = -30*self.dir[0]
-        self.currentstate = states_enemy.Stun(self,duration=30)#should it overwrite?
+        self.currentstate.handle_input('stun', duration = 30)
 
     def health_bar(self):#called from omamori Boss_HP
         pass
@@ -86,8 +83,7 @@ class Flying_enemy(Enemy):
 
         self.max_vel = [C.max_vel[0],C.max_vel[0]]
         self.dir[1] = 1
-        #self.AI = AI_enemy_flying.Patrol(self)
-        self.currentstate = states_enemy_flying.Idle(self)
+        self.currentstate = states_enemy_flying.Patrol(self)
 
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
@@ -105,7 +101,7 @@ class Flying_enemy(Enemy):
         self.velocity[0] += 0.005*(position[0]-self.rect.centerx)
         self.velocity[1] += 0.005*(position[1]-self.rect.centery)
 
-    def walk(self, time):#called from walk state
+    def sway(self, time):
         amp = min(abs(self.velocity[0]),0.3)
         self.velocity[1] += amp*math.sin(5*time)# - self.entity.dir[1]*0.1
 

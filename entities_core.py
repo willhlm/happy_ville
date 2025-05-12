@@ -151,13 +151,11 @@ class Character(Platform_entity):#enemy, NPC,player
         if self.health > 0:#check if dead
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')#turn white and shake
-            self.AI.handle_input('Hurt')
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state -> can handle hitstop if we want
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
         else:#if dead
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
             self.flags['aggro'] = False
-            self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
         return True#return truw to show that damage was taken
 

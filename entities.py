@@ -6,8 +6,8 @@ from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Lo
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
 #from folders
-from ai import reindeer_ai, AI_mygga_crystal, AI_crab_crystal, AI_froggy, AI_butterfly, AI_maggot, AI_wall_slime, AI_vatt, AI_kusa, AI_enemy_flying, AI_bird, AI_enemy, AI_mygga, AI_larv, AI_rav
-from states import hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states
+from ai import reindeer_ai
+from states import hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
 
 def sign(number):
     if number > 0: return 1
@@ -829,11 +829,11 @@ class Player(Character):
         self.backpack = backpack.Backpack(self)
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
-        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
-        self.reset_movement()
+        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.        
 
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
+        self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform
         #self.shader_state = states_shader.Thunder_ball(self)
@@ -910,6 +910,7 @@ class Player(Character):
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
         self.time = 0
+        #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update(self):
         self.movement_manager.update()#update the movement manager
@@ -976,7 +977,6 @@ class Mygga_chase(Flying_enemy):
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 3
         self.aggro_distance = [130, 80]
-        self.AI = AI_mygga.Patrol(self)
         self.accel = [0.013, 0.008]
         self.accel_chase = [0.026, 0.009]
         self.deaccel_knock = 0.84
@@ -985,7 +985,7 @@ class Mygga_chase(Flying_enemy):
         self.friction = [0.009,0.009]
 
     def knock_back(self,dir):
-        self.AI.enter_AI('Knock_back')
+        self.currentstate.enter_state('Knock_back')
         amp = 19
         if dir[1] != 0:
             self.velocity[1] = -dir[1] * amp
@@ -995,30 +995,30 @@ class Mygga_chase(Flying_enemy):
     def player_collision(self, player):#when player collides with enemy
         super().player_collision(player)
         self.velocity = [0, 0]
-        self.AI.enter_AI('Wait', time = 30, next_AI = 'Chase')
+        self.currentstate.enter_state('Wait', time = 30, next_AI = 'Chase')
 
-    def patrol(self, position):#called from AI: when patroling
+    def patrol(self, position):#called from state: when patroling
         self.velocity[0] += sign(position[0] - self.rect.centerx) * self.accel[0]
         self.velocity[1] += sign(position[1] - self.rect.centery) * self.accel[1]
         self.velocity[0] = min(self.max_chase_vel, self.velocity[0])
         self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
 
-    def chase(self, target_distance):#called from AI: when chaising
+    def chase(self, target_distance):#called from state: when chaising
         self.velocity[0] += sign(target_distance[0]) * self.accel_chase[0]
         self.velocity[1] += sign(target_distance[1]) * self.accel_chase[1]
         for i in range(2):
             if abs(self.velocity[i]) > self.max_chase_vel:
                 self.velocity[i] = sign(self.velocity[i]) *  self.max_chase_vel
 
-    def chase_knock_back(self, target_distance):#called from AI: when chaising
+    def chase_knock_back(self, target_distance):#called from state: when chaising
         self.velocity[0] *= self.deaccel_knock#sign(target_distance[0])
         self.velocity[1] *= self.deaccel_knock#sign(target_distance[1])
 
-    def walk(self, time):#called from walk state
+    def sway(self, time):#called from walk state
         amp = min(abs(self.velocity[0]),0.008)
         self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
-class Mygga_torpedo(Flying_enemy):
+class Mygga_torpedo(Flying_enemy):#torpedo
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga_torpedo/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -1027,7 +1027,6 @@ class Mygga_torpedo(Flying_enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 30
-        self.AI = AI_mygga.Patrol(self)
 
         self.aggro_distance = [180,130]
         self.attack_distance = [150,100]
@@ -1040,7 +1039,7 @@ class Mygga_torpedo(Flying_enemy):
         self.friction = [0.009,0.009]
 
     def knock_back(self,dir):
-        self.AI.enter_AI('Knock_back')
+        self.currentstate.enter_state('Knock_back')
         amp = [16,16]
         self.velocity[0] = dir[0]*amp[0]
         self.velocity[1] = -dir[1]*amp[1]
@@ -1048,26 +1047,26 @@ class Mygga_torpedo(Flying_enemy):
     def player_collision(self, player):#when player collides with enemy
         super().player_collision(player)
         self.velocity = [0, 0]
-        self.AI.enter_AI('Wait', time = 30, next_AI = 'Chase')
+        self.currentstate.enter_state('Wait', time = 30, next_AI = 'Chase')
 
-    def patrol(self, position):#called from AI: when patroling
+    def patrol(self, position):#called from state: when patroling
         self.velocity[0] += sign(position[0] - self.rect.centerx) * self.accel[0]
         self.velocity[1] += sign(position[1] - self.rect.centery) * self.accel[1]
         self.velocity[0] = min(self.max_chase_vel, self.velocity[0])
         self.velocity[1] = min(self.max_chase_vel, self.velocity[1])
 
-    def chase(self, target_distance):#called from AI: when chaising
+    def chase(self, target_distance):#called from state: when chaising
         self.velocity[0] += sign(target_distance[0]) * self.accel_chase[0]
         self.velocity[1] += sign(target_distance[1]) * self.accel_chase[1]
         for i in range(2):
             if abs(self.velocity[i]) > self.max_chase_vel:
                 self.velocity[i] = sign(self.velocity[i]) *  self.max_chase_vel
 
-    def chase_knock_back(self, target_distance):#called from AI: when chaising
+    def chase_knock_back(self, target_distance):#called from state: when chaising
         self.velocity[0] *= self.deaccel_knock#sign(target_distance[0])
         self.velocity[1] *= self.deaccel_knock#sign(target_distance[1])
 
-    def walk(self, time):#called from walk state
+    def sway(self, time):#called from walk state
         amp = min(abs(self.velocity[0]),0.008)
         self.velocity[1] += amp*math.sin(2.2*time)# - self.entity.dir[1]*0.1
 
@@ -1080,7 +1079,6 @@ class Mygga_suicide(Flying_enemy):#torpedo and explode
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 1
-        self.AI = AI_mygga.Patrol(self)
 
         self.aggro_distance = [180,130]
         self.attack_distance = self.aggro_distance.copy()
@@ -1126,7 +1124,7 @@ class Mygga_suicide(Flying_enemy):#torpedo and explode
         super().ramp_top_collision(ramp)
         self.currentstate.handle_input('collision')#for suicide
 
-class Mygga_colliding(Flying_enemy):
+class Mygga_colliding(Flying_enemy):#bounce around
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/mygga/',game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
@@ -1135,11 +1133,14 @@ class Mygga_colliding(Flying_enemy):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 3
-        self.velocity = [random.randint(-3,3),random.randint(-3,3)]
+        self.velocity = [random.randint(-2,2),random.randint(-2,2)]
         self.dir[0] = sign(self.velocity[0])
-        self.AI.enter_AI('idle')
+        self.aggro_distance = [0, 0]
 
-    def walk(self, time):#called from walk state
+    def sway(self, time):#called from walk state
+        pass
+    
+    def patrol(self, target):
         pass
 
     def update_vel(self):
@@ -1176,16 +1177,34 @@ class Mygga_colliding(Flying_enemy):
         self.collision_types['top'] = True
         self.velocity[1] *= -1
 
-class Mygga_roaming_projectile(Mygga_colliding):
+class Mygga_collising_projectile(Mygga_colliding):#bounce around and eject projectiles
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.AI.enter_AI('roaming_attack', frequency = 150)
+        self.currentstate.enter_state('Roaming_attack', frequency = 100)
 
     def attack(self):#called from roaming AI
         dirs = [[1,1],[-1,1],[1,-1],[-1,-1]]
         for direction in dirs:
             obj = Projectile_1(self.hitbox.center, self.game_objects, dir = direction, amp = [3,3])
             self.game_objects.eprojectiles.add(obj)
+
+class Mygga_exploding(Flying_enemy):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga_exploding/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
+        self.health = 4
+        self.attack_distance = [70,70]
+        self.aggro_distance = [150,100]
+        self.currentstate = states_exploding_mygga.Patrol(self)
+
+    def killed(self):
+        self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)
+        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
+        self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
 class Mygga_crystal(Flying_enemy):
     def __init__(self,pos,game_objects):
@@ -1197,44 +1216,25 @@ class Mygga_crystal(Flying_enemy):
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
         self.health = 3
 
-        self.AI = AI_mygga_crystal.Patrol(self)
-        self.currentstate = states_mygga_crystal.Idle(self)
+        self.currentstate = states_mygga_crystal.Patrol(self)
 
         self.flee_distance = [50, 50]#starting fleeing if too close
         self.attack_distance = [100, 100]#attack distance
         self.aggro_distance = [150, 100]#start chasing
 
-    def attack(self):#called from roaming AI
+    def attack(self):#called from state
         dirs = [[1,1], [-1,1], [1,-1], [-1,-1]]
         for direction in dirs:
             obj = Poisonblobb(self.hitbox.topleft, self.game_objects, dir = direction, amp = [3,3])
             self.game_objects.eprojectiles.add(obj)
 
-    def chase(self, direction):#called from AI: when chaising
+    def chase(self, direction):#called from state: when chaising
         self.velocity[0] += direction[0]*0.5
         self.velocity[1] += direction[1]*0.5
 
-    def patrol(self, position):#called from AI: when patroling
+    def patrol(self, position):#called from state: when patroling
         self.velocity[0] += (position[0]-self.rect.centerx) * 0.002
         self.velocity[1] += (position[1]-self.rect.centery) * 0.002
-
-class Mygga_exploding(Flying_enemy):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/enemies/mygga_exploding/')#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/exploding_mygga/', game_objects)#Read_files.Sprites_enteties('Sprites/Enteties/enemies/woopie/')
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
-        self.health = 4
-        self.attack_distance = [20,20]
-        self.aggro_distance = [150,100]
-        self.currentstate = states_exploding_mygga.Idle(self)
-
-    def killed(self):
-        self.game_objects.sound.play_sfx(self.sounds['explosion'][0], vol = 0.2)
-        self.projectiles.add(Hurt_box(self, size = [64,64], lifetime = 30, dir = [0,0]))
-        self.game_objects.camera_manager.camera_shake(amp = 2, duration = 30)#amplitude and duration
 
 class Crab_crystal(Enemy):
     def __init__(self,pos,game_objects):
@@ -1245,7 +1245,6 @@ class Crab_crystal(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1], 16, 16)
 
         self.currentstate = states_crab_crystal.Idle(self)
-        self.AI = AI_crab_crystal.AI(self)
 
         self.hide_distance = [100, 50]#the distance to hide
         self.fly_distance = [150, 50]#the distance to hide
@@ -1277,7 +1276,6 @@ class Froggy(Enemy):
 
         self.currentstate = states_froggy.Idle(self)
         self.shader_state = states_shader.Idle(self)
-        self.AI = AI_froggy.AI(self)
         self.inventory = {'Amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
 
     def knock_back(self,dir):
@@ -1363,7 +1361,6 @@ class Vatt(Enemy):
         self.flags['aggro'] = False
 
         self.currentstate = states_vatt.Idle(self)
-        self.AI = AI_vatt.AI(self)
         self.attack_distance = [60, 30]
 
     def turn_clan(self):#this is acalled when tranformation is finished
@@ -1383,8 +1380,8 @@ class Maggot(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],20,30)
-        self.currentstate = states_maggot.Fall_stand(self)
-        self.AI = AI_maggot.Idle(self)
+        self.currentstate = states_maggot.Idle(self)
+        self.animation.play('fall_stand')
         self.health = 1
 
         self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
@@ -1393,25 +1390,24 @@ class Maggot(Enemy):
 class Larv_base(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.AI = AI_larv.Idle(self)
 
     def walk(self):
         self.velocity[0] += self.dir[0]*0.22
 
     def knock_back(self, dir):
         super().knock_back(dir)
-        self.AI = AI_larv.Idle(self, carry_dir = False, timer = 40)
+        self.currenrstate.handle_input('idle', carry_dir = False, timer = 40)
 
     #pltform collisions.
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
         if self.dir[0] > 0:
-            self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
+            self.currenrstate.handle_input(self, carry_dir = True, timer = 60)
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
         if self.dir[0] < 0:
-            self.AI = AI_larv.Idle(self, carry_dir = True, timer = 60)
+            self.currenrstate.handle_input(self, carry_dir = True, timer = 60)
 
 class Larv(Enemy):
     def __init__(self, pos, game_objects):
@@ -1421,7 +1417,9 @@ class Larv(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
-        self.attack_distance = [0,0]
+        
+        self.attack_distance = [0,0]        
+        self.currentstate.enter_state('Patrol')
 
     def loots(self):#spawn minions
         pos = [self.hitbox.centerx,self.hitbox.centery - 10]
@@ -1471,13 +1469,12 @@ class Larv_wall(Enemy):
 
         self.angle = 0
         self.friction = [0.1, 0.1]
-        self.clockwise = -1#1 is clockqise, -1 is counter clockwise
-        self.AI = AI_wall_slime.Floor(self)
-        self.dir[0] = self.clockwise
+        self.clockwise = 1#1 is clockqise, -1 is counter clockwise
+        self.currentstate = larv_wall_states.Floor(self)
+        self.dir[0] = -self.clockwise 
 
-    def update_vel(self):#called from hitsop_states
-        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[0] - self.friction[0] * self.velocity[0])
-        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.friction[1] * self.velocity[1])
+    def update_vel(self):    
+        pass
 
     def knock_back(self,dir):
         pass
@@ -1520,14 +1517,14 @@ class Shroompoline(Enemy):#an enemy or interactable?
 class Kusa(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=Read_files.load_sprites_dict('Sprites/enteties/enemies/kusa/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/kusa/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+
         self.currentstate = states_kusa.Idle(self)
-        self.attack_distance = 30
+        self.attack_distance = [30, 30]
         self.health = 1
-        self.AI = AI_kusa.Peace(self)
         self.dmg = 2
 
     def suicide(self):
@@ -1537,14 +1534,14 @@ class Kusa(Enemy):
 class Svampis(Enemy):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/svampis/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/svampis/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox=pygame.Rect(pos[0],pos[1],32,32)
+
         self.currentstate = states_kusa.Idle(self)
-        self.attack_distance = 30
+        self.attack_distance = [30, 30]
         self.health = 1
-        self.AI = AI_kusa.Peace(self)
         self.dmg = 2
 
     def suicide(self):
@@ -1657,7 +1654,6 @@ class Bird(Enemy):
         self.currentstate = states_bird.Idle(self)
         self.flags['aggro'] = False
         self.health = 1
-        self.AI = AI_bird.Idle(self)
         self.aggro_distance = [100,50]#at which distance is should fly away
 
     def knock_back(self,dir):
@@ -1804,7 +1800,6 @@ class Butterfly(Flying_enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos,self.image.size)
         self.hitbox = self.rect.copy()
-        self.AI = AI_butterfly.Idle(self)
         self.currentstate = states_butterfly.Idle(self)
         self.health =20
 

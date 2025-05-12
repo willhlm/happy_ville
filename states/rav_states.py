@@ -6,7 +6,6 @@ class BaseState():
         self.player_distance = [0,0]
 
     def enter_state(self, newstate, **kwarg):
-        print(newstate)
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
 
     def update(self):
