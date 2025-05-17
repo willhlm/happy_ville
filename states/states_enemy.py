@@ -22,13 +22,14 @@ class Idle(EnemyStates):#do nothing
     def __init__(self, entity):
         super().__init__(entity)
 
-class Patrol(EnemyStates):#patrol in a circle aorund the original position
+class Patrol(EnemyStates):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.dir[0] = self.entity.dir[0] * -1
         patrol_timer = 100
-        self.patrol_speed = 1
+        self.patrol_speed = 0.5
         self.timer = self.entity.game_objects.timer_manager.start_timer(patrol_timer, self.timeout)
+        self.entity.animation.play('walk')
 
     def update(self):
         super().update()
@@ -46,12 +47,12 @@ class Patrol(EnemyStates):#patrol in a circle aorund the original position
             x = self.entity.hitbox.right + 5
             
         if not self.entity.game_objects.collisions.check_ground([x, self.entity.hitbox.bottom + 5]):
-            return
             self.entity.game_objects.timer_manager.remove_timer(self.timer)
             self.enter_state('Wait', time = 70, next_state = 'Patrol')
 
     def check_sight(self):
         if abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
+            self.entity.game_objects.timer_manager.remove_timer(self.timer)
             self.enter_state('Wait', time = 10, next_state = 'Chase')
 
 class Wait(EnemyStates):
@@ -59,6 +60,7 @@ class Wait(EnemyStates):
         super().__init__(entity)
         self.time = kwarg.get('time',50)
         self.next_state = kwarg.get('next_state','Patrol')
+        self.entity.animation.play('idle')
 
     def update(self):
         self.time -= self.entity.game_objects.game.dt
@@ -70,6 +72,7 @@ class Chase(EnemyStates):
         super().__init__(entity)
         self.giveup = kwarg.get('giveup', 400)
         self.time = self.giveup
+        self.entity.animation.play('walk')
 
     def update(self):
         super().update()
