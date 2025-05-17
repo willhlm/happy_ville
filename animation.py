@@ -16,14 +16,15 @@ class Animation():
 
     def update(self):
         frame = int(self.frame)
-        self.entity.image = self.entity.sprites[self.animation_name][frame]  
-        self.image_frame = 0#frame#save the current frame. Used for normal maps     
+        self.entity.image = self.entity.sprites[self.animation_name][frame]
+        self.image_frame = 0#frame#save the current frame. Used for normal maps
         self.frame += self.framerate * self.entity.game_objects.game.dt * self.entity.slow_motion * self.direction
 
         if self.frame * self.direction >= len(self.entity.sprites[self.animation_name]):
             self.entity.reset_timer()
             self.reset_timer()
 
-    def play(self, name):
+    def play(self, name, f_rate=C.animation_framerate):
+        self.framerate = f_rate
         self.animation_name = name
         self.reset_timer()

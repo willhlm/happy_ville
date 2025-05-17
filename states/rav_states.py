@@ -31,7 +31,7 @@ class Idle(BaseState):#do nothing
 class Patrol(BaseState):#patrol in a circle aorund the original position
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.animation.play('walk')
+        self.entity.animation.play('walk', 0.17)
         self.entity.dir[0] = self.entity.dir[0] * -1
         self.entity.velocity = [self.entity.patrol_speed, self.entity.velocity[1]]
         self.timer = self.entity.game_objects.timer_manager.start_timer(self.entity.patrol_timer, self.timeout, ID = 'BOOYAA')
@@ -46,7 +46,7 @@ class Patrol(BaseState):#patrol in a circle aorund the original position
         super().enter_state(newstate, **kwarg)
 
     def timeout(self):
-        self.enter_state('Wait', time = 150, next_state = 'Patrol')
+        self.enter_state('Wait', time = 120, next_state = 'Patrol')
 
     def check_ground(self):
         if self.entity.dir[0] < 0:
@@ -55,7 +55,7 @@ class Patrol(BaseState):#patrol in a circle aorund the original position
             x = self.entity.hitbox.right + 5
         if not self.entity.game_objects.collisions.check_ground([x, self.entity.hitbox.bottom + 5]):
             self.entity.game_objects.timer_manager.remove_timer(self.timer)
-            self.enter_state('Wait', time = 70, next_state = 'Patrol')
+            self.enter_state('Wait', time = 60, next_state = 'Patrol')
 
     def check_sight(self):
         if abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
@@ -66,34 +66,78 @@ class Wait(BaseState):
         super().__init__(entity)
         self.time = kwarg.get('time',50)
         self.next_state = kwarg.get('next_state','Patrol')
-        self.entity.animation.play('idle')
+        self.entity.animation.play('idle', 0.2)
 
     def update(self):
+        super().update()
         self.time -= self.entity.game_objects.game.dt
         if self.time < 0:
+            self.check_sight()
+
+    def check_sight(self):
+        if abs(self.player_distance[0]) < self.entity.attack_distance[0]: # and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close
+            self.enter_state('Attack_pre')
+        elif abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
+            self.enter_state('Chase')
+        else:
             self.enter_state(self.next_state)
 
 class Chase(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
+        self.entity.animation.play('walk')
         self.giveup = kwarg.get('giveup', 400)
         self.time = self.giveup
 
     def update(self):
         super().update()
+        self.check_sight()
+        self.check_ground()
         self.look_target()
         self.entity.chase(self.player_distance)
-        self.check_sight()
+
+    def check_ground(self):
+        if self.entity.dir[0] < 0:
+            x = self.entity.hitbox.left - 5
+        else:
+            x = self.entity.hitbox.right + 5
+        if not self.entity.game_objects.collisions.check_ground([x, self.entity.hitbox.bottom + 5]):
+            self.enter_state('Wait', time = 120, next_state = 'Patrol')
 
     def check_sight(self):
-        if abs(self.player_distance[0]) > self.entity.aggro_distance[0] or abs(self.player_distance[1]) > self.entity.aggro_distance[1]:#player far away
+        if abs(self.player_distance[0]) < self.entity.attack_distance[0]: # and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close
+            self.enter_state('Attack_pre')
+        elif abs(self.player_distance[0]) > self.entity.aggro_distance[0] or abs(self.player_distance[1]) > self.entity.aggro_distance[1]:#player far away
             self.time -= self.entity.game_objects.game.dt
             if self.time < 0:
                 self.enter_state('Wait',next_state = 'Patrol', time = 20)
-        elif abs(self.player_distance[0]) < self.entity.attack_distance[0] and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close
-            self.enter_state('Attack')
         else:#player close, reset timer
             self.time = self.giveup
+
+    def look_target(self):
+        if self.player_distance[0] > 0:
+            self.entity.dir[0] = 1
+        else:
+            self.entity.dir[0] = -1
+
+class Knock_back_old(BaseState):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.animation.play('hurt', 0.2)
+        print('yes')
+
+    def update(self):
+        super().update()
+        self.look_target()
+        self.entity.chase_knock_back(self.player_distance)
+        self.check_vel()
+
+    def increase_phase(self):
+        self.enter_state('Chase')
+
+    def check_vel(self):
+        if abs(self.entity.velocity[0]) + abs(self.entity.velocity[1]) < 0.3:
+            self.enter_state('Wait')
 
     def look_target(self):
         if self.player_distance[0] > 0:
@@ -104,28 +148,44 @@ class Chase(BaseState):
 class Knock_back(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
+        self.entity.animation.play('hurt', 0.2)
 
-    def update(self):
-        super().update()
-        self.look_target()
-        self.entity.chase_knock_back(self.player_distance)
-        self.check_vel()
+    def increase_phase(self):
+        self.enter_state('Wait', time=20)
 
-    def check_vel(self):
-        if abs(self.entity.velocity[0]) + abs(self.entity.velocity[1]) < 0.3:
-            self.enter_state('Wait', next_state = 'Chase', time = 10)
-
-    def look_target(self):
-        if self.player_distance[0] > 0:
-            self.entity.dir[0] = 1
-        else:
-            self.entity.dir[0] = -1
-
-class Attack(BaseState):
+class Death(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.currentstate.handle_input('attack')
+        self.entity.animation.play('death', 0.2)
 
-    def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
-        if input == 'finish_attack':
-            self.enter_state('Wait', next_state = 'Chase', time = 30)
+    def enter_state(self, newstate, **kwarg):
+        pass
+
+    def increase_phase(self):
+        self.entity.currentstate = Dead(self.entity)
+
+class Dead(BaseState):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.dead()
+
+class Attack_pre(BaseState):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.animation.play('attack_pre', 0.25)
+
+    def increase_phase(self):
+        self.enter_state('Attack_main')
+
+class Attack_main(BaseState):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.animation.play('attack_main', 0.2)
+        self.entity.attack()
+
+    def increase_phase(self):
+        self.enter_state('Wait', time=10)
+
+    #def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
+    #    if input == 'finish_attack':
+    #        self.enter_state('Wait', next_state = 'Chase', time = 30)

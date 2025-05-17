@@ -48,11 +48,13 @@ class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
         self.colour = kwarg.get('colour', [1, 1, 1, 1])
         self.decay_rate = kwarg.get('decay_rate', 5)
         self.direction = kwarg.get('direction', [1,0])
+        self.alpha_decay = kwarg.get('alpha_decay', 0.974)
 
     def draw(self):
         self.entity.shader['time'] = self.time*0.01
         self.entity.shader['frequency'] = self.frequency
         self.entity.shader['amplitude'] = self.amplitude
+        self.colour[-1] *= self.alpha_decay
         self.entity.shader['colour'] = self.colour
         self.entity.shader['decay_rate'] = self.decay_rate
         self.entity.shader['direction'] = self.direction
@@ -240,7 +242,7 @@ class Outline(Shader_states):
     def update(self):
         self.time +=1
 
-    def draw(self):        
+    def draw(self):
         #self.entity.shader['TIME'] = self.time
         return
         self.entity.shader['color_gradiant'] = self.entity.image
@@ -259,7 +261,7 @@ class MB(Shader_states):#motion blur
     def update(self):
         pass
 
-    def draw(self):        
+    def draw(self):
         self.entity.shader['dir'] = self.dir
         self.entity.shader['quality'] = 6
 
@@ -268,14 +270,14 @@ class MB(Shader_states):#motion blur
             self.enter_state('Idle')
         elif input == 'Hurt':
             self.enter_state('Hurt')
-         
+
 class Noise_border(Shader_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
-        self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks                
+        self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
         self.color_Lookup = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
-                
+
         self.entity.shader = self.entity.game_objects.shaders['noise_border']
         self.time = 0
 
@@ -283,13 +285,13 @@ class Noise_border(Shader_states):
         self.time += self.entity.game_objects.game.dt*0.01
 
     def draw(self):
-        self.empty.clear(0,0,0,0)   
+        self.empty.clear(0,0,0,0)
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
         self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.entity.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
         self.entity.game_objects.shaders['noise_perlin']['scale'] = [100,100]#"standard"
         self.entity.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
-                
+
 
         self.entity.game_objects.shaders['gradient']['numStops'] = 3
         self.entity.game_objects.shaders['gradient']['colors'] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
@@ -308,7 +310,7 @@ class Noise_border(Shader_states):
 
 class Aura(Shader_states):#not used
     def __init__(self, entity, **kwarg):
-        super().__init__(entity)        
+        super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['aura']
         self.time = 0
 
