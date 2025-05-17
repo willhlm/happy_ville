@@ -36,7 +36,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
         self.currentstate = states_basic.Idle(self)#
 
     def update(self):
-        self.currentstate.update()        
+        self.currentstate.update()
         self.animation.update()
 
     def reset_timer(self):#called from aniumation when the animation is finished

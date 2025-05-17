@@ -829,7 +829,7 @@ class Player(Character):
         self.backpack = backpack.Backpack(self)
 
         self.timers = []#a list where timers are append whe applicable, e.g. wet status
-        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.        
+        self.timer_jobs = {'wet': Wet_status(self, 60)}#these timers are activated when promt and a job is appeneded to self.timer.
 
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
@@ -1139,7 +1139,7 @@ class Mygga_colliding(Flying_enemy):#bounce around
 
     def sway(self, time):#called from walk state
         pass
-    
+
     def patrol(self, target):
         pass
 
@@ -1335,14 +1335,20 @@ class Rav(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
-        self.aggro_distance = [-200,20]#at which distance to the player when you should be aggro -> negative means no
-        self.attack_distance = [50,20]
-        self.health = 3
-        self.chase_speed = 1.6
-        self.patrol_speed = 0.4
+        self.aggro_distance = [200,10]#at which distance to the player when you should be aggro -> negative means no
+        self.attack_distance = [50,150]
+        self.health = 50
+        self.chase_speed = 0.8
+        self.patrol_speed = 0.3
         self.patrol_timer = 220
-        self.animation.framerate = 0.2
+        #self.animation.framerate = 0.2
         self.currentstate = rav_states.Patrol(self)
+
+    def knock_back(self, dir):
+        self.currentstate.enter_state('Knock_back')
+        amp_x = 25
+        self.velocity[0] = dir[0] * amp_x * (1 - abs(dir[1]))
+        self.velocity[1] = -dir[1] * 10
 
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
@@ -1417,8 +1423,8 @@ class Larv(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 20, 30)
-        
-        self.attack_distance = [0,0]        
+
+        self.attack_distance = [0,0]
         self.currentstate.enter_state('Patrol')
 
     def loots(self):#spawn minions
@@ -1471,9 +1477,9 @@ class Larv_wall(Enemy):
         self.friction = [0.1, 0.1]
         self.clockwise = 1#1 is clockqise, -1 is counter clockwise
         self.currentstate = larv_wall_states.Floor(self)
-        self.dir[0] = -self.clockwise 
+        self.dir[0] = -self.clockwise
 
-    def update_vel(self):    
+    def update_vel(self):
         pass
 
     def knock_back(self,dir):
@@ -2520,8 +2526,8 @@ class Aila_sword(Melee):
     def collision_enemy(self, collision_enemy):
         self.currentstate.sword_jump()#only down sword will give velocity up
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
-            self.entity.hitstop_states.enter_state('Stop', lifetime = 5)#hitstop to sword vielder
-            collision_enemy.hitstop_states.enter_state('Stop', lifetime = 10, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
+            self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
+            collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
             collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
             self.clash_particles(collision_enemy.hitbox.center)
             #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
