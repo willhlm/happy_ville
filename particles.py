@@ -10,21 +10,21 @@ class Particles(pygame.sprite.Sprite):
 
         self.lifetime = kwarg.get('lifetime', 60)
         self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))#make a copy of the list by list()
-        dir = kwarg.get('dir', 'isotropic') 
+        dir = kwarg.get('dir', 'isotropic')
         angle = self.define_angle(dir)
 
         distance = kwarg.get('distance', 0)
         vel = kwarg.get('vel', {'linear':[7,15]})
-        
+
         self.angle = -(2*math.pi*angle)/360
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
         motion = list(vel.keys())[0]#linear, wave, gravity motion etc
-        self.set_velocity = {'linear':self.linear,'wave':self.wave, 'gravity': self.gravity}[motion]
+        self.set_velocity = {'linear':self.linear,'wave':self.wave, 'gravity':self.gravity, 'ejac':self.ejac}[motion]
         self.gravity_scale = kwarg.get('gravity_scale', 1)
         amp = random.uniform(min(vel[motion][0],vel[motion][1]), max(vel[motion][0],vel[motion][1]))
         self.velocity = [-amp*math.cos(self.angle),-amp*math.sin(self.angle)]
         self.phase = random.uniform(-math.pi,math.pi)#for the cave grass relsease particles
-        
+
         state = kwarg.get('state', 'Idle')
         self.currentstate = getattr(states_particles, state)(self)
 
@@ -48,6 +48,12 @@ class Particles(pygame.sprite.Sprite):
         self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)
         self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
 
+    def ejac(self):
+        max_y_vel = -1.3
+        self.velocity[0] -= 0.065*self.velocity[0]*self.game_objects.game.dt + 0.03*math.sin(self.phase)#0.1*math.cos(self.angle)
+        self.velocity[1] += self.game_objects.game.dt * self.gravity_scale
+        self.velocity[1] = max(self.velocity[1], max_y_vel)
+
     def fading(self):
         self.colour[-1] -= self.fade_scale * self.game_objects.game.dt
         self.colour[-1] = max(self.colour[-1], 0)
@@ -63,19 +69,19 @@ class Particles(pygame.sprite.Sprite):
             dir += 180 * random.randint(0,1)
             spawn_angle = 10
             angle = random.randint(dir - spawn_angle, dir + spawn_angle)#the ejection anglex
-        else:#list 
+        else:#list
             if dir[1] == -1:#hit from down hit
                 spawn_angle = 30
-                angle = random.randint(90-spawn_angle, 90+spawn_angle)#the ejection anglex       
+                angle = random.randint(90-spawn_angle, 90+spawn_angle)#the ejection anglex
             elif dir[1] == 1:#hit from above hit
                 spawn_angle = 30
-                angle = random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex     
+                angle = random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex
             elif dir[0] == -1:#rigth hit
-                spawn_angle = 30
+                spawn_angle = 6
                 angle = random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
             elif dir[0] == 1:#left hit
-                spawn_angle = 30
-                angle = random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex                           
+                spawn_angle = 6
+                angle = random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex
         return angle
 
     def draw(self, target):
@@ -97,7 +103,7 @@ class Circle(Particles):
         self.rect.center = self.true_pos
         self.hitbox = self.rect.copy()
 
-        self.shader = game_objects.shaders['circle']#draws a circle        
+        self.shader = game_objects.shaders['circle']#draws a circle
         self.gradient = kwarg.get('gradient', 0)#one means gradient, 0 is without
 
     def draw(self, target):#his called just before the draw
@@ -107,7 +113,7 @@ class Circle(Particles):
         self.shader['size'] = self.image.size
         super().draw(target)
 
-    def pool(game_objects):#save the stuff in memory for later use    
+    def pool(game_objects):#save the stuff in memory for later use
         Circle.image = game_objects.game.display.make_layer((50,50)).texture
 
 class Goop(Particles):#circles that "distorts" due to noise
@@ -186,12 +192,12 @@ class Floaty_particles(Particles):#particles with a texture
         self.hitbox = self.rect.copy()
         self.shader = self.game_objects.shaders['particles_configure']
 
-        random_value = random.uniform(0.7,1)   
+        random_value = random.uniform(0.7,1)
         self.colour1 = (0,0.5*random_value,1*random_value,1)#main colour
         self.colour2 = (1,1,1,1)#seond
         self.colour3 = (1,0,0,1)#third9
 
-    def update(self):        
+    def update(self):
         self.animation.update()
         self.update_pos()
         self.update_velocity()
@@ -207,9 +213,9 @@ class Floaty_particles(Particles):#particles with a texture
         super().draw(target)
 
     def reset_timer(self):#when animation is finished
-        self.kill() 
+        self.kill()
 
-    def update_velocity(self):  
+    def update_velocity(self):
         self.velocity[1] += self.game_objects.game.dt*0.01
 
     def pool(game_objects):#save the stuff in memory for later use
@@ -223,16 +229,16 @@ class Offset(Particles):#not implemented fully -> need angular motion
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.rect.center = self.true_pos
         self.hitbox = self.rect.copy()
-        self.shader = self.game_objects.shaders['particles_configure']        
+        self.shader = self.game_objects.shaders['particles_configure']
 
-        random_value = random.uniform(0.7,1)   
+        random_value = random.uniform(0.7,1)
         self.colour1 = (0,0.5*random_value,1*random_value,1)#main colour
         self.colour2 = (1,1,1,1)#seond
         self.colour3 = (1,0,0,1)#third9
 
         self.time = 0
 
-    def update(self):        
+    def update(self):
         self.update_pos()
         self.update_velocity()
         self.destroy()
@@ -247,9 +253,9 @@ class Offset(Particles):#not implemented fully -> need angular motion
 
     def draw(self, target):#his called just before the draw
         self.update_uniforms()
-        super().draw(target)    
+        super().draw(target)
 
-    def update_velocity(self):  
+    def update_velocity(self):
         self.velocity  = [math.sin(self.time*0.1),math.sin(self.time*0.1)-0.5]
 
     def pool(game_objects):#save the stuff in memory for later use
