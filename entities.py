@@ -2549,10 +2549,11 @@ class Aila_sword(Melee):
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
             collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
-            collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
+            #collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
             collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=5, angle_spread = [13, 15], angle_dist = 'normal', colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 8, vel = {'ejac':[13,17]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
-            self.clash_particles(collision_enemy.hitbox.center)
-            #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
+            self.clash_particles(collision_enemy.hitbox.center, number_particles = 5)
+            #self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
+            self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.3)
 
             collision_enemy.currentstate.handle_input('sword')
             self.stone_states['enemy_collision'].enemy_collision()
@@ -2561,7 +2562,7 @@ class Aila_sword(Melee):
         angle = random.randint(-180, 180)#the erection anglex
         color = [255, 255, 255, 255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 40, vel = {'linear':[7,14]}, dir = angle, scale = 1.2, fade_scale = 5, colour = color, state = 'Idle')
+            obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 10, vel = {'linear':[5,7]}, dir = angle, scale = 0.8, fade_scale = 7, colour = color)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword

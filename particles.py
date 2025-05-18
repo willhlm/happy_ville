@@ -71,7 +71,7 @@ class Particles(pygame.sprite.Sprite):
             angle = random.randint(-180, 180)#the ejection anglex
         elif isinstance(dir, (int, float)):#interger/float
             dir += 180 * random.randint(0,1)
-            spawn_angle = 10
+            spawn_angle = 30
             angle = random.randint(dir - spawn_angle, dir + spawn_angle)#the ejection anglex
         elif self.angle_dist == 'normal':
             if dir[1] == -1:#hit from down hit
