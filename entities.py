@@ -2528,7 +2528,8 @@ class Aila_sword(Melee):
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
             collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
-            collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
+            #collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
+            collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=4, colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 6, vel = {'ejac':[12,16]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
             self.clash_particles(collision_enemy.hitbox.center)
             #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
 
