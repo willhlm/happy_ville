@@ -35,7 +35,7 @@ class Enemy(Character):
         self.chase_speed = 0.6
 
     def update(self):
-        self.hitstop_states.update()#need to be after update_vel and animation, and AI
+        self.hitstop_states.update()
         self.group_distance()
 
     def player_collision(self, player):#when player collides with enemy
@@ -194,7 +194,7 @@ class Projectiles(Platform_entity):#projectiels
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.lifetime = kwarg.get('lifetime', 300)
-        self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False)}#if they can break special blocks
+        self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False), 'aggro': True}#if they can break special blocks
 
     def update(self):
         super().update()
@@ -213,7 +213,8 @@ class Projectiles(Platform_entity):#projectiels
         eprojectile.take_dmg(self.dmg)
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
-        collision_enemy.take_dmg(self.dmg)
+        if self.flags['aggro']:
+            collision_enemy.take_dmg(self.dmg)
 
     def collision_interactables(self,interactable):#collusion interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables

@@ -5,9 +5,8 @@ import constants as C
 from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Loot, Enemy_drop, Interactable, Interactable_item
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
-#from folders
-from ai import reindeer_ai
-from states import hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
+#from folder
+from states import packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
 
 def sign(number):
     if number > 0: return 1
@@ -1282,25 +1281,31 @@ class Froggy(Enemy):
         pass
 
 class Packun(Enemy):
-    def __init__(self,pos, game_objects):
+    def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/packun/', game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 32, 32)
         self.health = 3
-        self.dmg = 1
-        self.attack_distance = [250,50]
+
+        self.currentstate = packun_states.Idle(self)
+        self.angle_state = getattr(packun_states, kwarg['direction'])(self)
 
     def attack(self):#called from states, attack main
-        attack = Projectile_1(self.rect.topleft, self.game_objects)#make the object
+        dir, amp = self.angle_state.get_angle()           
+        attack = Projectile_1(self.rect.topleft, self.game_objects, dir = dir, amp = amp)#make the object
         self.projectiles.add(attack)#add to group but in main phase
 
-    def chase(self, position):#called from AI
+    def update_vel(self):
         pass
 
-    def patrol(self,position):
-        pass
+    def draw(self, target):#called just before draw in group
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.game_objects.game.display.render(self.image, target, angle = self.angle_state.angle, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
+
+    def on_attack_timeout(self):
+        self.flags['attack_able'] = True
 
 class Sandrew(Enemy):
     def __init__(self,pos,game_objects):
@@ -1781,18 +1786,20 @@ class Reindeer(Boss):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
         self.image = self.sprites['idle_nice'][0]
-        self.animation.play('idle_nice')
+
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
 
-        self.currentstate = reindeer_states.Idle_nice(self)
-        self.AI = reindeer_ai.AI(self)
+        self.currentstate = reindeer_states.State_manager(self)
 
         self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
         self.attack_distance = [50, 10]
+        self.chase_distance = [200, 50]
+        self.jump_distance = [240, 50]
         self.attack = Hurt_box
+
         self.game_objects.lights.add_light(self, radius = 150)
-        self.chase_speed = 2
+        
         self.animation.framerate = 1/6
 
     def give_abillity(self):#called when reindeer dies
@@ -2331,12 +2338,20 @@ class Projectile_1(Projectiles):
         self.lifetime = kwarg.get('lifetime', 200)
         self.dir = kwarg.get('dir', [1, 0])
         amp = kwarg.get('amp', [5, 5])
-        self.velocity = [-amp[0] * self.dir[0], amp[1] * self.dir[1]]
+        self.velocity = [amp[0] * self.dir[0], amp[1] * self.dir[1]]
 
     def pool(game_objects):
         Projectile_1.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
+    def update(self):
+        super().update()
+        self.update_vel()
+
+    def update_vel(self):
+        self.velocity[1] += 0.05 * self.game_objects.game.dt#gravity
+
     def collision_platform(self,platform):
+        self.flags['aggro'] = False
         self.velocity = [0,0]
         self.currentstate.handle_input('Death')
 
@@ -2344,6 +2359,9 @@ class Projectile_1(Projectiles):
         self.collision_platform(None)
 
     def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
+        self.collision_platform(None)
+
+    def take_dmg(self, dmg):#called when fprojicle collides
         self.collision_platform(None)
 
 class Falling_rock(Projectiles):#things that can be placed in cave, the source makes this and can hurt player

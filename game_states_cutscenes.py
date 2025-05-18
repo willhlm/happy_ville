@@ -205,19 +205,26 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
 
         elif self.stage==1:#transform
             if self.timer > 200:
-                self.entity.currentstate.enter_state('Transform')
+                self.entity.currentstate.queue_task(task = 'transform')
+                self.entity.currentstate.queue_task(task = 'idle', animation = 'idle')
+                self.entity.currentstate.start_next_task()
                 self.game.game_objects.player.velocity[0] = -20
                 self.stage = 2
 
         elif self.stage==2:#roar
             if self.timer > 300:
-                self.entity.currentstate.enter_state('Roar_pre')
+                self.entity.currentstate.queue_task(task = 'roar_pre')
+                self.entity.currentstate.queue_task(task = 'roar_main')
+                self.entity.currentstate.queue_task(task = 'roar_post')
+                self.entity.currentstate.queue_task(task = 'idle', animation = 'idle')                
+                self.entity.currentstate.start_next_task()
                 self.stage = 3
 
         elif self.stage==3:
             if self.timer > 600:
                 self.game.game_objects.camera_manager.camera.exit_state()#exsiting deer encounter camera
-                self.entity.AI.activate()
+                self.entity.currentstate.queue_task(task = 'chase')
+                self.entity.currentstate.start_next_task()
                 self.game.state_manager.exit_state()                
 
 class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies

@@ -1399,3 +1399,28 @@ class Dark_forest(Biome):
             elif id == 14:
                 new_boss = entities.Reindeer(object_position, self.level.game_objects)
                 self.level.game_objects.enemies.add(new_boss)
+
+class Tall_trees(Biome):
+    def __init__(self, level):
+        super().__init__(level)
+
+    def room(self, room = 1):
+        pass
+ 
+    def load_objects(self, data, parallax, offset):
+        for obj in data['objects']:
+            new_map_diff = [-self.level.PLAYER_CENTER[0],-self.level.PLAYER_CENTER[1]]
+            object_size = [int(obj['width']),int(obj['height'])]
+            object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.level.map_data['objects_firstgid']
+
+
+            if id == 10:#packun
+                kwarg = {}
+                for property in properties:
+                    if property['name'] == 'direction':#determine spawn type and set position accordingly
+                        kwarg['direction'] = property['value']
+
+                new_viens = entities.Packun(object_position, self.level.game_objects, **kwarg)
+                self.level.game_objects.enemies.add(new_viens)

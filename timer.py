@@ -1,3 +1,5 @@
+import inspect
+
 class Timer_manager():
     def __init__(self, game_objects):
         self.game_objects = game_objects
@@ -14,6 +16,8 @@ class Timer_manager():
             del self.timers[ID]
 
     def remove_timer(self, timer):# Remove the specific timer from its ID category
+        caller = inspect.stack()[1]
+#        print(f"Called by function '{caller.function}' in file '{caller.filename}', line {caller.lineno}")
         self.timers[timer.ID].remove(timer)
         if not self.timers[timer.ID]:  # Clean up if there are no more timers under this ID
             del self.timers[timer.ID]
