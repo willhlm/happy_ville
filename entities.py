@@ -1292,6 +1292,9 @@ class Packun(Enemy):
         self.currentstate = packun_states.Idle(self)
         self.angle_state = getattr(packun_states, kwarg['direction'])(self)
 
+    def knock_back(self, dir):
+        pass
+
     def attack(self):#called from states, attack main
         dir, amp = self.angle_state.get_angle()
         attack = Projectile_1(self.rect.topleft, self.game_objects, dir = dir, amp = amp)#make the object
