@@ -1293,7 +1293,7 @@ class Packun(Enemy):
         self.angle_state = getattr(packun_states, kwarg['direction'])(self)
 
     def attack(self):#called from states, attack main
-        dir, amp = self.angle_state.get_angle()           
+        dir, amp = self.angle_state.get_angle()
         attack = Projectile_1(self.rect.topleft, self.game_objects, dir = dir, amp = amp)#make the object
         self.projectiles.add(attack)#add to group but in main phase
 
@@ -1799,7 +1799,7 @@ class Reindeer(Boss):
         self.attack = Hurt_box
 
         self.game_objects.lights.add_light(self, radius = 150)
-        
+
         self.animation.framerate = 1/6
 
     def give_abillity(self):#called when reindeer dies
@@ -2546,8 +2546,8 @@ class Aila_sword(Melee):
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
             collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
-            #collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
-            collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=4, colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 6, vel = {'ejac':[12,16]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
+            collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
+            collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=5, angle_spread = [13, 15], angle_dist = 'normal', colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 8, vel = {'ejac':[13,17]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
             self.clash_particles(collision_enemy.hitbox.center)
             #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
 
