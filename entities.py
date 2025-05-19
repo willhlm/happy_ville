@@ -279,10 +279,9 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
         self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['lightning'])
 
     def player_collision(self):#player collision
-        self.game_objects.player.take_dmg(1)
-        self.game_objects.player.currentstate.handle_input('interrupt')#interupts dash
         pm_one = sign(self.game_objects.player.hitbox.center[0]-self.hitbox.center[0])
-        self.game_objects.player.knock_back([pm_one,0])
+        self.game_objects.player.take_dmg(dmg = 1, effects = [lambda: self.game_objects.player.knock_back(amp = [50, 0], dir = [pm_one, 0])])
+        self.game_objects.player.currentstate.handle_input('interrupt')#interupts dash
 
     def player_noncollision(self):
         pass
@@ -859,15 +858,15 @@ class Player(Character):
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
 
-    def take_dmg(self, dmg = 1):#called from collisions
-        return self.damage_manager.take_damage(dmg)
+    def take_dmg(self, dmg = 1, effects = []):#called from collisions
+        return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
 
-    def apply_damage(self, dmg):#called from damage_manager
+    def apply_damage(self, context):#called from damage_manager
         self.flags['invincibility'] = True
-        self.health -= dmg# * self.dmg_scale#a omamori can set the dmg_scale to 0.5
-        self.game_objects.UI.hud.remove_hearts(dmg)# * self.dmg_scale)#update UI
+        self.health -= context.dmg# * self.dmg_scale#a omamori can set the dmg_scale to 0.5
+        self.game_objects.UI.hud.remove_hearts(context.dmg)# * self.dmg_scale)#update UI
 
-        if self.health > 0:#check if dead¨
+        if self.health > 0:#check if dead¨            
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
@@ -879,6 +878,10 @@ class Player(Character):
             self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 20, scale = 0.9)
 
             self.game_objects.shader_render.append_shader('chromatic_aberration', duration = 20)
+
+            for effect in context.effects:#e.g. knock back
+                effect()#apply the effects
+
         else:#if health < 0
             self.game_objects.signals.emit('player_died')#emit a signal that player died
             self.death_state.die()#depending on gameplay state, different death stuff should happen
@@ -914,7 +917,7 @@ class Player(Character):
     def update(self):
         self.movement_manager.update()#update the movement manager
         self.hitstop_states.update()
-        self.backpack.necklace.update()
+        self.backpack.necklace.update()#update the omamoris
         self.update_timers()
 
     def draw(self, target):#called in group
@@ -2294,9 +2297,6 @@ class Poisoncloud(Projectiles):
         if self.lifetime<0:
             self.currentstate.handle_input('Death')
 
-    def countered(self,dir,pos):#shielded
-        self.currentstate.handle_input('Death')
-
 class Poisonblobb(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
@@ -2503,9 +2503,7 @@ class Sword(Melee):
 
     def collision_enemy(self, collision_enemy):
         if collision_enemy.flags['invincibility']: return
-        collision_enemy.take_dmg(self.dmg)
-        collision_enemy.knock_back(self.dir)
-        collision_enemy.emit_particles(dir = self.dir)
+        collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = self.dir), lambda: collision_enemy.emit_particles(dir = self.dir)])        
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
 
@@ -2545,10 +2543,10 @@ class Aila_sword(Melee):
         self.stone_states['projectile_collision'].projectile_collision(eprojectile)
 
     def collision_enemy(self, collision_enemy):
-        self.currentstate.sword_jump()#only down sword will give velocity up
-        if collision_enemy.take_dmg(self.dmg):#if damage was taken
+        self.currentstate.sword_jump()#only down sword will give velocity up        ]
+        if collision_enemy.take_dmg(dmg = self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
-            collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
+            collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back( knock_back = {'amp': [0,0], 'dir':self.dir}))#hitstop to enemy, with knock back after hittop
             #collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
             collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=4, colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 6, vel = {'ejac':[12,16]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
             self.clash_particles(collision_enemy.hitbox.center)
@@ -2731,7 +2729,7 @@ class Shield(Projectiles):#a protection shield
         self.die = False
         self.progress = 0
 
-    def take_damage(self, dmg):#called when entity takes damage
+    def take_dmg(self, dmg):#called when entity takes damage
         if self.flags['invincibility']: return
         self.health -= dmg
 
@@ -3706,7 +3704,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
     def player_collision(self, player):
         if self.interacted: return#enter only once
         self.player_transport(player)
-        player.take_dmg()
+        player.take_dmg(dmg = 1)
         self.interacted = True
 
     def player_transport(self, player):#transports the player to safe position
@@ -3914,7 +3912,7 @@ class Cocoon(Interactable):#larv cocoon in light forest
         self.health = 3
         self.flags = {'invincibility': False}
 
-    def take_dmg(self,projectile):
+    def take_dmg(self, projectile):
         if self.flags['invincibility']: return
         #projectile.clash_particles(self.hitbox.center)
         self.health -= 1
@@ -4326,7 +4324,7 @@ class Grind(Interactable):#trap
         pass
 
     def player_collision(self, player):#player collision
-        player.take_dmg(1)
+        player.take_dmg(dmg = 1)
 
     def take_dmg(self, projectile):#when player hits with e.g. sword
         if hasattr(projectile, 'sword_jump'):#if it has the attribute

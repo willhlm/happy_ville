@@ -30,7 +30,7 @@ invincibility_time_player = 50
 invincibility_time_enemy = 20
 sword_time_player = 25#how long one has to wait before can swing the sword again
 hurt_animation_length = 15#how long enteties turn white upon dmg
-default_enemydmg_hitstop = 5
+default_enemydmg_hitstop = 7
 
 #colour
 spirit_colour = [255*0.39, 255*0.78, 255, 255]

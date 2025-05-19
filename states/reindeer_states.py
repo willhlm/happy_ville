@@ -47,6 +47,11 @@ class State_manager():#manager
     def increase_phase(self):
         self.state.increase_phase()
 
+    def enter_state(self, newstate):
+        self.clear_tasks()
+        self.queue_task(task = newstate)
+        self.start_next_task()        
+
 class Base_states():
     def __init__(self, entity, **kwarg):
         self.entity = entity
@@ -180,22 +185,22 @@ class Roar_post(Base_states):
         self.entity.currentstate.start_next_task()     
 
 class Death(Base_states):
-    def __init__(self,entity):
+    def __init__(self,entity,**kwarg):
         super().__init__(entity)
+        self.entity.animation.play('death')
 
     def update(self):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
+        self.entity.currentstate.queue_task(task = 'Dead')
         self.entity.currentstate.start_next_task()  #got to death
 
 class Dead(Base_states):
-    def __init__(self,entity):
+    def __init__(self,entity,**kwarg):
         super().__init__(entity)
+        self.entity.animation.play('dead') 
         self.entity.dead()
-
-    def update(self):
-        self.entity.velocity = [0,0]
 
 class Attack_pre(Base_states):
     def __init__(self,entity, **kwarg):
@@ -251,6 +256,10 @@ class Charge_run(Base_states):
         if not self.next: return
         self.cycles -= 1 
         if self.cycles == 0: self.entity.currentstate.start_next_task()
+
+    def handle_input(self, input):
+        if input == 'Wall':
+            self.entity.currentstate.start_next_task()
 
 class Charge_attack_pre(Base_states):
     def __init__(self, entity, **kwarg):
