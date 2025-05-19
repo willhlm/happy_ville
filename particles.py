@@ -8,13 +8,17 @@ class Particles(pygame.sprite.Sprite):
         self.game_objects = game_objects
         self.spawn_point = [pos[0],pos[1]]
 
+        self.angle_dist = kwarg.get('angle_dist', None)
         self.lifetime = kwarg.get('lifetime', 60)
+        self.angle_spread = kwarg.get('angle_spread', [30, 30])
         self.colour = list(kwarg.get('colour', [255, 255, 255, 255]))#make a copy of the list by list()
         dir = kwarg.get('dir', 'isotropic')
         angle = self.define_angle(dir)
 
         distance = kwarg.get('distance', 0)
         vel = kwarg.get('vel', {'linear':[7,15]})
+
+
 
         self.angle = -(2*math.pi*angle)/360
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
@@ -49,10 +53,10 @@ class Particles(pygame.sprite.Sprite):
         self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
 
     def ejac(self):
-        max_y_vel = -1.3
+        end_y_vel = -0.9
         self.velocity[0] -= 0.065*self.velocity[0]*self.game_objects.game.dt + 0.03*math.sin(self.phase)#0.1*math.cos(self.angle)
-        self.velocity[1] += self.game_objects.game.dt * self.gravity_scale
-        self.velocity[1] = max(self.velocity[1], max_y_vel)
+        #self.velocity[1] += self.game_objects.game.dt * self.gravity_scale * (end_y_vel-self.velocity[1])*0.1
+        self.velocity[1] += self.game_objects.game.dt * (end_y_vel-self.velocity[1])*0.1
 
     def fading(self):
         self.colour[-1] -= self.fade_scale * self.game_objects.game.dt
@@ -67,8 +71,23 @@ class Particles(pygame.sprite.Sprite):
             angle = random.randint(-180, 180)#the ejection anglex
         elif isinstance(dir, (int, float)):#interger/float
             dir += 180 * random.randint(0,1)
-            spawn_angle = 10
+            spawn_angle = 30
             angle = random.randint(dir - spawn_angle, dir + spawn_angle)#the ejection anglex
+        elif self.angle_dist == 'normal':
+            if dir[1] == -1:#hit from down hit
+                spawn_angle = 30
+                angle = random.randint(90-spawn_angle, 90+spawn_angle)#the ejection anglex
+            elif dir[1] == 1:#hit from above hit
+                spawn_angle = 30
+                angle = random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex
+            elif dir[0] == -1:#rigth hit
+                m = 0 + (self.angle_spread[1] - self.angle_spread[0])/2
+                s = (self.angle_spread[1] + self.angle_spread[0])/2
+                angle = random.normalvariate(mu = m, sigma=s)
+            elif dir[0] == 1:#left hit
+                m = 180 + (self.angle_spread[0] - self.angle_spread[1])/2
+                s = (self.angle_spread[0] + self.angle_spread[1])/2
+                angle = random.normalvariate(mu = m, sigma=s)
         else:#list
             if dir[1] == -1:#hit from down hit
                 spawn_angle = 30
@@ -77,11 +96,9 @@ class Particles(pygame.sprite.Sprite):
                 spawn_angle = 30
                 angle = random.randint(270-spawn_angle, 270+spawn_angle)#the ejection anglex
             elif dir[0] == -1:#rigth hit
-                spawn_angle = 6
-                angle = random.randint(0-spawn_angle, 0+spawn_angle)#the ejection anglex
+                angle = random.randrange(0-self.angle_spread[0], 0+self.angle_spread[1])#the ejection anglex
             elif dir[0] == 1:#left hit
-                spawn_angle = 6
-                angle = random.randint(180-spawn_angle, 180+spawn_angle)#the ejection anglex
+                angle = random.randrange(180-self.angle_spread[1], 180+self.angle_spread[0])#the ejection anglex
         return angle
 
     def draw(self, target):

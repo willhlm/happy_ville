@@ -1299,7 +1299,7 @@ class Packun(Enemy):
         pass
 
     def attack(self):#called from states, attack main
-        dir, amp = self.angle_state.get_angle()           
+        dir, amp = self.angle_state.get_angle()
         attack = Projectile_1(self.rect.topleft, self.game_objects, dir = dir, amp = amp)#make the object
         self.projectiles.add(attack)#add to group but in main phase
 
@@ -1355,11 +1355,10 @@ class Rav(Enemy):
         #self.animation.framerate = 0.2
         self.currentstate = rav_states.Patrol(self)
 
-    def knock_back(self, dir):
+    def knock_back(self, amp, dir):
         self.currentstate.enter_state('Knock_back')
-        amp_x = 25
-        self.velocity[0] = dir[0] * amp_x * (1 - abs(dir[1]))
-        self.velocity[1] = -dir[1] * 10
+        self.velocity[0] = dir[0] * amp[0] * (1 - abs(dir[1]))
+        self.velocity[1] = -dir[1] * amp[1] 
 
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
@@ -1805,7 +1804,7 @@ class Reindeer(Boss):
         self.attack = Hurt_box
 
         self.game_objects.lights.add_light(self, radius = 150)
-        
+
         self.animation.framerate = 1/6
 
     def give_abillity(self):#called when reindeer dies
@@ -2546,11 +2545,13 @@ class Aila_sword(Melee):
         self.currentstate.sword_jump()#only down sword will give velocity up        ]
         if collision_enemy.take_dmg(dmg = self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
-            collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back( knock_back = {'amp': [0,0], 'dir':self.dir}))#hitstop to enemy, with knock back after hittop
-            #collision_enemy.emit_particles(dir = self.dir)#, colour=[255,255,255,255])
-            collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=4, colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 6, vel = {'ejac':[12,16]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
-            self.clash_particles(collision_enemy.hitbox.center)
-            #self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.04)
+            collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(amp = [25,10], dir = self.dir))#hitstop to enemy, with knock back after hittop
+            #collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
+            collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=5, angle_spread = [13, 15], angle_dist = 'normal', colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 8, vel = {'ejac':[13,17]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
+            self.clash_particles(collision_enemy.hitbox.center, number_particles = 5)
+
+            #self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
+            self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.3)
 
             collision_enemy.currentstate.handle_input('sword')
             self.stone_states['enemy_collision'].enemy_collision()
@@ -2559,7 +2560,7 @@ class Aila_sword(Melee):
         angle = random.randint(-180, 180)#the erection anglex
         color = [255, 255, 255, 255]
         for i in range(0,number_particles):
-            obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 40, vel = {'linear':[7,14]}, dir = angle, scale = 1.2, fade_scale = 5, colour = color, state = 'Idle')
+            obj1 = getattr(particles, 'Spark')(pos, self.game_objects, distance = 0, lifetime = 10, vel = {'linear':[5,7]}, dir = angle, scale = 0.8, fade_scale = 7, colour = color)
             self.entity.game_objects.cosmetics.add(obj1)
 
     def level_up(self):#called when the smith imporoves the sword

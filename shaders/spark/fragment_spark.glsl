@@ -26,7 +26,7 @@ void main()
     vec2 norm_velocity = velocity/sqrt(velocity.x*velocity.x+velocity.y*velocity.y);
 
     float angle = -1*sign(asin(norm_velocity.y))*acos(norm_velocity.x);
-    float SDF = sdRhombus(rotate(angle)*(size*fragmentTexCoord-size*vec2(0.5)), scale*size*vec2(0.15,0.05));
+    float SDF = sdRhombus(rotate(angle)*(size*fragmentTexCoord-size*vec2(0.5)), scale*size*vec2(0.55,0.03)); // old: (0.15, 0.05)
 
     vec4 norm_colour = colour/vec4(255);//normalise
     norm_colour.w = step(SDF,0)*norm_colour.w;
