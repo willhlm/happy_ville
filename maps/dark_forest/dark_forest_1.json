@@ -1249,24 +1249,6 @@
                          "width":16,
                          "x":7664,
                          "y":544
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":304,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Packun"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":5072,
-                         "y":432
                         }],
                  "opacity":1,
                  "type":"objectgroup",

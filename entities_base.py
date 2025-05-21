@@ -40,15 +40,13 @@ class Enemy(Character):
 
     def player_collision(self, player):#when player collides with enemy
         if type(player.currentstate).__name__ in ['Thunder_main', 'Thunder_post']:
-            self.take_dmg(1)
-            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
-            self.knock_back([pm_one,0])
+            pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])            
+            self.take_dmg(dmg = 1, effects = [lambda: self.knock_back(amp = [50, 0], dir = [pm_one, 0])])
         else:
             if not self.flags['aggro']: return
             if player.flags['invincibility']: return
-            player.take_dmg(1)
             pm_one = sign(player.hitbox.center[0]-self.hitbox.center[0])
-            player.knock_back([pm_one,0])
+            player.take_dmg(dmg = 1, effects = [lambda: player.knock_back(amp = [50, 0], dir = [pm_one, 0])])#player take damage
 
     def dead(self):#called when death animation is finished
         self.loots()
@@ -61,10 +59,6 @@ class Enemy(Character):
                 obj = getattr(entities, key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0
-
-    def countered(self):#purple infifite stone
-        self.velocity[0] = -30*self.dir[0]
-        self.currentstate.handle_input('stun', duration = 30)
 
     def health_bar(self):#called from omamori Boss_HP
         pass
@@ -187,7 +181,7 @@ class Boss(Enemy):
     def give_abillity(self):
         self.game_objects.player.abilities.spirit_abilities[self.ability] = getattr(entities, self.ability)(self.game_objects.player)
 
-    def knock_back(self,dir):
+    def knock_back(self,**kwarg):
         pass
 
 class Projectiles(Platform_entity):#projectiels
@@ -214,7 +208,7 @@ class Projectiles(Platform_entity):#projectiels
 
     def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
         if self.flags['aggro']:
-            collision_enemy.take_dmg(self.dmg)
+            collision_enemy.take_dmg(dmg = self.dmg)
 
     def collision_interactables(self,interactable):#collusion interactables
         interactable.take_dmg(self)#some will call clash_particles but other will not. So sending self to interactables
@@ -270,6 +264,11 @@ class Melee(Projectiles):
         self.entity = entity#needs entity for making the hitbox follow the player in update hitbox
         self.dir = kwarg.get('dir', entity.dir.copy())
         self.direction_mapping = {(0, 0): ('center', 'center'), (1, 1): ('midbottom', 'midtop'),(-1, 1): ('midbottom', 'midtop'), (1, -1): ('midtop', 'midbottom'),(-1, -1): ('midtop', 'midbottom'),(1, 0): ('midleft', 'midright'),(-1, 0): ('midright', 'midleft')}
+
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
+        if self.flags['aggro']:
+            pm_one = sign(collision_enemy.hitbox.center[0]-self.entity.hitbox.center[0])
+            collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = [pm_one, 0])])
 
     def update_hitbox(self):#called from update hirbox in plaform entity
         rounded_dir = (sign(self.dir[0]), sign(self.dir[1]))#analogue controls may have none integer values
