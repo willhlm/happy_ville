@@ -1345,7 +1345,7 @@ class Rav(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
         self.aggro_distance = [200,10]#at which distance to the player when you should be aggro -> negative means no
         self.attack_distance = [50,150]
-        self.health = 50
+        self.health = 3
         self.chase_speed = 0.8
         self.patrol_speed = 0.3
         self.patrol_timer = 220
@@ -2549,7 +2549,7 @@ class Aila_sword(Melee):
         if collision_enemy.take_dmg(self.dmg):#if damage was taken
             self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
             collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(self.dir))#hitstop to enemy, with knock back after hittop
-            #collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
+            collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
             collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=5, angle_spread = [13, 15], angle_dist = 'normal', colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 8, vel = {'ejac':[13,17]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
             self.clash_particles(collision_enemy.hitbox.center, number_particles = 5)
             #self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
