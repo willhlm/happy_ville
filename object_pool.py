@@ -44,6 +44,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Shield.pool(game_objects)
         entities.Thunder.pool(game_objects)
         entities.Droplet.pool(game_objects)
+        entities.SlamAttack.pool(game_objects)
 
         entities_UI.Menu_Arrow.pool(game_objects)
         entities.Arrow_UI.pool(game_objects)

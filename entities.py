@@ -1356,9 +1356,8 @@ class Rav(Enemy):
         self.currentstate = rav_states.Patrol(self)
 
     def knock_back(self, amp, dir):
+        super().knock_back(amp, dir)
         self.currentstate.enter_state('Knock_back')
-        self.velocity[0] = dir[0] * amp[0] * (1 - abs(dir[1]))
-        self.velocity[1] = -dir[1] * amp[1] 
 
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
@@ -1799,7 +1798,7 @@ class Reindeer(Boss):
 
         self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
         self.attack_distance = [50, 10]
-        self.chase_distance = [200, 50]
+        #self.chase_distance = [200, 50]
         self.jump_distance = [240, 50]
         self.attack = Hurt_box
 
@@ -1807,10 +1806,19 @@ class Reindeer(Boss):
 
         self.animation.framerate = 1/6
 
+    def update(self):
+        super().update()       
+
+    def draw(self, target):#called in group
+        super().draw(target)
+
     def give_abillity(self):#called when reindeer dies
         self.game_objects.world_state.cutscenes_complete['Boss_deer_encounter'] = True#so not to trigger the cutscene again
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
+    def slam_attack(self):#called from states, attack main
+        self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 9, frequency = 20))
+        
 class Butterfly(Flying_enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos,game_objects)
@@ -2423,6 +2431,27 @@ class Droplet(Projectiles):#droplet that can be placed, the source makes this an
     def draw(self,target):
         self.shader_state.draw()
         super().draw(target)
+
+class SlamAttack(Projectiles):
+    def __init__(self, pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg) 
+        self.sprites = SlamAttack.sprites
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = self.rect.copy()
+        self.currentstate.enter_state('Death')
+        self.animation.play('idle')
+        self.dir = kwarg.get('dir', [1, 0])
+        self.dmg = 1
+        
+    def pool(game_objects):
+        SlamAttack.sprites = read_files.load_sprites_dict('Sprites/attack/slam/', game_objects, flip_x = True)
+
+    def collision_enemy(self, collision_enemy):#projecticle enemy collision (including player)
+        collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = self.dir)])
+
+    def collision_platform(self, collision_plat):#collision platform
+        pass
 
 class Hurt_box(Melee):#a hitbox that spawns
     def __init__(self, entity, **kwarg):
@@ -4467,3 +4496,37 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
         pos = [self.entity.hitbox.centerx + random.randint(-5,5), self.entity.hitbox.centery + random.randint(-5,5)]
         obj1 = particles.Circle(pos, self.entity.game_objects, lifetime = 50, dir = [0, -1], colour = [self.water_tint[0]*255, self.water_tint[1]*255, self.water_tint[2]*255, 255], vel = {'gravity': [0, -1]}, gravity_scale = 0.2, fade_scale = 2, gradient=0)
         self.entity.game_objects.cosmetics.add(obj1)
+
+class ChainProjectile(Staticentity):
+    def __init__(self, pos, game_objects, projecticle, direction, distance, number, frequency):
+        super().__init__(pos, game_objects)
+        self.pos = pos#inital position
+        self.projecticle = projecticle
+        self.game_objects = game_objects
+        self.direction = direction
+        self.distance = distance
+        self.number = number
+        self.spawn_number = 0
+        self.frequency = frequency
+        self.time = frequency
+        self.spawn()
+
+    def draw(self, target):
+        pass
+
+    def release_texture(self):
+        pass
+
+    def update(self):                
+        self.time -= self.game_objects.game.dt
+        if self.time <= 0:          
+            self.spawn()  
+            self.time = self.frequency#reset the timer     
+
+    def spawn(self):
+        if self.spawn_number >= self.number: 
+            self.kill()
+            return
+        pos = [self.pos[0] + self.direction[0] * self.distance * self.spawn_number, self.pos[1]+ self.direction[1] * self.distance * self.spawn_number]
+        self.game_objects.eprojectiles.add(self.projecticle(pos, self.game_objects, dir = self.direction))        
+        self.spawn_number += 1

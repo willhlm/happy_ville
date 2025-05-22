@@ -23,7 +23,7 @@ class State_manager():#manager
     def update(self):
         self.track_player_distance()
         self.state.update()
-
+ 
     def track_player_distance(self):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx, self.entity.game_objects.player.rect.centery - self.entity.rect.centery]
 
@@ -85,10 +85,10 @@ class Wait(Base_states):
 class Turn_around(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
-        self.entity.animation.play('idle')
         self.entity.dir[0] *= -1
+        self.entity.animation.play('idle')                  
 
-    def update(self):   
+    def update(self):
         self.entity.currentstate.start_next_task()
 
 class Transform(Base_states):
@@ -102,35 +102,58 @@ class Transform(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()      
 
-class Chase(Base_states):            
+class Move(Base_states):
     def __init__(self, entity, **kwarg):
-        super().__init__(entity)   
+        super().__init__(entity)
         self.entity.animation.play('walk')
+        self.timer = 200  # duration to walk before re-evaluating (adjust as needed)
 
-    def update(self):   
-        self.check_sight()        
+    def update(self):
+        self.entity.chase([0, 0])
 
-    def check_sight(self):    
-        if self.entity.currentstate.player_distance[0] > 0 and self.entity.dir[0] == -1 or self.entity.currentstate.player_distance[0] < 0 and self.entity.dir[0] == 1:#player on right and looking at left#player on left and looking right            
+        dist_x, dist_y = self.entity.currentstate.player_distance
+        self.timer -= self.entity.game_objects.game.dt
+
+        # Stop if close enough to reevaluate
+        if abs(dist_x) < self.entity.attack_distance[0] * 1.5:
+            self.entity.currentstate.queue_task(task='Pattern_logic')
+            self.entity.currentstate.start_next_task()
+
+        elif self.timer <= 0:
+            self.entity.currentstate.queue_task(task='Pattern_logic')  # reevaluate after some walk
+            self.entity.currentstate.start_next_task()
+
+class Pattern_logic(Base_states):#decides what to do based on distance
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+
+    def update(self):
+        dist_x, dist_y = self.entity.currentstate.player_distance
+
+        if (dist_x > 0 and self.entity.dir[0] == -1) or (dist_x < 0 and self.entity.dir[0] == 1):#turn around if the player is behind
             self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
             self.entity.currentstate.queue_task(task = 'turn_around')
             self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
-            self.entity.currentstate.queue_task(task = 'chase')
+            self.entity.currentstate.queue_task(task='Pattern_logic')
             self.entity.currentstate.start_next_task()
+            return
 
-        if abs(self.entity.currentstate.player_distance[0]) < self.entity.attack_distance[0] and abs(self.entity.currentstate.player_distance[1]) < self.entity.attack_distance[1]:#player close             
+        if abs(dist_x) < self.entity.attack_distance[0] and abs(dist_y) < self.entity.attack_distance[1]:#within attack range
             if self.entity.flags['attack_able']:
-                self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_attack_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
-                self.entity.currentstate.queue_task(task = 'attack_pre')
-                self.entity.currentstate.queue_task(task = 'attack_main')
+                self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_attack_timeout)
+                self.entity.currentstate.queue_task(task='attack_pre')
+                self.entity.currentstate.queue_task(task='attack_main')
                 self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
-                self.entity.currentstate.queue_task(task = 'chase')
+                self.entity.currentstate.queue_task(task='Pattern_logic')
                 self.entity.currentstate.start_next_task()
+                return
 
-        elif abs(self.entity.currentstate.player_distance[0]) < self.entity.chase_distance[0] and abs(self.entity.currentstate.player_distance[1]) < self.entity.chase_distance[1]:#player close             
-            self.entity.chase([0,0])#chases at self.entity.dir direction
+        #elif abs(dist_x) < self.entity.chase_distance[0] and abs(dist_y) < self.entity.chase_distance[1]:#within chase range
+            #self.entity.currentstate.queue_task(task='move')
+            #self.entity.currentstate.start_next_task()
+            #return
 
-        elif abs(self.entity.currentstate.player_distance[0]) < self.entity.jump_distance[0] and abs(self.entity.currentstate.player_distance[1]) < self.entity.jump_distance[1]:#player far away                 
+        elif abs(dist_x) < self.entity.jump_distance[0] and abs(dist_y) < self.entity.jump_distance[1]:#within jump range
             self.entity.currentstate.queue_task(task = 'jump_pre')  
             self.entity.currentstate.queue_task(task = 'jump_main')  
             self.entity.currentstate.queue_task(task = 'fall_pre')  
@@ -139,10 +162,11 @@ class Chase(Base_states):
             self.entity.currentstate.queue_task(task = 'slam_main')  
             self.entity.currentstate.queue_task(task = 'slam_post')  
             self.entity.currentstate.queue_task(task = 'wait', duration = 100)  
-            self.entity.currentstate.queue_task(task = 'chase')  
-            self.entity.currentstate.start_next_task()    
+            self.entity.currentstate.queue_task(task = 'Pattern_logic')  
+            self.entity.currentstate.start_next_task()
+            return
 
-        else:
+        else:#if outside of all ranges
             self.entity.currentstate.queue_task(task = 'charge_pre')  
             self.entity.currentstate.queue_task(task = 'charge_main')  
             self.entity.currentstate.queue_task(task = 'charge_run')  
@@ -150,8 +174,9 @@ class Chase(Base_states):
             self.entity.currentstate.queue_task(task = 'charge_attack')  
             self.entity.currentstate.queue_task(task = 'charge_post')          
             self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
-            self.entity.currentstate.queue_task(task = 'chase') 
-            self.entity.currentstate.start_next_task()  
+            self.entity.currentstate.queue_task(task = 'Pattern_logic') 
+            self.entity.currentstate.start_next_task()
+            return
 
 class Roar_pre(Base_states):
     def __init__(self,entity, **kwarg):
@@ -339,6 +364,7 @@ class Slam_main(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.play('slam_main') 
+        self.entity.slam_attack()
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()           
@@ -350,3 +376,5 @@ class Slam_post(Base_states):
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()             
+
+
