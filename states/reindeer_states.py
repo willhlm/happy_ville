@@ -62,6 +62,7 @@ class State_manager():#manager
         self.entity = entity
         self.task_queue = []  # Tasks to execute in order
         self.state = Idle(self.entity)
+        self.selector = PatternSelector(entity, PATTERNS)        
 
     def update(self):
         self.track_player_distance()
@@ -94,6 +95,28 @@ class State_manager():#manager
         self.clear_tasks()
         self.queue_task(task = newstate)
         self.start_next_task()        
+
+class PatternSelector():
+    def __init__(self, entity, patterns):
+        self.entity = entity
+        self.patterns = patterns
+
+    def get_valid_ranges(self, dist_x, dist_y):
+        ax = abs(dist_x)
+        ay = abs(dist_y)
+
+        if ax < self.entity.attack_distance[0] and ay < self.entity.attack_distance[1]:
+            return ["close", "mid", "far"]
+        elif ax < self.entity.jump_distance[0] and ay < self.entity.jump_distance[1]:
+            return ["mid", "far"]
+        else:
+            return ["far"]
+
+    def pick_pattern(self, dist_x, dist_y):#caleld from think
+        valid_ranges = self.get_valid_ranges(dist_x, dist_y)
+        options = [name for name, data in self.patterns.items() if data["range"] in valid_ranges or data["range"] == "any"]
+        weights = [self.patterns[name]["weight"] for name in options]
+        return self.patterns[random.choices(options, weights=weights, k=1)[0]]
 
 class Base_states():
     def __init__(self, entity, **kwarg):
@@ -168,8 +191,7 @@ class Move(Base_states):#not used
 
 class Think(Base_states):
     def __init__(self, entity, **kwarg):
-        super().__init__(entity)
-        self.selector = PatternSelector(entity, PATTERNS)
+        super().__init__(entity)        
 
     def update(self):
         dist_x, dist_y = self.entity.currentstate.player_distance
@@ -184,9 +206,9 @@ class Think(Base_states):
             return
 
         if self.entity.flags["attack_able"]:
-            chosen = self.selector.pick_pattern(dist_x, dist_y)
+            pattern = self.entity.currentstate.selector.pick_pattern(dist_x, dist_y)
             self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_attack_timeout)
-            for step in PATTERNS[chosen]["tasks"]:
+            for step in pattern["tasks"]:
                 self.entity.currentstate.queue_task(**step)
             self.entity.currentstate.start_next_task()
             return
@@ -394,27 +416,3 @@ class Slam_post(Base_states):
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()             
-
-class PatternSelector():
-    def __init__(self, entity, patterns):
-        self.entity = entity
-        self.patterns = patterns
-
-    def get_valid_ranges(self, dist_x, dist_y):
-        ax = abs(dist_x)
-        ay = abs(dist_y)
-
-        if ax < self.entity.attack_distance[0] and ay < self.entity.attack_distance[1]:
-            return ["close", "mid", "far"]
-        elif ax < self.entity.jump_distance[0] and ay < self.entity.jump_distance[1]:
-            return ["mid", "far"]
-        else:
-            return ["far"]
-
-    def pick_pattern(self, dist_x, dist_y):#caleld from think
-        valid_ranges = self.get_valid_ranges(dist_x, dist_y)
-        options = [name for name, data in self.patterns.items() if data["range"] in valid_ranges or data["range"] == "any"]
-
-        weights = [self.patterns[name]["weight"] for name in options]
-
-        return random.choices(options, weights=weights, k=1)[0]
