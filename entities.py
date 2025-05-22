@@ -866,7 +866,7 @@ class Player(Character):
         self.health -= context.dmg# * self.dmg_scale#a omamori can set the dmg_scale to 0.5
         self.game_objects.UI.hud.remove_hearts(context.dmg)# * self.dmg_scale)#update UI
 
-        if self.health > 0:#check if dead¨            
+        if self.health > 0:#check if dead¨
             self.game_objects.timer_manager.start_timer(C.invincibility_time_player, self.on_invincibility_timeout)#adds a timer to timer_manager and sets self.invincible to false after a while
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
@@ -1348,7 +1348,7 @@ class Rav(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
         self.aggro_distance = [200,10]#at which distance to the player when you should be aggro -> negative means no
         self.attack_distance = [50,150]
-        self.health = 50
+        self.health = 3
         self.chase_speed = 0.8
         self.patrol_speed = 0.3
         self.patrol_timer = 220
@@ -2531,7 +2531,7 @@ class Sword(Melee):
 
     def collision_enemy(self, collision_enemy):
         if collision_enemy.flags['invincibility']: return
-        collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = self.dir), lambda: collision_enemy.emit_particles(dir = self.dir)])        
+        collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = self.dir), lambda: collision_enemy.emit_particles(dir = self.dir)])
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
 
