@@ -1797,7 +1797,7 @@ class Reindeer(Boss):
         self.currentstate = reindeer_states.State_manager(self)
 
         self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
-        self.attack_distance = [50, 10]
+        self.attack_distance = [100, 50]
         #self.chase_distance = [200, 50]
         self.jump_distance = [240, 50]
         self.attack = Hurt_box
@@ -1817,7 +1817,7 @@ class Reindeer(Boss):
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
     def slam_attack(self):#called from states, attack main
-        self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 9, frequency = 20))
+        self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
         
 class Butterfly(Flying_enemy):
     def __init__(self, pos, game_objects):
@@ -2452,6 +2452,9 @@ class SlamAttack(Projectiles):
 
     def collision_platform(self, collision_plat):#collision platform
         pass
+
+    def collision_projectile(self, eprojectile):#fprojecticle proectile collision with eprojecitile: called from collisions
+        eprojectile.take_dmg(self.dmg)              
 
 class Hurt_box(Melee):#a hitbox that spawns
     def __init__(self, entity, **kwarg):

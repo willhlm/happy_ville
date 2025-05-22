@@ -1,18 +1,61 @@
-import sys
+import sys, random
 
-def pattern_normal_phase():#not used: if we want repeated pattern with phases
-    return [
-        {'task': 'idle', 'duration': 1000, 'repeat': True},
-        {'task': 'slam', 'power': 1, 'repeat': True},
-        {'task': 'recover', 'duration': 500, 'repeat': True}
-    ]
-
-def pattern_rage_phase():#not used: if we want repeated pattern with phases
-    return [
-        {'task': 'idle', 'duration': 600, 'repeat': True},
-        {'task': 'rage_slam', 'power': 2, 'repeat': True},
-        {'task': 'teleport', 'target': 'random', 'repeat': True}
-    ]    
+#attack patterns
+PATTERNS = {
+    "combo_slash": {
+        "weight": 4,
+        "range": "close",
+        "tasks": [
+            {"task": "attack_pre"},
+            {"task": "attack_main"},
+            {"task": "wait", "duration": 20},
+            {"task": "think"},
+        ]
+    },
+    "jump_and_slam": {
+        "weight": 3,
+        "range": "mid",
+        "tasks": [
+            {"task": "jump_pre"},
+            {"task": "jump_main"},
+            {"task": "fall_pre"},
+            {"task": "fall_main"},
+            {"task": "slam_pre"},
+            {"task": "slam_main"},
+            {"task": "slam_post"},
+            {"task": "wait", "duration": 80},
+            {"task": "think"}
+        ]
+    },
+    "charge_combo": {
+        "weight": 2,
+        "range": "far",
+        "tasks": [
+            {"task": "charge_pre"},
+            {"task": "charge_main"},
+            {"task": "charge_run"},
+            {"task": "charge_attack_pre"},
+            {"task": "charge_attack"},
+            {"task": "charge_post"},
+            {"task": "wait", "duration": 30},
+            {"task": "think"}
+        ]
+    },
+    "retreat_then_jump": {
+        "weight": 1,
+        "range": "any",  # Flexible
+        "tasks": [
+            {"task": "wait", "duration": 15},
+            {"task": "turn_around"},
+            {"task": "wait", "duration": 15},
+            {"task": "jump_pre"},
+            {"task": "jump_main"},
+            {"task": "fall_pre"},
+            {"task": "fall_main"},
+            {"task": "think"}
+        ]
+    }
+}
 
 class State_manager():#manager
     def __init__(self, entity):
@@ -102,7 +145,7 @@ class Transform(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()      
 
-class Move(Base_states):
+class Move(Base_states):#not used
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.play('walk')
@@ -116,67 +159,42 @@ class Move(Base_states):
 
         # Stop if close enough to reevaluate
         if abs(dist_x) < self.entity.attack_distance[0] * 1.5:
-            self.entity.currentstate.queue_task(task='Pattern_logic')
+            self.entity.currentstate.queue_task(task='think')
             self.entity.currentstate.start_next_task()
 
         elif self.timer <= 0:
-            self.entity.currentstate.queue_task(task='Pattern_logic')  # reevaluate after some walk
+            self.entity.currentstate.queue_task(task='think')  # reevaluate after some walk
             self.entity.currentstate.start_next_task()
 
-class Pattern_logic(Base_states):#decides what to do based on distance
+class Think(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
+        self.selector = PatternSelector(entity, PATTERNS)
 
     def update(self):
         dist_x, dist_y = self.entity.currentstate.player_distance
 
-        if (dist_x > 0 and self.entity.dir[0] == -1) or (dist_x < 0 and self.entity.dir[0] == 1):#turn around if the player is behind
-            self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
-            self.entity.currentstate.queue_task(task = 'turn_around')
-            self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
-            self.entity.currentstate.queue_task(task='Pattern_logic')
+        # Face the player first
+        if (dist_x > 0 and self.entity.dir[0] == -1) or (dist_x < 0 and self.entity.dir[0] == 1):
+            self.entity.currentstate.queue_task(task="wait", duration=20)
+            self.entity.currentstate.queue_task(task="turn_around")
+            self.entity.currentstate.queue_task(task="wait", duration=20)
+            self.entity.currentstate.queue_task(task="think")
             self.entity.currentstate.start_next_task()
             return
 
-        if abs(dist_x) < self.entity.attack_distance[0] and abs(dist_y) < self.entity.attack_distance[1]:#within attack range
-            if self.entity.flags['attack_able']:
-                self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_attack_timeout)
-                self.entity.currentstate.queue_task(task='attack_pre')
-                self.entity.currentstate.queue_task(task='attack_main')
-                self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
-                self.entity.currentstate.queue_task(task='Pattern_logic')
-                self.entity.currentstate.start_next_task()
-                return
-
-        #elif abs(dist_x) < self.entity.chase_distance[0] and abs(dist_y) < self.entity.chase_distance[1]:#within chase range
-            #self.entity.currentstate.queue_task(task='move')
-            #self.entity.currentstate.start_next_task()
-            #return
-
-        elif abs(dist_x) < self.entity.jump_distance[0] and abs(dist_y) < self.entity.jump_distance[1]:#within jump range
-            self.entity.currentstate.queue_task(task = 'jump_pre')  
-            self.entity.currentstate.queue_task(task = 'jump_main')  
-            self.entity.currentstate.queue_task(task = 'fall_pre')  
-            self.entity.currentstate.queue_task(task = 'fall_main')  
-            self.entity.currentstate.queue_task(task = 'slam_pre')  
-            self.entity.currentstate.queue_task(task = 'slam_main')  
-            self.entity.currentstate.queue_task(task = 'slam_post')  
-            self.entity.currentstate.queue_task(task = 'wait', duration = 100)  
-            self.entity.currentstate.queue_task(task = 'Pattern_logic')  
+        if self.entity.flags["attack_able"]:
+            chosen = self.selector.pick_pattern(dist_x, dist_y)
+            self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_attack_timeout)
+            for step in PATTERNS[chosen]["tasks"]:
+                self.entity.currentstate.queue_task(**step)
             self.entity.currentstate.start_next_task()
             return
 
-        else:#if outside of all ranges
-            self.entity.currentstate.queue_task(task = 'charge_pre')  
-            self.entity.currentstate.queue_task(task = 'charge_main')  
-            self.entity.currentstate.queue_task(task = 'charge_run')  
-            self.entity.currentstate.queue_task(task = 'charge_attack_pre')  
-            self.entity.currentstate.queue_task(task = 'charge_attack')  
-            self.entity.currentstate.queue_task(task = 'charge_post')          
-            self.entity.currentstate.queue_task(task = 'wait', duration = 20)  
-            self.entity.currentstate.queue_task(task = 'Pattern_logic') 
-            self.entity.currentstate.start_next_task()
-            return
+        # fallback wait
+        self.entity.currentstate.queue_task(task="wait", duration=40)
+        self.entity.currentstate.queue_task(task="think")
+        self.entity.currentstate.start_next_task()
 
 class Roar_pre(Base_states):
     def __init__(self,entity, **kwarg):
@@ -377,4 +395,26 @@ class Slam_post(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()             
 
+class PatternSelector():
+    def __init__(self, entity, patterns):
+        self.entity = entity
+        self.patterns = patterns
 
+    def get_valid_ranges(self, dist_x, dist_y):
+        ax = abs(dist_x)
+        ay = abs(dist_y)
+
+        if ax < self.entity.attack_distance[0] and ay < self.entity.attack_distance[1]:
+            return ["close", "mid", "far"]
+        elif ax < self.entity.jump_distance[0] and ay < self.entity.jump_distance[1]:
+            return ["mid", "far"]
+        else:
+            return ["far"]
+
+    def pick_pattern(self, dist_x, dist_y):#caleld from think
+        valid_ranges = self.get_valid_ranges(dist_x, dist_y)
+        options = [name for name, data in self.patterns.items() if data["range"] in valid_ranges or data["range"] == "any"]
+
+        weights = [self.patterns[name]["weight"] for name in options]
+
+        return random.choices(options, weights=weights, k=1)[0]

@@ -223,7 +223,7 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         elif self.stage==3:
             if self.timer > 600:
                 self.game.game_objects.camera_manager.camera.exit_state()#exsiting deer encounter camera
-                self.entity.currentstate.queue_task(task = 'pattern_logic')
+                self.entity.currentstate.queue_task(task = 'think')
                 self.entity.currentstate.start_next_task()
                 self.game.state_manager.exit_state()                
 

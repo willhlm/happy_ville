@@ -23,7 +23,7 @@ class Enemy(Character):
 
         self.currentstate = states_enemy.Idle(self)
 
-        self.inventory = {'Amber_droplet':500,'Bone':1,'Heal_item':1}#thigs to drop wgen killed
+        self.inventory = {'Amber_droplet':random.randint(1, 3),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
         self.spirit = 10
         self.health = 3
 
