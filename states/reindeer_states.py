@@ -1,5 +1,3 @@
-import sys, random
-
 #attack patterns
 PATTERNS = {
     "combo_slash": {
@@ -56,67 +54,6 @@ PATTERNS = {
         ]
     }
 }
-
-class State_manager():#manager
-    def __init__(self, entity):
-        self.entity = entity
-        self.task_queue = []  # Tasks to execute in order
-        self.state = Idle(self.entity)
-        self.selector = PatternSelector(entity, PATTERNS)        
-
-    def update(self):
-        self.track_player_distance()
-        self.state.update()
- 
-    def track_player_distance(self):
-        self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx, self.entity.game_objects.player.rect.centery - self.entity.rect.centery]
-
-    def start_next_task(self):#start when state is finished
-        if self.task_queue:
-            kwarg = self.task_queue.pop(0)
-            self.state = getattr(sys.modules[__name__], kwarg['task'].capitalize())(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
-
-            if kwarg.pop("repeat", False):#re-add the task if repeat=True
-                self.queue_task(**kwarg)
-
-    def queue_task(self, **kwarg):
-        self.task_queue.append(kwarg)
-
-    def clear_tasks(self):
-        self.task_queue.clear()  # Clear current tasks
-
-    def handle_input(self, input):
-        self.state.handle_input(input)
-    
-    def increase_phase(self):
-        self.state.increase_phase()
-
-    def enter_state(self, newstate):
-        self.clear_tasks()
-        self.queue_task(task = newstate)
-        self.start_next_task()        
-
-class PatternSelector():
-    def __init__(self, entity, patterns):
-        self.entity = entity
-        self.patterns = patterns
-
-    def get_valid_ranges(self, dist_x, dist_y):
-        ax = abs(dist_x)
-        ay = abs(dist_y)
-
-        if ax < self.entity.attack_distance[0] and ay < self.entity.attack_distance[1]:
-            return ["close", "mid", "far"]
-        elif ax < self.entity.jump_distance[0] and ay < self.entity.jump_distance[1]:
-            return ["mid", "far"]
-        else:
-            return ["far"]
-
-    def pick_pattern(self, dist_x, dist_y):#caleld from think
-        valid_ranges = self.get_valid_ranges(dist_x, dist_y)
-        options = [name for name, data in self.patterns.items() if data["range"] in valid_ranges or data["range"] == "any"]
-        weights = [self.patterns[name]["weight"] for name in options]
-        return self.patterns[random.choices(options, weights=weights, k=1)[0]]
 
 class Base_states():
     def __init__(self, entity, **kwarg):
@@ -416,3 +353,5 @@ class Slam_post(Base_states):
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()             
+
+STATE_REGISTRY = {'idle': Idle, 'wait': Wait, 'turn_around': Turn_around, 'transform': Transform, 'move': Move, 'think': Think, 'roar_pre': Roar_pre, 'roar_main': Roar_main, 'roar_post': Roar_post, 'death': Death, 'dead': Dead, 'attack_pre': Attack_pre, 'attack_main': Attack_main, 'charge_pre': Charge_pre, 'charge_main': Charge_main, 'charge_run': Charge_run, 'charge_attack_pre': Charge_attack_pre, 'charge_attack': Charge_attack, 'charge_post': Charge_post, 'jump_pre': Jump_pre, 'jump_main': Jump_main, 'fall_pre': Fall_pre, 'fall_main': Fall_main, 'slam_pre': Slam_pre, 'slam_main': Slam_main, 'slam_post': Slam_post}

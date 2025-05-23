@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, groups, backpack, modifier_damage, modifier_movement, seeds
+import read_files, particles, animation, dialogue, groups, backpack, modifier_damage, modifier_movement, seeds, task_manager
 import constants as C
 
 from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Loot, Enemy_drop, Interactable, Interactable_item
@@ -1790,11 +1790,10 @@ class Reindeer(Boss):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
         self.image = self.sprites['idle_nice'][0]
-
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
 
-        self.currentstate = reindeer_states.State_manager(self)
+        self.currentstate = task_manager.TaskManager(self, reindeer_states.STATE_REGISTRY, reindeer_states.PATTERNS)        
 
         self.ability = 'air_dash_main'#the stae of image that will be blitted to show which ability that was gained
         self.attack_distance = [100, 50]
@@ -1805,12 +1804,6 @@ class Reindeer(Boss):
         self.game_objects.lights.add_light(self, radius = 150)
 
         self.animation.framerate = 1/6
-
-    def update(self):
-        super().update()       
-
-    def draw(self, target):#called in group
-        super().draw(target)
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.world_state.cutscenes_complete['Boss_deer_encounter'] = True#so not to trigger the cutscene again
