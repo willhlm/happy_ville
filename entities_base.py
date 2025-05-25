@@ -82,8 +82,7 @@ class Flying_enemy(Enemy):
     def update_hitbox(self):
         self.hitbox.center = self.rect.center
 
-    def knock_back(self,dir):
-        amp = [20,20]
+    def knock_back(self,amp, dir):
         self.velocity[0] = dir[0]*amp[0]
         self.velocity[1] = -dir[1]*amp[1]
 

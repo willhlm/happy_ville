@@ -1,7 +1,7 @@
 import pygame, sys
 import UI_loader
 import entities#to load the inventory -> entities_UI?
-from states import states_inventory
+from entities_UI import InventoryPointer
 
 class BackpackUI():#initialised in UI.py
     def __init__(self, game_objects):
@@ -55,18 +55,14 @@ class BaseUI():
 class InventoryUI(BaseUI):
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state, **kwarg)
-        self.state = states_inventory.Items(self)
-        self.item_index = [0, 0]
         self.iventory_UI = InventoryUI.iventory_UI
         self.texts = InventoryUI.texts
-        self.define_blit_positions()
-
-    def on_enter(self):
-        self.define_blit_positions()
+        self.pointer = InventoryUI.pointer
+        self.selected_container = self.iventory_UI.containers[0]#initial default container
 
     def pool(game_objects):
         InventoryUI.iventory_UI = getattr(UI_loader, 'Inventory')(game_objects)
-        InventoryUI.define_pointer(game_objects)
+        InventoryUI.pointer = InventoryPointer([0,0], game_objects)
         InventoryUI.define_botton_texts(game_objects)
 
     @classmethod
@@ -75,39 +71,9 @@ class InventoryUI(BaseUI):
         InventoryUI.texts = []
         for conv in convs:
             InventoryUI.texts.append(game_objects.font.render((32,32), conv, len(conv)))
-            #self.texts[-1].fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-
-    def define_blit_positions(self):#set positions
-        items = self.iventory_UI.items.copy()#a list of empty items
-        key_items = self.iventory_UI.key_items#a dict of empty key items
-        index = 0
-        for key in self.game_objects.player.backpack.inventory.items.keys():#crease the object in inventory and sepeerate between useable items and key items
-            item = getattr(entities, key.capitalize())([0,0], self.game_objects)
-            if hasattr(item, 'use_item'):#usable items
-                item.rect.topleft = items[index].rect.topleft
-                item.number = self.game_objects.player.backpack.inventory.get_quantity(key)#number of items euirepped
-                items[index] = item
-                index += 1
-            else:#key items
-                item.rect.topleft = key_items[key.capitalize()].rect.topleft
-                item.number = self.game_objects.player.backpack.inventory.get_quantity(key)#number of items euirepped
-                key_items[key.capitalize()] = item
-
-        stones = self.iventory_UI.stones#a dict of emppty stones
-        for key in self.game_objects.player.sword.stones.keys():#stones player has
-            self.game_objects.player.sword.stones[key].rect.topleft = stones[key].rect.topleft
-            stones[key] = self.game_objects.player.sword.stones[key]
-
-        self.items = {'sword':list(stones.values()),'key_items':list(key_items.values()),'items':items}#organised items: used to select the item
-
-    @classmethod
-    def define_pointer(cls, game_objects):#called everytime we move from one area to another
-        size = [16,16]
-        cls.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
-        pygame.draw.rect(cls.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
-        cls.pointer = game_objects.game.display.surface_to_texture(cls.pointer)
 
     def render(self):
+        self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
         self.blit_inventory_BG()
         self.blit_inventory()
         self.blit_sword()
@@ -120,30 +86,34 @@ class InventoryUI(BaseUI):
         self.game_objects.game.display.render(self.iventory_UI.BG, self.game_objects.UI.backpack.screen)#shader render
 
     def blit_inventory(self):
-        for index, item in enumerate(self.items['items'] + self.items['key_items']):#items we can use
-            item.animation.update()
-            self.game_objects.game.display.render(item.image, self.game_objects.UI.backpack.screen, position = item.rect.topleft)#shader render
-            number = self.game_objects.font.render(text = '' + str(item.number))
-            self.game_objects.game.display.render(number, self.game_objects.UI.backpack.screen, position = item.rect.center)#shader render
+        for container in self.iventory_UI.containers:#blit all containers
+            self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
+
+        for key in self.game_objects.player.backpack.inventory.items.keys():#blit the items there is in inventory
+            self.iventory_UI.items[key].animation.update()#update the image
+            self.game_objects.game.display.render(self.iventory_UI.items[key].image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items[key].rect.topleft)#shader render
+            
+            quantity = self.game_objects.player.backpack.inventory.get_quantity(key)
+            number = self.game_objects.font.render(text = '' + str(quantity))
+            self.game_objects.game.display.render(number, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items[key].rect.center)#shader render
             number.release()
 
     def blit_sword(self):
-        self.iventory_UI.sword.animation.update()
-        self.game_objects.game.display.render(self.iventory_UI.sword.image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.sword.rect.topleft)#shader render
-        for stone in self.items['sword']:
-            stone.animation.update()
-            self.game_objects.game.display.render(stone.image, self.game_objects.UI.backpack.screen, position = stone.rect.topleft)#shader render
-
+        self.iventory_UI.items['sword'].animation.update()
+        self.game_objects.game.display.render(self.iventory_UI.items['sword'].image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items['sword'].rect.topleft)#shader render
+  
     def blit_pointer(self):
-        self.game_objects.game.display.render(self.pointer, self.game_objects.UI.backpack.screen, position = self.items[self.state.state_name][self.item_index[0]].rect.topleft)#shader render
+        pos = self.selected_container.rect.topleft#should change this index
+        self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.backpack.screen, position = pos)#shader render
 
     def blit_description(self):
-        self.conv = self.items[self.state.state_name][self.item_index[0]].description
-        text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
-        #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-        self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (420,150),shader = self.game_objects.shaders['colour'])#shader render
-        text.release()
+        item_name = self.selected_container.get_item()
+        if self.game_objects.player.backpack.inventory.items.get(item_name, None):#if the item is in the inventory
+            self.conv = self.iventory_UI.items[item_name].description
+            text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
+            self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+            self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (420,150),shader = self.game_objects.shaders['colour'])#shader render
+            text.release()
 
     def blit_bottons(self):
         for index, button in enumerate(self.iventory_UI.buttons.keys()):
@@ -152,7 +122,7 @@ class InventoryUI(BaseUI):
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
             self.game_objects.game.display.render(self.texts[index], self.game_objects.UI.backpack.screen, position = self.iventory_UI.buttons[button].rect.center,shader = self.game_objects.shaders['colour'])#shader render
 
-    def handle_events(self,input):
+    def handle_events(self, input):
         event = input.output()
         input.processed()
         if event[0]:#press
@@ -169,19 +139,70 @@ class InventoryUI(BaseUI):
             elif event[-1]=='a' or event[-1]=='return':
                 self.iventory_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
-            elif event[-1] == 'down':#navigate
-                pass
-            self.state.handle_input(input)
             self.letter_frame = 0
         elif event[1]:#release
             if event[-1]=='a' or event[-1]=='return':
                 self.iventory_UI.buttons['a'].currentstate.handle_input('release')
 
+        if event[2]['l_stick'][1] < 0:  # up
+            next_container = self.find_closest_container('up')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+        elif event[2]['l_stick'][1] > 0:  # down
+            next_container = self.find_closest_container('down')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+        elif event[2]['l_stick'][0] < 0:  # left
+            next_container = self.find_closest_container('left')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+        elif event[2]['l_stick'][0] > 0:  # right
+            next_container = self.find_closest_container('right')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+
+    def find_closest_container(self, direction):
+        current = self.selected_container.rect
+        best = None
+        best_score = float('inf')
+
+        for container in self.iventory_UI.containers:
+            if container == self.selected_container:
+                continue
+            target = container.rect
+
+            dx = target.centerx - current.centerx
+            dy = target.centery - current.centery
+
+            # Check direction and filter candidates
+            if direction == 'up' and dy >= 0: continue
+            if direction == 'down' and dy <= 0: continue
+            if direction == 'left' and dx >= 0: continue
+            if direction == 'right' and dx <= 0: continue
+
+            # Prioritize closest in direction
+            distance = dx**2 + dy**2
+            angle_priority = abs(dx if direction in ('up', 'down') else dy)
+
+            score = distance + angle_priority * 0.5  # fine-tune weighting
+            if score < best_score:
+                best_score = score
+                best = container
+
+        return best
+
     def use_item(self):
-        if not hasattr(self.items[self.state.state_name][self.item_index[0]], 'use_item'): return#if it is a item
-        if self.items[self.state.state_name][self.item_index[0]].number <= 0: return#if we have more than 0 item
-        self.items[self.state.state_name][self.item_index[0]].use_item()
-        self.items[self.state.state_name][self.item_index[0]].number -= 1
+        item_name = self.selected_container.get_item()
+        item = self.iventory_UI.items[item_name]
+
+        if not hasattr(item, 'use_item'): return#if it is a item that cannot be used
+        if self.game_objects.player.backpack.inventory.get_quantity(item_name) <= 0: return#if we have more than 0 item
+        item.use_item()
+        self.game_objects.player.backpack.inventory.remove_item(item_name, 1)#remove one item from the inventory
 
 class NecklaseUI(BaseUI):
     def __init__(self, game_state, **kwarg):

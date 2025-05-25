@@ -1,10 +1,8 @@
-import pygame
+import pygame, math
 import read_files, animation
-import math
-from sys import platform
+
 from states import states_buttons, states_health, states_basic
-from entities import Animatedentity
-from entities_core import Staticentity
+from entities_core import Animatedentity
 
 #for map UI
 class Banner(Animatedentity):
@@ -41,25 +39,23 @@ class Banner(Animatedentity):
         pass#open the local map
 
 #inventory
-class Item(Animatedentity):#for invenotry, an empty item
+class InventoryPointer(Animatedentity):#for invenotry, the pointer
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/item/empty/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/pointer/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-        self.number = ''#to bilt the number of items player has. THis class is an empty object so no number
 
-class Item_new(Animatedentity):#for invenotry, an empty item
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('UI/inventory/images/item/',game_objects)
+class InventoryContainer(Animatedentity):#for invenotry, will contain items
+    def __init__(self, pos, game_objects, item):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/container/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-        self.number = ''#to bilt the number of items player has. THis class is an empty object so no number
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height) 
+        self.item = item      
+
+    def get_item(self):
+        return self.item
 
 class Sword(Animatedentity):
     def __init__(self,pos,game_objects):
@@ -71,33 +67,6 @@ class Sword(Animatedentity):
 
     def set_level(self, level):
         self.currentstate.set_animation_name('level_'+str(level))
-
-class Infinity_stone(Animatedentity):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/infinity_stone/empty/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-
-class Amber_droplet(Animatedentity):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/amber_droplet/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = 'moneyyyyy'
-
-class Bone(Animatedentity):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/bone/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = 'boner'
 
 #momamori inventory
 class Omamori(Animatedentity):#this will save the positions needed to the UI

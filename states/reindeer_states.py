@@ -1,3 +1,5 @@
+from utils import register_state
+
 #attack patterns
 PATTERNS = {
     "combo_slash": {
@@ -55,6 +57,8 @@ PATTERNS = {
     }
 }
 
+STATE_REGISTRY = {}#populate with register_state decorator
+
 class Base_states():
     def __init__(self, entity, **kwarg):
         self.entity = entity
@@ -68,12 +72,14 @@ class Base_states():
     def increase_phase(self):
         pass
 
+@register_state(STATE_REGISTRY)
 class Idle(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
         animation = kwarg.get('animation', 'idle_nice')
         self.entity.animation.play(animation)
 
+@register_state(STATE_REGISTRY)
 class Wait(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
@@ -85,6 +91,7 @@ class Wait(Base_states):
         if self.duration < 0:
             self.entity.currentstate.start_next_task()
 
+@register_state(STATE_REGISTRY)
 class Turn_around(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
@@ -94,6 +101,7 @@ class Turn_around(Base_states):
     def update(self):
         self.entity.currentstate.start_next_task()
 
+@register_state(STATE_REGISTRY)
 class Transform(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -105,6 +113,7 @@ class Transform(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()      
 
+@register_state(STATE_REGISTRY)
 class Move(Base_states):#not used
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -126,6 +135,7 @@ class Move(Base_states):#not used
             self.entity.currentstate.queue_task(task='think')  # reevaluate after some walk
             self.entity.currentstate.start_next_task()
 
+@register_state(STATE_REGISTRY)
 class Think(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)        
@@ -155,6 +165,7 @@ class Think(Base_states):
         self.entity.currentstate.queue_task(task="think")
         self.entity.currentstate.start_next_task()
 
+@register_state(STATE_REGISTRY)
 class Roar_pre(Base_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
@@ -163,6 +174,7 @@ class Roar_pre(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()
 
+@register_state(STATE_REGISTRY)
 class Roar_main(Base_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
@@ -178,6 +190,7 @@ class Roar_main(Base_states):
             self.entity.currentstate.start_next_task()    
             self.entity.game_objects.shader_render.remove_shader('Speed_lines')
 
+@register_state(STATE_REGISTRY)
 class Roar_post(Base_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
@@ -186,6 +199,7 @@ class Roar_post(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()     
 
+@register_state(STATE_REGISTRY)
 class Death(Base_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
@@ -198,12 +212,14 @@ class Death(Base_states):
         self.entity.currentstate.queue_task(task = 'Dead')
         self.entity.currentstate.start_next_task()  #got to death
 
+@register_state(STATE_REGISTRY)
 class Dead(Base_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
         self.entity.animation.play('dead') 
         self.entity.dead()
 
+@register_state(STATE_REGISTRY)
 class Attack_pre(Base_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
@@ -213,6 +229,7 @@ class Attack_pre(Base_states):
     def increase_phase(self):
          self.entity.currentstate.start_next_task()     
 
+@register_state(STATE_REGISTRY)
 class Attack_main(Base_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
@@ -223,6 +240,7 @@ class Attack_main(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()     
 
+@register_state(STATE_REGISTRY)
 class Charge_pre(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)   
@@ -232,6 +250,7 @@ class Charge_pre(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()    
 
+@register_state(STATE_REGISTRY)
 class Charge_main(Base_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)       
@@ -242,6 +261,7 @@ class Charge_main(Base_states):
         self.cycles -= 1
         if self.cycles == 0: self.entity.currentstate.start_next_task()    
 
+@register_state(STATE_REGISTRY)
 class Charge_run(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -263,6 +283,7 @@ class Charge_run(Base_states):
         if input == 'Wall':
             self.entity.currentstate.start_next_task()
 
+@register_state(STATE_REGISTRY)
 class Charge_attack_pre(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -271,6 +292,7 @@ class Charge_attack_pre(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()  
 
+@register_state(STATE_REGISTRY)
 class Charge_attack(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -281,6 +303,7 @@ class Charge_attack(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()        
 
+@register_state(STATE_REGISTRY)
 class Charge_post(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -289,6 +312,7 @@ class Charge_post(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()          
 
+@register_state(STATE_REGISTRY)
 class Jump_pre(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -297,6 +321,7 @@ class Jump_pre(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()            
 
+@register_state(STATE_REGISTRY)
 class Jump_main(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -310,6 +335,7 @@ class Jump_main(Base_states):
         if self.timer < 0:
             self.entity.currentstate.start_next_task()    
 
+@register_state(STATE_REGISTRY)
 class Fall_pre(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -318,6 +344,7 @@ class Fall_pre(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()       
 
+@register_state(STATE_REGISTRY)
 class Fall_main(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -329,6 +356,7 @@ class Fall_main(Base_states):
             self.entity.acceleration[0] =0
             self.entity.currentstate.start_next_task()   
             
+@register_state(STATE_REGISTRY)            
 class Slam_pre(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -337,6 +365,7 @@ class Slam_pre(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()   
 
+@register_state(STATE_REGISTRY)
 class Slam_main(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -346,6 +375,7 @@ class Slam_main(Base_states):
     def increase_phase(self):
         self.entity.currentstate.start_next_task()           
 
+@register_state(STATE_REGISTRY)
 class Slam_post(Base_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -353,5 +383,3 @@ class Slam_post(Base_states):
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()             
-
-STATE_REGISTRY = {'idle': Idle, 'wait': Wait, 'turn_around': Turn_around, 'transform': Transform, 'move': Move, 'think': Think, 'roar_pre': Roar_pre, 'roar_main': Roar_main, 'roar_post': Roar_post, 'death': Death, 'dead': Dead, 'attack_pre': Attack_pre, 'attack_main': Attack_main, 'charge_pre': Charge_pre, 'charge_main': Charge_main, 'charge_run': Charge_run, 'charge_attack_pre': Charge_attack_pre, 'charge_attack': Charge_attack, 'charge_post': Charge_post, 'jump_pre': Jump_pre, 'jump_main': Jump_main, 'fall_pre': Fall_pre, 'fall_main': Fall_main, 'slam_pre': Slam_pre, 'slam_main': Slam_main, 'slam_post': Slam_post}

@@ -2907,11 +2907,10 @@ class Amber_droplet(Enemy_drop):
         self.sounds = Amber_droplet.sounds
 
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(0,0,16,16)
-        self.hitbox.center = pos
+        self.rect = pygame.Rect(pos[0], pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1],16,16)
 
-        self.rect.midbottom = self.hitbox.midbottom
+        self.hitbox.midbottom = self.rect.midbottom
         self.true_pos = list(self.rect.topleft)
         self.description = 'moneyy'
 
@@ -2932,10 +2931,10 @@ class Bone(Enemy_drop):
         self.sprites = Bone.sprites
         self.sounds = Bone.sounds
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(0,0,16,16)
-        self.hitbox.center = pos
-        self.rect.midbottom = self.hitbox.midbottom
+        self.rect = pygame.Rect(pos[0], pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1],16,16)
+
+        self.hitbox.midbottom = self.rect.midbottom
         self.true_pos = list(self.rect.topleft)
         self.description = 'Ribs from my daugther. You can respawn and stuff'
 
@@ -2958,10 +2957,10 @@ class Heal_item(Enemy_drop):
         self.sprites = Heal_item.sprites
         self.sounds = Heal_item.sounds
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(0,0,16,16)
-        self.hitbox.center = pos
-        self.rect.midbottom = self.hitbox.midbottom
+        self.rect = pygame.Rect(pos[0], pos[1],self.image.width,self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1],16,16)
+
+        self.hitbox.midbottom = self.rect.midbottom
         self.true_pos = list(self.rect.topleft)
         self.description = 'Use it to heal'
 

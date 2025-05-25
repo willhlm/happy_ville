@@ -1,6 +1,7 @@
 import pygame
 import read_files
 import entities_UI
+from entities import Amber_droplet, Bone, Heal_item
 
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
@@ -129,32 +130,19 @@ class Inventory(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
 
-    def load_data(self):
-        self.key_items = {}
-        self.items = []
-        self.stones = {}
+    def load_data(self): 
         self.buttons = {}
-        for obj in self.map_data['elements']:
+        self.containers = []
+        self.items = {}                      
+        for obj in self.map_data['elements']:        
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
             properties = obj.get('properties',[])
             id = obj['gid'] - self.map_data['UI_firstgid']
 
             if id == 0:#sword
-                new_item = entities_UI.Sword(topleft_object_position,self.game_objects)
-                self.sword = new_item
-            elif id == 1:#infinity stone
-                name = properties[0]['value']#the name of stone
-                new_item = entities_UI.Infinity_stone(topleft_object_position,self.game_objects)#make an object based on stringgetattr(entities_UI, name)
-                self.stones[name] = new_item
-            elif id == 2:#item
-                name = properties[0]['value']#the name of item
-                new_item = entities_UI.Item(topleft_object_position,self.game_objects)
-                self.items.append(new_item)
-            elif id == 3:#key_item
-                name = properties[0]['value']#the name of keyitem
-                new_item = entities_UI.Item(topleft_object_position,self.game_objects)
-                self.key_items[name] = new_item
+                self.items['sword'] = entities_UI.Sword(topleft_object_position,self.game_objects)
+
             elif id == 4:#a button
                 new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'a')
                 self.buttons['a'] = new_button
@@ -167,10 +155,21 @@ class Inventory(UI_loader):
             elif id == 7:#rb button
                 new_button = getattr(entities_UI, self.game_objects.controller.controller_type[-1].capitalize())(topleft_object_position,self.game_objects,'rb')
                 self.buttons['rb'] = new_button
-            elif id == 8:#item
-                name = properties[0]['value']#the name of item
-                new_item = entities_UI.Item_new(topleft_object_position,self.game_objects)
-                self.items.append(new_item)
+
+            elif id == 10:#Container
+                item = str(obj['id'])
+                for property in properties:
+                    if property['name'] == 'item':
+                        item = property['value']
+                self.containers.append(entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item))
+
+            elif id == 11:#money
+                self.items['amber_droplet'] = Amber_droplet(topleft_object_position, self.game_objects)                       
+                self.items['amber_droplet'].animation.play('ui')#set the animation to ui
+            elif id == 12:#bone
+                self.items['bone'] = Bone(topleft_object_position, self.game_objects)                       
+            elif id == 13:#heal item
+                self.items['heal_item'] = Heal_item(topleft_object_position, self.game_objects)                                                              
 
 class Ability_movement_upgrade(UI_loader):
     def __init__(self, game_objects):

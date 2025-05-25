@@ -908,6 +908,9 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
     def handle_events(self,input):
         self.game.game_objects.UI.handle_events(input)
 
+    def handle_movement(self):#aila movement is not needed in UIs
+        pass
+
 class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
     def __init__(self, game, image, text = '', callback = None):
         super().__init__(game)
