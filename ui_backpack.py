@@ -459,60 +459,20 @@ class MapUI(BaseUI):#local maps
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
         self.map_UI = MapUI.map_UI[kwarg.get('map', game_objects.map.biome_name)]#load the map the player is in
-        #self.selected_container = self.map_UI.objects[0]#initial default container
-
-        self.scroll = [0,0]
-        self.pos = [-0.5*(self.map_UI.BG.width - self.game_objects.game.window_size[0]),-0.5*(self.map_UI.BG.height - self.game_objects.game.window_size[1])]#start offset position
-
-        for object in self.map_UI.objects:
-            object.update(self.pos)
+        self.selected_container = self.map_UI.objects[0]#initial default container
 
     def pool(game_objects):
         MapUI.map_UI = {'world': getattr(UI_loader, 'WorldMap')(game_objects),'nordveden': getattr(UI_loader, 'NordvedenMap')(game_objects),'dark_forest': getattr(UI_loader, 'DarkforestMap')(game_objects)}
 
     def update(self):
-        self.continious_input()
-        self.update_pos(self.scroll)
-        self.limit_pos()
-        for object in self.map_UI.objects:
-            object.update(self.scroll)
-
-    def continious_input(self):        
-        self.scroll = [-2*self.game_objects.controller.value['r_stick'][0], -2*self.game_objects.controller.value['r_stick'][1]]#right analog stick
-
-    def update_pos(self,scroll):
-        self.pos = [self.pos[0]+scroll[0],self.pos[1]+scroll[1]]
-
-    def limit_pos(self):
-        #self.pos[0] = min(0,self.pos[0])
-        #self.pos[0] = max(self.game.window_size[0] - self.map_UI.BG.get_width(),self.pos[0])
-        #self.pos[1] = min(0,self.pos[1])
-        #self.pos[1] = max(self.game.window_size[1] - self.map_UI.BG.get_height(),self.pos[1])
-        if self.pos[0] > 0:
-            self.pos[0] = 0
-            self.scroll[0] = 0
-        elif self.pos[0] < self.game_objects.game.window_size[0] - self.map_UI.BG.width:
-            self.pos[0] = self.game_objects.game.window_size[0] - self.map_UI.BG.width
-            self.scroll[0] = 0
-        if self.pos[1] > 0:
-            self.pos[1] = 0
-            self.scroll[1] = 0
-        elif self.pos[1] < self.game_objects.game.window_size[1] - self.map_UI.BG.height:
-            self.pos[1] = self.game_objects.game.window_size[1] - self.map_UI.BG.height
-            self.scroll[1] = 0
+        self.selected_container.update()#make it move
 
     def render(self):        
         self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
-        self.game_objects.game.display.render(self.map_UI.BG, self.game_objects.UI.backpack.screen, position = self.pos)
+        self.game_objects.game.display.render(self.map_UI.BG, self.game_objects.UI.backpack.screen, position = [0,0])
         for object in self.map_UI.objects:
-            self.game_objects.game.display.render(object.image, self.game_objects.UI.backpack.screen, position = object.rect.topleft)
+            object.draw(self.game_objects.UI.backpack.screen)#draw the object. If it is selected, draw it with a different colour
         self.blit_screen()
-
-    def calculate_position(self):
-        scroll = [-self.selected_container.rect.center[0]+self.game_objects.game.window_size[0]*0.5,-self.selected_container.rect.center[1]+self.game_objects.game.window_size[1]*0.5]
-        for object in self.map_UI.objects:
-            object.update(scroll)
-        self.update_pos(scroll)
 
     def handle_events(self,input):
         event = input.output()
@@ -525,9 +485,65 @@ class MapUI(BaseUI):#local maps
                 new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)
 
-            elif event[-1] == 'a':#when pressing a
+            elif event[-1] == 'a':#nezt page
+                map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
+                new_ui = MapUI(self.game_objects, map = map_name, screen_alpha = 230)
+                self.game_objects.UI.backpack.enter_page(new_ui)  
+
+            elif event[-1] == 'x':#when pressing a
                 new_map = MapUI_2(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_map)
+
+        if event[2]['l_stick'][1] < 0:  # up
+            next_container = self.find_closest_position('up')
+            if next_container:
+                self.selected_container.reset()#reset the position of the container
+                self.selected_container = next_container
+        elif event[2]['l_stick'][1] > 0:  # down
+            next_container = self.find_closest_position('down')
+            if next_container:
+                self.selected_container.reset()#reset the position of the container
+                self.selected_container = next_container
+        elif event[2]['l_stick'][0] < 0:  # left
+            next_container = self.find_closest_position('left')
+            if next_container:
+                self.selected_container.reset()#reset the position of the container
+                self.selected_container = next_container
+        elif event[2]['l_stick'][0] > 0:  # right
+            next_container = self.find_closest_position('right')
+            if next_container:
+                self.selected_container.reset()#reset the position of the container
+                self.selected_container = next_container
+
+    def find_closest_position(self, direction):
+        current = self.selected_container.rect
+        best = None
+        best_score = float('inf')
+
+        for container in self.map_UI.objects:
+            if container == self.selected_container:
+                continue
+            target = container.rect
+
+            dx = target.centerx - current.centerx
+            dy = target.centery - current.centery
+
+            # Check direction and filter candidates
+            if direction == 'up' and dy >= 0: continue
+            if direction == 'down' and dy <= 0: continue
+            if direction == 'left' and dx >= 0: continue
+            if direction == 'right' and dx <= 0: continue
+
+            # Prioritize closest in direction
+            distance = dx**2 + dy**2
+            angle_priority = abs(dx if direction in ('up', 'down') else dy)
+
+            score = distance + angle_priority * 0.5  # fine-tune weighting
+            if score < best_score:
+                best_score = score
+                best = container
+
+        return best          
 
     def exit_state(self):
         self.game_objects.game.state_manager.exit_state()       
@@ -598,7 +614,7 @@ class MapUI_2(BaseUI):#world map
             elif event[-1] == 'rb':#nezt page
                 new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)
-            elif event[-1] == 'a':#when pressing a
+            elif event[-1] == 'x':#when pressing a
                 map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
                 new_ui = MapUI(self.game_objects, map = map_name, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)

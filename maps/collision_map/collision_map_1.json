@@ -29,27 +29,16 @@
                          "y":112
                         }, 
                         {
-                         "gid":99,
+                         "gid":96,
                          "height":16,
-                         "id":1377,
+                         "id":1387,
                          "name":"",
-                         "properties":[
-                                {
-                                 "name":"path_to",
-                                 "type":"string",
-                                 "value":"collision_map_1"
-                                }, 
-                                {
-                                 "name":"spawn",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
-                         "width":528,
-                         "x":80,
-                         "y":352
+                         "width":656,
+                         "x":128,
+                         "y":416
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -88,7 +77,7 @@
          "y":0
         }],
  "nextlayerid":33,
- "nextobjectid":1387,
+ "nextobjectid":1388,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

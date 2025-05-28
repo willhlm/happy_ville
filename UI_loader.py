@@ -186,16 +186,71 @@ class WorldMap(UI_loader):
 class NordvedenMap(UI_loader):
     def __init__(self, game_objects):
         self.game_objects = game_objects        
-        type = self.__class__.__name__.lower()
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/nordveden/BG.png').convert_alpha())           
         self.objects = []
+        self.load_UI_data()
+        self.load_data()
+
+    def load_UI_data(self):
+        map_data = read_files.read_json("UI/maps/nordveden/nordveden.json")
+        self.map_data = read_files.format_tiled_json(map_data)
+        for tileset in self.map_data['tilesets']:
+            if 'source' in tileset.keys():
+                if 'nordveden' + '_UI' in tileset['source']:#the name of the tmx file
+                    self.map_data['UI_firstgid'] =  tileset['firstgid']
+
+    def load_data(self):       
+        self.objects = [] 
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:
+                for property in properties:
+                    if property['name'] == 'direction':
+                        direction = property['value']
+                    elif property['name'] == 'map':
+                        map = property['value']                        
+
+                new_arrow = entities_UI.MapArrow(topleft_object_position, self.game_objects, map, direction)
+                self.objects.append(new_arrow)
+            
 
 class DarkforestMap(UI_loader):
     def __init__(self, game_objects):
         self.game_objects = game_objects        
-        type = self.__class__.__name__.lower()
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/darkforest/BG.png').convert_alpha())           
-        self.objects = []        
+        self.objects = []   
+        self.load_UI_data()
+        self.load_data()     
+
+    def load_UI_data(self):
+        map_data = read_files.read_json("UI/maps/darkforest/darkforest.json")
+        self.map_data = read_files.format_tiled_json(map_data)
+        for tileset in self.map_data['tilesets']:
+            if 'source' in tileset.keys():
+                if 'darkforest' + '_UI' in tileset['source']:#the name of the tmx file
+                    self.map_data['UI_firstgid'] =  tileset['firstgid']
+
+    def load_data(self):       
+        self.objects = [] 
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:
+                for property in properties:
+                    if property['name'] == 'direction':
+                        direction = property['value']
+                    elif property['name'] == 'map':
+                        map = property['value']                        
+
+                new_arrow = entities_UI.MapArrow(topleft_object_position, self.game_objects, map, direction)
+                self.objects.append(new_arrow)
 
 class Ability_movement_upgrade(UI_loader):
     def __init__(self, game_objects):
