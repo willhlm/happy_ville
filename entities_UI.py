@@ -6,14 +6,15 @@ from entities_core import Animatedentity
 
 #for map UI
 class Banner(Animatedentity):
-    def __init__(self,pos,game_objects,type,text):
+    def __init__(self, pos, game_objects, type, map_text):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/map/banner/banner_' + type + '/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
         self.original_pos = pos
-        #self.blit_text(text)
+        self.map_text = map_text
+        #self.blit_text(map_text)
 
     def blit_text(self,text):
         screen = self.game_objects.game.display.make_layer((self.image.width,self.image.height))#make a layer ("surface")
@@ -31,12 +32,8 @@ class Banner(Animatedentity):
     def update_pos(self,scroll):
         self.rect.center = [self.rect.center[0] + scroll[0], self.rect.center[1] + scroll[1]]
 
-    def revert(self):#called when quitting map state
-        self.rect.topleft = self.original_pos
-        self.currentstate.handle_input('Idle')
-
     def activate(self):#called from map when selecting the pecific banner
-        pass#open the local map
+        return self.map_text
 
 #inventory
 class InventoryPointer(Animatedentity):#for invenotry, the pointer

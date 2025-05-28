@@ -18,8 +18,6 @@ class Particles(pygame.sprite.Sprite):
         distance = kwarg.get('distance', 0)
         vel = kwarg.get('vel', {'linear':[7,15]})
 
-
-
         self.angle = -(2*math.pi*angle)/360
         self.true_pos = [pos[0]+distance*math.cos(self.angle),pos[1]+distance*math.sin(self.angle)]
         motion = list(vel.keys())[0]#linear, wave, gravity motion etc
@@ -99,6 +97,11 @@ class Particles(pygame.sprite.Sprite):
                 angle = random.randrange(0-self.angle_spread[0], 0+self.angle_spread[1])#the ejection anglex
             elif dir[0] == 1:#left hit
                 angle = random.randrange(180-self.angle_spread[1], 180+self.angle_spread[0])#the ejection anglex
+            else:
+                if dir[0] == 0:
+                    angle = 90
+                else:
+                    angle = math.tan(dir[1]/dir[0])#just to avoid error
         return angle
 
     def draw(self, target):

@@ -52,7 +52,7 @@ class Once(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
         self.next_state = kwarg['next_state']
-        self.entity.state = kwarg['animation_name']
+        self.entity.animation.play(kwarg['animation_name'])#the name of the class
 
     def increase_phase(self):
         self.enter_state(self.next_state)

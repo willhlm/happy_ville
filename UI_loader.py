@@ -44,28 +44,6 @@ class Vendor(UI_loader):
                 new_item = entities_UI.Item(topleft_object_position,self.game_objects)
                 self.next_items.append(new_item)
 
-class Map(UI_loader):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
-
-    def load_data(self):
-        self.objects = []
-        for obj in self.map_data['elements']:
-            object_size = [int(obj['width']),int(obj['height'])]
-            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['UI_firstgid']
-
-            if id == 0:
-                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(1),properties[0]['value'])
-                self.objects.append(new_banner)
-            elif id == 1:
-                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(2),properties[0]['value'])
-                self.objects.append(new_banner)
-            elif id == 2:
-                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(3),properties[0]['value'])
-                self.objects.append(new_banner)
-
 class Omamori(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
@@ -170,6 +148,54 @@ class Inventory(UI_loader):
                 self.items['bone'] = Bone(topleft_object_position, self.game_objects)                       
             elif id == 13:#heal item
                 self.items['heal_item'] = Heal_item(topleft_object_position, self.game_objects)                                                              
+
+class WorldMap(UI_loader):
+    def __init__(self, game_objects):
+        self.game_objects = game_objects        
+        type = self.__class__.__name__.lower()
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/' + type + '/BG.png').convert_alpha())
+        self.load_UI_data(type)
+        self.load_data()        
+
+    def load_UI_data(self, type):
+        map_data = read_files.read_json("UI/maps/worldmap/worldmap.json")
+        self.map_data = read_files.format_tiled_json(map_data)
+        for tileset in self.map_data['tilesets']:
+            if 'source' in tileset.keys():
+                if type + '_UI' in tileset['source']:#the name of the tmx file
+                    self.map_data['UI_firstgid'] =  tileset['firstgid']
+
+    def load_data(self):       
+        self.objects = [] 
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:
+                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(1),properties[0]['value'])
+                self.objects.append(new_banner)
+            elif id == 1:
+                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(2),properties[0]['value'])
+                self.objects.append(new_banner)
+            elif id == 2:
+                new_banner = entities_UI.Banner(topleft_object_position,self.game_objects,str(3),properties[0]['value'])
+                self.objects.append(new_banner)
+
+class NordvedenMap(UI_loader):
+    def __init__(self, game_objects):
+        self.game_objects = game_objects        
+        type = self.__class__.__name__.lower()
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/nordveden/BG.png').convert_alpha())           
+        self.objects = []
+
+class DarkforestMap(UI_loader):
+    def __init__(self, game_objects):
+        self.game_objects = game_objects        
+        type = self.__class__.__name__.lower()
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/darkforest/BG.png').convert_alpha())           
+        self.objects = []        
 
 class Ability_movement_upgrade(UI_loader):
     def __init__(self, game_objects):
