@@ -56,7 +56,6 @@ class InventoryUI(BaseUI):
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state, **kwarg)
         self.iventory_UI = InventoryUI.iventory_UI
-        self.texts = InventoryUI.texts
         self.pointer = InventoryUI.pointer
         self.selected_container = self.iventory_UI.containers[0]#initial default container
 
@@ -558,14 +557,15 @@ class MapUI_2(BaseUI):#world map
         self.pos = [-0.5*(self.map_UI.BG.width - self.game_objects.game.window_size[0]),-0.5*(self.map_UI.BG.height - self.game_objects.game.window_size[1])]#start offset position
 
         for object in self.map_UI.objects:
-            object.update(self.pos)
+            object.update_scroll(self.pos)
         
     def update(self):
+        self.selected_container.update()#make it move
         self.continious_input()
         self.update_pos(self.scroll)
         self.limit_pos()
         for object in self.map_UI.objects:
-            object.update(self.scroll)
+            object.update_scroll(self.scroll)
 
     def continious_input(self):        
         self.scroll = [-2*self.game_objects.controller.value['r_stick'][0], -2*self.game_objects.controller.value['r_stick'][1]]#right analog stick
@@ -574,16 +574,13 @@ class MapUI_2(BaseUI):#world map
         self.pos = [self.pos[0]+scroll[0],self.pos[1]+scroll[1]]
 
     def limit_pos(self):
-        #self.pos[0] = min(0,self.pos[0])
-        #self.pos[0] = max(self.game.window_size[0] - self.map_UI.BG.get_width(),self.pos[0])
-        #self.pos[1] = min(0,self.pos[1])
-        #self.pos[1] = max(self.game.window_size[1] - self.map_UI.BG.get_height(),self.pos[1])
         if self.pos[0] > 0:
             self.pos[0] = 0
             self.scroll[0] = 0
         elif self.pos[0] < self.game_objects.game.window_size[0] - self.map_UI.BG.width:
             self.pos[0] = self.game_objects.game.window_size[0] - self.map_UI.BG.width
             self.scroll[0] = 0
+            
         if self.pos[1] > 0:
             self.pos[1] = 0
             self.scroll[1] = 0
@@ -601,7 +598,7 @@ class MapUI_2(BaseUI):#world map
     def calculate_position(self):
         scroll = [-self.selected_container.rect.center[0]+self.game_objects.game.window_size[0]*0.5,-self.selected_container.rect.center[1]+self.game_objects.game.window_size[1]*0.5]
         for object in self.map_UI.objects:
-            object.update(scroll)
+            object.update_scroll(scroll)
         self.update_pos(scroll)
 
     def handle_events(self,input):

@@ -14,6 +14,7 @@ class Banner(Animatedentity):
         self.rect.topleft = pos
         self.original_pos = pos
         self.map_text = map_text
+        self.time = 0#for the animation
         #self.blit_text(map_text)
 
     def blit_text(self,text):
@@ -25,12 +26,16 @@ class Banner(Animatedentity):
                 self.game_objects.game.display.render(text_surface, screen, position = (image.width*0.5,image.height*0.5))
                 self.sprites[state][frame] = screen
 
-    def update(self,scroll):
-        super().update()
-        self.update_pos(scroll)
-
-    def update_pos(self,scroll):
+    def update_scroll(self, scroll):
         self.rect.center = [self.rect.center[0] + scroll[0], self.rect.center[1] + scroll[1]]
+
+    def update(self):
+        super().update()
+        self.time += self.game_objects.game.dt * 0.05    
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.center = [self.rect.center[0], self.rect.center[1] + math.sin(2 * self.time)]    
 
     def activate(self):#called from map when selecting the pecific banner
         return self.map_text

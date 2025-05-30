@@ -30,6 +30,8 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Player_Soul.pool(game_objects)
         entities.Pray_effect.pool(game_objects)
         entities.Fade_effect.pool(game_objects)
+        entities.ThunderBall.pool(game_objects)
+        entities.ThunderSpark.pool(game_objects)
 
         #projectiles
         entities.Bouncy_balls.pool(game_objects)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.10.1" name="interactables" tilewidth="224" tileheight="288" tilecount="15" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="interactables" tilewidth="224" tileheight="288" tilecount="15" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <transformations hflip="1" vflip="0" rotate="0" preferuntransformed="0"/>
  <tile id="2">
@@ -66,7 +66,7 @@
   <properties>
    <property name="interactable_item" value=""/>
   </properties>
-  <image width="32" height="32" source="../../Sprites/enteties/items/interactables_items/equip_holder.png"/>
+  <image width="16" height="16" source="../../Sprites/enteties/items/interactable_item/idle/Sprite-0002.png"/>
  </tile>
  <tile id="15">
   <properties>

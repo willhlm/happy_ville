@@ -86,6 +86,7 @@ class Particles(pygame.sprite.Sprite):
                 m = 180 + (self.angle_spread[0] - self.angle_spread[1])/2
                 s = (self.angle_spread[0] + self.angle_spread[1])/2
                 angle = random.normalvariate(mu = m, sigma=s)
+        
         else:#list
             if dir[1] == -1:#hit from down hit
                 spawn_angle = 30

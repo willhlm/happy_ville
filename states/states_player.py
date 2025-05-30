@@ -573,7 +573,7 @@ class Air_dash_pre(Player_states):
     def update(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.exit_state()
@@ -713,7 +713,7 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
 
     def update(self):
         self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.buffer_time -= self.entity.game_objects.game.dt
         self.exit_state()
@@ -728,7 +728,7 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
 
     def update(self):
         self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.buffer_time -= self.entity.game_objects.game.dt
         self.exit_state()
@@ -1042,9 +1042,15 @@ class Plant_bone_main(Player_states):
 
 class Thunder_pre(Player_states):
     def __init__(self, entity):
-        super().__init__(entity)
+        self.entity = entity
+
+        self.ball = entities.ThunderBall(self.entity.rect.topleft, self.entity.game_objects)#will be aila since aila will be swirlying
+        self.entity.game_objects.cosmetics.add(self.ball)
+
         self.duration = 100
-        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+        self.entity.shader_state.enter_state('Swirl')#take current animation and swirl it
+
+        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:#aim arrow
             self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects)
             self.entity.game_objects.cosmetics.add(self.arrow)
 
@@ -1056,6 +1062,8 @@ class Thunder_pre(Player_states):
             self.exit_state()
 
     def exit_state(self):
+        self.entity.shader_state.enter_state('Idle')
+        self.ball.kill()
         if self.entity.abilities.spirit_abilities['Thunder'].level == 1:
             self.enter_state('Thunder_main', dir = [0,1])
         else:
@@ -1078,31 +1086,41 @@ class Thunder_main(Player_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.dir = kwarg.get('dir', [0, 1])
-        self.time = 30
+        self.time = 30#how long to thunder dive
         self.entity.flags['invincibility'] = True
+        self.entity.shader_state.enter_state('MB')        
 
     def update(self):
-        self.entity.velocity = [8*self.dir[0], 8*self.dir[1]]
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
+        self.entity.velocity = [20*self.dir[0], 20*self.dir[1]]
         self.time -= self.entity.game_objects.game.dt
         if self.time < 0:
-            self.enter_state('Thunder_post')
+            self.exit_state()
+            
+    def exit_state(self):
+        self.entity.shader_state.enter_state('Idle')    
+        self.enter_state('Thunder_post')    
 
     def handle_movement(self,event):
         pass
 
     def handle_input(self, input, **kwarg):
-        if input in ['Ground', 'Wall', 'belt']:
-            self.entity.game_objects.camera_manager.camera_shake()
-            self.enter_state('Thunder_post')
+        if input in ['Ground', 'Wall', 'belt']:                        
+            self.exit_state()
 
 class Thunder_post(Player_states):
     def __init__(self,entity):
-        super().__init__(entity)
+        super().__init__(entity)        
+        self.entity.game_objects.time_manager.modify_time(time_scale = 0, duration = 7, callback = lambda: self.entity.game_objects.camera_manager.camera_shake(amplitude = 30, duration = 30, scale = 0.9))#freeze
+        
+        sparks = entities.ThunderSpark(self.entity.rect.topleft, self.entity.game_objects)
+        sparks.rect.midbottom = [self.entity.hitbox.midbottom[0], self.entity.hitbox.midbottom[1] + 16 ]#adjust the position
+        self.entity.game_objects.cosmetics.add(sparks)        
 
     def update(self):
         self.entity.velocity = [0,0]
 
-    def handle_movement(self,event):
+    def handle_movement(self, event):
         pass
 
     def increase_phase(self):#called when an animation is finihed for that state

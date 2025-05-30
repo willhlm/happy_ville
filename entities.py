@@ -761,18 +761,18 @@ class Arrow_UI(Staticentity):#for thuder charge state
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['arrow'])#shader render
 
 class Thunder_ball(Staticentity):#not used
-    def __init__(self, pos, game_objects, size):
+    def __init__(self, pos, game_objects, size, praalalx):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
         self.size = size
         self.time = 0
 
     def update(self):
-        self.time += self.entity.game_objects.game.dt*0.01
+        self.time += self.game_objects.game.dt*0.01
 
     def draw(self, target):
-        self.entity.game_objects.shaders['thunder_ball']['iTime'] = self.time
-        self.entity.game_objects.shaders['thunder_ball']['iResolution'] = self.size
+        self.game_objects.shaders['thunder_ball']['iTime'] = self.time
+        self.game_objects.shaders['thunder_ball']['iResolution'] = self.size
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['thunder_ball'])#shader render
@@ -834,7 +834,7 @@ class Player(Character):
         self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform
-        #self.shader_state = states_shader.Thunder_ball(self)
+        #self.shader_state = states_shader.Swirl(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -854,9 +854,9 @@ class Player(Character):
 
     def update_vel(self):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*context.friction[1])#gravity
+        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
-        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - context.friction[0]*self.velocity[0])
+        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
         return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
@@ -917,7 +917,7 @@ class Player(Character):
     def update(self):
         self.movement_manager.update()#update the movement manager
         self.hitstop_states.update()
-        self.backpack.necklace.update()#update the omamoris
+        self.backpack.necklace.update()#update the omamoris        
         self.update_timers()
 
     def draw(self, target):#called in group
@@ -1915,17 +1915,17 @@ class Spawner(Staticentity):#an entity spawner
             self.game_objects.enemies.add(obj)
 
 class Fade_effect(Staticentity):#fade effect
-    def __init__(self, entity, alpha = 255):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity.rect.center, entity.game_objects)
         self.image = entity.image
         self.image_copy = Fade_effect.image_copy
 
         self.rect = pygame.Rect(0, 0, self.image.width, self.image.height)
         self.rect.center = entity.rect.center
-        self.alpha = alpha
+        self.alpha = kwarg.get('alpha', 255)
 
-        self.true_pos = self.rect.topleft
         self.dir = entity.dir.copy()
+        self.blur_dir = kwarg.get('blur_dir', [0.05, 0]) 
 
     def update(self):
         self.alpha *= 0.9
@@ -1933,7 +1933,7 @@ class Fade_effect(Staticentity):#fade effect
 
     def draw(self, target):
         self.image_copy.clear(0,0,0,0)
-        self.game_objects.shaders['motion_blur']['dir'] = [0.05, 0]
+        self.game_objects.shaders['motion_blur']['dir'] = self.blur_dir
         self.game_objects.shaders['motion_blur']['quality'] = 3
         self.game_objects.game.display.render(self.image, self.image_copy, shader = self.game_objects.shaders['motion_blur'])#shader render
 
@@ -3324,8 +3324,8 @@ class Dust_running_particles(Animatedentity):#should make for grass, dust, water
         pass
 
 class Player_Soul(Animatedentity):#the thing that popps out when player dies
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
         self.sprites = Player_Soul.sprites
         self.image = self.sprites['once'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -3352,6 +3352,34 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
 
     def release_texture(self):
         pass
+
+class ThunderBall(Animatedentity):#for thunder dive
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = ThunderBall.sprites
+        self.image = self.sprites['once'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.currentstate = states_basic.Once(self, next_state = 'Idle', animation_name='once')
+
+    def pool(game_objects):
+        ThunderBall.sprites = read_files.load_sprites_dict('Sprites/enteties/soul/', game_objects)
+
+    def release_texture(self):
+        pass
+
+class ThunderSpark(Animatedentity):#when landing thunder dive
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = ThunderSpark.sprites
+        self.image = self.sprites['death'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.currentstate = states_basic.Death(self)
+
+    def pool(game_objects):
+        ThunderSpark.sprites = read_files.load_sprites_dict('Sprites/animations/thunder_spark/', game_objects)
+
+    def release_texture(self):
+        pass        
 
 class Spawneffect(Animatedentity):#the thing that crets when aila re-spawns
     def __init__(self,pos,game_objects):

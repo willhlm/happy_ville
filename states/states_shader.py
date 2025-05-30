@@ -319,3 +319,19 @@ class Aura(Shader_states):#not used
 
     def draw(self):
         self.entity.game_objects.shaders['aura']['TIME'] = self.time
+
+class Swirl(Shader_states):#not used
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['swirl']
+        self.ratio = 1
+
+    def update(self):
+        self.ratio -= self.entity.game_objects.game.dt*0.01
+        self.ratio = max(0, self.ratio)
+        if self.ratio <= 0:
+            self.enter_state('Idle')
+
+    def draw(self):        
+        self.entity.shader['ratio'] = self.ratio
+        
