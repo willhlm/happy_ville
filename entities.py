@@ -2174,6 +2174,30 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
     def __init__(self, entity):
         super().__init__(entity)
         self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
+        self.duration = 200#slow motion duration, in time [whatever units]
+        self.rate = 0.5#slow motion rate
+        self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
+
+    def initiate(self):#called when using the ability from player states
+        self.game_objects.time_manager.modify_time(time_scale = self.rate, duration = self.duration)#sow motion
+
+    def upgrade_ability(self):#called from upgrade menu
+        self.entity.slow_motion = 1/self.rate#can make aila move normal speed
+
+class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
+        self.level = 1#upgrade pointer
+        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
+
+    def initiate(self, dir, time):#called when relasing the button
+        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50, time = time))#add attack to group
+
+class Counter_abilty(Player_ability):#just a counter abilty 
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/projectiles/beaivis_time/')
         self.duration = 10#slow motion duration, in time [whatever units]
         self.rate = 0.5#slow motion rate
@@ -2214,16 +2238,6 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
 
     def upgrade_ability(self):#called from upgrade menu
         self.entity.slow_motion = 1/self.rate#can make aila move normal speed
-
-class Juksakkas_blessing(Player_ability):#arrow -> fetillity god
-    def __init__(self, entity):
-        super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/juksakkas_blessing/', entity.game_objects)
-        self.level = 1#upgrade pointer
-        self.description = ['shoot arrow','charge arrows','charge for insta kill','imba']
-
-    def initiate(self, dir, time):#called when relasing the button
-        self.entity.projectiles.add(Arrow(pos = self.entity.hitbox.topleft, game_objects = self.entity.game_objects, dir = dir, lifetime = 50, time = time))#add attack to group
 
 #projectiles
 class Bouncy_balls(Projectiles):#for ball challange room
