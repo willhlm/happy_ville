@@ -72,6 +72,24 @@ class Omamori(UI_loader):
 
         self.equipped.sort(key = lambda x: x.rect.centery)#sort the order according to left to right
 
+class Radna(UI_loader):
+
+    def load_data(self):
+        self.equipped = []
+        self.inventory = {}
+        self.hand = 0
+        self.rings = {}
+        for index, obj in enumerate(self.map_data['elements']):
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#inventory
+                self.hand = entities_UI.Hand(topleft_object_position,self.game_objects)
+
+
+
 class Journal(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
@@ -108,11 +126,11 @@ class Inventory(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
 
-    def load_data(self): 
+    def load_data(self):
         self.buttons = {}
         self.containers = []
-        self.items = {}                      
-        for obj in self.map_data['elements']:        
+        self.items = {}
+        for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
             properties = obj.get('properties',[])
@@ -142,20 +160,20 @@ class Inventory(UI_loader):
                 self.containers.append(entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item))
 
             elif id == 11:#money
-                self.items['amber_droplet'] = Amber_droplet(topleft_object_position, self.game_objects)                       
+                self.items['amber_droplet'] = Amber_droplet(topleft_object_position, self.game_objects)
                 self.items['amber_droplet'].animation.play('ui')#set the animation to ui
             elif id == 12:#bone
-                self.items['bone'] = Bone(topleft_object_position, self.game_objects)                       
+                self.items['bone'] = Bone(topleft_object_position, self.game_objects)
             elif id == 13:#heal item
-                self.items['heal_item'] = Heal_item(topleft_object_position, self.game_objects)                                                              
+                self.items['heal_item'] = Heal_item(topleft_object_position, self.game_objects)
 
 class WorldMap(UI_loader):
     def __init__(self, game_objects):
-        self.game_objects = game_objects        
+        self.game_objects = game_objects
         type = self.__class__.__name__.lower()
         self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/' + type + '/BG.png').convert_alpha())
         self.load_UI_data(type)
-        self.load_data()        
+        self.load_data()
 
     def load_UI_data(self, type):
         map_data = read_files.read_json("UI/maps/worldmap/worldmap.json")
@@ -165,8 +183,8 @@ class WorldMap(UI_loader):
                 if type + '_UI' in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
 
-    def load_data(self):       
-        self.objects = [] 
+    def load_data(self):
+        self.objects = []
         for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
@@ -185,8 +203,8 @@ class WorldMap(UI_loader):
 
 class NordvedenMap(UI_loader):
     def __init__(self, game_objects):
-        self.game_objects = game_objects        
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/nordveden/BG.png').convert_alpha())           
+        self.game_objects = game_objects
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/nordveden/BG.png').convert_alpha())
         self.objects = []
         self.load_UI_data()
         self.load_data()
@@ -199,8 +217,8 @@ class NordvedenMap(UI_loader):
                 if 'nordveden' + '_UI' in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
 
-    def load_data(self):       
-        self.objects = [] 
+    def load_data(self):
+        self.objects = []
         for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
@@ -212,19 +230,19 @@ class NordvedenMap(UI_loader):
                     if property['name'] == 'direction':
                         direction = property['value']
                     elif property['name'] == 'map':
-                        map = property['value']                        
+                        map = property['value']
 
                 new_arrow = entities_UI.MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
-            
+
 
 class DarkforestMap(UI_loader):
     def __init__(self, game_objects):
-        self.game_objects = game_objects        
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/darkforest/BG.png').convert_alpha())           
-        self.objects = []   
+        self.game_objects = game_objects
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/darkforest/BG.png').convert_alpha())
+        self.objects = []
         self.load_UI_data()
-        self.load_data()     
+        self.load_data()
 
     def load_UI_data(self):
         map_data = read_files.read_json("UI/maps/darkforest/darkforest.json")
@@ -234,8 +252,8 @@ class DarkforestMap(UI_loader):
                 if 'darkforest' + '_UI' in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
 
-    def load_data(self):       
-        self.objects = [] 
+    def load_data(self):
+        self.objects = []
         for obj in self.map_data['elements']:
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
@@ -247,7 +265,7 @@ class DarkforestMap(UI_loader):
                     if property['name'] == 'direction':
                         direction = property['value']
                     elif property['name'] == 'map':
-                        map = property['value']                        
+                        map = property['value']
 
                 new_arrow = entities_UI.MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
