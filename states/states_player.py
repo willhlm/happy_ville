@@ -1114,7 +1114,7 @@ class Thunder_post(Player_states):
         self.entity.game_objects.time_manager.modify_time(time_scale = 0, duration = 7, callback = lambda: self.entity.game_objects.camera_manager.camera_shake(amplitude = 30, duration = 30, scale = 0.9))#freeze
         
         sparks = entities.ThunderSpark(self.entity.rect.topleft, self.entity.game_objects)
-        sparks.rect.midbottom = [self.entity.hitbox.midbottom[0], self.entity.hitbox.midbottom[1] + 16 ]#adjust the position
+        sparks.rect.midbottom = [self.entity.hitbox.midbottom[0], self.entity.hitbox.midbottom[1] + 16]#adjust the position
         self.entity.game_objects.cosmetics.add(sparks)        
 
     def update(self):

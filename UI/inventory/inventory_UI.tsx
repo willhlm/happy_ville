@@ -31,4 +31,7 @@
  <tile id="13">
   <image width="48" height="48" source="../../Sprites/enteties/items/heal_item/idle/health1.png"/>
  </tile>
+ <tile id="14">
+  <image width="16" height="16" source="../../Sprites/enteties/items/tungsten/idle/tungsten1.png"/>
+ </tile>
 </tileset>
