@@ -9,7 +9,7 @@ uniform vec4 cloud_color = vec4(1); // Color of the clouds (including transparen
 uniform float cloud_opacity = 1; // Opacity of the clouds
 uniform float time;        // Time variable for animation
 uniform vec2 camera_scroll; // 
-uniform vec2 u_resolution = vec2(640,360); 
+uniform vec2 u_resolution; 
 
 // Function to interpolate (fade) used in Perlin noise
 float fade(float t) {

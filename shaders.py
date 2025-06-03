@@ -166,6 +166,25 @@ class Speed_lines(Shaders):
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, shader = self.renderer.game_objects.shaders['speed_lines'])#shader render
         return self.renderer.game_objects.game.screen
 
+class Slowmotion(Shaders):
+    def __init__(self, renderer, **kwarg):
+        super().__init__(renderer)
+        self.screen_copy = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
+        self.time = 0
+
+    def update(self):
+        self.time += self.renderer.game_objects.game.dt * 0.1
+
+    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
+        self.screen_copy.clear(0,0,0,0)
+        self.renderer.game_objects.shaders['slowmotion']['TIME'] = self.time 
+        self.renderer.game_objects.shaders['slowmotion']['camera_world_pos'] = self.renderer.game_objects.camera_manager.camera.true_scroll
+
+        self.renderer.game_objects.game.display.render(base_texture, self.screen_copy)
+
+        self.renderer.game_objects.game.display.render(self.screen_copy.texture, self.renderer.game_objects.game.screen, shader = self.renderer.game_objects.shaders['slowmotion'])#shader render
+        return self.renderer.game_objects.game.screen
+
 #not used below
 class Idle(Shaders):#enteties use it
     def __init__(self, renderer, **kwarg):

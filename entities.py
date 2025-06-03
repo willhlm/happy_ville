@@ -360,7 +360,7 @@ class Sky(Staticentity):
         #self.game_objects.shaders['cloud']['noise_texture'] = self.noise_layer.texture
         self.game_objects.shaders['cloud']['time'] = self.time
         self.game_objects.shaders['cloud']['camera_scroll'] = [self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0],self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
-        #self.game_objects.shaders['cloud']['texture_size'] = self.size
+        self.game_objects.shaders['cloud']['u_resolution'] = self.size
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.game.display.render(self.empty.texture, self.game_objects.game.screen, position = blit_pos, shader = self.game_objects.shaders['cloud'])
@@ -691,7 +691,7 @@ class Smoke(Staticentity):#2D smoke
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['smoke'])#shader render
 
-class Rainbow(Staticentity):
+class Rainbow(Staticentity):#rainbow
     def __init__(self, pos, game_objects, size, parallax, **properties):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
@@ -759,6 +759,23 @@ class Arrow_UI(Staticentity):#for thuder charge state
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['arrow'])#shader render
+
+class Nebula(Staticentity):#can be used as soul
+    def __init__(self, pos, game_objects, size, praalalx):
+        super().__init__(pos, game_objects)
+        self.image = game_objects.game.display.make_layer(size)
+        self.size = size
+        self.time = 0
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.1
+
+    def draw(self, target):
+        self.game_objects.shaders['nebula']['time'] = self.time 
+        self.game_objects.shaders['nebula']['resolution'] = self.size
+
+        pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['nebula'])#shader render
 
 class Thunder_ball(Staticentity):#not used
     def __init__(self, pos, game_objects, size, praalalx):
@@ -834,7 +851,7 @@ class Player(Character):
         self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform
-        #self.shader_state = states_shader.Swirl(self)
+        self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -2173,13 +2190,14 @@ class Bieggs_breath(Player_ability):#force push
 class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
     def __init__(self, entity):
         super().__init__(entity)
-        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/',entity.game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/attack/UI/beaivis_time/', entity.game_objects)
         self.duration = 200#slow motion duration, in time [whatever units]
         self.rate = 0.5#slow motion rate
         self.description = ['slow motion','longer slow motion','slow motion but aila','imba']
 
     def initiate(self):#called when using the ability from player states
         self.game_objects.time_manager.modify_time(time_scale = self.rate, duration = self.duration)#sow motion
+        self.game_objects.shader_render.append_shader('Slowmotion')
 
     def upgrade_ability(self):#called from upgrade menu
         self.entity.slow_motion = 1/self.rate#can make aila move normal speed

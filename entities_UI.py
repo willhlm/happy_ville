@@ -81,6 +81,16 @@ class MapArrow(Animatedentity):#for invenotry, the pointer
         self.rect.topleft = self.original_pos
         self.time = 0
 
+class Rooms(Animatedentity):
+    def __init__(self, pos, game_objects, number):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/map/rooms/nordveden/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        
+        self.room_number = number
+
+
 #inventory
 class InventoryPointer(Animatedentity):#for invenotry, the pointer
     def __init__(self,pos,game_objects):
