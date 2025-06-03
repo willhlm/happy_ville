@@ -31,11 +31,11 @@ class Banner(Animatedentity):
 
     def update(self):
         super().update()
-        self.time += self.game_objects.game.dt * 0.05    
+        self.time += self.game_objects.game.dt * 0.05
         self.update_pos()
 
     def update_pos(self):
-        self.rect.center = [self.rect.center[0], self.rect.center[1] + math.sin(2 * self.time)]    
+        self.rect.center = [self.rect.center[0], self.rect.center[1] + math.sin(2 * self.time)]
 
     def activate(self):#called from map when selecting the pecific banner
         return self.map_text
@@ -66,15 +66,15 @@ class MapArrow(Animatedentity):#for invenotry, the pointer
     def activate(self):
         return self.map_text
 
-    def update(self):        
+    def update(self):
         super().update()
         self.time += self.game_objects.game.dt * 0.1
         self.update_pos()
 
     def update_pos(self):
-        self.rect.center = [self.rect.center[0] + 2 * self.move_direction[0] * math.sin(self.time), self.rect.center[1] + 2 * self.move_direction[1] * math.sin(self.time)]    
+        self.rect.center = [self.rect.center[0] + 2 * self.move_direction[0] * math.sin(self.time), self.rect.center[1] + 2 * self.move_direction[1] * math.sin(self.time)]
 
-    def draw(self, target):    
+    def draw(self, target):
         self.game_objects.game.display.render(self.image, target, angle = self.angle, position = self.rect.topleft)#shader render
 
     def reset(self):
@@ -104,8 +104,8 @@ class InventoryContainer(Animatedentity):#for invenotry, will contain items
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/container/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height) 
-        self.item = item      
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.item = item
 
     def get_item(self):
         return self.item
@@ -138,6 +138,17 @@ class Necklace(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/necklace/',game_objects)#for inventory
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect.topleft = pos
+
+    def set_level(self,level):
+        self.currentstate.set_animation_name('level_'+str(level))
+
+class Hand(Animatedentity):
+    def __init__(self,pos,game_objects):
+        super().__init__(pos,game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/radna/hand/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos

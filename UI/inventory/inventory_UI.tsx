@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="inventory_UI" tilewidth="48" tileheight="112" tilecount="10" columns="0">
+<tileset version="1.10" tiledversion="1.10.1" name="inventory_UI" tilewidth="48" tileheight="112" tilecount="9" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="32" height="112" source="../../Sprites/UI/inventory/sword/idle/sword_0.png"/>
@@ -23,7 +23,7 @@
   <image width="32" height="32" source="../../Sprites/UI/inventory/container/idle/square_empty.png"/>
  </tile>
  <tile id="11">
-  <image width="48" height="48" source="../../Sprites/enteties/items/amber_droplet/ui/amber_droplet01.png"/>
+  <image width="10" height="10" source="../../Sprites/Enteties/Items/amber_droplet/ui/hjortron.png"/>
  </tile>
  <tile id="12">
   <image width="48" height="48" source="../../Sprites/enteties/items/bone/idle/bone1.png"/>

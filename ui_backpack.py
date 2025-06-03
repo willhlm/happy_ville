@@ -1,6 +1,6 @@
 import pygame, sys
 import UI_loader
-import entities#to load the inventory -> entities_UI?
+import entities
 from entities_UI import InventoryPointer
 
 class BackpackUI():#initialised in UI.py
@@ -202,6 +202,15 @@ class InventoryUI(BaseUI):
         if self.game_objects.player.backpack.inventory.get_quantity(item_name) <= 0: return#if we have more than 0 item
         item.use_item()
         self.game_objects.player.backpack.inventory.remove_item(item_name, 1)#remove one item from the inventory
+
+class RadnaUI(BaseUI):
+    def __init__(self, game_state, **kwarg):
+        super().__init__(game_state, **kwarg)
+        self.omamori_UI = NecklaseUI.omamori_UI
+        self.pointer = NecklaseUI.pointer
+        self.define_blit_positions()
+        self.omamori_index = kwarg.get('omamori_index', 0)
+        self.omamori_UI.necklace.set_level(self.game_objects.player.backpack.necklace.level)
 
 class NecklaseUI(BaseUI):
     def __init__(self, game_state, **kwarg):
@@ -668,4 +677,4 @@ class MapUI_2(BaseUI):#world map
                 best_score = score
                 best = container
 
-        return best          
+        return best   
