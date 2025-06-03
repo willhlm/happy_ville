@@ -51,7 +51,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities_UI.Menu_Arrow.pool(game_objects)
         entities.Arrow_UI.pool(game_objects)
 
-
         entities_parallax.Leaves.pool(game_objects)
         entities_parallax.Droplet.pool(game_objects)
         entities_parallax.Falling_rock.pool(game_objects)
@@ -77,7 +76,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
 
         #UI backpack
         ui_backpack.InventoryUI.pool(game_objects)
-        ui_backpack.NecklaseUI.pool(game_objects)
+        ui_backpack.RadnaUI.pool(game_objects)
         ui_backpack.JournalUI.pool(game_objects)
         ui_backpack.MapUI.pool(game_objects)
 

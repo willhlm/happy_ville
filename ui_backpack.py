@@ -129,7 +129,7 @@ class InventoryUI(BaseUI):
                 self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 self.iventory_UI.buttons['rb'].currentstate.handle_input('press')
-                new_ui = NecklaseUI(self.game_objects, screen_alpha = 230)
+                new_ui = RadnaUI(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)
             elif event[-1] == 'lb':#previouse
                 self.iventory_UI.buttons['lb'].currentstate.handle_input('press')
@@ -206,161 +206,128 @@ class InventoryUI(BaseUI):
 class RadnaUI(BaseUI):
     def __init__(self, game_state, **kwarg):
         super().__init__(game_state, **kwarg)
-        self.omamori_UI = NecklaseUI.omamori_UI
-        self.pointer = NecklaseUI.pointer
-        self.define_blit_positions()
-        self.omamori_index = kwarg.get('omamori_index', 0)
-        self.omamori_UI.necklace.set_level(self.game_objects.player.backpack.necklace.level)
-
-class NecklaseUI(BaseUI):
-    def __init__(self, game_state, **kwarg):
-        super().__init__(game_state, **kwarg)
-        self.omamori_UI = NecklaseUI.omamori_UI
-        self.pointer = NecklaseUI.pointer
-        self.define_blit_positions()
-        self.omamori_index = kwarg.get('omamori_index', 0)
-        self.omamori_UI.necklace.set_level(self.game_objects.player.backpack.necklace.level)
-
-    def on_enter(self):
-        self.define_blit_positions()
+        self.radna_UI = RadnaUI.radna_UI
+        self.pointer = RadnaUI.pointer
+        self.selected_container = self.radna_UI.containers[0]#initial default container
 
     def pool(game_objects):
-        NecklaseUI.omamori_UI = getattr(UI_loader, 'Omamori')(game_objects)
-        NecklaseUI.define_pointer(game_objects)
-
-    def define_blit_positions(self):
-        for key in self.game_objects.player.backpack.necklace.equipped.keys():
-            for index, omamori in enumerate(self.game_objects.player.backpack.necklace.equipped[key]):
-                pos = omamori.rect.topleft
-                self.game_objects.player.backpack.necklace.equipped[key][index].set_pos(pos)
-
-        omamori_dict = self.omamori_UI.inventory#copy all empty ones and then overwrite with the rellavant ones in inventory
-        for index, key in enumerate(self.game_objects.player.backpack.necklace.inventory):#the ones in inventory
-            pos = self.omamori_UI.inventory[key].rect.topleft
-            self.game_objects.player.backpack.necklace.inventory[key].set_pos(pos)
-            omamori_dict[key] = self.game_objects.player.backpack.necklace.inventory[key]
-        self.omamori_list = list(omamori_dict.values())
-        self.omamori_list.sort(key=lambda x: (x.rect.topleft[1], x.rect.topleft[0]))
-
-    @classmethod
-    def define_pointer(cls, game_objects, size = [32,32]):#called everytime we move from one area to another
-        cls.pointer = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(cls.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
-        cls.pointer = game_objects.game.display.surface_to_texture(cls.pointer)
+        RadnaUI.radna_UI = getattr(UI_loader, 'Radna')(game_objects)
+        RadnaUI.pointer = InventoryPointer([0,0], game_objects)
 
     def render(self):
-        self.blit_omamori_BG()
-        self.blit_necklace()
-        self.blit_omamori_menu()
+        self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
+        self.blit_BG()
+        self.blit_rings()
+        self.blit_hand()
         self.blit_pointer()
         self.blit_description()
         self.blit_screen()
 
-    def blit_omamori_BG(self):
-        #self.omamori_UI.BG.set_alpha(230)
-        self.game_objects.game.display.render(self.omamori_UI.BG, self.game_objects.UI.backpack.screen)
+    def blit_BG(self):
+        self.game_objects.game.display.render(self.radna_UI.BG, self.game_objects.UI.backpack.screen)#shader render
 
-    def blit_omamori_menu(self):
-        flattened_list = [item for sublist in list(self.game_objects.player.backpack.necklace.equipped.values()) for item in sublist]
+    def blit_rings(self):
+        for container in self.radna_UI.containers:#blit all containers
+            self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
 
-        for omamori in flattened_list + self.omamori_list:
-            omamori.animation.update()#update the image
-            omamori.render_UI(self.game_objects.UI.backpack.screen)
-            self.game_objects.game.display.render(omamori.image, self.game_objects.UI.backpack.screen, position = omamori.rect.topleft)
-
-    def blit_description(self):
-        self.conv = self.omamori_list[self.omamori_index].description
-        text = self.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
-        self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-        self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (100,250), shader = self.game_objects.shaders['colour'])
-        text.release()
-
-    def blit_necklace(self):
-        self.omamori_UI.necklace.animation.update()
-        self.game_objects.game.display.render(self.omamori_UI.necklace.image,self.game_objects.UI.backpack.screen, position = self.omamori_UI.necklace.rect.topleft)
+        for key in self.game_objects.player.backpack.necklace.inventory.keys():#blit the items there is in inventory
+            self.radna_UI.items[key].animation.update()#update the image
+            self.game_objects.game.display.render(self.radna_UI.items[key].image, self.game_objects.UI.backpack.screen, position = self.radna_UI.items[key].rect.topleft)#shader render        
 
     def blit_pointer(self):
-        self.game_objects.game.display.render(self.pointer, self.game_objects.UI.backpack.screen, position = self.omamori_list[self.omamori_index].rect.topleft)
+        pos = self.selected_container.rect.topleft#should change this index
+        self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.backpack.screen, position = pos)#shader render        
 
-    def handle_events(self,input):
+    def blit_hand(self):
+        self.radna_UI.items['hand'].animation.update()
+        self.game_objects.game.display.render(self.radna_UI.items['hand'].image, self.game_objects.UI.backpack.screen, position = self.radna_UI.items['hand'].rect.topleft)#shader render
+
+    def blit_description(self):
+        item_name = self.selected_container.get_item()
+        if self.game_objects.player.backpack.necklace.inventory.get(item_name, None):#if the item is in the inventory
+            self.conv = self.radna_UI.items[item_name].description
+            text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
+            self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
+            self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (320,220),shader = self.game_objects.shaders['colour'])#shader render
+            text.release()
+
+    def handle_events(self, input):
         event = input.output()
         input.processed()
         if event[0]:#press
             if event[-1] == 'select':
                 self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
-                if self.game_objects.world_state.statistics['kill']:#if we have killed something
-                    new_ui = JournalUI(self.game_objects, screen_alpha = 230)
-                    self.game_objects.UI.backpack.enter_page(new_ui)
-            elif event[-1] == 'lb':#previouse page
+                #self.radna_UI.buttons['rb'].currentstate.handle_input('press')
+                new_ui = JournalUI(self.game_objects, screen_alpha = 230)
+                self.game_objects.UI.backpack.enter_page(new_ui)
+            elif event[-1] == 'lb':#previouse
+                #self.radna_UI.buttons['lb'].currentstate.handle_input('press')
                 new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
                 self.game_objects.UI.backpack.enter_page(new_ui)
             elif event[-1]=='a' or event[-1]=='return':
-                self.choose_omamori()
-
-            elif event[-1] =='right':
-                self.letter_frame = 0
-                self.omamori_index += 1
-                self.omamori_index = min(self.omamori_index, len(self.omamori_list)-1)
-
-            elif event[-1] =='left':
-                self.letter_frame = 0
-                self.omamori_index -= 1
-                self.omamori_index = max(0,self.omamori_index)
-
-            elif event[-1] =='down':
-                self.letter_frame = 0
-                self.omamori_index += 4
-                self.omamori_index = min(self.omamori_index, len(self.omamori_list)-1)
-
-            elif event[-1] =='up':
-                self.letter_frame = 0
-                self.omamori_index -= 4
-                self.omamori_index = max(0,self.omamori_index)
-
-    def choose_omamori(self):
-        name = type(self.omamori_list[self.omamori_index]).__name__#name of omamori
-        if name == 'Omamori': return#if it is an empty omamori. return
-        response = self.game_objects.player.backpack.necklace.equip_omamori(name, self.omamori_UI.equipped)
-        if not response[0]:#if couldn't eqiup
-            new_ui = NecklaseUI_2(self.game_objects, response = response[1], screen_alpha = 230, omamori_index = self.omamori_index)
-            self.game_objects.UI.backpack.enter_page(new_ui)
-
-class NecklaseUI_2(NecklaseUI):#blit potential response from action
-    def __init__(self, game_state, **kwarg):
-        super().__init__(game_state, **kwarg)
-        self.response = kwarg.get('response', 'No')
-        self.text_window_size = (200, 100)
-        self.text_window = self.game_objects.font.fill_text_bg(self.text_window_size)#TODO
-        self.layer = self.game_objects.game.display.make_layer(self.game_objects.game.window_size)#TODO
-
-    def render(self):
-        self.blit_omamori_BG()
-        self.blit_necklace()
-        self.blit_omamori_menu()
-        self.blit_description()
-        self.blit_screen()
-        self.tint_screen()
-        self.blit_message()
-
-    def tint_screen(self):#blits everything first to self.game_state.screen. Then blit it to the game screen at the end
-        self.layer.clear(0, 0, 0, 100)
-        self.game_objects.game.display.render(self.layer.texture, self.game_objects.game.screen)
-
-    def blit_message(self):
-        text = self.game_objects.font.render(self.text_window_size, self.response, int(self.letter_frame//2))
-        self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-        self.game_objects.game.display.render(self.text_window, self.game_objects.game.screen, position = (280,120))#shader render
-        self.game_objects.game.display.render(text, self.game_objects.game.screen, position = (300,170), shader = self.game_objects.shaders['colour'])
-        text.release()
-
-    def handle_events(self,input):
-        event = input.output()
-        input.processed()
-        if event[0]:#press
+                #self.radna_UI.buttons['a'].currentstate.handle_input('press')
+                self.use_item()
+            self.letter_frame = 0
+        elif event[1]:#release
             if event[-1]=='a' or event[-1]=='return':
-                new_ui = NecklaseUI(self.game_objects)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                pass
+                #self.radna_UI.buttons['a'].currentstate.handle_input('release')
+
+        if event[2]['l_stick'][1] < 0:  # up
+            next_container = self.find_closest_position('up')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+        elif event[2]['l_stick'][1] > 0:  # down
+            next_container = self.find_closest_position('down')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+        elif event[2]['l_stick'][0] < 0:  # left
+            next_container = self.find_closest_position('left')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+        elif event[2]['l_stick'][0] > 0:  # right
+            next_container = self.find_closest_position('right')
+            if next_container:
+                self.selected_container = next_container
+                self.letter_frame = 0
+
+    def find_closest_position(self, direction):
+        current = self.selected_container.rect
+        best = None
+        best_score = float('inf')
+
+        for container in self.radna_UI.containers:
+            if container == self.selected_container:
+                continue
+            target = container.rect
+
+            dx = target.centerx - current.centerx
+            dy = target.centery - current.centery
+
+            # Check direction and filter candidates
+            if direction == 'up' and dy >= 0: continue
+            if direction == 'down' and dy <= 0: continue
+            if direction == 'left' and dx >= 0: continue
+            if direction == 'right' and dx <= 0: continue
+
+            # Prioritize closest in direction
+            distance = dx**2 + dy**2
+            angle_priority = abs(dx if direction in ('up', 'down') else dy)
+
+            score = distance + angle_priority * 0.5  # fine-tune weighting
+            if score < best_score:
+                best_score = score
+                best = container
+
+        return best
+
+    def use_item(self):
+        item_name = self.selected_container.get_item()
+        self.game_objects.player.backpack.necklace.equip_item(item_name)
 
 class JournalUI(BaseUI):
     def __init__(self, game_sate, **kwarg):

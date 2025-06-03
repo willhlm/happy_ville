@@ -1,7 +1,7 @@
 import pygame
 import read_files
 import entities_UI
-from entities import Amber_droplet, Bone, Heal_item
+from entities import Amber_droplet, Bone, Heal_item, Half_dmg
 
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
@@ -44,13 +44,14 @@ class Vendor(UI_loader):
                 new_item = entities_UI.Item(topleft_object_position,self.game_objects)
                 self.next_items.append(new_item)
 
-class Omamori(UI_loader):
+class Radna(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
 
     def load_data(self):
-        self.equipped = []
-        self.inventory = {}
+        self.buttons = {}
+        self.containers = []
+        self.items = {}
         for index, obj in enumerate(self.map_data['elements']):
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
@@ -58,37 +59,17 @@ class Omamori(UI_loader):
             id = obj['gid'] - self.map_data['UI_firstgid']
 
             if id == 0:#inventory
-                if properties:
-                    name = properties[0]['value']#the name of omamori
-                else:
-                    name = str(index)
-                new_omamori = entities_UI.Omamori(topleft_object_position,self.game_objects)
-                self.inventory[name] = new_omamori
-            elif id == 1:#equipeed
-                new_omamori = entities_UI.Omamori(topleft_object_position,self.game_objects)
-                self.equipped.append(new_omamori)
-            elif id == 2:#necklace
-                self.necklace = entities_UI.Necklace(topleft_object_position,self.game_objects)
+                self.items['hand'] = entities_UI.Hand(topleft_object_position,self.game_objects)
 
-        self.equipped.sort(key = lambda x: x.rect.centery)#sort the order according to left to right
+            elif id == 1:#Container
+                item = str(obj['id'])
+                for property in properties:
+                    if property['name'] == 'item':
+                        item = property['value']
+                self.containers.append(entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item))
 
-class Radna(UI_loader):
-
-    def load_data(self):
-        self.equipped = []
-        self.inventory = {}
-        self.hand = 0
-        self.rings = {}
-        for index, obj in enumerate(self.map_data['elements']):
-            object_size = [int(obj['width']),int(obj['height'])]
-            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['UI_firstgid']
-
-            if id == 0:#inventory
-                self.hand = entities_UI.Hand(topleft_object_position,self.game_objects)
-
-
+            elif id == 2:#haöf_dmg
+                self.items['half_dmg'] = Half_dmg(topleft_object_position, self.game_objects, wild = False)
 
 class Journal(UI_loader):
     def __init__(self, game_objects):

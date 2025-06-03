@@ -81,15 +81,13 @@ class MapArrow(Animatedentity):#for invenotry, the pointer
         self.rect.topleft = self.original_pos
         self.time = 0
 
-class Rooms(Animatedentity):
+class Rooms(Animatedentity):#the rroms in map
     def __init__(self, pos, game_objects, number):
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/map/rooms/nordveden/',game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)        
         self.room_number = number
-
 
 #inventory
 class InventoryPointer(Animatedentity):#for invenotry, the pointer
@@ -121,40 +119,13 @@ class Sword(Animatedentity):
     def set_level(self, level):
         self.currentstate.set_animation_name('level_'+str(level))
 
-#momamori inventory
-class Omamori(Animatedentity):#this will save the positions needed to the UI
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/omamori/empty/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-
-    def render_UI(self, target):
-        pass
-
-class Necklace(Animatedentity):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/necklace/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-
-    def set_level(self,level):
-        self.currentstate.set_animation_name('level_'+str(level))
-
+#radna inventory screen
 class Hand(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/radna/hand/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-
-    def set_level(self,level):
-        self.currentstate.set_animation_name('level_'+str(level))
 
 #gameplay HUD
 class Health(Animatedentity):#gameplay UI

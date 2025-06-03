@@ -1,5 +1,5 @@
 import pygame, random, sys, math
-import read_files, particles, animation, dialogue, groups, backpack, modifier_damage, modifier_movement, seeds, task_manager
+import read_files, particles, animation, dialogue, backpack, modifier_damage, modifier_movement, seeds, task_manager
 import constants as C
 
 from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Loot, Enemy_drop, Interactable, Interactable_item
@@ -880,7 +880,7 @@ class Player(Character):
 
     def apply_damage(self, context):#called from damage_manager
         self.flags['invincibility'] = True
-        self.health -= context.dmg# * self.dmg_scale#a omamori can set the dmg_scale to 0.5
+        self.health -= context.dmg
         self.game_objects.UI.hud.remove_hearts(context.dmg)# * self.dmg_scale)#update UI
 
         if self.health > 0:#check if dead¨
@@ -934,7 +934,7 @@ class Player(Character):
     def update(self):
         self.movement_manager.update()#update the movement manager
         self.hitstop_states.update()
-        self.backpack.necklace.update()#update the omamoris        
+        self.backpack.necklace.update()#update the radnas        
         self.update_timers()
 
     def draw(self, target):#called in group
@@ -1795,12 +1795,12 @@ class MrWood(NPC):#lumber jack
     def define_conversations(self):#the elements will pop after saying the stuff
         self.priority = []#priority events to say
         self.event = []#normal events to say
-        self.quest = ['lumberjack_omamori']#quest stuff to say
+        self.quest = ['lumberjack_radna']#quest stuff to say
 
     def interact(self):#when plater press t
         self.game_objects.game.state_manager.enter_state(state_name = 'Conversation', npc = self)
-        if self.game_objects.world_state.quests.get('lumberjack_omamori', False):#if the quest is running
-            self.game_objects.quests_events.active_quests['lumberjack_omamori'].complete()
+        if self.game_objects.world_state.quests.get('lumberjack_radna', False):#if the quest is running
+            self.game_objects.quests_events.active_quests['lumberjack_radna'].complete()
 
 class Reindeer(Boss):
     def __init__(self, pos, game_objects):
@@ -3026,33 +3026,20 @@ class Tungsten(Interactable_item):
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/tungsten/',game_objects)
         super().pool(game_objects)
 
-class Omamori(Interactable_item):
+class Radna(Interactable_item):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.entity = kwarg.get('entity', None)
         self.description = ''#for inventory
-        self.ui_group = groups.Group()#for the particle stuff in UI
-        self.level = 0
+        self.level = 0#the level of ring reuried to equip
 
-    def equipped(self):#an updated that should be called when equppied
+    def equipped(self):#called from the rings, when rings are updated
         pass
-
-    def render_UI(self, target):#called from oamori menu
-        if self.state != 'equip': return
-        obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,1]}, dir = 'isotropic')
-        self.ui_group.add(obj1)
-        for spr in self.ui_group.sprites():
-            spr.update()#the position
-            spr.update_uniforms()#the unforms for the draw
-            self.game_objects.game.display.render(spr.image, target, position = spr.rect.topleft, shader = spr.shader)
 
     def pickup(self, player):
         super().pickup(player)
-        player.backpack.necklace.inventory[type(self).__name__] = self
+        player.backpack.necklace.add([type(self).__name__].lower())
         self.entity = player
-
-    def handle_press_input(self,input):
-        pass
 
     def detach(self):
         self.animation.play('idle')
@@ -3060,13 +3047,10 @@ class Omamori(Interactable_item):
     def attach(self):
         self.animation.play('equip')
 
-    def reset_timer(self):
-        pass
-
     def set_pos(self,pos):#for inventory
         self.rect.topleft = pos
 
-class Half_dmg(Omamori):
+class Half_dmg(Radna):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Half_dmg.sprites
@@ -3086,10 +3070,10 @@ class Half_dmg(Omamori):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/half_dmg/',game_objects)#for inventory
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/radna/half_dmg/',game_objects)#for inventory
         super().pool(game_objects)
 
-class Loot_magnet(Omamori):
+class Loot_magnet(Radna):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Loot_magnet.sprites
@@ -3109,10 +3093,10 @@ class Loot_magnet(Omamori):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/loot_magnet/',game_objects)#for inventory
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/radna/loot_magnet/',game_objects)#for inventory
         super().pool(game_objects)
 
-class Boss_HP(Omamori):
+class Boss_HP(Radna):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Boss_HP.sprites
@@ -3129,30 +3113,30 @@ class Boss_HP(Omamori):
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/omamori/boss_HP/',game_objects)#for inventor
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/radna/boss_HP/',game_objects)#for inventor
         super().pool(game_objects)
 
-class Indincibillity(Omamori):#extends the invincibillity time
+class Indincibillity(Radna):#extends the invincibillity time
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 
-class Runspeed(Omamori):#increase the runs speed
+class Runspeed(Radna):#increase the runs speed
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 
-class Dashpeed(Omamori):#decrease the dash cooldown?
+class Dashpeed(Radna):#decrease the dash cooldown?
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 
-class Shields(Omamori):#autoamtic shield that negates one damage, if have been outside combat for a while?
+class Shields(Radna):#autoamtic shield that negates one damage, if have been outside combat for a while?
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 
-class Wallglue(Omamori):#to make aila stick to wall, insead of gliding?
+class Wallglue(Radna):#to make aila stick to wall, insead of gliding?
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 
-class Hover(Omamori):#If holding jump button, make a small hover
+class Hover(Radna):#If holding jump button, make a small hover
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
 

@@ -377,7 +377,7 @@ class Enemy_drop(Loot):
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects)
-        if not kwarg.get('entity', None):#if it is spawn in the wild
+        if kwarg.get('wild', None):#if it is spawn in the wild
             velocity = kwarg.get('velocity', [2, -4])
             velocity_range = kwarg.get('velocity_range', [1, 0])#olus minus the velocity
             self.velocity = [random.uniform(velocity[0] - velocity_range[0], velocity[0] + velocity_range[0]),random.uniform(velocity[1] - velocity_range[1], velocity[1] + velocity_range[1])]

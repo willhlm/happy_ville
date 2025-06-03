@@ -140,19 +140,19 @@ class Golden_fields_encounter_1(Tasks):#called from golden fields room event_tri
         self.cleanup()    
 
 #quests
-class Lumberjack_omamori(Tasks):#called from monument, #TODO need to make so that this omamori cannot be eqquiped while this quest is runing
+class Lumberjack_radna(Tasks):#called from monument, #TODO need to make so that this radna cannot be eqquiped while this quest is runing
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects)
-        self.description = 'bring back the omamori to lumberjack within a given time'        
+        self.description = 'bring back the radna to lumberjack within a given time'        
         self.time = 9000#time to compplete        
-        self.omamori = kwarg['item']
+        self.radna = kwarg['item']
 
     def time_out(self):#called when timer_display runs out   
-        del self.game_objects.player.omamoris.inventory[self.omamori] #remove the omamori    
-        self.game_objects.world_state.quests['lumberjack_omamori'] = False        
+        del self.game_objects.player.backpack.necklace.inventory[self.radna] #remove the radna    
+        self.game_objects.world_state.quests['lumberjack_radna'] = False        
 
-    def initiate_quest(self):#called when omamori is picked up 
-        self.game_objects.world_state.quests['lumberjack_omamori'] = True        
+    def initiate_quest(self):#called when radna is picked up 
+        self.game_objects.world_state.quests['lumberjack_radna'] = True        
         self.timer = entities.Timer_display(self, self.time)
         self.game_objects.cosmetics_no_clear.add(self.timer)       
         

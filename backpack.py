@@ -58,69 +58,26 @@ class Map():
 class Necklace():        
     def __init__(self, entity):
         self.entity = entity
-        self.equipped = {'0':[], '1':[], '2':[]}#equiped omamoris
-        self.inventory = {}#omamoris in inventory.: 'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)
-        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)
-        self.level = 1#can be leveld up at black smith
+        self.equipped = {}#equiped rings
+        self.inventory = {'half_dmg': 1}#radnas in inventory
 
-    def level_up(self):#shuold be called from e.g. black smith. bot implement yet
-        self.level += 1
+    def add(self, item_name):  # Allow adding multiple at once
+        self.inventory.setdefault(item_name, 0)
+        self.inventory[item_name] += 1
+
+    def remove(self, item_name):
+        self.inventory[item_name] -= 1
 
     def update(self):
-        for omamoris in self.equipped.values():
-            for omamori in omamoris:
-                omamori.equipped()
+        for ring in self.equipped.values():
+            ring.update()
 
     def handle_press_input(self,input):
-        for omamoris in self.equipped.values():
-            for omamori in omamoris:
-                omamori.handle_press_input(input)
+        for ring in self.equipped.values():
+            ring.handle_press_input(input)
 
-    def equip_omamori(self, omamori_string, list_of_places):        
-        if self.inventory[omamori_string].state != 'equip':#if not alrady equiped
-            number_equipped = len(self.equipped['0']) + len(self.equipped['1']) + len(self.equipped['2'])
-            if number_equipped >= 7: return [False, 'no avilable slots']
-
-            new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0], self.entity.game_objects, entity = self.entity)
-
-            if new_omamori.level == 2:
-                if self.level == 0: return [False, 'no avilable slots']
-                if len(self.equipped['2']) != 0: return [False, 'no avilable slots']
-
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[-1].rect.topleft)
-                self.equipped['2'].append(new_omamori)
-
-            elif new_omamori.level == 1:
-                if len(self.equipped['1']) + len(self.equipped['2']) >= self.level: return [False, 'no avilable slots']
-
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[7 - self.level + len(self.equipped['1'])].rect.topleft)
-                if 7 - self.level + len(self.equipped['1']) == 6:
-                    self.equipped['2'].append(new_omamori)
-                else:
-                    self.equipped['1'].append(new_omamori)
-
-            elif new_omamori.level == 0:
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[len(self.equipped['0'])].rect.topleft)
-                self.equipped['0'].append(new_omamori)
-
-        else:# If already equipped, remove the omamori
-            self.inventory[omamori_string].currentstate.set_animation_name('idle')
-            self.inventory[omamori_string].ui_group.empty()
-
-            for key in self.equipped.keys():
-                for omamori in self.equipped[key]:
-                    if type(omamori).__name__ != omamori_string: continue
-                    omamori.detach()
-                    self.equipped[key].remove(omamori)
-                    break
-
-        return [True]
+    def equip_item(self, item_name):        
+        pass
 
 class Journal():#beast journal 
     def __init__(self):
