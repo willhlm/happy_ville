@@ -1,7 +1,7 @@
 import pygame
 import read_files
 import entities_UI
-from entities import Amber_droplet, Bone, Heal_item, Half_dmg
+from entities import Amber_droplet, Bone, Heal_item, Half_dmg, Rings, Loot_magnet, Boss_HP
 
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
@@ -51,7 +51,9 @@ class Radna(UI_loader):
     def load_data(self):
         self.buttons = {}
         self.containers = []
+        self.equipped_containers = {}
         self.items = {}
+        self.rings = {}
         for index, obj in enumerate(self.map_data['elements']):
             object_size = [int(obj['width']),int(obj['height'])]
             topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
@@ -69,7 +71,25 @@ class Radna(UI_loader):
                 self.containers.append(entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item))
 
             elif id == 2:#haöf_dmg
-                self.items['half_dmg'] = Half_dmg(topleft_object_position, self.game_objects, wild = False)
+                self.items['half_dmg'] = Half_dmg(topleft_object_position, self.game_objects, state = 'idle')
+
+            elif id == 3:#base ring
+                for property in properties:
+                    if property['name'] == 'finger':
+                        finger = property['value']            
+                self.rings[finger] = Rings(topleft_object_position, self.game_objects, state = 'idle')    
+
+            elif id == 4:#equiped radna container   
+                for property in properties:
+                    if property['name'] == 'finger':
+                        finger = property['value']                
+                self.equipped_containers[finger] = entities_UI.InventoryContainer(topleft_object_position, self.game_objects, finger)
+
+            elif id == 5:#boss hp
+                self.items['boss_hp'] = Boss_HP(topleft_object_position, self.game_objects, state = 'idle')
+
+            elif id == 6:#Loot_magnet
+                self.items['loot_magnet'] = Loot_magnet(topleft_object_position, self.game_objects, state = 'idle')                                             
 
 class Journal(UI_loader):
     def __init__(self, game_objects):

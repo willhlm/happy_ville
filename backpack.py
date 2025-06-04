@@ -58,26 +58,48 @@ class Map():
 class Necklace():        
     def __init__(self, entity):
         self.entity = entity
-        self.equipped = {}#equiped rings
-        self.inventory = {'half_dmg': 1}#radnas in inventory
+        self.equipped = {}#rings with radna
+        self.inventory = {'half_dmg': 1, 'loot_magnet': 1, 'boss_hp': 1}#radnas in inventory
+        self._available_slots = ['index', 'long', 'ring', 'small']
+        self.rings = {}#rings in inventory
 
-    def add(self, item_name):  # Allow adding multiple at once
+    def add(self, item_name):
         self.inventory.setdefault(item_name, 0)
         self.inventory[item_name] += 1
 
     def remove(self, item_name):
         self.inventory[item_name] -= 1
 
+    def add_ring(self, ring):
+        for slot in self._available_slots:
+            if slot not in self.rings:
+                self.rings[slot] = ring
+                break
+
     def update(self):
         for ring in self.equipped.values():
-            ring.update()
+            ring.update_equipped()
 
-    def handle_press_input(self,input):
+    def handle_press_input(self, input):
         for ring in self.equipped.values():
             ring.handle_press_input(input)
 
-    def equip_item(self, item_name):        
-        pass
+    def equip_item(self, radna): #called from backpack, to add a radna on to a ring
+        for slot in self.rings.keys():#attach a radna objet to a ring
+            ring = self.rings[slot]
+            if ring.level < radna.level: continue#if not enough level
+            if self.equipped.get(slot, False): continue#if the slot if occupied
+            ring.attach_radna(radna)    
+            self.equipped[slot] = ring
+            break
+
+    def remove_item(self, radna): #called from backpack, to remove a radna from a ring
+        for slot in self.rings.keys():#attach a radna objet to a ring
+            ring = self.rings[slot]
+            if ring.radna == radna:
+                ring.detach_radna(radna)    
+                del self.equipped[slot]    
+                break    
 
 class Journal():#beast journal 
     def __init__(self):

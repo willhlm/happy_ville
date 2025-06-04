@@ -473,7 +473,7 @@
                                 {
                                  "name":"quest",
                                  "type":"string",
-                                 "value":"lumberjack_omamori"
+                                 "value":"lumberjack_radna"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -745,14 +745,68 @@
                                 {
                                  "name":"interactable_item",
                                  "type":"string",
-                                 "value":"Loot_magnet"
+                                 "value":"Rings"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":2352,
-                         "y":1168
+                         "x":1712,
+                         "y":800
+                        }, 
+                        {
+                         "gid":31002,
+                         "height":32,
+                         "id":862,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"Rings"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1568,
+                         "y":800
+                        }, 
+                        {
+                         "gid":31002,
+                         "height":32,
+                         "id":863,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"Rings"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1680,
+                         "y":768
+                        }, 
+                        {
+                         "gid":31002,
+                         "height":32,
+                         "id":864,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"Rings"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":1776,
+                         "y":816
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -796,7 +850,7 @@
                          "type":"",
                          "visible":true,
                          "width":336,
-                         "x":2480,
+                         "x":2416,
                          "y":1184
                         }],
                  "opacity":1,
@@ -839,7 +893,7 @@
          "y":0
         }],
  "nextlayerid":113,
- "nextobjectid":861,
+ "nextobjectid":865,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

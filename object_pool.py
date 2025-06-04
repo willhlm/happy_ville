@@ -17,6 +17,7 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         entities.Boss_HP.pool(game_objects)
         entities.Loot_magnet.pool(game_objects)
         entities.Half_dmg.pool(game_objects)
+        entities.Rings.pool(game_objects)
 
         #cosmetics
         entities.Water_running_particles.pool(game_objects)

@@ -3026,46 +3026,86 @@ class Tungsten(Interactable_item):
         cls.sprites = read_files.load_sprites_dict('Sprites/enteties/items/tungsten/',game_objects)
         super().pool(game_objects)
 
+class Rings(Interactable_item):#ring in which to attach radnas
+    def __init__(self,pos, game_objects, **kwarg):
+        super().__init__(pos, game_objects, **kwarg)    
+        self.sprites = Rings.sprites
+        self.image = self.sprites[kwarg.get('state', 'idle')][0]
+        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.hitbox = self.rect.copy()        
+
+        self.level = 1
+        self.description = 'A ring'
+        self.radna = None
+
+    def update_equipped(self):#caleld from neckalce
+        self.radna.equipped()
+
+    def handle_press_input(input):#called from neckalce
+        self.radna.handle_press_input(input)
+
+    def upgrade(self):
+        self.level += 1
+
+    def pickup(self, player):
+        super().pickup(player)
+        player.backpack.necklace.add_ring(self)
+        self.set_owner(player)
+
+    def attach_radna(self, radna):
+        self.radna = radna
+        self.radna.set_owner(self.entity)
+        self.radna.attach()
+
+    def detach_radna(self, radna):        
+        self.radna.detach()                
+        self.radna.set_owner(None)
+        self.radna = None
+
+    @classmethod
+    def pool(cls, game_objects):
+        cls.sprites = read_files.load_sprites_dict('Sprites/enteties/radna/rings/',game_objects)
+        super().pool(game_objects)
+
 class Radna(Interactable_item):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
-        self.entity = kwarg.get('entity', None)
         self.description = ''#for inventory
-        self.level = 0#the level of ring reuried to equip
+        self.level = 1#the level of ring reuried to equip
+        self.entity = None#defualt is no owner
 
     def equipped(self):#called from the rings, when rings are updated
         pass
 
+    def handle_press_input(input):#called from neckalce
+        pass
+
     def pickup(self, player):
         super().pickup(player)
-        player.backpack.necklace.add([type(self).__name__].lower())
-        self.entity = player
+        player.backpack.necklace.add(type(self).__name__.lower())
+        self.set_owner(player)
+        self.game_objects.signals.emit('item_interacted', item = self, player = player)                        
 
-    def detach(self):
-        self.animation.play('idle')
+    def detach(self):#called when de-taching the radna to ring
+        pass
 
-    def attach(self):
-        self.animation.play('equip')
-
-    def set_pos(self,pos):#for inventory
-        self.rect.topleft = pos
+    def attach(self):#called when attaching the radna to ring
+        pass
 
 class Half_dmg(Radna):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Half_dmg.sprites
-        self.image = self.sprites['idle'][0]
+        self.image = self.sprites[kwarg.get('state', 'idle')][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
         self.level = 1
         self.description = 'Take half dmg ' + '[' + str(self.level) + ']'
 
     def attach(self):
-        super().attach()
         self.entity.damage_manager.add_modifier('Half_dmg')
 
     def detach(self):
-        super().detach()
         self.entity.damage_manager.remove_modifier('Half_dmg')
 
     @classmethod
@@ -3077,19 +3117,15 @@ class Loot_magnet(Radna):
     def __init__(self, pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Loot_magnet.sprites
-        self.image = self.sprites[self.state][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.image = self.sprites[kwarg.get('state', 'idle')][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
-        self.description = 'Attracts loot ' + '[' + str(self.level) + ']'
-        self.quest = kwarg.get('quest', None)
+        self.description = 'Attracts loot ' + '[' + str(self.level) + ']'        
 
     def equipped(self):#an update that should be called when equppied
+        print('fe')
         for loot in self.entity.game_objects.loot.sprites():
-            loot.attract(self.entity.rect.center)
-
-    def interact(self, player):
-        super().interact(player)
-        self.game_objects.quests_events.initiate_quest(self.quest.capitalize(), item = 'Loot_magnet')
+            loot.attract(self.entity.rect.center)      
 
     @classmethod
     def pool(cls, game_objects):
@@ -3100,14 +3136,13 @@ class Boss_HP(Radna):
     def __init__(self,pos, game_objects, **kwarg):
         super().__init__(pos, game_objects, **kwarg)
         self.sprites = Boss_HP.sprites
-        self.image = self.sprites['idle'][0]
+        self.image = self.sprites[kwarg.get('state', 'idle')][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()
-        self.level=2
+        self.level = 2
         self.description = 'Visible boss HP ' + '[' + str(self.level) + ']'
 
     def attach(self):
-        super().attach()
         for enemy in self.entity.game_objects.enemies.sprites():
             enemy.health_bar()#attached a healthbar on boss
 
@@ -3659,7 +3694,7 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
         super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/animations/challenges/stone_wood/', game_objects)
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
         self.item = item
@@ -3668,9 +3703,15 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
         self.interacted = self.game_objects.world_state.quests.get(quest, False)
         self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say
         self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
+        
+        self.game_objects.signals.subscribe('item_interacted', self.on_interact)
 
-    def buisness(self):#enters after conversation
-        item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, quest = self.quest)#make a class based on the name of the newstate: need to import sys
+    def on_interact(self, item, player):#called when the signal is emitted
+        if type(item).__name__.lower() == self.item:            
+            self.game_objects.quests_events.initiate_quest(self.quest, item = self.item)
+
+    def buisness(self):#enters after conversation        
+        item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, state = 'wild')#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)
 
 class Air_dash_statue(Interactable):#interact with it to get air dash

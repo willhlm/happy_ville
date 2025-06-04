@@ -5,7 +5,7 @@ import constants as C
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 import entities
 
-from states import states_enemy, states_enemy_flying, states_NPC
+from states import states_enemy, states_enemy_flying, states_NPC, interactale_item_states
 
 def sign(number):
     if number > 0: return 1
@@ -376,23 +376,16 @@ class Enemy_drop(Loot):
 
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects)
-        if kwarg.get('wild', None):#if it is spawn in the wild
-            velocity = kwarg.get('velocity', [2, -4])
-            velocity_range = kwarg.get('velocity_range', [1, 0])#olus minus the velocity
-            self.velocity = [random.uniform(velocity[0] - velocity_range[0], velocity[0] + velocity_range[0]),random.uniform(velocity[1] - velocity_range[1], velocity[1] + velocity_range[1])]
-            self.hitbox = pygame.Rect([pos[0], pos[1]],(16,16))#light need hitbox
-            self.light = self.game_objects.lights.add_light(self, radius = 50)
-            self.state = 'wild'
-
-    def update(self):
-        super().update()
-        self.twinkle()
+        super().__init__(pos, game_objects)        
+        if kwarg.get('state', 'idle') == 'wild':#if it is spawn in the wild
+            self.currentstate = interactale_item_states.Wild(self, **kwarg)
+        else:
+            self.currentstate = interactale_item_states.Idle(self, **kwarg)
 
     def pickup(self, player):
         self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'][type(self).__name__] = True#save in state file that the items on this map has picked up (assume that only one interactable item on each room)
 
-    def twinkle(self):
+    def twinkle(self):#called from interactale_item_states in wild state, in its update
         pos = [self.hitbox.centerx + random.randint(-50, 50), self.hitbox.centery + random.randint(-50, 50)]
         twinkle = entities.Twinkle(pos, self.game_objects)#twinkle.animation.frame = random.randint(0, len(twinkle.sprites['idle']) - 1)
         self.game_objects.cosmetics.add(twinkle)
@@ -404,11 +397,14 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         self.kill()
 
     def on_exit(self):#called when eiting the blit_image_text state
-        self.game_objects.player.currentstate.handle_input('Pray_post')#needed when picked up Interactable_item
+        self.game_objects.player.currentstate.handle_input('Pray_post')
 
     def kill(self):
         super().kill()
         self.game_objects.lights.remove_light(self.light)
+
+    def set_owner(self, entity):
+        self.entity = entity
 
     @classmethod
     def pool(cls, game_objects):

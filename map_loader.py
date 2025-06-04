@@ -578,7 +578,7 @@ class Level():
                     if property['name'] == 'interactable_item':
                         name = property['value']
                 if not self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'].get(name, False):#if it has not been interacted with: (assume only one interactable)
-                    new_loot = getattr(entities, name)(object_position, self.game_objects)
+                    new_loot = getattr(entities, name)(object_position, self.game_objects, state = 'wild')
                     self.game_objects.loot.add(new_loot)
 
             elif id == 15:#gate

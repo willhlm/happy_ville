@@ -217,8 +217,8 @@ class RadnaUI(BaseUI):
     def render(self):
         self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
         self.blit_BG()
-        self.blit_rings()
         self.blit_hand()
+        self.blit_rings()        
         self.blit_pointer()
         self.blit_description()
         self.blit_screen()
@@ -230,12 +230,21 @@ class RadnaUI(BaseUI):
         for container in self.radna_UI.containers:#blit all containers
             self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
 
-        for key in self.game_objects.player.backpack.necklace.inventory.keys():#blit the items there is in inventory
-            self.radna_UI.items[key].animation.update()#update the image
+        for container in self.radna_UI.equipped_containers.values():#blit all containers
+            self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
+
+        for key in self.game_objects.player.backpack.necklace.inventory.keys():#blit the radnas there is in inventory
             self.game_objects.game.display.render(self.radna_UI.items[key].image, self.game_objects.UI.backpack.screen, position = self.radna_UI.items[key].rect.topleft)#shader render        
 
+        for key in self.game_objects.player.backpack.necklace.rings.keys():#blit the rings there is in inventory
+            self.game_objects.game.display.render(self.radna_UI.rings[key].image, self.game_objects.UI.backpack.screen, position = self.radna_UI.rings[key].rect.topleft)#shader render        
+
+        for finger in self.game_objects.player.backpack.necklace.equipped.keys():#blit the equipped radnas
+            ring = self.game_objects.player.backpack.necklace.rings[finger]
+            self.game_objects.game.display.render(ring.radna.image, self.game_objects.UI.backpack.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
+
     def blit_pointer(self):
-        pos = self.selected_container.rect.topleft#should change this index
+        pos = self.selected_container.rect.topleft
         self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.backpack.screen, position = pos)#shader render        
 
     def blit_hand(self):
@@ -327,7 +336,12 @@ class RadnaUI(BaseUI):
 
     def use_item(self):
         item_name = self.selected_container.get_item()
-        self.game_objects.player.backpack.necklace.equip_item(item_name)
+        if item_name.isdigit(): return#if it is a number: empty container
+        new_radna = self.radna_UI.items[item_name]#selected radna
+        if not new_radna.entity:#if it has an owner            
+            self.game_objects.player.backpack.necklace.equip_item(new_radna)
+        else:
+            self.game_objects.player.backpack.necklace.remove_item(new_radna)
 
 class JournalUI(BaseUI):
     def __init__(self, game_sate, **kwarg):

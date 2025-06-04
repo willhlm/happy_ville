@@ -28,8 +28,8 @@
                  "type":"",
                  "visible":true,
                  "width":161,
-                 "x":80,
-                 "y":288
+                 "x":64,
+                 "y":272
                 }, 
                 {
                  "gid":882,
@@ -54,6 +54,12 @@
                  "height":32,
                  "id":32,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"item",
+                         "type":"string",
+                         "value":"boss_hp"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -66,6 +72,12 @@
                  "height":32,
                  "id":33,
                  "name":"",
+                 "properties":[
+                        {
+                         "name":"item",
+                         "type":"string",
+                         "value":"loot_magnet"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -218,54 +230,6 @@
                  "y":201
                 }, 
                 {
-                 "gid":882,
-                 "height":32,
-                 "id":47,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":80,
-                 "y":288
-                }, 
-                {
-                 "gid":882,
-                 "height":32,
-                 "id":49,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":128,
-                 "y":288
-                }, 
-                {
-                 "gid":882,
-                 "height":32,
-                 "id":50,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":176,
-                 "y":288
-                }, 
-                {
-                 "gid":882,
-                 "height":32,
-                 "id":51,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":224,
-                 "y":288
-                }, 
-                {
                  "gid":883,
                  "height":32,
                  "id":52,
@@ -276,6 +240,174 @@
                  "width":32,
                  "x":320,
                  "y":117
+                }, 
+                {
+                 "gid":884,
+                 "height":13,
+                 "id":54,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"small"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":96,
+                 "y":208
+                }, 
+                {
+                 "gid":884,
+                 "height":13,
+                 "id":55,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"ring"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":112,
+                 "y":192
+                }, 
+                {
+                 "gid":884,
+                 "height":13,
+                 "id":56,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"long"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":144,
+                 "y":176
+                }, 
+                {
+                 "gid":884,
+                 "height":13,
+                 "id":57,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"index"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":160,
+                 "y":176
+                }, 
+                {
+                 "gid":885,
+                 "height":32,
+                 "id":58,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"small"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":80,
+                 "y":288
+                }, 
+                {
+                 "gid":885,
+                 "height":32,
+                 "id":59,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"ring"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":128,
+                 "y":288
+                }, 
+                {
+                 "gid":885,
+                 "height":32,
+                 "id":60,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"long"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":176,
+                 "y":288
+                }, 
+                {
+                 "gid":885,
+                 "height":32,
+                 "id":61,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"finger",
+                         "type":"string",
+                         "value":"index"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":224,
+                 "y":288
+                }, 
+                {
+                 "gid":886,
+                 "height":32,
+                 "id":62,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":368,
+                 "y":122
+                }, 
+                {
+                 "gid":887,
+                 "height":32,
+                 "id":63,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":416,
+                 "y":119
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -284,7 +416,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":54,
+ "nextobjectid":64,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
