@@ -20,17 +20,27 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
 
 class Inventory():
     def __init__(self):
-        self.items = {}# { "healthpotion": 3, "amber": 1 }
+        self.items = {}#{"healthpotion": {"item": <Item instance>, "quantity": 3}}
 
-    def add(self, item_name, quantity = 1):  # Allow adding multiple at once
-        self.items.setdefault(item_name, 0)
-        self.items[item_name] += quantity
+    def get_item(self, item_name):
+        if item_name in self.items:
+            return self.items[item_name]['item']
+        return False
 
-    def remove(self, item_name, quantity = 1):
-        self.items[item_name] -= quantity
+    def add(self, item, quantity=1):
+        name = type(item).__name__.lower()
+        if self.items.get(name, False):
+            self.items[name]["quantity"] += quantity
+        else:#new item
+            new_item = type(item)([0,0], item.game_objects)#make a copy
+            new_item.set_ui()
+            self.items[name] = {"item": new_item, "quantity": quantity}            
+
+    def remove(self, item_name, quantity=1):
+        self.items[item_name]["quantity"] -= quantity
     
     def get_quantity(self, item_name):#return quantity. If item doesn't exist, return 0
-        return self.items.get(item_name, 0)
+        return self.items.get(item_name, {}).get("quantity", 0)
 
 class Map():        
     def __init__(self):
@@ -58,19 +68,23 @@ class Map():
 class Necklace():        
     def __init__(self, entity):
         self.entity = entity
-        self.equipped = {}#rings with radna
-        self.inventory = {'half_dmg': 1, 'loot_magnet': 1, 'boss_hp': 1}#radnas in inventory
+        self.equipped = {}#rings with radna {'fingers': <Ring instance>}
+        self.inventory = {}#radnas in inventory: # {"half_dmg":  <Half_dmg instance>}
         self._available_slots = ['index', 'long', 'ring', 'small']
-        self.rings = {}#rings in inventory
+        self.rings = {}#rings in inventory: {'fingers': <Ring instance>}
 
-    def add(self, item_name):
-        self.inventory.setdefault(item_name, 0)
-        self.inventory[item_name] += 1
+    def get_radna(self, item_name):
+        return self.inventory.get(item_name, False)
 
-    def remove(self, item_name):
-        self.inventory[item_name] -= 1
+    def get_ring(self, item_name):
+        return self.rings.get(item_name, False)
 
-    def add_ring(self, ring):
+    def add(self, item):
+        name = type(item).__name__.lower()
+        item.set_ui()
+        self.inventory[name] = item
+
+    def add_ring(self, ring):#string the objects
         for slot in self._available_slots:
             if slot not in self.rings:
                 self.rings[slot] = ring
@@ -86,7 +100,7 @@ class Necklace():
 
     def equip_item(self, radna): #called from backpack, to add a radna on to a ring
         for slot in self.rings.keys():#attach a radna objet to a ring
-            ring = self.rings[slot]
+            ring = self.rings[slot]            
             if ring.level < radna.level: continue#if not enough level
             if self.equipped.get(slot, False): continue#if the slot if occupied
             ring.attach_radna(radna)    

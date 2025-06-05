@@ -2904,7 +2904,7 @@ class Soul_essence(Loot):#genkidama
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting with in the world
 
     def player_collision(self, player):
-        player.backpack.inventory.add('soul_essence')
+        player.backpack.inventory.add(self)
         self.game_objects.world_state.state[self.game_objects.map.level_name]['soul_essence'][self.ID_key] = True#write in the state file that this has been picked up
         #make a cutscene?TODO
         self.kill()
@@ -2949,13 +2949,15 @@ class Amber_droplet(Enemy_drop):
     def player_collision(self,player):#when the player collides with this object
         super().player_collision(player)
         self.game_objects.world_state.update_statistcis('amber_droplet')
-        name = self.__class__.__name__.lower()
-        tot_amber = player.backpack.inventory.get_quantity(name)
+        tot_amber = player.backpack.inventory.get_quantity(self)
         self.game_objects.UI.hud.update_money(tot_amber)
 
     def pool(game_objects):#all things that should be saved in object pool
         Amber_droplet.sprites = read_files.load_sprites_dict('Sprites/enteties/items/amber_droplet/',game_objects)
         Amber_droplet.sounds = read_files.load_sounds_dict('audio/SFX/enteties/items/amber_droplet/')
+
+    def set_ui(self):#called from backpask
+        self.animation.play('ui')
 
 class Bone(Enemy_drop):
     def __init__(self,pos,game_objects):
@@ -3019,7 +3021,7 @@ class Tungsten(Interactable_item):
 
     def pickup(self, player):
         super().pickup(player)
-        player.backpack.inventory.add('tungsten')
+        player.backpack.inventory.add(self)
 
     @classmethod
     def pool(cls, game_objects):
@@ -3034,9 +3036,9 @@ class Rings(Interactable_item):#ring in which to attach radnas
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = self.rect.copy()        
 
-        self.level = 1
+        self.level = 1 
         self.description = 'A ring'
-        self.radna = None
+        self.radna = None        
 
     def update_equipped(self):#caleld from neckalce
         self.radna.equipped()
@@ -3045,12 +3047,13 @@ class Rings(Interactable_item):#ring in which to attach radnas
         self.radna.handle_press_input(input)
 
     def upgrade(self):
-        self.level += 1
+        self.level += 1        
+        self.animation.play('level_' + str(self.level))
 
     def pickup(self, player):
         super().pickup(player)
         player.backpack.necklace.add_ring(self)
-        self.set_owner(player)
+        self.set_owner(player)  
 
     def attach_radna(self, radna):
         self.radna = radna
@@ -3082,8 +3085,8 @@ class Radna(Interactable_item):
 
     def pickup(self, player):
         super().pickup(player)
-        player.backpack.necklace.add(type(self).__name__.lower())
-        self.set_owner(player)
+        copy_item = type(self)([0,0], self.game_objects)        
+        player.backpack.necklace.add(copy_item)    
         self.game_objects.signals.emit('item_interacted', item = self, player = player)                        
 
     def detach(self):#called when de-taching the radna to ring
@@ -3123,7 +3126,6 @@ class Loot_magnet(Radna):
         self.description = 'Attracts loot ' + '[' + str(self.level) + ']'        
 
     def equipped(self):#an update that should be called when equppied
-        print('fe')
         for loot in self.entity.game_objects.loot.sprites():
             loot.attract(self.entity.rect.center)      
 
@@ -3702,15 +3704,14 @@ class Stone_wood(Challenges):#the stone "statue" to initiate the lumberjacl ques
 
         self.interacted = self.game_objects.world_state.quests.get(quest, False)
         self.dialogue = dialogue.Dialogue_interactable(self, quest)#handles dialoage and what to say
-        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)
-        
-        self.game_objects.signals.subscribe('item_interacted', self.on_interact)
+        self.shader_state = {False : states_shader.Idle, True: states_shader.Tint}[self.interacted](self)            
 
     def on_interact(self, item, player):#called when the signal is emitted
         if type(item).__name__.lower() == self.item:            
             self.game_objects.quests_events.initiate_quest(self.quest, item = self.item)
 
     def buisness(self):#enters after conversation        
+        self.game_objects.signals.subscribe('item_interacted', self.on_interact)
         item = getattr(sys.modules[__name__], self.item.capitalize())(self.rect.center, self.game_objects, state = 'wild')#make a class based on the name of the newstate: need to import sys
         self.game_objects.loot.add(item)
 

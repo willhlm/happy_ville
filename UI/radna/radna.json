@@ -29,7 +29,7 @@
                  "visible":true,
                  "width":161,
                  "x":64,
-                 "y":272
+                 "y":256
                 }, 
                 {
                  "gid":882,
@@ -314,78 +314,6 @@
                  "y":176
                 }, 
                 {
-                 "gid":885,
-                 "height":32,
-                 "id":58,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"small"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":80,
-                 "y":288
-                }, 
-                {
-                 "gid":885,
-                 "height":32,
-                 "id":59,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"ring"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":128,
-                 "y":288
-                }, 
-                {
-                 "gid":885,
-                 "height":32,
-                 "id":60,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"long"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":176,
-                 "y":288
-                }, 
-                {
-                 "gid":885,
-                 "height":32,
-                 "id":61,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"index"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":224,
-                 "y":288
-                }, 
-                {
                  "gid":886,
                  "height":32,
                  "id":62,
@@ -408,6 +336,78 @@
                  "width":32,
                  "x":416,
                  "y":119
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":64,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"item",
+                         "type":"string",
+                         "value":"index"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":224,
+                 "y":304
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":65,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"item",
+                         "type":"string",
+                         "value":"long"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":176,
+                 "y":304
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":66,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"item",
+                         "type":"string",
+                         "value":"ring"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":128,
+                 "y":304
+                }, 
+                {
+                 "gid":882,
+                 "height":32,
+                 "id":67,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"item",
+                         "type":"string",
+                         "value":"small"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":64,
+                 "y":304
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -416,7 +416,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":64,
+ "nextobjectid":68,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

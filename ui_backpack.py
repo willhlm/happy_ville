@@ -89,12 +89,14 @@ class InventoryUI(BaseUI):
             self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
 
         for key in self.game_objects.player.backpack.inventory.items.keys():#blit the items there is in inventory
-            self.iventory_UI.items[key].animation.update()#update the image
-            self.game_objects.game.display.render(self.iventory_UI.items[key].image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items[key].rect.topleft)#shader render
+            item = self.game_objects.player.backpack.inventory.get_item(key)    
+            item.animation.update()
+            self.game_objects.game.display.render(item.image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items[key])#shader render
             
             quantity = self.game_objects.player.backpack.inventory.get_quantity(key)
             number = self.game_objects.font.render(text = '' + str(quantity))
-            self.game_objects.game.display.render(number, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items[key].rect.center)#shader render
+            topleft = self.iventory_UI.items[key]
+            self.game_objects.game.display.render(number, self.game_objects.UI.backpack.screen, position = [topleft[0] + item.rect[2], topleft[1] + item.rect[3]])#shader render
             number.release()
 
     def blit_sword(self):
@@ -107,8 +109,9 @@ class InventoryUI(BaseUI):
 
     def blit_description(self):
         item_name = self.selected_container.get_item()
-        if self.game_objects.player.backpack.inventory.items.get(item_name, None):#if the item is in the inventory
-            self.conv = self.iventory_UI.items[item_name].description
+        item = self.game_objects.player.backpack.inventory.get_item(item_name)
+        if item:#if the item is in the inventory
+            self.conv = item.description
             text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
             self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (420,150),shader = self.game_objects.shaders['colour'])#shader render
@@ -218,6 +221,8 @@ class RadnaUI(BaseUI):
         self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
         self.blit_BG()
         self.blit_hand()
+        self.blit_containers()
+        self.blit_radnas()
         self.blit_rings()        
         self.blit_pointer()
         self.blit_description()
@@ -226,22 +231,27 @@ class RadnaUI(BaseUI):
     def blit_BG(self):
         self.game_objects.game.display.render(self.radna_UI.BG, self.game_objects.UI.backpack.screen)#shader render
 
-    def blit_rings(self):
+    def blit_containers(self):
         for container in self.radna_UI.containers:#blit all containers
             self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
 
         for container in self.radna_UI.equipped_containers.values():#blit all containers
             self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
 
+    def blit_radnas(self):
         for key in self.game_objects.player.backpack.necklace.inventory.keys():#blit the radnas there is in inventory
-            self.game_objects.game.display.render(self.radna_UI.items[key].image, self.game_objects.UI.backpack.screen, position = self.radna_UI.items[key].rect.topleft)#shader render        
-
-        for key in self.game_objects.player.backpack.necklace.rings.keys():#blit the rings there is in inventory
-            self.game_objects.game.display.render(self.radna_UI.rings[key].image, self.game_objects.UI.backpack.screen, position = self.radna_UI.rings[key].rect.topleft)#shader render        
+            item = self.game_objects.player.backpack.necklace.get_radna(key)
+            self.game_objects.game.display.render(item.image, self.game_objects.UI.backpack.screen, position = self.radna_UI.items[key])#shader render        
 
         for finger in self.game_objects.player.backpack.necklace.equipped.keys():#blit the equipped radnas
             ring = self.game_objects.player.backpack.necklace.rings[finger]
             self.game_objects.game.display.render(ring.radna.image, self.game_objects.UI.backpack.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
+
+    def blit_rings(self): 
+        for key in self.game_objects.player.backpack.necklace.rings.keys():#blit the rings there is in inventory
+            ring = self.game_objects.player.backpack.necklace.get_ring(key)
+            ring.animation.update()            
+            self.game_objects.game.display.render(ring.image, self.game_objects.UI.backpack.screen, position = self.radna_UI.rings[key])#shader render        
 
     def blit_pointer(self):
         pos = self.selected_container.rect.topleft
@@ -253,8 +263,9 @@ class RadnaUI(BaseUI):
 
     def blit_description(self):
         item_name = self.selected_container.get_item()
-        if self.game_objects.player.backpack.necklace.inventory.get(item_name, None):#if the item is in the inventory
-            self.conv = self.radna_UI.items[item_name].description
+        item = self.game_objects.player.backpack.necklace.get_radna(item_name)
+        if item:#if the item is in the inventory
+            self.conv = item.description
             text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
             self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (320,220),shader = self.game_objects.shaders['colour'])#shader render
@@ -337,8 +348,8 @@ class RadnaUI(BaseUI):
     def use_item(self):
         item_name = self.selected_container.get_item()
         if item_name.isdigit(): return#if it is a number: empty container
-        new_radna = self.radna_UI.items[item_name]#selected radna
-        if not new_radna.entity:#if it has an owner            
+        new_radna = self.game_objects.player.backpack.necklace.get_radna(item_name)        
+        if not new_radna.entity:#if it has an owner, i.e. equipped           
             self.game_objects.player.backpack.necklace.equip_item(new_radna)
         else:
             self.game_objects.player.backpack.necklace.remove_item(new_radna)

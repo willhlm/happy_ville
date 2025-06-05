@@ -68,28 +68,26 @@ class Radna(UI_loader):
                 for property in properties:
                     if property['name'] == 'item':
                         item = property['value']
-                self.containers.append(entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item))
+                
+                if item in ['index', 'long', 'ring', 'small']:#name of the fingers
+                    self.equipped_containers[item] = entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item)
+                else:
+                    self.containers.append(entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item))
 
             elif id == 2:#haöf_dmg
-                self.items['half_dmg'] = Half_dmg(topleft_object_position, self.game_objects, state = 'idle')
+                self.items['half_dmg'] = topleft_object_position
 
             elif id == 3:#base ring
                 for property in properties:
                     if property['name'] == 'finger':
                         finger = property['value']            
-                self.rings[finger] = Rings(topleft_object_position, self.game_objects, state = 'idle')    
-
-            elif id == 4:#equiped radna container   
-                for property in properties:
-                    if property['name'] == 'finger':
-                        finger = property['value']                
-                self.equipped_containers[finger] = entities_UI.InventoryContainer(topleft_object_position, self.game_objects, finger)
+                self.rings[finger] = topleft_object_position
 
             elif id == 5:#boss hp
-                self.items['boss_hp'] = Boss_HP(topleft_object_position, self.game_objects, state = 'idle')
+                self.items['boss_hp'] = topleft_object_position
 
             elif id == 6:#Loot_magnet
-                self.items['loot_magnet'] = Loot_magnet(topleft_object_position, self.game_objects, state = 'idle')                                             
+                self.items['loot_magnet'] = topleft_object_position
 
 class Journal(UI_loader):
     def __init__(self, game_objects):
@@ -161,12 +159,11 @@ class Inventory(UI_loader):
                 self.containers.append(entities_UI.InventoryContainer(topleft_object_position, self.game_objects, item))
 
             elif id == 11:#money
-                self.items['amber_droplet'] = Amber_droplet(topleft_object_position, self.game_objects)
-                self.items['amber_droplet'].animation.play('ui')#set the animation to ui
+                self.items['amber_droplet'] = topleft_object_position
             elif id == 12:#bone
-                self.items['bone'] = Bone(topleft_object_position, self.game_objects)
+                self.items['bone'] = topleft_object_position
             elif id == 13:#heal item
-                self.items['heal_item'] = Heal_item(topleft_object_position, self.game_objects)
+                self.items['heal_item'] = topleft_object_position
 
 class WorldMap(UI_loader):
     def __init__(self, game_objects):

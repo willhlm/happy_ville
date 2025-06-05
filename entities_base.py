@@ -348,6 +348,9 @@ class Loot(Platform_entity):#
         if self.bounce_coefficient < 0.1:#to avoid falling through one way collisiosn
             self.velocity[1] = max(self.velocity[1],0.6)
 
+    def set_ui(self):#called from backpask
+        pass
+
 class Enemy_drop(Loot):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -369,10 +372,9 @@ class Enemy_drop(Loot):
 
     def player_collision(self, player):#when the player collides with this object
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
-        self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states
-        name = self.__class__.__name__.lower()
-        player.backpack.inventory.add(name)
+        self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states        
         self.currentstate.handle_input('Death')
+        player.backpack.inventory.add(self)
 
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
