@@ -1,7 +1,6 @@
 import pygame
 import read_files
 import entities_UI
-from entities import Amber_droplet, Bone, Heal_item, Half_dmg, Rings, Loot_magnet, Boss_HP
 
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
