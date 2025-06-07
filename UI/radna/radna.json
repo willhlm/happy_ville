@@ -29,7 +29,7 @@
                  "visible":true,
                  "width":161,
                  "x":80,
-                 "y":272
+                 "y":288
                 }, 
                 {
                  "gid":882,
@@ -242,78 +242,6 @@
                  "y":117
                 }, 
                 {
-                 "gid":884,
-                 "height":13,
-                 "id":54,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"small"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":20,
-                 "x":96,
-                 "y":192
-                }, 
-                {
-                 "gid":884,
-                 "height":13,
-                 "id":55,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"ring"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":20,
-                 "x":128,
-                 "y":176
-                }, 
-                {
-                 "gid":884,
-                 "height":13,
-                 "id":56,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"long"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":20,
-                 "x":160,
-                 "y":176
-                }, 
-                {
-                 "gid":884,
-                 "height":13,
-                 "id":57,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"finger",
-                         "type":"string",
-                         "value":"index"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":20,
-                 "x":208,
-                 "y":176
-                }, 
-                {
                  "gid":886,
                  "height":32,
                  "id":62,
@@ -408,6 +336,54 @@
                  "width":32,
                  "x":64,
                  "y":304
+                }, 
+                {
+                 "gid":884,
+                 "height":13,
+                 "id":68,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":20,
+                 "x":208,
+                 "y":176
+                }, 
+                {
+                 "gid":888,
+                 "height":9,
+                 "id":69,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":17,
+                 "x":160,
+                 "y":176
+                }, 
+                {
+                 "gid":889,
+                 "height":18,
+                 "id":70,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":25,
+                 "x":112,
+                 "y":176
+                }, 
+                {
+                 "gid":890,
+                 "height":9,
+                 "id":71,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":21,
+                 "x":64,
+                 "y":176
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -416,7 +392,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":68,
+ "nextobjectid":72,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

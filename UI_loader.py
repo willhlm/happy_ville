@@ -76,11 +76,14 @@ class Radna(UI_loader):
             elif id == 2:#haöf_dmg
                 self.items['half_dmg'] = topleft_object_position
 
-            elif id == 3:#base ring
-                for property in properties:
-                    if property['name'] == 'finger':
-                        finger = property['value']            
-                self.rings[finger] = topleft_object_position
+            elif id == 3:#base ring        
+                self.rings['index'] = topleft_object_position
+            elif id == 7:#base ring        
+                self.rings['long'] = topleft_object_position
+            elif id == 8:#base ring        
+                self.rings['ring'] = topleft_object_position
+            elif id == 9:#base ring        
+                self.rings['small'] = topleft_object_position
 
             elif id == 5:#boss hp
                 self.items['boss_hp'] = topleft_object_position

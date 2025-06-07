@@ -3094,10 +3094,10 @@ class Radna(Interactable_item):
         self.game_objects.signals.emit('item_interacted', item = self, player = player)                        
 
     def detach(self):#called when de-taching the radna to ring
-        self.shader = None
+        self.shader = None#for ui
 
     def attach(self):#called when attaching the radna to ring
-        self.shader = self.game_objects.shaders['colour']   
+        self.shader = self.game_objects.shaders['colour'] #for ui
 
 class Half_dmg(Radna):
     def __init__(self,pos, game_objects, **kwarg):

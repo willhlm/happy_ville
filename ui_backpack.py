@@ -207,11 +207,12 @@ class RadnaUI(BaseUI):
 
     def blit_radnas(self):
         for key in self.game_objects.player.backpack.necklace.inventory.keys():#blit the radnas there is in inventory
-            item = self.game_objects.player.backpack.necklace.get_radna(key)                              
+            item = self.game_objects.player.backpack.necklace.get_radna(key)           
+            self.game_objects.shaders['colour']['colour'] = (0,0,0,255)#item.shader toggle sbetween colour and None                   
             self.game_objects.game.display.render(item.image, self.game_objects.UI.screen, position = self.radna_UI.items[key], shader = item.shader)#shader render        
 
         for finger in self.game_objects.player.backpack.necklace.equipped.keys():#blit the equipped radnas
-            ring = self.game_objects.player.backpack.necklace.rings[finger]
+            ring = self.game_objects.player.backpack.necklace.rings[finger]            
             self.game_objects.game.display.render(ring.radna.image, self.game_objects.UI.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
 
     def blit_rings(self): 
