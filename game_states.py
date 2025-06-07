@@ -521,7 +521,7 @@ class Gameplay(Game_State):
         event = input.output()
         if event[0]:#press
             if event[-1]=='start':#escape button
-                input.processed()
+                input.processed()                
                 self.game.state_manager.enter_state('Pause_menu')
 
             elif event[-1]=='rb':
@@ -534,7 +534,7 @@ class Gameplay(Game_State):
 
             elif event[-1] == 'select':
                 input.processed()
-                self.game.state_manager.enter_state('UIs', page = 'backpack')
+                self.game.state_manager.enter_state('UIs', page = 'inventory')
 
             elif event[-1] == 'down':
                 input.processed()#should it be processed here or when passed through?
@@ -892,7 +892,7 @@ class Conversation(Gameplay):
         self.background.release()
         self.npc.buisness()
 
-class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
+class UIs(Gameplay):#pressing i: map, inventory, radna, journal
     def __init__(self, game, page, **kwarg):
         super().__init__(game)
         self.game.game_objects.UI.set_ui(page, **kwarg)
@@ -905,7 +905,7 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
         super().render()
         self.game.game_objects.UI.render()
 
-    def handle_events(self,input):
+    def handle_events(self,input):        
         self.game.game_objects.UI.handle_events(input)
 
     def handle_movement(self):#aila movement is not needed in UIs

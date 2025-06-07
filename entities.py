@@ -3040,6 +3040,10 @@ class Rings(Interactable_item):#ring in which to attach radnas
         self.description = 'A ring'
         self.radna = None        
 
+    def set_finger(self, finger):
+        self.finger = finger
+        self.animation.play(self.finger + '_' + str(self.level))
+
     def update_equipped(self):#caleld from neckalce
         self.radna.equipped()
 
@@ -3048,7 +3052,7 @@ class Rings(Interactable_item):#ring in which to attach radnas
 
     def upgrade(self):
         self.level += 1        
-        self.animation.play('level_' + str(self.level))
+        self.animation.play(self.finger + '_' + str(self.level))
 
     def pickup(self, player):
         super().pickup(player)
@@ -3075,7 +3079,7 @@ class Radna(Interactable_item):
         super().__init__(pos, game_objects, **kwarg)
         self.description = ''#for inventory
         self.level = 1#the level of ring reuried to equip
-        self.entity = None#defualt is no owner
+        self.entity = None#defualt is no owner             
 
     def equipped(self):#called from the rings, when rings are updated
         pass
@@ -3090,10 +3094,10 @@ class Radna(Interactable_item):
         self.game_objects.signals.emit('item_interacted', item = self, player = player)                        
 
     def detach(self):#called when de-taching the radna to ring
-        pass
+        self.shader = None
 
     def attach(self):#called when attaching the radna to ring
-        pass
+        self.shader = self.game_objects.shaders['colour']   
 
 class Half_dmg(Radna):
     def __init__(self,pos, game_objects, **kwarg):
@@ -3106,9 +3110,11 @@ class Half_dmg(Radna):
         self.description = 'Take half dmg ' + '[' + str(self.level) + ']'
 
     def attach(self):
+        super().attach()
         self.entity.damage_manager.add_modifier('Half_dmg')
 
     def detach(self):
+        super().detach()
         self.entity.damage_manager.remove_modifier('Half_dmg')
 
     @classmethod

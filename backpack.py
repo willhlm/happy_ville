@@ -84,10 +84,11 @@ class Necklace():
         item.set_ui()
         self.inventory[name] = item
 
-    def add_ring(self, ring):#string the objects
+    def add_ring(self, ring):#strong the objects
         for slot in self._available_slots:
-            if slot not in self.rings:
+            if slot not in self.rings:                
                 self.rings[slot] = ring
+                ring.set_finger(slot)
                 break
 
     def update(self):
@@ -97,6 +98,13 @@ class Necklace():
     def handle_press_input(self, input):
         for ring in self.equipped.values():
             ring.handle_press_input(input)
+
+    def check_position(self, radna):
+        for slot in self.rings.keys():
+            ring = self.rings[slot]            
+            if ring.level < radna.level: continue#if not enough level
+            if self.equipped.get(slot, False): continue#if the slot if occupied
+            return slot 
 
     def equip_item(self, radna): #called from backpack, to add a radna on to a ring
         for slot in self.rings.keys():#attach a radna objet to a ring
@@ -113,7 +121,7 @@ class Necklace():
             if ring.radna == radna:
                 ring.detach_radna(radna)    
                 del self.equipped[slot]    
-                break    
+                break  
 
 class Journal():#beast journal 
     def __init__(self):

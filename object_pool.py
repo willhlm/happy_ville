@@ -75,12 +75,6 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         platforms.Bubble.pool(game_objects)
         seeds.Seed_platform.pool(game_objects)
 
-        #UI backpack
-        ui_backpack.InventoryUI.pool(game_objects)
-        ui_backpack.RadnaUI.pool(game_objects)
-        ui_backpack.JournalUI.pool(game_objects)
-        ui_backpack.MapUI.pool(game_objects)
-
         #states
         game_states_facilities.Bank.pool(game_objects)
 

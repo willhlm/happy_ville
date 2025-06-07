@@ -1,35 +1,11 @@
 import pygame, sys
 import UI_loader
-import entities
+import entities#used for enemies in journal
 from entities_UI import InventoryPointer
-
-class BackpackUI():#initialised in UI.py
-    def __init__(self, game_objects):
-        self.game_objects = game_objects
-        self.screen = self.game_objects.game.display.make_layer(self.game_objects.game.window_size)
-        self.current_page =  InventoryUI(game_objects)
-
-    def update(self):
-        self.current_page.update()
-
-    def render(self):
-        self.current_page.render()
-
-    def handle_events(self,input):
-        self.current_page.handle_events(input)
-
-    def enter_page(self, page):
-        self.current_page.on_exit()
-        self.current_page = page
-
-    def on_enter(self):#called first time entering the backpack
-        self.current_page.on_enter()
 
 class BaseUI():
     def __init__(self, game_objects, **kwarg):
         self.game_objects = game_objects
-        self.screen_alpha = kwarg.get('screen_alpha', 0)
-        self.letter_frame = 0#for descriptions
 
     def update(self):
         self.letter_frame += self.game_objects.game.dt
@@ -45,34 +21,31 @@ class BaseUI():
     def on_exit(self, **kwarg):
         pass
 
-    def on_enter(self):
-        pass
+    def on_enter(self, **kwarg):
+        self.screen_alpha = kwarg.get('screen_alpha', 0)
+        self.letter_frame = 0#for descriptions
 
     def blit_screen(self):#blits everything first to self.game_state.screen. Then blit it to the game screen at the end
         self.game_objects.shaders['alpha']['alpha'] = self.screen_alpha
-        self.game_objects.game.display.render(self.game_objects.UI.backpack.screen.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['alpha'])
+        self.game_objects.game.display.render(self.game_objects.UI.screen.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['alpha'])
 
 class InventoryUI(BaseUI):
-    def __init__(self, game_state, **kwarg):
-        super().__init__(game_state, **kwarg)
-        self.iventory_UI = InventoryUI.iventory_UI
-        self.pointer = InventoryUI.pointer
+    def __init__(self, game_objects, **kwarg):
+        super().__init__(game_objects, **kwarg)
+        self.iventory_UI = getattr(UI_loader, 'Inventory')(game_objects)
         self.selected_container = self.iventory_UI.containers[0]#initial default container
 
-    def pool(game_objects):
-        InventoryUI.iventory_UI = getattr(UI_loader, 'Inventory')(game_objects)
-        InventoryUI.pointer = InventoryPointer([0,0], game_objects)
-        InventoryUI.define_botton_texts(game_objects)
+        self.pointer = InventoryPointer([0,0], game_objects)
+        self.define_botton_texts(game_objects)
 
-    @classmethod
-    def define_botton_texts(cls, game_objects):
+    def define_botton_texts(self, game_objects):
         convs = ['select','exit','Map','Omamori']
-        InventoryUI.texts = []
+        self.texts = []
         for conv in convs:
-            InventoryUI.texts.append(game_objects.font.render((32,32), conv, len(conv)))
+            self.texts.append(game_objects.font.render((32,32), conv, len(conv)))
 
     def render(self):
-        self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
+        self.game_objects.UI.screen.clear(0, 0, 0, 0)#clear the screen
         self.blit_inventory_BG()
         self.blit_inventory()
         self.blit_sword()
@@ -82,30 +55,30 @@ class InventoryUI(BaseUI):
         self.blit_screen()
 
     def blit_inventory_BG(self):
-        self.game_objects.game.display.render(self.iventory_UI.BG, self.game_objects.UI.backpack.screen)#shader render
+        self.game_objects.game.display.render(self.iventory_UI.BG, self.game_objects.UI.screen)#shader render
 
     def blit_inventory(self):
         for container in self.iventory_UI.containers:#blit all containers
-            self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
+            self.game_objects.game.display.render(container.image, self.game_objects.UI.screen, position = container.rect.topleft)#shader render
 
         for key in self.game_objects.player.backpack.inventory.items.keys():#blit the items there is in inventory
             item = self.game_objects.player.backpack.inventory.get_item(key)    
             item.animation.update()
-            self.game_objects.game.display.render(item.image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items[key])#shader render
+            self.game_objects.game.display.render(item.image, self.game_objects.UI.screen, position = self.iventory_UI.items[key])#shader render
             
             quantity = self.game_objects.player.backpack.inventory.get_quantity(key)
             number = self.game_objects.font.render(text = '' + str(quantity))
             topleft = self.iventory_UI.items[key]
-            self.game_objects.game.display.render(number, self.game_objects.UI.backpack.screen, position = [topleft[0] + item.rect[2], topleft[1] + item.rect[3]])#shader render
+            self.game_objects.game.display.render(number, self.game_objects.UI.screen, position = [topleft[0] + item.rect[2], topleft[1] + item.rect[3]])#shader render
             number.release()
 
     def blit_sword(self):
         self.iventory_UI.items['sword'].animation.update()
-        self.game_objects.game.display.render(self.iventory_UI.items['sword'].image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.items['sword'].rect.topleft)#shader render
+        self.game_objects.game.display.render(self.iventory_UI.items['sword'].image, self.game_objects.UI.screen, position = self.iventory_UI.items['sword'].rect.topleft)#shader render
   
     def blit_pointer(self):
         pos = self.selected_container.rect.topleft#should change this index
-        self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.backpack.screen, position = pos)#shader render
+        self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.screen, position = pos)#shader render
 
     def blit_description(self):
         item_name = self.selected_container.get_item()
@@ -114,15 +87,15 @@ class InventoryUI(BaseUI):
             self.conv = item.description
             text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-            self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (420,150),shader = self.game_objects.shaders['colour'])#shader render
+            self.game_objects.game.display.render(text, self.game_objects.UI.screen, position = (420,150),shader = self.game_objects.shaders['colour'])#shader render
             text.release()
 
     def blit_bottons(self):
         for index, button in enumerate(self.iventory_UI.buttons.keys()):
             self.iventory_UI.buttons[button].update()
-            self.game_objects.game.display.render(self.iventory_UI.buttons[button].image, self.game_objects.UI.backpack.screen, position = self.iventory_UI.buttons[button].rect.topleft)#shader render
+            self.game_objects.game.display.render(self.iventory_UI.buttons[button].image, self.game_objects.UI.screen, position = self.iventory_UI.buttons[button].rect.topleft)#shader render
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-            self.game_objects.game.display.render(self.texts[index], self.game_objects.UI.backpack.screen, position = self.iventory_UI.buttons[button].rect.center,shader = self.game_objects.shaders['colour'])#shader render
+            self.game_objects.game.display.render(self.texts[index], self.game_objects.UI.screen, position = self.iventory_UI.buttons[button].rect.center,shader = self.game_objects.shaders['colour'])#shader render
 
     def handle_events(self, input):
         event = input.output()
@@ -132,12 +105,10 @@ class InventoryUI(BaseUI):
                 self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 self.iventory_UI.buttons['rb'].currentstate.handle_input('press')
-                new_ui = RadnaUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                self.game_objects.UI.set_ui('radna', screen_alpha = 230)
             elif event[-1] == 'lb':#previouse
                 self.iventory_UI.buttons['lb'].currentstate.handle_input('press')
-                new_ui = MapUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                self.game_objects.UI.set_ui('map', screen_alpha = 230)
             elif event[-1]=='a' or event[-1]=='return':
                 self.iventory_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
@@ -199,7 +170,7 @@ class InventoryUI(BaseUI):
 
     def use_item(self):
         item_name = self.selected_container.get_item()
-        item = self.iventory_UI.items[item_name]
+        item = self.iventory_UI.items.get('item_name', False)
 
         if not hasattr(item, 'use_item'): return#if it is a item that cannot be used
         if self.game_objects.player.backpack.inventory.get_quantity(item_name) <= 0: return#if we have more than 0 item
@@ -207,18 +178,14 @@ class InventoryUI(BaseUI):
         self.game_objects.player.backpack.inventory.remove_item(item_name, 1)#remove one item from the inventory
 
 class RadnaUI(BaseUI):
-    def __init__(self, game_state, **kwarg):
-        super().__init__(game_state, **kwarg)
-        self.radna_UI = RadnaUI.radna_UI
-        self.pointer = RadnaUI.pointer
+    def __init__(self, game_objects, **kwarg):
+        super().__init__(game_objects, **kwarg)
+        self.radna_UI = getattr(UI_loader, 'Radna')(game_objects)
+        self.pointer = InventoryPointer([0,0], game_objects)
         self.selected_container = self.radna_UI.containers[0]#initial default container
 
-    def pool(game_objects):
-        RadnaUI.radna_UI = getattr(UI_loader, 'Radna')(game_objects)
-        RadnaUI.pointer = InventoryPointer([0,0], game_objects)
-
     def render(self):
-        self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
+        self.game_objects.UI.screen.clear(0, 0, 0, 0)#clear the screen
         self.blit_BG()
         self.blit_hand()
         self.blit_containers()
@@ -229,47 +196,56 @@ class RadnaUI(BaseUI):
         self.blit_screen()
 
     def blit_BG(self):
-        self.game_objects.game.display.render(self.radna_UI.BG, self.game_objects.UI.backpack.screen)#shader render
+        self.game_objects.game.display.render(self.radna_UI.BG, self.game_objects.UI.screen)#shader render
 
     def blit_containers(self):
         for container in self.radna_UI.containers:#blit all containers
-            self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
+            self.game_objects.game.display.render(container.image, self.game_objects.UI.screen, position = container.rect.topleft)#shader render
 
         for container in self.radna_UI.equipped_containers.values():#blit all containers
-            self.game_objects.game.display.render(container.image, self.game_objects.UI.backpack.screen, position = container.rect.topleft)#shader render
+            self.game_objects.game.display.render(container.image, self.game_objects.UI.screen, position = container.rect.topleft)#shader render
 
     def blit_radnas(self):
         for key in self.game_objects.player.backpack.necklace.inventory.keys():#blit the radnas there is in inventory
-            item = self.game_objects.player.backpack.necklace.get_radna(key)
-            self.game_objects.game.display.render(item.image, self.game_objects.UI.backpack.screen, position = self.radna_UI.items[key])#shader render        
+            item = self.game_objects.player.backpack.necklace.get_radna(key)                              
+            self.game_objects.game.display.render(item.image, self.game_objects.UI.screen, position = self.radna_UI.items[key], shader = item.shader)#shader render        
 
         for finger in self.game_objects.player.backpack.necklace.equipped.keys():#blit the equipped radnas
             ring = self.game_objects.player.backpack.necklace.rings[finger]
-            self.game_objects.game.display.render(ring.radna.image, self.game_objects.UI.backpack.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
+            self.game_objects.game.display.render(ring.radna.image, self.game_objects.UI.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
 
     def blit_rings(self): 
         for key in self.game_objects.player.backpack.necklace.rings.keys():#blit the rings there is in inventory
             ring = self.game_objects.player.backpack.necklace.get_ring(key)
             ring.animation.update()            
-            self.game_objects.game.display.render(ring.image, self.game_objects.UI.backpack.screen, position = self.radna_UI.rings[key])#shader render        
+            self.game_objects.game.display.render(ring.image, self.game_objects.UI.screen, position = self.radna_UI.rings[key])#shader render        
 
     def blit_pointer(self):
         pos = self.selected_container.rect.topleft
-        self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.backpack.screen, position = pos)#shader render        
+        self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.screen, position = pos)#shader render        
 
     def blit_hand(self):
         self.radna_UI.items['hand'].animation.update()
-        self.game_objects.game.display.render(self.radna_UI.items['hand'].image, self.game_objects.UI.backpack.screen, position = self.radna_UI.items['hand'].rect.topleft)#shader render
+        self.game_objects.shaders['colour']['colour'] = (0,0,0,255)
+        self.game_objects.game.display.render(self.radna_UI.items['hand'].image, self.game_objects.UI.screen, position = self.radna_UI.items['hand'].rect.topleft,shader = self.game_objects.shaders['colour'])#shader render
 
     def blit_description(self):
         item_name = self.selected_container.get_item()
         item = self.game_objects.player.backpack.necklace.get_radna(item_name)
         if item:#if the item is in the inventory
+            self.dark(item)#blit a dark radna at the equippable position
             self.conv = item.description
             text = self.game_objects.font.render((140,80), self.conv, int(self.letter_frame//2))
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-            self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (320,220),shader = self.game_objects.shaders['colour'])#shader render
+            self.game_objects.game.display.render(text, self.game_objects.UI.screen, position = (320,220),shader = self.game_objects.shaders['colour'])#shader render
             text.release()
+
+    def dark(self, item):        
+        if item.entity: return#if it is equpped
+        slot = self.game_objects.player.backpack.necklace.check_position(item)#blit a dark radna at this potsion
+        if not slot: return
+        self.game_objects.shaders['colour']['colour'] = (0,0,0,255)
+        self.game_objects.game.display.render(item.image, self.game_objects.UI.screen, position =self.radna_UI.equipped_containers[slot].rect.topleft,shader = self.game_objects.shaders['colour'])#shader render           
 
     def handle_events(self, input):
         event = input.output()
@@ -279,12 +255,10 @@ class RadnaUI(BaseUI):
                 self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 #self.radna_UI.buttons['rb'].currentstate.handle_input('press')
-                new_ui = JournalUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                self.game_objects.UI.set_ui('journal', screen_alpha = 230)
             elif event[-1] == 'lb':#previouse
                 #self.radna_UI.buttons['lb'].currentstate.handle_input('press')
-                new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                self.game_objects.UI.set_ui('inventory', screen_alpha = 230)
             elif event[-1]=='a' or event[-1]=='return':
                 #self.radna_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
@@ -347,18 +321,18 @@ class RadnaUI(BaseUI):
 
     def use_item(self):
         item_name = self.selected_container.get_item()
-        if item_name.isdigit(): return#if it is a number: empty container
-        new_radna = self.game_objects.player.backpack.necklace.get_radna(item_name)        
+        new_radna = self.game_objects.player.backpack.necklace.get_radna(item_name)       
+        if not new_radna: return#if there is not in inventory
         if not new_radna.entity:#if it has an owner, i.e. equipped           
             self.game_objects.player.backpack.necklace.equip_item(new_radna)
         else:
             self.game_objects.player.backpack.necklace.remove_item(new_radna)
 
 class JournalUI(BaseUI):
-    def __init__(self, game_sate, **kwarg):
-        super().__init__(game_sate, **kwarg)
-        self.journal_UI = JournalUI.journal_UI
-        self.pointer = JournalUI.pointer
+    def __init__(self, game_objects, **kwarg):
+        super().__init__(game_objects, **kwarg)
+        self.journal_UI = getattr(UI_loader, 'Journal')(game_objects)
+        self.define_pointer(game_objects)
         self.journal_index = [0,0]
         self.enemies = []
         self.enemy_index = self.journal_index.copy()
@@ -375,19 +349,14 @@ class JournalUI(BaseUI):
         for enemy in self.game_objects.world_state.statistics['kill']:
             self.enemies.append(getattr(sys.modules[entities.__name__], enemy.capitalize())([0,0],self.game_objects))#make the object based on the string
 
-    def pool(game_objects):
-        JournalUI.journal_UI = getattr(UI_loader, 'Journal')(game_objects)
-        JournalUI.define_pointer(game_objects)
-
     def select_enemies(self):
         self.selected_enemies = self.enemies[self.enemy_index[0]:self.enemy_index[0]+self.number:1]
 
-    @classmethod
-    def define_pointer(cls, game_objects):#called everytime we move from one area to another
+    def define_pointer(self, game_objects):#called everytime we move from one area to another
         size = [48,16]
-        cls.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(cls.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
-        cls.pointer = game_objects.game.display.surface_to_texture(cls.pointer)
+        self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
+        pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
+        self.pointer = game_objects.game.display.surface_to_texture(self.pointer)
 
     def render(self):
         self.blit_journal_BG()
@@ -458,20 +427,21 @@ class JournalUI(BaseUI):
 class MapUI(BaseUI):#local maps
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
-        self.map_UI = MapUI.map_UI[kwarg.get('map', game_objects.map.biome_name)]#load the map the player is in
-        self.selected_container = self.map_UI.objects[0]#initial default container
+        self.map_UIs = {'nordveden': getattr(UI_loader, 'NordvedenMap')(game_objects),'dark_forest': getattr(UI_loader, 'DarkforestMap')(game_objects)}        
 
-    def pool(game_objects):
-        MapUI.map_UI = {'world': getattr(UI_loader, 'WorldMap')(game_objects),'nordveden': getattr(UI_loader, 'NordvedenMap')(game_objects),'dark_forest': getattr(UI_loader, 'DarkforestMap')(game_objects)}
+    def on_enter(self, **kwarg):
+        super().on_enter(**kwarg)
+        self.map_UI = self.map_UIs[kwarg.get('map', self.game_objects.map.biome_name)]#load the map the player is in
+        self.selected_container = self.map_UI.objects[0]#initial default container
 
     def update(self):
         self.selected_container.update()#make it move
 
     def render(self):        
-        self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
-        self.game_objects.game.display.render(self.map_UI.BG, self.game_objects.UI.backpack.screen, position = [0,0])
+        self.game_objects.UI.screen.clear(0, 0, 0, 0)#clear the screen
+        self.game_objects.game.display.render(self.map_UI.BG, self.game_objects.UI.screen, position = [0,0])
         for object in self.map_UI.objects:
-            object.draw(self.game_objects.UI.backpack.screen)#draw the object. If it is selected, draw it with a different colour
+            object.draw(self.game_objects.UI.screen)#draw the object. If it is selected, draw it with a different colour
         self.blit_screen()
 
     def handle_events(self,input):
@@ -482,17 +452,14 @@ class MapUI(BaseUI):#local maps
             if event[-1] == 'select':
                 self.exit_state()
             elif event[-1] == 'rb':#nezt page
-                new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                self.game_objects.UI.set_ui('inventory', screen_alpha = 230)
 
             elif event[-1] == 'a':#nezt page
                 map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
-                new_ui = MapUI(self.game_objects, map = map_name, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)  
+                self.game_objects.UI.set_ui('map', screen_alpha = 230, map = map_name)  
 
             elif event[-1] == 'x':#when pressing a
-                new_map = MapUI_2(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_map)
+                self.game_objects.UI.set_ui('worldmap', screen_alpha = 230)#world map
 
         if event[2]['l_stick'][1] < 0:  # up
             next_container = self.find_closest_position('up')
@@ -551,7 +518,7 @@ class MapUI(BaseUI):#local maps
 class MapUI_2(BaseUI):#world map
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
-        self.map_UI = MapUI.map_UI['world']
+        self.map_UI = getattr(UI_loader, 'WorldMap')(game_objects),
         self.selected_container = self.map_UI.objects[0]#initial default container
 
         self.scroll = [0,0]
@@ -614,8 +581,7 @@ class MapUI_2(BaseUI):#world map
                 self.game_objects.UI.backpack.enter_page(new_ui)
             elif event[-1] == 'x':#when pressing a
                 map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
-                new_ui = MapUI(self.game_objects, map = map_name, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                self.game_objects.UI.set_ui('map', map = map_name, screen_alpha = 230)#world map
 
         if event[2]['l_stick'][1] < 0:  # up
             next_container = self.find_closest_position('up')
