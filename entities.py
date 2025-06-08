@@ -3034,7 +3034,7 @@ class Rings(Interactable_item):#ring in which to attach radnas
         self.sprites = Rings.sprites
         self.image = self.sprites[kwarg.get('state', 'idle')][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()        
+        self.hitbox = self.rect.copy()   
 
         self.level = 1 
         self.description = 'A ring'
