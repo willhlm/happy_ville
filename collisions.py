@@ -98,15 +98,15 @@ class Collisions():
             
             #move in x every dynamic sprite            
             entity.old_hitbox = entity.hitbox.copy()#save old position
-            entity.update_true_pos_x()
+            entity.update_true_pos_x()#it sets the true pos and update the hitbox
             static_entities_x = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
             for static_entity_x in static_entities_x:                
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
-            entity.update_true_pos_y()            
-            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
-            for static_entity_y in static_entities_y:
+            entity.update_true_pos_y()#it sets the true pos and update the hitbox              
+            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)            
+            for static_entity_y in static_entities_y:                
                 static_entity_y.collide_y(entity)
 
             ramps = pygame.sprite.spritecollide(entity,self.game_objects.platforms_ramps,False,Collisions.collided)
@@ -117,6 +117,9 @@ class Collisions():
                 entity.go_through['ramp'] = False       
 
     def sprite_collide(self, sprite, group):
+        return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
+
+    def sprite_collide_any(self, sprite, group):
         return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
 
     #make the hitbox collide instead of rect

@@ -518,8 +518,8 @@ class MapUI(BaseUI):#local maps
 
 class MapUI_2(BaseUI):#world map
     def __init__(self, game_objects, **kwarg):
-        super().__init__(game_objects, **kwarg)
-        self.map_UI = getattr(UI_loader, 'WorldMap')(game_objects),
+        super().__init__(game_objects, **kwarg)        
+        self.map_UI = getattr(UI_loader, 'WorldMap')(game_objects)        
         self.selected_container = self.map_UI.objects[0]#initial default container
 
         self.scroll = [0,0]
@@ -558,10 +558,10 @@ class MapUI_2(BaseUI):#world map
             self.scroll[1] = 0
 
     def render(self):        
-        self.game_objects.UI.backpack.screen.clear(0, 0, 0, 0)#clear the screen
-        self.game_objects.game.display.render(self.map_UI.BG, self.game_objects.UI.backpack.screen, position = self.pos)
+        self.game_objects.UI.screen.clear(0, 0, 0, 0)#clear the screen
+        self.game_objects.game.display.render(self.map_UI.BG, self.game_objects.UI.screen, position = self.pos)
         for object in self.map_UI.objects:
-            self.game_objects.game.display.render(object.image, self.game_objects.UI.backpack.screen, position = object.rect.topleft)
+            self.game_objects.game.display.render(object.image, self.game_objects.UI.screen, position = object.rect.topleft)
         self.blit_screen()
 
     def calculate_position(self):
@@ -578,11 +578,11 @@ class MapUI_2(BaseUI):#world map
             if event[-1] == 'select':
                 self.exit_state()
             elif event[-1] == 'rb':#nezt page
-                new_ui = InventoryUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                
+                self.game_objects.UI.set_ui('inventory', screen_alpha = 230)  
             elif event[-1] == 'x':#when pressing a
                 map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
-                self.game_objects.UI.set_ui('map', map = map_name, screen_alpha = 230)#world map
+                self.game_objects.UI.set_ui('map', screen_alpha = 230, map = map_name)  
 
         if event[2]['l_stick'][1] < 0:  # up
             next_container = self.find_closest_position('up')

@@ -162,7 +162,10 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
                 
         elif self.stage ==1:
             if self.timer > 200:
-                self.entity.currentstate.enter_state('Walk_nice')       
+                self.entity.currentstate.queue_task(task = 'walk', animation = 'walk_nice')   
+                self.entity.currentstate.queue_task(task = 'idle')
+                self.entity.currentstate.start_next_task()
+                
                 self.entity.velocity[0] = 5      
                 self.entity.dir[0] *= -1
                 self.stage = 2

@@ -375,7 +375,7 @@ class Waterfall(Staticentity):
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.blur_layer = game_objects.game.display.make_layer(size)
-        self.time = 5#offset the time
+        self.time = 5*100#offset the time
 
         sounds = read_files.load_sounds_dict('audio/SFX/environment/waterfall/')
         self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1)
@@ -414,7 +414,8 @@ class Waterfall(Staticentity):
         self.game_objects.shaders['waterfall']['refraction_map'] = self.noise_layer.texture
         self.game_objects.shaders['waterfall']['water_mask'] = self.noise_layer.texture
         self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.screen_copy.texture
-        self.game_objects.shaders['waterfall']['TIME'] = self.time
+        self.game_objects.shaders['waterfall']['TIME'] = self.time * 0.5
+        self.game_objects.shaders['waterfall']['texture_size'] = self.size
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
@@ -1372,10 +1373,6 @@ class Rav(Enemy):
         #self.animation.framerate = 0.2
         self.currentstate = rav_states.Patrol(self)
 
-    def knock_back(self, amp, dir):
-        super().knock_back(amp, dir)
-        self.currentstate.enter_state('Knock_back')
-
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
         self.projectiles.add(attack)#add to group but in main phase
@@ -1426,20 +1423,16 @@ class Larv_base(Enemy):
     def walk(self):
         self.velocity[0] += self.dir[0]*0.22
 
-    def knock_back(self, dir):
-        super().knock_back(dir)
-        self.currenrstate.handle_input('idle', carry_dir = False, timer = 40)
-
     #pltform collisions.
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
         if self.dir[0] > 0:
-            self.currenrstate.handle_input(self, carry_dir = True, timer = 60)
+            self.currentstate.handle_input(self, carry_dir = True, timer = 60)
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
         if self.dir[0] < 0:
-            self.currenrstate.handle_input(self, carry_dir = True, timer = 60)
+            self.currentstate.handle_input(self, carry_dir = True, timer = 60)
 
 class Larv(Enemy):
     def __init__(self, pos, game_objects):
@@ -1688,7 +1681,7 @@ class Bird(Enemy):
         self.health = 1
         self.aggro_distance = [100,50]#at which distance is should fly away
 
-    def knock_back(self,dir):
+    def knock_back(self, amp, dir):
         pass
 
 #NPCs
@@ -1818,7 +1811,7 @@ class Reindeer(Boss):
         self.jump_distance = [240, 50]
         self.attack = Hurt_box
 
-        self.game_objects.lights.add_light(self, radius = 150)
+        self.light = self.game_objects.lights.add_light(self, radius = 150)
 
         self.animation.framerate = 1/6
 
@@ -1829,6 +1822,10 @@ class Reindeer(Boss):
     def slam_attack(self):#called from states, attack main
         self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
         
+    def kill(self):
+        super().kill()
+        self.game_objects.lights.remove_light(self.light)
+
 class Butterfly(Flying_enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos,game_objects)
