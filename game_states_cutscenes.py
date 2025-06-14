@@ -137,15 +137,13 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,game):
         super().__init__(game)
-        for enemy in self.game.game_objects.enemies.sprites():#get the reindeer reference
-            if type(enemy).__name__ == 'Reindeer':
-                self.entity = enemy
-                break
-
-        #self.entity.AI.deactivate()
+        self.game.game_objects.signals.emit('who_is_reindeer', callback = self.set_entity)        
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
         self.stage = 0
+
+    def set_entity(self, entity):#the entity to control, set through signals
+        self.entity = entity
 
     def update(self):#write how you want things to act
         super().update()
@@ -185,10 +183,7 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
     def __init__(self,objects):
         super().__init__(objects)
-        for enemy in self.game.game_objects.enemies.sprites():#get the reindeer reference
-            if type(enemy).__name__ == 'Reindeer':
-                self.entity = enemy
-                break
+        self.game.game_objects.signals.emit('who_is_reindeer', callback = self.set_entity)        
 
         self.entity.dir[0] = -1
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
@@ -196,6 +191,9 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         
         self.game.game_objects.player.shader_state.handle_input('idle')        
         self.game.game_objects.player.acceleration[0]  = 1#start walking        
+
+    def set_entity(self, entity):#the entity to control, set through signals
+        self.entity = entity
 
     def update(self):#write how you want the player/group to act
         super().update()
@@ -312,19 +310,21 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.game.game_objects.player.death_state.handle_input('cultist_encounter')
         self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
 
-        #should entity stuff be in quest insted?
-        spawn_pos1 = (self.game.game_objects.camera_manager.camera.scroll[0] - 300, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        spawn_pos2 = (self.game.game_objects.camera_manager.camera.scroll[0] + 50, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        self.entity1 = entities.Cultist_warrior(spawn_pos1, self.game.game_objects)#added to group in cutscene
-        self.entity1.dir[0] *= -1
-        self.entity1.AI.deactivate()
-        self.game.game_objects.enemies.add(self.entity1)
-        self.entity2 = entities.Cultist_rogue(spawn_pos2, self.game.game_objects)#added to group in cutscene
-        ##
-
+        self.game.game_objects.signals.emit('who_is_cultist_warrior', callback = self.set_entity1) 
+        self.game.game_objects.signals.emit('who_is_cultist_rogue', callback = self.set_entity2) 
+        
         self.stage = 0
         self.game.game_objects.camera_manager.set_camera('Cultist_encounter')
         self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
+
+    def set_entity1(self, entity):#the entity to control, set through signals
+        self.entity1 = entity
+        self.entity1.dir[0] = 1
+
+    def set_entity2(self, entity):#the entity to control, set through signals
+        self.entity2 = entity
+        self.entity2.dir[0] = -1
+        self.entity2.currentstate.enter_state('Ambush_pre')        
 
     def update(self):
         super().update()
@@ -343,12 +343,8 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
 
         elif self.stage == 1:
             if self.timer > 200:#sapawn cultist_rogue
-                spawn_pos = self.game.game_objects.player.rect.topright
-                self.entity2.AI.deactivate()
-                self.entity2.dir[0] = -1
-                self.entity2.currentstate.enter_state('Ambush_pre')
+                spawn_pos = self.game.game_objects.player.rect.topright                
                 self.game.game_objects.enemies.add(self.entity2)
-
                 self.stage=2
                 self.timer=0
 
@@ -357,8 +353,6 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
                 self.game.state_manager.exit_state()
 
     def on_exit(self):
-        self.entity1.AI.activate()
-        self.entity2.AI.activate()
         self.game.game_objects.camera_manager.camera.exit_state()
         super().on_exit()
 
@@ -377,8 +371,11 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
         self.stage = 0
-        self.cocoon = self.game.game_objects.map.references['cocoon_boss']
+        self.game.game_objects.signals.emit('who_is_cocoon', callback = self.set_entity) 
         self.const[1] = 0.9
+
+    def set_entity(self, entity):#the entity to control, set through signals
+        self.entity = entity
 
     def update(self):
         super().update()
@@ -400,7 +397,7 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
                 self.stage = 2
 
         elif self.stage == 2:#spawn
-            self.cocoon.particle_release()
+            self.entity.particle_release()
             if self.timer > 400:
                 self.game_objects.quests_events.initiate_quest('butterfly_encounter')
                 self.game.state_manager.exit_state()

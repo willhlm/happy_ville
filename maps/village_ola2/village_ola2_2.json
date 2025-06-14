@@ -367,12 +367,12 @@
                                 {
                                  "name":"path_to",
                                  "type":"string",
-                                 "value":"forest_path_1"
+                                 "value":"golden_fields_1"
                                 }, 
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"1"
+                                 "value":"2"
                                 }],
                          "rotation":0,
                          "type":"",

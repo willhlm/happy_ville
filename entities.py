@@ -499,6 +499,32 @@ class Reflection(Staticentity):#water, e.g. village
             self.game_objects.game.display.render(self.noise_layer.texture, self.blur_layer, shader = self.game_objects.shaders['water_perspective'])
             self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
 
+class GodRaysRadial(Staticentity):
+    def __init__(self, pos, game_objects, parallax, size, **properties):
+        super().__init__(pos, game_objects)
+        self.parallax = parallax
+        self.image = game_objects.game.display.make_layer(size).texture
+        self.shader = game_objects.shaders['rays_radial']
+        self.shader['resolution'] = self.game_objects.game.window_size
+        self.time = 0
+        self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
+        self.edge_falloff_distance = properties.get('edge_falloff_distance',0.3)
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt* 0.01
+
+    def draw(self, target):
+        self.shader['edge_falloff_distance'] = self.edge_falloff_distance
+        self.shader['time'] = self.time
+        self.shader['size'] = self.image.size
+        self.shader['color'] = self.colour
+
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
+
 class God_rays(Staticentity):
     def __init__(self, pos, game_objects, parallax, size, **properties):
         super().__init__(pos, game_objects)
@@ -1607,6 +1633,10 @@ class Cultist_rogue(Enemy):
         self.health = 3
         self.attack_distance = [80,10]
         self.currentstate = states_rogue_cultist.Idle(self)
+        self.game_objects.signals.subscribe('who_is_cultist_rogue', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
+
+    def respond_to_cutscene(self, callback):
+        callback(self)
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
@@ -1624,6 +1654,10 @@ class Cultist_warrior(Enemy):
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 3
         self.attack_distance = [80,10]
+        self.game_objects.signals.subscribe('who_is_cultist_warrior', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
+
+    def respond_to_cutscene(self, callback):
+        callback(self)
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
@@ -1812,8 +1846,11 @@ class Reindeer(Boss):
         self.attack = Hurt_box
 
         self.light = self.game_objects.lights.add_light(self, radius = 150)
-
         self.animation.framerate = 1/6
+        self.game_objects.signals.subscribe('who_is_reindeer', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
+
+    def respond_to_cutscene(self, callback):
+        callback(self)
 
     def give_abillity(self):#called when reindeer dies
         self.game_objects.world_state.cutscenes_complete['Boss_deer_encounter'] = True#so not to trigger the cutscene again
@@ -4053,6 +4090,10 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
         self.aggro_distance = [200,50]
         self.currentstate = states_cocoon_boss.Idle(self)
         self.item = Tungsten
+        self.game_objects.signals.subscribe('who_is_cocoon', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
+
+    def respond_to_cutscene(self, callback):
+        callback(self)
 
     def particle_release(self):
         for i in range(0,30):
