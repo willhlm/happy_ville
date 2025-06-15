@@ -1866,8 +1866,11 @@ class Reindeer(Boss):
 
     def dead(self):#called when death animation is finished
         super().dead()
-        self.game_objects.world_state.cutscene_complete('boss_deer_encounter')#so not to trigger the cutscene again      
-        self.game_objects.lights.remove_light(self.light)          
+        self.game_objects.world_state.cutscene_complete('boss_deer_encounter')#so not to trigger the cutscene again   
+
+    def kill(self):
+        super().kill()   
+        self.game_objects.lights.remove_light(self.light)#should be removed when reindeer is removed from the game
 
 class Butterfly(Flying_enemy):
     def __init__(self, pos, game_objects):

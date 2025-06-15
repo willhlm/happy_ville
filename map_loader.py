@@ -1,5 +1,5 @@
 import pygame, math, sys
-import entities, read_files, entities_parallax, game_states, platforms, event_triggers, screen_shader, weather
+import entities, read_files, entities_parallax, game_states, platforms, event_triggers, screen_particles, weather
 import constants as C
 
 class Level():
@@ -261,7 +261,7 @@ class Level():
                     if property['name'] == 'particle':
                         particle_type = property['value']
 
-                new_shader_screen = getattr(screen_shader, particle_type)
+                new_shader_screen = getattr(screen_particles, particle_type)
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(new_shader_screen(self.game_objects, parallax, 20))
                 else:

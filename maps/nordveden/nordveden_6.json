@@ -1426,7 +1426,7 @@
                                 {
                                  "name":"event",
                                  "type":"string",
-                                 "value":"Deer_encounter"
+                                 "value":"deer_encounter"
                                 }, 
                                 {
                                  "name":"new_state",

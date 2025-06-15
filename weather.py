@@ -1,7 +1,7 @@
 import pygame, random
 import read_files
 from states import weather_states, weatherfx_states
-from screen_shader import Particles_shader
+from screen_particles import ScreenParticles
 
 class Weather():#initialied in game_objects: a container of weather objects
     def __init__(self, game_objects):
@@ -88,6 +88,9 @@ class WeatherFX(pygame.sprite.Sprite):#make a layer on screen, then use shaders 
     def draw(self, target):
         self.currentstate.draw(target)
 
+    def release_texture(self):
+        pass
+
 class WindFX(WeatherFX):#the shader that will draw things: will be added in all_bg/fg s
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, kwarg.get('parallax', [1,1]))
@@ -99,6 +102,10 @@ class WindFX(WeatherFX):#the shader that will draw things: will be added in all_
 
     def deactivate(self):
         self.currentstate.enter_state('idle')
+
+    def release_texture(self):
+        self.image.release()
+        self.noise_layer.release()
 
 class FogFX(WeatherFX):
     def __init__(self, game_objects, parallax):
@@ -124,10 +131,13 @@ class FogFX(WeatherFX):
         
         self.game_objects.game.display.render(self.image.texture, target, shader = self.game_objects.shaders['fog'])                    
 
-class RainFX(Particles_shader):
+    def release_texture(self):
+        self.image.release()
+        self.noise_layer.release()
+
+class RainFX(ScreenParticles):
     def __init__(self, game_objects, parallax, number_particles = 20):
         super().__init__(game_objects, parallax, number_particles)
-        
         size = 5
         width = int(game_objects.game.window_size[0] + 2*size)#size of the canvas
         height = int(game_objects.game.window_size[1] + 2*size)#size of the canvas

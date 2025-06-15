@@ -2,52 +2,35 @@ import pygame, math, random
 import read_files
 from entities import Animatedentity
 
-class Screen_shader(pygame.sprite.Sprite):#make a layer on screen, then use shaders to generate stuff. Better performance
-    def __init__(self, game_objects, parallax):
+class ScreenParticles(pygame.sprite.Sprite):#make a layer on screen, then use shaders to generate stuff. Better performance
+    def __init__(self, game_objects, parallax, number_particles):
         super().__init__()
+        size = 5
+        width = int(game_objects.game.window_size[0] + 2*size)#size of the canvas
+        height = int(game_objects.game.window_size[1] + 2*size)#size of the canvas
+        self.image = game_objects.game.display.make_layer((width, height))
+
         self.game_objects = game_objects
         self.parallax = parallax
         self.time = 0
-
-    @classmethod
-    def set_size(cls):
-        return 0
+        self.number_particles = number_particles#max 20, hard coded in shader
+        self.set_parameters()        
 
     def update(self):
         self.time += self.game_objects.game.dt
+        self.update_partciles()
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image.texture, target, shader = self.shader)#shader render
 
-    @classmethod
-    def pool(cls, game_objects):
-        size = cls.set_size()
-        width = int(game_objects.game.window_size[0] + 2*size)#size of the canvas
-        height = int(game_objects.game.window_size[1] + 2*size)#size of the canvas
-        cls.image = game_objects.game.display.make_layer((width, height))
-
     def release_texture(self):
-        pass           
-
-class Particles_shader(Screen_shader):#particles. Better performance
-    def __init__(self, game_objects, parallax, number_particles):
-        super().__init__(game_objects, parallax)
-        self.number_particles = number_particles#max 20, hard coded in shader
-        self.set_parameters()
-
-    @classmethod
-    def set_size(cls):#size of particle
-        return 5
+        self.image.release()           
 
     def set_parameters(self):#set stuff specific for the particles
-        pass
-
-    def update(self):
-        super().update()
-        self.update_partciles()
+        pass        
 
     def update_partciles(self):
-        for i in range(0,self.number_particles):
+        for i in range(0, self.number_particles):
             self.update_vel(i)
             self.update_centers(i)
             self.update_size(i)
@@ -61,7 +44,7 @@ class Particles_shader(Screen_shader):#particles. Better performance
     def update_size(self, i):#should they change size?
         pass
 
-class Vertical_circles(Particles_shader):
+class Vertical_circles(ScreenParticles):
     def __init__(self, game_objects, parallax, number_particles):
         super().__init__(game_objects, parallax, number_particles)
         self.shader = self.game_objects.shaders['screen_circles']
