@@ -29,56 +29,6 @@ class Screen_shader(pygame.sprite.Sprite):#make a layer on screen, then use shad
     def release_texture(self):
         pass           
 
-class Flash(Screen_shader):#white colour fades out and then in
-    def __init__(self, game_objects, **kwarg):
-        super().__init__(game_objects, kwarg.get('parallax', [1,1]))
-        self.fade_length = 100
-        self.image.clear(255,255,255,int(170/self.fade_length))
-        self.shader = None
-        self.add_light_source()
- 
-    def add_light_source(self):
-        radius = self.game_objects.game.window_size[0] * 0.5
-        position = [self.game_objects.camera_manager.camera.scroll[0] + self.game_objects.game.window_size[0] * 0.5, self.game_objects.camera_manager.camera.scroll[1] + self.game_objects.game.window_size[1]*0.5]#put a bg light in center
-        self.hitbox = pygame.Rect(0, 0, self.game_objects.game.window_size[0], self.game_objects.game.window_size[1])#for the light source
-        self.hitbox.center = position
-        self.light = self.game_objects.lights.add_light(target = self ,radius = radius, fade = True, lifetime = True)#put a bg light in center        
-
-    def update_image(self):
-        alpha = int((self.fade_length - self.time)*(255/self.fade_length))
-        self.image.clear(255,255,255,alpha)
-        self.hitbox.center = [self.game_objects.camera_manager.camera.scroll[0] + self.game_objects.game.window_size[0] * 0.5, self.game_objects.camera_manager.camera.scroll[1] + self.game_objects.game.window_size[1]*0.5]#put a bg light in center
-
-    def update(self):
-        super().update()
-        self.update_image()
-        if self.time > self.fade_length:
-            self.kill()
-            self.game_objects.lights.remove_light(self.light)
-
-class Fog(Screen_shader):
-    def __init__(self, game_objects, parallax, num):
-        super().__init__(game_objects, parallax)
-        self.shader = game_objects.shaders['fog']
-
-    @classmethod
-    def pool(cls, game_objects):
-        super().pool(game_objects)
-        cls.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)
-
-    def draw(self, target):#called before draw in group
-        self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.005
-        self.game_objects.shaders['noise_perlin']['u_resolution'] = self.game_objects.game.window_size
-        self.game_objects.shaders['noise_perlin']['scale'] = (10,10)
-        self.game_objects.shaders['noise_perlin']['scroll'] = [self.game_objects.camera_manager.camera.scroll[0]*self.parallax[0],self.game_objects.camera_manager.camera.scroll[1]*self.parallax[1]]
-
-        self.game_objects.game.display.render(self.image.texture, self.noise_layer, shader = self.game_objects.shaders['noise_perlin'])
-        self.shader['noise'] = self.noise_layer.texture
-        self.shader['TIME'] = self.time*0.001
-        self.shader['fog_color'] = (1,1,1, 1)
-        self.shader['scroll'] = [self.game_objects.camera_manager.camera.scroll[0]*self.parallax[0],self.game_objects.camera_manager.camera.scroll[1]*self.parallax[1]]
-        super().draw(target)
-
 class Particles_shader(Screen_shader):#particles. Better performance
     def __init__(self, game_objects, parallax, number_particles):
         super().__init__(game_objects, parallax)
@@ -175,48 +125,6 @@ class Fireflies(Vertical_circles):
 
     def update_vel(self,i):
         self.velocity[i]  = [math.cos(self.time*0.01+self.phase[i]),math.sin(self.time*0.01+self.phase[i])]
-
-class Rain(Particles_shader):
-    def __init__(self, game_objects, parallax, number_particles):
-        super().__init__(game_objects, parallax, number_particles)
-        self.shader = self.game_objects.shaders['screen_rectangle']
-        self.shader['size'] = self.image.texture.size
-        self.shader['number_particles'] = self.number_particles
-        self.shader['angle'] = 0#rotation angle of the rectangle
-        colours=[(10,191,255,255),(152,245,255,255),(61,89,171,255),(100,149,237,255)]
-        self.shader['colour'] = colours[random.randint(0, len(colours)-1)]
-        self.shader['scale'] = (self.parallax[0],self.parallax[0])
-
-    def set_parameters(self):#parameters needed for the shader
-        self.canvas_size = self.parallax[0]
-        self.centers, self.velocity = [], []#make a list of stuff keep info as "attributes"
-        for i in range(0, self.number_particles):
-            x = random.uniform(-self.canvas_size, self.game_objects.game.window_size[0] + self.canvas_size)
-            y = random.uniform(-self.canvas_size, self.game_objects.game.window_size[1] + self.canvas_size)
-            self.centers.append([x,y])
-            self.velocity.append([0,0])
-
-    def draw(self, target):
-        self.shader['parallax'] = self.parallax
-        self.shader['centers'] = self.centers
-        self.shader['scroll'] = self.game_objects.camera_manager.camera.scroll
-        super().draw(target)
-
-    def update_vel(self, i):#how it should move
-        self.velocity[i]  = [-1, 5]
-
-class Snow(Rain):
-    def __init__(self, game_objects, parallax, number_particles):
-        super().__init__(game_objects, parallax, number_particles)
-        self.shader['colour'] = (255,255,255,255)
-        self.shader['scale'] = (self.parallax[0]*2,self.parallax[0]*0.33)#to make it square
-
-    def draw(self, target):
-        self.shader['centers'] = self.centers
-        super().draw(target)
-
-    def update_vel(self, i):#how it should move
-        self.velocity[i]  = [0.5*math.cos(self.time*0.01), 1]
 
 #particles from files
 class Bound_entity(Animatedentity):#entities bound to the scereen, should it be inheriting from animated entities (if we intendo to use animation) or static entity (if we intend to use pygame for particles)

@@ -1,5 +1,5 @@
 from game_states import Gameplay
-import entities
+from entities import Spawneffect, Lighitning, Reindeer, Cultist_warrior, Cultist_rogue
 import read_files
 import animation
 import particles
@@ -137,13 +137,12 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,game):
         super().__init__(game)
-        self.game.game_objects.signals.emit('who_is_reindeer', callback = self.set_entity)        
+        pos = [2992, 848]
+        self.entity = Reindeer(pos, game.game_objects)
+        game.game_objects.enemies.add(self.entity)
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
         self.stage = 0
-
-    def set_entity(self, entity):#the entity to control, set through signals
-        self.entity = entity
 
     def update(self):#write how you want things to act
         super().update()
@@ -178,22 +177,22 @@ class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by w
     def on_exit(self):
         self.game.game_objects.camera_manager.camera.exit_state()
         self.entity.kill()
+        self.game.game_objects.world_state.cutscene_complete('deer_encounter')
         super().on_exit()
 
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
-    def __init__(self,objects):
-        super().__init__(objects)
-        self.game.game_objects.signals.emit('who_is_reindeer', callback = self.set_entity)        
-
+    def __init__(self, game):
+        super().__init__(game)
+        pos = [5888, 600]
+        self.entity = Reindeer(pos, game.game_objects)
+        game.game_objects.enemies.add(self.entity)
         self.entity.dir[0] = -1
+
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.stage = 0
         
         self.game.game_objects.player.shader_state.handle_input('idle')        
         self.game.game_objects.player.acceleration[0]  = 1#start walking        
-
-    def set_entity(self, entity):#the entity to control, set through signals
-        self.entity = entity
 
     def update(self):#write how you want the player/group to act
         super().update()
@@ -310,21 +309,13 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.game.game_objects.player.death_state.handle_input('cultist_encounter')
         self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
 
-        self.game.game_objects.signals.emit('who_is_cultist_warrior', callback = self.set_entity1) 
-        self.game.game_objects.signals.emit('who_is_cultist_rogue', callback = self.set_entity2) 
+        pos = [1420, 500]
+        self.entity1 = Cultist_warrior(pos, game.game_objects)
+        self.game.game_objects.enemies.add(self.entity1)
         
         self.stage = 0
         self.game.game_objects.camera_manager.set_camera('Cultist_encounter')
         self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
-
-    def set_entity1(self, entity):#the entity to control, set through signals
-        self.entity1 = entity
-        self.entity1.dir[0] = 1
-
-    def set_entity2(self, entity):#the entity to control, set through signals
-        self.entity2 = entity
-        self.entity2.dir[0] = -1
-        self.entity2.currentstate.enter_state('Ambush_pre')        
 
     def update(self):
         super().update()
@@ -343,8 +334,13 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
 
         elif self.stage == 1:
             if self.timer > 200:#sapawn cultist_rogue
-                spawn_pos = self.game.game_objects.player.rect.topright                
+
+                spawn_pos = self.game.game_objects.player.rect.topright  
+                self.entity2 = Cultist_rogue(spawn_pos, self.game.game_objects)                               
+                self.entity2.dir[0] = -1
+                self.entity2.currentstate.enter_state('Ambush_pre')    
                 self.game.game_objects.enemies.add(self.entity2)
+
                 self.stage=2
                 self.timer=0
 

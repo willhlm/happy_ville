@@ -747,6 +747,10 @@ class Biome():
                 "manager": self.level.game_objects.weather.fog,
                 "fx_class": "FogFX",
             },
+            "snow": {
+                "manager": self.level.game_objects.weather.snow,
+                "fx_class": "SnowFX",
+            },            
         }
 
     def congigure_weather(self, group, parallax):
@@ -758,7 +762,7 @@ class Biome():
     def set_camera(self):
         pass
 
-    def room(self, room):#called wgen a new room is loaded
+    def room(self, room):#called wgen a new room is loaded -> before load objects or configure weather
         pass
 
     def play_music(self):
@@ -915,34 +919,31 @@ class Nordveden(Biome):
     def __init__(self, level):
         super().__init__(level)
         self.weather_config = {
-            "wind": {
-                "velocity": [-2, 0.1],
-                "duration_range": [3000, 7000],
+            "wind": {                                
                 "layers": {
-                    "bg1": { "intensity": 0.5 },
-                    "bg2": { "intensity": 1.0 },
-                    "bg3": { "intensity": 0.3 }
+                    "bg1": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
+                    "bg2": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
+                    "bg3": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] }
                 }
             },
             "rain": {
-                "intensity": 0.7,
                 "layers": {
-                    "bg1": { "splatter": True }
+                    "bg1": { "number_particles": 20}
                 }
             },
             "fog": {
                 "layers": {
                     "bg1": { "intensity": 0.5 },
                     "bg2": { "intensity": 1.0 },
-                    "bg3": { "intensity": 0.3 }
+                    "bg3": { "intensity": 0.3 },
+                    "bg4": { "intensity": 0.5 },
+                    "bg5": { "intensity": 1.0 }
                 }
             }
         }        
 
     def congigure_weather(self, group, parallax):        
         for weather_type in self.weather_config.keys():#wind, rain, for etc.
-            if weather_type in ['rain', 'fog']: continue#temporary
-
             if self.weather_config[weather_type]['layers'].get(group, False):                     
                 new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax)
                 

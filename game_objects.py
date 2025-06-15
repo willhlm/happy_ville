@@ -114,6 +114,7 @@ class Game_Objects():
         self.interactables_fg.empty()
         self.fprojectiles.empty()
         self.timer_manager.clear_timers()
+        self.weather.empty()
 
     def collide_all(self):        
         self.platform_collision()

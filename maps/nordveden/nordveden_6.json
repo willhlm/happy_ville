@@ -1443,24 +1443,6 @@
                         {
                          "gid":3,
                          "height":16,
-                         "id":561,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Reindeer"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2992,
-                         "y":848
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
                          "id":566,
                          "name":"",
                          "properties":[

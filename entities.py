@@ -1481,9 +1481,9 @@ class Larv(Enemy):
             self.game_objects.enemies.add(obj)
 
 class Larv_jr(Larv_base):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects,True)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/', game_objects, True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],22,12)
@@ -1626,17 +1626,19 @@ class Egg(Enemy):#change design
 class Cultist_rogue(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_rogue/',game_objects)
+        self.sprites = Cultist_rogue.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 40, 40)
         self.health = 3
         self.attack_distance = [80,10]
         self.currentstate = states_rogue_cultist.Idle(self)
-        self.game_objects.signals.subscribe('who_is_cultist_rogue', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
 
-    def respond_to_cutscene(self, callback):
-        callback(self)
+    def pool(game_objects):
+        Cultist_rogue.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_rogue/',game_objects)
+
+    def release_texture(self):
+        pass
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
@@ -1648,16 +1650,18 @@ class Cultist_rogue(Enemy):
 class Cultist_warrior(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_warrior/',game_objects)
+        self.sprites = Cultist_warrior.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 3
         self.attack_distance = [80,10]
-        self.game_objects.signals.subscribe('who_is_cultist_warrior', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
 
-    def respond_to_cutscene(self, callback):
-        callback(self)
+    def pool(game_objects):
+        Cultist_warrior.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_warrior/',game_objects)
+
+    def release_texture(self):
+        pass
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
@@ -1832,7 +1836,7 @@ class MrWood(NPC):#lumber jack
 class Reindeer(Boss):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
+        self.sprites = Reindeer.sprites
         self.image = self.sprites['idle_nice'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
@@ -1847,21 +1851,23 @@ class Reindeer(Boss):
 
         self.light = self.game_objects.lights.add_light(self, radius = 150)
         self.animation.framerate = 1/6
-        self.game_objects.signals.subscribe('who_is_reindeer', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
 
-    def respond_to_cutscene(self, callback):
-        callback(self)
+    def pool(game_objects):
+        Reindeer.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
 
-    def give_abillity(self):#called when reindeer dies
-        self.game_objects.world_state.cutscenes_complete['Boss_deer_encounter'] = True#so not to trigger the cutscene again
+    def release_texture(self):
+        pass
+
+    def give_abillity(self):#called when reindeer dies        
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
     def slam_attack(self):#called from states, attack main
         self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
-        
-    def kill(self):
-        super().kill()
-        self.game_objects.lights.remove_light(self.light)
+
+    def dead(self):#called when death animation is finished
+        super().dead()
+        self.game_objects.world_state.cutscene_complete('boss_deer_encounter')#so not to trigger the cutscene again      
+        self.game_objects.lights.remove_light(self.light)          
 
 class Butterfly(Flying_enemy):
     def __init__(self, pos, game_objects):

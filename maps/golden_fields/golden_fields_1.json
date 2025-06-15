@@ -859,42 +859,6 @@
                          "width":16,
                          "x":2048,
                          "y":528
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":268,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Cultist_warrior"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1120,
-                         "y":544
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":269,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Cultist_rogue"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":1584,
-                         "y":528
                         }],
                  "opacity":1,
                  "type":"objectgroup",
