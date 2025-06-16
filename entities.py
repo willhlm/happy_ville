@@ -375,7 +375,7 @@ class Waterfall(Staticentity):
         self.screen_copy = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.noise_layer = game_objects.game.display.make_layer(size)
         self.blur_layer = game_objects.game.display.make_layer(size)
-        self.time = 5#offset the time
+        self.time = 5*100#offset the time
 
         sounds = read_files.load_sounds_dict('audio/SFX/environment/waterfall/')
         self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1)
@@ -414,7 +414,8 @@ class Waterfall(Staticentity):
         self.game_objects.shaders['waterfall']['refraction_map'] = self.noise_layer.texture
         self.game_objects.shaders['waterfall']['water_mask'] = self.noise_layer.texture
         self.game_objects.shaders['waterfall']['SCREEN_TEXTURE'] = self.screen_copy.texture
-        self.game_objects.shaders['waterfall']['TIME'] = self.time
+        self.game_objects.shaders['waterfall']['TIME'] = self.time * 0.5
+        self.game_objects.shaders['waterfall']['texture_size'] = self.size
 
         blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
         self.game_objects.shaders['waterfall']['section'] = [blit_pos[0],blit_pos[1],self.size[0],self.size[1]]
@@ -497,6 +498,32 @@ class Reflection(Staticentity):#water, e.g. village
             self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
             self.game_objects.game.display.render(self.noise_layer.texture, self.blur_layer, shader = self.game_objects.shaders['water_perspective'])
             self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
+
+class GodRaysRadial(Staticentity):
+    def __init__(self, pos, game_objects, parallax, size, **properties):
+        super().__init__(pos, game_objects)
+        self.parallax = parallax
+        self.image = game_objects.game.display.make_layer(size).texture
+        self.shader = game_objects.shaders['rays_radial']
+        self.shader['resolution'] = self.game_objects.game.window_size
+        self.time = 0
+        self.colour = properties.get('colour',(1.0, 0.9, 0.65, 0.6))#colour
+        self.edge_falloff_distance = properties.get('edge_falloff_distance',0.3)
+
+    def release_texture(self):
+        self.image.release()
+
+    def update(self):
+        self.time += self.game_objects.game.dt* 0.01
+
+    def draw(self, target):
+        self.shader['edge_falloff_distance'] = self.edge_falloff_distance
+        self.shader['time'] = self.time
+        self.shader['size'] = self.image.size
+        self.shader['color'] = self.colour
+
+        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.scroll[1]))
+        self.game_objects.game.display.render(self.image, self.game_objects.game.screen, position = pos, shader = self.shader)#shader render
 
 class God_rays(Staticentity):
     def __init__(self, pos, game_objects, parallax, size, **properties):
@@ -614,8 +641,9 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         self.image = game_objects.game.display.make_layer(size)
         self.hitbox = pygame.Rect(pos[0] + size[0]* 0.2 * 0.5, pos[1], size[0] * 0.8, size[1])#adjust the hitbox size based on texture
         self.time = 0
-        self.accel = 0.6
-        self.max_speed = 6
+        self.accel_y = 0.8
+        self.accel_x = 0.8
+        self.max_speed = 7
 
         horizontal = kwarg.get('horizontal', 0)
         vertical = kwarg.get('vertical', 0)
@@ -627,8 +655,8 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         context = player.movement_manager.resolve()
-        player.velocity[0] += self.dir[0] * self.game_objects.game.dt * self.accel * context.upstream
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * self.accel * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
+        player.velocity[0] += self.dir[0] * self.game_objects.game.dt * self.accel_x * context.upstream
+        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
         if (player.velocity[1]) < 0:
             player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
 
@@ -1376,10 +1404,6 @@ class Rav(Enemy):
         #self.animation.framerate = 0.2
         self.currentstate = rav_states.Patrol(self)
 
-    def knock_back(self, amp, dir):
-        super().knock_back(amp, dir)
-        self.currentstate.enter_state('Knock_back')
-
     def attack(self):#called from states, attack main
         attack = Hurt_box(self, lifetime = 10, dir = self.dir, size = [32, 32])#make the object
         self.projectiles.add(attack)#add to group but in main phase
@@ -1430,20 +1454,16 @@ class Larv_base(Enemy):
     def walk(self):
         self.velocity[0] += self.dir[0]*0.22
 
-    def knock_back(self, dir):
-        super().knock_back(dir)
-        self.currenrstate.handle_input('idle', carry_dir = False, timer = 40)
-
     #pltform collisions.
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
         if self.dir[0] > 0:
-            self.currenrstate.handle_input(self, carry_dir = True, timer = 60)
+            self.currentstate.handle_input(self, carry_dir = True, timer = 60)
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
         if self.dir[0] < 0:
-            self.currenrstate.handle_input(self, carry_dir = True, timer = 60)
+            self.currentstate.handle_input(self, carry_dir = True, timer = 60)
 
 class Larv(Enemy):
     def __init__(self, pos, game_objects):
@@ -1466,9 +1486,9 @@ class Larv(Enemy):
             self.game_objects.enemies.add(obj)
 
 class Larv_jr(Larv_base):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/',game_objects,True)
+    def __init__(self, pos, game_objects):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/larv_jr/', game_objects, True)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],22,12)
@@ -1611,13 +1631,19 @@ class Egg(Enemy):#change design
 class Cultist_rogue(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites=read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_rogue/',game_objects)
+        self.sprites = Cultist_rogue.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 40, 40)
         self.health = 3
         self.attack_distance = [80,10]
         self.currentstate = states_rogue_cultist.Idle(self)
+
+    def pool(game_objects):
+        Cultist_rogue.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_rogue/',game_objects)
+
+    def release_texture(self):
+        pass
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
@@ -1629,12 +1655,18 @@ class Cultist_rogue(Enemy):
 class Cultist_warrior(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_warrior/',game_objects)
+        self.sprites = Cultist_warrior.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],40,40)
         self.health = 3
         self.attack_distance = [80,10]
+
+    def pool(game_objects):
+        Cultist_warrior.sprites = read_files.load_sprites_dict('Sprites/enteties/enemies/cultist_warrior/',game_objects)
+
+    def release_texture(self):
+        pass
 
     def attack(self):#called from states, attack main
         self.projectiles.add(Sword(self))#add to group
@@ -1692,7 +1724,7 @@ class Bird(Enemy):
         self.health = 1
         self.aggro_distance = [100,50]#at which distance is should fly away
 
-    def knock_back(self,dir):
+    def knock_back(self, amp, dir):
         pass
 
 #NPCs
@@ -1809,7 +1841,7 @@ class MrWood(NPC):#lumber jack
 class Reindeer(Boss):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
+        self.sprites = Reindeer.sprites
         self.image = self.sprites['idle_nice'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 35, 45)
@@ -1822,16 +1854,28 @@ class Reindeer(Boss):
         self.jump_distance = [240, 50]
         self.attack = Hurt_box
 
-        self.game_objects.lights.add_light(self, radius = 150)
-
+        self.light = self.game_objects.lights.add_light(self, radius = 150)
         self.animation.framerate = 1/6
 
+    def pool(game_objects):
+        Reindeer.sprites = read_files.load_sprites_dict('Sprites/enteties/boss/reindeer/',game_objects)
+
+    def release_texture(self):
+        pass
+
     def give_abillity(self):#called when reindeer dies
-        self.game_objects.world_state.cutscenes_complete['Boss_deer_encounter'] = True#so not to trigger the cutscene again
         self.game_objects.player.states['Dash'] = True#append dash abillity to available states
 
     def slam_attack(self):#called from states, attack main
         self.game_objects.cosmetics.add(ChainProjectile(self.rect.center, self.game_objects, SlamAttack, direction = self.dir, distance = 50, number = 5, frequency = 20))
+
+    def dead(self):#called when death animation is finished
+        super().dead()
+        self.game_objects.world_state.cutscene_complete('boss_deer_encounter')#so not to trigger the cutscene again
+
+    def kill(self):
+        super().kill()
+        self.game_objects.lights.remove_light(self.light)#should be removed when reindeer is removed from the game
 
 class Butterfly(Flying_enemy):
     def __init__(self, pos, game_objects):
@@ -4060,6 +4104,10 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
         self.aggro_distance = [200,50]
         self.currentstate = states_cocoon_boss.Idle(self)
         self.item = Tungsten
+        self.game_objects.signals.subscribe('who_is_cocoon', self.respond_to_cutscene)#the signal is emitted when the cutscene is initalised
+
+    def respond_to_cutscene(self, callback):
+        callback(self)
 
     def particle_release(self):
         for i in range(0,30):

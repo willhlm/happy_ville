@@ -22,7 +22,7 @@ class BaseState():
 
     def handle_input(self, input):#input is hurt when taking dmg
         if input == 'Hurt':
-            self.enter_state('Chase')
+            self.enter_state('Hurt')
 
 class Idle(BaseState):#do nothing
     def __init__(self, entity):
@@ -120,32 +120,7 @@ class Chase(BaseState):
         else:
             self.entity.dir[0] = -1
 
-class Knock_back_old(BaseState):
-    def __init__(self, entity, **kwarg):
-        super().__init__(entity)
-        self.entity.animation.play('hurt', 0.2)
-        print('yes')
-
-    def update(self):
-        super().update()
-        self.look_target()
-        self.entity.chase_knock_back(self.player_distance)
-        self.check_vel()
-
-    def increase_phase(self):
-        self.enter_state('Chase')
-
-    def check_vel(self):
-        if abs(self.entity.velocity[0]) + abs(self.entity.velocity[1]) < 0.3:
-            self.enter_state('Wait')
-
-    def look_target(self):
-        if self.player_distance[0] > 0:
-            self.entity.dir[0] = 1
-        else:
-            self.entity.dir[0] = -1
-
-class Knock_back(BaseState):
+class Hurt(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.play('hurt', 0.2)
@@ -162,11 +137,6 @@ class Death(BaseState):
         pass
 
     def increase_phase(self):
-        self.entity.currentstate = Dead(self.entity)
-
-class Dead(BaseState):
-    def __init__(self, entity, **kwarg):
-        super().__init__(entity)
         self.entity.dead()
 
 class Attack_pre(BaseState):

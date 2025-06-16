@@ -18,6 +18,9 @@ uniform float cutoff = 0.1; // side somehow
 uniform float edge_fade = 0.3; // side fade
 uniform float thickness = 300; // thickness
 
+// New uniform for isotropic edge falloff
+uniform float edge_falloff = 0.0; // Controls how much the rays fade near edges (0.0 = no fade, 1.0 = max fade)
+
 uniform float speed = 1.0;
 uniform float ray1_density = 8.0;
 uniform float ray2_density = 30.0;
@@ -104,6 +107,23 @@ void main()
 
     rays *= smoothstep(0.0 + cutoff, edge_fade + cutoff, transformed_pygame_position.x); // Left
     rays *= smoothstep(0.0 + cutoff, edge_fade + cutoff, 1.0 - transformed_pygame_position.x); // Right
+
+    // NEW: Isotropic edge falloff
+    // Calculate normalized coordinates (0 to 1)
+    vec2 uv = fragmentTexCoord;
+    
+    // Calculate distance from each edge
+    float distFromLeft = uv.x;
+    float distFromRight = 1.0 - uv.x;
+    float distFromTop = 1.0 - uv.y;
+    float distFromBottom = uv.y;
+    
+    // Find the minimum distance to any edge
+    float distToEdge = min(min(distFromLeft, distFromRight), min(distFromTop, distFromBottom));
+    
+    // Apply smooth falloff based on distance to nearest edge
+    float edgeFalloffFactor = smoothstep(0.0, edge_falloff, distToEdge);
+    rays *= edgeFalloffFactor;
 
     // Color to the rays
     vec3 shine = vec3(rays) * color.rgb;

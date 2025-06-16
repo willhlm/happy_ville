@@ -129,14 +129,14 @@ class Title_menu(Game_State):
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
-            self.game.game_objects.load_map(self,'nordveden_windtest','1')
+            #self.game.game_objects.load_map(self,'nordveden_20','1')
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.load_map(self,'nordveden_enemytest','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
-            #self.game.game_objects.load_map(self,'hlifblom_40','1')
+            self.game.game_objects.load_map(self,'hlifblom_2','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'spirit_world_1','1')
 

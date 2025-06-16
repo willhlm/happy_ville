@@ -19,7 +19,7 @@ class EnemyStates():
         pass
 
 class Idle(EnemyStates):#do nothing
-    def __init__(self, entity):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
 
 class Patrol(EnemyStates):
@@ -124,3 +124,17 @@ class Attack(EnemyStates):
     def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
         if input == 'finish_attack':
             self.enter_state('Wait', next_state = 'Chase', time = 30)
+
+class Death(EnemyStates):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.animation.play('death')
+
+    def enter_state(self, newstate, **kwarg):
+        pass
+
+    def update(self):
+        self.entity.velocity = [0,0]
+
+    def increase_phase(self):
+        self.entity.dead()        

@@ -383,3 +383,12 @@ class Slam_post(Base_states):
 
     def increase_phase(self):
         self.entity.currentstate.start_next_task()             
+
+@register_state(STATE_REGISTRY)
+class Walk(Base_states):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.animation.play(kwarg.get('animation','walk')) 
+
+    def increase_phase(self):
+        self.entity.currentstate.start_next_task()        

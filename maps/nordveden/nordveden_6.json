@@ -3459,7 +3459,7 @@
                                 {
                                  "name":"event",
                                  "type":"string",
-                                 "value":"Deer_encounter"
+                                 "value":"deer_encounter"
                                 }, 
                                 {
                                  "name":"new_state",
@@ -3470,26 +3470,8 @@
                          "type":"",
                          "visible":true,
                          "width":16,
-                         "x":2520,
-                         "y":889
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":561,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Reindeer"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":2992,
-                         "y":848
+                         "x":2512,
+                         "y":816
                         }, 
                         {
                          "gid":3,
@@ -3559,7 +3541,7 @@
          "y":0
         }],
  "nextlayerid":117,
- "nextobjectid":569,
+ "nextobjectid":571,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.1",

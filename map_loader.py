@@ -1,5 +1,5 @@
 import pygame, math, sys
-import entities, read_files, weather, entities_parallax, game_states, platforms, event_triggers
+import entities, read_files, entities_parallax, game_states, platforms, event_triggers, screen_particles, weather
 import constants as C
 
 class Level():
@@ -22,7 +22,7 @@ class Level():
         self.check_biome()#pause the sound if we change area
         self.load_map_data()#load the map data
         self.init_state_file()#need to be before load groups
-        self.load_groups()#memory leak here somwerhe
+        self.load_groups()
         self.set_camera()
         self.orginise_references()
 
@@ -91,8 +91,12 @@ class Level():
             self.layer = group#name of the folder in tiled
 
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'back')#objects behind layers
-            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)#memory leak somerhe
+            self.load_layers(self.map_data['groups'][group]['layers'],parallax,offset)
             self.load_objects(self.map_data['groups'][group]['objects'],parallax,offset,'front')#object infron of layers
+            self.congigure_weather(group, parallax)#do this at the end so that it getis into the front of layers
+
+    def congigure_weather(self, group, parallax):
+        self.biome.congigure_weather(group, parallax)
 
     def load_objects(self, data, parallax, offset, position):
         for object in data.keys():
@@ -257,7 +261,7 @@ class Level():
                     if property['name'] == 'particle':
                         particle_type = property['value']
 
-                new_shader_screen = getattr(weather, particle_type)
+                new_shader_screen = getattr(screen_particles, particle_type)
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(new_shader_screen(self.game_objects, parallax, 20))
                 else:
@@ -709,7 +713,7 @@ class Level():
         if self.references.get('shade_trigger',False):
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
-        for lever in self.references['lever']:#assume that the gate,platform - lever is on the same map
+        for lever in self.references['lever']:#assume that the gate/platform - lever is on the same map
             for gate in self.references['gate']:
                 if lever.ID_key == gate.ID_key:
                     lever.add_reference(gate)
@@ -718,7 +722,7 @@ class Level():
                 if lever.ID_key == platform.ID_key:
                     lever.add_reference(platform)
 
-        for i, bg_fade in enumerate(self.references['bg_fade']):
+        for i, bg_fade in enumerate(self.references['bg_fade']):#combines the bg_fades
             for j in range(i + 1, len(self.references['bg_fade'])):
                 if bg_fade.hitbox.colliderect(self.references['bg_fade'][j].hitbox):
                     bg_fade.add_child(self.references['bg_fade'][j])
@@ -729,6 +733,28 @@ class Biome():
         self.level = level
         self.live_blur = False#default is false live blurring
         self.play_music()
+        self.weather_config = {}
+        self._weather_registry = {
+            "wind": {
+                "manager": self.level.game_objects.weather.wind,
+                "fx_class": "WindFX",
+            },
+            "rain": {
+                "manager": self.level.game_objects.weather.rain,
+                "fx_class": "RainFX",
+            },
+            "fog": {
+                "manager": self.level.game_objects.weather.fog,
+                "fx_class": "FogFX",
+            },
+            "snow": {
+                "manager": self.level.game_objects.weather.snow,
+                "fx_class": "SnowFX",
+            },            
+        }
+
+    def congigure_weather(self, group, parallax):
+        pass
 
     def load_objects(self, data, parallax, offset):
         pass
@@ -736,7 +762,7 @@ class Biome():
     def set_camera(self):
         pass
 
-    def room(self, room):#called wgen a new room is loaded
+    def room(self, room):#called wgen a new room is loaded -> before load objects or configure weather
         pass
 
     def play_music(self):
@@ -878,7 +904,6 @@ class Light_forest(Biome):
 
             elif id == 8:#cocoon
                 new_cocoon = entities.Cocoon_boss(object_position, self.level.game_objects)
-                self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.level.game_objects.interactables.add(new_cocoon)
 
             elif id == 9:#one side brakable
@@ -893,6 +918,40 @@ class Light_forest(Biome):
 class Nordveden(Biome):
     def __init__(self, level):
         super().__init__(level)
+        self.weather_config = {
+            "wind": {                                
+                "layers": {
+                    "bg1": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
+                    "bg2": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] },
+                    "bg3": {"velocity": [-2, 0.1], "duration_range": [3000, 7000] }
+                }
+            },
+            "rain": {
+                "layers": {
+                    "bg1": { "number_particles": 20}
+                }
+            },
+            "fog": {
+                "layers": {
+                    "bg1": { "intensity": 0.5 },
+                    "bg2": { "intensity": 1.0 },
+                    "bg3": { "intensity": 0.3 },
+                    "bg4": { "intensity": 0.5 },
+                    "bg5": { "intensity": 1.0 }
+                }
+            }
+        }        
+
+    def congigure_weather(self, group, parallax):        
+        for weather_type in self.weather_config.keys():#wind, rain, for etc.
+            if self.weather_config[weather_type]['layers'].get(group, False):                     
+                new_weather = getattr(weather, self._weather_registry[weather_type]['fx_class'])(self.level.game_objects, parallax = parallax)
+                
+                self._weather_registry[weather_type]['manager'].add_fx(new_weather)
+                if group.startswith('fg'):
+                    self.level.game_objects.all_fgs.add(new_weather)
+                else:
+                    self.level.game_objects.all_bgs.add(new_weather)
 
     def play_music(self):
         #super().play_music()
@@ -973,7 +1032,6 @@ class Nordveden(Biome):
 
             elif id == 8:#cocoon
                 new_cocoon = entities.Cocoon_boss(object_position, self.level.game_objects)
-                self.level.references['cocoon_boss'] = new_cocoon#save for ater use in encounter
                 self.level.game_objects.interactables.add(new_cocoon)
 
             elif id == 9:#one side brakable

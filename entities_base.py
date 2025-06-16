@@ -56,7 +56,8 @@ class Enemy(Character):
     def loots(self):#called when dead
         for key in self.inventory.keys():#go through all loot
             for i in range(0,self.inventory[key]):#make that many object for that specific loot and add to gorup
-                obj = getattr(entities, key)(self.hitbox.midtop,self.game_objects)#make a class based on the name of the key
+                obj = getattr(entities, key)(self.hitbox.midtop, self.game_objects)#make a class based on the name of the key       
+                obj.spawn_position()                                         
                 self.game_objects.loot.add(obj)
             self.inventory[key] = 0
 
@@ -291,6 +292,26 @@ class Loot(Platform_entity):#
         super().__init__(pos, game_objects)
         self.description = ''
         self.bounce_coefficient = 0.6
+
+    def spawn_position(self):#make sure the items down't spawn inside the platforms
+        # Try to resolve initial collision
+        if not self.game_objects.collisions.sprite_collide_any(self, self.game_objects.platforms): return
+        directions = [(0, -1),(0, 1), (-1, 0), (1, 0)]  # up, down, right, left
+        step = 5  # How far to move each step
+        max_radius = 100  # Max distance to search
+        
+        original_x, original_y = self.hitbox.topleft
+        for radius in range(step, max_radius + step, step):
+            for dx, dy in directions:
+                new_x = original_x + dx * radius
+                new_y = original_y + dy * radius
+                self.hitbox.topleft = (new_x, new_y)
+                if not self.game_objects.collisions.sprite_collide_any(self, self.game_objects.platforms):
+                    self.update_rect_x()
+                    self.update_rect_y()                   
+                    return
+
+        self.hitbox.topleft = (original_x, original_y)# If no space found, put it back to original position as last resort
 
     def update_vel(self):#add gravity
         self.velocity[1] += 0.3*self.game_objects.game.dt
