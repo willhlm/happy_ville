@@ -544,11 +544,12 @@ class Level():
 
             elif id == 10:#lever
                 kwarg = {}
-                for property in properties:
+                for property in properties:                    
                     if property['name'] == 'ID':
                         kwarg['ID'] = property['value']
                     elif property['name'] == 'on':
                         kwarg['on'] = property['value']
+                
                 lever = entities.Lever(object_position,self.game_objects, **kwarg)
                 self.references['lever'].append(lever)
                 self.game_objects.interactables.add(lever)
@@ -714,11 +715,11 @@ class Level():
             self.references['shade_trigger'].add_shade_layers(self.references['shade'])
 
         for lever in self.references['lever']:#assume that the gate/platform - lever is on the same map
-            for gate in self.references['gate']:
+            for gate in self.references['gate']:#conenct gates to a lever
                 if lever.ID_key == gate.ID_key:
                     lever.add_reference(gate)
 
-            for platform in self.references['platforms']:
+            for platform in self.references['platforms']:#connect a platform to a lever
                 if lever.ID_key == platform.ID_key:
                     lever.add_reference(platform)
 

@@ -8,7 +8,7 @@ class Basic_states():
     def update(self):
         pass
 
-    def enter_state(self, newstate, **kwarg):
+    def enter_state(self, newstate, **kwarg):        
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
 
     def increase_phase(self):
@@ -23,7 +23,7 @@ class Erect(Basic_states):
         self.entity.hitbox = self.entity.rect.copy()
 
     def handle_input(self,input):
-        if input == 'Transform' or input == 'Off':
+        if input == 'Transform' or input == 'Off':            
             self.enter_state('Transform_down')
 
 class Transform_down(Basic_states):

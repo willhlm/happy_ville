@@ -42,7 +42,6 @@
  <tile id="10">
   <properties>
    <property name="ID" value=""/>
-   <property name="on" type="bool" value="false"/>
   </properties>
   <image width="32" height="32" source="../../Sprites/animations/lever/off/lever1.png"/>
  </tile>
