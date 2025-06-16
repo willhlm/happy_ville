@@ -27,9 +27,9 @@ float noise(vec2 p)
 // Smooth smoke effect using layers of noise
 float smokeEffect(vec2 uv, float time)
 {
-    float n = 0.0;
-    float scale = 1.0;
-    float persistence = 0.5;
+    float n = 0.1;
+    float scale = 2.0;
+    float persistence = 0.3;
 
     for (int i = 0; i < 4; i++)
     {

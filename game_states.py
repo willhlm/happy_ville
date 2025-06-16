@@ -129,7 +129,7 @@ class Title_menu(Game_State):
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
-            self.game.game_objects.load_map(self,'nordveden_26','1')
+            self.game.game_objects.load_map(self,'nordveden_windtest','1')
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
@@ -521,7 +521,7 @@ class Gameplay(Game_State):
         event = input.output()
         if event[0]:#press
             if event[-1]=='start':#escape button
-                input.processed()                
+                input.processed()
                 self.game.state_manager.enter_state('Pause_menu')
 
             elif event[-1]=='rb':
@@ -905,7 +905,7 @@ class UIs(Gameplay):#pressing i: map, inventory, radna, journal
         super().render()
         self.game.game_objects.UI.render()
 
-    def handle_events(self,input):        
+    def handle_events(self,input):
         self.game.game_objects.UI.handle_events(input)
 
     def handle_movement(self):#aila movement is not needed in UIs
