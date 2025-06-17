@@ -5,7 +5,7 @@ class BaseState():
         self.entity = entity
         self.player_distance = [0,0]
 
-    def enter_state(self, newstate, **kwarg):
+    def enter_state(self, newstate, **kwarg):     
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
 
     def update(self):
@@ -28,7 +28,7 @@ class Idle(BaseState):#do nothing
     def __init__(self, entity):
         super().__init__(entity)
 
-class Patrol(BaseState):#patrol in a circle aorund the original position
+class Patrol(BaseState):#goes back and forth
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.play('walk', 0.17)
@@ -40,10 +40,7 @@ class Patrol(BaseState):#patrol in a circle aorund the original position
         super().update()
         self.entity.velocity[0] += self.entity.dir[0]*self.entity.patrol_speed
         self.check_sight()
-        self.check_ground()
-
-    def enter_state(self, newstate, **kwarg):
-        super().enter_state(newstate, **kwarg)
+        self.check_ground()       
 
     def timeout(self):
         self.enter_state('Wait', time = 120, next_state = 'Patrol')
@@ -59,7 +56,8 @@ class Patrol(BaseState):#patrol in a circle aorund the original position
 
     def check_sight(self):
         if abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
-            self.enter_state('Wait', time = 10, next_state = 'Chase')
+            self.entity.game_objects.timer_manager.remove_timer(self.timer)
+            self.enter_state('Wait', time = 10, next_state = 'Chase')            
 
 class Wait(BaseState):
     def __init__(self, entity, **kwarg):
@@ -155,7 +153,3 @@ class Attack_main(BaseState):
 
     def increase_phase(self):
         self.enter_state('Wait', time=10)
-
-    #def handle_input(self,input):#called from states, depending on if the player was close when it wanted to explode or not
-    #    if input == 'finish_attack':
-    #        self.enter_state('Wait', next_state = 'Chase', time = 30)

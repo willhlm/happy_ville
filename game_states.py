@@ -1,7 +1,6 @@
 import pygame, sys
 import read_files
 import entities_UI
-import cutscene
 import constants as C
 import animation
 
@@ -136,7 +135,7 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'nordveden_enemytest','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
-            self.game.game_objects.load_map(self,'hlifblom_2','1')
+            self.game.game_objects.load_map(self,'hlifblom_20','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'spirit_world_1','1')
 

@@ -379,6 +379,7 @@ class Waterfall(Staticentity):
 
         sounds = read_files.load_sounds_dict('audio/SFX/environment/waterfall/')
         self.channel = self.game_objects.sound.play_sfx(sounds['idle'][0], loop = -1)
+        self.set_volume()
 
     def release_texture(self):
         self.empty.release()
@@ -4206,7 +4207,7 @@ class Loot_containers(Interactable):
         projectile.clash_particles(self.hitbox.center)
         self.health -= 1
         self.flags['invincibility'] = True
-        self.shader_state.handle_input('Hurt', colour = (1,1,1,0), direction = [1,0.5])
+        self.shader_state.handle_input('Hurt', colour = [1,1,1,1], direction = [1,0.5])
         self.hit_loot()
 
         if self.health > 0:
@@ -4535,6 +4536,8 @@ class Lever(Interactable):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
 
+        self.references = []
+
         self.ID_key = kwarg.get('ID', None)#an ID to match with the reference (gate or platform etc) and an unique ID key to identify which item that the player is intracting within the world
         self.flags = {'invincibility': False}
         if self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'].get(self.ID_key, False) or kwarg.get('on', False):
@@ -4553,17 +4556,15 @@ class Lever(Interactable):
 
         self.currentstate.handle_input('Transform')
         self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = not self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key]#write in the state dict that this has been picked up
-        self.reference.currentstate.handle_input('Transform')
+        
+        for reference in self.references:
+            reference.currentstate.handle_input('Transform')
 
     def on_invincibility_timeout(self):
         self.flags['invincibility'] = False
 
     def add_reference(self, reference):#called from map loader
-        self.reference = reference
-        if type(self.currentstate).__name__ == 'On':
-            self.reference.currentstate.handle_input('On')#erect
-        else:
-            self.reference.currentstate.handle_input('Off')#down
+        self.references.append(reference)
 
 class Shadow_light_lantern(Interactable):#emits a shadow light upon interaction. Shadow light inetracts with dark forest enemy and platofrm
     def __init__(self, pos, game_objects, **kwarg):
