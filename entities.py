@@ -1031,7 +1031,7 @@ class Mygga_chase(Flying_enemy):
         self.max_patrol_vel = 1.2
         self.friction = [0.009,0.009]
 
-    def knock_back(self,dir):
+    def knock_back(self, amp, dir):
         self.currentstate.enter_state('Knock_back')
         amp = 19
         if dir[1] != 0:
@@ -1085,7 +1085,7 @@ class Mygga_torpedo(Flying_enemy):#torpedo
         self.max_patrol_vel = 1.2
         self.friction = [0.009,0.009]
 
-    def knock_back(self,dir):
+    def knock_back(self, amp, dir):
         self.currentstate.enter_state('Knock_back')
         amp = [16,16]
         self.velocity[0] = dir[0]*amp[0]
@@ -2603,7 +2603,7 @@ class Sword(Melee):
 
     def collision_enemy(self, collision_enemy):
         if collision_enemy.flags['invincibility']: return
-        collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = self.dir), lambda: collision_enemy.emit_particles(dir = self.dir)])
+        collision_enemy.take_dmg(dmg = self.dmg, effects = [lambda: collision_enemy.knock_back(amp = [50, 0], dir = self.dir), lambda: collision_enemy.emit_particles(dir = self.dir)])#TODO insead of lambdas, we could/should maybe change to class based effects
         #slash=Slash([collision_enemy.rect.x,collision_enemy.rect.y])#self.entity.cosmetics.add(slash)
         self.clash_particles(collision_enemy.hitbox.center, lifetime = 20, dir = random.randint(-180, 180))
 
