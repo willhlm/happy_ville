@@ -6,7 +6,7 @@ from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Lo
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
 #from folder
-from states import packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
+from states import player_states, packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
 
 def sign(number):
     if number > 0: return 1
@@ -841,7 +841,7 @@ class Player(Character):
         self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/aila/')
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/aila/texture/', game_objects)
         self.normal_maps = read_files.load_sprites_dict('Sprites/enteties/aila/normal/', game_objects)
-        self.image = self.sprites['idle_main'][0]
+        self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
@@ -855,18 +855,8 @@ class Player(Character):
         self.sword = Aila_sword(self)
         self.abilities = Player_abilities(self)#spirit (thunder,migawari etc) and movement /dash, double jump and wall glide)
 
-        self.states = {'Idle':True, 'Walk':True, 'Run':True,'Pray':True,'Stand_up':True,
-                     'Jump':True,'Fall':True,'Death':True,
-                     'Invisible':True,'Hurt':True,'Spawn':True,'Plant_bone':True,
-                     'Sword_run1':True,'Sword_run2':True,'Sword_stand1':True,'Sword_stand2':True,
-                     'Air_sword2':True,'Air_sword1':True,'Sword_up':True,'Sword_down':True,
-                     'Dash_attack':True,'Ground_dash':True,'Air_dash':True,'Belt_glide':True, 'Wall_glide':True,'Double_jump':False,
-                     'Thunder':True,'Shield':True, 'Slow_motion':True,
-                     'Bow':True,'Counter':True, 'Sword_fall':True,'Sword_jump1':True, 'Sword_jump2':True, 'Dash_jump':True, 'Wind':True,
-                     'Heal': True}
-
         self.flags = {'ground': True, 'invincibility': False, 'shroompoline': False, 'attack_able': True}# flags to check if on ground (used for jumpåing), #a flag to make sure you can only swing sword when this is False
-        self.currentstate = states_player.Idle_main(self)
+        self.currentstate = player_states.PlayerStates(self)#states_player.Idle_main(self)
         self.death_state = states_death.Idle(self)#this one can call "normal die" or specifal death (for example cultist encounter)
 
         self.backpack = backpack.Backpack(self)
@@ -879,7 +869,7 @@ class Player(Character):
         self.reset_movement()
 
         self.colliding_platform = None#save the last collising platform
-        self.shader_state = states_shader.Aura(self)
+        #self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -2003,7 +1993,7 @@ class Fade_effect(Staticentity):#fade effect
         self.game_objects.game.display.render(self.image_copy.texture, target, position = blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['alpha'])#shader render
 
     def pool(game_objects):
-        size = (96, 64)#player canvas size
+        size = (128, 80)#player canvas size
         Fade_effect.image_copy = game_objects.game.display.make_layer(size)
 
     def destroy(self):
@@ -2668,6 +2658,9 @@ class Aila_sword(Melee):
         self.entity.inventory['Tungsten'] -= self.tungsten_cost
         self.dmg *= 1.2
         self.tungsten_cost += 2#1, 3, 5 tungstes to level up
+
+    def draw(self, target):
+        pass
 
 class Thunder(Projectiles):
     def __init__(self, pos, game_objects, **kwarg):

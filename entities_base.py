@@ -252,7 +252,7 @@ class Projectiles(Platform_entity):#projectiels
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
         pass
 
-    def release_texture(self):#i guess all projectiles will have a pool
+    def release_texture(self):#i guess all projectiles will have a pool?
         pass
 
     def on_invincibility_timeout(self):

@@ -29,7 +29,7 @@ class Movement_manager():
         for mod in modifiers:
             mod.update()
 
-    def _sort_modifiers(self):
+    def _sort_modifiers(self):#sort modifiers by priority
         self._sorted_modifiers = sorted(self.modifiers.values(), key = lambda m: m.priority, reverse = True)        
 
 class Movement_context():

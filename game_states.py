@@ -128,13 +128,13 @@ class Title_menu(Game_State):
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
-            self.game.game_objects.load_map(self,'nordveden_1','1')
-            #self.game.game_objects.load_map(self,'golden_fields_1','2')
+            #self.game.game_objects.load_map(self,'nordveden_1','1')
+            #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
-            #self.game.game_objects.load_map(self,'nordveden_enemytest','1')
+            self.game.game_objects.load_map(self,'nordveden_enemytest','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
-            #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
+            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
             #self.game.game_objects.load_map(self,'hlifblom_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'spirit_world_1','1')
@@ -544,7 +544,11 @@ class Gameplay(Game_State):
                 self.game.game_objects.player.abilities.handle_input(event[2]['d_pad'])#to change movement ability with d pad
 
             else:
-                self.game.game_objects.player.currentstate.handle_press_input(input)
+                interpreted = self.game.game_objects.input_interpreter.interpret(input)
+                self.game.game_objects.player.currentstate.handle_press_input(interpreted)                
+
+                #interpret_input = self.game.game_objects.input_interpreter.interpret(input)
+                #self.game.game_objects.player.currentstate.handle_press_input(interpret_input)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
