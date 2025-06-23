@@ -520,7 +520,7 @@ class Gameplay(Game_State):
         event = input.output()
         if event[0]:#press
             if event[-1]=='start':#escape button
-                input.processed()                
+                input.processed()
                 self.game.state_manager.enter_state('Pause_menu')
 
             elif event[-1]=='rb':
@@ -908,7 +908,7 @@ class UIs(Gameplay):#pressing i: map, inventory, radna, journal
         super().render()
         self.game.game_objects.UI.render()
 
-    def handle_events(self,input):        
+    def handle_events(self,input):
         self.game.game_objects.UI.handle_events(input)
 
     def handle_movement(self):#aila movement is not needed in UIs
