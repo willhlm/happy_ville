@@ -486,6 +486,7 @@ class Gameplay(Game_State):
         super().__init__(game)
 
     def update(self):
+        self.game.game_objects.input_interpreter.update()#checks for smash like inputs
         self.handle_movement()
         self.game.game_objects.time_manager.update()
         self.game.game_objects.update()
@@ -547,7 +548,6 @@ class Gameplay(Game_State):
                 interpreted = self.game.game_objects.input_interpreter.interpret(input)
                 self.game.game_objects.player.currentstate.handle_press_input(interpreted)                
 
-                #interpret_input = self.game.game_objects.input_interpreter.interpret(input)
                 #self.game.game_objects.player.currentstate.handle_press_input(interpret_input)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif event[1]:#release

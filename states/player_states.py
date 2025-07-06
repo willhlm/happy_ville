@@ -11,6 +11,7 @@ class PlayerStates():
         self.states = {
             'idle': IdleState(entity),
             'run': RunState(entity),
+            'walk': WalkState(entity),
             'fall': FallState(entity),
             'jump': JumpState(entity),
             'dash_ground': DashGroundState(entity),
@@ -28,7 +29,6 @@ class PlayerStates():
 
     def enter_state(self, state_name, phase = None, **kwargs):
         state = self.states.get(state_name)  
-        print(state_name, phase)
         if state:#if the requested state is unlocked     
             self.composite_state = state
             self.composite_state.enter_state(phase, **kwargs)#choose the phase
@@ -103,6 +103,11 @@ class RunState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': RunPre(entity), 'main': RunMain(entity), 'post': RunPost(entity)}
 
+class WalkState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': WalkPre(entity), 'main': WalkMain(entity), 'post': WalkPost(entity)}
+
 class IdleState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -139,13 +144,12 @@ class WallJumpState(CompositeState):
 class SwordStandState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': SwordStandPre(entity), 'main': SwordStandMain(entity), 'post': SwordStandPost(entity)}#'pre': WallJumpPre(entity), 
+        self.phases = {'main': SwordStandMain(entity), 'post': SwordStandPost(entity)}#'pre': SwordStandPre(entity), 
 
 class SwordHeavyState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': SwordHeavyPre(entity), 'main': SwordHeavyMain(entity), 'post': SwordHeavyPost(entity)}#'pre': WallJumpPre(entity), 
-
+        self.phases = {'pre': SwordHeavyPre(entity), 'main': SwordHeavyMain(entity), 'post': SwordHeavyPost(entity)}
 
 class PhaseBase():
     def __init__(self, entity):
@@ -177,8 +181,10 @@ class PhaseBase():
 
     def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
         value = event['l_stick']#the avlue of the press
+        
+        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
+        self.entity.acceleration[0] = C.acceleration[0] * abs(value[0]*0.8)#always positive, add acceleration to entity
 
-        self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
         self.entity.dir[1] = -value[1]
         if abs(value[0]) > 0.1:
             self.entity.dir[0] = sign(value[0])
@@ -211,7 +217,7 @@ class IdleMain(PhaseBase):
         elif event[-1]=='lb':
             input.processed()
             self.enter_state('dash_ground')
-        elif event[-1]=='double_x':
+        elif event[-1]=='smash_x':
             input.processed()
             self.enter_state('sword_heavy')           
         elif event[-1]=='x':
@@ -229,10 +235,15 @@ class IdleMain(PhaseBase):
         if event[-1]=='a':
             input.processed()
 
-    def handle_movement(self,event):
+    def handle_movement(self, event):
         super().handle_movement(event)
-        if self.entity.acceleration[0] != 0:
+        #if self.entity.acceleration[0] != 0:
+            #self.enter_state('run')        
+
+        if abs(self.entity.acceleration[0]) > 0.5:
             self.enter_state('run')
+        elif abs(self.entity.acceleration[0]) > 0.1:
+            self.enter_state('walk')
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
@@ -282,6 +293,9 @@ class RunPre(PhaseBase):
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
+        elif event[-1]=='smash_x':
+            input.processed()
+            self.enter_state('sword_heavy')                
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
@@ -310,7 +324,6 @@ class RunMain(PhaseBase):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        print('runnnnn')
         self.entity.animation.play('run_main')
         self.particle_timer = 0
         self.sfx_loop_time = int(18 * self.entity.game_objects.game.dt)
@@ -331,9 +344,9 @@ class RunMain(PhaseBase):
             self.enter_state('fall')#fall pre
             self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
-    def enter_state(self, new_state):
+    def enter_state(self, new_state, **kwarg):
         #self.sfx_channel.stop()
-        super().enter_state(new_state)
+        super().enter_state(new_state, **kwarg)
 
     def running_particles(self):
         #particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
@@ -350,7 +363,7 @@ class RunMain(PhaseBase):
             self.enter_state('dash_ground')
         elif event[-1]=='x':
             input.processed()
-            self.swing_sword()
+            self.swing_sword()              
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
@@ -364,6 +377,8 @@ class RunMain(PhaseBase):
         super().handle_movement(event)
         if self.entity.acceleration[0] == 0:
             self.entity.currentstate.composite_state.enter_phase('post')
+        elif abs(self.entity.acceleration[0]) < 0.3:
+            self.enter_state('walk', phase = 'main')            
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
@@ -405,6 +420,195 @@ class RunPost(PhaseBase):
         super().handle_movement(event)
         if self.entity.acceleration[0] != 0:
             self.entity.currentstate.composite_state.enter_phase('pre')
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()
+
+    def swing_sword(self):
+        if not self.entity.flags['attack_able']: return
+        if self.entity.dir[1]==0:
+            state='sword_stand'+str(int(self.entity.sword.swing)+1)
+            self.enter_state(state)
+            self.entity.sword.swing = not self.entity.sword.swing
+
+        elif self.entity.dir[1]>0:
+            self.enter_state('Sword_up_main')
+
+    def increase_phase(self):
+        self.enter_state('idle')
+
+class WalkPre(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('walk_pre')
+        self.particle_timer = 0
+        self.entity.flags['ground'] = True
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
+
+    def update(self):
+        self.particle_timer -= self.entity.game_objects.game.dt
+        if self.particle_timer < 0:
+            self.running_particles()
+            #self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
+
+        if not self.entity.collision_types['bottom']:#disable this one while on ramp
+            self.enter_state('fall')
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+
+    def increase_phase(self):
+        self.enter_phase('main')
+
+    def running_particles(self):
+        #particle = self.entity.running_particles(self.entity.hitbox.midbottom, self.entity.game_objects)
+        #self.entity.game_objects.cosmetics.add(particle)
+        self.particle_timer = 10
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            input.processed()
+            self.enter_state('jump')#main
+        elif event[-1]=='lb':
+            input.processed()
+            self.enter_state('dash_ground')
+        elif event[-1]=='x':
+            input.processed()
+            self.swing_sword()
+        elif event[-1]=='smash_x':
+            input.processed()
+            self.enter_state('sword_heavy')                
+        elif event[-1]=='b':#depends on if the abillities have pre or main animation
+            input.processed()
+            self.do_ability()
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()
+
+    def handle_movement(self,event):
+        super().handle_movement(event)
+        if self.entity.acceleration[0] == 0:
+            self.entity.currentstate.composite_state.enter_phase('post')
+        elif abs(self.entity.acceleration[0]) > 0.5:
+            self.enter_state('run')
+
+    def swing_sword(self):
+        if not self.entity.flags['attack_able']: return
+        if abs(self.entity.dir[1])<0.8:
+            state='sword_stand'+str(int(self.entity.sword.swing)+1)
+            self.enter_state(state)
+            self.entity.sword.swing = not self.entity.sword.swing
+        elif self.entity.dir[1]>0.8:
+            self.enter_state('sword_up')
+
+class WalkMain(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('walk_main')
+        self.particle_timer = 0
+        self.sfx_loop_time = int(18 * self.entity.game_objects.game.dt)
+        self.sfx_timer = 1
+
+    def update(self):
+        self.particle_timer -= self.entity.game_objects.game.dt
+        if self.particle_timer < 0:
+            pass
+            #self.running_particles()
+
+        self.sfx_timer -= 1
+        if self.sfx_timer == 0:
+            self.entity.game_objects.sound.play_sfx(self.entity.sounds['run'][self.sfx_timer%2], vol = 0.8)
+            self.sfx_timer = self.sfx_loop_time
+
+        if not self.entity.collision_types['bottom']:#TODO disable this one while entering ramp
+            self.enter_state('fall')#fall pre
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+
+    def enter_state(self, new_state):
+        #self.sfx_channel.stop()
+        super().enter_state(new_state)
+
+    def running_particles(self):
+        #particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
+        #self.entity.game_objects.cosmetics.add(particle)
+        self.particle_timer = 10
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            input.processed()
+            self.enter_state('jump')#main
+        elif event[-1]=='lb':
+            input.processed()
+            self.enter_state('dash_ground')
+        elif event[-1]=='x':
+            input.processed()
+            self.swing_sword()              
+        elif event[-1]=='b':#depends on if the abillities have pre or main animation
+            input.processed()
+            self.do_ability()
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='a':
+            input.processed()
+
+    def handle_movement(self,event):
+        super().handle_movement(event)
+        if self.entity.acceleration[0] == 0:
+            self.entity.currentstate.composite_state.enter_phase('post')
+        elif abs(self.entity.acceleration[0]) > 0.5:
+            self.enter_state('run')
+
+    def swing_sword(self):
+        if not self.entity.flags['attack_able']: return
+        if abs(self.entity.dir[1]) < 0.8:
+            state='sword_stand'+str(int(self.entity.sword.swing)+1)
+            self.enter_state(state)
+            self.entity.sword.swing = not self.entity.sword.swing
+        elif self.entity.dir[1] > 0.8:
+            self.enter_state('Sword_up_main')
+
+class WalkPost(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+        
+    def enter(self, **kwarg):
+        self.entity.animation.play('walk_post')
+
+    def update(self):
+        if not self.entity.collision_types['bottom']:
+            self.enter_state('fall')#pre
+            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
+
+    def handle_press_input(self,input):
+        event = input.output()
+        if event[-1] == 'a':
+            input.processed()
+            self.enter_state('jump')#main
+        elif event[-1]=='lb':
+            input.processed()
+            self.enter_state('dash_ground')
+        elif event[-1]=='x':
+            input.processed()
+            self.swing_sword()
+        elif event[-1]=='b':#depends on if the abillities have pre or main animation
+            input.processed()
+            self.do_ability()
+
+    def handle_movement(self,event):
+        super().handle_movement(event)
+        if self.entity.acceleration[0] != 0:
+            self.entity.currentstate.composite_state.enter_phase('pre')
+        elif abs(self.entity.acceleration[0]) > 0.5:
+            self.enter_state('run')
 
     def handle_release_input(self, input):
         event = input.output()
@@ -904,6 +1108,10 @@ class Sword(PhaseBase):#main phases shold inheret this
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.entity.sword.stone_states['slash'].slash_speed()
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        value = event['l_stick']#the avlue of the press
+        self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
 
 class SwordStandPre(Sword):
     def __init__(self,entity):
