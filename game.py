@@ -43,6 +43,7 @@ class Game():
         self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
         #self.state_stack[-1].continuous_input_checks()#tdiscrete_inputs_UI is inprinciple not needed for gameplay state
         inputs = self.game_objects.controller.input_buffer.copy()
+        self.game_objects.input_interpreter.update()#checks for flicks and other input related things
         for input in inputs:
             input.update(self.dt)
             self.state_manager.handle_events(input)

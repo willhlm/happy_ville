@@ -149,7 +149,7 @@ class SwordStandState(CompositeState):
 class SwordHeavyState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': SwordHeavyPre(entity), 'main': SwordHeavyMain(entity), 'post': SwordHeavyPost(entity)}
+        self.phases = {'pre': SwordHeavyPre(entity), 'charge': SwordHeavyCharge(entity), 'main': SwordHeavyMain(entity), 'post': SwordHeavyPost(entity)}
 
 class PhaseBase():
     def __init__(self, entity):
@@ -1174,24 +1174,63 @@ class SwordStandPost(Sword):
 class SwordHeavyPre(Sword):
     def __init__(self,entity):
         super().__init__(entity)
-        self.animation_name = 'sword_heavy_pre'
+        self.animation_name = 'sword_heavy_pre'        
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
-        #self.entity.sword.currentstate.enter_state('Slash_1')
-        #self.entity.projectiles.add(self.entity.sword)#add sword to group 
+        self.release_input = False#used to check if the input is released, so that the sword can be swung
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        pass
 
     def update(self):
         super().update()
-        self.entity.velocity[0] *= 0.8
+        self.entity.velocity[0] = 0
+
+    def increase_phase(self):   
+        if self.release_input:     
+            self.enter_phase('main') 
+        else:
+            self.enter_phase('charge')             
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='x':
+            self.release_input = True
+
+class SwordHeavyCharge(Sword):
+    def __init__(self,entity):
+        super().__init__(entity)
+        self.animation_name = 'sword_heavy_charge'        
+
+    def enter(self, **kwarg):
+        self.entity.animation.play(self.animation_name)        
+        self.time  = 20 
+
+    def update(self):
+        super().update()
+        self.entity.velocity[0] = 0
+        self.time -= self.entity.game_objects.game.dt
+        if self.time < 0: self.enter_phase('main') 
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        pass
 
     def increase_phase(self):        
-        self.enter_phase('main')
+        pass
+        
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1]=='x':
+            self.enter_phase('main') 
 
 class SwordHeavyMain(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.animation_name = 'sword_heavy_main'
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        pass
 
     def enter(self, **kwarg):        
         self.entity.animation.play(self.animation_name)
@@ -1206,28 +1245,28 @@ class SwordHeavyMain(Sword):
 
     def update(self):
         super().update()
-        self.entity.velocity[0] *= 0.8
+        self.entity.velocity[0] *= 0.1    
 
-    def increase_phase(self):        
-        self.enter_phase('post')  
+    def increase_phase(self):
+        self.enter_phase('post') 
 
 class SwordHeavyPost(Sword):
     def __init__(self,entity):
         super().__init__(entity)
         self.animation_name = 'sword_heavy_post'
 
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        pass
+
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
 
     def update(self):
         super().update()
-        self.entity.velocity[0] *= 0.8
+        self.entity.velocity[0] *= 0.1
 
-    def increase_phase(self):
-        if self.entity.acceleration[0] == 0:
-            self.enter_state('idle')
-        else:
-            self.enter_state('run')                                
+    def increase_phase(self):        
+        self.enter_state('idle')                             
 #TODO the states below
 
 class Air_dash_pre(PhaseBase):
