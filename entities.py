@@ -853,7 +853,7 @@ class Player(Character):
 
         self.max_health = 15
         self.max_spirit = 4
-        self.health = 14
+        self.health = 2
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1386,8 +1386,8 @@ class Rav(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
-        self.aggro_distance = [200,10]#at which distance to the player when you should be aggro -> negative means no
-        self.attack_distance = [50,150]
+        self.aggro_distance = [200, 20]#at which distance to the player when you should be aggro -> negative means no
+        self.attack_distance = [50, 150]
         self.health = 3
         self.chase_speed = 0.8
         self.patrol_speed = 0.3

@@ -35,6 +35,8 @@ class Idle(Shader_states):
             self.enter_state('Blur')
         elif input == 'motion_blur':
             self.enter_state('MB')
+        if input == 'colour':
+            self.enter_state('Colour', **kwarg)            
 
 class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
     def __init__(self, entity, **kwarg):
@@ -95,6 +97,19 @@ class Mix_colour(Shader_states):#shade screen uses it
         self.entity.shader['colour'] = self.entity.colour#higher alpha for lower parallax
         self.entity.shader['new_colour'] = self.entity.new_colour#higher alpha for lower parallax
         self.entity.shader['position'] = max((self.entity.game_objects.player.hitbox.centerx - self.entity.bounds.left)/self.entity.bounds[2],0)
+
+    def handle_input(self,input):
+        if input == 'idle':
+            self.enter_state('Idle')
+
+class Colour(Shader_states):#shade screen uses it
+    def __init__(self,entity, **kwarg):#colour is a list of 4 floats):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['colour']
+        self.colour = kwarg.get('colour', [1,1,1,1])#colour is a list of 4 floats
+        
+    def update(self):
+        self.entity.shader['colour'] = self.colour
 
     def handle_input(self,input):
         if input == 'idle':

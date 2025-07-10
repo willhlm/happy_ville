@@ -18,7 +18,7 @@ class Idle(Basic_states):
         super().__init__(entity)
 
     def die(self):#"normal" gameplay states calls this
-        self.entity.currentstate.enter_state('Death_pre')#overrite any state and go to deat
+        self.entity.currentstate.enter_state('death')#overrite any state and go to deat
         self.entity.die()
 
     def handle_input(self, input):

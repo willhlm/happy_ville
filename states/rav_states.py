@@ -37,7 +37,7 @@ class Patrol(BaseState):#goes back and forth
         self.timer = self.entity.game_objects.timer_manager.start_timer(self.entity.patrol_timer, self.timeout, ID = 'BOOYAA')
 
     def update(self):
-        super().update()
+        super().update()        
         self.entity.velocity[0] += self.entity.dir[0]*self.entity.patrol_speed
         self.check_sight()
         self.check_ground()       

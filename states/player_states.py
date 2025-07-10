@@ -17,14 +17,18 @@ class PlayerStates():
             'dash_ground': DashGroundState(entity),
             'dash_jump': DashJumpState(entity),
             'wall_glide': WallGlideState(entity),
+            'belt_glide': BeltGlideState(entity),
             'wall_jump': WallJumpState(entity),
             'sword_stand1': SwordStandState(entity),
-            'sword_stand2': SwordStandState(entity),    
+            'sword_stand2': SwordStandState(entity),   
+            'sword_air': SwordAirState(entity),    
             'smash_side': SmashSideState(entity),  
             'smash_up': SmashUpState(entity),  
-            'dash_air': DashAirState(entity),            
+            'dash_air': DashAirState(entity), 
+            'death': DeathState(entity),     
+            'respawn': ReSpawnState(entity),#used when respawning after death  
+            'heal': HealState(entity),#used when respawning after death  
 
-            #'Sword_up': SwordUpState(entity),
         }
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
@@ -134,6 +138,11 @@ class WallGlideState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': WallGlide(entity, animation_name = 'wall_glide_pre'), 'main': WallGlide(entity, animation_name = 'wall_glide_main')}
 
+class BeltGlideState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': BeltGlide(entity, animation_name = 'wall_glide_pre'), 'main': BeltGlide(entity, animation_name = 'wall_glide_main')}
+
 class DashJumpState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -168,6 +177,21 @@ class DashAirState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
         self.phases = {'pre': DashAirPre(entity), 'main': DashAirMain(entity), 'post': DashAirPost(entity)}
+
+class DeathState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': DeathMain(entity), 'post': DeathPost(entity)}    
+
+class ReSpawnState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': ReSpawnMain(entity)}  
+
+class HealState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': HealPre(entity), 'main': HealMain(entity)}                       
 
 class PhaseBase():
     def __init__(self, entity):
@@ -881,37 +905,43 @@ class WallGlide(PhaseBase):
         self.entity.movement_manager.remove_modifier('Wall_glide')
         super().enter_state(input, **kwarg)       
 
-class Belt_glide_main(PhaseBase):#same as wall glide but only jump if wall_glide has been unlocked
+class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.animation.play('wall_glide_main')
-        self.entity.movement_manager.add_modifier('Wall_glide')
+        self.animation_name = kwarg['animation_name']
+
+    def enter(self, **kwarg):        
+        self.entity.animation.play(self.animation_name)#the name of the class
+        self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        if self.entity.states['Wall_glide']:#can jump if wall glide has been unlocked
-            self.entity.flags['ground'] = True
+        self.entity.movement_manager.add_modifier('Wall_glide')
+        if self.entity.collision_types['right']:
+            self.dir = [1,0]
+        else:
+            self.dir = [-1,0]
 
     def update(self):#is needed
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
-            self.enter_state('Fall_pre')
-            if self.entity.states['Wall_glide']:
+            self.enter_state('fall')
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
             input.processed()
-            if self.entity.states['Wall_glide']:
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.velocity[0] = -self.dir[0]*10
                 self.entity.velocity[1] = -7#to get a vertical velocity
-                self.enter_state('Jump_main')
+                self.enter_state('jump')
             else:
                 self.entity.velocity[0] = -self.entity.dir[0]*10
-                self.enter_state('Fall_pre')
+                self.enter_state('fall')
         elif event[-1] == 'lb':
-            if self.entity.states['Wall_glide']:
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.dir[0] *= -1
                 input.processed()
-                self.enter_state('Ground_dash_pre')
+                self.enter_state('dash_ground')
 
     def handle_movement(self, event):
         value = event['l_stick']#the avlue of the press
@@ -924,18 +954,18 @@ class Belt_glide_main(PhaseBase):#same as wall glide but only jump if wall_glide
 
         if value[0] * curr_dir < 0:#change sign
             self.entity.velocity[0] = self.entity.dir[0]*2
-            self.enter_state('Fall_pre')
-            if self.entity.states['Wall_glide']:
+            self.enter_state('fall')
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
         elif value[0] == 0:#release
             self.entity.velocity[0] = -self.entity.dir[0]*2
-            self.enter_state('Fall_pre')
-            if self.entity.states['Wall_glide']:
+            self.enter_state('fall')
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_input(self, input, **kwarg):
         if input == 'Ground':
-            self.enter_state('Run_main')
+            self.enter_state('run')
 
     def enter_state(self,input):#reset friction before exiting this state
         self.entity.movement_manager.remove_modifier('Wall_glide')
@@ -1506,55 +1536,16 @@ class DashAirPost(DashAirPre):
         else:
             self.enter_state('run')
 
-#TODO the states below
-
-class Death_pre(PhaseBase):
+class DeathMain(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('death_main')        
         self.entity.game_objects.cosmetics.add(entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
-        self.entity.velocity[1] = -3
-        self.entity.acceleration[0] = 0#don't move
-        if self.entity.velocity[0]<0:
-            self.dir[0]=1
-        else:
-            self.dir[0]=-1
 
     def update(self):
-        self.entity.invincibile = True
-
-    def handle_movement(self,event):
-        pass
-
-    def increase_phase(self):
-        if self.entity.collision_types['bottom']:#if on the ground when dying
-            self.enter_state('Death_main')
-        else:
-            self.enter_state('Death_charge')
-
-class Death_charge(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.time = 100
-
-    def update(self):
-        self.time -= self.entity.game_objects.game.dt
-        self.entity.invincibile = True
-        if self.time < 0:
-            self.entity.dead()
-            self.enter_state('Death_post')
-
-    def handle_movement(self,event):
-        pass
-
-    def handle_input(self, input, **kwarg):
-        if input == 'Ground':#if hit ground
-            self.enter_state('Death_main')
-
-class Death_main(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
+        self.entity.acceleration[0] = 0#slow down
         self.entity.invincibile = True
 
     def handle_movement(self,event):
@@ -1562,11 +1553,15 @@ class Death_main(PhaseBase):
 
     def increase_phase(self):
         self.entity.dead()
-        self.enter_state('Death_post')
+        self.enter_phase('post')
 
-class Death_post(PhaseBase):
+class DeathPost(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.acceleration[0] = 0#slow down
+        self.entity.animation.play('death_post')        
 
     def update(self):
         self.entity.invincibile = True
@@ -1574,35 +1569,56 @@ class Death_post(PhaseBase):
     def handle_movement(self,event):
         pass
 
-    def increase_phase(self):
+class ReSpawnMain(PhaseBase):#enters when aila respawn after death
+    def __init__(self,entity):
+        super().__init__(entity)
+        
+    def enter(self, **kwarg):
+        self.entity.animation.play('respawn')
+        self.entity.invincibile = False
+
+    def handle_movement(self,event):
         pass
 
-class Heal_pre(PhaseBase):
+    def increase_phase(self):#when animation finishes
+        self.entity.health = max(self.entity.health,0)#if negative, set it to 0
+        self.entity.heal(self.entity.max_health)
+        if self.entity.backpack.map.spawn_point.get('bone', False):#if bone, remove it
+            self.entity.backpack.map.spawn_point.pop()
+        self.enter_state('idle')
+    
+class HealPre(PhaseBase):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
+        
+    def enter(self, **kwarg):
+        self.entity.animation.play('heal_pre')
 
     def handle_release_input(self, input):
         event = input.output()
         if event[-1] == 'rt':#if releasing the button
             input.processed()
-            self.enter_state('Idle_main')
+            self.enter_state('idle')
 
     def handle_movement(self, event):
         pass
 
     def increase_phase(self):
-        self.enter_state('Heal_main')
+        self.enter_phase('main')
 
-class Heal_main(PhaseBase):
+class HealMain(PhaseBase):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('heal_main')        
         self.heal_cost = 1
 
     def handle_release_input(self, input):
         event = input.output()
         if event[-1] == 'rt':#if releasing the button
             input.processed()
-            self.enter_state('Idle_main')
+            self.enter_state('idle')
 
     def handle_movement(self, event):
         pass
@@ -1611,6 +1627,8 @@ class Heal_main(PhaseBase):
         self.entity.heal()
         self.entity.backpack.inventory.remove('amber_droplet', self.heal_cost)
         self.enter_state('Heal_main')
+
+#TODO the states below          
 
 class Stand_up_main(PhaseBase):
     def __init__(self,entity):
@@ -1658,42 +1676,6 @@ class Pray_post(PhaseBase):
     def increase_phase(self):
         self.enter_state('Idle_main')
 
-class Hurt_main(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-        if entity.collision_types['bottom']:
-            self.next_state = 'Idle_main'
-        else:
-            self.next_state = 'Fall_pre'
-
-    def increase_phase(self):
-        self.enter_state(self.next_state)
-
-    def update(self):
-        if entity.collision_types['bottom']:
-            if self.entity.acceleration[0] == 0:
-                self.next_state = 'Idle_main'
-            else:
-                self.next_state ='Run_pre'
-        else:
-            self.next_state = 'Fall_pre'
-
-class Spawn_main(PhaseBase):#enters when aila respawn after death
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.entity.invincibile = False
-
-    def handle_movement(self,event):
-        pass
-
-    def increase_phase(self):#when animation finishes
-        self.entity.health = max(self.entity.health,0)#if negative, set it to 0
-        self.entity.heal(self.entity.max_health)
-        if self.entity.backpack.map.spawn_point.get('bone', False):#if bone, remove it
-            self.entity.backpack.map.spawn_point.pop()
-
-        self.enter_state('Idle_main')
-
 class Sword_up_main(Sword):
     def __init__(self,entity):
         super().__init__(entity)
@@ -1727,6 +1709,7 @@ class Plant_bone_main(PhaseBase):
 
     def increase_phase(self):
         self.enter_state('Idle_main')
+
 
 class Thunder_pre(PhaseBase):
     def __init__(self, entity):
