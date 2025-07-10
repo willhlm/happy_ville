@@ -44,7 +44,7 @@ class Slash_2(Slash_1):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Slash_up(Basic_states):#not implemented
+class Slash_up(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.lifetime = 10#swrod hitbox duration
