@@ -217,6 +217,7 @@ class Inputs():
         self.keydown = keydown
         self.keyup = keyup
         self.value = value
+        self.meta = {}#store if the input is a smash, and direction for the inturpruter
 
     def output(self):
         return [self.keydown, self.keyup, self.value, self.key]

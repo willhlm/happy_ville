@@ -4274,7 +4274,7 @@ class Savepoint(Interactable):#save point
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
-        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        self.game_objects.player.currentstate.enter_state('crouch')
         self.game_objects.player.backpack.map.save_savepoint(map =  self.map, point = self.init_cord)
         self.currentstate.handle_input('active')
         self.game_objects.cosmetics.add(Logo_loading(self.game_objects))

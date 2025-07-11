@@ -16,29 +16,29 @@ class InputInterpreter():#mashing
         self.last_flick_time[0] += self.game_objects.game.dt
         self.last_flick_time[1] += self.game_objects.game.dt
 
-        self.last_l_stick = self.game_objects.controller.value['l_stick']    
+        self.last_l_stick = self.game_objects.controller.value['l_stick']          
 
         if abs(curr_x) > self.flick_threshold and abs(curr_x - prev_x) > 0.4:
             self.last_flick_time[0] = 0 
-            self.flick_direction[0] = self.sign(curr_x)   
+            self.flick_direction[0] = self.sign(curr_x)               
         elif abs(curr_y) > self.flick_threshold and abs(curr_y - prev_y) > 0.4:
             self.last_flick_time[1] = 0    
             self.flick_direction[1] = self.sign(curr_y)                   
 
     def interpret(self, input):
         if input.key == 'x':
-            if self.last_flick_time[0] < self.grace_period_frames:                
+            if self.last_flick_time[0] < self.grace_period_frames:      
+                print('fe')          
                 if self.flick_direction[0] > 0:
-                    input.key = 'smash_right'
+                    input.meta = {'smash': True, 'direction': 'right'}
                 else:
-                    input.key = 'smash_left'     
+                    input.meta = {'smash': True, 'direction': 'left'}
 
             elif self.last_flick_time[1] < self.grace_period_frames:
-
                 if self.flick_direction[1] > 0:
-                    input.key = 'smash_down'
+                    input.meta = {'smash': True, 'direction': 'down'}
                 else:
-                    input.key = 'smash_up'                
+                    input.meta = {'smash': True, 'direction': 'up'}        
         return input
 
     @staticmethod
