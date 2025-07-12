@@ -2218,7 +2218,7 @@ class Bieggs_breath(Player_ability):#force push
         else:#up or down
             dir = [0,-self.entity.dir[1]]
 
-        spawn = Wind(self.entity.rect.center, self.entity.game_objects, dir = dir)
+        spawn = Wind(self.entity.hitbox.midtop, self.entity.game_objects, dir = dir)
         self.entity.game_objects.fprojectiles.add(spawn)
 
     def upgrade_ability(self):#called from upgrade menu
@@ -2788,7 +2788,7 @@ class Wind(Projectiles):
         self.kill()
 
     def pool(game_objects):
-        size = [64, 64]
+        size = [32, 32]
         Wind.image = game_objects.game.display.make_layer(size)
 
     def collision_enemy(self, collision_enemy):#if hit something

@@ -18,7 +18,7 @@ class InputInterpreter():#mashing
 
         self.last_l_stick = self.game_objects.controller.value['l_stick']          
 
-        if abs(curr_x) > self.flick_threshold and abs(curr_x - prev_x) > 0.4:
+        if abs(curr_x) > self.flick_threshold and abs(curr_x - prev_x) > 0.4:            
             self.last_flick_time[0] = 0 
             self.flick_direction[0] = self.sign(curr_x)               
         elif abs(curr_y) > self.flick_threshold and abs(curr_y - prev_y) > 0.4:
@@ -27,8 +27,7 @@ class InputInterpreter():#mashing
 
     def interpret(self, input):
         if input.key == 'x':
-            if self.last_flick_time[0] < self.grace_period_frames:      
-                print('fe')          
+            if self.last_flick_time[0] < self.grace_period_frames:                      
                 if self.flick_direction[0] > 0:
                     input.meta = {'smash': True, 'direction': 'right'}
                 else:
