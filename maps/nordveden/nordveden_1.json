@@ -822,7 +822,37 @@
                  "draworder":"topdown",
                  "id":86,
                  "name":"interactables",
-                 "objects":[],
+                 "objects":[
+                        {
+                         "gid":30990,
+                         "height":96,
+                         "id":1117,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":144,
+                         "x":3968,
+                         "y":928
+                        }, 
+                        {
+                         "gid":31002,
+                         "height":16,
+                         "id":1120,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"interactable_item",
+                                 "type":"string",
+                                 "value":"Half_dmg"
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":4192,
+                         "y":880
+                        }],
                  "opacity":1,
                  "type":"objectgroup",
                  "visible":true,
@@ -1796,7 +1826,7 @@
          "y":0
         }],
  "nextlayerid":109,
- "nextobjectid":1117,
+ "nextobjectid":1121,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

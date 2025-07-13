@@ -1,5 +1,5 @@
 from game_states import Gameplay
-from entities import Spawneffect, Lighitning, Reindeer, Cultist_warrior, Cultist_rogue
+from entities import Spawneffect, Lighitning, Reindeer, Cultist_warrior, Cultist_rogue, Spawneffect
 import read_files
 import animation
 import particles
@@ -260,7 +260,7 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
 class Death(Cutscene_engine):#when aila dies
     def __init__(self,game):
         super().__init__(game)
-        self.stage = 0
+        self.stage = 0        
 
     def update(self):
         super().update()
@@ -271,19 +271,20 @@ class Death(Cutscene_engine):#when aila dies
             if self.timer > 120:
                 self.state1()
 
-        elif self.stage == 1:
+        elif self.stage == 1:                
                 #spawn effect
                 pos = (0,0)#
-                offset = 100#depends on the effect animation
-                self.spawneffect = entities.Spawneffect(pos,self.game.game_objects)
+                offset = 100#depends on the effect animation    
+                self.spawneffect = Spawneffect(pos,self.game.game_objects)
                 self.spawneffect.rect.midbottom=self.game.game_objects.player.rect.midbottom
                 self.spawneffect.rect.bottom += offset
                 self.game.game_objects.cosmetics.add(self.spawneffect)
                 self.stage = 2
 
         elif self.stage == 2:
-            if self.spawneffect.finish:#when the cosmetic effetc finishes
-                self.game.game_objects.player.currentstate.enter_state('Spawn_main')
+            if self.spawneffect.finish:#when the cosmetic effetc finishes        
+                self.game.game_objects.player.shader = self.game.game_objects.shaders['idle']#put it back to idle shader
+                self.game.game_objects.player.currentstate.enter_state('respawn')
                 self.game.state_manager.exit_state()
 
     def state1(self):
@@ -293,7 +294,7 @@ class Death(Cutscene_engine):#when aila dies
             del self.game.game_objects.player.backpack.map.spawn_point['bone']
         else:#normal resawn
             map = self.game.game_objects.player.backpack.map.spawn_point['map']
-            point =  self.game.game_objects.player.backpack.map.spawn_point['point']
+            point =  self.game.game_objects.player.backpack.map.spawn_point['point']        
         self.game.game_objects.load_map(self, map, point)
         self.stage = 1
 

@@ -853,7 +853,7 @@ class Player(Character):
 
         self.max_health = 15
         self.max_spirit = 4
-        self.health = 14
+        self.health = 2
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -1386,8 +1386,8 @@ class Rav(Enemy):
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1], 32, 32)
-        self.aggro_distance = [200,10]#at which distance to the player when you should be aggro -> negative means no
-        self.attack_distance = [50,150]
+        self.aggro_distance = [200, 20]#at which distance to the player when you should be aggro -> negative means no
+        self.attack_distance = [50, 150]
         self.health = 3
         self.chase_speed = 0.8
         self.patrol_speed = 0.3
@@ -2218,7 +2218,7 @@ class Bieggs_breath(Player_ability):#force push
         else:#up or down
             dir = [0,-self.entity.dir[1]]
 
-        spawn = Wind(self.entity.rect.center, self.entity.game_objects, dir = dir)
+        spawn = Wind(self.entity.hitbox.midtop, self.entity.game_objects, dir = dir)
         self.entity.game_objects.fprojectiles.add(spawn)
 
     def upgrade_ability(self):#called from upgrade menu
@@ -2788,7 +2788,7 @@ class Wind(Projectiles):
         self.kill()
 
     def pool(game_objects):
-        size = [64, 64]
+        size = [32, 32]
         Wind.image = game_objects.game.display.make_layer(size)
 
     def collision_enemy(self, collision_enemy):#if hit something
@@ -4274,7 +4274,7 @@ class Savepoint(Interactable):#save point
         self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
-        self.game_objects.player.currentstate.enter_state('Pray_pre')
+        self.game_objects.player.currentstate.enter_state('crouch')
         self.game_objects.player.backpack.map.save_savepoint(map =  self.map, point = self.init_cord)
         self.currentstate.handle_input('active')
         self.game_objects.cosmetics.add(Logo_loading(self.game_objects))

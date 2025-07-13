@@ -17,14 +17,26 @@ class PlayerStates():
             'dash_ground': DashGroundState(entity),
             'dash_jump': DashJumpState(entity),
             'wall_glide': WallGlideState(entity),
+            'belt_glide': BeltGlideState(entity),
             'wall_jump': WallJumpState(entity),
             'sword_stand1': SwordStandState(entity),
-            'sword_stand2': SwordStandState(entity),    
+            'sword_stand2': SwordStandState(entity),   
+            'sword_air': SwordAirState(entity),    
+            'sword_down': SwordDownState(entity),  
+            'sword_up': SwordUpState(entity),            
             'smash_side': SmashSideState(entity),  
             'smash_up': SmashUpState(entity),  
-            'dash_air': DashAirState(entity),            
-
-            #'Sword_up': SwordUpState(entity),
+            'dash_air': DashAirState(entity), 
+            'death': DeathState(entity),     
+            'respawn': ReSpawnState(entity),#used when respawning after death  
+            'heal': HealState(entity),
+            'crouch': CrouchState(entity),
+            'plat_bone': PlantBoneState(entity), 
+            'thunder': ThunderState(entity),  
+            'shield': ShieldState(entity),   
+            'wind': WindState(entity),  
+            'slow_motion': SlowMotionState(entity),     
+            'bow': BowState(entity),            
         }
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
@@ -134,6 +146,11 @@ class WallGlideState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': WallGlide(entity, animation_name = 'wall_glide_pre'), 'main': WallGlide(entity, animation_name = 'wall_glide_main')}
 
+class BeltGlideState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': BeltGlide(entity, animation_name = 'wall_glide_pre'), 'main': BeltGlide(entity, animation_name = 'wall_glide_main')}
+
 class DashJumpState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -148,6 +165,16 @@ class SwordStandState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
         self.phases = {'main': SwordStandMain(entity), 'post': SwordStandPost(entity)}#'pre': SwordStandPre(entity), 
+
+class SwordDownState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': SwordDownMain(entity)}
+
+class SwordUpState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': SwordUpMain(entity)}        
 
 class SmashSideState(CompositeState):
     def __init__(self, entity):
@@ -169,6 +196,56 @@ class DashAirState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': DashAirPre(entity), 'main': DashAirMain(entity), 'post': DashAirPost(entity)}
 
+class DeathState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': DeathMain(entity), 'post': DeathPost(entity)}    
+
+class ReSpawnState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': ReSpawnMain(entity)}  
+
+class HealState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': HealPre(entity), 'main': HealMain(entity)}                       
+
+class CrouchState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': CrouchPre(entity), 'main': CrouchMain(entity), 'post': CrouchPost(entity)}    
+
+class PlantBoneState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': PlantBoneMain(entity)}
+
+class ThunderState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': ThunderPre(entity), 'main': ThunderMain(entity), 'post': ThunderPost(entity)}
+
+class ShieldState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': ShieldMain(entity)}
+
+class WindState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': WindMain(entity)}
+
+class SlowMotionState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': SlowMotionPre(entity), 'main': SlowMotionMain(entity)}        
+
+class BowState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'pre': BowPre(entity), 'main': BowMain(entity)}  
+
 class PhaseBase():
     def __init__(self, entity):
         self.entity = entity                
@@ -188,8 +265,8 @@ class PhaseBase():
     def enter_state(self, new_state, **kwarg):#should call when entering a new state   
         self.entity.currentstate.enter_state(new_state, **kwarg)
 
-    def enter_phase(self, phase_name):#should call when just changing phase
-        self.entity.currentstate.composite_state.enter_phase(phase_name)
+    def enter_phase(self, phase_name, **kwarg):#should call when just changing phase
+        self.entity.currentstate.composite_state.enter_phase(phase_name, **kwarg)
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
@@ -201,17 +278,14 @@ class PhaseBase():
         value = event['l_stick']#the avlue of the press
         
         #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        self.entity.acceleration[0] = C.acceleration[0] * abs(value[0]*0.8)#always positive, add acceleration to entity
+        self.entity.acceleration[0] = C.acceleration[0] * abs(value[0])#always positive, add acceleration to entity
 
         self.entity.dir[1] = -value[1]
         if abs(value[0]) > 0.1:
             self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
-        if self.entity.abilities.equip == 'Thunder' or self.entity.abilities.equip == 'Slow_motion' or self.entity.abilities.equip == 'Bow':
-            self.enter_state(self.entity.abilities.equip + '_pre')
-        else:
-            self.enter_state(self.entity.abilities.equip + '_main')
+        self.enter_state(self.entity.abilities.equip.lower())
 
 class IdleMain(PhaseBase):
     def __init__(self, entity):
@@ -235,18 +309,19 @@ class IdleMain(PhaseBase):
         elif event[-1]=='lb':
             input.processed()
             self.enter_state('dash_ground')
-        elif event[-1] == 'smash_left':
-            input.processed()
-            self.enter_state('smash_side', dir = -1) 
-        elif event[-1] == 'smash_right':
-            input.processed()
-            self.enter_state('smash_side', dir = 1)                         
-        elif event[-1]=='smash_up':
-            input.processed()
-            self.enter_state('smash_up')                        
-        elif event[-1]=='x':
-            input.processed()
-            self.swing_sword()             
+        elif event[-1] == 'x':
+            if input.meta.get('smash'):
+                direction = input.meta.get('direction')
+                if direction == 'left':
+                    self.enter_state('smash_side', dir = -1) 
+                elif direction == 'right':
+                    self.enter_state('smash_side', dir = 1) 
+                elif direction == 'up':
+                    self.enter_state('smash_up')   
+            else:                
+                self.swing_sword()   
+            input.processed()                                     
+           
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
@@ -311,15 +386,18 @@ class RunPre(PhaseBase):
         elif event[-1]=='lb':
             input.processed()
             self.enter_state('dash_ground')
-        elif event[-1]=='x':
-            input.processed()
-            self.swing_sword()
-        elif event[-1] == 'smash_left':
-            input.processed()
-            self.enter_state('smash_side', dir = -1) 
-        elif event[-1] == 'smash_right':
-            input.processed()
-            self.enter_state('smash_side', dir = 1)                
+        elif event[-1] == 'x':
+            if input.meta.get('smash'):
+                direction = input.meta.get('direction')
+                if direction == 'left':
+                    self.enter_state('smash_side', dir = -1) 
+                elif direction == 'right':
+                    self.enter_state('smash_side', dir = 1) 
+                elif direction == 'up':
+                    self.enter_state('smash_up')   
+            else:                
+                self.swing_sword()  
+            input.processed()               
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
@@ -411,7 +489,7 @@ class RunMain(PhaseBase):
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0.8:
-            self.enter_state('Sword_up_main')
+            self.enter_state('sword_up')
 
 class RunPost(PhaseBase):
     def __init__(self,entity):
@@ -433,9 +511,18 @@ class RunPost(PhaseBase):
         elif event[-1]=='lb':
             input.processed()
             self.enter_state('dash_ground')
-        elif event[-1]=='x':
+        elif event[-1] == 'x':
+            if input.meta.get('smash'):
+                direction = input.meta.get('direction')
+                if direction == 'left':
+                    self.enter_state('smash_side', dir = -1) 
+                elif direction == 'right':
+                    self.enter_state('smash_side', dir = 1) 
+                elif direction == 'up':
+                    self.enter_state('smash_up')   
+            else:                
+                self.swing_sword()  
             input.processed()
-            self.swing_sword()
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
@@ -458,7 +545,7 @@ class RunPost(PhaseBase):
             self.entity.sword.swing = not self.entity.sword.swing
 
         elif self.entity.dir[1]>0:
-            self.enter_state('Sword_up_main')
+            self.enter_state('sword_up')
 
     def increase_phase(self):
         self.enter_state('idle')
@@ -499,12 +586,18 @@ class WalkPre(PhaseBase):
         elif event[-1]=='lb':
             input.processed()
             self.enter_state('dash_ground')
-        elif event[-1]=='x':
-            input.processed()
-            self.swing_sword()
-        elif event[-1]=='smash_x':
-            input.processed()
-            self.enter_state('sword_heavy')                
+        elif event[-1] == 'x':
+            if input.meta.get('smash'):
+                direction = input.meta.get('direction')
+                if direction == 'left':
+                    self.enter_state('smash_side', dir = -1) 
+                elif direction == 'right':
+                    self.enter_state('smash_side', dir = 1) 
+                elif direction == 'up':
+                    self.enter_state('smash_up')   
+            else:                
+                self.swing_sword()  
+            input.processed()               
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
@@ -598,7 +691,7 @@ class WalkMain(PhaseBase):
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0.8:
-            self.enter_state('Sword_up_main')
+            self.enter_state('sword_up')
 
 class WalkPost(PhaseBase):
     def __init__(self,entity):
@@ -620,9 +713,18 @@ class WalkPost(PhaseBase):
         elif event[-1]=='lb':
             input.processed()
             self.enter_state('dash_ground')
-        elif event[-1]=='x':
+        elif event[-1] == 'x':
+            if input.meta.get('smash'):
+                direction = input.meta.get('direction')
+                if direction == 'left':
+                    self.enter_state('smash_side', dir = -1) 
+                elif direction == 'right':
+                    self.enter_state('smash_side', dir = 1) 
+                elif direction == 'up':
+                    self.enter_state('smash_up')   
+            else:                
+                self.swing_sword()  
             input.processed()
-            self.swing_sword()
         elif event[-1]=='b':#depends on if the abillities have pre or main animation
             input.processed()
             self.do_ability()
@@ -647,7 +749,7 @@ class WalkPost(PhaseBase):
             self.entity.sword.swing = not self.entity.sword.swing
 
         elif self.entity.dir[1]>0:
-            self.enter_state('Sword_up_main')
+            self.enter_state('sword_up')
 
     def increase_phase(self):
         self.enter_state('idle')
@@ -706,15 +808,15 @@ class JumpMain(PhaseBase):
 
     def handle_input(self, input, **kwarg):
         if input == 'belt':
-            self.enter_state('Belt_glide_main')
+            self.enter_state('belt_glide')
 
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
         if self.entity.dir[1] > 0.7:
-            self.enter_state('Sword_up_main')
+            self.enter_state('sword_up')
         elif self.entity.dir[1] < -0.7:
-            self.enter_state('Sword_down_main')
-        else:#right or left            
+            self.enter_state('sword_down')
+        else:#right or left       
             self.enter_state('sword_air')
 
 class WallJumpPre(PhaseBase):
@@ -785,9 +887,9 @@ class FallPre(PhaseBase):
     def swing_sword(self):
         if not self.entity.flags['attack_able']: return
         if self.entity.dir[1] > 0.7:
-            self.enter_state('Sword_up_main')
+            self.enter_state('sword_up')
         elif self.entity.dir[1] < -0.7:
-            self.enter_state('Sword_down_main')
+            self.enter_state('sword_down')
         else:#right or left
             self.enter_state('sword_air')
 
@@ -881,37 +983,43 @@ class WallGlide(PhaseBase):
         self.entity.movement_manager.remove_modifier('Wall_glide')
         super().enter_state(input, **kwarg)       
 
-class Belt_glide_main(PhaseBase):#same as wall glide but only jump if wall_glide has been unlocked
+class BeltGlide(PhaseBase):#same as wall glide but only jump if wall_glide has been unlocked
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.animation.play('wall_glide_main')
-        self.entity.movement_manager.add_modifier('Wall_glide')
+        self.animation_name = kwarg['animation_name']
+
+    def enter(self, **kwarg):        
+        self.entity.animation.play(self.animation_name)#the name of the class
+        self.entity.flags['ground'] = True#used for jumping: sets to false in cayote timer and in jump state
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        if self.entity.states['Wall_glide']:#can jump if wall glide has been unlocked
-            self.entity.flags['ground'] = True
+        self.entity.movement_manager.add_modifier('Wall_glide')
+        if self.entity.collision_types['right']:
+            self.dir = [1,0]
+        else:
+            self.dir = [-1,0]
 
     def update(self):#is needed
         if not self.entity.collision_types['right'] and not self.entity.collision_types['left']:#non wall and not on ground
-            self.enter_state('Fall_pre')
-            if self.entity.states['Wall_glide']:
+            self.enter_state('fall')
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
             input.processed()
-            if self.entity.states['Wall_glide']:
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.velocity[0] = -self.dir[0]*10
                 self.entity.velocity[1] = -7#to get a vertical velocity
-                self.enter_state('Jump_main')
+                self.enter_state('jump')
             else:
                 self.entity.velocity[0] = -self.entity.dir[0]*10
-                self.enter_state('Fall_pre')
+                self.enter_state('fall')
         elif event[-1] == 'lb':
-            if self.entity.states['Wall_glide']:
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.dir[0] *= -1
                 input.processed()
-                self.enter_state('Ground_dash_pre')
+                self.enter_state('dash_ground')
 
     def handle_movement(self, event):
         value = event['l_stick']#the avlue of the press
@@ -924,18 +1032,18 @@ class Belt_glide_main(PhaseBase):#same as wall glide but only jump if wall_glide
 
         if value[0] * curr_dir < 0:#change sign
             self.entity.velocity[0] = self.entity.dir[0]*2
-            self.enter_state('Fall_pre')
-            if self.entity.states['Wall_glide']:
+            self.enter_state('fall')
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
         elif value[0] == 0:#release
             self.entity.velocity[0] = -self.entity.dir[0]*2
-            self.enter_state('Fall_pre')
-            if self.entity.states['Wall_glide']:
+            self.enter_state('fall')
+            if self.entity.currentstate.states.get('wall_glide'):
                 self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout, ID = 'cayote')
 
     def handle_input(self, input, **kwarg):
         if input == 'Ground':
-            self.enter_state('Run_main')
+            self.enter_state('run')
 
     def enter_state(self,input):#reset friction before exiting this state
         self.entity.movement_manager.remove_modifier('Wall_glide')
@@ -1123,7 +1231,6 @@ class Sword(PhaseBase):#main phases shold inheret this
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
-        self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.entity.sword.stone_states['slash'].slash_speed()
 
@@ -1194,6 +1301,46 @@ class SwordStandPost(Sword):
             self.enter_state('idle')
         else:
             self.enter_state('run')  
+
+class SwordDownMain(Sword):
+    def __init__(self,entity):
+        super().__init__(entity)
+    
+    def enter(self, **kwarg):
+        self.entity.animation.play('sword_down_main')
+        self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
+        self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
+        self.entity.sword.stone_states['slash'].slash_speed()        
+        self.entity.sword.currentstate.enter_state('Slash_down')
+        self.entity.projectiles.add(self.entity.sword)#add sword to group        
+
+    def increase_phase(self):
+        self.enter_state('fall')
+
+class SwordUpMain(Sword):
+    def __init__(self,entity):
+        super().__init__(entity)
+    
+    def enter(self, **kwarg):
+        self.entity.animation.play('sword_up_main')
+        self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
+        self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
+        self.entity.sword.stone_states['slash'].slash_speed()        
+        self.entity.sword.currentstate.enter_state('Slash_up')
+        self.entity.projectiles.add(self.entity.sword)#add sword to group        
+
+    def increase_phase(self):    
+        if self.entity.flags['ground']:
+            if self.entity.acceleration[0] == 0:
+                self.enter_state('idle')
+            else:
+                self.enter_state('run')
+        else:
+            self.enter_state('fall')            
 
 class SmashSidePre(Sword):
     def __init__(self,entity):
@@ -1506,55 +1653,16 @@ class DashAirPost(DashAirPre):
         else:
             self.enter_state('run')
 
-#TODO the states below
-
-class Death_pre(PhaseBase):
+class DeathMain(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('death_main')        
         self.entity.game_objects.cosmetics.add(entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
-        self.entity.velocity[1] = -3
-        self.entity.acceleration[0] = 0#don't move
-        if self.entity.velocity[0]<0:
-            self.dir[0]=1
-        else:
-            self.dir[0]=-1
 
     def update(self):
-        self.entity.invincibile = True
-
-    def handle_movement(self,event):
-        pass
-
-    def increase_phase(self):
-        if self.entity.collision_types['bottom']:#if on the ground when dying
-            self.enter_state('Death_main')
-        else:
-            self.enter_state('Death_charge')
-
-class Death_charge(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.time = 100
-
-    def update(self):
-        self.time -= self.entity.game_objects.game.dt
-        self.entity.invincibile = True
-        if self.time < 0:
-            self.entity.dead()
-            self.enter_state('Death_post')
-
-    def handle_movement(self,event):
-        pass
-
-    def handle_input(self, input, **kwarg):
-        if input == 'Ground':#if hit ground
-            self.enter_state('Death_main')
-
-class Death_main(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def update(self):
+        self.entity.acceleration[0] = 0#slow down
         self.entity.invincibile = True
 
     def handle_movement(self,event):
@@ -1562,11 +1670,15 @@ class Death_main(PhaseBase):
 
     def increase_phase(self):
         self.entity.dead()
-        self.enter_state('Death_post')
+        self.enter_phase('post')
 
-class Death_post(PhaseBase):
+class DeathPost(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.acceleration[0] = 0#slow down
+        self.entity.animation.play('death_post')        
 
     def update(self):
         self.entity.invincibile = True
@@ -1574,113 +1686,12 @@ class Death_post(PhaseBase):
     def handle_movement(self,event):
         pass
 
-    def increase_phase(self):
-        pass
-
-class Heal_pre(PhaseBase):
-    def __init__(self, entity, **kwarg):
-        super().__init__(entity)
-
-    def handle_release_input(self, input):
-        event = input.output()
-        if event[-1] == 'rt':#if releasing the button
-            input.processed()
-            self.enter_state('Idle_main')
-
-    def handle_movement(self, event):
-        pass
-
-    def increase_phase(self):
-        self.enter_state('Heal_main')
-
-class Heal_main(PhaseBase):
-    def __init__(self, entity, **kwarg):
-        super().__init__(entity)
-        self.heal_cost = 1
-
-    def handle_release_input(self, input):
-        event = input.output()
-        if event[-1] == 'rt':#if releasing the button
-            input.processed()
-            self.enter_state('Idle_main')
-
-    def handle_movement(self, event):
-        pass
-
-    def increase_phase(self):
-        self.entity.heal()
-        self.entity.backpack.inventory.remove('amber_droplet', self.heal_cost)
-        self.enter_state('Heal_main')
-
-class Stand_up_main(PhaseBase):
+class ReSpawnMain(PhaseBase):#enters when aila respawn after death
     def __init__(self,entity):
         super().__init__(entity)
-
-    def handle_movement(self,event):
-        pass
-
-    def increase_phase(self):
-        self.enter_state('Idle_main')
-
-class Pray_pre(PhaseBase):
-    def __init__(self, entity):
-        super().__init__(entity)
-        effect = entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
-        effect.rect.bottom = self.entity.rect.bottom
-        self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
-        self.entity.acceleration[0] = 0
-
-    def handle_movement(self,event):
-        pass
-
-    def increase_phase(self):
-        self.enter_state('Pray_main')
-
-class Pray_main(PhaseBase):
-    def __init__(self, entity):
-        super().__init__(entity)
-
-    def handle_movement(self,event):
-        pass
-
-    def handle_input(self, input, **kwarg):
-        if input == 'Pray_post':
-            self.enter_state('Pray_post')
-
-class Pray_post(PhaseBase):
-    def __init__(self, entity):
-        super().__init__(entity)
-
-    def handle_movement(self,event):
-        pass
-
-    def increase_phase(self):
-        self.enter_state('Idle_main')
-
-class Hurt_main(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-        if entity.collision_types['bottom']:
-            self.next_state = 'Idle_main'
-        else:
-            self.next_state = 'Fall_pre'
-
-    def increase_phase(self):
-        self.enter_state(self.next_state)
-
-    def update(self):
-        if entity.collision_types['bottom']:
-            if self.entity.acceleration[0] == 0:
-                self.next_state = 'Idle_main'
-            else:
-                self.next_state ='Run_pre'
-        else:
-            self.next_state = 'Fall_pre'
-
-class Spawn_main(PhaseBase):#enters when aila respawn after death
-    def __init__(self,entity):
-        super().__init__(entity)
+        
+    def enter(self, **kwarg):
+        self.entity.animation.play('respawn')
         self.entity.invincibile = False
 
     def handle_movement(self,event):
@@ -1691,47 +1702,121 @@ class Spawn_main(PhaseBase):#enters when aila respawn after death
         self.entity.heal(self.entity.max_health)
         if self.entity.backpack.map.spawn_point.get('bone', False):#if bone, remove it
             self.entity.backpack.map.spawn_point.pop()
-
-        self.enter_state('Idle_main')
-
-class Sword_up_main(Sword):
-    def __init__(self,entity):
+        self.enter_state('idle')
+    
+class HealPre(PhaseBase):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.currentstate.enter_state('Slash_up')
-        self.entity.projectiles.add(self.entity.sword)#add sword to group
+        
+    def enter(self, **kwarg):
+        self.entity.animation.play('heal_pre')
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1] == 'rt':#if releasing the button
+            input.processed()
+            self.enter_state('idle')
+
+    def handle_movement(self, event):
+        pass
 
     def increase_phase(self):
-        if self.entity.flags['ground']:
-            if self.entity.acceleration[0] == 0:
-                self.enter_state('Idle_main')
-            else:
-                self.enter_state('Run_main')
-        else:
-            self.enter_state('Fall_pre')
+        self.enter_phase('main')
 
-class Sword_down_main(Sword):
-    def __init__(self,entity):
+class HealMain(PhaseBase):
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.sword.currentstate.enter_state('Slash_down')
-        self.entity.projectiles.add(self.entity.sword)#add sword to group but in main phase
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('heal_main')        
+        self.heal_cost = 1
+
+    def handle_release_input(self, input):
+        event = input.output()
+        if event[-1] == 'rt':#if releasing the button
+            input.processed()
+            self.enter_state('idle')
+
+    def handle_movement(self, event):
+        pass
 
     def increase_phase(self):
-        self.enter_state('Fall_pre')
+        self.entity.heal()
+        self.entity.backpack.inventory.remove('amber_droplet', self.heal_cost)
+        self.enter_state('Heal_main')
 
-class Plant_bone_main(PhaseBase):
-    def __init__(self,entity):
+class CrouchPre(PhaseBase):#used when saving and picking up interactable items
+    def __init__(self, entity):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('crouch_pre')        
+        effect = entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
+        effect.rect.bottom = self.entity.rect.bottom
+        self.entity.game_objects.cosmetics.add(effect)
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
+        self.entity.acceleration[0] = 0
 
     def handle_movement(self,event):
         pass
 
     def increase_phase(self):
-        self.enter_state('Idle_main')
+        self.enter_phase('main')
 
-class Thunder_pre(PhaseBase):
+class CrouchMain(PhaseBase):
     def __init__(self, entity):
-        self.entity = entity
+        super().__init__(entity)
+        self.animation_number = 1#1 blinks, 2 doesn't
 
+    def enter(self, **kwarg):
+        self.entity.animation.play('crouch1_main')       # 
+
+    def handle_movement(self,event):
+        pass
+
+    def increase_phase(self):
+        if random.randint(0, self.animation_number * 2) == 0:
+            self.animation_number = 3 - self.animation_number#altrernate vetwwn 1 and 2
+            animation_name = 'crouch' + str(self.animation_number) + '_main'
+            self.entity.animation.play(animation_name)        
+
+    def handle_input(self, input, **kwarg):#called from savepoint when animation finishes, or when picking up an interactable item
+        if input == 'pray_post':
+            self.enter_phase('post')
+
+class CrouchPost(PhaseBase):#standing up
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('crouch_post')        
+
+    def handle_movement(self,event):
+        pass
+
+    def increase_phase(self):
+        self.enter_state('idle')
+
+class PlantBoneMain(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('plant_bone_main')   
+        self.entity.acceleration[0] = 0
+
+    def handle_movement(self,event):
+        pass
+
+    def increase_phase(self):
+        self.enter_state('idle')
+
+class ThunderPre(PhaseBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        #self.entity.animation.play('thunder_pre')  
         self.ball = entities.ThunderBall(self.entity.rect.topleft, self.entity.game_objects)#will be aila since aila will be swirlying
         self.entity.game_objects.cosmetics.add(self.ball)
 
@@ -1753,10 +1838,10 @@ class Thunder_pre(PhaseBase):
         self.entity.shader_state.enter_state('Idle')
         self.ball.kill()
         if self.entity.abilities.spirit_abilities['Thunder'].level == 1:
-            self.enter_state('Thunder_main', dir = [0,1])
+            self.enter_phase('main', dir = [0,1])
         else:
             self.arrow.kill()
-            self.enter_state('Thunder_main', dir = [self.arrow.dir[0],-self.arrow.dir[1]])
+            self.enter_phase('main', dir = [self.arrow.dir[0],-self.arrow.dir[1]])
 
     def handle_release_input(self, input):
         event = input.output()
@@ -1770,9 +1855,12 @@ class Thunder_pre(PhaseBase):
             if value[0] != 0 or value[1] != 0:
                 self.arrow.dir = [value[0],-value[1]]
 
-class Thunder_main(PhaseBase):
+class ThunderMain(PhaseBase):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('thunder_main')          
         self.dir = kwarg.get('dir', [0, 1])
         self.time = 30#how long to thunder dive
         self.entity.flags['invincibility'] = True
@@ -1787,7 +1875,7 @@ class Thunder_main(PhaseBase):
             
     def exit_state(self):
         self.entity.shader_state.enter_state('Idle')    
-        self.enter_state('Thunder_post')    
+        self.enter_phase('post')    
 
     def handle_movement(self,event):
         pass
@@ -1796,9 +1884,12 @@ class Thunder_main(PhaseBase):
         if input in ['Ground', 'Wall', 'belt']:                        
             self.exit_state()
 
-class Thunder_post(PhaseBase):
+class ThunderPost(PhaseBase):
     def __init__(self,entity):
-        super().__init__(entity)        
+        super().__init__(entity)      
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('thunder_post')  
         self.entity.game_objects.time_manager.modify_time(time_scale = 0, duration = 7, callback = lambda: self.entity.game_objects.camera_manager.camera_shake(amplitude = 30, duration = 30, scale = 0.9))#freeze
         
         sparks = entities.ThunderSpark(self.entity.rect.topleft, self.entity.game_objects)
@@ -1813,47 +1904,63 @@ class Thunder_post(PhaseBase):
 
     def increase_phase(self):#called when an animation is finihed for that state
         self.entity.flags['invincibility'] = False
-        self.enter_state('Idle_main')
+        self.enter_state('idle')
 
-class Shield_main(PhaseBase):
+class ShieldMain(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def enter(self):
+        self.entity.animation.play('shield_main')
         self.entity.consume_spirit()
         self.entity.abilities.spirit_abilities['Shield'].initiate()
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
-            self.enter_state('Idle_main')
+            self.enter_state('idle')
         else:
-            self.enter_state('Run_main')
+            self.enter_state('run')
 
-class Wind_main(PhaseBase):
+class WindMain(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def enter(self):
+        self.entity.animation.play('wind_main')
         self.entity.consume_spirit()
         self.entity.abilities.spirit_abilities['Wind'].initiate()
 
     def increase_phase(self):
-        self.enter_state('Idle_main')
+        self.enter_state('idle')
 
-class Slow_motion_pre(PhaseBase):
+class SlowMotionPre(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def increase_phase(self):
-        self.enter_state('Slow_motion_main')
-
-class Slow_motion_main(Slow_motion_pre):
-    def __init__(self,entity):
-        super().__init__(entity)
+    def enter(self):
+        self.entity.animation.play('slow_motion_pre')
         self.entity.abilities.spirit_abilities['Slow_motion'].initiate()
 
     def increase_phase(self):
-        self.enter_state('Idle_main')
+        self.enter_phase('main')
 
-class Bow_pre(PhaseBase):
+class SlowMotionMain(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self):
+        self.entity.animation.play('slow_motion_main')
+        self.entity.abilities.spirit_abilities['Slow_motion'].initiate()
+
+    def increase_phase(self):
+        self.enter_state('idle')
+
+class BowPre(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)
+
+    def enter(self):
+        self.entity.animation.play('bow_pre')
         self.duration = 100#charge times
         self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects, dir = self.entity.dir.copy())
         self.entity.game_objects.cosmetics.add(self.arrow)
@@ -1869,7 +1976,7 @@ class Bow_pre(PhaseBase):
 
     def exit_state(self):
         self.arrow.kill()
-        self.enter_state('Bow_main', dir = [self.arrow.dir[0], -self.arrow.dir[1]], time = self.time)
+        self.enter_phase('main', dir = [self.arrow.dir[0], -self.arrow.dir[1]], time = self.time)
 
     def handle_release_input(self, input):
         event = input.output()
@@ -1882,11 +1989,14 @@ class Bow_pre(PhaseBase):
         if value[0] != 0 or value[1] != 0:
             self.arrow.dir = [value[0],-value[1]]
 
-class Bow_main(PhaseBase):
+class BowMain(PhaseBase):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('bow_main')        
         self.entity.consume_spirit()
         self.entity.abilities.spirit_abilities['Bow'].initiate(dir = kwarg['dir'], time = kwarg['time'])
 
     def increase_phase(self):
-        self.enter_state('Idle_main')
+        self.enter_state('idle')

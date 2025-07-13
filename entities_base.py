@@ -414,13 +414,13 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         self.game_objects.cosmetics.add(twinkle)
 
     def interact(self, player):#when player press T
-        player.currentstate.enter_state('Pray_pre')
+        player.currentstate.enter_state('crouch')
         self.pickup(player)#object specific
         self.game_objects.game.state_manager.enter_state(state_name = 'Blit_image_text', image = self.sprites['idle'][0], text = self.description, callback = self.on_exit)
         self.kill()
 
     def on_exit(self):#called when eiting the blit_image_text state
-        self.game_objects.player.currentstate.handle_input('Pray_post')
+        self.game_objects.player.currentstate.handle_input('pray_post')
 
     def kill(self):
         super().kill()

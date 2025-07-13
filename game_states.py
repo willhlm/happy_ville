@@ -128,11 +128,11 @@ class Title_menu(Game_State):
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
-            #self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
-            self.game.game_objects.load_map(self,'nordveden_enemytest','1')
+            #self.game.game_objects.load_map(self,'nordveden_enemytest','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
             #self.game.game_objects.load_map(self,'hlifblom_1','1')
@@ -718,11 +718,10 @@ class Fadein(Gameplay):
         self.fade_surface.clear(0,0,0,255)
 
     def init(self):
-        self.aila_state = 'Idle_main'#for respawn after death
         for state in self.game.state_manager.state_stack:
             if 'Death' == type(state).__name__:
-                self.aila_state = 'Invisible_main'
-                self.game.game_objects.player.currentstate.enter_state('Invisible_main')
+                self.game.game_objects.player.shader = self.game.game_objects.shaders['alpha']
+                self.game.game_objects.player.shader['alpha'] = 0
                 break
 
     def update(self):
@@ -733,7 +732,6 @@ class Fadein(Gameplay):
 
     def exit(self):
         self.game.game_objects.player.reset_movement()
-        self.game.game_objects.player.currentstate.enter_state(self.aila_state)
         self.fade_surface.release()
         self.game.state_manager.exit_state()
 

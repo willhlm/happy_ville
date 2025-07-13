@@ -170,19 +170,27 @@ class Slowmotion(Shaders):
     def __init__(self, renderer, **kwarg):
         super().__init__(renderer)
         self.screen_copy = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
+        self.empty = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
+        self.noise_layer = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
         self.time = 0
 
     def update(self):
-        self.time += self.renderer.game_objects.game.dt * 0.1
+        self.time += self.renderer.game_objects.game.dt * 0.01
 
     def draw(self, base_texture, pos = [0,0], flip = [False, False]):
-        self.screen_copy.clear(0,0,0,0)
-        self.renderer.game_objects.shaders['slowmotion']['TIME'] = self.time 
-        self.renderer.game_objects.shaders['slowmotion']['camera_world_pos'] = self.renderer.game_objects.camera_manager.camera.true_scroll
+        self.renderer.game_objects.shaders['noise_perlin']['u_resolution'] = self.renderer.game_objects.game.screen.size
+        self.renderer.game_objects.shaders['noise_perlin']['u_time'] = self.time 
+        self.renderer.game_objects.shaders['noise_perlin']['scroll'] = [self.renderer.game_objects.camera_manager.camera.scroll[0], -self.renderer.game_objects.camera_manager.camera.scroll[1]]
+        self.renderer.game_objects.shaders['noise_perlin']['scale'] = [3, 3]
+        self.renderer.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.renderer.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.renderer.game_objects.game.display.render(base_texture, self.screen_copy)
 
-        self.renderer.game_objects.game.display.render(self.screen_copy.texture, self.renderer.game_objects.game.screen, shader = self.renderer.game_objects.shaders['slowmotion'])#shader render
+        self.renderer.game_objects.shaders['slowmotion']['TIME'] = self.time 
+        self.renderer.game_objects.shaders['slowmotion']['NOISE_TEXTURE'] = self.noise_layer.texture
+        self.renderer.game_objects.shaders['slowmotion']['SCREEN_TEXTURE'] = self.screen_copy.texture
+
+        self.renderer.game_objects.game.display.render(self.empty.texture, self.renderer.game_objects.game.screen, shader = self.renderer.game_objects.shaders['slowmotion'])#shader render
         return self.renderer.game_objects.game.screen
 
 #not used below
