@@ -128,11 +128,11 @@ class Title_menu(Game_State):
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
-            #self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'nordveden_2','1')
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'tall_trees_1','1')
-            self.game.game_objects.load_map(self,'nordveden_enemytest','1')
+            #self.game.game_objects.load_map(self,'nordveden_enemytest','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
             #self.game.game_objects.load_map(self,'hlifblom_1','1')
@@ -720,8 +720,7 @@ class Fadein(Gameplay):
     def init(self):
         for state in self.game.state_manager.state_stack:
             if 'Death' == type(state).__name__:
-                self.game.game_objects.player.shader = self.game.game_objects.shaders['alpha']
-                self.game.game_objects.player.shader['alpha'] = 0
+                self.game.game_objects.player.currentstate.enter_state('invisible')
                 break
 
     def update(self):
@@ -776,7 +775,7 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.count = 0
         self.fade_length = 60
-        self.fade_surface.clear(0,0,0,int(255/self.fade_length))
+        self.fade_surface.clear(0,0,0,int(255/self.fade_length))        
 
     def update(self):
         super().update()
@@ -799,13 +798,14 @@ class Safe_spawn_2(Gameplay):#fade
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.fade_surface.clear(0,0,0,255)
         self.game.game_objects.player.set_pos(self.game.game_objects.player.backpack.map.spawn_point['safe_spawn'])
-        self.game.game_objects.player.currentstate.enter_state('Stand_up_main')
+        self.game.game_objects.player.currentstate.enter_state('crouch', phase = 'main')        
 
     def update(self):
         super().update()
         self.count += self.game.dt
         if self.count > self.fade_length*2:
-            self.game.state_manager.exit_state()
+            self.game.game_objects.player.currentstate.handle_input('pray_post')#to stand up
+            self.game.state_manager.exit_state()            
 
     def render(self):
         super().render()#gameplay render

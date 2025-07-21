@@ -3869,8 +3869,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
     def player_transport(self, player):#transports the player to safe position
         if player.health > 1:#if about to die, don't transport to safe point
             self.game_objects.game.state_manager.enter_state(state_name = 'Safe_spawn_1')
-
-            self.game_objects.player.currentstate.enter_state('Invisible_main')
+            self.game_objects.player.currentstate.enter_state('invisible')
         else:
             self.game_objects.player.invincibile = False
         player.velocity = [0,0]

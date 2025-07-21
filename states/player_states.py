@@ -10,6 +10,7 @@ class PlayerStates():
         self.entity = entity
         self.states = {
             'idle': IdleState(entity),
+            'invisible': InvisibleState(entity),
             'run': RunState(entity),
             'walk': WalkState(entity),
             'fall': FallState(entity),
@@ -114,6 +115,12 @@ class FallState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
         self.phases = {'pre': FallPre(entity), 'main': FallMain(entity), 'post': FallPost(entity)}
+
+#wrappers
+class InvisibleState(CompositeState):
+    def __init__(self, entity):
+        super().__init__(entity)
+        self.phases = {'main': Invisible(entity)}
 
 class RunState(CompositeState):
     def __init__(self, entity):
@@ -303,6 +310,13 @@ class PhaseBase():
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         self.enter_state(self.entity.abilities.equip.lower())
+
+class Invisible(PhaseBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.animation.play('invisible')
 
 class IdleMain(PhaseBase):
     def __init__(self, entity):
@@ -899,7 +913,7 @@ class FallPre(PhaseBase):
             self.enter_state('Belt_glide_main')
         elif input == 'Ground':
             if self.entity.acceleration[0] != 0:
-                self.enter_state('run', phase = 'main')#enter run pre phase
+                self.enter_state('run')#enter run pre phase
             else:
                 self.enter_state('idle')
 
@@ -1165,7 +1179,7 @@ class DashGroundPost(DashGroundPre):
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
         else:
-            self.enter_state('run', phase = 'main')#enter run main phase
+            self.enter_state('run')#enter run main phase
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         event = input.output()
