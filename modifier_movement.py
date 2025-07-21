@@ -78,7 +78,7 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         context.friction[0] = self.friction
 
     def update(self):
-        self.friction += self.entity.game_objects.game.dt * 0.0015
+        self.friction += self.entity.game_objects.game.dt * 0.0018
         if abs(self.friction - self.target) < 0.01:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 
