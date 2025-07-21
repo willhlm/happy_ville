@@ -109,6 +109,7 @@ class CompositeState():#will contain pre, main, post phases of a state
     def increase_phase(self):#called when an animation is finished for that state
         self.current_phase.increase_phase()
 
+#wrappers
 class FallState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
@@ -244,7 +245,7 @@ class ThunderState(CompositeState):
 class ShieldState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'main': ShieldMain(entity)}
+        self.phases = {'pre': ShieldPre(entity), 'main': ShieldMain(entity)}
 
 class WindState(CompositeState):
     def __init__(self, entity):
@@ -261,6 +262,7 @@ class BowState(CompositeState):
         super().__init__(entity)
         self.phases = {'pre': BowPre(entity), 'main': BowMain(entity)}
 
+#normal phases
 class PhaseBase():
     def __init__(self, entity):
         self.entity = entity
@@ -1081,6 +1083,7 @@ class DashGroundPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.time = C.jump_dash_timer
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
         if wall_dir:
             self.entity.dir[0] = -wall_dir[0]
@@ -1132,7 +1135,6 @@ class DashGroundMain(DashGroundPre):#level one dash: normal
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_ground_main')
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
         self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
         self.dash_length = C.dash_length
         self.time = C.jump_dash_timer
@@ -1837,6 +1839,7 @@ class PlantBoneMain(PhaseBase):
     def increase_phase(self):
         self.enter_state('idle')
 
+#abilities
 class ThunderPre(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)
@@ -1932,9 +1935,26 @@ class ThunderPost(PhaseBase):
         self.entity.flags['invincibility'] = False
         self.enter_state('idle')
 
+class ShieldPre(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_movement(self, event):
+        pass
+
+    def enter(self):
+        self.entity.acceleration[0] = 0#stop moving
+        self.entity.animation.play('shield_pre')
+
+    def increase_phase(self):
+        self.enter_phase('main')
+
 class ShieldMain(PhaseBase):
     def __init__(self,entity):
         super().__init__(entity)
+
+    def handle_movement(self, event):
+        pass
 
     def enter(self):
         self.entity.animation.play('shield_main')
@@ -1942,10 +1962,35 @@ class ShieldMain(PhaseBase):
         self.entity.abilities.spirit_abilities['Shield'].initiate()
 
     def increase_phase(self):
-        if self.entity.acceleration[0] == 0:
-            self.enter_state('idle')
-        else:
-            self.enter_state('run')
+        self.enter_state('idle')
+
+class SlowMotionPre(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_movement(self, event):
+        pass
+
+    def enter(self):
+        self.entity.acceleration[0] = 0#stop moving
+        self.entity.animation.play('slow_motion_pre')
+
+    def increase_phase(self):
+        self.enter_phase('main')
+
+class SlowMotionMain(PhaseBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def handle_movement(self, event):
+        pass
+
+    def enter(self):
+        self.entity.animation.play('slow_motion_main')
+        self.entity.abilities.spirit_abilities['Slow_motion'].initiate()
+
+    def increase_phase(self):
+        self.enter_state('idle')
 
 class WindMain(PhaseBase):
     def __init__(self,entity):
@@ -1955,28 +2000,6 @@ class WindMain(PhaseBase):
         self.entity.animation.play('wind_main')
         self.entity.consume_spirit()
         self.entity.abilities.spirit_abilities['Wind'].initiate()
-
-    def increase_phase(self):
-        self.enter_state('idle')
-
-class SlowMotionPre(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def enter(self):
-        self.entity.animation.play('slow_motion_pre')
-        self.entity.abilities.spirit_abilities['Slow_motion'].initiate()
-
-    def increase_phase(self):
-        self.enter_phase('main')
-
-class SlowMotionMain(PhaseBase):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def enter(self):
-        self.entity.animation.play('slow_motion_main')
-        self.entity.abilities.spirit_abilities['Slow_motion'].initiate()
 
     def increase_phase(self):
         self.enter_state('idle')
