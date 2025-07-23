@@ -132,7 +132,7 @@ class Zoom(Shaders):#only zoom in?
     def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
 
-class Speed_lines(Shaders):
+class Speed_lines(Shaders):#TODO, should jusu be a cosmetic, not a screen shader
     def __init__(self, renderer, **kwarg):
         super().__init__(renderer)
         self.noise_layer = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
@@ -164,18 +164,24 @@ class Speed_lines(Shaders):
 
         self.set_uniforms()
         self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, shader = self.renderer.game_objects.shaders['speed_lines'])#shader render
-        return self.renderer.game_objects.game.screen
+        return self.renderer.game_objects.game.screen.texture
 
 class Slowmotion(Shaders):
     def __init__(self, renderer, **kwarg):
         super().__init__(renderer)
         self.screen_copy = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
         self.empty = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
+        self.empty2 = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
+        
         self.noise_layer = renderer.game_objects.game.display.make_layer(renderer.game_objects.game.screen.size)#TODO
         self.time = 0
+        self.duration = kwarg.get('duration', 20)
 
     def update(self):
         self.time += self.renderer.game_objects.game.dt * 0.01
+        self.duration -= self.renderer.game_objects.game.dt
+        if self.duration <= 0:
+            self.renderer.game_objects.shader_render.remove_shader('slowmotion')        
 
     def draw(self, base_texture, pos = [0,0], flip = [False, False]):
         self.renderer.game_objects.shaders['noise_perlin']['u_resolution'] = self.renderer.game_objects.game.screen.size
@@ -191,7 +197,7 @@ class Slowmotion(Shaders):
         self.renderer.game_objects.shaders['slowmotion']['SCREEN_TEXTURE'] = self.screen_copy.texture
 
         self.renderer.game_objects.game.display.render(self.empty.texture, self.renderer.game_objects.game.screen, shader = self.renderer.game_objects.shaders['slowmotion'])#shader render
-        return self.renderer.game_objects.game.screen
+        return self.renderer.game_objects.game.screen.texture
 
 #not used below
 class Idle(Shaders):#enteties use it

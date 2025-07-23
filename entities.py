@@ -6,7 +6,7 @@ from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Lo
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
 #from folder
-from states import player_states, packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
+from states import runestone_states, player_states, packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
 
 def sign(number):
     if number > 0: return 1
@@ -853,7 +853,7 @@ class Player(Character):
 
         self.max_health = 15
         self.max_spirit = 4
-        self.health = 2
+        self.health = 6
         self.spirit = 2
 
         self.projectiles = game_objects.fprojectiles
@@ -2236,7 +2236,7 @@ class Beaivis_time(Player_ability):#slow motion -> sun god: Beaiviáigi in sami
 
     def initiate(self):#called when using the ability from player states
         self.game_objects.time_manager.modify_time(time_scale = self.rate, duration = self.duration)#sow motion
-        self.game_objects.shader_render.append_shader('Slowmotion')
+        self.game_objects.shader_render.append_shader('slowmotion', duration = self.duration)
 
     def upgrade_ability(self):#called from upgrade menu
         self.entity.slow_motion = 1/self.rate#can make aila move normal speed
@@ -3869,9 +3869,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
     def player_transport(self, player):#transports the player to safe position
         if player.health > 1:#if about to die, don't transport to safe point
             self.game_objects.game.state_manager.enter_state(state_name = 'Safe_spawn_1')
-            self.game_objects.player.currentstate.enter_state('invisible')
-        else:
-            self.game_objects.player.invincibile = False
+            player.currentstate.enter_state('invisible')            
         player.velocity = [0,0]
         player.acceleration = [0,0]
 
@@ -4114,7 +4112,7 @@ class Cocoon_boss(Cocoon):#boss cocoon in light forest
 
 class Runestones(Interactable):
     def __init__(self, pos, game_objects, state, ID_key):
-        super().__init__(pos,game_objects)
+        super().__init__(pos, game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/animations/runestones/' + ID_key + '/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -4122,18 +4120,17 @@ class Runestones(Interactable):
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
         self.true_pos = self.rect.topleft
         self.hitbox.midbottom = self.rect.midbottom
+
         if state:
-            self.currentstate = states_basic.Interacted(self)
+            self.currentstate = runestone_states.Interacted(self)
+        else:
+            self.currentstate = runestone_states.Idle(self)
 
     def interact(self):
         if type(self.currentstate).__name__ == 'Interacted': return
-        self.game_objects.player.currentstate.enter_state('Pray_pre')
-        self.currentstate.handle_input('Transform')#goes to interacted after transform
+        self.game_objects.player.currentstate.enter_state('crouch')
+        self.currentstate.handle_input('transform')#goes to interacted after transform
         self.game_objects.world_state.state[self.game_objects.map.level_name]['runestone'][self.ID_key] = True#write in the state dict that this has been picked up
-
-    def reset_timer(self):#when animation finished
-        super().reset_timer()
-        self.game_objects.player.currentstate.handle_input('Pray_post')
 
 class Uber_runestone(Interactable):
     def __init__(self, pos, game_objects):
@@ -4228,6 +4225,15 @@ class Chest_2(Loot_containers):
 
     def hit_loot(self):
         pass
+
+class Chest_3(Loot_containers):
+    def __init__(self, pos, game_objects, state, ID_key):
+        super().__init__(pos, game_objects, state, ID_key)
+        self.sounds = read_files.load_sounds_dict('audio/SFX/enteties/interactables/chest/')
+        self.inventory = {'Amber_droplet':3}
+
+    def hit_loot(self):
+        pass        
 
 class Amber_tree(Loot_containers):#amber source
     def __init__(self, pos, game_objects, state, ID_key):

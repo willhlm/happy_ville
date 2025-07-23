@@ -23,7 +23,7 @@ class Enemy(Character):
 
         self.currentstate = states_enemy.Idle(self)
 
-        self.inventory = {'Amber_droplet':random.randint(1, 3),'Bone':1,'Heal_item':1}#thigs to drop wgen killed
+        self.inventory = {'Amber_droplet':random.randint(1,3), 'Bone': 1}#thigs to drop wgen killed
         self.spirit = 10
         self.health = 3
 
@@ -293,25 +293,26 @@ class Loot(Platform_entity):#
         self.description = ''
         self.bounce_coefficient = 0.6
 
-    def spawn_position(self):#make sure the items down't spawn inside the platforms
-        # Try to resolve initial collision
-        if not self.game_objects.collisions.sprite_collide_any(self, self.game_objects.platforms): return
-        directions = [(0, -1),(0, 1), (-1, 0), (1, 0)]  # up, down, right, left
-        step = 5  # How far to move each step
-        max_radius = 100  # Max distance to search
-        
+    def spawn_position(self):  # Make sure the items don't spawn inside the platforms
+        if not self.game_objects.collisions.sprite_collide_any(self, self.game_objects.platforms):
+            return
+
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]  # up, down, left, right
+        step = 5
+        max_radius = 100
+
         original_x, original_y = self.hitbox.topleft
-        for radius in range(step, max_radius + step, step):
-            for dx, dy in directions:
+        for dx, dy in directions:
+            for radius in range(step, max_radius + step, step):
                 new_x = original_x + dx * radius
                 new_y = original_y + dy * radius
                 self.hitbox.topleft = (new_x, new_y)
                 if not self.game_objects.collisions.sprite_collide_any(self, self.game_objects.platforms):
                     self.update_rect_x()
-                    self.update_rect_y()                   
+                    self.update_rect_y()
                     return
-
-        self.hitbox.topleft = (original_x, original_y)# If no space found, put it back to original position as last resort
+        
+        self.hitbox.topleft = (original_x, original_y)# If no space found, put it back to original position
 
     def update_vel(self):#add gravity
         self.velocity[1] += 0.3*self.game_objects.game.dt

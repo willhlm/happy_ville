@@ -54,8 +54,8 @@ class PlayerStates():
         #print(self.composite_state.current_phase)
         self.composite_state.update()#main state
 
-    def handle_input(self, *args, **kwargs):
-        self.composite_state.handle_input(*args, **kwargs)
+    def handle_input(self, input, **kwargs):        
+        self.composite_state.handle_input(input, **kwargs)
 
     def handle_press_input(self, input):
         self.composite_state.handle_press_input(input)
@@ -1153,6 +1153,9 @@ class DashGroundMain(DashGroundPre):#level one dash: normal
         self.dash_length = C.dash_length
         self.time = C.jump_dash_timer
 
+    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
+        input.processed()
+
     def increase_phase(self):
         self.entity.shader_state.handle_input('idle')
         self.enter_phase('post')
@@ -1683,21 +1686,25 @@ class DashAirPost(DashAirPre):
 
 class DeathPre(PhaseBase):
     def __init__(self,entity):
-        super().__init__(entity)
+        super().__init__(entity)    
+        self.timeout = 50    
 
     def enter(self, **kwarg):
         self.entity.animation.play('death_pre')
         self.entity.game_objects.cosmetics.add(entities.Player_Soul([self.entity.rect[0],self.entity.rect[1]],self.entity.game_objects))
 
     def update(self):
+        self.timeout -= self.entity.game_objects.game.dt
         self.entity.acceleration[0] = 0#slow down
         self.entity.invincibile = True
+        if self.timeout < 0:
+            self.enter_phase('main')
 
     def handle_movement(self,event):
         pass
 
-    def handle_input(self, input):
-        if input == 'Ground':
+    def handle_input(self, input):        
+        if input == 'Ground' or input == 'hole':
             self.enter_phase('main')
 
 class DeathMain(PhaseBase):
@@ -1713,8 +1720,7 @@ class DeathMain(PhaseBase):
     def handle_movement(self,event):
         pass
 
-    def increase_phase(self):
-        self.entity.dead()
+    def increase_phase(self):        
         self.enter_phase('post')
 
 class DeathPost(PhaseBase):
@@ -1722,6 +1728,7 @@ class DeathPost(PhaseBase):
         super().__init__(entity)
 
     def enter(self, **kwarg):
+        self.entity.dead()
         self.entity.animation.play('death_post')
 
     def update(self):
