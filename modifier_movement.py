@@ -69,13 +69,18 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         super().__init__(priority)
         self.entity = kwarg['entity']
         self.friction = 0.12
+        self.friction_y = 0
         self.target = Movement_context().friction[0]
 
     def set_friction(self, friction):
         self.friction = friction
 
+    def set_fritction_y(self, friction):
+        self.friction_y = friction
+
     def apply(self, context):
         context.friction[0] = self.friction
+        context.friction[1] = self.friction_y
 
     def update(self):
         self.friction += self.entity.game_objects.game.dt * 0.0018

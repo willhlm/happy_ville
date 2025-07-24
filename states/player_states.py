@@ -1187,6 +1187,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.dash_jump_vel_player
         self.buffer_time = C.jump_dash_wall_timer
+        self.entity.acceleration[1] = 0.26
 
     def exit_state(self):
         if self.dash_length < 0:
@@ -1204,15 +1205,17 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
                         self.enter_state(state, **kwarg)
 
     def enter_state(self, state):
+        print(self.entity.movement_manager.modifiers['Dash_jump'].set_fritction_y(0.07))
         super().enter_state(state)
         self.entity.shader_state.handle_input('idle')
 
     def enter_phase(self, phase):
+        print(self.entity.movement_manager.modifiers['Dash_jump'].set_fritction_y(0.07))
         super().enter_phase(phase)
         self.entity.shader_state.handle_input('idle')
 
     def update(self):
-        self.entity.velocity[1] = C.dash_jump_vel_player
+        #self.entity.velocity[1] = C.dash_jump_vel_player
         self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt

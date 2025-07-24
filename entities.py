@@ -893,6 +893,7 @@ class Player(Character):
         self.colliding_platform = block#save the latest platform
 
     def update_vel(self):#called from hitsop_states
+        print(self.acceleration[1])
         context = self.movement_manager.resolve()
         self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
@@ -4549,7 +4550,7 @@ class Lever(Interactable):
 
         self.currentstate.handle_input('Transform')
         self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key] = not self.game_objects.world_state.state[self.game_objects.map.level_name]['lever'][self.ID_key]#write in the state dict that this has been picked up
-        
+
         for reference in self.references:
             reference.currentstate.handle_input('Transform')
 
