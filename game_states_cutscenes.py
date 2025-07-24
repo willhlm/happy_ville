@@ -283,7 +283,6 @@ class Death(Cutscene_engine):#when aila dies
 
         elif self.stage == 2:
             if self.spawneffect.finish:#when the cosmetic effetc finishes        
-                self.game.game_objects.player.shader = self.game.game_objects.shaders['idle']#put it back to idle shader
                 self.game.game_objects.player.currentstate.enter_state('respawn')
                 self.game.state_manager.exit_state()
 

@@ -12,7 +12,7 @@
   <image width="64" height="80" source="../../Sprites/animations/runestones/1/idle/runestone1.png"/>
  </tile>
  <tile id="4">
-  <image width="60" height="53" source="../../Sprites/animations/chest_2/idle/idle1.png"/>
+  <image width="64" height="32" source="../../Sprites/animations/loot_containers/chest_3/idle/Chest.png"/>
  </tile>
  <tile id="5">
   <properties>
