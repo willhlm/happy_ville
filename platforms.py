@@ -799,6 +799,18 @@ class Breakable_oneside_1(Collision_breakable_oneside):
         if projectile.rect.centerx - self.hitbox.centerx > 0:#projectile from right: depends on the speciic objects
             super().take_dmg(projectile)
 
+class Breakable_oneside_2(Collision_breakable_oneside):
+    def __init__(self, pos, game_objects, ID):
+        super().__init__(pos, game_objects, ID)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type3/', game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = self.rect.copy()
+
+    def take_dmg(self, projectile):
+        if self.hitbox.centerx - projectile.rect.centerx > 0:#projectile from left: depends on the speciic objects
+            super().take_dmg(projectile)            
+
 #dynamics (moving) ones
 class Collision_dynamic(Collision_texture):
     def __init__(self, pos, game_objects):

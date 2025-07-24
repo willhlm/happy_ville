@@ -1093,10 +1093,10 @@ class DashGroundPre(PhaseBase):
 
         self.dash_length = C.dash_length
         self.entity.shader_state.handle_input('motion_blur')
-
+        self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-        self.time = C.jump_dash_timer
+        self.jump_dash_timer = C.jump_dash_timer
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
         if wall_dir:
@@ -1106,7 +1106,7 @@ class DashGroundPre(PhaseBase):
         pass
 
     def update(self):
-        self.time -= self.entity.game_objects.game.dt
+        self.jump_dash_timer -= self.entity.game_objects.game.dt
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
@@ -1137,7 +1137,7 @@ class DashGroundPre(PhaseBase):
         event = input.output()
         if event[-1] == 'a':
             input.processed()
-            if self.time > 0: self.enter_state('dash_jump')
+            if self.jump_dash_timer > 0: self.enter_state('dash_jump')
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')
@@ -1148,10 +1148,9 @@ class DashGroundMain(DashGroundPre):#level one dash: normal
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_ground_main')
-        self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
+        self.entity.animation.play('dash_ground_main')        
         self.dash_length = C.dash_length
-        self.time = C.jump_dash_timer
+        self.jump_dash_timer = C.jump_dash_timer
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         input.processed()
@@ -1182,7 +1181,7 @@ class DashGroundPost(DashGroundPre):
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
         else:
-            self.enter_state('run')#enter run main phase
+            self.enter_state('run')#enter run
 
     def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
         event = input.output()
@@ -1609,21 +1608,31 @@ class SwordAirMain(Sword):
                 self.enter_state('idle')
 
 class DashAirPre(PhaseBase):
-    def __init__(self, entity, **kwarg):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)
 
-    def enter(self):
-        self.dir = self.entity.dir.copy()
+    def enter(self, **kwarg):
+        self.entity.animation.play('dash_air_pre')#the name of the class
+
         self.dash_length = C.dash_length
-        self.entity.animation.play('dash_air_pre')#animation name
         self.entity.shader_state.handle_input('motion_blur')
+        self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'one'))#dust
+        self.entity.flags['ground'] = True
+        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
+        self.jump_dash_timer = C.jump_dash_timer
+        
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
+        wall_dir = kwarg.get('wall_dir', False)
+        if wall_dir:
+            self.entity.dir[0] = -wall_dir[0]
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
         pass
 
     def update(self):
+        self.jump_dash_timer -= self.entity.game_objects.game.dt
         self.entity.velocity[1] = 0
-        self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
@@ -1648,41 +1657,61 @@ class DashAirPre(PhaseBase):
     def increase_phase(self):
         self.enter_phase('main')
 
-class DashAirMain(DashAirPre):#level one dash: normal
-    def __init__(self, entity):
+    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
+        event = input.output()
+        if event[-1] == 'a':
+            input.processed()
+            if self.jump_dash_timer > 0: self.enter_state('dash_jump')
+
+    def enter_state(self, state, **kwarg):
+        self.entity.shader_state.handle_input('idle')
+        super().enter_state(state, **kwarg)
+
+class DashAirMain(DashGroundPre):#level one dash: normal
+    def __init__(self, entity, **kwarg):
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_air_main')#animation name
+        self.entity.animation.play('dash_air_main')        
         self.dash_length = C.dash_length
-        self.dir = self.entity.dir.copy()
-        self.entity.velocity[0] = C.dash_vel*self.dir[0]
-        self.entity.consume_spirit(1)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
+        self.jump_dash_timer = C.jump_dash_timer
 
-    def exit_state(self):
-        if self.dash_length < 0:
-            self.enter_phase('post')
+    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
+        input.processed()
 
     def increase_phase(self):
-        pass#self.enter_state('Air_dash_post')
+        self.entity.shader_state.handle_input('idle')
+        self.enter_phase('post')
 
-class DashAirPost(DashAirPre):
+class DashAirPost(DashGroundPre):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def enter(self):
-        self.entity.animation.play('dash_air_post')#animation name
-        self.entity.shader_state.handle_input('idle')
+    def enter(self, **kwarg):
+        self.entity.animation.play('dash_air_post')
 
     def update(self):
         pass
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        value = event['l_stick']#the avlue of the press
+        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
+        self.entity.acceleration[0] = C.acceleration[0] * abs(value[0])#always positive, add acceleration to entity
+        self.entity.dir[1] = -value[1]
+        if abs(value[0]) > 0.1:
+            self.entity.dir[0] = sign(value[0])
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
         else:
-            self.enter_state('run')
+            self.enter_state('run')#enter run main phase
+
+    def handle_press_input(self, input):#all states should inehrent this function, if it should be able to jump
+        event = input.output()
+        if event[-1] == 'a':
+            self.enter_state('jump')
+            input.processed()
 
 class DeathPre(PhaseBase):
     def __init__(self,entity):

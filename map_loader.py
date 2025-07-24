@@ -501,7 +501,7 @@ class Level():
 
             elif id == 4:#chests
                 state = self.game_objects.world_state.state[self.level_name]['loot_container'].get(str(loot_container), False)
-                new_interacable = entities.Chest_2(object_position,self.game_objects, state, str(loot_container))
+                new_interacable = entities.Chest_3(object_position,self.game_objects, state, str(loot_container))
                 self.game_objects.interactables.add(new_interacable)
                 loot_container += 1
 
@@ -1051,7 +1051,16 @@ class Nordveden(Biome):
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
                     platform = platforms.Nordveden_1(object_position, self.level.game_objects, str(ID_key))
-                    self.level.game_objects.platforms.add(platform)                    
+                    self.level.game_objects.platforms.add(platform)  
+
+            elif id == 11:#one side brakable
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID_key = property['value']
+
+                if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
+                    platform = platforms.Breakable_oneside_2(object_position, self.level.game_objects, str(ID_key))
+                    self.level.game_objects.platforms.add(platform)                                      
 
 class Rhoutta_encounter(Biome):
     def __init__(self, level):
@@ -1473,7 +1482,6 @@ class Tall_trees(Biome):
             object_position = [int(obj['x']) - math.ceil((1-parallax[0])*new_map_diff[0]) + offset[0], int(obj['y']) - math.ceil((1-parallax[1])*new_map_diff[1]) + offset[1]-object_size[1]]
             properties = obj.get('properties',[])
             id = obj['gid'] - self.level.map_data['objects_firstgid']
-
 
             if id == 10:#packun
                 kwarg = {}
