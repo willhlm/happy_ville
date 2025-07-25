@@ -799,7 +799,10 @@ class JumpMain(PhaseBase):
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
-        self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        try:
+            self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        except AttributeError:
+            print(self.entity.flags['ground'])
         self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'two'))#dust
 
     def update(self):
@@ -807,7 +810,8 @@ class JumpMain(PhaseBase):
         self.air_timer -= self.entity.game_objects.game.dt
         if self.air_timer >= 0:
             self.entity.velocity[1] = C.jump_vel_player * self.shroomboost
-        if self.entity.velocity[1] > 0.7:
+        if self.entity.velocity[1] >= 0.7:
+            print(self.air_timer)
             self.enter_state('fall')#pre
 
     def handle_press_input(self,input):
@@ -1335,11 +1339,6 @@ class SwordStandPost(Sword):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
 
-#    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
- #       value = event['l_stick']#the avlue of the press
-  #      if value[0] == 0:
-   #         self.entity.acceleration[0] = 0
-
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
 
@@ -1348,6 +1347,11 @@ class SwordStandPost(Sword):
             self.enter_state('idle')
         else:
             self.enter_state('run')
+
+    #def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+    #    value = event['l_stick']#the avlue of the press
+    #    if value[0] == 0:
+    #        self.entity.acceleration[0] = 0
 
 class SwordDownMain(Sword):
     def __init__(self,entity):
