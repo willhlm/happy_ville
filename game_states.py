@@ -119,7 +119,7 @@ class Title_menu(Game_State):
                 pygame.quit()
                 sys.exit()
 
-    def play_music(self):#called from e.g. exiting ganeplay state
+    def play_music(self):#called from e.g. exiting gameplay state
         self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['main'][0], index = 0, loop = -1, fade = 700, vol = 0.3)
         self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['whisper'][0], index = 1, loop = -1, fade = 700, vol = 0.1)
 
@@ -133,7 +133,8 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_enemytest','1')
-            self.game.game_objects.load_map(self,'nordveden_6','1')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
+            #self.game.game_objects.load_map(self,'tall_trees_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
