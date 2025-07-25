@@ -105,7 +105,7 @@ class Collisions():
 
             #move in y every dynamic sprite
             entity.update_true_pos_y()#it sets the true pos and update the hitbox              
-            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)            
+            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)                        
             for static_entity_y in static_entities_y:                
                 static_entity_y.collide_y(entity)
 

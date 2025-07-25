@@ -173,14 +173,14 @@ class WallJumpState(CompositeState):
 class SwordStand1State(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': SwordStandPre(entity, animation_name = 'sword_stand1_pre'),
+        self.phases = {#'pre': SwordStandPre(entity, animation_name = 'sword_stand1_pre'),
                        'main': SwordStandMain(entity, animation_name = 'sword_stand1_main'),
                        'post': SwordStandPost(entity, animation_name = 'sword_stand1_post')}#
 
 class SwordStand2State(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': SwordStandPre(entity, animation_name = 'sword_stand2_pre'),
+        self.phases = {#'pre': SwordStandPre(entity, animation_name = 'sword_stand2_pre'),
                        'main': SwordStandMain(entity, animation_name = 'sword_stand2_main'),
                        'post': SwordStandPost(entity, animation_name = 'sword_stand2_post')}#
 
@@ -339,6 +339,7 @@ class IdleMain(PhaseBase):
             self.enter_state('jump')
         elif event[-1]=='lb':
             input.processed()
+            print('heheh')
             self.enter_state('dash_ground')
         elif event[-1] == 'x':
             if input.meta.get('smash'):
@@ -816,9 +817,9 @@ class JumpMain(PhaseBase):
             if self.jump_dash_timer > 0:
                 if self.wall_dir:
                     self.entity.dir[0] = -self.wall_dir[0]#if the jmup came from wall glide, jump away
-                self.enter_state('dash_jump')#main
+                self.enter_state('dash_jump')
             else:
-                self.enter_state('dash_air')#pre
+                self.enter_state('dash_air')
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
@@ -895,8 +896,9 @@ class FallPre(PhaseBase):
             if self.entity.flags['ground']:
                 input.processed()
                 self.enter_state('Ground_dash_pre', wall_dir = self.wall_dir)
-            elif self.enter_state('dash_air'):
-                input.processed()
+            else:
+                input.processed() 
+                self.enter_state('dash_air')                
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
@@ -1333,17 +1335,13 @@ class SwordStandPost(Sword):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
 
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
-        value = event['l_stick']#the avlue of the press
-        if value[0] == 0:
-            self.entity.acceleration[0] = 0
+#    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+ #       value = event['l_stick']#the avlue of the press
+  #      if value[0] == 0:
+   #         self.entity.acceleration[0] = 0
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
-
-    def update(self):
-        super().update()
-        self.entity.velocity[0] *= 0.8
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:

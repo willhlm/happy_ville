@@ -296,14 +296,14 @@
                                 {
                                  "name":"direction",
                                  "type":"string",
-                                 "value":"Right"
+                                 "value":"Up"
                                 }],
                          "rotation":0,
                          "type":"",
                          "visible":true,
                          "width":64,
-                         "x":976,
-                         "y":336
+                         "x":992,
+                         "y":288
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -364,7 +364,7 @@
          "y":0
         }],
  "nextlayerid":60,
- "nextobjectid":1721,
+ "nextobjectid":1722,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

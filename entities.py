@@ -1445,17 +1445,6 @@ class Larv_base(Enemy):
     def walk(self):
         self.velocity[0] += self.dir[0]*0.22
 
-    #pltform collisions.
-    def right_collision(self, block, type = 'Wall'):
-        super().right_collision(block, type)
-        if self.dir[0] > 0:
-            self.currentstate.handle_input(self, carry_dir = True, timer = 60)
-
-    def left_collision(self, block, type = 'Wall'):
-        super().left_collision(block, type)
-        if self.dir[0] < 0:
-            self.currentstate.handle_input(self, carry_dir = True, timer = 60)
-
 class Larv(Enemy):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -2981,8 +2970,8 @@ class Amber_droplet(Enemy_drop):
         self.sounds = Amber_droplet.sounds
 
         self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0], pos[1],self.image.width,self.image.height)
-        self.hitbox = pygame.Rect(pos[0], pos[1],16,16)
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.hitbox = pygame.Rect(pos[0], pos[1], 16, 16)
 
         self.hitbox.midbottom = self.rect.midbottom
         self.true_pos = list(self.rect.topleft)
