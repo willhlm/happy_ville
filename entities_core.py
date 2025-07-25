@@ -97,7 +97,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
     def right_collision(self, block, type = 'Wall'):
         self.hitbox.right = block.hitbox.left
         self.collision_types['right'] = True
-        self.currentstate.handle_input(type)
+        self.currentstate.handle_input(type)        
 
     def left_collision(self, block, type = 'Wall'):
         self.hitbox.left = block.hitbox.right
@@ -115,7 +115,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
-        self.velocity[1] = 1.2/self.game_objects.game.dt
+        self.velocity[1] = 1.2/max(self.game_objects.game.dt, 1)#assume at least 60 fps -> 1
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -134,16 +134,16 @@ class Character(Platform_entity):#enemy, NPC,player
         self.shader_state.update()#need to be after animation
 
     def update_vel(self):#called from hitsop_states
-        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
-        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
+        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
+        self.velocity[1] = min(self.velocity[1], self.max_vel[1] * self.game_objects.game.dt)#set a y max speed#
+        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
-    def take_dmg(self, dmg):
+    def take_dmg(self, dmg = 1, effects = []):
         if self.flags['invincibility']: return
-        self.health -= dmg
+        self.health -= dmg#take damage
         self.flags['invincibility'] = True
 
-        try:#TODO add hit sounds to all enteties
+        try:#TODO add hurt sounds to all enteties
             self.game_objects.sound.play_sfx(self.sounds['hit'][0], vol = 0.2)
         except:
             pass
@@ -151,20 +151,20 @@ class Character(Platform_entity):#enemy, NPC,player
         if self.health > 0:#check if dead
             self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
             self.shader_state.handle_input('Hurt')#turn white and shake
-            self.AI.handle_input('Hurt')
             self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state -> can handle hitstop if we want
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
+            
+            for effect in effects:#e.g. knock back
+                effect()
         else:#if dead
             self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
             self.flags['aggro'] = False
-            self.AI.deactivate()
             self.currentstate.enter_state('Death')#overrite any state and go to deat
         return True#return truw to show that damage was taken
 
-    def knock_back(self, dir):
-        amp_x = 50
-        self.velocity[0] = dir[0] * amp_x * (1 - abs(dir[1]))
-        self.velocity[1] = -dir[1] * 10
+    def knock_back(self, amp, dir):
+        self.velocity[0] = dir[0] * amp[0] * (1 - abs(dir[1]))
+        self.velocity[1] = -dir[1] * amp[1]
 
     def emit_particles(self, type = 'Circle', number_particles = 20, **kwarg):
         for i in range(0, number_particles):

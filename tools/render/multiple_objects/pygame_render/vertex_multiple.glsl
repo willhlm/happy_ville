@@ -5,12 +5,12 @@ in vec2 vertexPos;
 in vec2 instPos;
 in vec2 instScale;
 in float instRot;
-in float instCustom;  // Make sure this is declared
+in float instCustom;
 
 out vec2 texCoord;
-out float custom;     // Pass it to fragment shader if needed
+out float custom;
 
-uniform vec2 screenSize = vec2(800,600);
+uniform vec2 screenSize;
 
 void main() {
     float s = sin(instRot);
@@ -26,6 +26,6 @@ void main() {
 
     gl_Position = vec4(clipPos * vec2(1, -1), 0.0, 1.0);
 
-    texCoord = vec2(0.5);//vertexPos + 0.5;
-    custom = instCustom;  // <-- use it so it's not optimized out
+    texCoord = vertexPos + vec2(0.5);  // range: [0.0, 1.0]
+    custom = instCustom;
 }

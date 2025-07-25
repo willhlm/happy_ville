@@ -231,24 +231,6 @@
                          "y":880
                         }, 
                         {
-                         "gid":43298,
-                         "height":32,
-                         "id":1925,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"1"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2544,
-                         "y":960
-                        }, 
-                        {
                          "gid":43299,
                          "height":144,
                          "id":1926,
@@ -268,53 +250,7 @@
                          "type":"",
                          "visible":true,
                          "width":32,
-                         "x":2640,
-                         "y":928
-                        }, 
-                        {
-                         "gid":43299,
-                         "height":144,
-                         "id":1927,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"ball_room_1"
-                                }, 
-                                {
-                                 "name":"erect",
-                                 "type":"bool",
-                                 "value":false
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":1408,
-                         "y":928
-                        }, 
-                        {
-                         "gid":43299,
-                         "height":144,
-                         "id":1928,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"ID",
-                                 "type":"string",
-                                 "value":"ball_room_2"
-                                }, 
-                                {
-                                 "name":"erect",
-                                 "type":"bool",
-                                 "value":true
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":32,
-                         "x":2064,
+                         "x":2624,
                          "y":928
                         }, 
                         {
@@ -334,6 +270,29 @@
                          "width":48,
                          "x":1728,
                          "y":944
+                        }, 
+                        {
+                         "gid":43298,
+                         "height":32,
+                         "id":1932,
+                         "name":"",
+                         "properties":[
+                                {
+                                 "name":"ID",
+                                 "type":"string",
+                                 "value":"1"
+                                }, 
+                                {
+                                 "name":"on",
+                                 "type":"bool",
+                                 "value":true
+                                }],
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":32,
+                         "x":2544,
+                         "y":960
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -715,7 +674,7 @@
          "y":0
         }],
  "nextlayerid":43,
- "nextobjectid":1930,
+ "nextobjectid":1935,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

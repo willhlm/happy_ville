@@ -1,13 +1,13 @@
 import entities, sys, random, math
-from states_entity import Entity_States
 import constants as C
+from states_entity import Entity_States
 
 def sign(number):
     if number > 0: return 1
     else: return -1
 
 class Player_states(Entity_States):
-    def __init__(self,entity):
+    def __init__(self, entity):
         super().__init__(entity)
 
     def handle_input(self, input, **kwarg):
@@ -91,68 +91,6 @@ class Idle_main(Player_states):
             self.enter_state(state)
             self.entity.sword.swing = not self.entity.sword.swing
         elif self.entity.dir[1] > 0:
-            self.enter_state('Sword_up_main')
-
-class Walk_main(Player_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.particle_timer = 0
-        self.entity.flags['ground'] = True
-        self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
-
-    def update(self):
-        self.particle_timer -= self.entity.game_objects.game.dt
-        if self.particle_timer < 0:
-            self.running_particles()
-            self.entity.game_objects.sound.play_sfx(self.entity.sounds['walk'])
-
-        if not self.entity.collision_types['bottom']:#disable this one while on ramp
-            self.enter_state('Fall_pre')
-            self.entity.game_objects.timer_manager.start_timer(C.cayote_timer_player, self.entity.on_cayote_timeout,ID = 'cayote')
-
-    def running_particles(self):
-        #particle = self.entity.running_particles(self.entity.hitbox.midbottom,self.entity.game_objects)
-        #self.entity.game_objects.cosmetics.add(particle)
-        self.particle_timer = 10
-
-    def handle_press_input(self,input):
-        event = input.output()
-        if event[-1] == 'a':
-            input.processed()
-            self.enter_state('Jump_main')
-        elif event[-1]=='lb':
-            input.processed()
-            self.enter_state('Ground_dash_pre')
-        elif event[-1]=='x':
-            input.processed()
-            self.swing_sword()
-        elif event[-1]=='b':#depends on if the abillities have pre or main animation
-            input.processed()
-            self.do_ability()
-
-    def handle_release_input(self, input):
-        event = input.output()
-        if event[-1]=='a':
-            input.processed()
-
-    def handle_input(self, input, **kwarg):
-        if input == 'jump':#caööed from jump buffer timer
-            self.enter_state('Jump_main')
-        elif input == 'dash':#called from dash buffer timer
-            self.enter_state('Ground_dash_pre')
-
-    def handle_movement(self,event):
-        super().handle_movement(event)
-        if self.entity.acceleration[0] == 0:
-            self.enter_state('Idle_main')
-
-    def swing_sword(self):
-        if not self.entity.flags['attack_able']: return
-        if abs(self.entity.dir[1])<0.8:
-            state='Sword_stand'+str(int(self.entity.sword.swing)+1)+'_main'
-            self.enter_state(state)
-            self.entity.sword.swing = not self.entity.sword.swing
-        elif self.entity.dir[1]>0.8:
             self.enter_state('Sword_up_main')
 
 class Run_pre(Player_states):
@@ -350,12 +288,11 @@ class Jump_main(Player_states):
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['jump'][random.randint(0,2)], vol = 0.1)
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.jump_dash_timer = C.jump_dash_timer
-        #self.entity.velocity[1] = C.jump_vel_player
         #self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
-        if self.entity.colliding_platform: self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
         self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.dir, state = 'two'))#dust
 
     def update(self):
@@ -636,7 +573,7 @@ class Air_dash_pre(Player_states):
     def update(self):
         self.entity.velocity[1] = 0
         self.entity.velocity[0] = self.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
         self.exit_state()
@@ -776,7 +713,7 @@ class Dash_jump_main(Air_dash_pre):#enters from ground dash pre
 
     def update(self):
         self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.buffer_time -= self.entity.game_objects.game.dt
         self.exit_state()
@@ -791,7 +728,7 @@ class Dash_jump_post(Air_dash_pre):#level one dash: normal
 
     def update(self):
         self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
-        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity,100))
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
         self.buffer_time -= self.entity.game_objects.game.dt
         self.exit_state()
@@ -1016,7 +953,7 @@ class Sword_fall_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.sword.currentstate.enter_state('Slash_' + str(int(self.entity.sword.swing)+1))#slash 1 and 2
-        self.entity.state = 'fall_main'#animation name
+        self.entity.animation.play('fall_main')#animation name
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
@@ -1034,7 +971,7 @@ class Sword_jump1_main(Sword):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.sword.currentstate.enter_state('Slash_1')
-        self.entity.state = 'jump_main'
+        self.entity.animation.play('fall_main')#animation name
         self.entity.animation.frame = kwarg.get('frame', 0)
         self.entity.projectiles.add(self.entity.sword)#add sword to grou
 
@@ -1105,9 +1042,15 @@ class Plant_bone_main(Player_states):
 
 class Thunder_pre(Player_states):
     def __init__(self, entity):
-        super().__init__(entity)
+        self.entity = entity
+
+        self.ball = entities.ThunderBall(self.entity.rect.topleft, self.entity.game_objects)#will be aila since aila will be swirlying
+        self.entity.game_objects.cosmetics.add(self.ball)
+
         self.duration = 100
-        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:
+        self.entity.shader_state.enter_state('Swirl')#take current animation and swirl it
+
+        if self.entity.abilities.spirit_abilities['Thunder'].level == 2:#aim arrow
             self.arrow = entities.Arrow_UI(self.entity.rect.topleft, self.entity.game_objects)
             self.entity.game_objects.cosmetics.add(self.arrow)
 
@@ -1119,6 +1062,8 @@ class Thunder_pre(Player_states):
             self.exit_state()
 
     def exit_state(self):
+        self.entity.shader_state.enter_state('Idle')
+        self.ball.kill()
         if self.entity.abilities.spirit_abilities['Thunder'].level == 1:
             self.enter_state('Thunder_main', dir = [0,1])
         else:
@@ -1141,31 +1086,41 @@ class Thunder_main(Player_states):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.dir = kwarg.get('dir', [0, 1])
-        self.time = 30
+        self.time = 30#how long to thunder dive
         self.entity.flags['invincibility'] = True
+        self.entity.shader_state.enter_state('MB')        
 
     def update(self):
-        self.entity.velocity = [8*self.dir[0], 8*self.dir[1]]
+        self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
+        self.entity.velocity = [20*self.dir[0], 20*self.dir[1]]
         self.time -= self.entity.game_objects.game.dt
         if self.time < 0:
-            self.enter_state('Thunder_post')
+            self.exit_state()
+            
+    def exit_state(self):
+        self.entity.shader_state.enter_state('Idle')    
+        self.enter_state('Thunder_post')    
 
     def handle_movement(self,event):
         pass
 
     def handle_input(self, input, **kwarg):
-        if input in ['Ground', 'Wall', 'belt']:
-            self.entity.game_objects.camera_manager.camera_shake()
-            self.enter_state('Thunder_post')
+        if input in ['Ground', 'Wall', 'belt']:                        
+            self.exit_state()
 
 class Thunder_post(Player_states):
     def __init__(self,entity):
-        super().__init__(entity)
+        super().__init__(entity)        
+        self.entity.game_objects.time_manager.modify_time(time_scale = 0, duration = 7, callback = lambda: self.entity.game_objects.camera_manager.camera_shake(amplitude = 30, duration = 30, scale = 0.9))#freeze
+        
+        sparks = entities.ThunderSpark(self.entity.rect.topleft, self.entity.game_objects)
+        sparks.rect.midbottom = [self.entity.hitbox.midbottom[0], self.entity.hitbox.midbottom[1] + 16]#adjust the position
+        self.entity.game_objects.cosmetics.add(sparks)        
 
     def update(self):
         self.entity.velocity = [0,0]
 
-    def handle_movement(self,event):
+    def handle_movement(self, event):
         pass
 
     def increase_phase(self):#called when an animation is finihed for that state

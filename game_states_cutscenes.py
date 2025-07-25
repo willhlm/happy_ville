@@ -1,5 +1,5 @@
 from game_states import Gameplay
-import entities
+from entities import Spawneffect, Lighitning, Reindeer, Cultist_warrior, Cultist_rogue, Spawneffect
 import read_files
 import animation
 import particles
@@ -137,50 +137,57 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
 class Deer_encounter(Cutscene_engine):#first deer encounter in light forest by waterfall
     def __init__(self,game):
         super().__init__(game)
-        spawn_pos=(2920,900)
-        self.entity = entities.Reindeer(spawn_pos, self.game.game_objects)
-        self.entity.AI.deactivate()
-
-        self.game.game_objects.enemies.add(self.entity)
+        pos = [2992, 848]
+        self.entity = Reindeer(pos, game.game_objects)
+        game.game_objects.enemies.add(self.entity)
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
-        self.game.game_objects.player.currentstate.enter_state('Walk_main')#should only enter these states once
+        self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
         self.stage = 0
 
     def update(self):#write how you want things to act
         super().update()
-        self.timer+=self.game.dt
+        self.timer += self.game.dt
         if self.stage == 0:
 
             if self.timer < 50:
-                self.game.game_objects.player.velocity[0]=4
+                self.game.game_objects.player.velocity[0] = 4
 
-            elif self.timer>50:
+            elif self.timer > 50:
                 self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
                 self.game.game_objects.player.acceleration[0] = 0
                 self.stage  = 1
-                self.entity.dir[0] *= -1
-
+                
         elif self.stage ==1:
-            if self.timer > 100:
+            if self.timer > 200:
+                self.entity.currentstate.queue_task(task = 'walk', animation = 'walk_nice')   
+                self.entity.currentstate.queue_task(task = 'idle')
+                self.entity.currentstate.start_next_task()
+                
+                self.entity.velocity[0] = 5      
+                self.entity.dir[0] *= -1
+                self.stage = 2
+
+        elif self.stage ==2:
+            if self.timer > 200:                   
                 self.entity.velocity[0] = 5
 
-        if self.timer>200:
+        if self.timer>300:
             self.game.state_manager.exit_state()
 
     def on_exit(self):
         self.game.game_objects.camera_manager.camera.exit_state()
         self.entity.kill()
+        self.game.game_objects.world_state.cutscene_complete('deer_encounter')
         super().on_exit()
 
 class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
-    def __init__(self,objects):
-        super().__init__(objects)
-        for enemy in self.game.game_objects.enemies.sprites():#get the reindeer reference
-            if type(enemy).__name__ == 'Reindeer':
-                self.entity = enemy
-                break
-
+    def __init__(self, game):
+        super().__init__(game)
+        pos = [5888, 600]
+        self.entity = Reindeer(pos, game.game_objects)
+        game.game_objects.enemies.add(self.entity)
         self.entity.dir[0] = -1
+
         self.game.game_objects.camera_manager.set_camera('Deer_encounter')
         self.stage = 0
         
@@ -198,19 +205,26 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
 
         elif self.stage==1:#transform
             if self.timer > 200:
-                self.entity.currentstate.enter_state('Transform')
+                self.entity.currentstate.queue_task(task = 'transform')
+                self.entity.currentstate.queue_task(task = 'idle', animation = 'idle')
+                self.entity.currentstate.start_next_task()
                 self.game.game_objects.player.velocity[0] = -20
                 self.stage = 2
 
         elif self.stage==2:#roar
             if self.timer > 300:
-                self.entity.currentstate.enter_state('Roar_pre')
+                self.entity.currentstate.queue_task(task = 'roar_pre')
+                self.entity.currentstate.queue_task(task = 'roar_main')
+                self.entity.currentstate.queue_task(task = 'roar_post')
+                self.entity.currentstate.queue_task(task = 'idle', animation = 'idle')                
+                self.entity.currentstate.start_next_task()
                 self.stage = 3
 
         elif self.stage==3:
             if self.timer > 600:
                 self.game.game_objects.camera_manager.camera.exit_state()#exsiting deer encounter camera
-                self.entity.AI.activate()
+                self.entity.currentstate.queue_task(task = 'think')
+                self.entity.currentstate.start_next_task()
                 self.game.state_manager.exit_state()                
 
 class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
@@ -246,7 +260,7 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
 class Death(Cutscene_engine):#when aila dies
     def __init__(self,game):
         super().__init__(game)
-        self.stage = 0
+        self.stage = 0        
 
     def update(self):
         super().update()
@@ -257,19 +271,19 @@ class Death(Cutscene_engine):#when aila dies
             if self.timer > 120:
                 self.state1()
 
-        elif self.stage == 1:
+        elif self.stage == 1:                
                 #spawn effect
                 pos = (0,0)#
-                offset = 100#depends on the effect animation
-                self.spawneffect = entities.Spawneffect(pos,self.game.game_objects)
+                offset = 100#depends on the effect animation    
+                self.spawneffect = Spawneffect(pos,self.game.game_objects)
                 self.spawneffect.rect.midbottom=self.game.game_objects.player.rect.midbottom
                 self.spawneffect.rect.bottom += offset
                 self.game.game_objects.cosmetics.add(self.spawneffect)
                 self.stage = 2
 
         elif self.stage == 2:
-            if self.spawneffect.finish:#when the cosmetic effetc finishes
-                self.game.game_objects.player.currentstate.enter_state('Spawn_main')
+            if self.spawneffect.finish:#when the cosmetic effetc finishes        
+                self.game.game_objects.player.currentstate.enter_state('respawn')
                 self.game.state_manager.exit_state()
 
     def state1(self):
@@ -279,7 +293,7 @@ class Death(Cutscene_engine):#when aila dies
             del self.game.game_objects.player.backpack.map.spawn_point['bone']
         else:#normal resawn
             map = self.game.game_objects.player.backpack.map.spawn_point['map']
-            point =  self.game.game_objects.player.backpack.map.spawn_point['point']
+            point =  self.game.game_objects.player.backpack.map.spawn_point['point']        
         self.game.game_objects.load_map(self, map, point)
         self.stage = 1
 
@@ -295,16 +309,10 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
         self.game.game_objects.player.death_state.handle_input('cultist_encounter')
         self.game.game_objects.quests_events.initiate_quest('cultist_encounter', kill = 2)
 
-        #should entity stuff be in quest insted?
-        spawn_pos1 = (self.game.game_objects.camera_manager.camera.scroll[0] - 300, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        spawn_pos2 = (self.game.game_objects.camera_manager.camera.scroll[0] + 50, self.game.game_objects.camera_manager.camera.scroll[1] + 100)
-        self.entity1 = entities.Cultist_warrior(spawn_pos1, self.game.game_objects)#added to group in cutscene
-        self.entity1.dir[0] *= -1
-        self.entity1.AI.deactivate()
+        pos = [1420, 500]
+        self.entity1 = Cultist_warrior(pos, game.game_objects)
         self.game.game_objects.enemies.add(self.entity1)
-        self.entity2 = entities.Cultist_rogue(spawn_pos2, self.game.game_objects)#added to group in cutscene
-        ##
-
+        
         self.stage = 0
         self.game.game_objects.camera_manager.set_camera('Cultist_encounter')
         self.game.game_objects.player.currentstate.enter_state('Run_pre')#should only enter these states once
@@ -326,10 +334,11 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
 
         elif self.stage == 1:
             if self.timer > 200:#sapawn cultist_rogue
-                spawn_pos = self.game.game_objects.player.rect.topright
-                self.entity2.AI.deactivate()
+
+                spawn_pos = self.game.game_objects.player.rect.topright  
+                self.entity2 = Cultist_rogue(spawn_pos, self.game.game_objects)                               
                 self.entity2.dir[0] = -1
-                self.entity2.currentstate.enter_state('Ambush_pre')
+                self.entity2.currentstate.enter_state('Ambush_pre')    
                 self.game.game_objects.enemies.add(self.entity2)
 
                 self.stage=2
@@ -340,8 +349,6 @@ class Cultist_encounter(Cutscene_engine):#intialised from cutscene trigger
                 self.game.state_manager.exit_state()
 
     def on_exit(self):
-        self.entity1.AI.activate()
-        self.entity2.AI.activate()
         self.game.game_objects.camera_manager.camera.exit_state()
         super().on_exit()
 
@@ -360,8 +367,11 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
     def __init__(self,game):
         super().__init__(game)
         self.stage = 0
-        self.cocoon = self.game.game_objects.map.references['cocoon_boss']
+        self.game.game_objects.signals.emit('who_is_cocoon', callback = self.set_entity) 
         self.const[1] = 0.9
+
+    def set_entity(self, entity):#the entity to control, set through signals
+        self.entity = entity
 
     def update(self):
         super().update()
@@ -383,7 +393,7 @@ class Butterfly_encounter(Cutscene_engine):#intialised from cutscene trigger
                 self.stage = 2
 
         elif self.stage == 2:#spawn
-            self.cocoon.particle_release()
+            self.entity.particle_release()
             if self.timer > 400:
                 self.game_objects.quests_events.initiate_quest('butterfly_encounter')
                 self.game.state_manager.exit_state()

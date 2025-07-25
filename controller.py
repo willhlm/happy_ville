@@ -194,12 +194,10 @@ class Controller():
     def discrete_inputs_UI(self):#inserts in buffer if there is a big change in input, or if there has been some time since last input
         current_time = time.time()
         l_stick = self.value['l_stick']
+        #r_stick = self.value['r_stick']
 
         # Check if a significant change occurred in the stick position
-        significant_change = (
-            abs(l_stick[0] - self.last_input['l_stick']['value'][0]) > 0.9 or
-            abs(l_stick[1] - self.last_input['l_stick']['value'][1]) > 0.9
-        )
+        significant_change = (abs(l_stick[0] - self.last_input['l_stick']['value'][0]) > 0.9 or abs(l_stick[1] - self.last_input['l_stick']['value'][1]) > 0.9)
         
         if significant_change or (current_time - self.last_input['l_stick']['time'] > self.input_cooldown):
             if abs(l_stick[0]) > 0.9 or abs(l_stick[1]) > 0.9:  # Threshold to consider as input
@@ -219,6 +217,7 @@ class Inputs():
         self.keydown = keydown
         self.keyup = keyup
         self.value = value
+        self.meta = {}#store if the input is a smash, and direction for the inturpruter
 
     def output(self):
         return [self.keydown, self.keyup, self.value, self.key]

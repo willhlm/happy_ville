@@ -10,6 +10,9 @@ class World_state():
         self.quests = {}#true means completed, false means still active -> tasks
         self.cutscenes_complete = {}#when a cutscenne has been played, its name gets appended here
 
+    def cutscene_complete(self, event):
+        self.cutscenes_complete[event] = True
+
     def update_event(self, event):
         self.events[event] = True
 

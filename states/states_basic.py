@@ -3,8 +3,7 @@ import sys, random
 class Basic_states():
     def __init__(self,entity):
         self.entity = entity
-        self.entity.state = type(self).__name__.lower()#the name of the class
-        self.entity.animation.reset_timer()
+        self.entity.animation.play(type(self).__name__.lower())#the name of the class
 
     def update(self):
         pass       
@@ -53,7 +52,7 @@ class Once(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
         self.next_state = kwarg['next_state']
-        self.entity.state = kwarg['animation_name']
+        self.entity.animation.play(kwarg['animation_name'])#the name of the class
 
     def increase_phase(self):
         self.enter_state(self.next_state)

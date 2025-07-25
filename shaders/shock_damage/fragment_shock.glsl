@@ -11,6 +11,7 @@ uniform vec4 colour = vec4(1,1,1,1);  // Shock color (white in this case)
 uniform float time;  // Time variable (equivalent to TIME in the original)
 uniform float decay_rate = 10;  // Decay rate of the amplitude over time (higher value = faster decay)
 uniform vec2 direction=vec2(1,0);
+
 void main() {
     // Apply exponential decay to the amplitude over time
     float dampedAmplitude = amplitude * exp(-decay_rate * time);

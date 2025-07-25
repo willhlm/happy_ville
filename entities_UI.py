@@ -1,21 +1,21 @@
-import pygame
+import pygame, math
 import read_files, animation
-import math
-from sys import platform
+
 from states import states_buttons, states_health, states_basic
-from entities import Animatedentity
-from entities_core import Staticentity
+from entities_core import Animatedentity
 
 #for map UI
 class Banner(Animatedentity):
-    def __init__(self,pos,game_objects,type,text):
+    def __init__(self, pos, game_objects, type, map_text):
         super().__init__(pos,game_objects)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/map/banner/banner_' + type + '/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.rect.topleft = pos
         self.original_pos = pos
-        #self.blit_text(text)
+        self.map_text = map_text
+        self.time = 0#for the animation
+        #self.blit_text(map_text)
 
     def blit_text(self,text):
         screen = self.game_objects.game.display.make_layer((self.image.width,self.image.height))#make a layer ("surface")
@@ -26,40 +26,87 @@ class Banner(Animatedentity):
                 self.game_objects.game.display.render(text_surface, screen, position = (image.width*0.5,image.height*0.5))
                 self.sprites[state][frame] = screen
 
-    def update(self,scroll):
-        super().update()
-        self.update_pos(scroll)
-
-    def update_pos(self,scroll):
+    def update_scroll(self, scroll):
         self.rect.center = [self.rect.center[0] + scroll[0], self.rect.center[1] + scroll[1]]
 
-    def revert(self):#called when quitting map state
-        self.rect.topleft = self.original_pos
-        self.currentstate.handle_input('Idle')
+    def update(self):
+        super().update()
+        self.time += self.game_objects.game.dt * 0.05
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.center = [self.rect.center[0], self.rect.center[1] + math.sin(2 * self.time)]
 
     def activate(self):#called from map when selecting the pecific banner
-        pass#open the local map
+        return self.map_text
+
+class MapArrow(Animatedentity):#for invenotry, the pointer
+    def __init__(self, pos, game_objects, map_text, direction):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/map/arrow/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
+        self.time = 0
+        self.map_text = map_text
+        self.original_pos = pos
+
+        if direction == 'left':
+            self.angle = 0#angle of the arrow
+            self.move_direction = [1,0]
+        elif direction == 'right':
+            self.angle = 180
+            self.move_direction = [1,0]
+        elif direction == 'up':
+            self.angle = 90
+            self.move_direction = [0,1]
+        elif direction == 'down':
+            self.angle = 270
+            self.move_direction = [0,1]
+
+    def activate(self):
+        return self.map_text
+
+    def update(self):
+        super().update()
+        self.time += self.game_objects.game.dt * 0.1
+        self.update_pos()
+
+    def update_pos(self):
+        self.rect.center = [self.rect.center[0] + 2 * self.move_direction[0] * math.sin(self.time), self.rect.center[1] + 2 * self.move_direction[1] * math.sin(self.time)]
+
+    def draw(self, target):
+        self.game_objects.game.display.render(self.image, target, angle = self.angle, position = self.rect.topleft)#shader render
+
+    def reset(self):
+        self.rect.topleft = self.original_pos
+        self.time = 0
+
+class Rooms(Animatedentity):#the rroms in map
+    def __init__(self, pos, game_objects, number):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/map/rooms/nordveden/',game_objects)
+        self.image = self.sprites['idle'][0]
+        self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)        
+        self.room_number = number
 
 #inventory
-class Item(Animatedentity):#for invenotry, an empty item
+class InventoryPointer(Animatedentity):#for invenotry, the pointer
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/item/empty/',game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/pointer/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-        self.number = ''#to bilt the number of items player has. THis class is an empty object so no number
 
-class Item_new(Animatedentity):#for invenotry, an empty item
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('UI/inventory/images/item/',game_objects)
+class InventoryContainer(Animatedentity):#for invenotry, will contain items
+    def __init__(self, pos, game_objects, item):
+        super().__init__(pos, game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/container/',game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-        self.number = ''#to bilt the number of items player has. THis class is an empty object so no number
+        self.item = item
+
+    def get_item(self):
+        return self.item
 
 class Sword(Animatedentity):
     def __init__(self,pos,game_objects):
@@ -72,56 +119,13 @@ class Sword(Animatedentity):
     def set_level(self, level):
         self.currentstate.set_animation_name('level_'+str(level))
 
-class Infinity_stone(Animatedentity):
+#radna inventory screen
+class Hand(Animatedentity):
     def __init__(self,pos,game_objects):
         super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/infinity_stone/empty/',game_objects)#for inventory
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/radna/hand/',game_objects)#for inventory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-
-class Amber_droplet(Animatedentity):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/amber_droplet/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = 'moneyyyyy'
-
-class Bone(Animatedentity):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/bone/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = 'boner'
-
-#momamori inventory
-class Omamori(Animatedentity):#this will save the positions needed to the UI
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/omamori/empty/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-        self.description = ''
-
-    def render_UI(self, target):
-        pass
-
-class Necklace(Animatedentity):
-    def __init__(self,pos,game_objects):
-        super().__init__(pos,game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/UI/inventory/necklace/',game_objects)#for inventory
-        self.image = self.sprites['idle'][0]
-        self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.rect.topleft = pos
-
-    def set_level(self,level):
-        self.currentstate.set_animation_name('level_'+str(level))
 
 #gameplay HUD
 class Health(Animatedentity):#gameplay UI
@@ -147,6 +151,7 @@ class Spirit(Animatedentity):#gameplay UI
         super().__init__([0,0],game_objects)
         self.sprites=read_files.load_sprites_dict(path, game_objects)
         self.image = self.sprites['death'][0]
+        self.animation.play('death')
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.currentstate = states_health.Death(self)
         self.health = 0
@@ -226,7 +231,6 @@ class Menu_Arrow():
     def pressed(self, state = 'select'):#when pressing a button
         self.play_SFX(state)
 
-
 class Menu_Box():
     def __init__(self, game_objects):
         img = pygame.image.load("Sprites/utils/box.png").convert_alpha()#select box
@@ -271,6 +275,7 @@ class Xbox(Controllers):
         super().__init__(pos, game_objects,type)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/xbox/',game_objects)
         self.image = self.sprites['a_idle'][0]
+        self.animation.play('a_idle')
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
 
 class Playstation(Controllers):
@@ -278,6 +283,7 @@ class Playstation(Controllers):
         super().__init__(pos, game_objects,type)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
+        self.animation.play('a_idle')
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
 
 class Keyboard(Controllers):
@@ -285,4 +291,5 @@ class Keyboard(Controllers):
         super().__init__(pos, game_objects,type)
         self.sprites = read_files.load_sprites_dict('Sprites/UI/controller/playstation/',game_objects)
         self.image = self.sprites['a_idle'][0]
+        self.animation.play('a_idle')
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)

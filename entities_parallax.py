@@ -449,8 +449,8 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.colour[-1] = max(self.colour[-1],0)
 
     def update_vel(self):
-        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
-        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
+        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
+        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
         if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1] > self.game_objects.game.window_size[1]+50:

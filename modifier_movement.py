@@ -4,7 +4,7 @@ import constants as C
 class Movement_manager():
     def __init__(self):
         self.modifiers = {}
-        self._sorted_modifiers = []        
+        self._sorted_modifiers = []
 
     def add_modifier(self, modifier, priority = 0, **kwarg):
         new_modifier = getattr(sys.modules[__name__], modifier)(priority, **kwarg)
@@ -29,8 +29,8 @@ class Movement_manager():
         for mod in modifiers:
             mod.update()
 
-    def _sort_modifiers(self):
-        self._sorted_modifiers = sorted(self.modifiers.values(), key = lambda m: m.priority, reverse = True)        
+    def _sort_modifiers(self):#sort modifiers by priority
+        self._sorted_modifiers = sorted(self.modifiers.values(), key = lambda m: m.priority, reverse = True)
 
 class Movement_context():
     def __init__(self):
@@ -44,10 +44,10 @@ class Movement_modifier():
         self.priority = priority
 
     def apply(self, context):
-        pass      
+        pass
 
     def update(self):#called from aila update
-        pass  
+        pass
 
 class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
@@ -68,7 +68,7 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
-        self.friction = 0.15  
+        self.friction = 0.12
         self.target = Movement_context().friction[0]
 
     def set_friction(self, friction):
@@ -78,9 +78,9 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         context.friction[0] = self.friction
 
     def update(self):
-        self.friction += self.entity.game_objects.game.dt * 0.001
+        self.friction += self.entity.game_objects.game.dt * 0.0018
         if abs(self.friction - self.target) < 0.01:
-            self.entity.movement_manager.remove_modifier('Dash_jump')        
+            self.entity.movement_manager.remove_modifier('Dash_jump')
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):
@@ -89,7 +89,7 @@ class Tjasolmais_embrace(Movement_modifier):#added from ability
 
     def apply(self, context):
         if self.entity.velocity[1] > 0:#only apply when falling
-            context.friction[1] = 0.2              
+            context.friction[1] = 0.2
         context.air_timer *= 2
         context.upstream = 2
-        #context.acceleration *= 1.2        
+        #context.acceleration *= 1.2

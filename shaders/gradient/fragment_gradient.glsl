@@ -4,8 +4,8 @@ in vec2 fragmentTexCoord;
 out vec4 color;
 
 uniform int numStops; // Number of color stops
-uniform float offsets[10]; // Up to 10 offsets (must be in ascending order)
-uniform vec3 colors[10];  // Up to 10 colors
+uniform float offsets[5]; // Up to 10 offsets (must be in ascending order)
+uniform vec3 colors[5];  // Up to 10 colors
 
 uniform bool isVertical = true; // false = horizontal, true = vertical
 

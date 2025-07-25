@@ -13,8 +13,6 @@ class HUD():
         self.init_ability()
         self.init_money()
 
-
-
     def init_hearts(self):
         self.hearts = []
         self.hearts.append(entities_UI.Health_frame(self.game_objects))

@@ -29,8 +29,9 @@ class Seed_platform(platforms.Collision_texture):
         self.sprites = Seed_platform.sprites
         self.image = self.sprites['grow'][0]
 
-        self.animation = animation.Animation(self)
+        self.animation = animation.Animation(self)        
         self.currentstate = states_basic.Once(self, next_state = 'Idle', animation_name = 'grow')
+
         self.get_hitbox(arrow, dir)
 
     def update(self):
