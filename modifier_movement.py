@@ -81,7 +81,6 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
 
     def set_fritction_y(self, friction):
         self.friction_y = friction
-        print('yoo')
 
     def increase_friction(self):
         self.inc_fric = True
