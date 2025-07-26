@@ -172,14 +172,14 @@ class WallJumpState(CompositeState):
 class SwordStand1State(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': SwordStandPre(entity, animation_name = 'sword_stand1_pre'),
+        self.phases = {#'pre': SwordStandPre(entity, animation_name = 'sword_stand1_pre'),
                        'main': SwordStandMain(entity, animation_name = 'sword_stand1_main'),
                        'post': SwordStandPost(entity, animation_name = 'sword_stand1_post')}#
 
 class SwordStand2State(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
-        self.phases = {'pre': SwordStandPre(entity, animation_name = 'sword_stand2_pre'),
+        self.phases = {#'pre': SwordStandPre(entity, animation_name = 'sword_stand2_pre'),
                        'main': SwordStandMain(entity, animation_name = 'sword_stand2_main'),
                        'post': SwordStandPost(entity, animation_name = 'sword_stand2_post')}#
 
@@ -338,6 +338,7 @@ class IdleMain(PhaseBase):
             self.enter_state('jump')
         elif event[-1]=='lb':
             input.processed()
+            print('heheh')
             self.enter_state('dash_ground')
         elif event[-1] == 'x':
             if input.meta.get('smash'):
@@ -797,7 +798,10 @@ class JumpMain(PhaseBase):
         self.entity.flags['ground'] = False
         self.wall_dir = kwarg.get('wall_dir', False)
         self.shroomboost = 1#if landing on shroompoline and press jump, this vakue is modified
-        self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        try:
+            self.air_timer = self.entity.colliding_platform.jumped()#jump charactereistics is set from the platform
+        except AttributeError:
+            print(self.entity.flags['ground'])
         self.entity.game_objects.cosmetics.add(entities.Dusts(self.entity.hitbox.center, self.entity.game_objects, dir = self.entity.dir, state = 'two'))#dust
 
     def update(self):
@@ -805,7 +809,8 @@ class JumpMain(PhaseBase):
         self.air_timer -= self.entity.game_objects.game.dt
         if self.air_timer >= 0:
             self.entity.velocity[1] = C.jump_vel_player * self.shroomboost
-        if self.entity.velocity[1] > 0.7:
+        if self.entity.velocity[1] >= 0.7:
+            print(self.air_timer)
             self.enter_state('fall')#pre
 
     def handle_press_input(self,input):
@@ -815,9 +820,9 @@ class JumpMain(PhaseBase):
             if self.jump_dash_timer > 0:
                 if self.wall_dir:
                     self.entity.dir[0] = -self.wall_dir[0]#if the jmup came from wall glide, jump away
-                self.enter_state('dash_jump')#main
+                self.enter_state('dash_jump')
             else:
-                self.enter_state('dash_air')#pre
+                self.enter_state('dash_air')
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
@@ -894,8 +899,9 @@ class FallPre(PhaseBase):
             if self.entity.flags['ground']:
                 input.processed()
                 self.enter_state('Ground_dash_pre', wall_dir = self.wall_dir)
-            elif self.enter_state('dash_air'):
-                input.processed()
+            else:
+                input.processed() 
+                self.enter_state('dash_air')                
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
@@ -1339,23 +1345,19 @@ class SwordStandPost(Sword):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
 
-    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
-        value = event['l_stick']#the avlue of the press
-        if value[0] == 0:
-            self.entity.acceleration[0] = 0
-
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)
-
-    def update(self):
-        super().update()
-        self.entity.velocity[0] *= 0.8
 
     def increase_phase(self):
         if self.entity.acceleration[0] == 0:
             self.enter_state('idle')
         else:
             self.enter_state('run')
+
+    #def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+    #    value = event['l_stick']#the avlue of the press
+    #    if value[0] == 0:
+    #        self.entity.acceleration[0] = 0
 
 class SwordDownMain(Sword):
     def __init__(self,entity):

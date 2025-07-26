@@ -23,7 +23,7 @@ class Enemy(Character):
 
         self.currentstate = states_enemy.Idle(self)
 
-        self.inventory = {'Amber_droplet':random.randint(10,30)}#thigs to drop wgen killed
+        self.inventory = {'Amber_droplet':random.randint(1,3)}#thigs to drop wgen killed
         self.spirit = 10
         self.health = 3
 
@@ -292,6 +292,7 @@ class Loot(Platform_entity):#
         super().__init__(pos, game_objects)
         self.description = ''
         self.bounce_coefficient = 0.6
+        self.bounce_directions = set()  # can contain 'up', 'down', 'left', 'right'
 
     def spawn_position(self):# Make sure the items don't spawn inside the platforms: call it when spawning the loot
         if not self.game_objects.collisions.sprite_collide_any(self, self.game_objects.platforms):
@@ -337,35 +338,31 @@ class Loot(Platform_entity):#
     def ramp_top_collision(self, ramp):#called from collusion in clollision_ramp
         self.hitbox.top = ramp.target
         self.collision_types['top'] = True
-        self.velocity[1] = -self.velocity[1]
+        self.bounce_directions.add("up")
 
     def ramp_down_collision(self, ramp):#called from collusion in clollision_ramp
         self.hitbox.bottom = ramp.target
         self.collision_types['bottom'] = True
         self.currentstate.handle_input('Ground')
-        self.velocity[0] = 0.5 * self.velocity[0]
-        self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
-        self.bounce_coefficient *= self.bounce_coefficient
+        self.bounce_directions.add("down")
 
     #plotfprm collisions
     def top_collision(self,block):
         self.hitbox.top = block.hitbox.bottom
         self.collision_types['top'] = True
-        self.velocity[1] = -self.velocity[1]
+        self.bounce_directions.add("up")
 
     def down_collision(self,block):
         super().down_collision(block)
-        self.velocity[0] = 0.7 * self.velocity[0]
-        self.velocity[1] = -self.bounce_coefficient*self.velocity[1]
-        self.bounce_coefficient *= self.bounce_coefficient
+        self.bounce_directions.add("down")
 
     def right_collision(self,block, type = 'Wall'):
         super().right_collision(block, type)
-        self.velocity[0] = -self.velocity[0]
+        self.bounce_directions.add("right")
 
     def left_collision(self,block, type = 'Wall'):
         super().left_collision(block, type)
-        self.velocity[0] = -self.velocity[0]
+        self.bounce_directions.add("left")
 
     def limit_y(self):
         if self.bounce_coefficient < 0.1:#to avoid falling through one way collisiosn
@@ -378,14 +375,14 @@ class Enemy_drop(Loot):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
         self.lifetime = 500
-        self.velocity = [random.uniform(-3, 3),-3]
-        self.bounce_count = 0
-        self.max_bounces = 10
+        self.velocity = [random.uniform(-3, 3),-3]                
 
     def update(self):
         super().update()
         self.lifetime -= self.game_objects.game.dt
-        self.destory()
+        self.destory()        
+        self.perform_bounce()     
+        self.bounce_directions.clear()             
 
     def attract(self,pos):#the omamori calls on this in loot group
         if self.lifetime < 350:
@@ -401,14 +398,14 @@ class Enemy_drop(Loot):
         self.currentstate.handle_input('Death')
         player.backpack.inventory.add(self)
 
-    def down_collision(self,block):
-        super().down_collision(block)
-        self.velocity[0] = 0.7 * self.velocity[0]
-        if self.bounce_count < self.max_bounces:
-            self.velocity[1] = -self.bounce_coefficient * self.velocity[1]
-            self.bounce_count += 1
-        else:
-            self.velocity[1] = 0
+    def perform_bounce(self):
+        for direction in self.bounce_directions:
+            if direction == "down" or direction == "up":
+                self.velocity[0] = 0.7 * self.velocity[0] 
+                self.velocity[1] = -self.bounce_coefficient * self.velocity[1]                
+                self.bounce_coefficient *= self.bounce_coefficient                                
+            elif direction == "left" or direction == "right":
+                self.velocity[0] *= -1        
 
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
