@@ -22,7 +22,7 @@ class Game():
         self.clock = pygame.time.Clock()
         self.dt = 0
         self.game_objects = game_objects.Game_Objects(self)
-        self.state_manager = state_manager.State_manager(self, 'Title_menu')        
+        self.state_manager = state_manager.State_manager(self, 'Title_menu')
 
         #debug flags
         self.DEBUG_MODE = True

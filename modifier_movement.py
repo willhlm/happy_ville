@@ -1,5 +1,6 @@
 import sys
 import constants as C
+import math
 
 class Movement_manager():
     def __init__(self):
@@ -68,24 +69,37 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
-        self.friction = 0.12
-        self.friction_y = 0
         self.target = Movement_context().friction[0]
+        self.friction_x = 0.15
+        self.friction_y = 0.00
+        self.ref_y = self.friction_y * (0.0001 * self.entity.game_objects.game.dt + 1)
+        self.ref_x = self.friction_x * (1 - 0.000000005 * self.entity.game_objects.game.dt)
+        self.inc_fric = False
 
     def set_friction(self, friction):
-        self.friction = friction
+        self.friction_x = friction
 
     def set_fritction_y(self, friction):
         self.friction_y = friction
+        print('yoo')
+
+    def increase_friction(self):
+        self.inc_fric = True
 
     def apply(self, context):
-        context.friction[0] = self.friction
+        context.friction[0] = self.friction_x
         context.friction[1] = self.friction_y
 
     def update(self):
-        self.friction += self.entity.game_objects.game.dt * 0.0018
-        if abs(self.friction - self.target) < 0.01:
+        if self.inc_fric:
+            #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 1.5)
+            self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.2)
+        self.friction_y -= self.entity.game_objects.game.dt * 0.0015
+        self.friction_y = max(0, self.friction_y)
+        if self.target - self.friction_x < 0.01:
             self.entity.movement_manager.remove_modifier('Dash_jump')
+
+
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):
