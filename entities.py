@@ -962,7 +962,7 @@ class Player(Character):
         self.hitstop_states.update(dt)
         self.backpack.necklace.update()#update the radnas
         self.update_timers(dt)
-
+        
     def draw(self, target):#called in group
         self.shader_state.draw()
         self.blit_pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]), round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
