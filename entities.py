@@ -74,8 +74,8 @@ class BG_Fade(BG_Block):
         height = max(y) - min(y)
         self.hitbox = pygame.Rect(min(x),min(y),width,height)
 
-    def update(self):
-        self.shader_state.update()
+    def update(self, dt):
+        self.shader_state.update(dt)
 
     def interact(self):
         self.shader_state.handle_input('alpha')
@@ -137,9 +137,9 @@ class Portal_2(Staticentity):#same as portal but masked based. Doesnt work becas
     def interact(self):#when player press T at place holder interactavle
         self.currentstate.handle_input('grow')
 
-    def update(self):
+    def update(self, dt):
         self.currentstate.update()#handles the radius and thickness of portal
-        self.time += self.game_objects.game.dt * 0.01
+        self.time += dt * 0.01
 
     def draw(self, target):
         #noise
@@ -217,9 +217,9 @@ class Portal(Staticentity):#portal to make a small spirit world with challenge r
     def interact(self):#when player press T at place holder interactavle
         self.currentstate.handle_input('grow')
 
-    def update(self):
+    def update(self, dt):
         self.currentstate.update()#handles the radius and thickness of portal
-        self.time += self.game_objects.game.dt * 0.01
+        self.time += dt * 0.01
 
     def draw(self, target):
         #noise
@@ -270,8 +270,8 @@ class Lighitning(Staticentity):#a shader to make lighning barrier
     def release_texture(self):
         self.image.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.01
+    def update(self, dt):
+        self.time += dt * 0.01
 
     def draw(self, target):
         self.game_objects.shaders['lightning']['TIME'] = self.time
@@ -300,8 +300,8 @@ class Bubble_gate(Staticentity):#a shader to make bubble barrier
     def player_collision(self):
         self.game_objects.player.velocity[0] += (self.game_objects.player.hitbox.centerx - self.hitbox.centerx)*0.02
 
-    def update(self):
-        self.time += self.game_objects.game.dt*0.01
+    def update(self, dt):
+        self.time += dt * 0.01
 
     def draw(self, target):
         self.game_objects.shaders['bubbles']['TIME'] = self.time
@@ -322,8 +322,8 @@ class Beam(Staticentity):
     def release_texture(self):
         self.image.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.1
+    def update(self, dt):
+        self.time += dt * 0.1
 
     def draw(self, target):
         self.game_objects.shaders['beam']['TIME'] = self.time
@@ -346,8 +346,8 @@ class Sky(Staticentity):
         self.empty2.release()
         self.noise_layer.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
 
     def draw(self, target):
         #noise
@@ -397,8 +397,8 @@ class Waterfall(Staticentity):
         normalized_distance = max(0, min(1, 1 - (distance_to_screencenter / max_distance)))#clamp it to 0, 1
         self.channel.set_volume(0.5 * normalized_distance)
 
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.01
+    def update(self, dt):
+        self.time += dt * 0.01
         self.set_volume()
 
     def draw(self, target):
@@ -461,8 +461,8 @@ class Reflection(Staticentity):#water, e.g. village
         self.screen_copy.release()
         self.channel.fadeout(300)
 
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.01
+    def update(self, dt):
+        self.time += dt * 0.01
 
     def draw(self, target):
         #noise
@@ -514,8 +514,8 @@ class GodRaysRadial(Staticentity):
     def release_texture(self):
         self.image.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt* 0.01
+    def update(self, dt):
+        self.time += dt * 0.01
 
     def draw(self, target):
         self.shader['edge_falloff_distance'] = self.edge_falloff_distance
@@ -542,8 +542,8 @@ class God_rays(Staticentity):
     def release_texture(self):
         self.image.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.1
+    def update(self, dt):
+        self.time += dt * 0.1
 
     def draw(self, target):
         self.shader['angle'] = self.angle
@@ -585,8 +585,8 @@ class TwoD_liquid(Staticentity):#inside interactables_fg group. fg because in fr
         self.screen_copy.release()
         self.noise_layer.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         self.currentstate.update()
 
     def draw(self, target):
@@ -668,8 +668,8 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         self.image.release()
         self.channel.fadeout(300)
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
 
     def draw(self, target):
         self.game_objects.shaders['up_stream']['dir'] = self.dir
@@ -699,8 +699,8 @@ class Smoke(Staticentity):#2D smoke
         self.image.release()
         self.noise_layer.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
 
     def draw(self, target):
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
@@ -751,8 +751,8 @@ class Death_fog(Staticentity):#2D explosion
         self.image.release()
         self.noise_layer.release()
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
 
     def draw(self, target):
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.size
@@ -779,8 +779,8 @@ class Arrow_UI(Staticentity):#for thuder charge state
     def release_texture(self):
         pass
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
 
     def pool(game_objects):
         size = (200,100)#to make the arrow more uniform when roated
@@ -800,8 +800,8 @@ class Nebula(Staticentity):#can be used as soul
         self.size = size
         self.time = 0
 
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.1
+    def update(self, dt):
+        self.time += dt * 0.1
 
     def draw(self, target):
         self.game_objects.shaders['nebula']['time'] = self.time
@@ -817,8 +817,8 @@ class Thunder_ball(Staticentity):#not used
         self.size = size
         self.time = 0
 
-    def update(self):
-        self.time += self.game_objects.game.dt*0.01
+    def update(self, dt):
+        self.time += dt * 0.01
 
     def draw(self, target):
         self.game_objects.shaders['thunder_ball']['iTime'] = self.time
@@ -834,8 +834,8 @@ class BG_Animated(Animatedentity):
         self.image = self.sprites['idle'][0]
         self.parallax = parallax
 
-    def update(self):
-        self.animation.update()
+    def update(self, dt):
+        self.animation.update(dt)
 
     def reset_timer(self):#animation need it
         pass
@@ -892,11 +892,11 @@ class Player(Character):
         super().left_collision(block, type)
         self.colliding_platform = block#save the latest platform
 
-    def update_vel(self):#called from hitsop_states
+    def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
+        self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
-        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
+        self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
         return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
@@ -911,7 +911,7 @@ class Player(Character):
             self.shader_state.handle_input('Hurt')#turn white and shake
             self.shader_state.handle_input('Invincibile')#blink a bit
             #self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state or interupt attacks?
-            self.emit_particles(lifetime = 40, scale=3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
+            self.emit_particles(lifetime = 40, scale = 3, colour=[0,0,0,255], fade_scale = 7,  number_particles = 60 )
             self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
 
             self.game_objects.time_manager.modify_time(time_scale = 0, duration = 20)
@@ -927,7 +927,7 @@ class Player(Character):
             self.death_state.die()#depending on gameplay state, different death stuff should happen
 
     def die(self):#called from idle death_state, also called from vertical acid
-        self.animation.update()#make sure you get the new animation
+        #self.animation.update()#make sure you get the new animation
         self.game_objects.cosmetics.add(Blood(self.hitbox.center, self.game_objects, dir = self.dir))#pause first, then slow motion
         self.game_objects.time_manager.modify_time(time_scale = 0.4, duration = 100)#sow motion
         self.game_objects.time_manager.modify_time(time_scale = 0, duration = 50)#freeze
@@ -954,11 +954,11 @@ class Player(Character):
         self.time = 0
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
-    def update(self):
-        self.movement_manager.update()#update the movement manager
-        self.hitstop_states.update()
+    def update(self, dt):
+        self.movement_manager.update(dt)#update the movement manager
+        self.hitstop_states.update(dt)
         self.backpack.necklace.update()#update the radnas
-        self.update_timers()
+        self.update_timers(dt)
 
     def draw(self, target):#called in group
         self.shader_state.draw()
@@ -969,9 +969,9 @@ class Player(Character):
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
         self.game_objects.game.display.render(self.normal_maps[self.animation.animation_name][self.animation.image_frame], self.game_objects.lights.normal_map, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.game_objects.shaders['normal_map'])#should be rendered on the same position, image_state and frame as the texture
 
-    def update_timers(self):
+    def update_timers(self, dt):
         for timer in self.timers:
-            timer.update()
+            timer.update(dt)
 
     def on_cayote_timeout(self):
         self.flags['ground'] = False
@@ -993,8 +993,8 @@ class Flower_butterfly(Flying_enemy):#peaceful ones
         self.game_objects.lights.add_light(self, colour = [77/255,168/255,177/255,200/255], interact = False)
         self.flags['aggro'] = False
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         obj1 = particles.Floaty_particles(self.rect.center, self.game_objects, distance = 0, vel = {'linear':[0.1,-1]}, dir = 'isotropic')
         self.game_objects.cosmetics2.add(obj1)
 
@@ -1684,8 +1684,8 @@ class Shadow_warrior(Shadow_enemy):
         self.health = 3
         self.attack_distance = [80,10]
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.check_light()
 
     def attack(self):#called from states, attack main
@@ -1724,9 +1724,9 @@ class Guide(NPC):
         self.shader_state = states_shader_guide.Idle(self)
         self.layer1 = self.game_objects.game.display.make_layer(self.image.size)#make a layer ("surface")TODO
 
-    def update(self):
-        super().update()
-        self.shader_state.update()#goes between idle and teleport
+    def update(self, dt):
+        super().update(dt)
+        self.shader_state.update(dt)#goes between idle and teleport
 
     def buisness(self):#enters after conversation
         self.shader_state = states_shader_guide.Teleport(self)
@@ -1913,8 +1913,8 @@ class Timer_display(Staticentity):#to display a timer on screen
         self.entity = entity
         self.time = time
 
-    def update(self):
-        self.time -= self.game_objects.game.dt
+    def update(self, dt):
+        self.time -= dt
         if self.time < 0:
             self.entity.time_out()
             self.kill()
@@ -1942,7 +1942,7 @@ class Camera_Stop(Staticentity):
     def release_texture(self):#called when .kill() and empty group
         pass
 
-    def update(self):
+    def update(self, dt):
         self.currentstate.update()
 
 class Spawner(Staticentity):#an entity spawner
@@ -1972,7 +1972,7 @@ class Fade_effect(Staticentity):#fade effect
         self.dir = entity.dir.copy()
         self.blur_dir = kwarg.get('blur_dir', [0.05, 0])
 
-    def update(self):
+    def update(self, dt):
         self.alpha *= 0.9
         self.destroy()
 
@@ -2020,19 +2020,19 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
         self.fade = 0
         self.page = 0
 
-    def update(self):
-        self.render_fade[self.page]()
+    def update(self, dt):
+        self.render_fade[self.page](dt)
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['alpha'])#shader render
 
-    def render_in(self):
-        self.fade += self.game_objects.game.dt
+    def render_in(self, dt):
+        self.fade += dt
         self.fade = min(self.fade,200)
         self.game_objects.shaders['alpha']['alpha'] = self.fade
 
-    def render_out(self):
-        self.fade -= self.game_objects.game.dt
+    def render_out(self, dt):
+        self.fade -= dt
         self.fade = max(self.fade,0)
         self.game_objects.shaders['alpha']['alpha'] = self.fade
 
@@ -2059,8 +2059,8 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
     def release_texture(self):
         self.image.release()
 
-    def update(self):
-        self.shader_state.update()
+    def update(self, dt):
+        self.shader_state.update(dt)
 
     def draw(self, target):
         self.shader_state.draw()
@@ -2131,8 +2131,8 @@ class Player_ability():#aila abilities
     def initiate(self):#called when using the ability
         pass
 
-    def update(self):#called from gameplayHUD
-        self.animation.update()
+    def update(self, dt):#called from gameplayHUD
+        self.animation.update(dt)
         self.currentstate.update()
 
     def reset_timer(self):
@@ -2371,12 +2371,12 @@ class Poisonblobb(Projectiles):
         amp = kwarg.get('amp', [5, 5])
         self.velocity = [-amp[0] * self.dir[0], amp[1] * self.dir[1]]
 
-    def update(self):
-        super().update()
-        self.update_vel()
+    def update(self, dt):
+        super().update(dt)
+        self.update_vel(dt)
 
     def update_vel(self):
-        self.velocity[1] += 0.1 * self.game_objects.game.dt#graivity
+        self.velocity[1] += 0.1 * dt#graivity
 
     def take_dmg(self, dmg):#aila sword without purple stone
         self.velocity = [0,0]
@@ -2406,12 +2406,12 @@ class Projectile_1(Projectiles):
     def pool(game_objects):
         Projectile_1.sprites = read_files.load_sprites_dict('Sprites/attack/projectile_1/',game_objects)
 
-    def update(self):
-        super().update()
-        self.update_vel()
+    def update(self, dt):
+        super().update(dt)
+        self.update_vel(dt)
 
     def update_vel(self):
-        self.velocity[1] += 0.05 * self.game_objects.game.dt#gravity
+        self.velocity[1] += 0.05 * dt#gravity
 
     def collision_platform(self,platform):
         self.flags['aggro'] = False
@@ -2515,8 +2515,8 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.hitbox = pygame.Rect(entity.rect.topleft, kwarg.get('size', [64, 64]))
         self.dmg = kwarg.get('dmg', 1)
 
-    def update(self):
-        self.lifetime -= self.game_objects.game.dt
+    def update(self, dt):
+        self.lifetime -= dt
         self.destroy()
 
     def draw(self, target):
@@ -2546,8 +2546,8 @@ class Counter(Melee):
         self.dmg = 0
         self.entity.flags['invincibility'] = True#make the player invincible
 
-    def update(self):
-        self.lifetime -= self.game_objects.game.dt
+    def update(self, dt):
+        self.lifetime -= dt
         self.destroy()
 
     def collision_enemy(self, collision_enemy):
@@ -2699,14 +2699,14 @@ class Arrow(Projectiles):#should it be called seed?
         self.friction = [0.01, 0.01]
         self.max_vel = [10, 10]
 
-    def update_vel(self):#called from hitsop_states
-        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
-        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
+    def update_vel(self, dt):#called from hitsop_states
+        self.velocity[1] += dt * (self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
+        self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
+        self.velocity[0] += dt * (self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
-    def update(self):
-        super().update()
-        self.update_vel()
+    def update(self, dt):
+        super().update(dt)
+        self.update_vel(dt)
         self.angle = self._get_trajectory_angle()
         self.emit_particles(lifetime = 50, dir = self.dir, vel = {'linear': [self.velocity[0] * 0.1, self.velocity[1] * 0.1]}, scale = 0.5, fade_scale = 5)
 
@@ -2786,9 +2786,9 @@ class Wind(Projectiles):
         collision_enemy.velocity[1] = -1
         self.kill()
 
-    def update(self):
-        self.time += self.game_objects.game.dt
-        self.lifetime -= self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
+        self.lifetime -= dt
         self.destroy()
 
     def draw(self, target):
@@ -2832,11 +2832,11 @@ class Shield(Projectiles):#a protection shield
     def time_out(self):#called when general timer it count down
         self.kill()
 
-    def update(self):
-        self.time += self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         if self.time > self.lifetime:
             self.die = True
-            self.progress += self.entity.game_objects.game.dt*0.005
+            self.progress += dt*0.005
             if self.progress >= 1:
                 self.kill()
         self.update_pos()
@@ -2899,8 +2899,8 @@ class Heart_container(Loot):
         self.hitbox=self.rect.copy()
         self.description = 'A heart container'
 
-    def update_vel(self):
-        self.velocity[1] = 3*self.game_objects.game.dt
+    def update_vel(self, dt):
+        self.velocity[1] = 3*dt
 
     def player_collision(self, player):
         player.max_health += 1
@@ -2916,8 +2916,8 @@ class Spirit_container(Loot):
         self.hitbox=self.rect.copy()
         self.description = 'A spirit container'
 
-    def update_vel(self):
-        self.velocity[1]=3*self.game_objects.game.dt
+    def update_vel(self, dt):
+        self.velocity[1]=3*dt
 
     def player_collision(self,player):
         player.max_spirit += 1
@@ -2940,8 +2940,8 @@ class Soul_essence(Loot):#genkidama
         #make a cutscene?TODO
         self.kill()
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         obj1 = getattr(particles, 'Spark')(self.rect.center, self.game_objects, distance = 100, lifetime=20, vel={'linear':[2,4]}, fade_scale = 10)
         self.game_objects.cosmetics.add(obj1)
 
@@ -3427,10 +3427,10 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
     def pool(game_objects):
         Player_Soul.sprites = read_files.load_sprites_dict('Sprites/enteties/soul/', game_objects)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().updatedt()
         self.update_pos()
-        self.timer += self.game_objects.game.dt
+        self.timer += dt
         if self.timer > 100:#fly to sky
             self.velocity[1] = -20
         elif self.timer>200:
@@ -3523,8 +3523,8 @@ class Thunder_aura(Animatedentity):#the auro around aila when doing the thunder 
         self.rect.center = pos
         self.hitbox = self.rect.copy()#pygame.Rect(self.entity.rect.x,self.entity.rect.y,50,50)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.update_hitbox()
 
     def update_hitbox(self):
@@ -3583,8 +3583,8 @@ class Logo_loading(Animatedentity):
     def pool(game_objects):
         Logo_loading.sprites = read_files.load_sprites_dict('Sprites/UI/logo_loading/',game_objects)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.rect.topleft = [self.true_pos[0] + self.game_objects.camera_manager.camera.scroll[0], self.true_pos[1] + self.game_objects.camera_manager.camera.scroll[1]]
 
     def release_texture(self):
@@ -3617,7 +3617,7 @@ class Place_holder_interacatble(Interactable):
         self.entity = entity
         self.hitbox = entity.hitbox
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def draw(self, target):
@@ -3652,9 +3652,9 @@ class Bubble_source(Interactable):#the thng that spits out bubbles in cave HAWK 
     def draw(self, target):
         pass
 
-    def update(self):
-        super().update()
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt
         if self.time > self.spawn_timer:
             self.game_objects.sound.play_sfx(self.sounds['spawn'][random.randint(0, 1)], vol = 0.3)
             bubble = self.bubble([self.rect.centerx, self.rect.top], self.game_objects, **self.prop)
@@ -3677,9 +3677,9 @@ class Crystal_source(Interactable):#the thng that spits out crystals in crystal 
     def group_distance(self):
         pass
 
-    def update(self):
-        super().update()
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt
         if self.time > self.frequency:
             crystal = Projectile_1(self.rect.center, self.game_objects, **self.kwarg)
             self.game_objects.eprojectiles.add(crystal)
@@ -3825,7 +3825,7 @@ class Safe_spawn(Interactable):#area which gives the coordinates which will make
     def draw(self, target):
         pass
 
-    def update(self):
+    def update(self, dt):
         self.group_distance()
 
     def player_collision(self, player):
@@ -3846,7 +3846,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
     def draw(self, target):
         pass
 
-    def update(self):
+    def update(self, dt):
         self.group_distance()
 
     def player_collision(self, player):
@@ -3881,7 +3881,7 @@ class Zoom_col(Interactable):
     def draw(self, target):
         pass
 
-    def update(self):
+    def update(self, dt):
         self.group_distance()
 
     def player_collision(self, player):
@@ -3926,7 +3926,7 @@ class Path_col(Interactable):
     def draw(self, target):
         pass
 
-    def update(self):
+    def update(self, dt):
         pass
         #self.group_distance()
 
@@ -3961,7 +3961,7 @@ class Path_inter(Interactable):
     def draw(self, target):
         pass
 
-    def update(self):
+    def update(self, dt):
         self.group_distance()
 
     def interact(self):
@@ -3984,7 +3984,7 @@ class Shade_trigger(Interactable):#it changes the colourof shade screen to a new
     def release_texture(self):
         pass
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def player_collision(self, player):#player collision
@@ -4163,9 +4163,9 @@ class Loot_containers(Interactable):
         else:
             self.currentstate = loot_container_states.Idle(self)
 
-    def update(self):
-        super().update()
-        self.shader_state.update()
+    def update(self, dt):
+        super().update(dt)
+        self.shader_state.update(dt)
 
     def draw(self, target):
         self.shader_state.draw()
@@ -4467,15 +4467,15 @@ class Grind(Interactable):#trap
         self.velocity[0] = self.direction[0] * self.distance * math.cos(self.speed * self.time)
         self.velocity[1] = self.direction[1] * self.distance * math.sin(self.speed * self.time)
 
-    def update(self):
-        super().update()
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt
         self.currentstate.update()
         self.update_vel()
-        self.update_pos()
+        self.update_pos(dt)
 
-    def update_pos(self):
-        self.true_pos = [self.original_pos[0] + self.velocity[0]*self.game_objects.game.dt,self.original_pos[1] + self.velocity[1]*self.game_objects.game.dt]
+    def update_pos(self, dt):
+        self.true_pos = [self.original_pos[0] + self.velocity[0] * dt,self.original_pos[1] + self.velocity[1] * dt]
         self.rect.topleft = self.true_pos
         self.hitbox.center = self.rect.center
 
@@ -4508,7 +4508,7 @@ class Door_inter(Interactable): #game object for itneracting with locked door
     def player_collision(self, player):#player collision
         pass
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def draw(self, target):
@@ -4596,8 +4596,8 @@ class Status():#like timers, but there is an effect during update
         if self not in self.entity.timers: return#do not remove if the timer is not inside
         self.entity.timers.remove(self)
 
-    def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.lifetime -= dt
         if self.lifetime < 0:
             self.deactivate()
 
@@ -4614,9 +4614,9 @@ class Wet_status(Status):#"a wet status". activates when player baths, and spawn
         if self in self.entity.timers: return#do not append if the timer is already inside
         self.entity.timers.append(self)
 
-    def update(self):
-        super().update()
-        self.time += self.entity.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt
         if self.time > self.spawn_frequency:
             self.time = 0
             self.drop()
@@ -4646,8 +4646,8 @@ class ChainProjectile(Staticentity):
     def release_texture(self):
         pass
 
-    def update(self):
-        self.time -= self.game_objects.game.dt
+    def update(self, dt):
+        self.time -= dt
         if self.time <= 0:
             self.spawn()
             self.time = self.frequency#reset the timer

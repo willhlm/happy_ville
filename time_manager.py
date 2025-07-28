@@ -3,8 +3,8 @@ class Time_manager():#can append things in series
         self.game_objects = game_objects
         self.reset()
 
-    def update(self):
-        self.time_modifiers[-1].update()
+    def update(self, dt):
+        return self.time_modifiers[-1].update(dt)
 
     def modify_time(self, **kwarg):
         self.time_modifiers.append(Slow_motion(self.game_objects, **kwarg))
@@ -16,8 +16,8 @@ class Idle():
     def __init__(self):   
         pass
 
-    def update(self):
-        pass 
+    def update(self, dt):        
+        return dt 
 
 class Slow_motion():
     def __init__(self, game_objects, **kwarg):   
@@ -26,9 +26,10 @@ class Slow_motion():
         self.lifetime = kwarg.get('duration', 100)
         self.callback = kwarg.get('callback', None)
 
-    def update(self):
-        self.lifetime -= self.game_objects.game.dt
-        self.game_objects.game.dt *= self.time_scale  
+    def update(self, dt):
+        self.lifetime -= dt
+        dt *= self.time_scale  
         if self.lifetime < 0:
             self.game_objects.time_manager.time_modifiers.remove(self)   
             if self.callback: self.callback()
+        return dt

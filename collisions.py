@@ -92,19 +92,19 @@ class Collisions():
 
     #collision of player, enemy and loot: setting the flags depedning on the collisoin directions
     #collisions between entities-groups: a dynamic and a static one
-    def platform_collision(self,dynamic_Entities):
+    def platform_collision(self, dynamic_Entities, dt):
         for entity in dynamic_Entities.sprites():
             entity.collision_types = {'top':False,'bottom':False,'right':False,'left':False, 'standing_platform': None}
             
             #move in x every dynamic sprite            
             entity.old_hitbox = entity.hitbox.copy()#save old position
-            entity.update_true_pos_x()#it sets the true pos and update the hitbox
+            entity.update_true_pos_x(dt)#it sets the true pos and update the hitbox
             static_entities_x = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
             for static_entity_x in static_entities_x:                
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
-            entity.update_true_pos_y()#it sets the true pos and update the hitbox              
+            entity.update_true_pos_y(dt)#it sets the true pos and update the hitbox              
             static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)                        
             for static_entity_y in static_entities_y:                
                 static_entity_y.collide_y(entity)

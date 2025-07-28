@@ -13,6 +13,9 @@ class Platform(pygame.sprite.Sprite):
         self.hitbox = self.rect.copy()
         #self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
 
+    def update(self, dt):
+        pass
+
     def collide_x(self, entity):
         pass
 
@@ -311,9 +314,9 @@ class Collision_texture(Platform):#blocks that has tectures
         self.game_objects = game_objects
         self.dir = [1,0]#states need it
 
-    def update(self):
+    def update(self, dt):
         self.currentstate.update()
-        self.animation.update()
+        self.animation.update(dt)
 
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
@@ -392,8 +395,8 @@ class Door(Gate_1):
         self.shader = None
         self.shader_state = states_shader.Idle(self)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.shader_state.update()
 
     def draw(self, target):
@@ -578,9 +581,9 @@ class Collision_shadow_light(Shadow_light):#collsion block but only lights and i
 
         self.game_objects.shaders['rectangle_border']['screenSize'] = self.game_objects.game.window_size
 
-    def update(self):
+    def update(self, dt):
         self.check_light()  # Check if the platform is hit by light
-        self.time += self.game_objects.game.dt * 0.01
+        self.time += dt * 0.01
 
     def draw(self, target):
         self.game_objects.shaders['rectangle_border']['TIME'] = self.time
@@ -606,7 +609,7 @@ class Dark_forest_1(Shadow_light):#a platform which dissapears when there is no 
         self.cut_rect = pygame.Rect(pos[0], pos[1], self.image.size[0], self.image.size[1])
         self.lights = game_objects.game.display.make_layer(self.image.size)
 
-    def update(self):
+    def update(self, dt):
         self.check_light()
 
 #timer based
@@ -817,8 +820,8 @@ class Collision_dynamic(Collision_texture):
         super().__init__(pos, game_objects)
         self.velocity = [0,0]
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.old_hitbox = self.hitbox.copy()#save old position before moving
         self.update_vel()
         self.update_true_pos_x()
@@ -936,8 +939,8 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
     def deactivate(self):#called when first timer runs out
         self.kill()
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.collided_y = False
         self.collided_right = False
         self.collided_left = False
@@ -1008,9 +1011,9 @@ class Smacker(Collision_dynamic):#trap
         self.animation = animation.Animation(self)
         self.currentstate = states_smacker.Idle(self)
 
-    def update(self):
+    def update(self, dt):
         self.currentstate.update()
-        self.animation.update()
+        self.animation.update(dt)
 
     def collide_entity_y(self,entity):#plpaotfrom mobings
         self.currentstate.collide_entity_y(entity)

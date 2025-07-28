@@ -11,11 +11,11 @@ class Weather():#initialied in game_objects: a container of weather objects
         self.rain = RainManager(game_objects)
         self.snow = SnowManager(game_objects)
 
-    def update(self):#called from game_obejcts
-        self.wind.update()
-        self.fog.update()
-        self.rain.update()
-        self.snow.update()
+    def update(self, dt):#called from game_obejcts
+        self.wind.update(dt)
+        self.fog.update(dt)
+        self.rain.update(dt)
+        self.snow.update(dt)
 
     def empty(self):#called from game_objects
         self.wind.empty()
@@ -32,8 +32,8 @@ class WeatherManagers():
         self.fx_list = []#add windfx from map loader
         self.currentstate = weather_states.Idle(self)
 
-    def update(self):        
-        self.currentstate.update()
+    def update(self, dt):        
+        self.currentstate.update(dt)
 
     def add_fx(self, fx):#called from maploader
         self.fx_list.append(fx)
@@ -82,8 +82,8 @@ class WeatherFX(pygame.sprite.Sprite):#make a layer on screen, then use shaders 
         self.parallax = parallax
         self.currentstate = weatherfx_states.Idle(self)
 
-    def update(self):
-        self.currentstate.update()
+    def update(self, dt):
+        self.currentstate.update(dt)
 
     def draw(self, target):
         self.currentstate.draw(target)
@@ -114,8 +114,8 @@ class FogFX(WeatherFX):
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)        
         self.time = 0
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
 
     def draw(self, target):
         self.game_objects.shaders['noise_perlin']['u_time'] = self.time*0.005
@@ -190,8 +190,8 @@ class FlashFX(WeatherFX):#white colour fades out and then in
         self.add_light_source()
         self.time = 0
  
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         self.update_image()
         if self.time > self.fade_length:
             self.kill()

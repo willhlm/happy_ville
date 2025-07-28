@@ -53,15 +53,15 @@ class HUD():
         string = str(num)
         self.money_image = self.game_objects.font.render((50,20), string)
 
-    def update(self):
+    def update(self, dt):
         for heart in self.hearts:
-            heart.update()
+            heart.update(dt)
         for spirit in self.spirits:
-            spirit.update()
+            spirit.update(dt)
         for ability_hud in self.ability_hud:
             ability_hud.update()
         for ability in self.abilities:
-            ability.update()
+            ability.update(dt)
 
     def render(self):
 

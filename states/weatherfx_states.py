@@ -4,7 +4,7 @@ class WeatherFXStates():
     def __init__(self, entity):
         self.entity = entity
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def enter_state(self, newstate):
@@ -22,8 +22,8 @@ class Wind(WeatherFXStates):
         super().__init__(entity)
         self.time = 0
 
-    def update(self):
-        self.time += self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
 
     def draw(self, target):
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.game_objects.game.window_size

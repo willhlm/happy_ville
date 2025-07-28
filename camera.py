@@ -18,10 +18,10 @@ class Camera_manager():
     def remove_decorator(self, decorator):#e.g. shake
         self.decorators.remove(decorator)
 
-    def update(self):
-        self.camera.update()  
+    def update(self, dt):
+        self.camera.update(dt)  
         for decorator in self.decorators:
-            decorator.update()
+            decorator.update(dt)
 
     def zoom(self, scale = 1, center = (0.5, 0.5), rate = 1):
         self.game_objects.shader_render.append_shader('zoom', scale = scale, center = center, rate = rate)
@@ -50,7 +50,7 @@ class Camera():#default camera
         self.original_center = self.center.copy()
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
 
-    def update(self):
+    def update(self, dt):
         self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do
 
         self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
@@ -64,7 +64,7 @@ class Camera():#default camera
         self.center = self.original_center.copy()
         self.game_objects.camera_manager.stop_handeler.reset()
         for stop in self.game_objects.camera_blocks:#apply cameras stopp
-            stop.update()
+            stop.update(0)
             stop.currentstate.init_pos()
         self.set_camera_position()
 
@@ -81,7 +81,7 @@ class No_camera(Camera):
     def camera_shake(self, **kwarg):
         pass
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def exit_state(self):#go back to the cameera
@@ -95,12 +95,12 @@ class Camera_shake_decorator():
         self.duration = kwarg.get('duration', 100)
         self.scale = kwarg.get('scale', 0.98)
 
-    def update(self):
+    def update(self, dt):
         self.amp *= self.scale
         self.current_camera.scroll[0] += random.uniform(-self.amp, self.amp)#only stuff relying on scroll will be affected, true scroll like player is not
         self.current_camera.scroll[1] += random.uniform(-self.amp, self.amp)
         
-        self.duration -= self.current_camera.game_objects.game.dt
+        self.duration -= dt
         self.exit_state()
 
     def exit_state(self):#go back to the cameera
@@ -144,8 +144,8 @@ class Deer_encounter(Cutscenes):
     def __init__(self, game_objects, scroll):
         super().__init__(game_objects, scroll)
 
-    def update(self):
-        self.center[0] -= 5*self.game_objects.game.dt
+    def update(self, dt):
+        self.center[0] -= 5*dt
         self.center[0] = max(100,self.center[0])
         super().update()
 
@@ -153,8 +153,8 @@ class Cultist_encounter(Cutscenes):
     def __init__(self, game_objects, scroll):
         super().__init__(game_objects, scroll)
 
-    def update(self):
-        self.center[0] += 2*self.game_objects.game.dt
+    def update(self, dt):
+        self.center[0] += 2*dt
         self.center[0] = min(500,self.center[0])
         super().update()
 
@@ -165,8 +165,8 @@ class New_game(Cutscenes):#initialised in New_game state
         self.center = [self.game_objects.camera_manager.camera.center[0],1000]#[176,230]
         self.set_camera_position()
 
-    def update(self):
-        self.center[1] -= 2*self.game_objects.game.dt
+    def update(self, dt):
+        self.center[1] -= 2*dt
         self.center[1] = max(230,self.center[1])
         super().update()
 
@@ -174,8 +174,8 @@ class Title_screen(Cutscenes):
     def __init__(self, game_objects, scroll):
         super().__init__(game_objects, scroll)
 
-    def update(self):
-        self.center[1] += 2*self.game_objects.game.dt
+    def update(self, dt):
+        self.center[1] += 2*dt
         self.center[1] = min(1000,self.center[1])
 
         self.true_scroll[1] += (self.game_objects.player.rect.center[1]-self.true_scroll[1]-self.center[1])

@@ -8,7 +8,7 @@ class BaseState():
     def enter_state(self, newstate, **kwarg):     
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
 
-    def update(self):
+    def update(self, dt):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx,self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance
 
     def deactivate(self):
@@ -36,8 +36,8 @@ class Patrol(BaseState):#goes back and forth
         self.entity.velocity = [self.entity.patrol_speed, self.entity.velocity[1]]
         self.timer = self.entity.game_objects.timer_manager.start_timer(self.entity.patrol_timer, self.timeout, ID = 'BOOYAA')
 
-    def update(self):
-        super().update()        
+    def update(self, dt):
+        super().update(dt)        
         self.entity.velocity[0] += self.entity.dir[0]*self.entity.patrol_speed
         self.check_sight()
         self.check_ground()       
@@ -66,9 +66,9 @@ class Wait(BaseState):
         self.next_state = kwarg.get('next_state','Patrol')
         self.entity.animation.play('idle', 0.2)
 
-    def update(self):
-        super().update()
-        self.time -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.time -= dt
         if self.time < 0:
             self.check_sight()
 
@@ -87,9 +87,9 @@ class Chase(BaseState):
         self.giveup = kwarg.get('giveup', 400)
         self.time = self.giveup
 
-    def update(self):
-        super().update()
-        self.check_sight()
+    def update(self, dt):
+        super().update(dt)
+        self.check_sight(dt)
         self.check_ground()
         self.look_target()
         self.entity.chase(self.player_distance)
@@ -102,11 +102,11 @@ class Chase(BaseState):
         if not self.entity.game_objects.collisions.check_ground([x, self.entity.hitbox.bottom + 5]):
             self.enter_state('Wait', time = 120, next_state = 'Patrol')
 
-    def check_sight(self):
+    def check_sight(self, dt):
         if abs(self.player_distance[0]) < self.entity.attack_distance[0]: # and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close
             self.enter_state('Attack_pre')
         elif abs(self.player_distance[0]) > self.entity.aggro_distance[0] or abs(self.player_distance[1]) > self.entity.aggro_distance[1]:#player far away
-            self.time -= self.entity.game_objects.game.dt
+            self.time -= dt
             if self.time < 0:
                 self.enter_state('Wait',next_state = 'Patrol', time = 20)
         else:#player close, reset timer

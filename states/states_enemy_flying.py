@@ -13,7 +13,7 @@ class Enemy_states():
     def enter_state(self, newstate, **kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys        
 
-    def update(self):
+    def update(self, dt):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx,self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance
 
     def handle_input(self, input, **kwarg):#input is hurt when taking dmg
@@ -34,8 +34,8 @@ class Roaming_attack(Enemy_states):#for roaming mygga
         self.time = self.frequency
         self.entity.animation.play('walk')
 
-    def update(self):
-        self.time -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time -= dt
         if self.time < 0:
             self.entity.attack()
             self.time = self.frequency   
@@ -47,9 +47,9 @@ class Patrol(Enemy_states):#patrol in a circle aorund the original position
         self.calculate_postion()  
         self.time = 0
 
-    def update(self):
-        super().update()       
-        self.time += 0.02 * self.entity.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)       
+        self.time += 0.02 * dt
         self.entity.patrol(self.target_position)
         self.entity.sway(self.time)#sway up and down
         self.check_position()
@@ -91,8 +91,8 @@ class Wait(Enemy_states):
         self.next_state = kwarg.get('next_state','Patrol')
         self.entity.animation.play('idle')
 
-    def update(self):   
-        self.time -= self.entity.game_objects.game.dt  
+    def update(self, dt):   
+        self.time -= dt
         if self.time < 0:
             self.enter_state(self.next_state)
 
@@ -103,8 +103,8 @@ class Chase(Enemy_states): #chase player
         self.time = self.giveup   
         self.entity.animation.play('walk')
 
-    def update(self):   
-        super().update()    
+    def update(self, dt):   
+        super().update(dt)    
         self.look_target()
         self.entity.chase(self.player_distance)
         self.check_sight()
@@ -129,8 +129,8 @@ class Knock_back(Enemy_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.look_target()
         self.entity.chase_knock_back(self.player_distance)
         self.check_vel()
@@ -150,7 +150,7 @@ class Attack_pre(Enemy_states):
         super().__init__(entity)
         self.entity.animation.play('attack_pre')
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
@@ -166,9 +166,9 @@ class Attack_main(Enemy_states):
         ratio = [abs(self.player_distance[0])/distance, abs(self.player_distance[1])/distance]
         self.velocity = [ratio[0] * 4 * sign(self.player_distance[0]), ratio[1] * 4 * sign(self.player_distance[1])]
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = self.velocity.copy()
-        self.duration -= self.entity.game_objects.game.dt
+        self.duration -= dt
         if self.duration < 0:
             self.enter_state('Chase')
 
@@ -182,7 +182,7 @@ class Death(Enemy_states):
         self.entity.animation.play('death')
         self.entity.killed()
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):

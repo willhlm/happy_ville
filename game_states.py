@@ -8,7 +8,7 @@ class Game_State():
     def __init__(self,game):
         self.game = game
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def render(self):
@@ -66,13 +66,13 @@ class Title_menu(Game_State):
     def reset_timer(self):
         pass
 
-    def update(self):#update menu arrow position
-        self.animation.update()
-        self.arrow.animate()
-        self.arrow_2.animate()
+    def update(self, dt):#update menu arrow position
+        self.animation.update(dt)
+        self.arrow.animate(dt)
+        self.arrow_2.animate(dt)
 
-    def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.update()
+    def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
+        self.update(dt)
 
     def render(self):
         self.buttons[self.current_button].hoover()
@@ -187,8 +187,8 @@ class Load_menu(Game_State):
     def reset_timer(self):
         pass
 
-    def update(self):
-        self.animation.update()
+    def update(self, dt):
+        self.animation.update(dt)
 
     def update_arrow(self):
         ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
@@ -485,17 +485,17 @@ class Gameplay(Game_State):
     def __init__(self, game):
         super().__init__(game)
 
-    def update(self):
+    def update(self, dt):
         self.handle_movement()
-        self.game.game_objects.time_manager.update()
-        self.game.game_objects.update()
-        self.game.game_objects.collide_all()
-        self.game.game_objects.UI.hud.update()
+        dt = self.game.game_objects.time_manager.update(dt)    
+        self.game.game_objects.update(dt)
+        self.game.game_objects.collide_all(dt)
+        self.game.game_objects.UI.hud.update(dt)
 
-    def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.game.game_objects.update()
-        self.game.game_objects.platform_collision()
-        self.game.game_objects.UI.hud.update()
+    def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
+        self.game.game_objects.update(dt)
+        self.game.game_objects.platform_collision(dt)
+        self.game.game_objects.UI.hud.update(dt)
 
     def render(self):
         self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
@@ -593,7 +593,7 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.arrow.update_pos(pos)
         self.arrow.play_SFX()
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def render(self):
@@ -676,9 +676,9 @@ class Ability_menu(Gameplay):#when pressing tab
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
         self.surface = self.game.display.make_layer(self.game.window_size)#TODO
 
-    def update(self):
-        self.game.dt *= 0.5#slow motion
-        super().update()
+    def update(self, dt):
+        dt *= 0.5#slow motion
+        super().update(dt)
 
     def render(self):
         super().render()
@@ -723,9 +723,9 @@ class Fadein(Gameplay):
                 self.game.game_objects.player.currentstate.enter_state('invisible')
                 break
 
-    def update(self):
-        self.fade_update()#so that it doesn't collide with collision path
-        self.count += self.game.dt
+    def update(self, dt):
+        self.fade_update(dt)#so that it doesn't collide with collision path
+        self.count += dt
         if self.count > self.fade_length*2:
             self.exit()
 
@@ -753,9 +753,9 @@ class Fadeout(Fadein):
     def init(self):
         pass
 
-    def update(self):
-        self.previous_state.fade_update()#so that it don't consider player input
-        self.count += self.game.dt
+    def update(self, dt):
+        self.previous_state.fade_update(dt)#so that it don't consider player input
+        self.count += dt
         if self.count > self.fade_length:
             self.exit()
 
@@ -777,9 +777,9 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
         self.fade_length = 60
         self.fade_surface.clear(0,0,0,int(255/self.fade_length))        
 
-    def update(self):
-        super().update()
-        self.count += self.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.count += dt
         if self.count > self.fade_length:
             self.game.state_manager.exit_state()
             self.game.state_manager.enter_state('Safe_spawn_2')
@@ -800,9 +800,9 @@ class Safe_spawn_2(Gameplay):#fade
         self.game.game_objects.player.set_pos(self.game.game_objects.player.backpack.map.spawn_point['safe_spawn'])
         self.game.game_objects.player.currentstate.enter_state('crouch', phase = 'main')        
 
-    def update(self):
-        super().update()
-        self.count += self.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.count += dt
         if self.count > self.fade_length*2:
             self.game.game_objects.player.currentstate.handle_input('pray_post')#to stand up
             self.game.state_manager.exit_state()            
@@ -839,10 +839,10 @@ class Conversation(Gameplay):
         print(self.text_win_size)
         self.game.display.render(self.text_window, self.background)#shader render
 
-    def update(self):
-        super().update()
-        self.letter_frame += self.print_frame_rate*self.game.dt
-        self.alpha += self.sign * self.game.dt*5
+    def update(self, dt):
+        super().update(dt)
+        self.letter_frame += self.print_frame_rate*dt
+        self.alpha += self.sign * dt * 5
         self.alpha = min(self.alpha,230)
         if self.alpha < 10:
             self.game.state_manager.exit_state()
@@ -897,8 +897,8 @@ class UIs(Gameplay):#pressing i: map, inventory, radna, journal
         super().__init__(game)
         self.game.game_objects.UI.set_ui(page, **kwarg)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.game.game_objects.UI.update()
 
     def render(self):

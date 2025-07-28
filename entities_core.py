@@ -16,6 +16,9 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
         self.shader = None#which shader program to run
         self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
 
+    def update(self, dt):
+        pass
+
     def group_distance(self):
         if self.blit_pos[0] < self.bounds[0] or self.blit_pos[0] > self.bounds[1] or self.blit_pos[1] < self.bounds[2] or self.blit_pos[1] > self.bounds[3]:
             self.remove(self.group)#remove from group
@@ -35,9 +38,9 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
         self.animation = animation.Animation(self)
         self.currentstate = states_basic.Idle(self)#
 
-    def update(self):
+    def update(self, dt):
         self.currentstate.update()
-        self.animation.update()
+        self.animation.update(dt)
 
     def reset_timer(self):#called from aniumation when the animation is finished
         self.currentstate.increase_phase()
@@ -70,13 +73,13 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.true_pos = list(self.rect.topleft)
         self.hitbox.midbottom = self.rect.midbottom
 
-    def update_true_pos_x(self):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
-        self.true_pos[0] += self.slow_motion*self.game_objects.game.dt*self.velocity[0]
+    def update_true_pos_x(self, dt):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
+        self.true_pos[0] += dt * self.velocity[0]
         self.rect.left = round(self.true_pos[0])#should be int -> round fixes gliding on bubble
         self.update_hitbox()
 
-    def update_true_pos_y(self):#called from Engine.platform collision
-        self.true_pos[1] += self.slow_motion*self.game_objects.game.dt*self.velocity[1]
+    def update_true_pos_y(self, dt):#called from Engine.platform collision
+        self.true_pos[1] += dt * self.velocity[1]
         self.rect.top = round(self.true_pos[1])#should be int -> round fixes gliding on bubble
         self.update_hitbox()
 
@@ -115,7 +118,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.velocity[1] = 0
 
     def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
-        self.velocity[1] = 1.2/max(self.game_objects.game.dt, 1)#assume at least 60 fps -> 1
+        self.velocity[1] = 1.2#assume at least 60 fps -> 1
 
 class Character(Platform_entity):#enemy, NPC,player
     def __init__(self,pos,game_objects):
@@ -127,16 +130,16 @@ class Character(Platform_entity):#enemy, NPC,player
         self.shader_state = states_shader.Idle(self)
         self.hitstop_states = hitstop_states.Idle(self)
 
-    def update(self):
-        self.update_vel()
+    def update(self, dt):
+        self.update_vel(dt)
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
-        self.animation.update()#need to be after currentstate since animation will animate the current state
+        self.animation.update(dt)#need to be after currentstate since animation will animate the current state
         self.shader_state.update()#need to be after animation
 
-    def update_vel(self):#called from hitsop_states
-        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
-        self.velocity[1] = min(self.velocity[1], self.max_vel[1] * self.game_objects.game.dt)#set a y max speed#
-        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
+    def update_vel(self, dt):#called from hitsop_states
+        self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
+        self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
+        self.velocity[0] += dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
     def take_dmg(self, dmg = 1, effects = []):
         if self.flags['invincibility']: return

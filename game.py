@@ -20,7 +20,9 @@ class Game():
 
         #initiate game related values
         self.clock = pygame.time.Clock()
-        self.dt = 0
+        self.fixed_dt = 1.0  # 60 physics updates per second
+        self.accumulator = 0.0
+
         self.game_objects = game_objects.Game_Objects(self)
         self.state_manager = state_manager.State_manager(self, 'Title_menu')        
 
@@ -31,7 +33,7 @@ class Game():
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.JOYAXISMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
         pygame.event.set_blocked([pygame.TEXTINPUT])#for some reason, there is a text input here and there. So, blocking it
 
-    def event_loop(self):
+    def event_loop(self, dt):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
@@ -43,30 +45,29 @@ class Game():
         self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
         #self.state_stack[-1].continuous_input_checks()#tdiscrete_inputs_UI is inprinciple not needed for gameplay state
         inputs = self.game_objects.controller.input_buffer.copy()
-        self.game_objects.input_interpreter.update()#checks for flicks and other input related things
+        self.game_objects.input_interpreter.update(dt)#checks for flicks and other input related things
         for input in inputs:
-            input.update(self.dt)
+            input.update(dt)
             self.state_manager.handle_events(input)
 
     def run(self):
         while True:
             self.screen.clear(0, 0, 0, 0)
 
-            #tick clock
-            self.clock.tick(C.fps)
-            self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            # Frame time
+            frame_time = 60 * self.clock.tick(C.fps) * 0.001
+  
+            self.accumulator += frame_time
 
-            #handle event
-            self.event_loop()
+            # Handle events ONCE per frame
+            self.event_loop(frame_time)
 
-            #update
-            self.state_manager.update()
+            while self.accumulator >= self.fixed_dt:
+                self.state_manager.update(self.fixed_dt)
+                self.accumulator -= self.fixed_dt
 
-            #render
-            self.state_manager.render()#render onto self.screeen
-            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
-
-            #update display
+            self.state_manager.render()
+            self.display.render(self.screen.texture, self.display.screen, scale=self.scale)
             pygame.display.flip()
 
     def scale_size(self, scale = None):

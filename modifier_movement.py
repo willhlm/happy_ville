@@ -24,10 +24,10 @@ class Movement_manager():
             mod.apply(context)
         return context
 
-    def update(self):
+    def update(self, dt):
         modifiers = self._sorted_modifiers.copy()
         for mod in modifiers:
-            mod.update()
+            mod.update(dt)
 
     def _sort_modifiers(self):#sort modifiers by priority
         self._sorted_modifiers = sorted(self.modifiers.values(), key = lambda m: m.priority, reverse = True)
@@ -46,7 +46,7 @@ class Movement_modifier():
     def apply(self, context):
         pass
 
-    def update(self):#called from aila update
+    def update(self, dt):#called from aila update
         pass
 
 class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
@@ -77,8 +77,8 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
     def apply(self, context):
         context.friction[0] = self.friction
 
-    def update(self):
-        self.friction += self.entity.game_objects.game.dt * 0.0018
+    def update(self, dt):
+        self.friction += dt * 0.0018
         if abs(self.friction - self.target) < 0.01:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 

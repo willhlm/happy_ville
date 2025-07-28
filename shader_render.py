@@ -7,10 +7,10 @@ class Screen_shader():#Shaders applied to whole screen, Can do multiple ones
         if not default_shader: return
         self.set_shader(default_shader, **kwarg)
 
-    def update(self):
+    def update(self, dt):
         shaders_keys = list(self.shaders.keys())
         for key in shaders_keys:
-            self.shaders[key].update()
+            self.shaders[key].update(dt)
 
     def draw(self, target):        
         self.layer.clear(0, 0, 0, 0)#need it so that it doesn't leave a "stain" in the screen

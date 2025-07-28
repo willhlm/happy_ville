@@ -4,6 +4,10 @@ class Group(pygame.sprite.Group):#normal
     def __init__(self):
         super().__init__()
 
+    def update(self, dt):
+        for s in self.sprites():
+            s.update(dt)
+
     def draw(self, target):
         for spr in self.sprites():
             spr.draw(target)
@@ -16,6 +20,10 @@ class Group(pygame.sprite.Group):#normal
 class LayeredUpdates(pygame.sprite.LayeredUpdates):#layered rendering
     def __init__(self):
         super().__init__()
+
+    def update(self, dt):
+        for s in self.sprites():
+            s.update(dt)
 
     def draw(self, target):
         for spr in self.sprites():
@@ -30,7 +38,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
     def __init__(self):
         super().__init__()
 
-    def update(self):
+    def update(self, dt):
         for s in self.sprites():
             self.group_distance(s)
 
@@ -59,7 +67,7 @@ class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside
     def __init__(self):
         super().__init__()
 
-    def update(self):
+    def update(self, dt):
         for s in self.sprites():
             self.group_distance(s)
 

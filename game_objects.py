@@ -119,8 +119,8 @@ class Game_Objects():
         self.timer_manager.clear_timers()
         self.weather.empty()
 
-    def collide_all(self):        
-        self.platform_collision()
+    def collide_all(self, dt):        
+        self.platform_collision(dt)
 
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
@@ -131,40 +131,40 @@ class Game_Objects():
         self.collisions.projectile_collision(self.fprojectiles, self.enemies)
         self.collisions.projectile_collision(self.eprojectiles, self.players)
 
-    def platform_collision(self):        
-        self.collisions.platform_collision(self.players)        
-        self.collisions.platform_collision(self.enemies)
-        self.collisions.platform_collision(self.eprojectiles)
-        self.collisions.platform_collision(self.fprojectiles)
-        self.collisions.platform_collision(self.npcs)
-        self.collisions.platform_collision(self.loot)
+    def platform_collision(self, dt):        
+        self.collisions.platform_collision(self.players, dt)        
+        self.collisions.platform_collision(self.enemies, dt)
+        self.collisions.platform_collision(self.eprojectiles, dt)
+        self.collisions.platform_collision(self.fprojectiles, dt)
+        self.collisions.platform_collision(self.npcs, dt)
+        self.collisions.platform_collision(self.loot, dt)
 
-    def update(self):
-        self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
-        self.camera_manager.update()#should be first
-        self.timer_manager.update()
-        self.platforms.update()        
-        self.platforms_ramps.update()
-        self.layer_pause.update()#should be before all_bgs and all_fgs
-        self.all_bgs.update()
-        self.bg_interact.update()
-        self.all_fgs.update()
-        self.players.update()
-        self.entity_pause.update()#should be before enemies, npcs and interactable groups
-        self.enemies.update()
-        self.npcs.update()
-        self.fprojectiles.update()
-        self.eprojectiles.update()
-        self.loot.update()
-        self.cosmetics.update()
-        self.cosmetics_no_clear.update()
-        self.cosmetics2.update()
-        self.interactables.update()
-        self.weather.update()
-        self.interactables_fg.update()#twoD water use it
-        self.special_shaders.update()#portal use it
-        self.lights.update()
-        self.shader_render.update()#housld be last
+    def update(self, dt):
+        self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
+        self.camera_manager.update(dt)#should be first
+        self.timer_manager.update(dt)
+        self.platforms.update(dt)        
+        self.platforms_ramps.update(dt)
+        self.layer_pause.update(dt)#should be before all_bgs and all_fgs
+        self.all_bgs.update(dt)
+        self.bg_interact.update(dt)
+        self.all_fgs.update(dt)
+        self.players.update(dt)
+        self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
+        self.enemies.update(dt)
+        self.npcs.update(dt)
+        self.fprojectiles.update(dt)
+        self.eprojectiles.update(dt)
+        self.loot.update(dt)
+        self.cosmetics.update(dt)
+        self.cosmetics_no_clear.update(dt)
+        self.cosmetics2.update(dt)
+        self.interactables.update(dt)
+        self.weather.update(dt)
+        self.interactables_fg.update(dt)#twoD water use it
+        self.special_shaders.update(dt)#portal use it
+        self.lights.update(dt)
+        self.shader_render.update(dt)#housld be last
 
     def draw(self):#called from render states
         self.lights.clear_normal_map()

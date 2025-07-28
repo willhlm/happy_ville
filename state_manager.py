@@ -25,9 +25,9 @@ class State_manager():
         state.on_exit()  # Call on_exit for the state we're exiting
         self.state_stack[-1].on_resume()  # Resume the previous state
 
-    def update(self):
+    def update(self, dt):
         """Update the current active state."""
-        self.state_stack[-1].update()
+        self.state_stack[-1].update(dt)
 
     def render(self):
         """Render the current active state."""

@@ -29,9 +29,9 @@ class Banner(Animatedentity):
     def update_scroll(self, scroll):
         self.rect.center = [self.rect.center[0] + scroll[0], self.rect.center[1] + scroll[1]]
 
-    def update(self):
-        super().update()
-        self.time += self.game_objects.game.dt * 0.05
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt * 0.05
         self.update_pos()
 
     def update_pos(self):
@@ -66,9 +66,9 @@ class MapArrow(Animatedentity):#for invenotry, the pointer
     def activate(self):
         return self.map_text
 
-    def update(self):
-        super().update()
-        self.time += self.game_objects.game.dt * 0.1
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt * 0.1
         self.update_pos()
 
     def update_pos(self):
@@ -207,10 +207,10 @@ class Menu_Arrow():
     def update(self):#note: sets pos to input, doesn't update with an increment of pos like other entities
         pass
 
-    def animate(self):
+    def animate(self, dt):
         if self.animate:
             amp = 5
-            self.time += self.game_objects.game.dt
+            self.time += dt
             _T = 0.08
             d = amp*math.pow(math.sin(self.time * _T) + 1, 0.5)
             if self.mirrored:
