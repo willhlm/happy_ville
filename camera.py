@@ -18,7 +18,7 @@ class Camera_manager():
     def remove_decorator(self, decorator):#e.g. shake
         self.decorators.remove(decorator)
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.camera.update(dt)  
         for decorator in self.decorators:
             decorator.update(dt)

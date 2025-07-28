@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, time
 import game_objects
 import constants as C
 import read_files
@@ -19,10 +19,7 @@ class Game():
         self.screen = self.display.make_layer(self.window_size)
 
         #initiate game related values
-        self.clock = pygame.time.Clock()
-        self.fixed_dt = 1.0  # 60 physics updates per second
-        self.accumulator = 0.0
-
+        self.game_loop = GameLoop(self)
         self.game_objects = game_objects.Game_Objects(self)
         self.state_manager = state_manager.State_manager(self, 'Title_menu')        
 
@@ -51,24 +48,7 @@ class Game():
             self.state_manager.handle_events(input)
 
     def run(self):
-        while True:
-            self.screen.clear(0, 0, 0, 0)
-
-            # Frame time
-            frame_time = 60 * self.clock.tick(C.fps) * 0.001
-  
-            self.accumulator += frame_time
-
-            # Handle events ONCE per frame
-            self.event_loop(frame_time)
-
-            while self.accumulator >= self.fixed_dt:
-                self.state_manager.update(self.fixed_dt)
-                self.accumulator -= self.fixed_dt
-
-            self.state_manager.render()
-            self.display.render(self.screen.texture, self.display.screen, scale=self.scale)
-            pygame.display.flip()
+        self.game_loop.run()
 
     def scale_size(self, scale = None):
         if not scale:#if None
@@ -76,6 +56,41 @@ class Game():
             scale_h = pygame.display.Info().current_h/self.window_size[1]
             return min(scale_w, scale_h)
         return scale
+
+class GameLoop():
+    def __init__(self, game):
+        self.game = game
+        self.fixed_dt = 1.0 / 60.0  # 60Hz physics step
+        self.accumulator = 0.0
+        self.clock = pygame.time.Clock()
+        self.prev_time = time.perf_counter()
+
+    def run(self):
+        while True:
+            self.game.screen.clear(0, 0, 0, 0)
+
+            self.clock.tick(C.fps)
+
+            # Use high-res timer to calculate actual elapsed time
+            current_time = time.perf_counter()
+            frame_time = current_time - self.prev_time
+            self.prev_time = current_time
+
+            self.accumulator += frame_time
+
+            # Handle input/events with scaled dt for old logic
+            self.game.event_loop(frame_time * 60)
+
+            # Fixed timestep update(s)
+            while self.accumulator >= self.fixed_dt:
+                self.game.state_manager.update(self.fixed_dt * 60)
+                self.accumulator -= self.fixed_dt
+
+            # Render
+            self.game.state_manager.update_render(frame_time * 60)
+            self.game.state_manager.render()
+            self.game.display.render(self.game.screen.texture, self.game.display.screen, scale=self.game.scale)
+            pygame.display.flip()
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

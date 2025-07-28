@@ -11,6 +11,9 @@ class Game_State():
     def update(self, dt):
         pass
 
+    def update_render(self, dt):
+        pass        
+
     def render(self):
         pass
 
@@ -66,8 +69,10 @@ class Title_menu(Game_State):
     def reset_timer(self):
         pass
 
-    def update(self, dt):#update menu arrow position
+    def update_render(self, dt):
         self.animation.update(dt)
+
+    def update(self, dt):#update menu arrow position
         self.arrow.animate(dt)
         self.arrow_2.animate(dt)
 
@@ -187,7 +192,7 @@ class Load_menu(Game_State):
     def reset_timer(self):
         pass
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.animation.update(dt)
 
     def update_arrow(self):
@@ -485,11 +490,16 @@ class Gameplay(Game_State):
     def __init__(self, game):
         super().__init__(game)
 
-    def update(self, dt):
-        self.handle_movement()
-        dt = self.game.game_objects.time_manager.update(dt)    
+    def update(self, dt):        
+        self.game.game_objects.time_manager.update(dt)#setäs the timescale
+        dt *= self.game.game_objects.time_manager.time_scale#apply time scale
+        self.handle_movement()               
         self.game.game_objects.update(dt)
-        self.game.game_objects.collide_all(dt)
+        self.game.game_objects.collide_all(dt)        
+
+    def update_render(self, dt):
+        dt *= self.game.game_objects.time_manager.time_scale#apply time scale
+        self.game.game_objects.update_render(dt)
         self.game.game_objects.UI.hud.update(dt)
 
     def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
@@ -504,7 +514,7 @@ class Gameplay(Game_State):
             self.blit_fps()
 
     def blit_fps(self):
-        fps_string = str(int(self.game.clock.get_fps()))
+        fps_string = str(int(self.game.game_loop.clock.get_fps()))
         image = self.game.game_objects.font.render((50,20),'fps ' + fps_string)
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-50,20),shader = self.game.game_objects.shaders['colour'])#shader render
@@ -595,6 +605,9 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
 
     def update(self, dt):
         pass
+
+    def update_render(self, dt):
+        pass        
 
     def render(self):
         super().render()

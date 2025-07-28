@@ -139,9 +139,9 @@ class Game_Objects():
         self.collisions.platform_collision(self.npcs, dt)
         self.collisions.platform_collision(self.loot, dt)
 
-    def update(self, dt):
-        self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
-        self.camera_manager.update(dt)#should be first
+    def update(self, dt):#called before update_render
+        #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
+        #self.camera_manager.update(dt)#should be first
         self.timer_manager.update(dt)
         self.platforms.update(dt)        
         self.platforms_ramps.update(dt)
@@ -156,15 +156,32 @@ class Game_Objects():
         self.fprojectiles.update(dt)
         self.eprojectiles.update(dt)
         self.loot.update(dt)
-        self.cosmetics.update(dt)
-        self.cosmetics_no_clear.update(dt)
-        self.cosmetics2.update(dt)
         self.interactables.update(dt)
         self.weather.update(dt)
         self.interactables_fg.update(dt)#twoD water use it
-        self.special_shaders.update(dt)#portal use it
-        self.lights.update(dt)
-        self.shader_render.update(dt)#housld be last
+
+    def update_render(self, dt):#called after update_physics
+        self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll
+        self.camera_manager.update_render(dt)#should be first
+        self.platforms.update_render(dt)        
+        self.platforms_ramps.update_render(dt)
+        self.all_bgs.update_render(dt)
+        self.bg_interact.update_render(dt)
+        self.all_fgs.update_render(dt)
+        self.players.update_render(dt)
+        self.enemies.update_render(dt)
+        self.npcs.update_render(dt)
+        self.fprojectiles.update_render(dt)
+        self.eprojectiles.update_render(dt)
+        self.loot.update_render(dt)
+        self.cosmetics.update_render(dt)
+        self.cosmetics_no_clear.update_render(dt)
+        self.cosmetics2.update_render(dt)
+        self.interactables.update_render(dt)
+        self.interactables_fg.update_render(dt)#twoD water use it
+        self.special_shaders.update_render(dt)#portal use it
+        self.lights.update_render(dt)
+        self.shader_render.update_render(dt)#housld be last
 
     def draw(self):#called from render states
         self.lights.clear_normal_map()

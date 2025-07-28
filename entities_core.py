@@ -16,6 +16,9 @@ class Staticentity(pygame.sprite.Sprite):#all enteties
         self.shader = None#which shader program to run
         self.dir = [-1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: needed when rendering the direction
 
+    def update_render(self, dt):
+        pass
+
     def update(self, dt):
         pass
 
@@ -40,6 +43,8 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
 
     def update(self, dt):
         self.currentstate.update()
+    
+    def update_render(self, dt):
         self.animation.update(dt)
 
     def reset_timer(self):#called from aniumation when the animation is finished
@@ -133,6 +138,8 @@ class Character(Platform_entity):#enemy, NPC,player
     def update(self, dt):
         self.update_vel(dt)
         self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
+
+    def update_render(self, dt):
         self.animation.update(dt)#need to be after currentstate since animation will animate the current state
         self.shader_state.update()#need to be after animation
 

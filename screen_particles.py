@@ -16,7 +16,7 @@ class ScreenParticles(pygame.sprite.Sprite):#make a layer on screen, then use sh
         self.number_particles = number_particles#max 20, hard coded in shader
         self.set_parameters()        
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.time += dt
         self.update_partciles(dt)
 
@@ -118,8 +118,8 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
         self.height = self.game_objects.game.window_size[1] + 0.6*self.game_objects.game.window_size[1]
         self.velocity = [0,0]
 
-    def update(self, dt):
-        super().update(dt)
+    def update_render(self, dt):
+        super().update_render(dt)
         self.update_pos(dt)
         self.boundary()
 

@@ -34,6 +34,9 @@ class Enemy(Character):
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
         self.chase_speed = 0.6
 
+    def update_render(self, dt):
+        self.hitstop_states.update_render(dt)
+
     def update(self, dt):
         self.hitstop_states.update(dt)
         self.group_distance()

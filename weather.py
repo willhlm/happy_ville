@@ -82,8 +82,8 @@ class WeatherFX(pygame.sprite.Sprite):#make a layer on screen, then use shaders 
         self.parallax = parallax
         self.currentstate = weatherfx_states.Idle(self)
 
-    def update(self, dt):
-        self.currentstate.update(dt)
+    def update_render(self, dt):
+        self.currentstate.update_render(dt)
 
     def draw(self, target):
         self.currentstate.draw(target)
@@ -114,7 +114,7 @@ class FogFX(WeatherFX):
         self.noise_layer = game_objects.game.display.make_layer(game_objects.game.window_size)        
         self.time = 0
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.time += dt
 
     def draw(self, target):
@@ -190,7 +190,7 @@ class FlashFX(WeatherFX):#white colour fades out and then in
         self.add_light_source()
         self.time = 0
  
-    def update(self, dt):
+    def update_render(self, dt):
         self.time += dt
         self.update_image()
         if self.time > self.fade_length:

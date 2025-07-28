@@ -13,6 +13,9 @@ class Platform(pygame.sprite.Sprite):
         self.hitbox = self.rect.copy()
         #self.run_particles = {'dust':entities.Dust_running_particles,'water':entities.Water_running_particles,'grass':entities.Grass_running_particles}[run_particle]
 
+    def update_render(self, dt):
+        pass
+
     def update(self, dt):
         pass
 
@@ -316,6 +319,8 @@ class Collision_texture(Platform):#blocks that has tectures
 
     def update(self, dt):
         self.currentstate.update()
+    
+    def update_render(self, dt):                
         self.animation.update(dt)
 
     def collide_x(self,entity):
@@ -395,8 +400,7 @@ class Door(Gate_1):
         self.shader = None
         self.shader_state = states_shader.Idle(self)
 
-    def update(self, dt):
-        super().update(dt)
+    def update_render(self, dt):
         self.shader_state.update()
 
     def draw(self, target):
@@ -1013,6 +1017,8 @@ class Smacker(Collision_dynamic):#trap
 
     def update(self, dt):
         self.currentstate.update()
+    
+    def update_render(self, dt):
         self.animation.update(dt)
 
     def collide_entity_y(self,entity):#plpaotfrom mobings

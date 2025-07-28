@@ -15,7 +15,7 @@ class Lights():
 
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.max_light_sources = 20#a valuehard coded in light shader
-        self.update(0)
+        self.update_render(0)
 
     def new_map(self):#called when loading a new map from map loader
         self.clear_lights()
@@ -24,7 +24,7 @@ class Lights():
     def clear_normal_map(self):#called at the begning of draw in game objects
         self.normal_map.clear(0, 0, 0, 0)
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.normal_interact = [0] * self.max_light_sources
         self.num_rectangle = [0] * self.max_light_sources
         self.points = []
@@ -36,7 +36,7 @@ class Lights():
         self.min_radius = [0] * self.max_light_sources
 
         for i, light in enumerate(self.lights_sources):        # Process each light source and update the lists
-            light.update()  # Update the light source            
+            light.update_render()  # Update the light source            
             
             self.positions[i] = (light.position[0], self.game_objects.game.window_size[1] - light.position[1])  # Get the positions of the lights
             self.radius[i] = light.radius
@@ -164,6 +164,6 @@ class Light():#light source
     def add_decorator(self, key):
         self.updates.append(self.update_functions[key])
 
-    def update(self, dt):#if they e.g. fade
+    def update_render(self, dt):#if they e.g. fade
         for update in self.updates:
             update()

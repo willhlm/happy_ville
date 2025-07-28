@@ -29,6 +29,10 @@ class State_manager():
         """Update the current active state."""
         self.state_stack[-1].update(dt)
 
+    def update_render(self, dt):
+        """Update the current active state."""
+        self.state_stack[-1].update_render(dt)
+
     def render(self):
         """Render the current active state."""
         self.state_stack[-1].render()

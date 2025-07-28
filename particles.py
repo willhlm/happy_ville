@@ -31,6 +31,9 @@ class Particles(pygame.sprite.Sprite):
         self.currentstate = getattr(states_particles, state)(self)
 
     def update(self, dt):
+        pass
+
+    def update_render(self, dt):
         self.update_pos(dt)
         self.lifetime -= dt
         self.currentstate.update(dt)

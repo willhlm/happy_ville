@@ -4,6 +4,10 @@ class Group(pygame.sprite.Group):#normal
     def __init__(self):
         super().__init__()
 
+    def update_render(self, dt):
+        for s in self.sprites():
+            s.update_render(dt)
+
     def update(self, dt):
         for s in self.sprites():
             s.update(dt)
@@ -20,6 +24,10 @@ class Group(pygame.sprite.Group):#normal
 class LayeredUpdates(pygame.sprite.LayeredUpdates):#layered rendering
     def __init__(self):
         super().__init__()
+
+    def update_render(self, dt):
+        for s in self.sprites():
+            s.update_render(dt)
 
     def update(self, dt):
         for s in self.sprites():

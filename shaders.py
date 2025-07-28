@@ -4,7 +4,7 @@ class Shaders():
     def __init__(self, renderer):
         self.renderer = renderer
 
-    def update(self, dt):
+    def update_render(self, dt):
         pass
 
     def set_uniforms(self):
@@ -37,7 +37,7 @@ class Chromatic_aberration(Shaders):
         super().__init__(renderer)
         self.duration = kwarg.get('duration',20)
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.duration -= dt
         if self.duration < 0:
             self.renderer.game_objects.shader_render.remove_shader('chromatic_aberration')
@@ -81,7 +81,7 @@ class White_balance(Shaders):
         self.temperature = kwarg.get('temperature', 0.2)
         self.init_temperature = 0
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.init_temperature += dt * 0.01
         self.init_temperature = min(self.init_temperature, self.temperature)
 
@@ -104,7 +104,7 @@ class Zoom(Shaders):#only zoom in?
         self.methods = {'zoom_out': self.zoom_out, 'zoom_in': self.zoom_in}
         self.zoom_start_timer = C.fps
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.methods[self.method](dt)
 
     def zoom_in(self, dt):
@@ -145,7 +145,7 @@ class Speed_lines(Shaders):#TODO, should jusu be a cosmetic, not a screen shader
         self.number = kwarg.get('number', 1)
         self.time = 0
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.time += dt * 0.1
 
     def set_uniforms(self):
@@ -177,7 +177,7 @@ class Slowmotion(Shaders):
         self.time = 0
         self.duration = kwarg.get('duration', 20)
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.time += dt * 0.01
         self.duration -= dt
         if self.duration <= 0:
@@ -220,7 +220,7 @@ class Hurt(Shaders):#turn white -> enteties use it
     def set_uniforms(self):
         self.renderer.game_objects.shaders['colour'] = self.colour
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.duration -= dt 
         if self.duration < 0:
             self.entity.shader_render.append_shader(self.next_animation)
@@ -240,7 +240,7 @@ class Invincibile(Shaders):#blink white -> enteyties use it
         self.duration = C.invincibility_time_player - (C.hurt_animation_length + 1)#a duration which considers the player invinsibility
         self.time = 0
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.duration -= dt
         self.time += 0.5 * dt
         if self.duration < 0:

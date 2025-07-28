@@ -954,6 +954,9 @@ class Player(Character):
         self.time = 0
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
+    def update_render(self, dt):#called in group
+        self.hitstop_states.update_render(dt)
+
     def update(self, dt):
         self.movement_manager.update(dt)#update the movement manager
         self.hitstop_states.update(dt)
@@ -1942,7 +1945,7 @@ class Camera_Stop(Staticentity):
     def release_texture(self):#called when .kill() and empty group
         pass
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.currentstate.update()
 
 class Spawner(Staticentity):#an entity spawner
@@ -1972,7 +1975,7 @@ class Fade_effect(Staticentity):#fade effect
         self.dir = entity.dir.copy()
         self.blur_dir = kwarg.get('blur_dir', [0.05, 0])
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.alpha *= 0.9
         self.destroy()
 
@@ -3428,7 +3431,7 @@ class Player_Soul(Animatedentity):#the thing that popps out when player dies
         Player_Soul.sprites = read_files.load_sprites_dict('Sprites/enteties/soul/', game_objects)
 
     def update(self, dt):
-        super().updatedt()
+        super().update(dt)
         self.update_pos()
         self.timer += dt
         if self.timer > 100:#fly to sky
@@ -3825,6 +3828,9 @@ class Safe_spawn(Interactable):#area which gives the coordinates which will make
     def draw(self, target):
         pass
 
+    def update_render(self, dt):
+        pass        
+
     def update(self, dt):
         self.group_distance()
 
@@ -3848,6 +3854,9 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
 
     def update(self, dt):
         self.group_distance()
+
+    def update_render(self, dt):
+        pass        
 
     def player_collision(self, player):
         if self.interacted: return#enter only once
@@ -3924,6 +3933,9 @@ class Path_col(Interactable):
         pass
 
     def draw(self, target):
+        pass
+
+    def update_render(self, dt):
         pass
 
     def update(self, dt):
@@ -4163,8 +4175,7 @@ class Loot_containers(Interactable):
         else:
             self.currentstate = loot_container_states.Idle(self)
 
-    def update(self, dt):
-        super().update(dt)
+    def update_render(self, dt):
         self.shader_state.update(dt)
 
     def draw(self, target):
