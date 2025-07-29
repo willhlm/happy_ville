@@ -19,10 +19,13 @@ class Camera_manager():
         self.decorators.remove(decorator)
 
     def update_render(self, dt):
-        self.camera.update(dt)  
+        self.camera.update_render(dt)  
         for decorator in self.decorators:
             decorator.update(dt)
 
+    def update(self, dt):
+        self.camera.update(dt)  
+        
     def zoom(self, scale = 1, center = (0.5, 0.5), rate = 1):
         self.game_objects.shader_render.append_shader('zoom', scale = scale, center = center, rate = rate)
 
@@ -44,6 +47,8 @@ class Camera():#default camera
         self.game_objects = game_objects
         self.true_scroll = scroll
         self.scroll = self.true_scroll.copy()
+        self.prev_true_scroll = self.true_scroll.copy()
+        self.interp_scroll = self.true_scroll.copy()
         self.y_offset = 30
         #self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
         self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + self.y_offset]
@@ -51,17 +56,19 @@ class Camera():#default camera
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
 
     def update(self, dt):
-        alpha = self.game_objects.game.game_loop.alpha  # Interpolation factor based on the accumulator
-        self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do
+        target_x = self.game_objects.player.true_pos[0] - self.center[0]
+        target_y = self.game_objects.player.true_pos[1] - self.center[1]
 
-        # Interpolate player position for smooth camera movement
-        interp_x = self.game_objects.player.prev_true_pos[0] + (self.game_objects.player.true_pos[0] - self.game_objects.player.prev_true_pos[0]) * alpha
-        interp_y = self.game_objects.player.prev_true_pos[1] + (self.game_objects.player.true_pos[1] - self.game_objects.player.prev_true_pos[1]) * alpha
+        # Smooth towards player once per physics step
+        self.prev_true_scroll = self.true_scroll.copy()
+        self.true_scroll[0] += (target_x - self.true_scroll[0]) * 0.1
+        self.true_scroll[1] += (target_y - self.true_scroll[1]) * 0.1
 
-        self.true_scroll[0] += (interp_x - self.true_scroll[0] - self.center[0]) * 0.1
-        self.true_scroll[1] += (interp_y - self.true_scroll[1] - self.center[1]) * 0.1
+    def update_render(self, dt):
+        alpha = self.game_objects.game.game_loop.alpha
+        self.interp_scroll = [self.prev_true_scroll[0] + (self.true_scroll[0] - self.prev_true_scroll[0]) * alpha, self.prev_true_scroll[1] + (self.true_scroll[1] - self.prev_true_scroll[1]) * alpha]
 
-        self.scroll = [round(self.true_scroll[0]), round(self.true_scroll[1])]
+        self.scroll = [round(self.interp_scroll[0]), round(self.interp_scroll[1])]        
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
