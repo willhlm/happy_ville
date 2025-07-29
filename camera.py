@@ -52,6 +52,8 @@ class Camera():#default camera
 
     def update(self, dt):
         alpha = self.game_objects.game.game_loop.alpha  # Interpolation factor based on the accumulator
+        self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do
+
         # Interpolate player position for smooth camera movement
         interp_x = self.game_objects.player.prev_true_pos[0] + (self.game_objects.player.true_pos[0] - self.game_objects.player.prev_true_pos[0]) * alpha
         interp_y = self.game_objects.player.prev_true_pos[1] + (self.game_objects.player.true_pos[1] - self.game_objects.player.prev_true_pos[1]) * alpha
