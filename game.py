@@ -70,7 +70,7 @@ class GameLoop():
         while True:
             self.game.screen.clear(0, 0, 0, 0)
 
-            frame_time = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            frame_time = 0.5/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
 
             # Use high-res timer to calculate actual elapsed time
             #current_time = time.perf_counter()
