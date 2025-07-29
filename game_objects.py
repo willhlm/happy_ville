@@ -140,8 +140,7 @@ class Game_Objects():
         self.collisions.platform_collision(self.loot, dt)
 
     def update(self, dt):#called before update_render
-        self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
-        self.camera_manager.update_render(dt)#should be first
+        self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll        
         self.timer_manager.update(dt)
         self.platforms.update(dt)        
         self.platforms_ramps.update(dt)
@@ -150,6 +149,7 @@ class Game_Objects():
         self.bg_interact.update(dt)
         self.all_fgs.update(dt)
         self.players.update(dt)
+        self.camera_manager.update_render(dt)#should be first        
         self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
         self.enemies.update(dt)
         self.npcs.update(dt)
