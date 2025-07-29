@@ -872,6 +872,7 @@ class Player(Character):
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
         self.reset_movement()
+        self.prev_true_pos = self.true_pos.copy()#to save the previous position
 
         self.colliding_platform = None#save the last collising platform
         #self.shader_state = states_shader.Aura(self)
@@ -958,6 +959,7 @@ class Player(Character):
         self.hitstop_states.update_render(dt)
 
     def update(self, dt):
+        self.prev_true_pos = self.true_pos.copy()
         self.movement_manager.update(dt)#update the movement manager
         self.hitstop_states.update(dt)
         self.backpack.necklace.update()#update the radnas

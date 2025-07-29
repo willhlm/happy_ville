@@ -51,14 +51,15 @@ class Camera():#default camera
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
 
     def update(self, dt):
-        self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do
+        alpha = self.game_objects.game.game_loop.alpha  # Interpolation factor based on the accumulator
+        # Interpolate player position for smooth camera movement
+        interp_x = self.game_objects.player.prev_true_pos[0] + (self.game_objects.player.true_pos[0] - self.game_objects.player.prev_true_pos[0]) * alpha
+        interp_y = self.game_objects.player.prev_true_pos[1] + (self.game_objects.player.true_pos[1] - self.game_objects.player.prev_true_pos[1]) * alpha
 
-        self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
-        self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
-        self.scroll = self.true_scroll.copy()
+        self.true_scroll[0] += (interp_x - self.true_scroll[0] - self.center[0]) * 0.1
+        self.true_scroll[1] += (interp_y - self.true_scroll[1] - self.center[1]) * 0.1
 
-        self.scroll[0] = round(self.scroll[0])
-        self.scroll[1] = round(self.scroll[1])
+        self.scroll = [round(self.true_scroll[0]), round(self.true_scroll[1])]
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()

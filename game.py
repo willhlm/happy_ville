@@ -87,6 +87,7 @@ class GameLoop():
                 self.accumulator -= self.fixed_dt
 
             # Render
+            self.alpha = self.accumulator / self.fixed_dt
             self.game.state_manager.update_render(frame_time * 60)
             self.game.state_manager.render()
             self.game.display.render(self.game.screen.texture, self.game.display.screen, scale=self.game.scale)

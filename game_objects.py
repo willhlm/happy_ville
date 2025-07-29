@@ -148,8 +148,7 @@ class Game_Objects():
         self.all_bgs.update(dt)
         self.bg_interact.update(dt)
         self.all_fgs.update(dt)
-        self.players.update(dt)
-        self.camera_manager.update_render(dt)#should be first        
+        self.players.update(dt)        
         self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
         self.enemies.update(dt)
         self.npcs.update(dt)
@@ -162,7 +161,7 @@ class Game_Objects():
 
     def update_render(self, dt):#called after update_physics
         #self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll
-        #self.camera_manager.update_render(dt)#should be first
+        self.camera_manager.update_render(dt)#should be first
         self.platforms.update_render(dt)        
         self.platforms_ramps.update_render(dt)
         self.all_bgs.update_render(dt)
