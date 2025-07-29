@@ -504,7 +504,7 @@ class Gameplay(Game_State):
             self.blit_fps()
 
     def blit_fps(self):
-        fps_string = str(int(self.game.clock.get_fps()))
+        fps_string = str(int(self.game.game_loop.clock.get_fps()))
         image = self.game.game_objects.font.render((50,20),'fps ' + fps_string)
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-50,20),shader = self.game.game_objects.shaders['colour'])#shader render
