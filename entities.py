@@ -2518,6 +2518,9 @@ class Hurt_box(Melee):#a hitbox that spawns
         self.hitbox = pygame.Rect(entity.rect.topleft, kwarg.get('size', [64, 64]))
         self.dmg = kwarg.get('dmg', 1)
 
+    def update_render(self, dt):
+        pass
+
     def update(self, dt):
         self.lifetime -= dt
         self.destroy()
