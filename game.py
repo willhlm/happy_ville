@@ -64,6 +64,7 @@ class GameLoop():
         self.accumulator = 0.0
         self.clock = pygame.time.Clock()
         self.prev_time = time.perf_counter()
+        self.alpha = self.accumulator / self.fixed_dt
 
     def run(self):
         while True:

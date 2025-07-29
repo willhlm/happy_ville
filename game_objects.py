@@ -141,6 +141,7 @@ class Game_Objects():
 
     def update(self, dt):#called before update_render
         self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll        
+        self.camera_manager.update_render(dt)#should be first        
         self.timer_manager.update(dt)
         self.platforms.update(dt)        
         self.platforms_ramps.update(dt)
@@ -160,8 +161,7 @@ class Game_Objects():
         self.interactables_fg.update(dt)#twoD water use it
 
     def update_render(self, dt):#called after update_physics
-        #self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll
-        self.camera_manager.update_render(dt)#should be first
+        #self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll        
         self.platforms.update_render(dt)        
         self.platforms_ramps.update_render(dt)
         self.all_bgs.update_render(dt)
