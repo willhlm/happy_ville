@@ -503,7 +503,7 @@ class Gameplay(Game_State):
         self.game.game_objects.UI.hud.update(dt)
 
     def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.game.game_objects.update(dt)
+        self.game.game_objects.update_render(dt)        
         self.game.game_objects.platform_collision(dt)
         self.game.game_objects.UI.hud.update(dt)
 
@@ -738,7 +738,7 @@ class Fadein(Gameplay):
 
     def update(self, dt):
         self.fade_update(dt)#so that it doesn't collide with collision path
-        self.count += dt
+        self.count += dt        
         if self.count > self.fade_length*2:
             self.exit()
 
@@ -750,6 +750,7 @@ class Fadein(Gameplay):
     def render(self):
         super().render()#gameplay render
         alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
+        print(alpha)
         self.fade_surface.clear(0,0,0,alpha)
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 

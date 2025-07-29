@@ -15,7 +15,7 @@ class Game():
         display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
 
-        self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])
+        self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync =0)
         self.screen = self.display.make_layer(self.window_size)
 
         #initiate game related values
