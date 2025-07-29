@@ -60,13 +60,13 @@ class Game():
 class GameLoop():
     def __init__(self, game):
         self.game = game
+        self.clock = pygame.time.Clock()  
         self.fixed_dt = 1.0 / 60.0  # 60Hz physics step
-        self.accumulator = 0.0
-        self.clock = pygame.time.Clock()
-        self.prev_time = time.perf_counter()
+        self.accumulator = 0.0              
         self.alpha = self.accumulator / self.fixed_dt
 
     def run(self):
+        prev_time = time.perf_counter()
         while True:
             self.game.screen.clear(0, 0, 0, 0)
 
@@ -74,12 +74,11 @@ class GameLoop():
 
             # Use high-res timer to calculate actual elapsed time
             current_time = time.perf_counter()
-            frame_time = current_time - self.prev_time
-            self.prev_time = current_time
-
+            frame_time = current_time - prev_time
+            frame_time = min(frame_time, 2/C.fps)  # Cap frame time to avoid large jumps
+            prev_time = current_time
             self.accumulator += frame_time
-
-            # Handle input/events with scaled dt for old logic
+            
             self.game.event_loop(frame_time * 60)
 
             # Fixed timestep update(s)

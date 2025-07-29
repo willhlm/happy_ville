@@ -55,7 +55,7 @@ class Camera():#default camera
         self.original_center = self.center.copy()
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
 
-    def update(self, dt):
+    def update(self, dt):        
         target_x = self.game_objects.player.true_pos[0] - self.center[0]
         target_y = self.game_objects.player.true_pos[1] - self.center[1]
 
@@ -64,7 +64,8 @@ class Camera():#default camera
         self.true_scroll[0] += (target_x - self.true_scroll[0]) * 0.1
         self.true_scroll[1] += (target_y - self.true_scroll[1]) * 0.1
 
-    def update_render(self, dt):
+    def update_render(self, dt):           
+        self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do     
         alpha = self.game_objects.game.game_loop.alpha
         self.interp_scroll = [self.prev_true_scroll[0] + (self.true_scroll[0] - self.prev_true_scroll[0]) * alpha, self.prev_true_scroll[1] + (self.true_scroll[1] - self.prev_true_scroll[1]) * alpha]
 
@@ -74,7 +75,7 @@ class Camera():#default camera
         self.center = self.original_center.copy()
         self.game_objects.camera_manager.stop_handeler.reset()
         for stop in self.game_objects.camera_blocks:#apply cameras stopp
-            stop.update(0)
+            stop.update_render(0)
             stop.currentstate.init_pos()
         self.set_camera_position()
 

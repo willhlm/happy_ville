@@ -736,9 +736,9 @@ class Fadein(Gameplay):
                 self.game.game_objects.player.currentstate.enter_state('invisible')
                 break
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.fade_update(dt)#so that it doesn't collide with collision path
-        self.count += dt        
+        self.count += dt     
         if self.count > self.fade_length*2:
             self.exit()
 
@@ -750,7 +750,6 @@ class Fadein(Gameplay):
     def render(self):
         super().render()#gameplay render
         alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
-        print(alpha)
         self.fade_surface.clear(0,0,0,alpha)
         self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
 
@@ -767,7 +766,7 @@ class Fadeout(Fadein):
     def init(self):
         pass
 
-    def update(self, dt):
+    def update_render(self, dt):
         self.previous_state.fade_update(dt)#so that it don't consider player input
         self.count += dt
         if self.count > self.fade_length:
