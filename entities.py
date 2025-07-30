@@ -967,15 +967,10 @@ class Player(Character):
         
     def draw(self, target):#called in group
         self.shader_state.draw()
-        alpha = self.game_objects.game.game_loop.alpha
-
-        # Interpolated player position
-        interp_x = self.prev_true_pos[0] + (self.true_pos[0] - self.prev_true_pos[0]) * alpha
-        interp_y = self.prev_true_pos[1] + (self.true_pos[1] - self.prev_true_pos[1]) * alpha
 
         self.blit_pos = (
-            round(interp_x - self.game_objects.camera_manager.camera.scroll[0]),
-            round(interp_y - self.game_objects.camera_manager.camera.scroll[1])
+            round(self.true_pos[0] - self.game_objects.camera_manager.camera.true_scroll[0]),
+            round(self.true_pos[1] - self.game_objects.camera_manager.camera.true_scroll[1])
         )
 
         #self.blit_pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]), round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))#true scroll, int or round
