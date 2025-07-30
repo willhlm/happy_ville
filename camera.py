@@ -76,7 +76,6 @@ class Camera():#default camera
             print("jump", self.save_scroll[0] - self.scroll[0], self.scroll[0])
 
         self.save_scroll = self.scroll.copy()
-   
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
