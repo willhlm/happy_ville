@@ -54,22 +54,34 @@ class Camera():#default camera
         self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + self.y_offset]
         self.original_center = self.center.copy()
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
+        self.save_scroll = self.scroll.copy()   
 
-    def update(self, dt):        
-        target_x = self.game_objects.player.true_pos[0] - self.center[0]
-        target_y = self.game_objects.player.true_pos[1] - self.center[1]
-
-        # Smooth towards player once per physics step
+    def update(self, dt):
+        # Store previous scroll value
         self.prev_true_scroll = self.true_scroll.copy()
-        self.true_scroll[0] += (target_x - self.true_scroll[0]) * 0.1
-        self.true_scroll[1] += (target_y - self.true_scroll[1]) * 0.1
 
-    def update_render(self, dt):           
-        self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do     
+        # Directly set target (no smoothing here)
+        self.true_scroll[0] = self.game_objects.player.true_pos[0] - self.center[0]
+        self.true_scroll[1] = self.game_objects.player.true_pos[1] - self.center[1]
+
+    def update_render(self, dt):
         alpha = self.game_objects.game.game_loop.alpha
-        self.interp_scroll = [self.prev_true_scroll[0] + (self.true_scroll[0] - self.prev_true_scroll[0]) * alpha, self.prev_true_scroll[1] + (self.true_scroll[1] - self.prev_true_scroll[1]) * alpha]
 
-        self.scroll = [round(self.interp_scroll[0]), round(self.interp_scroll[1])]        
+        # Interpolate between prev and current
+        raw_interp_x = self.prev_true_scroll[0] + (self.true_scroll[0] - self.prev_true_scroll[0]) * alpha
+        raw_interp_y = self.prev_true_scroll[1] + (self.true_scroll[1] - self.prev_true_scroll[1]) * alpha
+
+        # Apply smoothing HERE instead of in update()
+        self.scroll = [
+            round(self.scroll[0] + (raw_interp_x - self.scroll[0]) * 0.1),
+            round(self.scroll[1] + (raw_interp_y - self.scroll[1]) * 0.1)
+        ]
+
+        if abs(self.save_scroll[0] - self.scroll[0]) > 1:
+            print("jump", self.save_scroll[0] - self.scroll[0], self.scroll[0])
+
+        self.save_scroll = self.scroll.copy()
+   
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
