@@ -12,7 +12,7 @@ dash_jump_vel_player = -4.8#-5.2#-3.6
 max_vel = [30,5]#[30,6]
 pogo_vel = -6
 dash_length = 8#how long  Aila dashes
-dash_jump_length = 10
+dash_jump_length = 12#10
 dash_vel = 8
 animation_framerate = 0.25#1/animation_framerate is the number of frames to blit before goging to next frame
 
