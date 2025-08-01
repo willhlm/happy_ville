@@ -13,19 +13,15 @@ class Screen_layer():
         self.layer = self.game.display.make_layer(self.game.window_size)
         self.offset = [0,0]
 
-    def update(self):
-        """
-        Updates the position of the layer based on the camera, ensuring pixel-perfect rendering.
-        """
-        # Compute integer camera position (prevents wobbling)
-        camera_x = int(self.game.game_objects.camera_manager.camera.scroll[0] * self.parallax[0])
-        camera_y = int(self.game.game_objects.camera_manager.camera.scroll[1] * self.parallax[1])
-
-        # Compute fractional offset
-        frac_x = (self.game.game_objects.camera_manager.camera.scroll[0] * self.parallax[0]) - camera_x
-        frac_y = (self.game.game_objects.camera_manager.camera.scroll[1] * self.parallax[1]) - camera_y
-
-        self.offset = (-frac_x, -frac_y)  # Store fractional offset for rendering
+    def update(self):      
+        camera_scroll_x = self.game.game_objects.camera_manager.camera.true_scroll[0] * self.parallax[0]
+        camera_scroll_y = self.game.game_objects.camera_manager.camera.true_scroll[1] * self.parallax[1]
+        
+        # Use fractional scroll for smooth offset
+        frac_x = camera_scroll_x - int(camera_scroll_x)
+        frac_y = camera_scroll_y - int(camera_scroll_y)
+        
+        self.offset = (-frac_x, -frac_y )#fractional paty of the scroll
 
     def render(self, target):
         """

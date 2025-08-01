@@ -57,8 +57,8 @@ class Camera():#default camera
         self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
         self.scroll = self.true_scroll.copy()
 
-        self.scroll[0] = round(self.scroll[0])
-        self.scroll[1] = round(self.scroll[1])
+        self.scroll[0] = int(self.scroll[0])
+        self.scroll[1] = int(self.scroll[1])
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
@@ -97,8 +97,9 @@ class Camera_shake_decorator():
 
     def update(self):
         self.amp *= self.scale
-        self.current_camera.scroll[0] += random.uniform(-self.amp, self.amp)
+        self.current_camera.scroll[0] += random.uniform(-self.amp, self.amp)#only stuff relying on scroll will be affected, true scroll like player is not
         self.current_camera.scroll[1] += random.uniform(-self.amp, self.amp)
+        
         self.duration -= self.current_camera.game_objects.game.dt
         self.exit_state()
 
@@ -145,7 +146,7 @@ class Deer_encounter(Cutscenes):
 
     def update(self):
         self.center[0] -= 5*self.game_objects.game.dt
-        self.center[0] = max(200,self.center[0])
+        self.center[0] = max(100,self.center[0])
         super().update()
 
 class Cultist_encounter(Cutscenes):

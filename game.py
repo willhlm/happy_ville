@@ -86,13 +86,12 @@ class Game():
         for index, key in enumerate(self.screens.keys()):  
             screen = self.screens[key]   
             screen.update()
-            #self.game_objects.shaders['pp']['parallax'] = screen.parallax
-            #self.game_objects.shaders['pp']['camera_offset'] = screen.offset            
-            #self.display.render(screen.layer.texture, self.screen, shader = self.game_objects.shaders['pp'])#shader render        
-            self.display.render(screen.layer.texture, self.display.screen, position = screen.offset, scale = self.scale)#shader render        
-            #TODO use a shader instead, but doesn't work
-            #TODO there is also an issue that eveyrthing seems to have a black outline. Something with alpha blending         
-            #everything works if we don't blur the BG... 
+            self.game_objects.shaders['pp']['u_camera_offset'] = screen.offset 
+            self.game_objects.shaders['pp']['u_scale'] = self.scale 
+            self.game_objects.shaders['pp']['u_screen_size'] = (640,360)      
+            self.display.set_premultiplied_alpha_blending()        
+            self.display.render(screen.layer.texture, self.display.screen, scale = self.scale, shader = self.game_objects.shaders['pp'])#shader render  
+            self.display.set_normal_alpha_blending()                                              
             
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
