@@ -21,7 +21,7 @@ class Screen_layer():
         frac_x = camera_scroll_x - int(camera_scroll_x)
         frac_y = camera_scroll_y - int(camera_scroll_y)
         
-        self.offset = (-frac_x, -frac_y )#fractional paty of the scroll
+        self.offset = (-frac_x, frac_y )#fractional paty of the scroll
 
     def render(self, target):
         """
