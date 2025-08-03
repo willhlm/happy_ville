@@ -67,7 +67,6 @@ class BG_Block(Staticentity):
 
     def draw(self, target):
         self.blurstate.set_uniform()#zsets the blur radius
-        print(target)
         pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[1]))       
         self.game_objects.game.display.render(self.image, target, position = pos)  # Shader render
 

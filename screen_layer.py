@@ -23,11 +23,14 @@ class Screen_layer():
         
         self.offset = (-frac_x, frac_y )#fractional paty of the scroll
 
-    def render(self, target):
+    def render(self, target, scale):
         """
         Blits this layer onto the main screen with sub-pixel correction.
         """
-        self.game.display.render(self.layer.texture, target, position = self.offset, shader = self.game.game_objects.shaders['pp'])
+        self.game.game_objects.shaders['pp']['u_camera_offset'] = self.offset 
+        self.game.game_objects.shaders['pp']['u_scale'] = scale 
+        self.game.game_objects.shaders['pp']['u_screen_size'] = self.game.window_size
+        self.game.display.render(self.layer.texture, target, scale = scale, shader = self.game.game_objects.shaders['pp'])#shader render  
 
     def clear(self):
         """ Clears the layer (useful before drawing new frame). """

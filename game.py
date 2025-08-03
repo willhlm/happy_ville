@@ -83,15 +83,15 @@ class Game():
         self.screens[key] = screen
 
     def merge_screens(self):                    
+        self.display.set_premultiplied_alpha_blending()
         for index, key in enumerate(self.screens.keys()):  
             screen = self.screens[key]   
             screen.update()
             self.game_objects.shaders['pp']['u_camera_offset'] = screen.offset 
             self.game_objects.shaders['pp']['u_scale'] = self.scale 
-            self.game_objects.shaders['pp']['u_screen_size'] = (640,360)      
-            self.display.set_premultiplied_alpha_blending()        
+            self.game_objects.shaders['pp']['u_screen_size'] = self.window_size
             self.display.render(screen.layer.texture, self.display.screen, scale = self.scale, shader = self.game_objects.shaders['pp'])#shader render  
-            self.display.set_normal_alpha_blending()                                              
+        self.display.set_normal_alpha_blending()                                              
             
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

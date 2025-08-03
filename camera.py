@@ -55,10 +55,9 @@ class Camera():#default camera
 
         self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*0.1
         self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*0.1
-        self.scroll = self.true_scroll.copy()
 
-        self.scroll[0] = int(self.scroll[0])
-        self.scroll[1] = int(self.scroll[1])
+        self.scroll[0] = int(self.true_scroll[0])
+        self.scroll[1] = int(self.true_scroll[1])
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()
