@@ -20,13 +20,16 @@ import quests_events
 import timer
 import signals
 import time_manager
+import alphabet
+import input_interpreter
+
 
 from time import perf_counter
 
 class Game_Objects():
     def __init__(self, game):
         self.game = game
-        self.font = read_files.Alphabet(self)#intitilise the alphabet class, scale of alphabet
+        self.font = alphabet.Alphabet(self)#intitilise the alphabet class, scale of alphabet
         self.shaders = read_files.load_shaders_dict(self)#load all shaders aavilable into a dict
         self.controller = controller.Controller()
         self.object_pool = object_pool.Object_pool(self)
@@ -45,6 +48,7 @@ class Game_Objects():
         self.render_state = states_gameplay.Idle(self)
         self.quests_events = quests_events.Quests_events(self)        
         self.signals = signals.Signals()
+        self.input_interpreter = input_interpreter.InputInterpreter(self)
         self.time_manager = time_manager.Time_manager(self)
 
     def create_groups(self):#define all sprite groups
@@ -117,6 +121,7 @@ class Game_Objects():
         self.interactables_fg.empty()
         self.fprojectiles.empty()
         self.timer_manager.clear_timers()
+        self.weather.empty()
 
     def collide_all(self):        
         self.platform_collision()
@@ -226,9 +231,12 @@ class Game_Objects():
                 pygame.draw.rect(image, (0,0,255), (int(cos.hitbox[0]-self.camera_manager.camera.scroll[0]),int(cos.hitbox[1]-self.camera_manager.camera.scroll[1]),cos.hitbox[2],cos.hitbox[3]),1)#draw hitbox
                 pygame.draw.rect(image, (255,0,255), (int(cos.rect[0]-self.camera_manager.camera.scroll[0]),int(cos.rect[1]-self.camera_manager.camera.scroll[1]),cos.rect[2],cos.rect[3]),1)#draw hitbox
             for platform in self.platforms:#go through the group
-                pygame.draw.rect(image, (255,0,0), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
+                if type(platform).__name__ == 'Collision_oneway_up':
+                    pygame.draw.rect(image, (255,0,255), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
+                else:
+                    pygame.draw.rect(image, (255,0,0), (int(platform.hitbox[0]-self.camera_manager.camera.scroll[0]),int(platform.hitbox[1]-self.camera_manager.camera.scroll[1]),platform.hitbox[2],platform.hitbox[3]),1)#draw hitbox
             for ramp in self.platforms_ramps:
-                pygame.draw.rect(image, (255,100,100), (int(ramp.hitbox[0]-self.camera_manager.camera.scroll[0]),int(ramp.hitbox[1]-self.camera_manager.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
+                pygame.draw.rect(image, (0,0,0), (int(ramp.hitbox[0]-self.camera_manager.camera.scroll[0]),int(ramp.hitbox[1]-self.camera_manager.camera.scroll[1]),ramp.hitbox[2],ramp.hitbox[3]),1)#draw hitbox
             for fade in self.bg_fade:
                 pygame.draw.rect(image, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera_manager.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera_manager.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
             for light in self.lights.lights_sources:

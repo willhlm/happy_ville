@@ -8,8 +8,7 @@ def sign(num):
 class Basic_states():#states for aila sword
     def __init__(self, entity):
         self.entity = entity
-        self.entity.state = str(type(self).__name__).lower()#the name of the class
-        self.entity.animation.reset_timer()
+        self.entity.animation.play(str(type(self).__name__).lower())#the name of the class
 
     def enter_state(self,newstate,**kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
@@ -45,7 +44,7 @@ class Slash_2(Slash_1):
     def __init__(self,entity):
         super().__init__(entity)
 
-class Slash_up(Basic_states):#not implemented
+class Slash_up(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.lifetime = 10#swrod hitbox duration

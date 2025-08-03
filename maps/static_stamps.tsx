@@ -99,8 +99,10 @@
  </tile>
  <tile id="20">
   <properties>
-   <property name="direction" value=""/>
+   <property name="offset" value=""/>
    <property name="speed" value=""/>
+   <property name="texture_parallax" value=""/>
+   <property name="water_texture_on" type="bool" value="false"/>
   </properties>
  </tile>
  <tile id="21">

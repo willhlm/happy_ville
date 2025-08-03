@@ -23,7 +23,7 @@ class Game():
         self.clock = pygame.time.Clock()
         self.dt = 0
         self.game_objects = game_objects.Game_Objects(self)
-        self.state_manager = state_manager.State_manager(self, 'Title_menu')        
+        self.state_manager = state_manager.State_manager(self, 'Title_menu')
 
         #debug flags
         self.DEBUG_MODE = True
@@ -44,6 +44,7 @@ class Game():
         self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
         #self.state_stack[-1].continuous_input_checks()#tdiscrete_inputs_UI is inprinciple not needed for gameplay state
         inputs = self.game_objects.controller.input_buffer.copy()
+        self.game_objects.input_interpreter.update()#checks for flicks and other input related things
         for input in inputs:
             input.update(self.dt)
             self.state_manager.handle_events(input)

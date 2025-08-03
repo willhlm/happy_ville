@@ -1,7 +1,6 @@
 import pygame, sys
 import read_files
 import entities_UI
-import cutscene
 import constants as C
 import animation
 
@@ -44,7 +43,9 @@ class Title_menu(Game_State):
         self.initiate_buttons()
         self.define_BG()
         #self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
-        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-10, -3])
+        offset = [-10, -2]
+        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-8, -1], animate = True)
+        self.arrow_2 = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midright, game.game_objects, offset = [-8, -1], mirrored = True, animate = True)
 
     def initiate_buttons(self):
         buttons = ['New game','Load game','Option','Quit']
@@ -54,7 +55,7 @@ class Title_menu(Game_State):
         for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
             self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [x_pos, y_pos], center = True))
-            y_pos += 20
+            y_pos += self.game.game_objects.font.get_height() + 3
 
     def define_BG(self):
         size = (90,100)
@@ -67,6 +68,8 @@ class Title_menu(Game_State):
 
     def update(self):#update menu arrow position
         self.animation.update()
+        self.arrow.animate()
+        self.arrow_2.animate()
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.update()
@@ -85,10 +88,13 @@ class Title_menu(Game_State):
 
         #blit arrow
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
+        self.game.display.render(self.arrow_2.image, self.game.screen, position = self.arrow_2.rect.topleft, flip = True)
 
     def update_arrow(self):
         ref_pos = self.buttons[self.current_button].rect.midleft
+        ref_pos2 = self.buttons[self.current_button].rect.midright
         self.arrow.update_pos((ref_pos[0], ref_pos[1]))
+        self.arrow_2.update_pos((ref_pos2[0], ref_pos2[1]))
         self.arrow.play_SFX()
 
     def handle_events(self, input):
@@ -122,15 +128,15 @@ class Title_menu(Game_State):
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
+            #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
-            #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
-            #self.game.game_objects.load_map(self,'collision_map_4','1')
+            #self.game.game_objects.load_map(self,'spirit_world_1','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()
@@ -148,7 +154,7 @@ class Load_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
+        self.title = self.game.game_objects.font.render(text = 'Inventory') #temporary
         self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
@@ -499,7 +505,7 @@ class Gameplay(Game_State):
 
     def blit_fps(self):
         fps_string = str(int(self.game.clock.get_fps()))
-        image = self.game.game_objects.font.render((50,12),'fps ' + fps_string)
+        image = self.game.game_objects.font.render((50,20),'fps ' + fps_string)
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-50,20),shader = self.game.game_objects.shaders['colour'])#shader render
         image.release()
@@ -527,7 +533,7 @@ class Gameplay(Game_State):
 
             elif event[-1] == 'select':
                 input.processed()
-                self.game.state_manager.enter_state('UIs', page = 'backpack')
+                self.game.state_manager.enter_state('UIs', page = 'inventory')
 
             elif event[-1] == 'down':
                 input.processed()#should it be processed here or when passed through?
@@ -538,7 +544,10 @@ class Gameplay(Game_State):
                 self.game.game_objects.player.abilities.handle_input(event[2]['d_pad'])#to change movement ability with d pad
 
             else:
-                self.game.game_objects.player.currentstate.handle_press_input(input)
+                interpreted = self.game.game_objects.input_interpreter.interpret(input)
+                self.game.game_objects.player.currentstate.handle_press_input(interpreted)
+
+                #self.game.game_objects.player.currentstate.handle_press_input(interpret_input)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
@@ -709,11 +718,9 @@ class Fadein(Gameplay):
         self.fade_surface.clear(0,0,0,255)
 
     def init(self):
-        self.aila_state = 'Idle_main'#for respawn after death
         for state in self.game.state_manager.state_stack:
             if 'Death' == type(state).__name__:
-                self.aila_state = 'Invisible_main'
-                self.game.game_objects.player.currentstate.enter_state('Invisible_main')
+                self.game.game_objects.player.currentstate.enter_state('invisible')
                 break
 
     def update(self):
@@ -724,7 +731,6 @@ class Fadein(Gameplay):
 
     def exit(self):
         self.game.game_objects.player.reset_movement()
-        self.game.game_objects.player.currentstate.enter_state(self.aila_state)
         self.fade_surface.release()
         self.game.state_manager.exit_state()
 
@@ -792,12 +798,13 @@ class Safe_spawn_2(Gameplay):#fade
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.fade_surface.clear(0,0,0,255)
         self.game.game_objects.player.set_pos(self.game.game_objects.player.backpack.map.spawn_point['safe_spawn'])
-        self.game.game_objects.player.currentstate.enter_state('Stand_up_main')
+        self.game.game_objects.player.currentstate.enter_state('crouch', phase = 'main')
 
     def update(self):
         super().update()
         self.count += self.game.dt
         if self.count > self.fade_length*2:
+            self.game.game_objects.player.currentstate.handle_input('pray_post')#to stand up
             self.game.state_manager.exit_state()
 
     def render(self):
@@ -813,7 +820,7 @@ class Conversation(Gameplay):
         self.game.game_objects.player.velocity = [0,0]
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
-        self.text_window_size = (352, 96)
+        self.text_window_size = (528, 160)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
         self.background = self.game.display.make_layer(self.text_window_size)#TODO
         self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
@@ -825,7 +832,11 @@ class Conversation(Gameplay):
 
     def clean_slate(self):
         self.letter_frame = 0
-        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
+        #self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
+        self.text_window = pygame.image.load('Sprites/utils/text_box3.png').convert_alpha()
+        self.text_window = self.game.display.surface_to_texture(self.text_window)
+        self.text_win_size = self.text_window.size
+        print(self.text_win_size)
         self.game.display.render(self.text_window, self.background)#shader render
 
     def update(self):
@@ -839,15 +850,19 @@ class Conversation(Gameplay):
     def render(self):
         super().render()
         self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
+        self.background.clear(10,10,10,0)#needed to make the self.background semi trasnaprant
+
+        self.game.display.render(self.text_window, self.background)#shader render
 
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
         self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)#shader render
-        self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
-        self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
+        self.game.display.render(text, self.background, position = (144,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
+        self.npc.render_potrait(self.background)#some conversation target may not have potraits
         text.release()
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
-        self.game.display.render(self.conv_screen.texture,self.game.screen,shader = self.game.game_objects.shaders['alpha'])#shader render
+        self.game.display.render(self.background.texture,self.conv_screen,position = [(640 - self.text_win_size[0])/2, 50],shader = self.game.game_objects.shaders['alpha'])
+        self.game.display.render(self.conv_screen.texture,self.game.screen)#shader render
 
     def handle_events(self, input):
         event = input.output()
@@ -877,7 +892,7 @@ class Conversation(Gameplay):
         self.background.release()
         self.npc.buisness()
 
-class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
+class UIs(Gameplay):#pressing i: map, inventory, radna, journal
     def __init__(self, game, page, **kwarg):
         super().__init__(game)
         self.game.game_objects.UI.set_ui(page, **kwarg)
@@ -892,6 +907,9 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
 
     def handle_events(self,input):
         self.game.game_objects.UI.handle_events(input)
+
+    def handle_movement(self):#aila movement is not needed in UIs
+        pass
 
 class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
     def __init__(self, game, image, text = '', callback = None):

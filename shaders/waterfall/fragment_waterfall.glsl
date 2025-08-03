@@ -29,12 +29,25 @@ uniform float highlight_width = 0.1;
 uniform vec2 u_resolution = vec2(640, 360);
 uniform vec4 section;
 
+// Texture size uniform - pass the actual pixel dimensions of your texture
+uniform vec2 texture_size; // Current texture size in pixels
+// Reference size for normalization (both speed and scale)
+const vec2 reference_size = vec2(300.0, 400.0);
+
 void main()
 {
 	// Get the two noise textures and make them move on the y axis. The gaps move twice as fast as the refraction, but you can tweak this by changing (speed * 0.5)
     vec2 UV = fragmentTexCoord;
-	vec2 refraction_offset = texture(refraction_map, vec2(UV.x, UV.y + -TIME * speed * 0.5) * scale * refraction_stretch).xy;//looks maybe better without * refraction_strength * zoom
-	vec2 gap_mask = texture(water_mask, vec2(UV.x, UV.y + -TIME * speed) * scale * gap_stretch).xy;
+    
+    // Calculate normalization factors
+    float speed_factor = reference_size.y / texture_size.y; // Use Y dimension for speed (vertical flow)
+    float normalized_speed = speed * speed_factor;
+    
+    // For texture sampling, use a fixed scale based on reference size to make droplets size-independent
+    vec2 fixed_scale = reference_size / 500.0; // Adjust this divisor to control base droplet size
+    
+	vec2 refraction_offset = texture(refraction_map, vec2(UV.x, UV.y + -TIME * normalized_speed * 0.5) * fixed_scale * refraction_stretch).xy;
+	vec2 gap_mask = texture(water_mask, vec2(UV.x, UV.y + -TIME * normalized_speed) * fixed_scale * gap_stretch).xy;
 
 	// Set values between -0.5 and 0.5 (instead of 0 and 1). Otherwise the reflection will move whith increased refraction_strength
 	//refraction_offset -= 0.5;
@@ -44,14 +57,12 @@ void main()
 	vec2 screenUV = UV * normalizedSectionSize + vec2(normalizedSectionPos.x, 1 - normalizedSectionPos.y - normalizedSectionSize.y);
 
 	// Get the screen texture and distort it
-	vec4 refraction = texture(SCREEN_TEXTURE, screenUV + refraction_offset * refraction_strength * zoom);//looks maybe better without * refraction_strength * zoom
-	//can remove the flixking by removing + refraction_offset * refraction_strength * zoom
+	vec4 refraction = texture(SCREEN_TEXTURE, screenUV + refraction_offset * refraction_strength * zoom);
 
 	// Use the grayscale value of the color to adjust the speed
 	float adjustedSpeed = 0.5/(pow(gap_mask.x,0.2)); // Adjust the speed based on the grayscale value
-	// Apply the adjusted speed to the gap_mask offset
-	gap_mask = texture(water_mask, vec2(UV.x, UV.y + TIME * adjustedSpeed) * scale * gap_stretch).xy;
-
+	// Apply the adjusted speed to the gap_mask offset with fixed scale
+	gap_mask = texture(water_mask, vec2(UV.x, UV.y + TIME * adjustedSpeed * speed_factor) * fixed_scale * gap_stretch).xy;
 
 	// Create holes and apply colors and textures //
 	vec4 color = vec4(1,1,1,1);
@@ -78,7 +89,8 @@ void main()
 	// Crate Edge Shape //
 
 	// Set the shape for the top and bottom edges. Use water_mask as shape but with other values to flatten it out horizontally.
-	vec2 water_edge = texture(water_mask, vec2(UV.x, UV.y + -TIME * 0.1) * scale * vec2(0.15, 0.6)).xy;
+	// Apply fixed scale to edge animation
+	vec2 water_edge = texture(water_mask, vec2(UV.x, UV.y + -TIME * 0.1 * speed_factor) * fixed_scale * vec2(0.15, 0.6)).xy;
 	water_edge -= 0.5;
 
 	// Use the same mask as for the gaps for left and right edge.

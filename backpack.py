@@ -20,22 +20,31 @@ class Backpack():#Ailas back pack. Can append new things such as journal, if pic
 
 class Inventory():
     def __init__(self):
-        self.items = {}  # Stores items and their quantities
+        self.items = {}#{"healthpotion": {"item": <Item instance>, "quantity": 3}}
 
-    def add(self, item, quantity = 1):  # Allow adding multiple at once
-        item_name = type(item).__name__.lower()
-        self.items.setdefault(item_name, {'item': item, 'quantity': 0})
-        self.items[item_name]['quantity'] += quantity
+    def get_item(self, item_name):
+        if item_name in self.items:
+            return self.items[item_name]['item']
+        return False
 
-    def remove(self, item_name, quantity = 1):
-        self.items[item_name]['quantity'] -= quantity
+    def add(self, item, quantity=1):
+        name = type(item).__name__.lower()
+        if self.items.get(name, False):
+            self.items[name]["quantity"] += quantity
+        else:#new item
+            new_item = type(item)([0,0], item.game_objects)#make a copy
+            new_item.set_ui()
+            self.items[name] = {"item": new_item, "quantity": quantity}            
 
-    def get_quantity(self, item_name):
-        return self.items[item_name]['quantity']
+    def remove(self, item_name, quantity=1):
+        self.items[item_name]["quantity"] -= quantity
+    
+    def get_quantity(self, item_name):#return quantity. If item doesn't exist, return 0
+        return self.items.get(item_name, {}).get("quantity", 0)
 
 class Map():        
     def __init__(self):
-        self.spawn_point = {'map': 'light_forest_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
+        self.spawn_point = {'map': 'nordveden_1', 'point': '1', 'safe_spawn' : [0,0]}#can append bone
         self.travel_points = {}#Fast travel system will read this dict. The key is the map, value is the coordinate. Appends the info when the travel is unlocked
         self.visited_bioms = {}#should be filled when nwe biome is visited
 
@@ -59,69 +68,60 @@ class Map():
 class Necklace():        
     def __init__(self, entity):
         self.entity = entity
-        self.equipped = {'0':[], '1':[], '2':[]}#equiped omamoris
-        self.inventory = {}#omamoris in inventory.: 'Half_dmg':Half_dmg([0,0], entity.game_objects, entity),'Loot_magnet':Loot_magnet([0,0], entity.game_objects, entity),'Boss_HP':Boss_HP([0,0], entity.game_objects, entity)
-        entity.dmg_scale = 1#one omamori can make it 0.5 (take half the damage)
-        self.level = 1#can be leveld up at black smith
+        self.equipped = {}#rings with radna {'fingers': <Ring instance>}
+        self.inventory = {}#radnas in inventory: # {"half_dmg":  <Half_dmg instance>}
+        self._available_slots = ['index', 'long', 'ring', 'small']
+        self.rings = {}#rings in inventory: {'fingers': <Ring instance>}
 
-    def level_up(self):#shuold be called from e.g. black smith. bot implement yet
-        self.level += 1
+    def get_radna(self, item_name):
+        return self.inventory.get(item_name, False)
+
+    def get_ring(self, item_name):
+        return self.rings.get(item_name, False)
+
+    def add(self, item):
+        name = type(item).__name__.lower()
+        item.set_ui()
+        self.inventory[name] = item
+
+    def add_ring(self, ring):#strong the objects
+        for slot in self._available_slots:
+            if slot not in self.rings:                
+                self.rings[slot] = ring
+                ring.set_finger(slot)
+                break
 
     def update(self):
-        for omamoris in self.equipped.values():
-            for omamori in omamoris:
-                omamori.equipped()
+        for ring in self.equipped.values():
+            ring.update_equipped()
 
-    def handle_press_input(self,input):
-        for omamoris in self.equipped.values():
-            for omamori in omamoris:
-                omamori.handle_press_input(input)
+    def handle_press_input(self, input):
+        for ring in self.equipped.values():
+            ring.handle_press_input(input)
 
-    def equip_omamori(self, omamori_string, list_of_places):        
-        if self.inventory[omamori_string].state != 'equip':#if not alrady equiped
-            number_equipped = len(self.equipped['0']) + len(self.equipped['1']) + len(self.equipped['2'])
-            if number_equipped >= 7: return [False, 'no avilable slots']
+    def check_position(self, radna):
+        for slot in self.rings.keys():
+            ring = self.rings[slot]            
+            if ring.level < radna.level: continue#if not enough level
+            if self.equipped.get(slot, False): continue#if the slot if occupied
+            return slot 
 
-            new_omamori = getattr(sys.modules[__name__], omamori_string)([0,0], self.entity.game_objects, entity = self.entity)
+    def equip_item(self, radna): #called from backpack, to add a radna on to a ring
+        for slot in self.rings.keys():#attach a radna objet to a ring
+            ring = self.rings[slot]            
+            if ring.level < radna.level: continue#if not enough level
+            if self.equipped.get(slot, False): continue#if the slot if occupied
+            ring.attach_radna(radna)    
+            self.equipped[slot] = ring
+            break
 
-            if new_omamori.level == 2:
-                if self.level == 0: return [False, 'no avilable slots']
-                if len(self.equipped['2']) != 0: return [False, 'no avilable slots']
-
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[-1].rect.topleft)
-                self.equipped['2'].append(new_omamori)
-
-            elif new_omamori.level == 1:
-                if len(self.equipped['1']) + len(self.equipped['2']) >= self.level: return [False, 'no avilable slots']
-
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[7 - self.level + len(self.equipped['1'])].rect.topleft)
-                if 7 - self.level + len(self.equipped['1']) == 6:
-                    self.equipped['2'].append(new_omamori)
-                else:
-                    self.equipped['1'].append(new_omamori)
-
-            elif new_omamori.level == 0:
-                self.inventory[omamori_string].currentstate.set_animation_name('equip')
-                new_omamori.attach()
-                new_omamori.set_pos(list_of_places[len(self.equipped['0'])].rect.topleft)
-                self.equipped['0'].append(new_omamori)
-
-        else:# If already equipped, remove the omamori
-            self.inventory[omamori_string].currentstate.set_animation_name('idle')
-            self.inventory[omamori_string].ui_group.empty()
-
-            for key in self.equipped.keys():
-                for omamori in self.equipped[key]:
-                    if type(omamori).__name__ != omamori_string: continue
-                    omamori.detach()
-                    self.equipped[key].remove(omamori)
-                    break
-
-        return [True]
+    def remove_item(self, radna): #called from backpack, to remove a radna from a ring
+        for slot in self.rings.keys():#attach a radna objet to a ring
+            ring = self.rings[slot]
+            if ring.radna == radna:
+                ring.detach_radna(radna)    
+                del self.equipped[slot]    
+                break  
 
 class Journal():#beast journal 
     def __init__(self):

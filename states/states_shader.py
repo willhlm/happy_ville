@@ -35,6 +35,8 @@ class Idle(Shader_states):
             self.enter_state('Blur')
         elif input == 'motion_blur':
             self.enter_state('MB')
+        if input == 'colour':
+            self.enter_state('Colour', **kwarg)            
 
 class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
     def __init__(self, entity, **kwarg):
@@ -48,11 +50,13 @@ class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
         self.colour = kwarg.get('colour', [1, 1, 1, 1])
         self.decay_rate = kwarg.get('decay_rate', 5)
         self.direction = kwarg.get('direction', [1,0])
+        self.alpha_decay = kwarg.get('alpha_decay', 0.974)
 
     def draw(self):
         self.entity.shader['time'] = self.time*0.01
         self.entity.shader['frequency'] = self.frequency
         self.entity.shader['amplitude'] = self.amplitude
+        self.colour[-1] *= self.alpha_decay
         self.entity.shader['colour'] = self.colour
         self.entity.shader['decay_rate'] = self.decay_rate
         self.entity.shader['direction'] = self.direction
@@ -93,6 +97,19 @@ class Mix_colour(Shader_states):#shade screen uses it
         self.entity.shader['colour'] = self.entity.colour#higher alpha for lower parallax
         self.entity.shader['new_colour'] = self.entity.new_colour#higher alpha for lower parallax
         self.entity.shader['position'] = max((self.entity.game_objects.player.hitbox.centerx - self.entity.bounds.left)/self.entity.bounds[2],0)
+
+    def handle_input(self,input):
+        if input == 'idle':
+            self.enter_state('Idle')
+
+class Colour(Shader_states):#shade screen uses it
+    def __init__(self,entity, **kwarg):#colour is a list of 4 floats):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['colour']
+        self.colour = kwarg.get('colour', [1,1,1,1])#colour is a list of 4 floats
+        
+    def update(self):
+        self.entity.shader['colour'] = self.colour
 
     def handle_input(self,input):
         if input == 'idle':
@@ -240,7 +257,7 @@ class Outline(Shader_states):
     def update(self):
         self.time +=1
 
-    def draw(self):        
+    def draw(self):
         #self.entity.shader['TIME'] = self.time
         return
         self.entity.shader['color_gradiant'] = self.entity.image
@@ -259,7 +276,7 @@ class MB(Shader_states):#motion blur
     def update(self):
         pass
 
-    def draw(self):        
+    def draw(self):
         self.entity.shader['dir'] = self.dir
         self.entity.shader['quality'] = 6
 
@@ -269,21 +286,14 @@ class MB(Shader_states):#motion blur
         elif input == 'Hurt':
             self.enter_state('Hurt')
 
-class Slash(Shader_states):#not used
+class Noise_border(Shader_states):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
         self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
-        
-        
-        self.width_gradient_mask = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
-        self.length_gradient_mask = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
-        self.highlight = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
         self.color_Lookup = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
-        
-        
-        self.entity.shader = self.entity.game_objects.shaders['slash']
 
+        self.entity.shader = self.entity.game_objects.shaders['noise_border']
         self.time = 0
 
     def update(self):
@@ -294,35 +304,100 @@ class Slash(Shader_states):#not used
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
         self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.entity.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
-        self.entity.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
+        self.entity.game_objects.shaders['noise_perlin']['scale'] = [100,100]#"standard"
         self.entity.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
-        
+
+
         self.entity.game_objects.shaders['gradient']['numStops'] = 3
         self.entity.game_objects.shaders['gradient']['colors'] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
         self.entity.game_objects.shaders['gradient']['offsets'] = [0.2, 0.5, 0.52]
 
+        self.entity.game_objects.game.display.render(self.empty.texture, self.color_Lookup, shader = self.entity.game_objects.shaders['gradient'])#shader render
+
+        #self.entity.game_objects.shaders['aura']['AuraProgres'] = 1
+        self.entity.game_objects.shaders['noise_border']['TIME'] = self.time
+        #self.entity.game_objects.shaders['aura']['color_gradiant'] = self.color_Lookup.texture
+        self.entity.game_objects.shaders['noise_border']['textureNoise'] = self.noise_layer.texture
+
+
+        #blit_pos = (round(self.entity.true_pos[0]-self.entity.game_objects.camera_manager.camera.true_scroll[0]), round(self.entity.true_pos[1]-self.entity.game_objects.camera_manager.camera.true_scroll[1]))
+        #self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render
+
+class Aura(Shader_states):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['aura']
+        self.time = 0
+
+    def update(self):
+        self.time += self.entity.game_objects.game.dt * 0.1
+ 
+    def draw(self):
+        self.entity.game_objects.shaders['aura']['TIME'] = self.time
+        self.entity.game_objects.shaders['aura']['AuraProgres'] =1        
+
+class Swirl(Shader_states):
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.entity.shader = self.entity.game_objects.shaders['swirl']
+        self.ratio = 1
+
+    def update(self):
+        self.ratio -= self.entity.game_objects.game.dt*0.01
+        self.ratio = max(0, self.ratio)
+        if self.ratio <= 0:
+            self.enter_state('Idle')
+
+    def draw(self):        
+        self.entity.shader['ratio'] = self.ratio        
+
+class Slash(Shader_states):#not working
+    def __init__(self, entity, **kwarg):
+        super().__init__(entity)
+        self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        self.empty = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        
+        self.width_gradient_mask = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        self.length_gradient_mask = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        self.highlight = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+        self.color_Lookup = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
+                
+        self.entity.shader = self.entity.game_objects.shaders['slash']
+        self.time = 0
+
+    def update(self):
+        self.time += self.entity.game_objects.game.dt * 0.01
+
+    def draw(self):
+        self.empty.clear(0,0,0,0)
+        self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
+        self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
+        self.entity.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
+        self.entity.game_objects.shaders['noise_perlin']['scale'] = [10,10]#"standard"
+        self.entity.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader = self.entity.game_objects.shaders['noise_perlin'])#make perlin noise texture
+        
+        self.entity.game_objects.shaders['gradient']['numStops'] = 3
+        self.entity.game_objects.shaders['gradient']['colors'] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0], [0,0,0], [0,0,0]]
+        self.entity.game_objects.shaders['gradient']['offsets'] = [0.2, 0.5, 0.52, 0, 0]
         self.entity.game_objects.game.display.render(self.empty.texture, self.width_gradient_mask, shader = self.entity.game_objects.shaders['gradient'])#shader render
 
         self.entity.game_objects.shaders['gradient']['numStops'] = 5
         self.entity.game_objects.shaders['gradient']['colors'] = [[1.0, 1.0, 1.0], [0.498, 0.498, 0.498], [0,0,0], [0.498, 0.498, 0.498], [1.0, 1.0, 1.0]]
         self.entity.game_objects.shaders['gradient']['offsets'] = [0.25, 0.4, 0.6, 0.65, 0.7]
-
         self.entity.game_objects.game.display.render(self.empty.texture, self.length_gradient_mask, shader = self.entity.game_objects.shaders['gradient'])#shader render
 
         self.entity.game_objects.shaders['gradient']['numStops'] = 3
-        self.entity.game_objects.shaders['gradient']['colors'] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]]
-        self.entity.game_objects.shaders['gradient']['offsets'] = [0.5, 0.52, 0.54]
-
+        self.entity.game_objects.shaders['gradient']['colors'] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0], [0,0,0], [0,0,0]]
+        self.entity.game_objects.shaders['gradient']['offsets'] = [0.5, 0.52, 0.54, 0, 0]
         self.entity.game_objects.game.display.render(self.empty.texture, self.highlight, shader = self.entity.game_objects.shaders['gradient'])#shader render
 
         self.entity.game_objects.shaders['gradient']['numStops'] = 3
-        self.entity.game_objects.shaders['gradient']['colors'] = [[0.749, 0.251, 0.749], [0.0, 0.502, 0.502], [0.678, 0.847, 0.902]]
-        self.entity.game_objects.shaders['gradient']['offsets'] = [0.0, 0.1, 0.2]
-
+        self.entity.game_objects.shaders['gradient']['colors'] = [[0.749, 0.251, 0.749], [0.0, 0.502, 0.502], [0.678, 0.847, 0.902], [0,0,0], [0,0,0]]
+        self.entity.game_objects.shaders['gradient']['offsets'] = [0.0, 0.1, 0.2, 0 , 0]
         self.entity.game_objects.game.display.render(self.empty.texture, self.color_Lookup, shader = self.entity.game_objects.shaders['gradient'])#shader render
 
         self.entity.game_objects.shaders['slash']['progress'] = self.time
-        self.entity.game_objects.shaders['slash']['TIME'] = self.time
+        self.entity.game_objects.shaders['slash']['time'] = self.time
 
         self.entity.game_objects.shaders['slash']['base_noise'] = self.noise_layer.texture
         self.entity.game_objects.shaders['slash']['width_gradient_mask'] = self.width_gradient_mask.texture
@@ -332,5 +407,3 @@ class Slash(Shader_states):#not used
 
         blit_pos = (round(self.entity.true_pos[0]-self.entity.game_objects.camera_manager.camera.true_scroll[0]), round(self.entity.true_pos[1]-self.entity.game_objects.camera_manager.camera.true_scroll[1]))
         self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render
-
-         

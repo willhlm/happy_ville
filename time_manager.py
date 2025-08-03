@@ -24,9 +24,11 @@ class Slow_motion():
         self.game_objects = game_objects
         self.time_scale = kwarg.get('time_scale', 0.5)
         self.lifetime = kwarg.get('duration', 100)
+        self.callback = kwarg.get('callback', None)
 
     def update(self):
         self.lifetime -= self.game_objects.game.dt
         self.game_objects.game.dt *= self.time_scale  
         if self.lifetime < 0:
             self.game_objects.time_manager.time_modifiers.remove(self)   
+            if self.callback: self.callback()

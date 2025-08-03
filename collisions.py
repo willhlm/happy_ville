@@ -4,7 +4,7 @@ class Collisions():
     def __init__(self,game_objects):
         self.game_objects = game_objects
 
-    def check_ground(self,point):#called from AI
+    def check_ground(self, point):#called from AI
         for platform in self.game_objects.platforms:
             if platform.hitbox.collidepoint(point):
                 return True
@@ -54,16 +54,21 @@ class Collisions():
     def projectile_collision(self, projectiles, enemies):
         for projectile in projectiles.sprites():#go through the group
             #projectile collision?            
-            collision_enemy = pygame.sprite.spritecollideany(projectile, enemies, Collisions.collided)
+            collision_enemies = pygame.sprite.spritecollide(projectile, enemies, False, Collisions.collided)
             collision_interactables = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables, Collisions.collided)
-
+            collision_interactables_fg = pygame.sprite.spritecollideany(projectile, self.game_objects.interactables_fg, Collisions.collided)
+            
             #if hit chest, bushes
             if collision_interactables:
                 projectile.collision_interactables(collision_interactables)#go through the projecticle in case there are projectile that should do dmg to interactable
 
+            #if hit e.g. twoDliquid
+            if collision_interactables_fg:
+                projectile.collision_interactables_fg(collision_interactables_fg)
+
             #if hit enemy
-            if collision_enemy:
-                projectile.collision_enemy(collision_enemy)#go through the projecticle in case there are projectile that should do dmg to enemy
+            for enemy in collision_enemies:
+                projectile.collision_enemy(enemy)
 
     #check for player collision
     def player_collision(self, enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce
@@ -93,15 +98,15 @@ class Collisions():
             
             #move in x every dynamic sprite            
             entity.old_hitbox = entity.hitbox.copy()#save old position
-            entity.update_true_pos_x()
+            entity.update_true_pos_x()#it sets the true pos and update the hitbox
             static_entities_x = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
             for static_entity_x in static_entities_x:                
                 static_entity_x.collide_x(entity)
 
             #move in y every dynamic sprite
-            entity.update_true_pos_y()            
-            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)
-            for static_entity_y in static_entities_y:
+            entity.update_true_pos_y()#it sets the true pos and update the hitbox              
+            static_entities_y = pygame.sprite.spritecollide(entity, self.game_objects.platforms, False, Collisions.collided)                        
+            for static_entity_y in static_entities_y:                
                 static_entity_y.collide_y(entity)
 
             ramps = pygame.sprite.spritecollide(entity,self.game_objects.platforms_ramps,False,Collisions.collided)
@@ -113,6 +118,9 @@ class Collisions():
 
     def sprite_collide(self, sprite, group):
         return pygame.sprite.spritecollide(sprite, group, False, Collisions.collided)
+
+    def sprite_collide_any(self, sprite, group):
+        return pygame.sprite.spritecollideany(sprite, group, Collisions.collided)
 
     #make the hitbox collide instead of rect
     @staticmethod
