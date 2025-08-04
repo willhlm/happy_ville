@@ -882,16 +882,17 @@ class Player(Character):
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
-        if 'Dash_jump' in self.movement_manager.modifiers:
-            self.movement_manager.remove_modifier('Dash_jump')
+        self.movement_manager.resolve_collision('ground')
         self.colliding_platform = block#save the latest platform
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
+        self.movement_manager.resolve_collision('side')
         self.colliding_platform = block#save the latest platform
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
+        self.movement_manager.resolve_collision('side')
         self.colliding_platform = block#save the latest platform
 
     def update_vel(self):#called from hitsop_states
