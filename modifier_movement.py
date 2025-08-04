@@ -32,7 +32,6 @@ class Movement_manager():
             elif direction == 'side':
                 mod.side_collision()
 
-
     def update(self):
         modifiers = self._sorted_modifiers.copy()
         for mod in modifiers:
