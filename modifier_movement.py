@@ -25,6 +25,13 @@ class Movement_manager():
             mod.apply(context)
         return context
 
+    def resolve_collision(self, direction):
+        for mod in list(self.modifiers.values()):
+            if direction == 'ground':
+                mod.ground_collision()
+            elif direction == 'side':
+                mod.side_collision()
+
     def update(self):
         modifiers = self._sorted_modifiers.copy()
         for mod in modifiers:
@@ -48,6 +55,12 @@ class Movement_modifier():
         pass
 
     def update(self):#called from aila update
+        pass
+
+    def ground_collision(self):
+        pass
+
+    def side_collision(self):
         pass
 
 class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
@@ -89,13 +102,21 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         context.friction[0] = self.friction_x
         context.friction[1] = self.friction_y
 
+    def ground_collision(self):
+        self.entity.movement_manager.remove_modifier('Dash_jump')
+
+    def side_collision(self):
+        self.entity.movement_manager.remove_modifier('Dash_jump')
+
     def update(self):
         if self.inc_fric:
-            #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 1.5)
-            self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.22)
+            self.friction_x += self.entity.game_objects.game.dt * 0.0008 #this is probably the best one
+            #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 2)
+            #self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.5)
+
         self.friction_y -= self.entity.game_objects.game.dt * 0.0015
         self.friction_y = max(0, self.friction_y)
-        if self.target - self.friction_x < 0.003:
+        if self.target - self.friction_x < 0.0003:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 
 

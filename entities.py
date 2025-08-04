@@ -882,16 +882,17 @@ class Player(Character):
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
-        if 'Dash_jump' in self.movement_manager.modifiers:
-            self.movement_manager.remove_modifier('Dash_jump')
+        self.movement_manager.resolve_collision('ground')
         self.colliding_platform = block#save the latest platform
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
+        self.movement_manager.resolve_collision('side')
         self.colliding_platform = block#save the latest platform
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
+        self.movement_manager.resolve_collision('side')
         self.colliding_platform = block#save the latest platform
 
     def update_vel(self):#called from hitsop_states
@@ -899,6 +900,7 @@ class Player(Character):
         self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
+        print(self.velocity[0])
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
         return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
