@@ -115,6 +115,7 @@ class FallState(CompositeState):
     def __init__(self, entity):
         super().__init__(entity)
         self.phases = {'pre': FallPre(entity), 'main': FallMain(entity), 'post': FallPost(entity)}
+
 #wrappers
 class InvisibleState(CompositeState):
     def __init__(self, entity):
@@ -900,8 +901,8 @@ class FallPre(PhaseBase):
                 input.processed()
                 self.enter_state('Ground_dash_pre', wall_dir = self.wall_dir)
             else:
-                input.processed() 
-                self.enter_state('dash_air')                
+                input.processed()
+                self.enter_state('dash_air')
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
@@ -1200,18 +1201,20 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_jump_pre')#the name of the class
-        self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)
         self.dash_length = C.dash_jump_length
         self.entity.velocity[0] = C.dash_vel * self.entity.dir[0]
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
+        self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.dash_jump_vel_player
+        self.entity.acceleration[1] = 0.04
         self.buffer_time = C.jump_dash_wall_timer
-        self.entity.acceleration[1] = 0.20
 
     def exit_state(self):
         if self.dash_length < 0:
+            self.entity.acceleration[1] =  C.acceleration[1]
+            self.entity.movement_manager.modifiers['Dash_jump'].increase_friction()
             self.enter_state('fall')
 
     def handle_movement(self, event):
@@ -1226,16 +1229,12 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
                         self.enter_state(state, **kwarg)
 
     def enter_state(self, state):
-        self.entity.acceleration[1] = C.acceleration[1]
-        self.entity.movement_manager.modifiers['Dash_jump'].increase_friction()
-        self.entity.movement_manager.modifiers['Dash_jump'].set_fritction_y(0.07)
+        self.entity.acceleration[1] =  C.acceleration[1]
         super().enter_state(state)
         self.entity.shader_state.handle_input('idle')
 
     def enter_phase(self, phase):
-        self.entity.acceleration[1] = C.acceleration[1]
-        self.entity.movement_manager.modifiers['Dash_jump'].increase_friction()
-        self.entity.movement_manager.modifiers['Dash_jump'].set_fritction_y(0.07)
+        self.entity.acceleration[1] =  C.acceleration[1]
         super().enter_phase(phase)
         self.entity.shader_state.handle_input('idle')
 
