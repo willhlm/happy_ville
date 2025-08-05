@@ -57,10 +57,8 @@ class Game_Objects():
         self.platforms = groups.Group()#platforms
         self.special_shaders = groups.Group()#portal use it for the drawing: draw not called normally but in different gameplay state
         self.platforms_ramps = groups.Group()#ramps
-        self.all_bgs = []
-        self.all_fgs = []
-        #self.all_bgs = groups.LayeredUpdates()#bg from tiled
-        #self.all_fgs = groups.LayeredUpdates()#fgs from tileed
+        self.all_bgs = groups.LayeredGroup()#[]
+        self.all_fgs = groups.LayeredGroup()#[]
         self.bg_interact = groups.Group()#small grass stuff so that interactables blends with BG
         self.bg_fade = groups.Group()#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
         self.eprojectiles = groups.Group()#enemy projectiles
@@ -106,12 +104,8 @@ class Game_Objects():
         self.loot.empty()
         self.platforms_ramps.empty()
         self.entity_pause.empty()  
-        for bg in self.all_bgs:      
-            bg.empty()
-        self.all_bgs = []
-        for fg in self.all_fgs:      
-            fg.empty()    
-        self.all_fgs = []        
+        self.all_bgs.empty()
+        self.all_fgs.empty()
         self.camera_blocks.empty()
         self.bg_interact.empty()
         self.cosmetics.empty()
@@ -152,11 +146,9 @@ class Game_Objects():
         self.platforms.update()        
         self.platforms_ramps.update()
         self.layer_pause.update()#should be before all_bgs and all_fgs
-        for bg in self.all_bgs:
-            bg.update()
+        self.all_bgs.update()
         self.bg_interact.update()
-        for fg in self.all_fgs:
-            fg.update()        
+        self.all_fgs.update()
         self.players.update()
         self.entity_pause.update()#should be before enemies, npcs and interactable groups
         self.enemies.update()
@@ -176,13 +168,8 @@ class Game_Objects():
 
     def draw(self):#called from render states
         self.lights.clear_normal_map()        
-        #self.game.display.use_alpha_blending(False)
-        for index_bg, bg in enumerate(self.all_bgs):
-            layer_bg = list(self.game.screen_manager.active_screens)[index_bg]              
-            bg.draw(self.game.screen_manager.screens[layer_bg].layer)           
-        
-        #self.game.display.use_alpha_blending(True)
-        player_layer_screen = self.game.screen_manager.screens[layer_bg].layer
+        layer = self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer      
+        player_layer_screen = self.game.screen_manager.screens[layer].layer
         self.interactables.draw(player_layer_screen)#should be before bg_interact
         self.bg_interact.draw(player_layer_screen)
         self.cosmetics2.draw(player_layer_screen)#Should be before enteties
@@ -200,13 +187,10 @@ class Game_Objects():
         self.cosmetics.draw(player_layer_screen)#Should be before fgs
         self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs
         
-        for index_fg, fg in enumerate(self.all_fgs):
-            layer_bg = list(self.game.screen_manager.active_screens)[index_bg + index_fg + 1]
-            fg.draw(self.game.screen_manager.screens[layer_bg].layer)      
-            
+        layer = self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer              
         #self.camera_blocks.draw()
-        self.lights.draw(self.game.screen_manager.screens[layer_bg].layer)#should be second to last
-        self.shader_render.draw(self.game.screen_manager.screens[layer_bg].layer)#housld be last: screen shader (can also make it compatible with enteties?)
+        self.lights.draw(self.game.screen_manager.screens[layer].layer)#should be second to last
+        self.shader_render.draw(self.game.screen_manager.screens[layer].layer)#housld be last: screen shader
         
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
@@ -245,10 +229,11 @@ class Game_Objects():
             #for reflect in self.reflections:
             #    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
             #    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
-            for reflect in self.all_bgs:
-                if type(reflect).__name__ == 'Reflection':
-                    pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
-                    pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+            for group in self.all_bgs.group_dict.values():
+                for obj in group:
+                    if type(obj).__name__ == 'Reflection':
+                        pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                        pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             for reflect in self.cosmetics:
                 if type(reflect).__name__ == 'Reflection':

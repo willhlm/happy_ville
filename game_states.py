@@ -125,7 +125,7 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_2','1')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
@@ -543,7 +543,7 @@ class Gameplay(Game_State):
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-        elif event[2]['l_stick'][1] > 0.85:
+        elif event[2]['l_stick'][1] > 0.85:#pressing down
             input.processed()#should it be processed here or when passed through?
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 

@@ -1,5 +1,30 @@
 import pygame
 
+class LayeredGroup():#costum layered rendering group
+    def __init__(self):
+        super().__init__()
+        self.group_dict = {}#a dict of groups for each layer
+
+    def add(self, layer_name, obj, layer = None):#add a object to a specific layer
+        self.group_dict[layer_name].add(obj, layer = layer)
+
+    def new_group(self, layer_name, pygame_group):
+        self.group_dict[layer_name] = pygame_group
+
+    def draw(self, target):
+        for (layer, group) in self.group_dict.items():
+            group.draw(target[layer].layer)       
+        return layer
+
+    def empty(self):    
+        for group in self.group_dict.values():
+            group.empty()
+        self.group_dict = {}   
+
+    def update(self):
+        for group in self.group_dict.values():
+            group.update()
+
 class Group(pygame.sprite.Group):#normal
     def __init__(self):
         super().__init__()
@@ -7,22 +32,6 @@ class Group(pygame.sprite.Group):#normal
     def draw(self, target):
         for spr in self.sprites():
             spr.draw(target)
-
-    def empty(self):    
-        for spr in self.sprites():
-            spr.release_texture()   
-        super().empty()
-
-
-class Group_BG(pygame.sprite.Group):#normal
-    def __init__(self):
-        super().__init__()
-
-    def draw(self, target):
-        for spr in self.sprites():
-            #spr.game_objects.game.display.use_alpha_blending(False)
-            spr.draw(target)
-            #spr.game_objects.game.display.use_alpha_blending(True)
 
     def empty(self):    
         for spr in self.sprites():
@@ -61,15 +70,14 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
         if pos[0] < s.bounds[0] or pos[0] > s.bounds[1] or pos[1] < s.bounds[2] or pos[1] > s.bounds[3]: #or abs(entity.rect[1])>300:#this means it is outside of screen
             pass
         else:#manually add to a specific layer
-            return
-            sprites = s.game_objects.all_bgs[-1].sprites()
-            bg = s.game_objects.all_bgs[-1].reference[tuple(s.parallax)]
-            index = sprites.index(bg)#find the index in which the static layer is located
-
-            s.game_objects.all_bgs[-1].spritedict[s] = s.game_objects.all_bgs[-1]._init_rect#in add internal
-            s.game_objects.all_bgs[-1]._spritelayers[s] = 0
-            s.game_objects.all_bgs[-1]._spritelist.insert(index,s)#it goes behind the static layer of reference
-            s.add_internal(s.game_objects.all_bgs[-1])
+            #s.remove(s.pause_group)#remove from pause  
+            #s.game_objects.all_bgs.add(s.layer_name, s, layer = 0)
+            #return
+            
+            s.game_objects.all_bgs.group_dict[s.layer_name].spritedict[s] = s.game_objects.all_bgs.group_dict[s.layer_name]._init_rect#in add internal
+            s.game_objects.all_bgs.group_dict[s.layer_name]._spritelayers[s] = 0
+            s.game_objects.all_bgs.group_dict[s.layer_name]._spritelist.insert(0, s)#add it behind everything
+            s.add_internal(s.game_objects.all_bgs.group_dict[s.layer_name])
             s.remove(s.pause_group)#remove from pause
 
 class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside the boundaries

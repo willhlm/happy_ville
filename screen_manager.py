@@ -14,18 +14,12 @@ class ScreenManager():
         
     def activate_screen(self, key):
         self.active_screens.append(key)
-        self._sort_screens()
         
     def deactivate_screen(self, key):
         self.active_screens.remove(key)
         
     def clear_screens(self):#called from map loader, loading a new map
         self.active_screens = []       
-
-    def _sort_screens(self):#Keep original order but move 'main' to the end
-        if 'main' in self.active_screens:
-            self.active_screens.remove('main')
-            self.active_screens.append('main')
 
     def render(self):#render multiple screen, for each parallax, with pp precision
         self.game.display.set_premultiplied_alpha_blending()
