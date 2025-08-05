@@ -57,8 +57,10 @@ class Game_Objects():
         self.platforms = groups.Group()#platforms
         self.special_shaders = groups.Group()#portal use it for the drawing: draw not called normally but in different gameplay state
         self.platforms_ramps = groups.Group()#ramps
-        self.all_bgs = groups.LayeredUpdates()#bg from tiled
-        self.all_fgs = groups.LayeredUpdates()#fgs from tileed
+        self.all_bgs = []
+        self.all_fgs = []
+        #self.all_bgs = groups.LayeredUpdates()#bg from tiled
+        #self.all_fgs = groups.LayeredUpdates()#fgs from tileed
         self.bg_interact = groups.Group()#small grass stuff so that interactables blends with BG
         self.bg_fade = groups.Group()#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
         self.eprojectiles = groups.Group()#enemy projectiles
@@ -103,9 +105,13 @@ class Game_Objects():
         self.platforms.empty()
         self.loot.empty()
         self.platforms_ramps.empty()
-        self.entity_pause.empty()
-        self.all_bgs.empty()
-        self.all_fgs.empty()
+        self.entity_pause.empty()  
+        for bg in self.all_bgs:      
+            bg.empty()
+        self.all_bgs = []
+        for fg in self.all_fgs:      
+            fg.empty()    
+        self.all_fgs = []        
         self.camera_blocks.empty()
         self.bg_interact.empty()
         self.cosmetics.empty()
@@ -146,9 +152,11 @@ class Game_Objects():
         self.platforms.update()        
         self.platforms_ramps.update()
         self.layer_pause.update()#should be before all_bgs and all_fgs
-        self.all_bgs.update()
+        for bg in self.all_bgs:
+            bg.update()
         self.bg_interact.update()
-        self.all_fgs.update()
+        for fg in self.all_fgs:
+            fg.update()        
         self.players.update()
         self.entity_pause.update()#should be before enemies, npcs and interactable groups
         self.enemies.update()
@@ -167,28 +175,39 @@ class Game_Objects():
         self.shader_render.update()#housld be last
 
     def draw(self):#called from render states
-        self.lights.clear_normal_map()
-        self.all_bgs.draw(self.game.screen)
-        self.interactables.draw(self.game.screen)#should be before bg_interact
-        self.bg_interact.draw(self.game.screen)
-        self.cosmetics2.draw(self.game.screen)#Should be before enteties
+        self.lights.clear_normal_map()        
+        #self.game.display.use_alpha_blending(False)
+        for index_bg, bg in enumerate(self.all_bgs):
+            layer_bg = list(self.game.screen_manager.active_screens)[index_bg]              
+            bg.draw(self.game.screen_manager.screens[layer_bg].layer)           
         
-        self.enemies.draw(self.game.screen)
-        self.npcs.draw(self.game.screen)
-        self.loot.draw(self.game.screen)
-        self.players.draw(self.game.screen)
-        self.platforms.draw(self.game.screen)
-        self.fprojectiles.draw(self.game.screen)
-        self.eprojectiles.draw(self.game.screen)        
+        #self.game.display.use_alpha_blending(True)
+        player_layer_screen = self.game.screen_manager.screens[layer_bg].layer
+        self.interactables.draw(player_layer_screen)#should be before bg_interact
+        self.bg_interact.draw(player_layer_screen)
+        self.cosmetics2.draw(player_layer_screen)#Should be before enteties
         
-        self.interactables_fg.draw(self.game.screen)#shoud be after player
-        self.cosmetics.draw(self.game.screen)#Should be before fgs
-        self.cosmetics_no_clear.draw(self.game.screen)#Should be before fgs
-        self.all_fgs.draw(self.game.screen)
+        self.enemies.draw(player_layer_screen)
+        self.npcs.draw(player_layer_screen)
+        self.loot.draw(player_layer_screen)
+        self.players.draw(player_layer_screen)
+                
+        self.platforms.draw(player_layer_screen)
+        self.fprojectiles.draw(player_layer_screen)
+        self.eprojectiles.draw(player_layer_screen)        
+        
+        self.interactables_fg.draw(player_layer_screen)#shoud be after player
+        self.cosmetics.draw(player_layer_screen)#Should be before fgs
+        self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs
+        
+        for index_fg, fg in enumerate(self.all_fgs):
+            layer_bg = list(self.game.screen_manager.active_screens)[index_bg + index_fg + 1]
+            fg.draw(self.game.screen_manager.screens[layer_bg].layer)      
+            
         #self.camera_blocks.draw()
-        self.lights.draw(self.game.screen)#should be second to last
-        self.shader_render.draw(self.game.screen)#housld be last: screen shader (can also make it compatible with enteties?)
-
+        self.lights.draw(self.game.screen_manager.screens[layer_bg].layer)#should be second to last
+        self.shader_render.draw(self.game.screen_manager.screens[layer_bg].layer)#housld be last: screen shader (can also make it compatible with enteties?)
+        
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
             image = pygame.Surface(self.game.window_size,pygame.SRCALPHA,32).convert_alpha()
@@ -237,5 +256,5 @@ class Game_Objects():
                     pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             tex = self.game.display.surface_to_texture(image)
-            self.game.display.render(tex, self.game.screen)#shader render
+            self.game.display.render(tex, player_layer_screen)#shader render
             tex.release()

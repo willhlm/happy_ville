@@ -35,17 +35,17 @@ class BG_Block(Staticentity):
         if self.parallax[0] != 1:  # Don't blur if there is no parallax
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = self.blur_radius  # Set the blur radius
-            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
             self.layers = self.game_objects.game.display.make_layer(self.image.size)# Make an empty layer
+            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline        
             self.game_objects.game.display.render(self.image, self.layers, shader = shader)  # Render the image onto the layer
             self.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
             self.image.release()
             self.image = self.layers.texture  # Get the texture of the layer
 
     def draw(self, target):
-        self.blurstate.set_uniform()#sets the blur radius
-        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)  # Shader render
+        self.blurstate.set_uniform()#zsets the blur radius
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[1]))       
+        self.game_objects.game.display.render(self.image, target, position = pos)  # Shader render
 
     def release_texture(self):  # Called when .kill() and when emptying the group
         self.image.release()
@@ -675,7 +675,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
+        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render        
 
 class Smoke(Staticentity):#2D smoke
     def __init__(self, pos, game_objects, size, **properties):
@@ -966,7 +966,7 @@ class Player(Character):
 
     def draw(self, target):#called in group
         self.shader_state.draw()
-        self.blit_pos = (round(self.true_pos[0]-self.game_objects.camera_manager.camera.true_scroll[0]), round(self.true_pos[1]-self.game_objects.camera_manager.camera.true_scroll[1]))
+        self.blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.scroll[0]), int(self.true_pos[1]-self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
