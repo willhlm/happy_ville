@@ -131,7 +131,7 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'nordveden_2','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
@@ -497,9 +497,9 @@ class Gameplay(Game_State):
         self.game.game_objects.UI.hud.update()
 
     def render(self):
-        self.game.game_objects.draw()
+        self.game.game_objects.draw()#rendered on multiple layers on each parallax screen
         #self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
-        self.game.game_objects.UI.hud.render()
+        self.game.game_objects.UI.hud.render()#renders on main screen
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
 
@@ -568,8 +568,6 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.define_BG()
         self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
-        self.screen_copy = self.game.display.make_layer(self.game.window_size)
-
     def define_BG(self):
         size = (100,120)
         bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
@@ -583,7 +581,6 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.button_rects = {}
         for b in self.buttons:
             text = (self.game.game_objects.font.render(text = b))
-            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
@@ -598,9 +595,10 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
 
     def render(self):
         super().render()
-        self.background.clear(50,50,50,30)
-        self.game.game_objects.shaders['blur']['blurRadius'] = 0.1
-        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#blur screen
+        screen_copy = self.game.screen_manager.get_screen()#copy the screen -> doesn't copy the main (has the ui)
+        self.game.display.render(self.game.screen.texture, screen_copy)#copy also the ui
+        self.background.clear(50, 50, 50, 30)        
+        
         self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]*0.5 - self.bg.width*0.5,100))#shader render
 
         #blit title
@@ -613,15 +611,15 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         #blit arrow
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
         self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-
-        self.game.display.render(self.screen_copy.texture, self.game.screen)#shader render
+                
+        self.game.game_objects.shaders['blur']['blurRadius'] = 1
+        self.game.display.render(screen_copy.texture, self.game.screen, shader = self.game.game_objects.shaders['blur'])#shader render
         self.game.display.render(self.background.texture, self.game.screen)#shader render
 
     def release_texture(self):
         self.title.release()
         self.bg.release()
         self.background.release()
-        self.screen_copy.release()
         for key in self.button_surfaces.keys():
             self.button_surfaces[key].release()
 

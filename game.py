@@ -4,7 +4,7 @@ import constants as C
 import read_files
 import state_manager
 from pygame_render import RenderEngine
-
+import screen_manager
 #pygame.print_debug_info()
 
 class Game():
@@ -15,9 +15,9 @@ class Game():
         display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
 
-        self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])
-        self.screen = self.display.make_layer(self.window_size)
-        self.screens = {}
+        self.display = RenderEngine(display_size[0] - self.scale, display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])        
+        self.screen_manager = screen_manager.ScreenManager(self)
+        self.screen = self.display.make_layer(self.window_size)#the "main" screen ''rendered last''
 
         #initiate game related values
         self.clock = pygame.time.Clock()
@@ -52,7 +52,7 @@ class Game():
     def run(self):
         while True:
             self.screen.clear(0, 0, 0, 0)
-            for screen in list(self.screens.values()):
+            for screen in list(self.screen_manager.screens.values()):
                 screen.layer.clear(0, 0, 0, 0)
 
             #tick clock
@@ -66,9 +66,11 @@ class Game():
             self.state_manager.update()
 
             #render
-            self.state_manager.render()#render onto
-            self.merge_screens()
-            #self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
+            self.state_manager.render()
+            
+            #display rendering
+            self.screen_manager.render()#render multiple screen, and make it pixel perfect to the display
+            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#render the main screen
 
             #update display
             pygame.display.flip()
@@ -79,21 +81,7 @@ class Game():
             scale_h = pygame.display.Info().current_h/self.window_size[1]
             return min(scale_w, scale_h)
         return scale
-
-    def new_screen(self, key, screen):
-        self.screens[key] = screen
-
-    def merge_screens(self):                    
-        self.display.set_premultiplied_alpha_blending()
-        for index, key in enumerate(self.screens.keys()):  
-            screen = self.screens[key]   
-            screen.update()
-            self.game_objects.shaders['pp']['u_camera_offset'] = screen.offset 
-            self.game_objects.shaders['pp']['u_scale'] = self.scale 
-            self.game_objects.shaders['pp']['u_screen_size'] = self.window_size
-            self.display.render(screen.layer.texture, self.display.screen, scale = self.scale, shader = self.game_objects.shaders['pp'])#shader render  
-        self.display.set_normal_alpha_blending()                                              
-            
+                                                    
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()
     pygame.init()#initilise

@@ -108,8 +108,10 @@ class Game_Objects():
         self.entity_pause.empty()  
         for bg in self.all_bgs:      
             bg.empty()
+        self.all_bgs = []
         for fg in self.all_fgs:      
-            fg.empty()            
+            fg.empty()    
+        self.all_fgs = []        
         self.camera_blocks.empty()
         self.bg_interact.empty()
         self.cosmetics.empty()
@@ -175,13 +177,12 @@ class Game_Objects():
     def draw(self):#called from render states
         self.lights.clear_normal_map()        
         #self.game.display.use_alpha_blending(False)
-        
         for index_bg, bg in enumerate(self.all_bgs):
-            screen = list(self.game.screens)[index_bg]  
-            bg.draw(self.game.screens[screen].layer)           
+            layer_bg = list(self.game.screen_manager.active_screens)[index_bg]              
+            bg.draw(self.game.screen_manager.screens[layer_bg].layer)           
         
         #self.game.display.use_alpha_blending(True)
-        player_layer_screen = self.game.screens[screen].layer
+        player_layer_screen = self.game.screen_manager.screens[layer_bg].layer
         self.interactables.draw(player_layer_screen)#should be before bg_interact
         self.bg_interact.draw(player_layer_screen)
         self.cosmetics2.draw(player_layer_screen)#Should be before enteties
@@ -200,12 +201,12 @@ class Game_Objects():
         self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs
         
         for index_fg, fg in enumerate(self.all_fgs):
-            screen = list(self.game.screens)[index_bg + index_fg + 1]
-            fg.draw(self.game.screens[screen].layer)      
+            layer_bg = list(self.game.screen_manager.active_screens)[index_bg + index_fg + 1]
+            fg.draw(self.game.screen_manager.screens[layer_bg].layer)      
             
         #self.camera_blocks.draw()
-        self.lights.draw(self.game.screens[screen].layer)#should be second to last
-        self.shader_render.draw(self.game.screens[screen].layer)#housld be last: screen shader (can also make it compatible with enteties?)
+        self.lights.draw(self.game.screen_manager.screens[layer_bg].layer)#should be second to last
+        self.shader_render.draw(self.game.screen_manager.screens[layer_bg].layer)#housld be last: screen shader (can also make it compatible with enteties?)
         
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:

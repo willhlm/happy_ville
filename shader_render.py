@@ -3,7 +3,7 @@ import shaders
 class Screen_shader():#Shaders applied to whole screen, Can do multiple ones
     def __init__(self, game_objects, default_shader = 'vignette', **kwarg):
         self.game_objects = game_objects        
-        self.layer = game_objects.game.display.make_layer(game_objects.game.screen.size)
+        self.layer = game_objects.game.display.make_layer(game_objects.game.window_size)
         if not default_shader: return
         self.set_shader(default_shader, **kwarg)
 

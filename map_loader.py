@@ -13,7 +13,8 @@ class Level():
         self.biome = Biome(self)
 
     def load_map(self, map_name, spawn):
-        self.game_objects.player.shader_state.handle_input('idle')#reset any shaders that might be on
+        self.game_objects.game.screen_manager.clear_screens()
+        self.game_objects.player.shader_state.handle_input('idle')#reset any shaders that might be on        
         self.references = {'shade':[], 'gate':[], 'lever':[], 'platforms':[], 'bg_fade': []}#to save some stuff so that it can be organisesed later in case e.g. some things needs to be loaded in order: needs to be cleaned after each map loading
         self.spawned = False#a flag so that we only spawn alia once
         self.level_name = map_name.lower()#biom_room
@@ -87,7 +88,7 @@ class Level():
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
             offset = [self.map_data['groups'][group]['offsetx'], self.map_data['groups'][group]['offsety']]
                        
-            self.game_objects.game.new_screen(group, screen_layer.Screen_layer(self.game_objects.game, parallax))#make a screen for eahcl ayer in tiled
+            self.game_objects.game.screen_manager.register_screen(group, parallax)#make a screen for eahcl ayer in tiled
             if group.startswith('bg'):
                 self.game_objects.all_bgs.append(groups.Group_BG())#make a new pygame group for each layer in tiled
                 self.game_objects.all_bgs[-1].reference = {}#to store the reference positions of each static bg layer or other information

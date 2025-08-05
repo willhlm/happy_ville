@@ -102,7 +102,7 @@ class Lights():
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])
         self.game_objects.game.display.render(self.layer2.texture, self.layer3, shader = self.shaders['blur'])
-        self.game_objects.game.display.use_alpha_blending(True)#turn it back on for rendering on screen
+        self.game_objects.game.display.use_alpha_blending(True)#turn it back on for rendering on screen        
         self.game_objects.game.display.render(self.layer3.texture, self.game_objects.game.screen, shader = self.shaders['blend'])
 
 class Light():#light source
