@@ -77,11 +77,10 @@ class GameLoop():
 
             # Use high-res timer to calculate actual elapsed time
             current_time = time.perf_counter()
-            frame_time = current_time - prev_time
-            frame_time = min(frame_time, 2/C.fps)  # Cap frame time to avoid large jumps
+            frame_time = min(current_time - prev_time, 2/C.fps)# Cap frame time to avoid large jumps
             prev_time = current_time
             self.accumulator += frame_time
-            
+
             self.game.event_loop(frame_time * 60)
 
             # Fixed timestep update(s)
@@ -94,6 +93,7 @@ class GameLoop():
             self.game.state_manager.update_render(frame_time * 60)
             self.game.state_manager.render()
 
+            #render to display
             self.game.screen_manager.render()#render multiple screen, and make it pixel perfect to the display
             self.game.display.render(self.game.screen.texture, self.game.display.screen, scale=self.game.scale)
             pygame.display.flip()

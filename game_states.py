@@ -104,7 +104,6 @@ class Title_menu(Game_State):
     def handle_events(self, input):
         event = input.output()
         input.processed()   
-        print(event)     
         if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
             self.current_button -= 1
             if self.current_button < 0:
@@ -503,7 +502,7 @@ class Gameplay(Game_State):
 
     def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.game.game_objects.update_render(dt)        
-        self.game.game_objects.platform_collision(dt)
+        #self.game.game_objects.platform_collision(dt)
         self.game.game_objects.UI.hud.update(dt)
 
     def render(self):
@@ -554,7 +553,8 @@ class Gameplay(Game_State):
                 self.game.game_objects.player.abilities.handle_input(event[2]['d_pad'])#to change movement ability with d pad
 
             else:
-                self.game.game_objects.player.currentstate.handle_press_input(input)
+                interpreted = self.game.game_objects.input_interpreter.interpret(input)
+                self.game.game_objects.player.currentstate.handle_press_input(interpreted)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
