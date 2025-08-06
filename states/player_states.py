@@ -302,10 +302,15 @@ class PhaseBase():
         value = event['l_stick']#the avlue of the press
 
         #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        self.entity.acceleration[0] = C.acceleration[0] * abs(value[0])#always positive, add acceleration to entity
+        multiplier = 0
+        if 0.1 < abs(value[0]) < 0.65:
+            multiplier = 0.3
+        elif abs(value[0]) >= 0.65:
+            multiplier = 1
+        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
 
         self.entity.dir[1] = -value[1]
-        if abs(value[0]) > 0.1:
+        if multiplier > 0:
             self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
@@ -878,6 +883,22 @@ class WallJumpMain(JumpMain):
     def enter(self, **kwarg):
         super().enter(**kwarg)
         self.entity.animation.play('wall_jump_main')#the name of the class
+        self.entity.velocity[0] = -self.entity.dir[0]*6
+        self.ignore_input_timer = 8
+        self.accelerate_timer = 15
+        self.start_dir = -self.entity.dir[0]
+
+    def update(self):
+        super().update()
+        self.ignore_input_timer -= 1
+        self.accelerate_timer -= 1
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        super().handle_movement(event)
+        if self.ignore_input_timer > 0:
+            self.entity.dir[0] = self.start_dir
+        if self.accelerate_timer > 0:
+            self.entity.acceleration[0] = C.acceleration[0]
 
 class FallPre(PhaseBase):
     def __init__(self, entity):
@@ -980,9 +1001,6 @@ class WallGlide(PhaseBase):
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
-            #self.entity.dir[0] *= -1#if we want to jump vertically
-            self.entity.velocity[0] = -self.dir[0]*10
-            self.entity.velocity[1] = -7#to get a vertical velocity
             input.processed()
             self.enter_state('wall_jump', wall_dir = self.dir)
         elif event[-1] == 'lb':
@@ -1214,7 +1232,8 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
     def exit_state(self):
         if self.dash_length < 0:
             self.entity.acceleration[1] =  C.acceleration[1]
-            self.entity.movement_manager.modifiers['Dash_jump'].increase_friction()
+            if 'Dash_jump' in self.entity.movement_manager.modifiers:
+                self.entity.movement_manager.modifiers['Dash_jump'].increase_friction()
             self.enter_state('fall')
 
     def handle_movement(self, event):
