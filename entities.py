@@ -475,30 +475,29 @@ class Reflection(Staticentity):#water, e.g. village
         self.game_objects.shaders['noise_perlin']['scale'] = [10,80]# make it elongated along x, and short along y
         self.game_objects.game.display.render(self.empty.texture, self.water_noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
-        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_copy)#stuff to reflect
+        screen_copy = self.game_objects.game.screen_manager.get_screen()#TODO probably, shouödn't copy all screens, need to send an argument
 
         #water
         self.game_objects.shaders['water_perspective']['noise_texture'] = self.noise_layer.texture
         self.game_objects.shaders['water_perspective']['noise_texture2'] = self.water_noise_layer.texture
         self.game_objects.shaders['water_perspective']['TIME'] = self.time
-        self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = self.screen_copy.texture#stuff to reflect
+        self.game_objects.shaders['water_perspective']['SCREEN_TEXTURE'] = screen_copy.texture#stuff to reflect
         self.game_objects.shaders['water_perspective']['water_speed'] = self.water_speed
         self.game_objects.shaders['water_perspective']['water_albedo'] = self.colour
         self.game_objects.shaders['water_perspective']['texture_parallax'] = self.texture_parallax
         self.game_objects.shaders['water_perspective']['water_texture_on'] = self.water_texture_on
 
-
-        self.reflect_rect.bottomleft = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], -self.offset + self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]# the part to cut
-        blit_pos = [self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.scroll[0], self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
+        self.reflect_rect.bottomleft = [int(self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[0]), int(-self.offset + self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.true_scroll[1])]# the part to cut
+        blit_pos = [int(self.rect.topleft[0] - self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[0]), int(self.rect.topleft[1] - self.parallax[1]*self.game_objects.camera_manager.camera.true_scroll[1])]
         self.game_objects.shaders['water_perspective']['section'] = [self.reflect_rect[0],self.reflect_rect[1],self.reflect_rect[2],self.reflect_rect[3]]
 
         #final rendering -> tmporary fix TODO
         if self.parallax[0] == 1:#don't blur if there is no parallax
-            self.game_objects.game.display.render(self.noise_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water_perspective'])
+            self.game_objects.game.display.render(self.noise_layer.texture, target, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['water_perspective'])
         else:
             self.game_objects.shaders['blur']['blurRadius'] = 1/self.parallax[0]#set the blur redius
             self.game_objects.game.display.render(self.noise_layer.texture, self.blur_layer, shader = self.game_objects.shaders['water_perspective'])
-            self.game_objects.game.display.render(self.blur_layer.texture, self.game_objects.game.screen, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
+            self.game_objects.game.display.render(self.blur_layer.texture, target, position = blit_pos, section = self.reflect_rect, scale = [1, self.squeeze], shader = self.game_objects.shaders['blur'])
 
 class GodRaysRadial(Staticentity):
     def __init__(self, pos, game_objects, parallax, size, **properties):
@@ -827,6 +826,76 @@ class Thunder_ball(Staticentity):#not used
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
         self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['thunder_ball'])#shader render
 
+class InteractableIndicator(Staticentity):#the hoovering above things to indicat it is interactable, or only for NPC?
+    def __init__(self, pos, game_objects, size = (32,32)):
+        super().__init__(pos, game_objects)
+        self.rect.bottomleft = pos
+        self.true_pos = self.rect.topleft
+
+        self.time = 0
+        self.velocity = [0,0]
+
+    def pool(game_objects):
+        size = (32,32)
+        InteractableIndicator.image = game_objects.font.fill_text_bg(size, 'text_bubble')
+
+    def release_texture(self):
+        pass
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.1
+        self.update_vel()
+        self.update_pos()
+
+    def update_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt,self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
+        self.rect.topleft = self.true_pos
+
+    def update_vel(self):
+        self.velocity[1] = 0.25*math.sin(self.time)   
+
+class ConversationBubbles(Staticentity):#the thing npcs have hoovering above them for random messages
+    def __init__(self, pos, game_objects, text, lifetime = 200, size = (32,32)):
+        super().__init__(pos, game_objects)
+        self.render_text(text)
+
+        self.lifetime = lifetime
+        self.rect.bottomleft = pos
+        self.true_pos = self.rect.topleft
+
+        self.time = 0
+        self.velocity = [0,0]
+
+    def pool(game_objects):
+        size = (32,32)
+        ConversationBubbles.layer = game_objects.game.display.make_layer(size)
+        ConversationBubbles.bg = game_objects.font.fill_text_bg(size, 'text_bubble')
+
+    def release_texture(self):
+        pass
+
+    def update(self):
+        self.time += self.game_objects.game.dt * 0.1
+        self.update_vel()
+        self.update_pos()
+        self.lifetime -= self.game_objects.game.dt
+        if self.lifetime < 0:
+            self.kill()
+
+    def update_pos(self):
+        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt,self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
+        self.rect.topleft = self.true_pos
+
+    def update_vel(self):
+        self.velocity[1] = 0.25*math.sin(self.time)
+
+    def render_text(self, text):
+        texture = self.game_objects.font.render(text = text)
+        self.game_objects.game.display.render(self.bg, self.layer)#shader render
+        self.game_objects.game.display.render(texture, self.layer, position = [10, self.rect[3]])#shader render
+        self.image = self.layer.texture
+        texture.release()    
+
 class BG_Animated(Animatedentity):
     def __init__(self, game_objects, pos, sprite_folder_path, parallax = (1,1)):
         super().__init__(pos,game_objects)
@@ -897,10 +966,9 @@ class Player(Character):
 
     def update_vel(self):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
+        self.velocity[1] += self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
-        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
-        print(self.velocity[0])
+        self.velocity[0] += self.game_objects.game.dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
         return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
@@ -1339,7 +1407,7 @@ class Packun(Enemy):
         self.currentstate = packun_states.Idle(self)
         self.angle_state = getattr(packun_states, kwarg['direction'])(self)
 
-    def knock_back(self, dir):
+    def knock_back(self, amp, dir):
         pass
 
     def attack(self):#called from states, attack main
@@ -2704,9 +2772,9 @@ class Arrow(Projectiles):#should it be called seed?
         self.max_vel = [10, 10]
 
     def update_vel(self):#called from hitsop_states
-        self.velocity[1] += self.slow_motion*self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
+        self.velocity[1] += self.game_objects.game.dt*(self.acceleration[1]-self.velocity[1]*self.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1],self.max_vel[1]*self.game_objects.game.dt)#set a y max speed#
-        self.velocity[0] += self.slow_motion*self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
+        self.velocity[0] += self.game_objects.game.dt*(self.dir[0]*self.acceleration[0] - self.friction[0]*self.velocity[0])
 
     def update(self):
         super().update()
@@ -4269,9 +4337,6 @@ class Savepoint(Interactable):#save point
         self.map = map
         self.init_cord = [pos[0],pos[1]-100]
         self.currentstate = states_savepoint.Idle(self)
-
-    def player_collision(self, player):#player collision
-        self.currentstate.handle_input('Outline')
 
     def interact(self):#when player press t/y
         self.game_objects.player.currentstate.enter_state('crouch')

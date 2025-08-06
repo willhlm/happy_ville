@@ -1,6 +1,6 @@
 import pygame
 
-class LayeredGroup():#costum layered rendering group
+class LayeredGroup():#costum layered rendering group: all_bgs and all_fgs
     def __init__(self):
         super().__init__()
         self.group_dict = {}#a dict of groups for each layer
@@ -73,7 +73,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
             #s.remove(s.pause_group)#remove from pause  
             #s.game_objects.all_bgs.add(s.layer_name, s, layer = 0)
             #return
-            
+
             s.game_objects.all_bgs.group_dict[s.layer_name].spritedict[s] = s.game_objects.all_bgs.group_dict[s.layer_name]._init_rect#in add internal
             s.game_objects.all_bgs.group_dict[s.layer_name]._spritelayers[s] = 0
             s.game_objects.all_bgs.group_dict[s.layer_name]._spritelist.insert(0, s)#add it behind everything
