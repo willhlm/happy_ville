@@ -50,11 +50,9 @@ class Camera():#default camera
         self.prev_true_scroll = self.true_scroll.copy()
         self.interp_scroll = self.true_scroll.copy()
         self.y_offset = 30
-        #self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5]
         self.center = [game_objects.map.PLAYER_CENTER[0] - game_objects.player.rect[2]*0.5, game_objects.map.PLAYER_CENTER[1] - game_objects.player.rect[3]*0.5 + self.y_offset]
         self.original_center = self.center.copy()
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
-        self.save_scroll = self.scroll.copy()   
 
     def update(self, dt):        
         target_x = self.game_objects.player.true_pos[0] - self.center[0]
@@ -70,12 +68,7 @@ class Camera():#default camera
         alpha = self.game_objects.game.game_loop.alpha
         self.interp_scroll = [self.prev_true_scroll[0] + (self.true_scroll[0] - self.prev_true_scroll[0]) * alpha, self.prev_true_scroll[1] + (self.true_scroll[1] - self.prev_true_scroll[1]) * alpha]
 
-        self.scroll = [round(self.interp_scroll[0]), round(self.interp_scroll[1])]        
-
-        if abs(self.save_scroll[0] - self.scroll[0]) > 1:
-            print("jump", self.save_scroll[0] - self.scroll[0], self.scroll[0])
-
-        self.save_scroll = self.scroll.copy()
+        self.scroll = [int(self.interp_scroll[0]),int(self.interp_scroll[1])]    
 
     def reset_player_center(self):#called when loading a map in maploader
         self.center = self.original_center.copy()

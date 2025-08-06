@@ -4,7 +4,7 @@ import constants as C
 import read_files
 import state_manager
 from pygame_render import RenderEngine
-
+import screen_manager
 #pygame.print_debug_info()
 
 class Game():
@@ -15,13 +15,14 @@ class Game():
         display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
 
-        self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync =1)
-        self.screen = self.display.make_layer(self.window_size)
+        self.display = RenderEngine(display_size[0] - self.scale, display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])        
+        self.screen_manager = screen_manager.ScreenManager(self)
+        self.screen = self.display.make_layer(self.window_size)#the "main" screen ''rendered last''
 
         #initiate game related values
         self.game_loop = GameLoop(self)
         self.game_objects = game_objects.Game_Objects(self)
-        self.state_manager = state_manager.State_manager(self, 'Title_menu')        
+        self.state_manager = state_manager.State_manager(self, 'Title_menu')
 
         #debug flags
         self.DEBUG_MODE = True
@@ -69,7 +70,9 @@ class GameLoop():
         prev_time = time.perf_counter()
         while True:
             self.game.screen.clear(0, 0, 0, 0)
-
+            for screen in list(self.game.screen_manager.screens.values()):
+                screen.layer.clear(0, 0, 0, 0)
+                
             self.clock.tick(C.fps)
 
             # Use high-res timer to calculate actual elapsed time
@@ -90,6 +93,8 @@ class GameLoop():
             self.alpha = self.accumulator / self.fixed_dt
             self.game.state_manager.update_render(frame_time * 60)
             self.game.state_manager.render()
+
+            self.game.screen_manager.render()#render multiple screen, and make it pixel perfect to the display
             self.game.display.render(self.game.screen.texture, self.game.display.screen, scale=self.game.scale)
             pygame.display.flip()
 

@@ -44,6 +44,13 @@ class Collisions():
             else:
                 interactable.player_noncollision()
 
+        for npc in self.game_objects.npcs.sprites():
+            collision_entity = pygame.sprite.spritecollideany(npc, enteties, Collisions.collided)            
+            if collision_entity:
+                npc.player_collision(collision_entity)
+            else:
+                npc.player_noncollision()
+
     @staticmethod
     def counter(fprojectiles, eprojectiles):
         for projectile in fprojectiles.sprites():#go through the group

@@ -25,6 +25,8 @@ class Idle(Shader_states):
     def handle_input(self, input, **kwarg):
         if input == 'Hurt':
             self.enter_state('Hurt', **kwarg)
+        elif input == 'outline':
+            self.enter_state('Outline',  **kwarg)            
         elif input == 'mix_colour':
             self.enter_state('Mix_colour')
         elif input == 'alpha':
@@ -249,19 +251,21 @@ class Palette_swap(Shader_states):#droplet use it
             self.enter_state('Idle')
 
 class Outline(Shader_states):
-    def __init__(self,entity):
+    def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['outline']
+        self.colour = kwarg.get('colour', [1, 1, 1, 1])
+        self.thickness = kwarg.get('thickness', 5)
+        self.falloff = kwarg.get('falloff', 0)
         self.time = 0
 
     def update(self, dt):
         self.time += dt
 
     def draw(self):
-        #self.entity.shader['TIME'] = self.time
-        return
-        self.entity.shader['color_gradiant'] = self.entity.image
-        self.entity.shader['AuraProgres'] = self.time*0.01
+        self.entity.shader['outlineColor'] = self.colour
+        self.entity.shader['outlineThickness'] = self.thickness
+        self.entity.shader['outlineAlphaFalloff'] = self.falloff
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':

@@ -1,5 +1,6 @@
 import sys
 import constants as C
+import math
 
 class Movement_manager():
     def __init__(self):
@@ -23,6 +24,13 @@ class Movement_manager():
         for mod in self.modifiers.values():
             mod.apply(context)
         return context
+
+    def resolve_collision(self, direction):
+        for mod in list(self.modifiers.values()):
+            if direction == 'ground':
+                mod.ground_collision()
+            elif direction == 'side':
+                mod.side_collision()
 
     def update(self, dt):
         modifiers = self._sorted_modifiers.copy()
@@ -49,6 +57,12 @@ class Movement_modifier():
     def update(self, dt):#called from aila update
         pass
 
+    def ground_collision(self):
+        pass
+
+    def side_collision(self):
+        pass
+
 class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
     def __init__(self, priority):
         super().__init__(priority)
@@ -68,19 +82,44 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
-        self.friction = 0.12
         self.target = Movement_context().friction[0]
+        self.friction_x = 0.15
+        self.friction_y = 0.00
+        self.ref_y = self.friction_y * (0.0001 * self.entity.game_objects.game.dt + 1)
+        self.ref_x = self.friction_x * (1 - 0.000000005 * self.entity.game_objects.game.dt)
+        self.inc_fric = False
 
     def set_friction(self, friction):
-        self.friction = friction
+        self.friction_x = friction
+
+    def set_fritction_y(self, friction):
+        self.friction_y = friction
+
+    def increase_friction(self):
+        self.inc_fric = True
 
     def apply(self, context):
-        context.friction[0] = self.friction
+        context.friction[0] = self.friction_x
+        context.friction[1] = self.friction_y
 
-    def update(self, dt):
-        self.friction += dt * 0.0018
-        if abs(self.friction - self.target) < 0.01:
+    def ground_collision(self):
+        self.entity.movement_manager.remove_modifier('Dash_jump')
+
+    def side_collision(self):
+        self.entity.movement_manager.remove_modifier('Dash_jump')
+
+    def update(self):
+        if self.inc_fric:
+            self.friction_x += self.entity.game_objects.game.dt * 0.0008 #this is probably the best one
+            #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 2)
+            #self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.5)
+
+        self.friction_y -= self.entity.game_objects.game.dt * 0.0015
+        self.friction_y = max(0, self.friction_y)
+        if self.target - self.friction_x < 0.0003:
             self.entity.movement_manager.remove_modifier('Dash_jump')
+
+
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):

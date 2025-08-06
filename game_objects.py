@@ -57,8 +57,8 @@ class Game_Objects():
         self.platforms = groups.Group()#platforms
         self.special_shaders = groups.Group()#portal use it for the drawing: draw not called normally but in different gameplay state
         self.platforms_ramps = groups.Group()#ramps
-        self.all_bgs = groups.LayeredUpdates()#bg from tiled
-        self.all_fgs = groups.LayeredUpdates()#fgs from tileed
+        self.all_bgs = groups.LayeredGroup()#[]
+        self.all_fgs = groups.LayeredGroup()#[]
         self.bg_interact = groups.Group()#small grass stuff so that interactables blends with BG
         self.bg_fade = groups.Group()#fg stuff that should dissapear when player comes: this should not blit or update. it will just run collision checks
         self.eprojectiles = groups.Group()#enemy projectiles
@@ -103,7 +103,7 @@ class Game_Objects():
         self.platforms.empty()
         self.loot.empty()
         self.platforms_ramps.empty()
-        self.entity_pause.empty()
+        self.entity_pause.empty()  
         self.all_bgs.empty()
         self.all_fgs.empty()
         self.camera_blocks.empty()
@@ -125,6 +125,7 @@ class Game_Objects():
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
         self.collisions.player_collision(self.bg_fade)
+        self.collisions.interactables_collision(self.npcs)
         self.collisions.interactables_collision(self.players)#need to know when it doesn't collide
 
         self.collisions.counter(self.fprojectiles, self.eprojectiles)
@@ -184,28 +185,31 @@ class Game_Objects():
         self.shader_render.update_render(dt)#housld be last
 
     def draw(self):#called from render states
-        self.lights.clear_normal_map()
-        self.all_bgs.draw(self.game.screen)
-        self.interactables.draw(self.game.screen)#should be before bg_interact
-        self.bg_interact.draw(self.game.screen)
-        self.cosmetics2.draw(self.game.screen)#Should be before enteties
+        self.lights.clear_normal_map()        
+        layer = self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer      
+        player_layer_screen = self.game.screen_manager.screens[layer].layer
+        self.interactables.draw(player_layer_screen)#should be before bg_interact
+        self.bg_interact.draw(player_layer_screen)
+        self.cosmetics2.draw(player_layer_screen)#Should be before enteties
         
-        self.enemies.draw(self.game.screen)
-        self.npcs.draw(self.game.screen)
-        self.loot.draw(self.game.screen)
-        self.players.draw(self.game.screen)
-        self.platforms.draw(self.game.screen)
-        self.fprojectiles.draw(self.game.screen)
-        self.eprojectiles.draw(self.game.screen)        
+        self.enemies.draw(player_layer_screen)
+        self.npcs.draw(player_layer_screen)
+        self.loot.draw(player_layer_screen)
+        self.players.draw(player_layer_screen)
+                
+        self.platforms.draw(player_layer_screen)
+        self.fprojectiles.draw(player_layer_screen)
+        self.eprojectiles.draw(player_layer_screen)        
         
-        self.interactables_fg.draw(self.game.screen)#shoud be after player
-        self.cosmetics.draw(self.game.screen)#Should be before fgs
-        self.cosmetics_no_clear.draw(self.game.screen)#Should be before fgs
-        self.all_fgs.draw(self.game.screen)
+        self.interactables_fg.draw(player_layer_screen)#shoud be after player
+        self.cosmetics.draw(player_layer_screen)#Should be before fgs
+        self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs
+        
+        layer = self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer              
         #self.camera_blocks.draw()
-        self.lights.draw(self.game.screen)#should be second to last
-        self.shader_render.draw(self.game.screen)#housld be last: screen shader (can also make it compatible with enteties?)
-
+        self.lights.draw(self.game.screen_manager.screens[layer].layer)#should be second to last
+        self.shader_render.draw(self.game.screen_manager.screens[layer].layer)#housld be last: screen shader
+        
         #temporaries draws. Shuold be removed
         if self.game.RENDER_HITBOX_FLAG:
             image = pygame.Surface(self.game.window_size,pygame.SRCALPHA,32).convert_alpha()
@@ -243,10 +247,11 @@ class Game_Objects():
             #for reflect in self.reflections:
             #    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
             #    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
-            for reflect in self.all_bgs:
-                if type(reflect).__name__ == 'Reflection':
-                    pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
-                    pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+            for group in self.all_bgs.group_dict.values():
+                for obj in group:
+                    if type(obj).__name__ == 'Reflection':
+                        pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
+                        pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             for reflect in self.cosmetics:
                 if type(reflect).__name__ == 'Reflection':
@@ -254,5 +259,5 @@ class Game_Objects():
                     pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             tex = self.game.display.surface_to_texture(image)
-            self.game.display.render(tex, self.game.screen)#shader render
+            self.game.display.render(tex, player_layer_screen)#shader render
             tex.release()
