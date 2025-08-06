@@ -316,6 +316,24 @@ class PhaseBase():
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         self.enter_state(self.entity.abilities.equip.lower())
 
+class PhaseAirBase(PhaseBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        value = event['l_stick']#the avlue of the press
+
+        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
+        multiplier = 0
+        if abs(value[0]) > 0.1:
+            multiplier = 1
+        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
+
+        self.entity.dir[1] = -value[1]
+        if multiplier > 0:
+            self.entity.dir[0] = sign(value[0])
+
+
 class Invisible(PhaseBase):
     def __init__(self, entity):
         super().__init__(entity)
@@ -791,7 +809,7 @@ class WalkPost(PhaseBase):
     def increase_phase(self):
         self.enter_state('idle')
 
-class JumpMain(PhaseBase):
+class JumpMain(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
 
@@ -900,7 +918,7 @@ class WallJumpMain(JumpMain):
         if self.accelerate_timer > 0:
             self.entity.acceleration[0] = C.acceleration[0]
 
-class FallPre(PhaseBase):
+class FallPre(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
 
@@ -1313,6 +1331,17 @@ class Sword(PhaseBase):#main phases shold inheret this
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.entity.sword.stone_states['slash'].slash_speed()
 
+class SwordAir(PhaseAirBase):
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
+        self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
+        self.entity.sword.stone_states['slash'].slash_speed()
+
 class SwordStandPre(Sword):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
@@ -1377,7 +1406,7 @@ class SwordStandPost(Sword):
     #    if value[0] == 0:
     #        self.entity.acceleration[0] = 0
 
-class SwordDownMain(Sword):
+class SwordDownMain(SwordAir):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -1612,7 +1641,7 @@ class SmashUpPost(Sword):
     def increase_phase(self):
         self.enter_state('idle')
 
-class SwordAirMain(Sword):
+class SwordAirMain(SwordAir):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
