@@ -115,11 +115,78 @@ class FrameStats:
     def log_stats(self):
         if not self.frame_times:
             return
+        
+        # Basic stats
         avg = statistics.mean(self.frame_times)
         stddev = statistics.stdev(self.frame_times) if len(self.frame_times) > 1 else 0.0
         worst = max(self.frame_times)
         best = min(self.frame_times)
+        
         print(f"[Frame Stats] Avg: {avg:.2f} ms | Jitter: ±{stddev:.2f} ms | Best: {best:.2f} ms | Worst: {worst:.2f} ms")
+        
+        # Advanced smoothness metrics
+        self.analyze_smoothness()
+
+    def analyze_smoothness(self):
+        if len(self.frame_times) < 10:
+            return
+            
+        # 1. Frame Time Consistency (frame-to-frame variation)
+        consistency = self.measure_frame_consistency()
+        
+        # 2. Target Deviation (how far from ideal 16.67ms for 60fps)
+        target_deviation = self.measure_target_deviation()
+        
+        # 3. Stutter Detection
+        stutter_rate = self.detect_stutters()
+        
+        # 4. Distribution Analysis
+        spread = self.analyze_distribution()
+        
+        # 5. Overall Smoothness Score
+        smoothness_score = self.calculate_smoothness_score(consistency, target_deviation, stutter_rate, spread)
+        
+        print(f"[Smoothness] Consistency: {consistency:.3f} | Target Dev: {target_deviation:.2f} | Stutters: {stutter_rate:.1f}% | Spread: {spread:.2f} | Score: {smoothness_score:.3f}")
+
+    def measure_frame_consistency(self):
+        """Measure frame-to-frame time consistency (lower = smoother)"""
+        intervals = [abs(self.frame_times[i+1] - self.frame_times[i]) 
+                    for i in range(len(self.frame_times)-1)]
+        return statistics.stdev(intervals) if len(intervals) > 1 else 0.0
+
+    def measure_target_deviation(self):
+        """Average deviation from target 60fps frame time"""
+        target_frame_time = 16.67  # 60fps target
+        deviations = [abs(ft - target_frame_time) for ft in self.frame_times]
+        return statistics.mean(deviations)
+
+    def detect_stutters(self, threshold=2.0):
+        """Detect frames that are significantly off from median"""
+        if len(self.frame_times) < 5:
+            return 0.0
+        median = statistics.median(self.frame_times)
+        stutters = [ft for ft in self.frame_times if abs(ft - median) > threshold]
+        return len(stutters) / len(self.frame_times) * 100
+
+    def analyze_distribution(self):
+        """Analyze frame time distribution (95th percentile spread)"""
+        sorted_times = sorted(self.frame_times)
+        p95_idx = int(len(sorted_times) * 0.95)
+        median_idx = len(sorted_times) // 2
+        
+        p95 = sorted_times[p95_idx] if p95_idx < len(sorted_times) else sorted_times[-1]
+        median = sorted_times[median_idx]
+        
+        return p95 - median  # Tighter spread = smoother
+
+    def calculate_smoothness_score(self, consistency, target_deviation, stutter_rate, spread):
+        """Combined smoothness score (lower = smoother)"""
+        # Weight the different metrics
+        score = (consistency * 2.0 +          # Frame consistency is most important
+                target_deviation * 1.0 +      # Target deviation
+                stutter_rate * 0.1 +          # Stutter rate
+                spread * 0.5)                 # Distribution spread
+        return score
 
 
 if __name__ == '__main__':
