@@ -76,9 +76,10 @@ class GameLoop():
                 screen.layer.clear(0, 0, 0, 0)                        
 
             # Use high-res timer to calculate actual elapsed time
-            current_time = time.perf_counter()
-            frame_time = min(current_time - prev_time, 2/C.fps)# Cap frame time to avoid large jumps
-            prev_time = current_time
+            #current_time = time.perf_counter()
+            #frame_time = min(current_time - prev_time, 2/C.fps)# Cap frame time to avoid large jumps
+            #prev_time = current_time
+            frame_time = 1/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
             frame_stats.record_frame(frame_time)
             self.accumulator += frame_time
 
