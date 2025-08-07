@@ -57,14 +57,14 @@ class Game():
             for screen in list(self.screen_manager.screens.values()):
                 screen.layer.clear(0, 0, 0, 0)
 
-            frame_end = time.perf_counter()
-            self.dt =60* min(frame_end - prev_time, 2/C.fps)
-            prev_time = frame_end
-            frame_stats.record_frame(self.dt/60)
+            #frame_end = time.perf_counter()
+            #self.dt =60* min(frame_end - prev_time, 2/C.fps)
+            #prev_time = frame_end
+            #frame_stats.record_frame(self.dt/60)
 
             #tick clock            
-            #self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-            #frame_stats.record_frame(self.dt / 60)
+            self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            frame_stats.record_frame(self.dt / 60)
             #handle event
             self.event_loop()
 
