@@ -133,7 +133,7 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
-            self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'nordveden_2','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
