@@ -61,6 +61,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types = {'top':False,'bottom':False,'right':False,'left':False}
         self.go_through = {'ramp': True, 'one_way':True}#a flag for entities to go through ramps from side or top
         self.velocity = [0,0]
+        self.prev_true_pos = list(pos)        
 
     def update_hitbox(self):
         self.hitbox.midbottom = self.rect.midbottom
@@ -78,12 +79,14 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.true_pos = list(self.rect.topleft)
         self.hitbox.midbottom = self.rect.midbottom
 
-    def update_true_pos_x(self, dt):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)
+    def update_true_pos_x(self, dt):#called from Engine.platform collision. The velocity to true pos need to be set in collision if group distance should work proerly for enemies (so that the velocity is not applied when removing the sprite from gorup)    
+        self.prev_true_pos[0] = self.true_pos[0] # Save previous position
         self.true_pos[0] += dt * self.velocity[0]
         self.rect.left = round(self.true_pos[0])#should be int -> round fixes gliding on bubble
         self.update_hitbox()
 
     def update_true_pos_y(self, dt):#called from Engine.platform collision
+        self.prev_true_pos[1] = self.true_pos[1] # Save previous position
         self.true_pos[1] += dt * self.velocity[1]
         self.rect.top = round(self.true_pos[1])#should be int -> round fixes gliding on bubble
         self.update_hitbox()

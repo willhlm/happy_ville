@@ -71,9 +71,7 @@ class GameLoop():
         while True:
             self.game.screen.clear(0, 0, 0, 0)
             for screen in list(self.game.screen_manager.screens.values()):
-                screen.layer.clear(0, 0, 0, 0)
-                
-            self.clock.tick(C.fps)
+                screen.layer.clear(0, 0, 0, 0)                        
 
             # Use high-res timer to calculate actual elapsed time
             current_time = time.perf_counter()
@@ -97,6 +95,9 @@ class GameLoop():
             self.game.screen_manager.render()#render multiple screen, and make it pixel perfect to the display
             self.game.display.render(self.game.screen.texture, self.game.display.screen, scale=self.game.scale)
             pygame.display.flip()
+            
+            # Frame rate limiting at the END
+            self.clock.tick(C.fps)
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

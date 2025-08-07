@@ -1031,7 +1031,6 @@ class Player(Character):
         self.hitstop_states.update_render(dt)
 
     def update(self, dt):        
-        self.prev_true_pos = self.true_pos.copy()
         self.movement_manager.update(dt)#update the movement manager
         self.hitstop_states.update(dt)
         self.backpack.necklace.update()#update the radnas
@@ -1039,7 +1038,13 @@ class Player(Character):
         
     def draw(self, target):#called in group
         self.shader_state.draw()
-        self.blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.scroll[0]), int(self.true_pos[1]-self.game_objects.camera_manager.camera.scroll[1]))#true scroll, int or round
+  
+        alpha = self.game_objects.game.game_loop.alpha
+        interp_x = self.prev_true_pos[0] + (self.true_pos[0] - self.prev_true_pos[0]) * alpha 
+        interp_y = self.prev_true_pos[1] + (self.true_pos[1] - self.prev_true_pos[1]) * alpha
+        self.blit_pos = [int(interp_x - self.game_objects.camera_manager.camera.scroll[0]), int(interp_y - self.game_objects.camera_manager.camera.scroll[1])]
+
+        #self.blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.scroll[0]), int(self.true_pos[1]-self.game_objects.camera_manager.camera.scroll[1]))#true scroll, int or round
         self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
