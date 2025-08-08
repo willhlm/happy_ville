@@ -141,15 +141,7 @@ class Game_Objects():
         self.collisions.platform_collision(self.loot)
 
     def update(self):
-        self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
-        self.camera_manager.update()#should be first
-        self.timer_manager.update()
-        self.platforms.update()        
-        self.platforms_ramps.update()
-        self.layer_pause.update()#should be before all_bgs and all_fgs
-        self.all_bgs.update()
-        self.bg_interact.update()
-        self.all_fgs.update()
+        #things that shuodl collide
         self.players.update()
         self.entity_pause.update()#should be before enemies, npcs and interactable groups
         self.enemies.update()
@@ -157,6 +149,22 @@ class Game_Objects():
         self.fprojectiles.update()
         self.eprojectiles.update()
         self.loot.update()
+
+        #collide and move the entities
+        self.collide_all()
+
+        #camera and calculate true pos
+        self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
+        self.camera_manager.update()#should be first
+
+        #update cosmetics and BGs
+        self.timer_manager.update()
+        self.platforms.update()        
+        self.platforms_ramps.update()
+        self.layer_pause.update()#should be before all_bgs and all_fgs
+        self.all_bgs.update()
+        self.bg_interact.update()
+        self.all_fgs.update()        
         self.cosmetics.update()
         self.cosmetics_no_clear.update()
         self.cosmetics2.update()

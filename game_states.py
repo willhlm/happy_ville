@@ -488,7 +488,7 @@ class Gameplay(Game_State):
         self.handle_movement()
         self.game.game_objects.time_manager.update()
         self.game.game_objects.update()
-        self.game.game_objects.collide_all()
+        #self.game.game_objects.collide_all()
         self.game.game_objects.UI.hud.update()
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
