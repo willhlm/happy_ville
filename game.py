@@ -67,37 +67,54 @@ class GameLoop():
         self.fixed_dt = 1.0 / 60.0  # 60Hz physics step
         self.accumulator = 0.0              
         self.alpha = self.accumulator / self.fixed_dt
+        self.dt = 1.0  # Initialize filtered dt (in 60Hz units)
+        self.filter_alpha = 0.05  # Smoothing factor (lower = smoother)
 
     def run(self):
         prev_time = time.perf_counter()
         frame_stats = FrameStats()
+        
         while True:
             self.game.screen.clear(0, 0, 0, 0)
             for screen in list(self.game.screen_manager.screens.values()):
                 screen.layer.clear(0, 0, 0, 0)                        
 
-            # Use high-res timer to calculate actual elapsed time
-           # current_time = time.perf_counter()
-           # frame_time = min(current_time - prev_time, 2/C.fps)# Cap frame time to avoid large jumps
-           # prev_time = current_time
-            frame_time = 1/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-            frame_stats.record_frame(frame_time)
-            self.accumulator += frame_time
+            # Calculate raw frame time
+            frame_end = time.perf_counter()
+            raw_frame_time = 1/max(self.clock.get_fps(),30)
+            #raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap to prevent large jumps
+            prev_time = frame_end
+            
+            # Convert to 60Hz units and apply minimum threshold
+            raw_dt = max(raw_frame_time * 60, 0.1)
+            
+            # Apply low-pass filter to smooth dt
+            self.dt = (self.filter_alpha * raw_dt) + (1 - self.filter_alpha) * self.dt
+            
+            # Convert back to seconds for accumulator
+            filtered_frame_time = self.dt / 60.0
+            
+            # Record stats using raw time for accuracy
+            frame_stats.record_frame(raw_frame_time)
+            
+            # Use filtered time for accumulator
+            self.accumulator += filtered_frame_time
 
-            self.game.event_loop(frame_time * 60)
+            # Event handling with filtered dt
+            self.game.event_loop(self.dt)
 
             # Fixed timestep update(s)
             while self.accumulator >= self.fixed_dt:
                 self.game.state_manager.update(self.fixed_dt * 60)
                 self.accumulator -= self.fixed_dt
 
-            # Render
+            # Render with interpolation
             self.alpha = self.accumulator / self.fixed_dt
-            self.game.state_manager.update_render(frame_time * 60)
+            self.game.state_manager.update_render(self.dt)
             self.game.state_manager.render()
 
-            #render to display
-            self.game.screen_manager.render()#render multiple screen, and make it pixel perfect to the display
+            # Render to display
+            self.game.screen_manager.render()
             self.game.display.render(self.game.screen.texture, self.game.display.screen, scale=self.game.scale)
             pygame.display.flip()
             
