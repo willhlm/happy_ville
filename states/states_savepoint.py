@@ -30,17 +30,5 @@ class Active(Basic_states):
         super().__init__(entity)
 
     def increase_phase(self):
-        self.enter_state('Idle')
+        self.enter_state('Idle')        
         self.entity.game_objects.player.currentstate.handle_input('pray_post')
-
-class Outline(Basic_states):
-    def __init__(self,entity):
-        super().__init__(entity)
-
-    def handle_input(self,input,**kwarg):
-        if input=='active':
-            self.enter_state('Active')
-
-    def increase_phase(self):
-        self.enter_state('Idle')
-

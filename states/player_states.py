@@ -362,7 +362,6 @@ class IdleMain(PhaseBase):
             self.enter_state('jump')
         elif event[-1]=='lb':
             input.processed()
-            print('heheh')
             self.enter_state('dash_ground')
         elif event[-1] == 'x':
             if input.meta.get('smash'):
@@ -834,7 +833,6 @@ class JumpMain(PhaseAirBase):
         if self.air_timer >= 0:
             self.entity.velocity[1] = C.jump_vel_player * self.shroomboost
         if self.entity.velocity[1] >= 0.7:
-            print(self.air_timer)
             self.enter_state('fall')#pre
 
     def handle_press_input(self,input):

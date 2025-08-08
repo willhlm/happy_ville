@@ -43,8 +43,8 @@ class Title_menu(Game_State):
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
-        #self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
-        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-10, -3])
+        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-8, -1], animate = True)
+        self.arrow_2 = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midright, game.game_objects, offset = [-8, -1], mirrored = True, animate = True)
 
     def initiate_buttons(self):
         buttons = ['New game','Load game','Option','Quit']
@@ -67,6 +67,8 @@ class Title_menu(Game_State):
 
     def update(self):#update menu arrow position
         self.animation.update()
+        self.arrow.animate()
+        self.arrow_2.animate()
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
         self.update()
@@ -85,21 +87,25 @@ class Title_menu(Game_State):
 
         #blit arrow
         self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
+        self.game.display.render(self.arrow_2.image, self.game.screen, position = self.arrow_2.rect.topleft, flip = True)
 
     def update_arrow(self):
         ref_pos = self.buttons[self.current_button].rect.midleft
+        ref_pos2 = self.buttons[self.current_button].rect.midright
         self.arrow.update_pos((ref_pos[0], ref_pos[1]))
+        self.arrow_2.update_pos((ref_pos2[0], ref_pos2[1]))
         self.arrow.play_SFX()
 
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[2]['l_stick'][1] < 0:#up
+        print(event)
+        if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
             self.current_button -= 1
             if self.current_button < 0:
                 self.current_button = len(self.buttons) - 1
             self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
+        elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
             self.current_button += 1
             if self.current_button >= len(self.buttons):
                 self.current_button = 0
@@ -125,9 +131,9 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'village_ola2_1','1')
             #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'nordveden_1','1')
+            #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
-            #self.game.game_objects.load_map(self,'light_forest_cave_6','1')
+            self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'hlifblom_40','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
@@ -491,9 +497,9 @@ class Gameplay(Game_State):
         self.game.game_objects.UI.hud.update()
 
     def render(self):
-        self.game.game_objects.draw()
+        self.game.game_objects.draw()#rendered on multiple layers on each parallax screen
         #self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
-        self.game.game_objects.UI.hud.render()
+        self.game.game_objects.UI.hud.render()#renders on main screen
         if self.game.RENDER_FPS_FLAG:
             self.blit_fps()
 
@@ -543,7 +549,7 @@ class Gameplay(Game_State):
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-        elif event[2]['l_stick'][1] > 0.85:
+        elif event[2]['l_stick'][1] > 0.85:#pressing down
             input.processed()#should it be processed here or when passed through?
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
@@ -559,8 +565,6 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.define_BG()
         self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
-        self.screen_copy = self.game.display.make_layer(self.game.window_size)
-
     def define_BG(self):
         size = (100,120)
         bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
@@ -574,7 +578,6 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.button_rects = {}
         for b in self.buttons:
             text = (self.game.game_objects.font.render(text = b))
-            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
@@ -589,9 +592,10 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
 
     def render(self):
         super().render()
-        self.background.clear(50,50,50,30)
-        self.game.game_objects.shaders['blur']['blurRadius'] = 0.1
-        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#blur screen
+        screen_copy = self.game.screen_manager.get_screen()#copy the screen -> doesn't copy the main (has the ui)
+        self.game.display.render(self.game.screen.texture, screen_copy)#copy also the ui
+        self.background.clear(50, 50, 50, 30)
+
         self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]*0.5 - self.bg.width*0.5,100))#shader render
 
         #blit title
@@ -605,14 +609,14 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
         self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
 
-        self.game.display.render(self.screen_copy.texture, self.game.screen)#shader render
+        self.game.game_objects.shaders['blur']['blurRadius'] = 1
+        self.game.display.render(screen_copy.texture, self.game.screen, shader = self.game.game_objects.shaders['blur'])#shader render
         self.game.display.render(self.background.texture, self.game.screen)#shader render
 
     def release_texture(self):
         self.title.release()
         self.bg.release()
         self.background.release()
-        self.screen_copy.release()
         for key in self.button_surfaces.keys():
             self.button_surfaces[key].release()
 
