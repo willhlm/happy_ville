@@ -81,8 +81,8 @@ class GameLoop():
 
             # Calculate raw frame time
             frame_end = time.perf_counter()
-            raw_frame_time = 1/max(self.clock.get_fps(),30)
-            #raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap to prevent large jumps
+            #raw_frame_time = 1/max(self.clock.get_fps(),30)
+            raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap to prevent large jumps
             prev_time = frame_end
             
             # Convert to 60Hz units and apply minimum threshold
