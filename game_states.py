@@ -98,8 +98,8 @@ class Title_menu(Game_State):
 
     def handle_events(self, input):
         event = input.output()
-        input.processed()   
-        print(event)     
+        input.processed()
+        print(event)
         if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
             self.current_button -= 1
             if self.current_button < 0:
@@ -594,8 +594,8 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         super().render()
         screen_copy = self.game.screen_manager.get_screen()#copy the screen -> doesn't copy the main (has the ui)
         self.game.display.render(self.game.screen.texture, screen_copy)#copy also the ui
-        self.background.clear(50, 50, 50, 30)        
-        
+        self.background.clear(50, 50, 50, 30)
+
         self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]*0.5 - self.bg.width*0.5,100))#shader render
 
         #blit title
@@ -608,7 +608,7 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         #blit arrow
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
         self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-                
+
         self.game.game_objects.shaders['blur']['blurRadius'] = 1
         self.game.display.render(screen_copy.texture, self.game.screen, shader = self.game.game_objects.shaders['blur'])#shader render
         self.game.display.render(self.background.texture, self.game.screen)#shader render
