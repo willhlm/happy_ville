@@ -52,18 +52,25 @@ class Game():
     def run(self):
         frame_stats = FrameStats()
         prev_time = time.perf_counter()
+        self.dt = 1.0
+        self.smooth_dt = 1
         while True:
             self.screen.clear(0, 0, 0, 0)
             for screen in list(self.screen_manager.screens.values()):
                 screen.layer.clear(0, 0, 0, 0)
 
-            #frame_end = time.perf_counter()
-            #self.dt =60* min(frame_end - prev_time, 2/C.fps)
-            #prev_time = frame_end
-            #frame_stats.record_frame(self.dt/60)
+            frame_end = time.perf_counter()    
+            dt = min(frame_end - prev_time, 2 / C.fps) * 60
+            dt = max(dt, 0.1)
+            alpha = 0.05  # lower alpha = more smoothing
+            prev_time = frame_end
+            self.dt = (alpha * dt) + (1 - alpha) * self.dt
+
+            # pass smoothed_dt to camera for interpolatio
 
             #tick clock            
-            self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            #self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            
             frame_stats.record_frame(self.dt / 60)
             #handle event
             self.event_loop()
@@ -88,7 +95,6 @@ class Game():
             scale_h = pygame.display.Info().current_h/self.window_size[1]
             return min(scale_w, scale_h)
         return scale
-
 
 class FrameStats:
     def __init__(self, log_interval=3.0, max_samples=300):
