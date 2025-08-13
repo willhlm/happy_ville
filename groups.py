@@ -2,7 +2,6 @@ import pygame
 
 class LayeredGroup():#costum layered rendering group: all_bgs and all_fgs
     def __init__(self):
-        super().__init__()
         self.group_dict = {}#a dict of groups for each layer
 
     def add(self, layer_name, obj, layer = None):#add a object to a specific layer
@@ -13,8 +12,7 @@ class LayeredGroup():#costum layered rendering group: all_bgs and all_fgs
 
     def draw(self, target):
         for (layer, group) in self.group_dict.items():
-            group.draw(target[layer].layer)       
-        return layer
+            group.draw(target[layer].layer)               
 
     def empty(self):    
         for group in self.group_dict.values():
@@ -24,6 +22,12 @@ class LayeredGroup():#costum layered rendering group: all_bgs and all_fgs
     def update(self):
         for group in self.group_dict.values():
             group.update()
+    
+    def get_topmost_screen(self):# Gets the last key that was inserted
+        return next(reversed(self.group_dict))
+
+    def remove_from_layer(self, layer_name, obj):
+        self.group_dict[layer_name].remove(obj)
 
 class Group(pygame.sprite.Group):#normal
     def __init__(self):
@@ -73,7 +77,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
             #s.remove(s.pause_group)#remove from pause  
             #s.game_objects.all_bgs.add(s.layer_name, s, layer = 0)
             #return
-
+            
             s.game_objects.all_bgs.group_dict[s.layer_name].spritedict[s] = s.game_objects.all_bgs.group_dict[s.layer_name]._init_rect#in add internal
             s.game_objects.all_bgs.group_dict[s.layer_name]._spritelayers[s] = 0
             s.game_objects.all_bgs.group_dict[s.layer_name]._spritelist.insert(0, s)#add it behind everything

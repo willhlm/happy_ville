@@ -1,4 +1,4 @@
-import pygame, sys, time, statistics
+import pygame, sys, time
 import game_objects
 import constants as C
 import read_files
@@ -12,16 +12,14 @@ class Game():
         #initiate all screens
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size(2)#get the scale according to your display size
-        display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
+        self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
-
-        self.display = RenderEngine(display_size[0] - self.scale, display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])        
+        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac               
         self.screen_manager = screen_manager.ScreenManager(self)
-        self.screen = self.display.make_layer(self.window_size)#the "main" screen ''rendered last''
 
         #initiate game related values
         self.clock = pygame.time.Clock()
-        self.dt = 0
+        self.dt = 1
         self.game_objects = game_objects.Game_Objects(self)
         self.state_manager = state_manager.State_manager(self, 'Title_menu')
 
@@ -50,28 +48,19 @@ class Game():
             self.state_manager.handle_events(input)
 
     def run(self):
-        frame_stats = FrameStats()
         prev_time = time.perf_counter()
-        self.dt = 1.0
-        self.smooth_dt = 1
+        alpha = 1 # lower alpha = more smoothing: need to be one for the slow motion to work
         while True:
-            self.screen.clear(0, 0, 0, 0)
-            for screen in list(self.screen_manager.screens.values()):
-                screen.layer.clear(0, 0, 0, 0)
-
+            self.screen_manager.clear()
+            
+            #time dt
             frame_end = time.perf_counter()    
             dt = min(frame_end - prev_time, 2 / C.fps) * 60
             dt = max(dt, 0.1)
-            alpha = 0.05  # lower alpha = more smoothing
             prev_time = frame_end
-            self.dt = (alpha * dt) + (1 - alpha) * self.dt
-
-            # pass smoothed_dt to camera for interpolatio
-
-            #tick clock            
+            self.dt = (alpha * dt) + (1 - alpha) * self.dt                     
             #self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
             
-            frame_stats.record_frame(self.dt / 60)
             #handle event
             self.event_loop()
 
@@ -79,11 +68,7 @@ class Game():
             self.state_manager.update()
 
             #render
-            self.state_manager.render()
-            
-            #display rendering
-            self.screen_manager.render()#render multiple screen, and make it pixel perfect to the display
-            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#render the main screen
+            self.state_manager.render()                                    
 
             #update display
             pygame.display.flip()
@@ -96,104 +81,10 @@ class Game():
             return min(scale_w, scale_h)
         return scale
 
-class FrameStats:
-    def __init__(self, log_interval=3.0, max_samples=300):
-        self.frame_times = []
-        self.log_interval = log_interval
-        self.max_samples = max_samples
-        self._log_timer = 0.0
-        self._last_log_time = time.perf_counter()
-
-    def record_frame(self, frame_time_sec):
-        ms = frame_time_sec * 1000  # convert to milliseconds
-        self.frame_times.append(ms)
-        if len(self.frame_times) > self.max_samples:
-            self.frame_times.pop(0)
-
-        now = time.perf_counter()
-        self._log_timer += now - self._last_log_time
-        self._last_log_time = now
-
-        if self._log_timer >= self.log_interval:
-            self._log_timer = 0.0
-            self.log_stats()
-
-    def log_stats(self):
-        if not self.frame_times:
-            return
-        
-        # Basic stats
-        avg = statistics.mean(self.frame_times)
-        stddev = statistics.stdev(self.frame_times) if len(self.frame_times) > 1 else 0.0
-        worst = max(self.frame_times)
-        best = min(self.frame_times)
-        
-        print(f"[Frame Stats] Avg: {avg:.2f} ms | Jitter: ±{stddev:.2f} ms | Best: {best:.2f} ms | Worst: {worst:.2f} ms")
-        
-        # Advanced smoothness metrics
-        self.analyze_smoothness()
-
-    def analyze_smoothness(self):
-        if len(self.frame_times) < 10:
-            return
-            
-        # 1. Frame Time Consistency (frame-to-frame variation)
-        consistency = self.measure_frame_consistency()
-        
-        # 2. Target Deviation (how far from ideal 16.67ms for 60fps)
-        target_deviation = self.measure_target_deviation()
-        
-        # 3. Stutter Detection
-        stutter_rate = self.detect_stutters()
-        
-        # 4. Distribution Analysis
-        spread = self.analyze_distribution()
-        
-        # 5. Overall Smoothness Score
-        smoothness_score = self.calculate_smoothness_score(consistency, target_deviation, stutter_rate, spread)
-        
-        print(f"[Smoothness] Consistency: {consistency:.3f} | Target Dev: {target_deviation:.2f} | Stutters: {stutter_rate:.1f}% | Spread: {spread:.2f} | Score: {smoothness_score:.3f}")
-
-    def measure_frame_consistency(self):
-        """Measure frame-to-frame time consistency (lower = smoother)"""
-        intervals = [abs(self.frame_times[i+1] - self.frame_times[i]) 
-                    for i in range(len(self.frame_times)-1)]
-        return statistics.stdev(intervals) if len(intervals) > 1 else 0.0
-
-    def measure_target_deviation(self):
-        """Average deviation from target 60fps frame time"""
-        target_frame_time = 16.67  # 60fps target
-        deviations = [abs(ft - target_frame_time) for ft in self.frame_times]
-        return statistics.mean(deviations)
-
-    def detect_stutters(self, threshold=2.0):
-        """Detect frames that are significantly off from median"""
-        if len(self.frame_times) < 5:
-            return 0.0
-        median = statistics.median(self.frame_times)
-        stutters = [ft for ft in self.frame_times if abs(ft - median) > threshold]
-        return len(stutters) / len(self.frame_times) * 100
-
-    def analyze_distribution(self):
-        """Analyze frame time distribution (95th percentile spread)"""
-        sorted_times = sorted(self.frame_times)
-        p95_idx = int(len(sorted_times) * 0.95)
-        median_idx = len(sorted_times) // 2
-        
-        p95 = sorted_times[p95_idx] if p95_idx < len(sorted_times) else sorted_times[-1]
-        median = sorted_times[median_idx]
-        
-        return p95 - median  # Tighter spread = smoother
-
-    def calculate_smoothness_score(self, consistency, target_deviation, stutter_rate, spread):
-        """Combined smoothness score (lower = smoother)"""
-        # Weight the different metrics
-        score = (consistency * 2.0 +          # Frame consistency is most important
-                target_deviation * 1.0 +      # Target deviation
-                stutter_rate * 0.1 +          # Stutter rate
-                spread * 0.5)                 # Distribution spread
-        return score
-
+    def render_display(self, texture, scale = True):#called from game states
+        if scale: scale = self.scale            
+        else: scale = 1
+        self.display.render(texture, self.display.screen, scale = scale)
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

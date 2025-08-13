@@ -42,7 +42,7 @@ class PlayerStates():
         }
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
-        self._state_factories = {}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
+        self._state_factories = {'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],'bow': [('bow', BowState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
     def enter_state(self, state_name, phase = None, **kwargs):
         state = self.states.get(state_name)
@@ -69,8 +69,9 @@ class PlayerStates():
     def increase_phase(self):#called when an animation is finished for that state
         self.composite_state.increase_phase()
 
-    def unlock_state(self, name):#should be called when unlocking a new state
-        self.states[name] = self.state_factories[name](self.entity)
+    def unlock_state(self, name):#should be called when unlocking a new state        
+        for state_name, cls in self._state_factories[name]:
+            self.states[state_name] = cls(self.entity)
 
 class CompositeState():#will contain pre, main, post phases of a state
     def __init__(self, entity):
@@ -1884,11 +1885,13 @@ class CrouchPre(PhaseBase):#used when saving and picking up interactable items
 
     def enter(self, **kwarg):
         self.entity.animation.play('crouch_pre')
+        self.entity.acceleration[0] = 0
+        
+        #effect
         effect = entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
-        self.entity.acceleration[0] = 0
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])        
 
     def handle_movement(self,event):
         pass

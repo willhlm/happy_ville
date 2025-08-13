@@ -24,7 +24,7 @@ class Camera_manager():
             decorator.update()
 
     def zoom(self, scale = 1, center = (0.5, 0.5), rate = 1):
-        self.game_objects.shader_render.append_shader('zoom', scale = scale, center = center, rate = rate)
+        self.game_objects.post_process.append_shader('zoom', scale = scale, center = center, rate = rate)
 
     def camera_shake(self, **kwarg):#shake dat ass
         self.add_decorator(Camera_shake_decorator(self.camera, **kwarg))
@@ -52,7 +52,7 @@ class Camera():#default camera
 
     def update(self):
         self.game_objects.camera_manager.centraliser.update()#camera stop and tight analogue stick can tell it what to do
-        factor = 1 - pow(1 - 0.1, self.game_objects.game.smooth_dt)
+        factor = 0.1
         self.true_scroll[0] += (self.game_objects.player.true_pos[0] - self.true_scroll[0] - self.center[0])*factor
         self.true_scroll[1] += (self.game_objects.player.true_pos[1] - self.true_scroll[1] - self.center[1])*factor
 
@@ -96,8 +96,8 @@ class Camera_shake_decorator():
 
     def update(self):
         self.amp *= self.scale
-        self.current_camera.scroll[0] += random.uniform(-self.amp, self.amp)#only stuff relying on scroll will be affected, true scroll like player is not
-        self.current_camera.scroll[1] += random.uniform(-self.amp, self.amp)
+        self.current_camera.true_scroll[0] += random.uniform(-self.amp, self.amp)#only stuff relying on scroll will be affected, true scroll like player is not
+        self.current_camera.true_scroll[1] += random.uniform(-self.amp, self.amp)
         
         self.duration -= self.current_camera.game_objects.game.dt
         self.exit_state()
