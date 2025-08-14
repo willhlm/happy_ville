@@ -42,7 +42,7 @@ class PlayerStates():
         }
         self.composite_state = self.states['idle']
         self.composite_state.enter_phase('main')
-        self._state_factories = {}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
+        self._state_factories = {'dash': [('dash_ground', DashGroundState), ('dash_jump', DashJumpState)],'bow': [('bow', BowState)]}#should contain all the states that can be created, so that they can be be appended to self.stataes when needed
 
     def enter_state(self, state_name, phase = None, **kwargs):
         state = self.states.get(state_name)
@@ -54,7 +54,7 @@ class PlayerStates():
         #print(self.composite_state.current_phase)
         self.composite_state.update()#main state
 
-    def handle_input(self, input, **kwargs):        
+    def handle_input(self, input, **kwargs):
         self.composite_state.handle_input(input, **kwargs)
 
     def handle_press_input(self, input):
@@ -69,8 +69,9 @@ class PlayerStates():
     def increase_phase(self):#called when an animation is finished for that state
         self.composite_state.increase_phase()
 
-    def unlock_state(self, name):#should be called when unlocking a new state
-        self.states[name] = self.state_factories[name](self.entity)
+    def unlock_state(self, name):#should be called when unlocking a new state        
+        for state_name, cls in self._state_factories[name]:
+            self.states[state_name] = cls(self.entity)
 
 class CompositeState():#will contain pre, main, post phases of a state
     def __init__(self, entity):
@@ -302,14 +303,37 @@ class PhaseBase():
         value = event['l_stick']#the avlue of the press
 
         #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
-        self.entity.acceleration[0] = C.acceleration[0] * abs(value[0])#always positive, add acceleration to entity
+        multiplier = 0
+        if 0.1 < abs(value[0]) < 0.65:
+            multiplier = 0.3
+        elif abs(value[0]) >= 0.65:
+            multiplier = 1
+        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
 
         self.entity.dir[1] = -value[1]
-        if abs(value[0]) > 0.1:
+        if multiplier > 0:
             self.entity.dir[0] = sign(value[0])
 
     def do_ability(self):#called when pressing B (E). This is needed if all of them do not have pre animation, or vice versa
         self.enter_state(self.entity.abilities.equip.lower())
+
+class PhaseAirBase(PhaseBase):
+    def __init__(self, entity):
+        super().__init__(entity)
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        value = event['l_stick']#the avlue of the press
+
+        #self.entity.acceleration[0] = C.acceleration[0] * math.ceil(abs(value[0]*0.8))#always positive, add acceleration to entity
+        multiplier = 0
+        if abs(value[0]) > 0.1:
+            multiplier = 1
+        self.entity.acceleration[0] = C.acceleration[0] * multiplier#always positive, add acceleration to entity
+
+        self.entity.dir[1] = -value[1]
+        if multiplier > 0:
+            self.entity.dir[0] = sign(value[0])
+
 
 class Invisible(PhaseBase):
     def __init__(self, entity):
@@ -339,7 +363,6 @@ class IdleMain(PhaseBase):
             self.enter_state('jump')
         elif event[-1]=='lb':
             input.processed()
-            print('heheh')
             self.enter_state('dash_ground')
         elif event[-1] == 'x':
             if input.meta.get('smash'):
@@ -786,7 +809,7 @@ class WalkPost(PhaseBase):
     def increase_phase(self):
         self.enter_state('idle')
 
-class JumpMain(PhaseBase):
+class JumpMain(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
 
@@ -811,7 +834,6 @@ class JumpMain(PhaseBase):
         if self.air_timer >= 0:
             self.entity.velocity[1] = C.jump_vel_player * self.shroomboost
         if self.entity.velocity[1] >= 0.7:
-            print(self.air_timer)
             self.enter_state('fall')#pre
 
     def handle_press_input(self,input):
@@ -878,8 +900,24 @@ class WallJumpMain(JumpMain):
     def enter(self, **kwarg):
         super().enter(**kwarg)
         self.entity.animation.play('wall_jump_main')#the name of the class
+        self.entity.velocity[0] = -self.entity.dir[0]*6
+        self.ignore_input_timer = 8
+        self.accelerate_timer = 15
+        self.start_dir = -self.entity.dir[0]
 
-class FallPre(PhaseBase):
+    def update(self):
+        super().update()
+        self.ignore_input_timer -= 1
+        self.accelerate_timer -= 1
+
+    def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
+        super().handle_movement(event)
+        if self.ignore_input_timer > 0:
+            self.entity.dir[0] = self.start_dir
+        if self.accelerate_timer > 0:
+            self.entity.acceleration[0] = C.acceleration[0]
+
+class FallPre(PhaseAirBase):
     def __init__(self, entity):
         super().__init__(entity)
 
@@ -901,8 +939,8 @@ class FallPre(PhaseBase):
                 input.processed()
                 self.enter_state('Ground_dash_pre', wall_dir = self.wall_dir)
             else:
-                input.processed() 
-                self.enter_state('dash_air')                
+                input.processed()
+                self.enter_state('dash_air')
         elif event[-1]=='x':
             input.processed()
             self.swing_sword()
@@ -980,9 +1018,6 @@ class WallGlide(PhaseBase):
     def handle_press_input(self,input):
         event = input.output()
         if event[-1] == 'a':
-            #self.entity.dir[0] *= -1#if we want to jump vertically
-            self.entity.velocity[0] = -self.dir[0]*10
-            self.entity.velocity[1] = -7#to get a vertical velocity
             input.processed()
             self.enter_state('wall_jump', wall_dir = self.dir)
         elif event[-1] == 'lb':
@@ -1154,7 +1189,7 @@ class DashGroundMain(DashGroundPre):#level one dash: normal
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_ground_main')        
+        self.entity.animation.play('dash_ground_main')
         self.dash_length = C.dash_length
         self.jump_dash_timer = C.jump_dash_timer
 
@@ -1208,10 +1243,14 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
         self.entity.velocity[1] = C.dash_jump_vel_player
+        self.entity.acceleration[1] = 0.04
         self.buffer_time = C.jump_dash_wall_timer
 
     def exit_state(self):
         if self.dash_length < 0:
+            self.entity.acceleration[1] =  C.acceleration[1]
+            if 'Dash_jump' in self.entity.movement_manager.modifiers:
+                self.entity.movement_manager.modifiers['Dash_jump'].increase_friction()
             self.enter_state('fall')
 
     def handle_movement(self, event):
@@ -1226,15 +1265,17 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
                         self.enter_state(state, **kwarg)
 
     def enter_state(self, state):
+        self.entity.acceleration[1] =  C.acceleration[1]
         super().enter_state(state)
         self.entity.shader_state.handle_input('idle')
 
     def enter_phase(self, phase):
+        self.entity.acceleration[1] =  C.acceleration[1]
         super().enter_phase(phase)
         self.entity.shader_state.handle_input('idle')
 
     def update(self):
-        self.entity.velocity[1] = C.dash_jump_vel_player
+        #self.entity.velocity[1] = C.dash_jump_vel_player
         self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= self.entity.game_objects.game.dt
@@ -1279,6 +1320,17 @@ class DashJumpPost(PhaseBase):#landing
             self.enter_state('run')
 
 class Sword(PhaseBase):#main phases shold inheret this
+    def __init__(self,entity):
+        super().__init__(entity)
+
+    def enter(self, **kwarg):
+        self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
+        self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
+        self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
+        self.entity.sword.stone_states['slash'].slash_speed()
+
+class SwordAir(PhaseAirBase):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -1353,7 +1405,7 @@ class SwordStandPost(Sword):
     #    if value[0] == 0:
     #        self.entity.acceleration[0] = 0
 
-class SwordDownMain(Sword):
+class SwordDownMain(SwordAir):
     def __init__(self,entity):
         super().__init__(entity)
 
@@ -1588,7 +1640,7 @@ class SmashUpPost(Sword):
     def increase_phase(self):
         self.enter_state('idle')
 
-class SwordAirMain(Sword):
+class SwordAirMain(SwordAir):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
         self.animation_name = kwarg['animation_name']
@@ -1622,7 +1674,7 @@ class DashAirPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-        
+
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
         if wall_dir:
@@ -1674,7 +1726,7 @@ class DashAirMain(DashGroundPre):#level one dash: normal
         super().__init__(entity)
 
     def enter(self, **kwarg):
-        self.entity.animation.play('dash_air_main')        
+        self.entity.animation.play('dash_air_main')
         self.dash_length = C.dash_length
         self.jump_dash_timer = C.jump_dash_timer
 
@@ -1717,8 +1769,8 @@ class DashAirPost(DashGroundPre):
 
 class DeathPre(PhaseBase):
     def __init__(self,entity):
-        super().__init__(entity)    
-        self.timeout = 50    
+        super().__init__(entity)
+        self.timeout = 50
 
     def enter(self, **kwarg):
         self.entity.animation.play('death_pre')
@@ -1734,7 +1786,7 @@ class DeathPre(PhaseBase):
     def handle_movement(self,event):
         pass
 
-    def handle_input(self, input):        
+    def handle_input(self, input):
         if input == 'Ground' or input == 'hole':
             self.enter_phase('main')
 
@@ -1751,7 +1803,7 @@ class DeathMain(PhaseBase):
     def handle_movement(self,event):
         pass
 
-    def increase_phase(self):        
+    def increase_phase(self):
         self.enter_phase('post')
 
 class DeathPost(PhaseBase):
@@ -1833,11 +1885,13 @@ class CrouchPre(PhaseBase):#used when saving and picking up interactable items
 
     def enter(self, **kwarg):
         self.entity.animation.play('crouch_pre')
+        self.entity.acceleration[0] = 0
+        
+        #effect
         effect = entities.Pray_effect(self.entity.rect.center,self.entity.game_objects)
         effect.rect.bottom = self.entity.rect.bottom
         self.entity.game_objects.cosmetics.add(effect)
-        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])
-        self.entity.acceleration[0] = 0
+        self.entity.game_objects.sound.play_sfx(self.entity.sounds['pray'][0])        
 
     def handle_movement(self,event):
         pass

@@ -3,7 +3,6 @@ import UI_loader
 from game_states import Gameplay
 import entities_UI, entities
 
-#ability upgrade
 class BaseUI(Gameplay):
     def __init__(self, game, **kwarg):
         super().__init__(game)
@@ -11,138 +10,13 @@ class BaseUI(Gameplay):
         self.letter_frame = 0#for descriptions
 
     def update(self):
-        pass
-        #super().update()#do we want the BG to be updating while interacting
+        super().update()#do we want the BG to be updating while interacting
 
     def render(self):
         super().render()
 
     def handle_events(self,input):
         input.processed()        
-
-class Spirit_upgrade_menu(BaseUI):
-    def __init__(self, game):
-        super().__init__(game)
-        self.define_UI()
-        self.index = [0,0]
-        self.letter_frame = 0
-        self.define_abilities()
-        self.define_pointer()
-        self.blit_titles()
-        self.next_page = 'Movement_upgrades_menu'
-
-    def define_UI(self):
-        self.abillity_UI = UI_loader.UI_loader(self.game_objects,'ability_spirit_upgrade')
-        self.abilities = self.game_objects.player.abilities.spirit_abilities
-
-    def define_abilities(self):
-        rows = self.abillity_UI.rows
-        for ability in self.abilities.keys():
-            self.abillity_UI.abilities[rows[ability]][0].activate(1)#set the first column of abilities aila has to one level 1
-
-            for level in range(1,len(self.abillity_UI.abilities[rows[ability]][0].description)):#the levels already aquired
-                if level < self.abilities[ability].level:
-                    self.abillity_UI.abilities[rows[ability]][level].activate(level+1)
-                else:
-                    self.abillity_UI.abilities[rows[ability]][level].deactivate(level+1)
-
-    def define_pointer(self,size = [32,32]):#called everytime we move from one area to another
-        self.pointer = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(self.pointer,[200,50,50,255],(0,0,size[0],size[1]),width=1,border_radius=5)
-
-    def update(self):
-        self.letter_frame += self.game_objects.game.dt
-
-    def render(self):
-        self.blit_BG()
-        self.blit_symbols()
-        self.blit_pointer()
-        self.blit_description()
-        self.blit_titles()
-
-    def blit_titles(self):
-        title = self.game_objects.font.render(text = 'absorbed abillities')
-        title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.game.screen.blit(title,[250,50])
-
-    def blit_pointer(self):
-        self.game_objects.game.screen.blit(self.pointer,self.abillity_UI.abilities[self.index[0]][self.index[1]].rect.center)#pointer
-
-    def blit_symbols(self):
-        for abilities in self.abillity_UI.abilities:
-            for ability in abilities:
-                ability.animation.update()
-                self.game_objects.game.screen.blit(ability.image,ability.rect.center)
-
-    def blit_BG(self):
-        self.abillity_UI.BG.set_alpha(230)
-        self.game_objects.game.screen.blit(self.abillity_UI.BG,(0,0))#pointer
-
-    def blit_description(self):
-        ability = self.abillity_UI.abilities[self.index[0]][0]#the row we are on
-        level = self.index[1]#the columns we are on
-        conv = ability.description[level]
-        text = self.game_objects.font.render((152,80), conv, int(self.letter_frame//2))
-        text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.game.screen.blit(text,(380,120))
-
-    def handle_events(self,input):
-        event = input.output()
-        input.processed()          
-        if event[0]:#press
-            if event[-1] == 'select':
-                self.game.state_manager.exit_state()
-            elif event[-1] == 'rb' or input[-1] == 'lb':#nezt page
-                self.enter_state(self.next_page)
-            elif event[-1]=='a' or input[-1]=='return':
-                self.choose_ability()
-
-            elif event[-1] =='right':
-                self.index[1] += 1
-                self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
-                self.letter_frame = 0
-
-            elif event[-1] =='left':
-                self.index[1] -= 1
-                self.index[1] = max(0,self.index[1])
-                self.letter_frame = 0
-
-            elif event[-1] =='down':
-                self.index[0] += 1
-                self.index[0] = min(self.index[0],len(self.abillity_UI.abilities)-1)
-                self.letter_frame = 0
-                self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
-
-            elif event[-1] =='up':
-                self.index[0] -= 1
-                self.index[0] = max(0,self.index[0])
-                self.letter_frame = 0
-                self.index[1] = min(self.index[1],len(self.abillity_UI.abilities[self.index[0]])-1)
-
-    def choose_ability(self):
-        ability = self.abillity_UI.abilities[self.index[0]][0]#the row we are on
-        level = self.index[1]#the columns we are on
-        if self.abilities[type(ability).__name__].level == level:
-            self.abilities[type(ability).__name__].upgrade_ability()
-            self.abillity_UI.abilities[self.index[0]][level].activate(level+1)
-
-    def exit_state(self):
-        super().exit_state()
-        self.game_objects.player.currentstate.handle_input('Pray_spe_post')
-
-class Movement_upgrades_menu(Spirit_upgrade_menu):#when double clicking the save point, open ability upgrade screen, spirit abilities
-    def __init__(self, game):
-        super().__init__(game)
-        self.next_page = 'Spirit_upgrade_menu'
-
-    def define_UI(self):
-        self.abillity_UI = UI_loader.UI_loader(self.game_objects,'ability_movement_upgrade')
-        self.abilities = self.game_objects.player.abilities.movement_dict
-
-    def blit_titles(self):
-        title = self.game_objects.font.render(text = 'absorbed abillities')
-        title.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.game.screen.blit(title,[250,50])
 
 #fast travel, smith, bank, souls essence, vendor
 class Fast_travel_unlock(BaseUI):
@@ -165,20 +39,20 @@ class Fast_travel_unlock(BaseUI):
 
     def blit_BG(self):
         pos = [self.game.window_size[0]*0.5-self.bg_size[0]*0.5,self.game.window_size[1]*0.25]
-        self.game.display.render(self.bg, self.game.screen, position = pos)#shader render
+        self.game.display.render(self.bg, self.game.screen_manager.screen, position = pos)#shader render
 
     def blit_actions(self):
         for index, action in enumerate(self.actions):
             response = self.game.game_objects.font.render(text = action)
-            self.game.display.render(response, self.game.screen, position = self.pos[index])#shader render
+            self.game.display.render(response, self.game.screen_manager.screen, position = self.pos[index])#shader render
 
     def blit_text(self):
         text = self.game.game_objects.font.render((130,90), self.conv, int(self.letter_frame//2))
-        self.game.display.render(text, self.game.screen, position =(220,90))#shader render        
+        self.game.display.render(text, sself.game.screen_manager.screen, position =(220,90))#shader render        
 
     def blit_pointer(self):
         pos = self.pos[self.index[0]]
-        self.game.display.render(self.pointer.image, self.game.screen, position =pos)#shader render        
+        self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =pos)#shader render        
         
     def update(self):
         self.letter_frame += self.game.dt
@@ -188,6 +62,7 @@ class Fast_travel_unlock(BaseUI):
         self.blit_actions()
         self.blit_text()
         self.blit_pointer()
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
         event = input.output()
@@ -227,21 +102,22 @@ class Fast_travel_menu(BaseUI):
             self.destinations.append(level)
 
     def blit_BG(self):        
-        self.game.display.render(self.travel_UI.BG, self.game.screen)#shader render                
+        self.game.display.render(self.travel_UI.BG, self.game.screen_manager.screen)#shader render                
 
     def blit_destinations(self):
         for index, name in enumerate(self.game.game_objects.world_state.travel_points.keys()):
             text = self.game.game_objects.font.render((152,80), name, 100)
-            self.game.display.render(text, self.game.screen, position =self.travel_UI.name_pos[index])#shader render                
+            self.game.display.render(text, self.game.screen_manager.screen, position =self.travel_UI.name_pos[index])#shader render                
 
     def blit_pointer(self):
         pos = self.travel_UI.name_pos[self.index[0]]
-        self.game.display.render(self.pointer.image, self.game.screen, position =pos)#shader render                
+        self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =pos)#shader render                
 
     def render(self):
         self.blit_BG()
         self.blit_destinations()
         self.blit_pointer()
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
         event = input.output()
@@ -287,21 +163,23 @@ class Smith(BaseUI):#called from mr smith
         self.respond = self.game.game_objects.font.render(text = text)
 
     def render(self):
+        super().render()
         self.game.game_objects.shaders['colour']['colour'] = [255,255,255,255]
         self.blit_text()
         self.blit_pointer()
         self.blit_response()
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def blit_text(self):
-        self.game.display.render(self.bg, self.game.screen, position =(280,120))#shader render                
+        self.game.display.render(self.bg, self.game.screen_manager.screen, position =(280,120))#shader render                
         for index, surf in enumerate(self.surf):
-            self.game.display.render(surf, self.game.screen, position =(310,135+index*10),shader = self.game.game_objects.shaders['colour'])#shader render                
+            self.game.display.render(surf, self.game.screen_manager.screen, position =(310,135+index*10),shader = self.game.game_objects.shaders['colour'])#shader render                
 
     def blit_pointer(self):
-        self.game.display.render(self.pointer.image, self.game.screen, position =(300,135+10*self.pointer_index[1]),shader = self.game.game_objects.shaders['colour'])#shader render                        
+        self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =(300,135+10*self.pointer_index[1]),shader = self.game.game_objects.shaders['colour'])#shader render                        
 
     def blit_response(self): 
-        self.game.display.render(self.respond, self.game.screen, position = (300,195),shader = self.game.game_objects.shaders['colour'])#shader render
+        self.game.display.render(self.respond, self.game.screen_manager.screen, position = (300,195),shader = self.game.game_objects.shaders['colour'])#shader render
 
     def handle_events(self,input):
         event = input.output()
@@ -309,14 +187,14 @@ class Smith(BaseUI):#called from mr smith
         if event[0]:#press
             if event[-1] == 'y':
                 self.game.state_manager.exit_state()
-            elif event[-1] =='down':
-                self.pointer_index[1] += 1
-                self.pointer_index[1] = min(self.pointer_index[1],len(self.actions)-1)
-            elif event[-1] =='up':
-                self.pointer_index[1] -= 1
-                self.pointer_index[1] = max(self.pointer_index[1],0)
             elif event[-1]=='a' or event[-1]=='return':
                 self.select()
+        if event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
+            self.pointer_index[1] += 1
+            self.pointer_index[1] = min(self.pointer_index[1],len(self.surf)-1)
+        elif event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
+            self.pointer_index[1] -= 1
+            self.pointer_index[1] = max(self.pointer_index[1],0)     
 
     def select(self):
         if self.pointer_index[1] == 0:#if we select upgrade
@@ -353,14 +231,15 @@ class Bank(BaseUI):#caled from mr banks
         super().render()
         self.blit_text()
         self.blit_pointer()
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def blit_text(self):
-        self.game.game_objects.game.display.render(self.bg, self.game.game_objects.game.screen, position = (190,150))#shader render        
+        self.game.game_objects.game.display.render(self.bg, self.game.screen_manager.screen, position = (190,150))#shader render        
         for index, surf in enumerate(self.surf):
-            self.game.game_objects.game.display.render(surf, self.game.game_objects.game.screen, position = (300,160+index*10))#shader render
+            self.game.game_objects.game.display.render(surf, self.game.screen_manager.screen, position = (300,160+index*10))#shader render
 
     def blit_pointer(self):
-        self.game.game_objects.game.display.render(self.pointer.image, self.game.game_objects.game.screen, position =(300,130+10*self.pointer_index[1]))#shader render              
+        self.game.game_objects.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =(300,130+10*self.pointer_index[1]))#shader render              
 
     def handle_events(self,input):
         event = input.output()
@@ -368,14 +247,14 @@ class Bank(BaseUI):#caled from mr banks
         if event[0]:#press
             if event[-1] == 'y':
                 self.game.state_manager.exit_state()
-            elif event[-1] =='down':
-                self.pointer_index[1] += 1
-                self.pointer_index[1] = min(self.pointer_index[1],len(self.actions)-1)
-            elif event[-1] =='up':
-                self.pointer_index[1] -= 1
-                self.pointer_index[1] = max(self.pointer_index[1],0)
             elif event[-1]=='a' or event[-1]=='return':
                 self.select()
+        if event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
+            self.pointer_index[1] += 1
+            self.pointer_index[1] = min(self.pointer_index[1],len(self.surf)-1)
+        elif event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
+            self.pointer_index[1] -= 1
+            self.pointer_index[1] = max(self.pointer_index[1],0)                
 
     def select(self):#exchane of money
         if self.pointer_index[1]==2:#cancel
@@ -397,9 +276,9 @@ class Bank_withdraw(Bank):#caled from mr banks
         self.game_state.state.pop()
 
     def blit_text(self):
-        self.game_objects.game.display.render(self.bg, self.game_objects.game.screen, position = (280,120))#shader render         
+        self.game_objects.game.display.render(self.bg, self.game.screen_manager.screen, position = (280,120))#shader render         
         self.amount_surf = self.game_objects.font.render(text = str(self.ammount))
-        self.game_objects.game.display.render(self.amount_surf, self.game_objects.game.screen, position = (310,130))#shader render         
+        self.game_objects.game.display.render(self.amount_surf, self.game.screen_manager.screen, position = (310,130))#shader render         
 
     def blit_pointer(self):
         pass
@@ -434,9 +313,9 @@ class Bank_deposite(Bank):#caled from mr banks
         self.game_state.state.pop()
 
     def blit_text(self):
-        self.game_objects.game.display.render(self.bg, self.game_objects.game.screen, position = (280,120))#shader render         
+        self.game_objects.game.display.render(self.bg, self.game.screen_manager.screen, position = (280,120))#shader render         
         self.amount_surf = self.game_objects.font.render(text = str(self.ammount))
-        self.game_objects.game.display.render(self.amount_surf, self.game_objects.game.screen, position = (310,130))#shader render         
+        self.game_objects.game.display.render(self.amount_surf, self.game.screen_manager.screen, position = (310,130))#shader render         
 
     def blit_pointer(self):
         pass
@@ -480,14 +359,15 @@ class Soul_essence(BaseUI):#called from inorinoki
         super().render()
         self.blit_BG()
         self.blit_pointer()
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def blit_pointer(self):
-        self.game.display.render(self.pointer.image, self.game.screen, position =  (self.bg_pos[0] + 30,self.bg_pos[1] + 10+self.pointer_index[1]*10))#shader render 
+        self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position =  (self.bg_pos[0] + 30,self.bg_pos[1] + 10+self.pointer_index[1]*10))#shader render 
 
     def blit_BG(self):
-        self.game.display.render(self.bg, self.game.screen, position = self.bg_pos)#shader render        
+        self.game.display.render(self.bg, self.game.screen_manager.screen, position = self.bg_pos)#shader render        
         for index, surf in enumerate(self.surf):
-            self.game.display.render(surf, self.game.screen, position = (self.bg_pos[0] + 30,self.bg_pos[1] + 10+index*10))#shader render        
+            self.game.display.render(surf, self.game.screen_manager.screen, position = (self.bg_pos[0] + 30,self.bg_pos[1] + 10+index*10))#shader render        
 
     def handle_events(self,input):
         event = input.output()
@@ -554,7 +434,7 @@ class Vendor(BaseUI):#called from Astrid
         self.respond = self.game.game_objects.font.render(text = text)
 
     def blit_response(self):
-        self.game.display.render(self.respond, self.game.game_objects.game.screen, position = (190,150))#shader render
+        self.game.display.render(self.respond, self.game.screen_manager.screen, position = (190,150))#shader render
 
     def update(self):
         self.letter_frame += self.game.game_objects.game.dt
@@ -566,42 +446,43 @@ class Vendor(BaseUI):#called from Astrid
         self.blit_description()
         self.blit_items()
         self.blit_pointer()
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def blit_BG(self):
-        self.game.display.render(self.vendor_UI.BG, self.game.screen, position = self.bg_pos)#shader render
+        self.game.display.render(self.vendor_UI.BG, self.game.screen_manager.screen, position = self.bg_pos)#shader render
 
     def blit_money(self):#blit how much gold we have in inventory
         money = self.game.game_objects.player.backpack.inventory.get_quantity('amber_droplet')
         count_text = self.game.game_objects.font.render(text = str(money))
         position = [self.bg_pos[0] + self.vendor_UI.amber.rect.bottomright[0], self.bg_pos[1] + self.vendor_UI.amber.rect.bottomright[1]]
-        self.game.display.render(count_text, self.game.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render
+        self.game.display.render(count_text, self.game.screen_manager.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render
 
         self.amber.animation.update()
         position = [self.bg_pos[0] + self.vendor_UI.amber.rect.topleft[0], self.bg_pos[1] + self.vendor_UI.amber.rect.topleft[1]]
-        self.game.display.render(self.amber.image, self.game.screen, position = position)#shader render
+        self.game.display.render(self.amber.image, self.game.screen_manager.screen, position = position)#shader render
 
     def blit_description(self):
         conv=self.items[self.item_index[1]].description        
         text = self.game.game_objects.font.render(self.vendor_UI.description['size'], conv, int(self.letter_frame//2))
         position = [self.bg_pos[0] + self.vendor_UI.description['position'][0], self.bg_pos[1] + self.vendor_UI.description['position'][1]]
-        self.game.display.render(text, self.game.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render
+        self.game.display.render(text, self.game.screen_manager.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render
 
     def blit_items(self):
         for index, item in enumerate(self.sale_items):            
             item.animation.update()
             position = [self.bg_pos[0] + self.vendor_UI.objects[index].rect.topleft[0], self.bg_pos[1] + self.vendor_UI.objects[index].rect.topleft[1]]
-            self.game.display.render(item.image, self.game.screen, position = position)#shader render
+            self.game.display.render(item.image, self.game.screen_manager.screen, position = position)#shader render
 
             #blit cost
             item_name=str(type(item).__name__)
             cost = self.npc.inventory[item_name]
             cost_text = self.game.game_objects.font.render(text = str(cost))
             position = [self.bg_pos[0] + self.vendor_UI.objects[index].rect.bottomright[0], self.bg_pos[1] + self.vendor_UI.objects[index].rect.bottomright[1]]
-            self.game.display.render(cost_text, self.game.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render                
+            self.game.display.render(cost_text, self.game.screen_manager.screen, position = position, shader = self.game.game_objects.shaders['colour'])#shader render                
             
     def blit_pointer(self):
         position = [self.bg_pos[0] + self.vendor_UI.objects[self.pointer_index[1]].rect.topleft[0], self.bg_pos[1] + self.vendor_UI.objects[self.pointer_index[1]].rect.topleft[1]]
-        self.game.display.render(self.pointer.image, self.game.screen, position = position)#shader render
+        self.game.display.render(self.pointer.image, self.game.screen_manager.screen, position = position)#shader render
 
     def handle_events(self, input):
         event = input.output()
@@ -649,17 +530,17 @@ class Vendor2(Vendor):#called from vendor when selecting an item
         self.init_canvas()
 
     def render(self):
-        super().render()
         self.blit_BG2()
-        self.blit_pointer()
+        self.blit_pointer()        
+        super().render()
 
     def blit_BG2(self):
-        self.game.display.render(self.buy_sur, self.game.screen,(280+30,120+10))#shader render        
-        self.game.display.render(self.cancel_sur, self.game.screen,(280+30,120 + 20))#shader render        
-        self.game.display.render(self.bg2, self.game.screen,(280,120))#shader render
+        self.game.display.render(self.buy_sur, self.game.screen_manager.screen,(280+30,120+10))#shader render        
+        self.game.display.render(self.cancel_sur, self.game.screen_manager.screen,(280+30,120 + 20))#shader render        
+        self.game.display.render(self.bg2, self.game.screen_manager.screen,(280,120))#shader render
 
     def blit_pointer(self):
-        self.game.display.render(self.pointer.image, self.game.screen, (300, 130 + 10 * self.pointer_index[1]))#shader render
+        self.game.display.render(self.pointer.image, self.game.screen_manager.screen, (300, 130 + 10 * self.pointer_index[1]))#shader render
 
     def select(self):
         if self.pointer_index[1] == 0:#if we select buy

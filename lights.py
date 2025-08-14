@@ -12,6 +12,7 @@ class Lights():
         self.layer1 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer2 = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.layer3 = game_objects.game.display.make_layer(game_objects.game.window_size)
+        self.screen_copy = game_objects.game.display.make_layer(game_objects.game.display_size)
 
         self.normal_map = game_objects.game.display.make_layer(game_objects.game.window_size)
         self.max_light_sources = 20#a valuehard coded in light shader
@@ -96,14 +97,15 @@ class Lights():
         self.shaders['light']['normal_interact'] = self.normal_interact
         self.shaders['light']['normal_map'] = self.normal_map.texture
 
-        self.shaders['blend']['background'] = self.game_objects.game.screen.texture     
+        self.game_objects.game.display.render(target.texture, self.screen_copy)#copy the screen, the display sized one
+        self.shaders['blend']['background'] = self.screen_copy.texture
         self.shaders['blur']['blurRadius'] = 5
 
         self.game_objects.game.display.use_alpha_blending(False)#need to turn of blending to remove black outline in places with no ambient dark. It looks beter if it is always True for dark areas
         self.game_objects.game.display.render(self.layer1.texture, self.layer2, shader = self.shaders['light'])
         self.game_objects.game.display.render(self.layer2.texture, self.layer3, shader = self.shaders['blur'])
-        self.game_objects.game.display.use_alpha_blending(True)#turn it back on for rendering on screen
-        self.game_objects.game.display.render(self.layer3.texture, self.game_objects.game.screen, shader = self.shaders['blend'])
+        self.game_objects.game.display.use_alpha_blending(True)#turn it back on for rendering on screen        
+        self.game_objects.game.display.render(self.layer3.texture, target, scale = self.game_objects.game.scale, shader = self.shaders['blend'])
 
 class Light():#light source
     def __init__(self, game_objects, target, **properties):

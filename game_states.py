@@ -1,6 +1,7 @@
 import pygame, sys
 import read_files
 import entities_UI
+import cutscene
 import constants as C
 import animation
 
@@ -42,8 +43,6 @@ class Title_menu(Game_State):
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
-        #self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.topleft, game.game_objects)
-        offset = [-10, -2]
         self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-8, -1], animate = True)
         self.arrow_2 = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midright, game.game_objects, offset = [-8, -1], mirrored = True, animate = True)
 
@@ -55,7 +54,7 @@ class Title_menu(Game_State):
         for b in buttons:
             text = (self.game.game_objects.font.render(text = b))
             self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [x_pos, y_pos], center = True))
-            y_pos += self.game.game_objects.font.get_height() + 3
+            y_pos += 20
 
     def define_BG(self):
         size = (90,100)
@@ -75,20 +74,23 @@ class Title_menu(Game_State):
         self.update()
 
     def render(self):
+        self.game.screen_manager.screen.clear(0,0,0,0)
         self.buttons[self.current_button].hoover()
-        self.game.display.render(self.image, self.game.screen)#shader render
+        self.game.display.render(self.image, self.game.screen_manager.screen)#shader render
 
         #blit title
-        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
+        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
         #self.game.display.render(self.bg, self.game.screen, position = (70,180))
 
         #blit buttons
         for b in self.buttons:
-            self.game.display.render(b.image, self.game.screen, position = b.rect.topleft)
+            self.game.display.render(b.image, self.game.screen_manager.screen, position = b.rect.topleft)
 
         #blit arrow
-        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
-        self.game.display.render(self.arrow_2.image, self.game.screen, position = self.arrow_2.rect.topleft, flip = True)
+        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft)
+        self.game.display.render(self.arrow_2.image, self.game.screen_manager.screen, position = self.arrow_2.rect.topleft, flip = True)
+
+        self.game.render_display(self.game.screen_manager.screen.texture)
 
     def update_arrow(self):
         ref_pos = self.buttons[self.current_button].rect.midleft
@@ -100,12 +102,12 @@ class Title_menu(Game_State):
     def handle_events(self, input):
         event = input.output()
         input.processed()
-        if event[2]['l_stick'][1] < 0:#up
+        if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
             self.current_button -= 1
             if self.current_button < 0:
                 self.current_button = len(self.buttons) - 1
             self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
+        elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
             self.current_button += 1
             if self.current_button >= len(self.buttons):
                 self.current_button = 0
@@ -128,16 +130,15 @@ class Title_menu(Game_State):
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
-            #self.game.game_objects.load_map(self,'nordveden_2','1')
-            #self.game.game_objects.load_map(self,'village_ola2_1','1')
+            #self.game.game_objects.load_map(self,'village_ola2_5','1')
+            #self.game.game_objects.load_map(self,'golden_fields_1','1')
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            self.game.game_objects.load_map(self,'tall_trees_2','1')
-            #self.game.game_objects.load_map(self,'nordveden_enemytest','1')
+            #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
-            #self.game.game_objects.load_map(self,'light_forest_cave_1','1')
-            #self.game.game_objects.load_map(self,'hlifblom_1','1')
+            #self.game.game_objects.load_map(self,'nordveden_1','1')
+            self.game.game_objects.load_map(self,'hlifblom_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
-            #self.game.game_objects.load_map(self,'spirit_world_1','1')
+            #self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
             self.arrow.pressed()
@@ -155,7 +156,7 @@ class Load_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
         self.game_objects = game.game_objects
-        self.title = self.game.game_objects.font.render(text = 'Inventory') #temporary
+        self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
         self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
         self.image = self.sprites['idle'][0]
         self.animation = animation.Animation(self)
@@ -197,19 +198,20 @@ class Load_menu(Game_State):
 
     def render(self):
         #fill game.screen
-        self.game.display.render(self.image, self.game.screen)
+        self.game.screen_manager.screen.clear(0,0,0,0)
+        self.game.display.render(self.image, self.game.screen_manager.screen)
 
         #blit title
-        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]/2 - self.title.width/2,50))
-        self.game.display.render(self.bg, self.game.screen, position = (70,180))
+        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]/2 - self.title.width/2,50))
+        self.game.display.render(self.bg, self.game.screen_manager.screen, position = (70,180))
 
         #blit buttons
         for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
-        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft)
-
+        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft)
+        self.game.render_display(self.game.screen_manager.screen.texture)
 
     def handle_events(self, input):
         event = input.output()
@@ -265,19 +267,20 @@ class Option_menu(Game_State):
 
     def render(self):
         #fill game.screen
-        self.game.screen.clear(255,255,255)
+        self.game.screen_manager.screen.clear(255,255,255, 255)        
 
         #blit title
-        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
+        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
 
         #blit buttons
         for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
 
         #blit arrow
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
-        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
+        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
 
+        self.game.render_display(self.game.screen_manager.screen.texture)
         #self.arrow.draw(self.game.screen)
 
     def handle_events(self, input):
@@ -339,27 +342,27 @@ class Option_menu_sounds(Game_State):
 
     def blit_buttons(self):
         for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
 
             volume_string = self.game.game_objects.font.render((30,12), str(self.game.game_objects.sound.volume[b]))
             self.game.game_objects.shaders['colour']['colour'] = (0,0,0,255)
-            self.game.display.render(volume_string, self.game.screen, position = [self.button_rects[b].centerx + 10,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
+            self.game.display.render(volume_string, self.game.screen_manager.screen, position = [self.button_rects[b].centerx + 10,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
             volume_string.release()
 
     def render(self):
         #fill game.screen
-        self.game.screen.clear(255,255,255)
+        self.game.screen_manager.screen.clear(255,255,255, 255)     
 
         #blit title
-        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5, 50))
+        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5, 50))
 
         #blit buttons
         self.blit_buttons()
 
         #blit arrow
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
-        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-
+        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
+        self.game.render_display(self.game.screen_manager.screen.texture)
         #self.arrow.draw(self.game.screen)
 
     def on_exit(self):
@@ -425,27 +428,27 @@ class Option_menu_display(Game_State):
 
     def blit_buttons(self):
         for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen, position = self.button_rects[b].topleft)
+            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
 
             settig_string = self.game.game_objects.font.render((60,12), str(self.game_settings['display'][b]))
             self.game.game_objects.shaders['colour']['colour'] = (0,0,0,255)
-            self.game.display.render(settig_string, self.game.screen, position = [self.button_rects[b].centerx + 50,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
+            self.game.display.render(settig_string, self.game.screen_manager.screen, position = [self.button_rects[b].centerx + 50,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
             settig_string.release()
 
     def render(self):
         #fill game.screen
-        self.game.screen.clear(255,255,255)
+        self.game.screen_manager.screen.clear(255,255,255, 255)     
 
         #blit title
-        self.game.display.render(self.title, self.game.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5, 50))
+        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5, 50))
 
         #blit buttons
         self.blit_buttons()
 
         #blit arrow
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
-        self.game.display.render(self.arrow.image, self.game.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-
+        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
+        self.game.render_display(self.game.screen_manager.screen.texture)
         #self.arrow.draw(self.game.screen)
 
     def handle_events(self, input):
@@ -489,7 +492,7 @@ class Gameplay(Game_State):
         self.handle_movement()
         self.game.game_objects.time_manager.update()
         self.game.game_objects.update()
-        self.game.game_objects.collide_all()
+        #self.game.game_objects.collide_all()        
         self.game.game_objects.UI.hud.update()
 
     def fade_update(self):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
@@ -498,17 +501,14 @@ class Gameplay(Game_State):
         self.game.game_objects.UI.hud.update()
 
     def render(self):
-        self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
-        self.game.game_objects.UI.hud.render()
-        if self.game.RENDER_FPS_FLAG:
-            self.blit_fps()
-
-    def blit_fps(self):
-        fps_string = str(int(self.game.clock.get_fps()))
-        image = self.game.game_objects.font.render((50,20),'fps ' + fps_string)
-        self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-        self.game.display.render(image, self.game.screen, position = (self.game.window_size[0]-50,20),shader = self.game.game_objects.shaders['colour'])#shader render
-        image.release()
+        self.game.game_objects.draw()#rendered on multiple layers on each parallax screen        
+        self.game.screen_manager.render()#renders each parllax to a composite screen with pp shader, which makes it display size
+        #self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
+        self.game.game_objects.lights.draw(self.game.screen_manager.composite_screen)#before post procssing shader?
+        self.game.game_objects.post_process.apply(self.game.screen_manager.composite_screen)#apply post process shaders to the composite screen, which is large
+        self.game.game_objects.UI.hud.draw(self.game.screen_manager.composite_screen)#renders hud elements to the composite             
+        
+        self.game.render_display(self.game.screen_manager.composite_screen.texture, scale = False)            
 
     def handle_movement(self):#every frame
         #value = self.game.game_objects.controller.continuous_input_checks()
@@ -544,15 +544,12 @@ class Gameplay(Game_State):
                 self.game.game_objects.player.abilities.handle_input(event[2]['d_pad'])#to change movement ability with d pad
 
             else:
-                interpreted = self.game.game_objects.input_interpreter.interpret(input)
-                self.game.game_objects.player.currentstate.handle_press_input(interpreted)
-
-                #self.game.game_objects.player.currentstate.handle_press_input(interpret_input)
+                self.game.game_objects.player.currentstate.handle_press_input(input)
                 #self.game.game_objects.player.omamoris.handle_press_input(input)
         elif event[1]:#release
             self.game.game_objects.player.currentstate.handle_release_input(input)
 
-        elif event[2]['l_stick'][1] > 0.85:
+        elif event[2]['l_stick'][1] > 0.85:#pressing down
             input.processed()#should it be processed here or when passed through?
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
@@ -567,8 +564,10 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.initiate_buttons()
         self.define_BG()
         self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
-
-        self.screen_copy = self.game.display.make_layer(self.game.window_size)
+        
+        self.screen_copy = self.game.display.make_layer(self.game.display_size)
+        self.game.game_objects.shaders['blur']['blurRadius'] = 1
+        self.game.display.render(self.game.screen_manager.composite_screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])
 
     def define_BG(self):
         size = (100,120)
@@ -583,7 +582,6 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.button_rects = {}
         for b in self.buttons:
             text = (self.game.game_objects.font.render(text = b))
-            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
             self.button_surfaces[b] = text
             self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
             y_pos += 20
@@ -597,10 +595,9 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         pass
 
     def render(self):
-        super().render()
-        self.background.clear(50,50,50,30)
-        self.game.game_objects.shaders['blur']['blurRadius'] = 0.1
-        self.game.display.render(self.game.screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])#blur screen
+        #super().render()
+        self.background.clear(50, 50, 50, 30)
+
         self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]*0.5 - self.bg.width*0.5,100))#shader render
 
         #blit title
@@ -614,8 +611,8 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
         self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
 
-        self.game.display.render(self.screen_copy.texture, self.game.screen)#shader render
-        self.game.display.render(self.background.texture, self.game.screen)#shader render
+        self.game.render_display(self.screen_copy.texture, scale = False)
+        self.game.render_display(self.background.texture)
 
     def release_texture(self):
         self.title.release()
@@ -676,21 +673,24 @@ class Ability_menu(Gameplay):#when pressing tab
         self.coordinates=[(40,0),(60,50),(30,60),(0,40),(20,0),(0,0)]
         self.surface = self.game.display.make_layer(self.game.window_size)#TODO
 
+    def release_texture(self):
+        self.surface.release()
+
     def update(self):
         self.game.dt *= 0.5#slow motion
         super().update()
 
     def render(self):
         super().render()
-        self.surface.clear(20,20,20,100)
-        self.game.display.render(self.surface.texture, self.game.screen)
+        self.surface.clear(20,20,20,100)        
 
-        hud=self.sprites[self.index]
+        hud = self.sprites[self.index]
         for index, ability in enumerate(self.abilities):
             pos = [self.coordinates[index][0] + 250, self.coordinates[index][1] + 100]
-            self.game.display.render(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites['active_1'][0], self.game.screen,position =pos)
+            self.game.display.render(self.game.game_objects.player.abilities.spirit_abilities[ability].sprites['active_1'][0], self.surface,position =pos)
 
-        self.game.display.render(hud, self.game.screen,position = (250,100))
+        self.game.display.render(hud, self.surface,position = (250,100))
+        self.game.render_display(self.surface.texture)
 
     def handle_events(self, input):
         event = input.output()
@@ -718,9 +718,11 @@ class Fadein(Gameplay):
         self.fade_surface.clear(0,0,0,255)
 
     def init(self):
+        self.aila_state = 'Idle_main'#for respawn after death
         for state in self.game.state_manager.state_stack:
             if 'Death' == type(state).__name__:
-                self.game.game_objects.player.currentstate.enter_state('invisible')
+                self.aila_state = 'Invisible_main'
+                self.game.game_objects.player.currentstate.enter_state('Invisible_main')
                 break
 
     def update(self):
@@ -731,6 +733,7 @@ class Fadein(Gameplay):
 
     def exit(self):
         self.game.game_objects.player.reset_movement()
+        self.game.game_objects.player.currentstate.enter_state(self.aila_state)
         self.fade_surface.release()
         self.game.state_manager.exit_state()
 
@@ -738,7 +741,7 @@ class Fadein(Gameplay):
         super().render()#gameplay render
         alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
         self.fade_surface.clear(0,0,0,alpha)
-        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
+        self.game.render_display(self.fade_surface.texture)
 
 class Fadeout(Fadein):
     def __init__(self,game, previous_state, map_name, spawn, fade):
@@ -767,7 +770,7 @@ class Fadeout(Fadein):
     def render(self):
         self.previous_state.render()
         self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
-        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
+        self.game.render_display(self.fade_surface.texture)
 
 class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
     def __init__(self, game):
@@ -775,7 +778,7 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.count = 0
         self.fade_length = 60
-        self.fade_surface.clear(0,0,0,int(255/self.fade_length))        
+        self.fade_surface.clear(0,0,0,int(255/self.fade_length))
 
     def update(self):
         super().update()
@@ -787,7 +790,7 @@ class Safe_spawn_1(Gameplay):#basically fade. Uses it when collising a hole
     def render(self):
         super().render()#gameplay render
         self.fade_surface.clear(0,0,0,int(self.count*(255/self.fade_length)))
-        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
+        self.game.render_display(self.fade_surface.texture)
 
 class Safe_spawn_2(Gameplay):#fade
     def __init__(self, game):
@@ -798,20 +801,20 @@ class Safe_spawn_2(Gameplay):#fade
         self.fade_surface = self.game.display.make_layer(self.game.window_size)#TODO
         self.fade_surface.clear(0,0,0,255)
         self.game.game_objects.player.set_pos(self.game.game_objects.player.backpack.map.spawn_point['safe_spawn'])
-        self.game.game_objects.player.currentstate.enter_state('crouch', phase = 'main')        
+        self.game.game_objects.player.currentstate.enter_state('crouch', phase = 'main')
 
     def update(self):
         super().update()
         self.count += self.game.dt
         if self.count > self.fade_length*2:
-            self.game.game_objects.player.currentstate.handle_input('pray_post')#to stand up
-            self.game.state_manager.exit_state()            
+            self.game.game_objects.player.currentstate.handle_input('pray_post')            
+            self.game.state_manager.exit_state()
 
     def render(self):
         super().render()#gameplay render
         alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
         self.fade_surface.clear(0,0,0,alpha)
-        self.game.display.render(self.fade_surface.texture, self.game.screen)#shader render
+        self.game.render_display(self.fade_surface.texture)        
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -820,7 +823,7 @@ class Conversation(Gameplay):
         self.game.game_objects.player.velocity = [0,0]
         self.npc = npc
         self.print_frame_rate = C.animation_framerate
-        self.text_window_size = (528, 160)
+        self.text_window_size = (352, 96)
         self.blit_pos = [int((self.game.window_size[0]-self.text_window_size[0])*0.5),50]
         self.background = self.game.display.make_layer(self.text_window_size)#TODO
         self.conv_screen = self.game.display.make_layer(self.game.window_size)#TODO
@@ -832,11 +835,7 @@ class Conversation(Gameplay):
 
     def clean_slate(self):
         self.letter_frame = 0
-        #self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
-        self.text_window = pygame.image.load('Sprites/utils/text_box3.png').convert_alpha()
-        self.text_window = self.game.display.surface_to_texture(self.text_window)
-        self.text_win_size = self.text_window.size
-        print(self.text_win_size)
+        self.text_window = self.game.game_objects.font.fill_text_bg(self.text_window_size)
         self.game.display.render(self.text_window, self.background)#shader render
 
     def update(self):
@@ -849,20 +848,18 @@ class Conversation(Gameplay):
 
     def render(self):
         super().render()
-        self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
-        self.background.clear(10,10,10,0)#needed to make the self.background semi trasnaprant
-
-        self.game.display.render(self.text_window, self.background)#shader render
+        self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant        
 
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-        self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)#shader render
-        self.game.display.render(text, self.background, position = (144,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
-        self.npc.render_potrait(self.background)#some conversation target may not have potraits
+        self.game.display.render(self.background.texture, self.conv_screen, position = self.blit_pos)
+        self.game.display.render(text, self.conv_screen, position = (180,self.blit_pos[1] + 20), shader = self.game.game_objects.shaders['colour'])#shader render
+        self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
         text.release()
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
-        self.game.display.render(self.background.texture,self.conv_screen,position = [(640 - self.text_win_size[0])/2, 50],shader = self.game.game_objects.shaders['alpha'])
-        self.game.display.render(self.conv_screen.texture,self.game.screen)#shader render
+                
+        self.game.display.render(self.conv_screen.texture, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['alpha'])#shader render
+        self.game.render_display(self.game.screen_manager.screen.texture)
 
     def handle_events(self, input):
         event = input.output()
@@ -890,9 +887,9 @@ class Conversation(Gameplay):
     def on_exit(self):
         self.conv_screen.release()
         self.background.release()
-        self.npc.buisness()
+        self.npc.buisness()        
 
-class UIs(Gameplay):#pressing i: map, inventory, radna, journal
+class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
     def __init__(self, game, page, **kwarg):
         super().__init__(game)
         self.game.game_objects.UI.set_ui(page, **kwarg)
@@ -908,9 +905,6 @@ class UIs(Gameplay):#pressing i: map, inventory, radna, journal
     def handle_events(self,input):
         self.game.game_objects.UI.handle_events(input)
 
-    def handle_movement(self):#aila movement is not needed in UIs
-        pass
-
 class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up inetractable item etc. It blits an image and text
     def __init__(self, game, image, text = '', callback = None):
         super().__init__(game)
@@ -923,7 +917,6 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
 
         self.game.game_objects.player.reset_movement()
 
-        self.surface = game.display.make_layer(game.window_size)#TODO
         self.fade = [0,0]
         self.callback = callback#a function to call when exiting
 
@@ -937,11 +930,11 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
         self.game.game_objects.shaders['alpha']['alpha'] = self.fade[1]
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,self.fade[1])
 
-        self.surface.clear(40, 40, 40, self.fade[0])
-
-        self.game.display.render(self.surface.texture, self.game.screen)
-        self.game.display.render(self.image.texture, self.game.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
-        self.game.display.render(self.text, self.game.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])
+        self.game.screen_manager.screen.clear(40, 40, 40, self.fade[0])
+        
+        self.game.display.render(self.image.texture, self.game.screen_manager.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
+        self.game.display.render(self.text, self.game.screen_manager.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])
+        self.game.render_display(self.game.screen_manager.screen.texture)
 
     def render_in(self):
         self.fade[0] += 1

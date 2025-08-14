@@ -5,7 +5,7 @@ import constants as C
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 import entities
 
-from states import states_enemy, states_enemy_flying, states_NPC, interactale_item_states
+from states import states_enemy, states_enemy_flying, states_NPC, interactale_item_states, states_shader
 
 def sign(number):
     if number > 0: return 1
@@ -128,6 +128,18 @@ class NPC(Character):
         self.currentstate = states_NPC.Idle(self)
         self.dialogue = dialogue.Dialogue(self)#handles dialoage and what to say
         self.define_conversations()
+        self.collided = False
+        self.indicator = entities.InteractableIndicator(self.rect.topright, self.game_objects)
+
+    def player_noncollision(self):
+        if not self.collided: return
+        self.indicator.kill()
+        self.collided = False
+        
+    def player_collision(self, player):        
+        if self.collided: return              
+        self.game_objects.cosmetics.add(self.indicator)
+        self.collided = True
 
     def define_conversations(self):#should depend on NPC
         self.priority = ['reindeer','ape']#priority events to say
@@ -150,7 +162,7 @@ class NPC(Character):
         self.game_objects.game.state_manager.enter_state('Conversation', npc = self)
 
     def random_conversation(self, text):#can say stuff through a text bubble
-        random_conv = dialogue.Conversation_bubbles(self.rect.topright,self.game_objects, text)
+        random_conv = entities.ConversationBubbles(self.rect.topright,self.game_objects, text)
         self.game_objects.cosmetics.add(random_conv)
 
     def buisness(self):#enters after conversation
@@ -449,12 +461,18 @@ class Interactable(Animatedentity):#interactables
         self.group = game_objects.interactables
         self.pause_group = game_objects.entity_pause
         self.true_pos = self.rect.topleft
+        self.shader_state = states_shader.Idle(self)
         if sfx: self.sfx = pygame.mixer.Sound('audio/SFX/environment/' + sfx + '.mp3')
         else: self.sfx = None # make more dynamic incase we want to use more than just mp3
 
     def update(self):
         super().update()
+        self.shader_state.update()
         self.group_distance()
+
+    def draw(self, target):#called just before draw in group
+        self.shader_state.draw()
+        super().draw(target)
 
     def play_sfx(self):
         self.game_objects.sound.play_sfx(self.sfx)
@@ -463,10 +481,10 @@ class Interactable(Animatedentity):#interactables
         pass
 
     def player_collision(self, player):#player collision
-        pass
+        self.shader_state.handle_input('outline')
 
     def player_noncollision(self):#when player doesn't collide: for grass
-        pass
+        self.shader_state.handle_input('idle')
 
     def take_dmg(self, projectile):#when player hits with e.g. sword
         pass

@@ -1,10 +1,10 @@
-import pygame, sys
+import pygame, sys, time
 import game_objects
 import constants as C
 import read_files
 import state_manager
 from pygame_render import RenderEngine
-
+import screen_manager
 #pygame.print_debug_info()
 
 class Game():
@@ -12,17 +12,16 @@ class Game():
         #initiate all screens
         self.window_size = C.window_size.copy()
         self.scale = self.scale_size(2)#get the scale according to your display size
-        display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
+        self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
-
-        self.display = RenderEngine(display_size[0], display_size[1], fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync'])
-        self.screen = self.display.make_layer(self.window_size)
+        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac               
+        self.screen_manager = screen_manager.ScreenManager(self)
 
         #initiate game related values
         self.clock = pygame.time.Clock()
-        self.dt = 0
+        self.dt = 1
         self.game_objects = game_objects.Game_Objects(self)
-        self.state_manager = state_manager.State_manager(self, 'Title_menu')        
+        self.state_manager = state_manager.State_manager(self, 'Title_menu')
 
         #debug flags
         self.DEBUG_MODE = True
@@ -49,13 +48,19 @@ class Game():
             self.state_manager.handle_events(input)
 
     def run(self):
+        prev_time = time.perf_counter()
+        alpha = 1 # lower alpha = more smoothing: need to be one for the slow motion to work
         while True:
-            self.screen.clear(0, 0, 0, 0)
-
-            #tick clock
-            self.clock.tick(C.fps)
-            self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-
+            self.screen_manager.clear()
+            
+            #time dt
+            frame_end = time.perf_counter()    
+            dt = min(frame_end - prev_time, 2 / C.fps) * 60
+            dt = max(dt, 0.1)
+            prev_time = frame_end
+            self.dt = (alpha * dt) + (1 - alpha) * self.dt                     
+            #self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
+            
             #handle event
             self.event_loop()
 
@@ -63,11 +68,11 @@ class Game():
             self.state_manager.update()
 
             #render
-            self.state_manager.render()#render onto self.screeen
-            self.display.render(self.screen.texture, self.display.screen, scale = self.scale)#shader render
+            self.state_manager.render()                                    
 
             #update display
             pygame.display.flip()
+            self.clock.tick(C.fps)
 
     def scale_size(self, scale = None):
         if not scale:#if None
@@ -75,6 +80,11 @@ class Game():
             scale_h = pygame.display.Info().current_h/self.window_size[1]
             return min(scale_w, scale_h)
         return scale
+
+    def render_display(self, texture, scale = True):#called from game states
+        if scale: scale = self.scale            
+        else: scale = 1
+        self.display.render(texture, self.display.screen, scale = scale)
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

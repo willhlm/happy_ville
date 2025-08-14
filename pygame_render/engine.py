@@ -169,6 +169,7 @@ class RenderEngine:
         Returns:
         - Layer
         """
+        
         tex = self.ctx.texture(size, components, data, samples=samples,
                                alignment=alignment, dtype=dtype,
                                internal_format=internal_format)
@@ -213,6 +214,15 @@ class RenderEngine:
 
         return self.make_shader(vertex_src, fragment_src)
 
+    def set_premultiplied_alpha_blending(self):
+        """Set blend mode for premultiplied alpha"""
+        self._ctx.blend_func = (moderngl.ONE, moderngl.ONE_MINUS_SRC_ALPHA)
+
+    def set_normal_alpha_blending(self):
+        """Set blend mode back to normal alpha blending"""
+        self._ctx.blend_func = (moderngl.SRC_ALPHA, moderngl.ONE_MINUS_SRC_ALPHA,
+                            moderngl.ONE, moderngl.ONE_MINUS_SRC_ALPHA)
+
     def reserve_uniform_block(self, shader: Shader, ubo_name: str, nbytes: int) -> None:
         """
         Allocate the memory for a uniform block in a given shader.
@@ -249,36 +259,16 @@ class RenderEngine:
         self._ctx.screen.clear(R, G, B, A)
 
     def render(self,
-               tex: Texture,
-               layer: Layer,
-               position: tuple[float, float] = (0, 0),
-               scale: tuple[float, float] or float = (1.0, 1.0),
-               angle: float = 0.0,
-               flip: tuple[bool, bool] or bool = (False, False),
-               section: pygame.Rect or None = None,
-               shader: Shader = None) -> None:
+            tex: Texture,
+            layer: Layer,
+            position: tuple[float, float] = (0, 0),
+            scale: tuple[float, float] or float = (1.0, 1.0),
+            angle: float = 0.0,
+            flip: tuple[bool, bool] or bool = (False, False),
+            section: pygame.Rect or None = None,
+            shader: Shader = None) -> None:
         """
         Render a texture onto a layer with optional transformations.
-
-        Parameters:
-        - tex (Texture): The texture to render.
-        - layer (Layer): The layer to render onto.
-        - position (tuple[float, float]): The position (x, y) where the texture will be rendered. Default is (0, 0).
-        - scale (tuple[float, float] | float): The scaling factor for the texture. Can be a tuple (x, y) or a scalar. Default is (1.0, 1.0).
-        - angle (float): The rotation angle in degrees. Default is 0.0.
-        - flip (tuple[bool, bool] | bool): Whether to flip the texture. Can be a tuple (flip x axis, flip y axis) or a boolean (flip x axis). Default is (False, False).
-        - section (pygame.Rect | None): The section of the texture to render. If None, the entire texture is rendered. Default is None.
-        - shader (Shader): The shader program to use for rendering. If None, a default shader is used. Default is None.
-
-        Returns:
-        None
-
-        Note:
-        - If scale is a scalar, it will be applied uniformly to both x and y.
-        - If flip is a boolean, it will only affect the x axis.
-        - If section is None, the entire texture is used.
-        - If section is larger than the texture, the texture is repeated to fill the section.
-        - If shader is None, a default shader (_prog_draw) is used.
         """
 
         # Create section rect if none
@@ -300,7 +290,7 @@ class RenderEngine:
         # Get the vertex coordinates of a rectangle that has been rotated,
         # scaled, and translated, in world coordinates
         points = create_rotated_rect(position, section.width,
-                                     section.height, scale, angle, flip)
+                                    section.height, scale, angle, flip)
 
         # Convert to destination coordinates
         dest_width, dest_height = layer.size
@@ -309,7 +299,7 @@ class RenderEngine:
         # Mesh for destination rect on screen
         p1, p2, p3, p4 = points
         vertex_coords = np.array([p3, p4, p2,
-                                  p2, p4, p1], dtype=np.float32)
+                                p2, p4, p1], dtype=np.float32)
 
         # Calculate the texture coordinates
         x = section.x / tex.width
@@ -319,7 +309,7 @@ class RenderEngine:
 
         # Mesh for the section within the texture
         tex_coords = np.array([(x, y + h), (x + w, y + h), (x, y),
-                               (x, y), (x + w, y + h), (x + w, y)], dtype=np.float32)
+                            (x, y), (x + w, y + h), (x + w, y)], dtype=np.float32)
 
         # Create VBO and VAO
         buffer_data = np.hstack([vertex_coords, tex_coords])

@@ -176,7 +176,6 @@ class Controller():
             r_axis_x = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTX))
             r_axis_y = self.normalize_axis(controller.get_axis(pygame.CONTROLLER_AXIS_RIGHTY))
 
-
             if abs(l_axis_x) > 0.2:
                 self.value["l_stick"][0] = l_axis_x
             if abs(l_axis_y) > 0.2:

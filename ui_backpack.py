@@ -26,8 +26,9 @@ class BaseUI():
         self.letter_frame = 0#for descriptions
 
     def blit_screen(self):#blits everything first to self.game_state.screen. Then blit it to the game screen at the end
-        self.game_objects.shaders['alpha']['alpha'] = self.screen_alpha
-        self.game_objects.game.display.render(self.game_objects.UI.screen.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['alpha'])
+        self.game_objects.shaders['alpha']['alpha'] = self.screen_alpha        
+        self.game_objects.game.display.render(self.game_objects.UI.screen.texture, self.game_objects.game.screen_manager.screen, shader = self.game_objects.shaders['alpha'])
+        self.game_objects.game.render_display(self.game_objects.game.screen_manager.screen.texture)
 
 class InventoryUI(BaseUI):
     def __init__(self, game_objects, **kwarg):
@@ -105,10 +106,10 @@ class InventoryUI(BaseUI):
                 self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 self.iventory_UI.buttons['rb'].currentstate.handle_input('press')
-                self.game_objects.UI.set_ui('radna', screen_alpha = 230)
+                self.game_objects.UI.next_page(screen_alpha = 230)
             elif event[-1] == 'lb':#previouse
                 self.iventory_UI.buttons['lb'].currentstate.handle_input('press')
-                self.game_objects.UI.set_ui('map', screen_alpha = 230)
+                self.game_objects.UI.previouse_page(screen_alpha = 230)
             elif event[-1]=='a' or event[-1]=='return':
                 self.iventory_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
@@ -206,18 +207,18 @@ class RadnaUI(BaseUI):
             self.game_objects.game.display.render(container.image, self.game_objects.UI.screen, position = container.rect.topleft)#shader render
 
     def blit_radnas(self):
-        for key in self.game_objects.player.backpack.necklace.inventory.keys():#blit the radnas there is in inventory
-            item = self.game_objects.player.backpack.necklace.get_radna(key)           
+        for key in self.game_objects.player.backpack.radna.inventory.keys():#blit the radnas there is in inventory
+            item = self.game_objects.player.backpack.radna.get_radna(key)           
             self.game_objects.shaders['colour']['colour'] = (0,0,0,255)#item.shader toggle sbetween colour and None                   
             self.game_objects.game.display.render(item.image, self.game_objects.UI.screen, position = self.radna_UI.items[key], shader = item.shader)#shader render        
 
-        for finger in self.game_objects.player.backpack.necklace.equipped.keys():#blit the equipped radnas
-            ring = self.game_objects.player.backpack.necklace.rings[finger]            
+        for finger in self.game_objects.player.backpack.radna.equipped.keys():#blit the equipped radnas
+            ring = self.game_objects.player.backpack.radna.rings[finger]            
             self.game_objects.game.display.render(ring.radna.image, self.game_objects.UI.screen, position = self.radna_UI.equipped_containers[finger].rect.topleft)#shader render        
 
     def blit_rings(self): 
-        for key in self.game_objects.player.backpack.necklace.rings.keys():#blit the rings there is in inventory
-            ring = self.game_objects.player.backpack.necklace.get_ring(key)
+        for key in self.game_objects.player.backpack.radna.rings.keys():#blit the rings there is in inventory
+            ring = self.game_objects.player.backpack.radna.get_ring(key)
             ring.animation.update()            
             self.game_objects.game.display.render(ring.image, self.game_objects.UI.screen, position = self.radna_UI.rings[key])#shader render        
 
@@ -232,7 +233,7 @@ class RadnaUI(BaseUI):
 
     def blit_description(self):
         item_name = self.selected_container.get_item()
-        item = self.game_objects.player.backpack.necklace.get_radna(item_name)
+        item = self.game_objects.player.backpack.radna.get_radna(item_name)
         if item:#if the item is in the inventory
             self.dark(item)#blit a dark radna at the equippable position
             self.conv = item.description
@@ -243,7 +244,7 @@ class RadnaUI(BaseUI):
 
     def dark(self, item):        
         if item.entity: return#if it is equpped
-        slot = self.game_objects.player.backpack.necklace.check_position(item)#blit a dark radna at this potsion
+        slot = self.game_objects.player.backpack.radna.check_position(item)#blit a dark radna at this potsion
         if not slot: return
         self.game_objects.shaders['colour']['colour'] = (0,0,0,255)
         self.game_objects.game.display.render(item.image, self.game_objects.UI.screen, position =self.radna_UI.equipped_containers[slot].rect.topleft,shader = self.game_objects.shaders['colour'])#shader render           
@@ -256,10 +257,10 @@ class RadnaUI(BaseUI):
                 self.game_objects.game.state_manager.exit_state()
             elif event[-1] == 'rb':#nezt page
                 #self.radna_UI.buttons['rb'].currentstate.handle_input('press')
-                self.game_objects.UI.set_ui('journal', screen_alpha = 230)
+                self.game_objects.UI.next_page(screen_alpha = 230)            
             elif event[-1] == 'lb':#previouse
                 #self.radna_UI.buttons['lb'].currentstate.handle_input('press')
-                self.game_objects.UI.set_ui('inventory', screen_alpha = 230)
+                self.game_objects.UI.previouse_page(screen_alpha = 230)
             elif event[-1]=='a' or event[-1]=='return':
                 #self.radna_UI.buttons['a'].currentstate.handle_input('press')
                 self.use_item()
@@ -322,12 +323,12 @@ class RadnaUI(BaseUI):
 
     def use_item(self):
         item_name = self.selected_container.get_item()
-        new_radna = self.game_objects.player.backpack.necklace.get_radna(item_name)       
+        new_radna = self.game_objects.player.backpack.radna.get_radna(item_name)       
         if not new_radna: return#if there is not in inventory
         if not new_radna.entity:#if it has an owner, i.e. equipped           
-            self.game_objects.player.backpack.necklace.equip_item(new_radna)
+            self.game_objects.player.backpack.radna.equip_item(new_radna)
         else:
-            self.game_objects.player.backpack.necklace.remove_item(new_radna)
+            self.game_objects.player.backpack.radna.remove_item(new_radna)
 
 class JournalUI(BaseUI):
     def __init__(self, game_objects, **kwarg):
@@ -342,7 +343,8 @@ class JournalUI(BaseUI):
         self.define_enemies()
         self.select_enemies()
 
-    def on_enter(self):
+    def on_enter(self, **kwarg):
+        super().on_enter(**kwarg)
         self.define_enemies()
         self.select_enemies()
 
@@ -369,31 +371,31 @@ class JournalUI(BaseUI):
 
     def blit_journal_BG(self):
         #self.journal_UI.BG.set_alpha(230)
-        self.game_objects.game.display.render(self.journal_UI.BG, self.game_objects.UI.backpack.screen)
+        self.game_objects.game.display.render(self.journal_UI.BG, self.game_objects.UI.screen)
 
     def blit_names(self):
         for index, enemy in enumerate(self.selected_enemies):
             name = enemy.__class__.__name__
             text = self.game_objects.font.render((152,80), name, 100)
             #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = self.journal_UI.name_pos[index])
+            self.game_objects.game.display.render(text, self.game_objects.UI.screen, position = self.journal_UI.name_pos[index])
             text.release()
 
     def blit_pointer(self):
         pos = [self.journal_UI.name_pos[self.journal_index[0]][0],self.journal_UI.name_pos[self.journal_index[0]][1]-5]#add a offset
-        self.game_objects.game.display.render(self.pointer, self.game_objects.UI.backpack.screen, position = pos)
+        self.game_objects.game.display.render(self.pointer, self.game_objects.UI.screen, position = pos)
 
     def blit_enemy(self):
         enemy = self.selected_enemies[self.journal_index[0]]
         enemy.rect.midbottom = self.journal_UI.image_pos#allign based on bottom
         enemy.animation.update()
-        self.game_objects.game.display.render(enemy.image, self.game_objects.UI.backpack.screen, position = [enemy.rect.center[0]-enemy.rect.width*0.5,enemy.rect.center[1]-enemy.rect.height*0.5])
+        self.game_objects.game.display.render(enemy.image, self.game_objects.UI.screen, position = [enemy.rect.center[0]-enemy.rect.width*0.5,enemy.rect.center[1]-enemy.rect.height*0.5])
 
     def blit_description(self):
         self.conv = self.selected_enemies[self.journal_index[0]].description
         text = self.game_objects.font.render((152,80), self.conv, int(self.letter_frame//2))
         #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-        self.game_objects.game.display.render(text, self.game_objects.UI.backpack.screen, position = (380,120))
+        self.game_objects.game.display.render(text, self.game_objects.UI.screen, position = (380,120))
         text.release()
 
     def handle_events(self,input):
@@ -405,8 +407,7 @@ class JournalUI(BaseUI):
             elif event[-1] == 'rb':#nezt page
                 pass
             elif event[-1] == 'lb':#previouse page
-                new_ui = NecklaseUI(self.game_objects, screen_alpha = 230)
-                self.game_objects.UI.backpack.enter_page(new_ui)
+                self.game_objects.UI.previouse_page(screen_alpha = 230)
             elif event[-1] =='down':
                 self.letter_frame = 0
                 self.journal_index[0] += 1
@@ -453,8 +454,7 @@ class MapUI(BaseUI):#local maps
             if event[-1] == 'select':
                 self.exit_state()
             elif event[-1] == 'rb':#nezt page
-                self.game_objects.UI.set_ui('inventory', screen_alpha = 230)
-
+                self.game_objects.UI.next_page(screen_alpha = 230)
             elif event[-1] == 'a':#nezt page
                 map_name = self.selected_container.activate()#open the local map. I guess it should be a new state
                 self.game_objects.UI.set_ui('map', screen_alpha = 230, map = map_name)  
