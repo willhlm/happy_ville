@@ -86,6 +86,35 @@ class Bloom(Shaders):
         self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['bloom'])
         self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
 
+class Glow(Shaders):
+    def __init__(self, post_process, **kwarg):
+        super().__init__(post_process)
+        self.glowRadius = kwarg.get('radius',5)
+        self.glowThreshold = kwarg.get('threshould',0.4)
+        self.glowIntensity = kwarg.get('intensity',10)
+        self.targetColor = kwarg.get('target_colour',(1,0,0))
+        self.glowColor = kwarg.get('colour',(1,0,0))
+        self.colorTolerance = kwarg.get('tolerance',0)
+
+    def set_uniforms(self):
+        self.post_process.game_objects.shaders['glow']['glowRadius'] = self.glowRadius
+        self.post_process.game_objects.shaders['glow']['glowIntensity'] = self.glowIntensity
+        self.post_process.game_objects.shaders['glow']['glowThreshold'] = self.glowThreshold
+        self.post_process.game_objects.shaders['glow']['targetColor'] = self.targetColor
+        self.post_process.game_objects.shaders['glow']['glowColor'] = self.glowColor
+        self.post_process.game_objects.shaders['glow']['colorTolerance'] = self.colorTolerance
+
+    def draw(self, temp_layer, composite_screen):
+        self.set_uniforms()
+        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['glow'])
+        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
+        return composite_screen
+
+    def draw_to_composite(self, temp_layer, composite_screen):#the final drawing onto the screen
+        self.set_uniforms()
+        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['glow'])
+        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen)
+
 class White_balance(Shaders):
     def __init__(self, post_process, **kwarg):
         super().__init__(post_process)

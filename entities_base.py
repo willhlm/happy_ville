@@ -383,6 +383,15 @@ class Loot(Platform_entity):#
     def set_ui(self):#called from backpask
         pass
 
+    def perform_bounce(self):
+        for direction in self.bounce_directions:
+            if direction == "down" or direction == "up":
+                self.velocity[0] = 0.7 * self.velocity[0] 
+                self.velocity[1] = -self.bounce_coefficient * self.velocity[1]                
+                self.bounce_coefficient *= self.bounce_coefficient                                
+            elif direction == "left" or direction == "right":
+                self.velocity[0] *= -1     
+
 class Enemy_drop(Loot):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
@@ -408,16 +417,7 @@ class Enemy_drop(Loot):
         if self.currentstate.__class__.__name__ == 'Death': return#enter only once
         self.game_objects.sound.play_sfx(self.sounds['death'][0])#should be in states        
         self.currentstate.handle_input('Death')
-        player.backpack.inventory.add(self)
-
-    def perform_bounce(self):
-        for direction in self.bounce_directions:
-            if direction == "down" or direction == "up":
-                self.velocity[0] = 0.7 * self.velocity[0] 
-                self.velocity[1] = -self.bounce_coefficient * self.velocity[1]                
-                self.bounce_coefficient *= self.bounce_coefficient                                
-            elif direction == "left" or direction == "right":
-                self.velocity[0] *= -1        
+        player.backpack.inventory.add(self)   
 
 class Interactable_item(Loot):#need to press Y to pick up - #key items: need to pick up instead of just colliding
     def __init__(self, pos, game_objects, **kwarg):
@@ -426,6 +426,11 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
             self.currentstate = interactale_item_states.Wild(self, **kwarg)
         else:
             self.currentstate = interactale_item_states.Idle(self, **kwarg)
+
+    def update(self):
+        super().update()
+        self.perform_bounce()     
+        self.bounce_directions.clear()     
 
     def pickup(self, player):
         self.game_objects.world_state.state[self.game_objects.map.level_name]['interactable_items'][type(self).__name__] = True#save in state file that the items on this map has picked up (assume that only one interactable item on each room)
@@ -453,7 +458,7 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
 
     @classmethod
     def pool(cls, game_objects):
-        cls.sprites['wild'] = read_files.load_sprites_list('Sprites/enteties/items/interactables_items/',game_objects)#the sprite to render when they are in the wild
+        cls.sprites['wild'] = read_files.load_sprites_list('Sprites/enteties/items/interactables_items/',game_objects)#the sprite to render when they are in the wild   
 
 class Interactable(Animatedentity):#interactables
     def __init__(self, pos, game_objects, sfx = None):
