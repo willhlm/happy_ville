@@ -5,9 +5,9 @@ uniform sampler2D imageTexture;// used texture unit
 out vec4 COLOR;
 //https://godotshaders.com/shader/just-chromatic-aberration/
 
-uniform vec2 r_displacement = 2*vec2(3.0, 0.0);
+uniform vec2 r_displacement = 2*vec2(6.0, 0.0);
 uniform vec2 g_displacement = vec2(0.0, 0.0);
-uniform vec2 b_displacement = 2*vec2(-3.0, 0.0);
+uniform vec2 b_displacement = 2*vec2(-6.0, 0.0);
 
 void main()
 {

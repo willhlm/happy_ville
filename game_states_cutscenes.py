@@ -16,7 +16,7 @@ class Cutscene_file():#cutscneens that will run based on file. The name of the f
         self.animation.update()
 
     def render(self):
-        self.game_objects.game.display.render(self.image,self.game_objects.game.screen)
+        self.game.render_display(self.image)  
 
     def reset_timer(self):#called when cutscene is finshed
         pass
@@ -60,8 +60,9 @@ class Cutscene_engine(Gameplay):#cut scenens that is based on game engien
         self.pos[0] = min(-self.game.window_size[1]*self.const[0], self.pos[0])
         self.pos[1] = max(self.game.window_size[1]*self.const[1], self.pos[1])
 
-        self.game.display.render(self.rect1.texture, self.game.screen, position = [0,self.pos[0]])
-        self.game.display.render(self.rect2.texture, self.game.screen, position = [0,self.pos[1]])
+        self.game.display.render(self.rect1.texture, self.game.screen_manager.screen, position = [0,self.pos[0]])
+        self.game.display.render(self.rect2.texture,  self.game.screen_manager.screen, position = [0,self.pos[1]])
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
         event = input.output()
@@ -111,14 +112,16 @@ class Title_screen(Cutscene_engine):#screen played after waking up from boss dre
     def render(self):
         super().render()
         if self.timer>250:
-            self.game.display.render(self.title_name,self.game.screen,position = (190,150))
+            self.game.display.render(self.title_name,self.game.screen_manager.screen,position = (190,150))
 
         if self.timer>500:
-            self.game.display.render(self.text1,self.game.screen,position = (190,170))
+            self.game.display.render(self.text1,self.game.screen_manager.screen,position = (190,170))
 
         if self.timer >700:
             self.game.game_objects.player.acceleration[0] *= 2#bacl to normal speed
             self.game.state_manager.exit_state()
+        
+        self.game.render_display(self.game.screen_manager.screen.texture)  
 
     def handle_events(self,input):
         event = input.output()
@@ -200,7 +203,7 @@ class Boss_deer_encounter(Cutscene_engine):#boss fight cutscene
         if self.stage == 0:
             if self.timer > 120:
                 self.stage = 1
-                self.game.game_objects.player.currentstate.enter_state('Idle_main')#should only enter these states once
+                self.game.game_objects.player.currentstate.enter_state('idle')#should only enter these states once
                 self.game.game_objects.player.acceleration[0] = 0
 
         elif self.stage==1:#transform
@@ -253,9 +256,6 @@ class Defeated_boss(Cutscene_engine):#cut scene to play when a boss dies
         if self.step1:
             particle = getattr(particles, 'Spark')(self.game.game_objects.player.rect.center, self.game.game_objects, distance = 400, lifetime = 60, vel = {'linear':[7,13]}, dir = 'isotropic', scale = 1, colour = [255,255,255,255])
             self.game.game_objects.cosmetics.add(particle)
-
-            self.game.game_objects.cosmetics.draw(self.game.game_objects.game.screen)
-            self.game.game_objects.players.draw(self.game.game_objects.game.screen)
 
 class Death(Cutscene_engine):#when aila dies
     def __init__(self,game):

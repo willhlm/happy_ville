@@ -11,10 +11,9 @@ class UI_manager():#initialised in game_objects, keep common UIs always in memor
             'worldmap':        ui_backpack.MapUI_2(game_objects),
             'radna':     ui_backpack.RadnaUI(game_objects),
             'journal':     ui_backpack.JournalUI(game_objects),
-            #'pause':      ui_menu.PauseMenuUI(game_objects),
-            #'options':    OptionsUI(game_objects, ui_assets),
-            # …etc.
         }
+        self.index = 1#start at inventory
+        self.backpack = list(game_objects.player.backpack.holdings.keys())#the things player has access to
 
     def update(self):
         self.active_ui.update()
@@ -28,6 +27,16 @@ class UI_manager():#initialised in game_objects, keep common UIs always in memor
     def set_ui(self, ui, **kwarg):     
         self.uis[ui].on_enter(**kwarg)   
         self.active_ui = self.uis[ui] 
+    
+    def next_page(self, **kwarg):
+        self.index += 1        
+        self.index = min(self.index, len(self.backpack))
+        self.set_ui(self.backpack[self.index], **kwarg)
+
+    def previouse_page(self, **kwarg):
+        self.index -= 1        
+        self.index = max(self.index, 0)
+        self.set_ui(self.backpack[self.index], **kwarg)        
 
     @property
     def hud(self):

@@ -48,7 +48,7 @@ class Idle_left(Basic_states):
         super().__init__(entity)
         self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
 
-    def update(self):
+    def update(self):        
         distance = [self.entity.rect.right - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
         if distance[0] > self.entity.offset*16: return
 
@@ -60,7 +60,7 @@ class Stop_left(Basic_states):
         super().__init__(entity)
         self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.player.hitbox.centerx - self.entity.rect.right - self.entity.game_objects.player.rect[2]*0.5
 
-    def update(self):
+    def update(self):  
         distance = [self.entity.rect.right - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.centery - self.entity.game_objects.player.hitbox.centery]
         if abs(distance[1]) < self.entity.size[1]*0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x
             self.entity.game_objects.camera_manager.camera.target[0] = self.entity.game_objects.player.hitbox.centerx - self.entity.rect.right - self.entity.game_objects.player.rect[2]*0.5

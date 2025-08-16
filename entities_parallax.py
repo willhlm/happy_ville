@@ -56,7 +56,7 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
     def group_distance(self):
         blit_pos = [self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[0], self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1]]
         if blit_pos[0] < self.bounds[0] or blit_pos[0] > self.bounds[1] or blit_pos[1] < self.bounds[2] or blit_pos[1] > self.bounds[3]:
-            self.remove(self.group)#remove from group
+            self.remove(self.group)#self.group.remove_from_layer(self.layer_name, self)#remove from group
             self.add(self.pause_group)#add to pause         
 
 class Trees(Layered_objects):
@@ -117,8 +117,8 @@ class Tree_2(Trees):
 
 class Cocoon(Layered_objects):#larv cocoon in light forest
     animations = {}
-    def __init__(self, pos, game_objects,parallax, live_blur = False):
-        super().__init__(pos, game_objects,parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
+        super().__init__(pos, game_objects,parallax,layer_name, live_blur)
         self.init_sprites('Sprites/animations/cocoon/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -127,8 +127,8 @@ class Cocoon(Layered_objects):#larv cocoon in light forest
 
 class Vines_1(Layered_objects):#light forest
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)
         self.init_sprites('Sprites/animations/vines/vines_1/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -150,8 +150,8 @@ class Vines_1(Layered_objects):#light forest
 
 class Small_tree1(Layered_objects):
     animations = {}
-    def __init__(self, pos, game_objects,parallax, live_blur = False):
-        super().__init__(pos, game_objects,parallax, live_blur)
+    def __init__(self, pos, game_objects,parallax,layer_name, live_blur = False):
+        super().__init__(pos, game_objects,parallax,layer_name, live_blur)
         self.init_sprites('Sprites/animations/bushes/small_tree1/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -175,8 +175,8 @@ class Small_tree1(Layered_objects):
 #lightf forest cave
 class Ljusmaskar(Layered_objects):
     animations = {}
-    def __init__(self,pos,game_objects,parallax, live_blur = False):
-        super().__init__(pos,game_objects,parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax, layer_name, live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name, live_blur)
         self.init_sprites('Sprites/animations/ljusmaskar/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -185,8 +185,8 @@ class Ljusmaskar(Layered_objects):
 
 class Cave_grass(Layered_objects):
     animations = {}    
-    def __init__(self,pos,game_objects,parallax, live_blur = False):
-        super().__init__(pos,game_objects,parallax, live_blur)
+    def __init__(self,pos,game_objects,parallax, layer_name,live_blur = False):
+        super().__init__(pos,game_objects,parallax, layer_name,live_blur)
         self.init_sprites('Sprites/animations/bushes/cave_grass/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -195,15 +195,14 @@ class Cave_grass(Layered_objects):
 
 class Droplet_source(Layered_objects):
     animations = {}    
-    def __init__(self,pos,game_objects,parallax, group, live_blur = False):
-        super().__init__(pos,game_objects,parallax, live_blur)
+    def __init__(self,pos,game_objects, parallax, layer_name, group, live_blur = False):
+        super().__init__(pos,game_objects, parallax, layer_name, live_blur)
         self.init_sprites('Sprites/animations/droplet/source/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.rect.topleft = pos
         self.droplet = Droplet
         self.currentstate = states_droplet_source.Idle(self)
-        self.group = group#all_bgs or all_fgs
     
         if game_objects.world_state.events.get('tjasolmai', False):#if water boss (golden fields) is dead            
             self.shader_state = states_shader.Palette_swap(self)
@@ -232,8 +231,8 @@ class Droplet_source(Layered_objects):
 
 class Falling_rock_source(Layered_objects):
     animations = {}    
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax,layer_name, live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)
         self.init_sprites('Sprites/animations/falling_rock/source/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -256,8 +255,8 @@ class Falling_rock_source(Layered_objects):
 
 class Vines_2(Layered_objects):#light forest cave
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)
         self.init_sprites('Sprites/animations/vines/vines_2/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
@@ -279,8 +278,8 @@ class Vines_2(Layered_objects):#light forest cave
 
 #crystal mines
 class Crystals(Layered_objects):
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)  
+    def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)  
         self.init_sprites('Sprites/animations/crystals/' + type(self).__name__.lower() + '/')#blur or lead from memory
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -305,34 +304,34 @@ class Crystals(Layered_objects):
 
 class Crystal_1(Crystals):
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)        
+    def __init__(self, pos, game_objects, parallax,layer_name, live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)        
 
 class Crystal_2(Crystals):
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)  
+    def __init__(self, pos, game_objects, parallax,layer_name, live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)  
 
 class Crystal_3(Crystals):
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)  
+    def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
+        super().__init__(pos, game_objects, parallax,layer_name, live_blur)  
 
 class Crystal_4(Crystals):
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)  
+    def __init__(self, pos, game_objects, parallax,layer_name, live_blur = False):
+        super().__init__(pos, game_objects, parallax,layer_name, live_blur)  
 
 class Crystal_5(Crystals):
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)                          
+    def __init__(self, pos, game_objects, parallax,layer_name, live_blur = False):
+        super().__init__(pos, game_objects, parallax,layer_name, live_blur)                          
 
 #village
 class Thor_mtn(Layered_objects):
     animations = {}
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax, layer_name,live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)
         self.init_sprites('Sprites/animations/bg_animations/thor_mtn_village/')#blur or lead from memory                    
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
@@ -342,13 +341,13 @@ class Thor_mtn(Layered_objects):
 
 #general
 class Light_source(Layered_objects):#should we decrease alpha for large parallax?
-    def __init__(self, pos, game_objects, parallax, live_blur = False):
-        super().__init__(pos, game_objects, parallax, live_blur)
+    def __init__(self, pos, game_objects, parallax,layer_name, live_blur = False):
+        super().__init__(pos, game_objects, parallax, layer_name,live_blur)
         self.rect = pygame.Rect(pos[0],pos[1],16,16)
         self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
 
-    def update(self):
+    def update(self, dt):
         self.group_distance()
 
     def draw(self, target):
@@ -365,21 +364,21 @@ class Dynamic_layered_objects(Layered_objects):
     def group_distance(self):
         pass
 
-    def update(self):
-        super().update()
-        self.update_pos()
+    def update(self, dt):
+        super().update(dt)
+        self.update_pos(dt)
         self.boundary()
 
-    def update_pos(self):
-        self.true_pos = [self.true_pos[0] + self.game_objects.game.dt * self.velocity[0]*self.parallax[0], self.true_pos[1] + self.game_objects.game.dt * self.velocity[1]*self.parallax[1]]
+    def update_pos(self, dt):
+        self.true_pos = [self.true_pos[0] + dt * self.velocity[0]*self.parallax[0], self.true_pos[1] + dt * self.velocity[1]*self.parallax[1]]
         self.rect.topleft = self.true_pos.copy()
 
     def boundary(self):
         pass
 
 class Droplet(Dynamic_layered_objects):#cosmetic droplet   
-    def __init__(self,pos,game_objects,parallax, live_blur = False):
-        super().__init__(pos,game_objects,parallax, live_blur)
+    def __init__(self,pos,game_objects,parallax,layer_name, live_blur = False):
+        super().__init__(pos,game_objects,parallax,layer_name, live_blur)
         self.sprites = Droplet.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)        
@@ -443,16 +442,16 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
     def pool(game_objects):#save the texture in memory for later use
         Leaves.sprites = read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
 
-    def update(self):
-        super().update()
-        self.time += self.game_objects.game.dt
-        self.update_vel()
-        self.colour[-1] -= self.game_objects.game.dt*0.2
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt
+        self.update_vel(dt)
+        self.colour[-1] -= dt*0.2
         self.colour[-1] = max(self.colour[-1],0)
 
-    def update_vel(self):
-        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
-        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
+    def update_vel(self, dt):
+        self.velocity[0] += dt*(self.game_objects.weather.wind.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
+        self.velocity[1] += dt*(self.game_objects.weather.wind.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
         if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1] > self.game_objects.game.window_size[1]+50:
@@ -466,8 +465,8 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
         self.rect.topleft = self.true_pos.copy()
 
 class Falling_rock(Dynamic_layered_objects):
-    def __init__(self,pos,game_objects,parallax, live_blur = False):
-        super().__init__(pos,game_objects,parallax, live_blur)
+    def __init__(self,pos,game_objects,parallax, layer_name,live_blur = False):
+        super().__init__(pos,game_objects,parallax, layer_name,live_blur)
         self.sprites = Falling_rock.sprites
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)

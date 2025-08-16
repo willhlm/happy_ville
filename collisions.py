@@ -29,12 +29,12 @@ class Collisions():
                 self.game_objects.player.velocity[1] = offset#so that it looks more natural (cannot be 0, needs to be finite)
                 self.game_objects.player.go_through['ramp'] = ramp.go_through#a flag that determines if one can go through
 
-    def interactables_collision(self, enteties):#interactables
-        for interactable in self.game_objects.interactables.sprites():
+    def interactables_collision(self, enteties):#interactables: only works for player since we have plyare collision and non collisiosn
+        for interactable in self.game_objects.interactables.sprites():                  
             collision_entity = pygame.sprite.spritecollideany(interactable, enteties, Collisions.collided)
             if collision_entity:
                 interactable.player_collision(collision_entity)
-            else:
+            else:                
                 interactable.player_noncollision()
 
         for interactable in self.game_objects.interactables_fg.sprites():
@@ -80,7 +80,7 @@ class Collisions():
     #check for player collision
     def player_collision(self, enteties):#loot and enemies: need to be sprite collide for loot so that you can pick up several ay pnce
         for player in self.game_objects.players:#aila and eventual double gangler
-            collision_enteties = pygame.sprite.spritecollide(player,enteties,dokill = False, collided = Collisions.collided)#check collision
+            collision_enteties = pygame.sprite.spritecollide(player, enteties, dokill = False, collided = Collisions.collided)#check collision
             for collision_entetiy in collision_enteties:
                 collision_entetiy.player_collision(player)
 
