@@ -36,7 +36,7 @@ class BG_Block(Staticentity):
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = self.blur_radius  # Set the blur radius
             self.layers = self.game_objects.game.display.make_layer(self.image.size)# Make an empty layer
-            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline        
+            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
             self.game_objects.game.display.render(self.image, self.layers, shader = shader)  # Render the image onto the layer
             self.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
             self.image.release()
@@ -44,7 +44,7 @@ class BG_Block(Staticentity):
 
     def draw(self, target):
         self.blurstate.set_uniform()#zsets the blur radius
-        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[1]))       
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.true_scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos)  # Shader render
 
     def release_texture(self):  # Called when .kill() and when emptying the group
@@ -639,7 +639,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
-        self.hitbox = pygame.Rect(pos[0] + size[0]* 0.2 * 0.5, pos[1], size[0] * 0.8, size[1])#adjust the hitbox size based on texture
+        self.hitbox = pygame.Rect(pos[0] + size[0]* 0.05, pos[1], size[0] * 0.9, size[1])#adjust the hitbox size based on texture
         self.time = 0
         self.accel_y = 0.8
         self.accel_x = 0.8
@@ -655,10 +655,16 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         context = player.movement_manager.resolve()
-        player.velocity[0] += self.dir[0] * self.game_objects.game.dt * self.accel_x * context.upstream
+        player.velocity[0] += self.dir[0] * self.game_objects.game.dt * self.accel_x * context.upstream + self.dir[0] * 0.5
         player.velocity[1] += self.dir[1] * self.game_objects.game.dt * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
-        if (player.velocity[1]) < 0:
+
+        if self.dir[1] < 0 and player.velocity[1] < 0:
             player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
+        elif self.dir[0]:
+            pass
+
+        #if (player.velocity[1]) < 0:
+        #    player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
 
     def player_noncollision(self):
         pass
@@ -674,7 +680,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render        
+        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
 class Smoke(Staticentity):#2D smoke
     def __init__(self, pos, game_objects, size, **properties):
@@ -852,7 +858,7 @@ class InteractableIndicator(Staticentity):#the hoovering above things to indicat
         self.rect.topleft = self.true_pos
 
     def update_vel(self):
-        self.velocity[1] = 0.25*math.sin(self.time)   
+        self.velocity[1] = 0.25*math.sin(self.time)
 
 class ConversationBubbles(Staticentity):#the thing npcs have hoovering above them for random messages
     def __init__(self, pos, game_objects, text, lifetime = 200, size = (32,32)):
@@ -894,7 +900,7 @@ class ConversationBubbles(Staticentity):#the thing npcs have hoovering above the
         self.game_objects.game.display.render(self.bg, self.layer)#shader render
         self.game_objects.game.display.render(texture, self.layer, position = [10, self.rect[3]])#shader render
         self.image = self.layer.texture
-        texture.release()    
+        texture.release()
 
 class BG_Animated(Animatedentity):
     def __init__(self, game_objects, pos, sprite_folder_path, parallax = (1,1)):
