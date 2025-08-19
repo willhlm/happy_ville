@@ -8,6 +8,7 @@ out vec4 COLOR;
 uniform float vignette_intensity = 1;
 uniform float vignette_opacity = 0.1;
 uniform vec4 colour = vec4(0.0, 0.0, 0.0, 1);
+uniform vec2 u_resolution = vec2(1920.0, 1080.0);  // Screen resolution
 
 float vignette(vec2 uv){
 	uv *= 1.0 - uv.xy;

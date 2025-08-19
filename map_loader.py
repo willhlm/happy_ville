@@ -87,7 +87,7 @@ class Level():
         for group in self.map_data['groups']:          
             parallax = [self.map_data['groups'][group]['parallaxx'], self.map_data['groups'][group]['parallaxy']]
             offset = [self.map_data['groups'][group]['offsetx'], self.map_data['groups'][group]['offsety']]
-                       
+
             self.game_objects.game.screen_manager.register_screen(group, parallax)#make a screen for eahcl ayer in tiled
             if group.startswith('bg'):
                 self.game_objects.all_bgs.new_group(group, groups.LayeredUpdates())#make a new pygame group for each layer in tiled
@@ -341,7 +341,7 @@ class Level():
                     elif property['name'] == 'water_texture_on':
                         prop['water_texture_on'] = property['value']                                      
 
-                reflection = entities.Reflection(object_position, self.game_objects, parallax, object_size, **prop)
+                reflection = entities.Reflection(object_position, self.game_objects, parallax, object_size, self.layer, **prop)
 
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,reflection)
@@ -393,7 +393,7 @@ class Level():
                         prop['pulsting'] = property['value']
                 prop['parallax'] = parallax
 
-                ligth_source = entities_parallax.Light_source(object_position, self.game_objects, parallax)
+                ligth_source = entities_parallax.Light_source(object_position, self.game_objects, parallax, self.layer)
                 self.game_objects.lights.add_light(ligth_source, **prop)
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,ligth_source)
@@ -413,19 +413,19 @@ class Level():
                         colour= list(pygame.Color(property['value']))
                         prop['line_color'] = [colour[1]/255,colour[2]/255,colour[3]/255,colour[0]/255]
 
-                water = entities.TwoD_liquid(object_position, self.game_objects, object_size, **prop)
+                water = entities.TwoD_liquid(object_position, self.game_objects, object_size, self.layer, **prop)
                 self.game_objects.interactables_fg.add(water)#cosmetics
 
             elif id == 27:#sky
-                reflection = entities.Sky(object_position, self.game_objects, parallax, object_size)
+                sky = entities.Sky(object_position, self.game_objects, parallax, object_size)
 
                 if self.layer.startswith('fg'):
-                    self.game_objects.all_fgs.add(self.layer,reflection)
+                    self.game_objects.all_fgs.add(self.layer,sky)
                 else:
                     #if parallax == [1,1]:#need to be in cosmetics if we want to reflect enteties on stage
-                     #   self.game_objects.cosmetics.add(reflection)
+                     #   self.game_objects.cosmetics.add(sky)
                     #else:
-                    self.game_objects.all_bgs.add(self.layer,reflection)
+                    self.game_objects.all_bgs.add(self.layer,sky)
 
             elif id == 28:#shadow light platform
                 platform = platforms.Collision_shadow_light(object_position, self.game_objects, object_size)
@@ -478,7 +478,7 @@ class Level():
                 self.game_objects.interactables_fg.add(upstream)
 
             elif id == 34:#waterfall object
-                waterfall = entities.Waterfall(object_position, self.game_objects, parallax, object_size)
+                waterfall = entities.Waterfall(object_position, self.game_objects, parallax, object_size, self.layer)
 
                 if self.layer.startswith('fg'):
                     self.game_objects.all_fgs.add(self.layer,waterfall)
@@ -805,11 +805,11 @@ class Village_ola2(Biome):
             id = obj['gid'] - self.level.map_data['objects_firstgid']
 
             if id == 0:
-                new_tree = entities_parallax.Thor_mtn(object_position, self.level.game_objects, parallax, self.live_blur)
+                thor_mtn = entities_parallax.Thor_mtn(object_position, self.level.game_objects, parallax, self.level.layer, self.live_blur)
                 if self.level.layer.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(self.level.layer,new_tree)
+                    self.level.game_objects.all_fgs.add(self.level.layer,thor_mtn)
                 else:
-                    self.level.game_objects.all_bgs.add(self.level.layer,new_tree)
+                    self.level.game_objects.all_bgs.add(self.level.layer,thor_mtn)
 
             elif id == 1:#boulder
                 new_tree = platforms.Boulder(object_position, self.level.game_objects)
@@ -1128,18 +1128,18 @@ class Light_forest_cave(Biome):
                     new_grass = entities.Cave_grass(object_position, self.level.game_objects)
                     self.level.game_objects.interactables.add(new_grass)
                 else:#if in parallax layers
-                    new_grass = entities_parallax.Cave_grass(object_position, self.level.game_objects, parallax)
+                    new_grass = entities_parallax.Cave_grass(object_position, self.level.game_objects, parallax, self.level.layer)
                     if self.level.layer.startswith('fg'):
                         self.level.game_objects.all_fgs.add(self.level.layer,new_grass)
                     else:
                         self.level.game_objects.all_bgs.add(self.level.layer,new_grass)
 
             elif id == 1:#ljusmaksar
-                new_grass = entities_parallax.Ljusmaskar(object_position, self.level.game_objects, parallax)
+                new_grass = entities_parallax.Ljusmaskar(object_position, self.level.game_objects, parallax, self.level.layer)
                 if self.level.layer.startswith('fg'):
-                    self.level.game_objects.all_fgs.add(self.level.layer,new_grass)
+                    self.level.game_objects.all_fgs.add(self.level.layer, new_grass)
                 else:
-                    self.level.game_objects.all_bgs.add(self.level.layer,new_grass)
+                    self.level.game_objects.all_bgs.add(self.level.layer, new_grass)
 
             elif id == 2:#droplet
                 if self.level.layer.startswith('fg'):
@@ -1147,18 +1147,18 @@ class Light_forest_cave(Biome):
                 else:
                     group = self.level.game_objects.all_bgs
 
-                new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, group)
-                group.add(new_drop)
+                new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, self.level.layer, group)
+                group.add(self.level.layer, new_drop)
 
             elif id == 3:#falling rock trap
-                new_rock = entities_parallax.Falling_rock_source(object_position, self.level.game_objects, parallax)
+                new_rock = entities_parallax.Falling_rock_source(object_position, self.level.game_objects, parallax, self.level.layer)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(self.level.layer,new_rock)
                 else:
                     self.level.game_objects.all_bgs.add(self.level.layer,new_rock)
 
             elif id == 4:#vines
-                new_vine = entities_parallax.Vines_2(object_position, self.level.game_objects, parallax)
+                new_vine = entities_parallax.Vines_2(object_position, self.level.game_objects, parallax, self.level.layer)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(self.level.layer,new_vine)
                 else:
@@ -1218,14 +1218,14 @@ class Hlifblom(Biome):
                     new_grass = entities.Cave_grass(object_position, self.level.game_objects)
                     self.level.game_objects.interactables.add(new_grass)
                 else:#if in parallax layers
-                    new_grass = entities_parallax.Cave_grass(object_position, self.level.game_objects, parallax)
+                    new_grass = entities_parallax.Cave_grass(object_position, self.level.game_objects, parallax, self.level.layer)
                     if self.level.layer.startswith('fg'):
                         self.level.game_objects.all_fgs.add(self.level.layer,new_grass)
                     else:
                         self.level.game_objects.all_bgs.add(self.level.layer,new_grass)
 
             elif id == 1:#ljusmaksar
-                new_grass = entities_parallax.Ljusmaskar(object_position, self.level.game_objects, parallax)
+                new_grass = entities_parallax.Ljusmaskar(object_position, self.level.game_objects, parallax, self.level.layer)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(self.level.layer,new_grass)
                 else:
@@ -1237,18 +1237,18 @@ class Hlifblom(Biome):
                 else:
                     group = self.level.game_objects.all_bgs
 
-                new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, group)
-                group.add(new_drop)
+                new_drop = entities_parallax.Droplet_source(object_position, self.level.game_objects, parallax, self.level.layer, group)
+                group.add(self.level.layer, new_drop)
 
             elif id == 3:#falling rock trap
-                new_rock = entities_parallax.Falling_rock_source(object_position, self.level.game_objects, parallax)
+                new_rock = entities_parallax.Falling_rock_source(object_position, self.level.game_objects, parallax, self.level.layer)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(self.level.layer,new_rock)
                 else:
                     self.level.game_objects.all_bgs.add(self.level.layer,new_rock)
 
             elif id == 4:#vines
-                new_vine = entities_parallax.Vines_2(object_position, self.level.game_objects, parallax)
+                new_vine = entities_parallax.Vines_2(object_position, self.level.game_objects, parallax, self.level.layer)
                 if self.level.layer.startswith('fg'):
                     self.level.game_objects.all_fgs.add(self.level.layer,new_vine)
                 else:

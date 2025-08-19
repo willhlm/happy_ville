@@ -134,9 +134,9 @@ class Character(Platform_entity):#enemy, NPC,player
         self.shader_state.update()#need to be after animation
 
     def update_vel(self):#called from hitsop_states
-        self.velocity[1] += self.slow_motion * self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
+        self.velocity[1] += self.game_objects.game.dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1], self.max_vel[1] * self.game_objects.game.dt)#set a y max speed#
-        self.velocity[0] += self.slow_motion * self.game_objects.game.dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
+        self.velocity[0] += self.game_objects.game.dt * (self.dir[0]*self.acceleration[0] - self.friction[0] * self.velocity[0])
 
     def take_dmg(self, dmg = 1, effects = []):
         if self.flags['invincibility']: return

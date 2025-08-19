@@ -181,14 +181,14 @@ class Roar_main(Base_states):
         self.entity.animation.play('roar_main')
         self.entity.game_objects.camera_manager.camera_shake(amp = 3, duration = 100)#amplitude, duration
         center = [self.entity.rect.centerx-self.entity.game_objects.camera_manager.camera.scroll[0],self.entity.rect.centery-self.entity.game_objects.camera_manager.camera.scroll[1]]
-        self.entity.game_objects.shader_render.append_shader('Speed_lines', center = center)
+        self.entity.game_objects.post_process.append_shader('Speed_lines', center = center)
         self.cycles = 7
 
     def increase_phase(self):
         self.cycles -= 1
         if self.cycles == 0: 
             self.entity.currentstate.start_next_task()    
-            self.entity.game_objects.shader_render.remove_shader('Speed_lines')
+            self.entity.game_objects.post_process.remove_shader('Speed_lines')
 
 @register_state(STATE_REGISTRY)
 class Roar_post(Base_states):

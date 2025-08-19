@@ -1717,6 +1717,29 @@
                  "width":450,
                  "x":0,
                  "y":0
+                }, 
+                {
+                 "draworder":"topdown",
+                 "id":55,
+                 "name":"statics",
+                 "objects":[
+                        {
+                         "gid":4131,
+                         "height":16,
+                         "id":1932,
+                         "name":"",
+                         "rotation":0,
+                         "type":"",
+                         "visible":true,
+                         "width":16,
+                         "x":3984,
+                         "y":1216
+                        }],
+                 "opacity":1,
+                 "type":"objectgroup",
+                 "visible":true,
+                 "x":0,
+                 "y":0
                 }],
          "name":"fg1",
          "offsetx":200,
@@ -1729,8 +1752,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":55,
- "nextobjectid":1930,
+ "nextlayerid":56,
+ "nextobjectid":1934,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",
