@@ -12,7 +12,7 @@ class Idle(Weather_States):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         rand=random.randint(0, self.entity.trans_prob)
         if rand==1:
             self.enter_state('Flip')

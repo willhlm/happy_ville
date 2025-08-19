@@ -12,7 +12,7 @@ class Collisions():
 
     def pass_through(self, entity):#called when pressing down
         hitbox = self.game_objects.player.hitbox.copy()
-        offset = 1/self.game_objects.game.dt#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
+        offset = 1#looks better if it is 1, but if it is 1, the fall through doesn't work when going dow the ramp
         hitbox.bottom += offset
 
         ramp = None

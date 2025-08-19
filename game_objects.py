@@ -207,6 +207,7 @@ class Game_Objects():
         self.npcs.draw(player_layer_screen)
         self.loot.draw(player_layer_screen)
         self.players.draw(self.game.screen_manager.screens['player'].layer)
+        #self.players.draw(player_layer_screen)
                 
         self.platforms.draw(player_layer_screen)
         self.fprojectiles.draw(player_layer_screen)

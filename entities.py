@@ -655,8 +655,8 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
     def player_collision(self, player):#player collision
         context = player.movement_manager.resolve()
-        player.velocity[0] += self.dir[0] * self.game_objects.game.dt * self.accel_x * context.upstream
-        player.velocity[1] += self.dir[1] * self.game_objects.game.dt * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
+        player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
+        player.velocity[1] += self.dir[1] * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
         if (player.velocity[1]) < 0:
             player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
 
@@ -842,13 +842,13 @@ class InteractableIndicator(Staticentity):#the hoovering above things to indicat
     def release_texture(self):
         pass
 
-    def update(self):
-        self.time += self.game_objects.game.dt * 0.1
+    def update(self, dt):
+        self.time += dt * 0.1
         self.update_vel()
-        self.update_pos()
+        self.update_pos(dt)
 
-    def update_pos(self):
-        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt,self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
+    def update_pos(self, dt):
+        self.true_pos = [self.true_pos[0] + self.velocity[0] * dt, self.true_pos[1] + self.velocity[1] * dt]
         self.rect.topleft = self.true_pos
 
     def update_vel(self):
@@ -952,17 +952,17 @@ class Player(Character):
 
     def down_collision(self, block):#when colliding with platform beneth
         super().down_collision(block)
-        self.movement_manager.resolve_collision('ground')
+        self.movement_manager.handle_input('ground')
         self.colliding_platform = block#save the latest platform
 
     def right_collision(self, block, type = 'Wall'):
         super().right_collision(block, type)
-        self.movement_manager.resolve_collision('side')
+        self.movement_manager.handle_input('wall')
         self.colliding_platform = block#save the latest platform
 
     def left_collision(self, block, type = 'Wall'):
         super().left_collision(block, type)
-        self.movement_manager.resolve_collision('side')
+        self.movement_manager.handle_input('wall')
         self.colliding_platform = block#save the latest platform
 
     def update_vel(self, dt):#called from hitsop_states
@@ -2217,7 +2217,7 @@ class Player_ability():#aila abilities
 
     def update(self, dt):#called from gameplayHUD
         self.animation.update(dt)
-        self.currentstate.update()
+        self.currentstate.update(dt)
 
     def reset_timer(self):
         pass
@@ -3981,7 +3981,7 @@ class Zoom_col(Interactable):
         self.group_distance()
 
     def player_collision(self, player):
-        self.blur_timer -= self.game_objects.game.dt
+        self.blur_timer -= 1#dt
         if self.blur_timer < 0:
             player.shader_state.handle_input('blur')
             for group in self.game_objects.all_bgs.group_dict.keys():
@@ -4064,6 +4064,9 @@ class Path_inter(Interactable):
 
     def update(self, dt):
         self.group_distance()
+
+    def update_render(self, dt):
+        pass
 
     def interact(self):
         if self.sfx: self.play_sfx()

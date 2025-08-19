@@ -33,7 +33,7 @@ class Game_State():
 class Title_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.game_objects = game.game_objects
+        self.game_objects = game.game_objects#animation needs it
         self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
         self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
         self.play_music()
@@ -125,7 +125,7 @@ class Title_menu(Game_State):
                 pygame.quit()
                 sys.exit()
 
-    def play_music(self):#called from e.g. exiting ganeplay state
+    def play_music(self):
         self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['main'][0], index = 0, loop = -1, fade = 700, vol = 0.3)
         self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['whisper'][0], index = 1, loop = -1, fade = 700, vol = 0.1)
 

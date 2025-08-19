@@ -318,7 +318,7 @@ class Collision_texture(Platform):#blocks that has tectures
         self.dir = [1,0]#states need it
 
     def update(self, dt):
-        self.currentstate.update()
+        self.currentstate.update(dt)
     
     def update_render(self, dt):                
         self.animation.update(dt)
@@ -401,7 +401,7 @@ class Door(Gate_1):
         self.shader_state = states_shader.Idle(self)
 
     def update_render(self, dt):
-        self.shader_state.update()
+        self.shader_state.update(dt)
 
     def draw(self, target):
         self.shader_state.draw()
@@ -514,15 +514,15 @@ class Conveyor_belt(Collision_texture):
     def collide_x(self,entity):
         if entity.velocity[0] > 0:#going to the right
             entity.right_collision(self, 'belt')
-            entity.velocity[1] += self.game_objects.game.dt * self.direction[1]
+            entity.velocity[1] += self.direction[1]
         else:#going to the leftx
             entity.left_collision(self, 'belt')
-            entity.velocity[1] += self.game_objects.game.dt * -self.direction[1]
+            entity.velocity[1] += -self.direction[1]
         entity.update_rect_x()
 
     def collide_y(self,entity):
         super().collide_y(entity)
-        entity.velocity[0] += self.game_objects.game.dt * self.direction[0] * 0.1
+        entity.velocity[0] += self.direction[0] * 0.1
         entity.friction[0] = C.friction_player[0] - 0.1 * self.direction[0] * entity.dir[0]
         entity.timer_jobs['friction'].activate()
 
@@ -827,17 +827,17 @@ class Collision_dynamic(Collision_texture):
     def update(self, dt):
         super().update(dt)
         self.old_hitbox = self.hitbox.copy()#save old position before moving
-        self.update_vel()
-        self.update_true_pos_x()
-        self.update_true_pos_y()
+        self.update_vel(dt)
+        self.update_true_pos_x(dt)
+        self.update_true_pos_y(dt)
 
     def update_true_pos_x(self):
-        self.true_pos[0] += self.game_objects.game.dt*self.velocity[0]
+        self.true_pos[0] += dt*self.velocity[0]
         self.rect.left = int(self.true_pos[0])#should be int
         self.hitbox.left = self.rect.left
 
     def update_true_pos_y(self):
-        self.true_pos[1] += self.game_objects.game.dt*self.velocity[1]
+        self.true_pos[1] += dt*self.velocity[1]
         self.rect.top = int(self.true_pos[1])#should be int
         self.hitbox.top = self.rect.top
 
@@ -886,31 +886,31 @@ class Bubble(Collision_dynamic):#dynamic one: #shoudl be added to platforms and 
         context = self.game_objects.player.movement_manager.resolve()
         return context.air_timer
 
-    def update_vel(self):
+    def update_vel(self, dt):
         x_col_vel = 2
         self.sign = 1
         if self.collided_y:
             self.sign = -1
             #self.accel = 40
-            self.velocity[1] -= self.sign * self.accel * 10 * self.game_objects.game.dt*0.01
+            self.velocity[1] -= self.sign * self.accel * 10 * dt*0.01
             self.velocity[1] = min(self.velocity[1], self.max_down_vel)
             self.velocity[0] = 0
         elif self.collided_right:
-            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            self.velocity[1] -= self.sign * self.accel * dt*0.01
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
             self.velocity[0] = x_col_vel
         elif self.collided_left:
-            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            self.velocity[1] -= self.sign * self.accel * dt*0.01
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
             self.velocity[0] = -1 * x_col_vel
         else:
-            self.velocity[1] -= self.sign * self.accel * self.game_objects.game.dt*0.01
+            self.velocity[1] -= self.sign * self.accel * dt*0.01
             self.velocity[1] = max(self.velocity[1], self.max_up_vel)
-            self.sin_time += self.game_objects.game.dt
+            self.sin_time += dt
             sin_vel = math.sin(self.sin_time/30)/40
             self.velocity[0] += sin_vel * self.cos_amp_scaler
-            self.velocity[0] += self.game_objects.game.dt*(0 - 0.06*self.velocity[0])
-        #self.velocity[0] += self.game_objects.game.dt*(0 - 0.1*self.velocity[0])
+            self.velocity[0] += dt*(0 - 0.06*self.velocity[0])
+        #self.velocity[0] += dt*(0 - 0.1*self.velocity[0])
 
     def collide_x(self, entity):  # Handles horizontal collision
         if entity.hitbox.right >= self.hitbox.left and entity.old_hitbox.right <= self.old_hitbox.left:

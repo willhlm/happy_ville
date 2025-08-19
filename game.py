@@ -71,7 +71,7 @@ class GameLoop():
         self.accumulator = 0.0              
         self.alpha = self.accumulator / self.fixed_dt
         self.dt = 1.0  # Initialize filtered dt (in 60Hz units)
-        self.filter_alpha =1  # Smoothing factor (lower = smoother)
+        self.filter_alpha = 1  # Smoothing factor (lower = smoother)
 
     def run(self):
         prev_time = time.perf_counter()        

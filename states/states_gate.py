@@ -5,7 +5,7 @@ class Basic_states():
         self.entity = entity
         self.entity.animation.play(str(type(self).__name__).lower())  #the name of the class      
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def enter_state(self, newstate, **kwarg):        

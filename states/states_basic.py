@@ -5,7 +5,7 @@ class Basic_states():
         self.entity = entity
         self.entity.animation.play(type(self).__name__.lower())#the name of the class
 
-    def update(self):
+    def update(self, dt):
         pass       
 
     def enter_state(self,newstate,**kwarg):
@@ -75,7 +75,7 @@ class Invisible(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if random.randint(0,500) == 1:
             self.enter_state('Idle')
 

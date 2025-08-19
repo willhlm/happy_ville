@@ -11,10 +11,11 @@ class ScreenManager():
     def register_screen(self, key, parallax):#called from maploader when loading each layer in titled
         if self.screens.get(key):#already exist, just update parallax
             self.screens[key].reset(parallax)
+            if key == 'bg1': self.activate_screen('player')
         else:
             self.screens[key] = ScreenLayer(self.game, parallax)
             if key == 'bg1':
-                self.screens['player'] = ScreenLayerPlayer(self.game, parallax)
+                self.screens['player'] = ScreenLayerPlayer(self.game)
                 self.activate_screen('player')
         self.activate_screen(key)
         
@@ -98,18 +99,9 @@ class ScreenLayer():
     def __getattr__(self, attr):
         return getattr(self.layer, attr)
 
-class ScreenLayerPlayer():
-    def __init__(self, game, parallax):
-        """
-        Initialize a screen layer.
-
-        :param game: The main game object (for accessing the screen).
-        :param parallax: Tuple (x, y) defining how much this layer moves compared to the camera.
-        """
-        self.game = game
-        self.parallax = parallax#(x, y) parallax factor
-        self.layer = self.game.display.make_layer(self.game.window_size)
-        self.offset = [0,0]
+class ScreenLayerPlayer(ScreenLayer):
+    def __init__(self, game):
+        super().__init__(game, parallax = [1, 1])
 
     def update(self):      
         camera_scroll_x = self.game.game_objects.player.blit_pos2[0]
@@ -120,19 +112,3 @@ class ScreenLayerPlayer():
         frac_y = camera_scroll_y - int(camera_scroll_y)
         
         self.offset = (frac_x, -frac_y )#fractional paty of the scroll
-
-    def render(self, target, scale):
-        """
-        Blits this layer onto the main screen with sub-pixel correction.
-        """
-        self.game.game_objects.shaders['pp']['u_camera_offset'] = self.offset 
-        self.game.game_objects.shaders['pp']['u_scale'] = scale 
-        self.game.game_objects.shaders['pp']['u_screen_size'] = self.game.window_size
-        self.game.display.render(self.layer.texture, target, scale = scale, shader = self.game.game_objects.shaders['pp'])#shader render  
-
-    def reset(self, parallax):
-        self.parallax = parallax
-        self.offset = [0,0]
-
-    def __getattr__(self, attr):
-        return getattr(self.layer, attr)        

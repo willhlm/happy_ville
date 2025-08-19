@@ -905,8 +905,8 @@ class WallJumpMain(JumpMain):
         self.accelerate_timer = 15
         self.start_dir = -self.entity.dir[0]
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.ignore_input_timer -= 1
         self.accelerate_timer -= 1
 
@@ -1274,7 +1274,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         super().enter_phase(phase)
         self.entity.shader_state.handle_input('idle')
 
-    def update(self):
+    def update(self, dt):
         #self.entity.velocity[1] = C.dash_jump_vel_player
         self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))

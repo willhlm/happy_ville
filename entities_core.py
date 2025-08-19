@@ -42,7 +42,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
         self.currentstate = states_basic.Idle(self)#
 
     def update(self, dt):
-        self.currentstate.update()
+        self.currentstate.update(dt)
     
     def update_render(self, dt):
         self.animation.update(dt)
@@ -137,11 +137,11 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def update(self, dt):
         self.update_vel(dt)
-        self.currentstate.update()#need to be aftre update_vel since some state transitions look at velocity
+        self.currentstate.update(dt)#need to be aftre update_vel since some state transitions look at velocity
 
     def update_render(self, dt):
         self.animation.update(dt)#need to be after currentstate since animation will animate the current state
-        self.shader_state.update()#need to be after animation
+        self.shader_state.update(dt)#need to be after animation
 
     def update_vel(self, dt):#called from hitsop_states
         self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
