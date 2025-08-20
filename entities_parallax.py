@@ -47,7 +47,7 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
 
     def draw(self, target):
         self.blurtstate.set_uniform()#sets the blur radius
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[1]))
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))               
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render      
 
     def release_texture(self):  # Called when .kill() and when emptying the group        
