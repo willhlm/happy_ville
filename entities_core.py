@@ -43,9 +43,7 @@ class Animatedentity(Staticentity):#animated stuff, i.e. cosmetics
 
     def update(self, dt):
         self.currentstate.update(dt)
-    
-    def update_render(self, dt):
-        self.animation.update(dt)
+        self.animation.update(dt)    
 
     def reset_timer(self):#called from aniumation when the animation is finished
         self.currentstate.increase_phase()
@@ -122,7 +120,7 @@ class Platform_entity(Animatedentity):#Things to collide with platforms
         self.collision_types['top'] = True
         self.velocity[1] = 0
 
-    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps: it makes a smooth drop
+    def limit_y(self):#limits the velocity on ground, onewayup. But not on ramps to make a smooth drop
         self.velocity[1] = 1.2#assume at least 60 fps -> 1
 
 class Character(Platform_entity):#enemy, NPC,player

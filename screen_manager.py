@@ -11,13 +11,16 @@ class ScreenManager():
     def register_screen(self, key, parallax):#called from maploader when loading each layer in titled
         if self.screens.get(key):#already exist, just update parallax
             self.screens[key].reset(parallax)
-            if key == 'bg1': self.activate_screen('player')
         else:
             self.screens[key] = ScreenLayer(self.game, parallax)
-            if key == 'bg1':
-                self.screens['player'] = ScreenLayerPlayer(self.game)
-                self.activate_screen('player')
-        self.activate_screen(key)
+        self.activate_screen(key)     
+
+        if key == 'bg1':
+            if not self.screens.get('player'):#first time we load bg1, we also create the player screen
+                self.screens['player'] = ScreenLayerPlayer(self.game)                
+                self.screens['player_fg'] = ScreenLayer(self.game)#make a layer for player foreground, but in bg1
+            self.activate_screen('player')
+            self.activate_screen('player_fg')   
         
     def activate_screen(self, key):
         self.active_screens.append(key)
@@ -61,7 +64,7 @@ class ScreenManager():
             screen.clear(0,0,0,0)
 
 class ScreenLayer():
-    def __init__(self, game, parallax):
+    def __init__(self, game, parallax = [1, 1]):
         """
         Initialize a screen layer.
 

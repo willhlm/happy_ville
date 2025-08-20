@@ -229,7 +229,7 @@ class Slowmotion(Shaders):
         self.time += dt * 0.01
         self.duration -= dt
         if self.duration <= 0:
-            self.post_process.game_objects.shader_render.remove_shader('slowmotion')        
+            self.post_process.game_objects.post_process.remove_shader('slowmotion')        
 
     def draw(self, temp_layer, composite_screen):
         self.post_process.game_objects.shaders['noise_perlin']['u_resolution'] = self.post_process.game_objects.game.display_size

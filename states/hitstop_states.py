@@ -4,13 +4,13 @@ class Idle():
     def __init__(self,entity):
         self.entity = entity
 
-    def update_render(self, dt):#notmal, do nothing
-        self.entity.animation.update(dt)#need to be after currentstate since animation will animate the current state        
+    def update_render(self, dt):#notmal, do nothing        
         self.entity.shader_state.update(dt)#need to be after animation   
 
     def update(self, dt):#notmal, do nothing
         self.entity.update_vel(dt)
         self.entity.currentstate.update(dt)#need to be aftre update_vel since some state transitions look at velocity  
+        self.entity.animation.update(dt)#need to be after currentstate since animation will animate the current state -> i suupose it should be in update_physcis?        
 
     def enter_state(self, newstate, **kwarg):
         self.entity.hitstop_states = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys

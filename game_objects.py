@@ -197,26 +197,29 @@ class Game_Objects():
         self.lights.clear_normal_map()        
         self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer      
         
+        #bg1:
         layer = self.all_bgs.get_topmost_screen()
-        player_layer_screen = self.game.screen_manager.screens[layer].layer
-        self.interactables.draw(player_layer_screen)#should be before bg_interact
-        self.bg_interact.draw(player_layer_screen)
-        self.cosmetics_bg.draw(player_layer_screen)#Should be before enteties
-        
-        self.enemies.draw(player_layer_screen)
-        self.npcs.draw(player_layer_screen)
-        self.loot.draw(player_layer_screen)
-        self.players.draw(self.game.screen_manager.screens['player'].layer)
-        #self.players.draw(player_layer_screen)
+        last_bg_screen = self.game.screen_manager.screens[layer].layer
+        self.platforms.draw(last_bg_screen)
+        self.interactables.draw(last_bg_screen)#should be before bg_interact
+        self.bg_interact.draw(last_bg_screen)#small grass stuff so that interactables blends with BG
+        self.cosmetics_bg.draw(last_bg_screen)#Should be before enteties
                 
-        self.platforms.draw(player_layer_screen)
-        self.fprojectiles.draw(player_layer_screen)
-        self.eprojectiles.draw(player_layer_screen)        
+        self.enemies.draw(last_bg_screen)
+        self.npcs.draw(last_bg_screen)
+        self.loot.draw(last_bg_screen)
+
+        self.players.draw(self.game.screen_manager.screens['player'].layer)        
+                
+        #after the player but bg1:       
+        plater_fg_screen = self.game.screen_manager.screens['player_fg'].layer         
+        self.fprojectiles.draw(plater_fg_screen)
+        self.eprojectiles.draw(plater_fg_screen)                
+        self.interactables_fg.draw(plater_fg_screen)#shoud be after the player -> upstream, 2D water
+        self.cosmetics.draw(plater_fg_screen)
+        self.cosmetics_no_clear.draw(plater_fg_screen)#e.g. big timer
         
-        self.interactables_fg.draw(player_layer_screen)#shoud be after interacrables
-        self.cosmetics.draw(player_layer_screen)#Should be before fgs
-        self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs
-        
+        #fgs
         self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer              
         #self.camera_blocks.draw()
       
@@ -269,5 +272,5 @@ class Game_Objects():
                     pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             tex = self.game.display.surface_to_texture(image)
-            self.game.display.render(tex, player_layer_screen)#shader render
+            self.game.display.render(tex, plater_fg_screen)#shader render
             tex.release()

@@ -790,7 +790,7 @@ class Arrow_UI(Staticentity):#for thuder charge state
         self.game_objects.shaders['arrow']['moonDirection'] = self.dir
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['arrow'])#shader render
+        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['arrow'])#shader render
 
 class Nebula(Staticentity):#can be used as soul
     def __init__(self, pos, game_objects, size, praalalx):
@@ -807,7 +807,7 @@ class Nebula(Staticentity):#can be used as soul
         self.game_objects.shaders['nebula']['resolution'] = self.size
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['nebula'])#shader render
+        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['nebula'])#shader render
 
 class Thunder_ball(Staticentity):#not used
     def __init__(self, pos, game_objects, size, praalalx):
@@ -824,7 +824,7 @@ class Thunder_ball(Staticentity):#not used
         self.game_objects.shaders['thunder_ball']['iResolution'] = self.size
 
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['thunder_ball'])#shader render
+        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['thunder_ball'])#shader render
 
 class InteractableIndicator(Staticentity):#the hoovering above things to indicat it is interactable, or only for NPC?
     def __init__(self, pos, game_objects, size = (32,32)):
@@ -2108,7 +2108,7 @@ class Sign_symbols(Staticentity):#a part of sign, it blits the landsmarks in the
         self.render_fade[self.page](dt)
 
     def draw(self, target):
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, shader = self.game_objects.shaders['alpha'])#shader render
+        self.game_objects.game.display.render(self.image.texture,target, shader = self.game_objects.shaders['alpha'])#shader render
 
     def render_in(self, dt):
         self.fade += dt
@@ -2882,7 +2882,7 @@ class Wind(Projectiles):
         self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
+        self.game_objects.game.display.render(self.image.texture,target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
 class Shield(Projectiles):#a protection shield
     def __init__(self, entity, **kwarg):
@@ -2940,8 +2940,9 @@ class Shield(Projectiles):#a protection shield
         self.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         #cut out the screen
+        screen_copy = self.game_objects.game.screen_manager.get_screen(layer = 'player', include = True)#make a copy of the screen
         self.reflect_rect.bottomleft = [self.hitbox.topleft[0], 640 - self.hitbox.topleft[1] + 90 - 10]
-        self.game_objects.game.display.render(self.game_objects.game.screen.texture, self.screen_layer, section = self.reflect_rect)
+        self.game_objects.game.display.render(screen_copy.texture, self.screen_layer, section = self.reflect_rect)        
 
         self.game_objects.shaders['shield']['TIME'] = self.time*0.001
         self.game_objects.shaders['shield']['noise_texture'] = self.noise_layer.texture
@@ -2949,7 +2950,7 @@ class Shield(Projectiles):#a protection shield
 
         if not self.die:#TODO
             self.game_objects.game.display.render(self.empty.texture, self.image, shader = self.game_objects.shaders['shield'])#shader render
-            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft)#shader render
+            self.game_objects.game.display.render(self.image.texture, target, position = self.hitbox.topleft)#shader render
         else:
             self.game_objects.shaders['dissolve']['dissolve_texture'] = self.noise_layer.texture
             self.game_objects.shaders['dissolve']['dissolve_value'] = max(1 - self.progress,0)
@@ -2957,7 +2958,7 @@ class Shield(Projectiles):#a protection shield
             self.game_objects.shaders['dissolve']['burn_color'] = [0.39, 0.78, 1,0.7]
 
             self.game_objects.game.display.render(self.empty.texture, self.image, shader = self.game_objects.shaders['shield'])#shader render
-            self.game_objects.game.display.render(self.image.texture, self.game_objects.game.screen, position = self.hitbox.topleft, shader = self.game_objects.shaders['dissolve'])#shader render
+            self.game_objects.game.display.render(self.image.texture, target, position = self.hitbox.topleft, shader = self.game_objects.shaders['dissolve'])#shader render
 
     def pool(game_objects):
         Shield.size = [90, 90]
