@@ -39,7 +39,7 @@ class Shift(Basic_states):
         max_displacement = [100, 50]
         self.camera_manager.camera.center[0] = max(self.camera_manager.camera.original_center[0] - max_displacement[0], min(self.camera_manager.camera.original_center[0] + max_displacement[0], new_x))
         self.camera_manager.camera.center[1] = max(self.camera_manager.camera.original_center[1] - max_displacement[1], min(self.camera_manager.camera.original_center[1] + max_displacement[1], new_y)) 
-        
+
         if max(abs(value[0]), abs(value[1])) == 0:#no input
             self.enter_state('centraliser')
         

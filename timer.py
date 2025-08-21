@@ -21,10 +21,10 @@ class Timer_manager():
     def clear_timers(self):
         self.timers = {}  # Clear all timers
 
-    def update(self):# Iterate through all timers in the dictionary, but do it safely
+    def update(self, dt):# Iterate through all timers in the dictionary, but do it safely
         for timers in list(self.timers.values()):  # Creating a copy of the values list for safe iteration
             for timer in timers[:]:  # Safe iteration over each list of timers
-                timer.update()
+                timer.update(dt)
 
 class Timer():
     def __init__(self, timer_manager, duration, callback, ID):
@@ -34,8 +34,8 @@ class Timer():
         self.callback = callback
         self.ID = ID
 
-    def update(self):# Decrease the timer duration based on the game’s delta time
-        self.duration -= self.timer_manager.game_objects.game.dt  # Adjusted based on frame time
+    def update(self, dt):# Decrease the timer duration based on the game’s delta time
+        self.duration -= dt  # Adjusted based on frame time
         if self.duration <= 0:
             self.callback()  # Trigger the callback when the timer ends
             self.remove()  # Remove the timer from the manager

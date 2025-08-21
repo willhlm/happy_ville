@@ -30,34 +30,37 @@ class Particles(pygame.sprite.Sprite):
         state = kwarg.get('state', 'Idle')
         self.currentstate = getattr(states_particles, state)(self)
 
-    def update(self):
-        self.update_pos()
-        self.lifetime -= self.game_objects.game.dt
-        self.currentstate.update()
+    def update(self, dt):
+        pass
 
-    def update_pos(self):
-        self.true_pos = [self.true_pos[0] + self.velocity[0]*self.game_objects.game.dt, self.true_pos[1] + self.velocity[1]*self.game_objects.game.dt]
+    def update_render(self, dt):
+        self.update_pos(dt)
+        self.lifetime -= dt
+        self.currentstate.update(dt)
+
+    def update_pos(self, dt):
+        self.true_pos = [self.true_pos[0] + self.velocity[0]*dt, self.true_pos[1] + self.velocity[1]*dt]
         self.rect.center = self.true_pos
         self.hitbox.center = self.true_pos
 
-    def gravity(self):
-        self.velocity[1] += self.game_objects.game.dt *  self.gravity_scale
+    def gravity(self, dt):
+        self.velocity[1] += dt *  self.gravity_scale
 
-    def wave(self):
+    def wave(self, dt):
         self.velocity  = [0.5*math.sin(self.lifetime*0.1 + self.angle + self.phase),-self.gravity_scale]
 
-    def linear(self):
-        self.velocity[0] -= 0.01*self.velocity[0]*self.game_objects.game.dt#0.1*math.cos(self.angle)
-        self.velocity[1] -= 0.01*self.velocity[1]*self.game_objects.game.dt#0.1*math.sin(self.angle)
+    def linear(self, dt):
+        self.velocity[0] -= 0.01*self.velocity[0]*dt#0.1*math.cos(self.angle)
+        self.velocity[1] -= 0.01*self.velocity[1]*dt#0.1*math.sin(self.angle)
 
-    def ejac(self):
+    def ejac(self, dt):
         end_y_vel = -0.9
-        self.velocity[0] -= 0.065*self.velocity[0]*self.game_objects.game.dt + 0.03*math.sin(self.phase)#0.1*math.cos(self.angle)
+        self.velocity[0] -= 0.065*self.velocity[0]*dt + 0.03*math.sin(self.phase)#0.1*math.cos(self.angle)
         #self.velocity[1] += self.game_objects.game.dt * self.gravity_scale * (end_y_vel-self.velocity[1])*0.1
-        self.velocity[1] += self.game_objects.game.dt * (end_y_vel-self.velocity[1])*0.1
+        self.velocity[1] += dt * (end_y_vel-self.velocity[1])*0.1
 
-    def fading(self):
-        self.colour[-1] -= self.fade_scale * self.game_objects.game.dt
+    def fading(self, dt):
+        self.colour[-1] -= self.fade_scale * dt
         self.colour[-1] = max(self.colour[-1], 0)
 
     def destroy(self):
@@ -159,9 +162,9 @@ class Goop(Particles):#circles that "distorts" due to noise
         self.shader = self.game_objects.shaders['goop']
         self.time = 0
 
-    def update(self):
-        super().update()
-        self.time += 0.01*self.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.time += 0.01*dt
 
     def draw(self, target):#his called just before the draw
         self.game_objects.shaders['noise_perlin']['u_resolution'] = self.image.size
@@ -218,10 +221,10 @@ class Floaty_particles(Particles):#particles with a texture
         self.colour2 = (1,1,1,1)#seond
         self.colour3 = (1,0,0,1)#third9
 
-    def update(self):
-        self.animation.update()
-        self.update_pos()
-        self.update_velocity()
+    def update(self, dt):
+        self.animation.update(dt)
+        self.update_pos(dt)
+        self.update_velocity(dt)
 
     def update_uniforms(self):
         self.shader['colour1'] = self.colour1
@@ -236,8 +239,8 @@ class Floaty_particles(Particles):#particles with a texture
     def reset_timer(self):#when animation is finished
         self.kill()
 
-    def update_velocity(self):
-        self.velocity[1] += self.game_objects.game.dt*0.01
+    def update_velocity(self, dt):
+        self.velocity[1] += dt*0.01
 
     def pool(game_objects):#save the stuff in memory for later use
         Floaty_particles.sprites = read_files.load_sprites_dict('Sprites/GFX/particles/floaty/', game_objects)
@@ -259,12 +262,12 @@ class Offset(Particles):#not implemented fully -> need angular motion
 
         self.time = 0
 
-    def update(self):
-        self.update_pos()
+    def update(self, dt):
+        self.update_pos(dt)
         self.update_velocity()
         self.destroy()
-        self.time += self.game_objects.game.dt
-        self.lifetime -= self.game_objects.game.dt
+        self.time += dt
+        self.lifetime -= dt
 
     def update_uniforms(self):
         self.shader['colour1'] = self.colour1

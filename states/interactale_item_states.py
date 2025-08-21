@@ -4,7 +4,7 @@ class Basic_states():
     def __init__(self,entity):
         self.entity = entity
 
-    def update(self):
+    def update(self, dt):
         pass       
 
     def enter_state(self,newstate,**kwarg):
@@ -25,11 +25,11 @@ class Wild(Basic_states):#idle once
     def __init__(self, entity, **kwarg):
         super().__init__(entity)        
         self.entity.animation.play('wild')
-        velocity = kwarg.get('velocity', [2, -4])
+        velocity = kwarg.get('velocity', [2, -2])
         velocity_range = kwarg.get('velocity_range', [1, 0])#plus minus the velocity
         self.entity.velocity = [random.uniform(velocity[0] - velocity_range[0], velocity[0] + velocity_range[0]),random.uniform(velocity[1] - velocity_range[1], velocity[1] + velocity_range[1])]
         self.entity.hitbox = self.entity.rect.copy()#light need hitbox
         self.entity.light = self.entity.game_objects.lights.add_light(self.entity, radius = 50)
 
-    def update(self):
+    def update(self, dt):
         self.entity.twinkle()

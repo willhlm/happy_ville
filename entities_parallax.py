@@ -14,8 +14,8 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
         self.live_blur = live_blur
         self.blurtstate = states_blur.Idle(self) 
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.group_distance()
 
     def init_sprites(self, path):#save in memory. key (0,0) is reserved for none blurred images
@@ -47,7 +47,7 @@ class Layered_objects(entities.Animatedentity):#objects in tiled that goes to di
 
     def draw(self, target):
         self.blurtstate.set_uniform()#sets the blur radius
-        pos = (int(self.true_pos[0]-self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[0]),int(self.true_pos[1]-self.parallax[0]*self.game_objects.camera_manager.camera.true_scroll[1]))
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))               
         self.game_objects.game.display.render(self.image, target, position = pos, shader = self.shader)#shader render      
 
     def release_texture(self):  # Called when .kill() and when emptying the group        
@@ -347,7 +347,7 @@ class Light_source(Layered_objects):#should we decrease alpha for large parallax
         self.true_pos = list(self.rect.topleft)
         self.hitbox = self.rect.copy()
 
-    def update(self):
+    def update(self, dt):
         self.group_distance()
 
     def draw(self, target):
@@ -364,13 +364,13 @@ class Dynamic_layered_objects(Layered_objects):
     def group_distance(self):
         pass
 
-    def update(self):
-        super().update()
-        self.update_pos()
+    def update(self, dt):
+        super().update(dt)
+        self.update_pos(dt)
         self.boundary()
 
-    def update_pos(self):
-        self.true_pos = [self.true_pos[0] + self.game_objects.game.dt * self.velocity[0]*self.parallax[0], self.true_pos[1] + self.game_objects.game.dt * self.velocity[1]*self.parallax[1]]
+    def update_pos(self, dt):
+        self.true_pos = [self.true_pos[0] + dt * self.velocity[0]*self.parallax[0], self.true_pos[1] + dt * self.velocity[1]*self.parallax[1]]
         self.rect.topleft = self.true_pos.copy()
 
     def boundary(self):
@@ -442,16 +442,16 @@ class Leaves(Dynamic_layered_objects):#leaves from trees
     def pool(game_objects):#save the texture in memory for later use
         Leaves.sprites = read_files.load_sprites_dict('Sprites/animations/weather/leaf'+str(random.randint(1,1))+'/', game_objects)#randomly choose a leaf type
 
-    def update(self):
-        super().update()
-        self.time += self.game_objects.game.dt
-        self.update_vel()
-        self.colour[-1] -= self.game_objects.game.dt*0.2
+    def update(self, dt):
+        super().update(dt)
+        self.time += dt
+        self.update_vel(dt)
+        self.colour[-1] -= dt*0.2
         self.colour[-1] = max(self.colour[-1],0)
 
-    def update_vel(self):
-        self.velocity[0] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
-        self.velocity[1] += self.game_objects.game.dt*(self.game_objects.weather.wind.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
+    def update_vel(self, dt):
+        self.velocity[0] += dt*(self.game_objects.weather.wind.velocity[0]  - self.friction[0]*self.velocity[0] + math.sin(self.time*0.1+self.phase)*self.parallax[0]*0.3)
+        self.velocity[1] += dt*(self.game_objects.weather.wind.velocity[1] * self.friction[1] - self.friction[1]*self.velocity[1])
 
     def boundary(self):
         if self.colour[-1] < 5 or self.true_pos[1]-self.parallax[1]*self.game_objects.camera_manager.camera.scroll[1] > self.game_objects.game.window_size[1]+50:

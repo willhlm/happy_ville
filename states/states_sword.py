@@ -19,7 +19,7 @@ class Basic_states():#states for aila sword
     def handle_input(self,input):
         pass
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def update_rect(self):

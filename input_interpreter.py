@@ -7,14 +7,14 @@ class InputInterpreter():#mashing
         self.last_flick_time = [grace_period_frames, grace_period_frames]#horizontal and vertical
         self.flick_direction = [0, 0]
 
-    def update(self):#check for flicking: called from game.py
+    def update(self, dt):#check for flicking: called from game.py
         prev_x = self.last_l_stick[0]        
         curr_x = self.game_objects.controller.value['l_stick'][0]     
         prev_y = self.last_l_stick[1]        
         curr_y = self.game_objects.controller.value['l_stick'][1]
 
-        self.last_flick_time[0] += self.game_objects.game.dt
-        self.last_flick_time[1] += self.game_objects.game.dt
+        self.last_flick_time[0] += dt
+        self.last_flick_time[1] += dt
 
         self.last_l_stick = self.game_objects.controller.value['l_stick']          
 

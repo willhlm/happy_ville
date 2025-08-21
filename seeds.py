@@ -34,9 +34,9 @@ class Seed_platform(platforms.Collision_texture):
 
         self.get_hitbox(arrow, dir)
 
-    def update(self):
-        super().update()
-        self.lifetime -= self.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.lifetime -= dt
         if self.lifetime < 0:
             self.kill()
 

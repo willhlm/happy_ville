@@ -54,15 +54,15 @@ class HUD():
         string = str(num)
         self.money_image = self.game_objects.font.render((50,20), string)
 
-    def update(self):
+    def update(self, dt):
         for heart in self.hearts:
-            heart.update()
+            heart.update(dt)
         for spirit in self.spirits:
-            spirit.update()
+            spirit.update(dt)
         for ability_hud in self.ability_hud:
             ability_hud.update()
         for ability in self.abilities:
-            ability.update()
+            ability.update(dt)
 
     def draw(self, composite_screen):
         h_pos = (14, 12)
@@ -104,7 +104,7 @@ class HUD():
 
     def render_fps(self):
         if self.game_objects.game.RENDER_FPS_FLAG:
-            fps_string = str(int(self.game_objects.game.clock.get_fps()))
+            fps_string = str(int(self.game_objects.game.game_loop.clock.get_fps()))
             image = self.game_objects.font.render((50,12),'fps ' + fps_string)
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
             self.game_objects.game.display.render(image, self.screen, position = (self.game_objects.game.window_size[0]-50,20),shader = self.game_objects.shaders['colour'])#shader render

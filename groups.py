@@ -19,10 +19,14 @@ class LayeredGroup():#costum layered rendering group: all_bgs and all_fgs
             group.empty()
         self.group_dict = {}   
 
-    def update(self):
+    def update(self, dt):
         for group in self.group_dict.values():
-            group.update()
+            group.update(dt)
     
+    def update_render(self, dt):
+        for group in self.group_dict.values():
+            group.update_render(dt)
+
     def get_topmost_screen(self):# Gets the last key that was inserted
         return next(reversed(self.group_dict))
 
@@ -32,6 +36,14 @@ class LayeredGroup():#costum layered rendering group: all_bgs and all_fgs
 class Group(pygame.sprite.Group):#normal
     def __init__(self):
         super().__init__()
+
+    def update_render(self, dt):
+        for s in self.sprites():
+            s.update_render(dt)
+
+    def update(self, dt):
+        for s in self.sprites():
+            s.update(dt)
 
     def draw(self, target):
         for spr in self.sprites():
@@ -46,6 +58,14 @@ class LayeredUpdates(pygame.sprite.LayeredUpdates):#layered rendering
     def __init__(self):
         super().__init__()
 
+    def update_render(self, dt):
+        for s in self.sprites():
+            s.update_render(dt)
+
+    def update(self, dt):
+        for s in self.sprites():
+            s.update(dt)
+
     def draw(self, target):
         for spr in self.sprites():
             spr.draw(target)
@@ -59,7 +79,7 @@ class PauseLayer(pygame.sprite.Group):#the pause group when parallax objects are
     def __init__(self):
         super().__init__()
 
-    def update(self):
+    def update(self, dt):
         for s in self.sprites():
             self.group_distance(s)
 
@@ -88,7 +108,7 @@ class PauseGroup(pygame.sprite.Group):#the pause group when enteties are outside
     def __init__(self):
         super().__init__()
 
-    def update(self):
+    def update(self, dt):
         for s in self.sprites():
             self.group_distance(s)
 

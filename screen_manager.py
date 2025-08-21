@@ -13,7 +13,14 @@ class ScreenManager():
             self.screens[key].reset(parallax)
         else:
             self.screens[key] = ScreenLayer(self.game, parallax)
-        self.activate_screen(key)
+        self.activate_screen(key)     
+
+        if key == 'bg1':
+            if not self.screens.get('player'):#first time we load bg1, we also create the player screen
+                self.screens['player'] = ScreenLayerPlayer(self.game)                
+                self.screens['player_fg'] = ScreenLayer(self.game)#make a layer for player foreground, but in bg1
+            self.activate_screen('player')
+            self.activate_screen('player_fg')   
         
     def activate_screen(self, key):
         self.active_screens.append(key)
@@ -57,7 +64,7 @@ class ScreenManager():
             screen.clear(0,0,0,0)
 
 class ScreenLayer():
-    def __init__(self, game, parallax):
+    def __init__(self, game, parallax = [1, 1]):
         """
         Initialize a screen layer.
 
@@ -70,8 +77,8 @@ class ScreenLayer():
         self.offset = [0,0]
 
     def update(self):      
-        camera_scroll_x = self.game.game_objects.camera_manager.camera.true_scroll[0] * self.parallax[0]
-        camera_scroll_y = self.game.game_objects.camera_manager.camera.true_scroll[1] * self.parallax[1]
+        camera_scroll_x = self.game.game_objects.camera_manager.camera.interp_scroll[0] * self.parallax[0]
+        camera_scroll_y = self.game.game_objects.camera_manager.camera.interp_scroll[1] * self.parallax[1]
         
         # Use fractional scroll for smooth offset
         frac_x = camera_scroll_x - int(camera_scroll_x)
@@ -94,3 +101,17 @@ class ScreenLayer():
 
     def __getattr__(self, attr):
         return getattr(self.layer, attr)
+
+class ScreenLayerPlayer(ScreenLayer):
+    def __init__(self, game):
+        super().__init__(game, parallax = [1, 1])
+
+    def update(self):      
+        camera_scroll_x = self.game.game_objects.player.blit_pos2[0]
+        camera_scroll_y = self.game.game_objects.player.blit_pos2[1]
+        
+        # Use fractional scroll for smooth offset
+        frac_x = camera_scroll_x - int(camera_scroll_x)
+        frac_y = camera_scroll_y - int(camera_scroll_y)
+        
+        self.offset = (frac_x, -frac_y )#fractional paty of the scroll

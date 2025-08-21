@@ -8,7 +8,7 @@ class EnemyStates():
     def enter_state(self, newstate, **kwarg):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
 
-    def update(self):
+    def update(self, dt):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx,self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance
 
     def handle_input(self, input):#input is hurt when taking dmg
@@ -31,8 +31,8 @@ class Patrol(EnemyStates):
         self.timer = self.entity.game_objects.timer_manager.start_timer(patrol_timer, self.timeout)
         self.entity.animation.play('walk')
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.entity.velocity[0] += self.entity.dir[0]*self.patrol_speed
         self.check_sight()
         self.check_ground()
@@ -62,8 +62,8 @@ class Wait(EnemyStates):
         self.next_state = kwarg.get('next_state','Patrol')
         self.entity.animation.play('idle')
 
-    def update(self):
-        self.time -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        self.time -= dt
         if self.time < 0:
             self.enter_state(self.next_state)
 
@@ -74,8 +74,8 @@ class Chase(EnemyStates):
         self.time = self.giveup
         self.entity.animation.play('walk')
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.look_target()
         self.entity.chase(self.player_distance)
         self.check_sight()
@@ -100,8 +100,8 @@ class Knock_back(EnemyStates):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.look_target()
         self.entity.chase_knock_back(self.player_distance)
         self.check_vel()
@@ -133,7 +133,7 @@ class Death(EnemyStates):
     def enter_state(self, newstate, **kwarg):
         pass
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):
