@@ -39,7 +39,9 @@ class Movement_manager():
 
 class Movement_context():
     def __init__(self):
-        self.gravity = C.acceleration[1]#not used yet
+        self.gravity = C.acceleration[1]
+        self.velocity = [0, 0]
+
         self.friction = C.friction_player.copy()#firction is sampled evey frame
         self.air_timer = C.air_timer
         self.upstream = 1#a scale for upstream movement: sampled during upsteram collision
@@ -111,15 +113,25 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         if self.target - self.friction_x < 0.0003:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 
-class Dash_ground(Movement_modifier):#should it instead be a general driction modifier?
+class Dash(Movement_modifier):#should it instead be a general driction modifier?
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
         self.entity = kwarg['entity']
+        self.dash_speed = C.dash_vel * 0.5
 
     def apply(self, context):
         context.gravity = 0
-        #context.friction = [0, 0]
-        self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel, abs(self.entity.velocity[0]))#max horizontal speed        
+        context.velocity[0] += self.dash_speed * self.entity.dir[0]
+
+class Up_stream(Movement_modifier):
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided        
+
+    def apply(self, context):
+        # Push as extra acceleration
+        context.velocity[0] += self.speed[0]
+        context.velocity[1] += self.speed[1]
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):

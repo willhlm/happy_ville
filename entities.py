@@ -652,16 +652,22 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
         sounds = read_files.load_sounds_dict('audio/SFX/environment/up_stream/')
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
+        self.interacted = False#for player collision
 
     def player_collision(self, player):#player collision
-        context = player.movement_manager.resolve()
-        player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
-        player.velocity[1] += self.dir[1] * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
-        if (player.velocity[1]) < 0:
-            player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
+        if self.interacted: return
+        self.interacted = True
+        player.movement_manager.add_modifier('up_stream', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y])#add modifier to player movement manager
+        #context = player.movement_manager.resolve()
+        #player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
+        #player.velocity[1] += self.dir[1] * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
+        #if (player.velocity[1]) < 0:
+        #    player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
 
     def player_noncollision(self):
-        pass
+        if not self.interacted: return
+        self.game_objects.player.movement_manager.remove_modifier('up_stream')
+        self.interacted = False
 
     def release_texture(self):
         self.image.release()
@@ -967,9 +973,10 @@ class Player(Character):
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1])#gravity
+
+        self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1] 
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
-        self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
+        self.velocity[0] += dt *(self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
         return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
