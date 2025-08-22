@@ -4,7 +4,7 @@ import entities, platforms
 class Quests_events():#quest and event handlere
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        self.active_quests = {}#quests the player has picked up. the object is only initiated when picking it up
+        self.active_quests = {}#quests the player has picked up. the object is only initiated when picking the quest
         self.active_events = {}#events that occur during gameplay. New object is always initiated.
 
     def initiate_quest(self, quest, **kwarg):

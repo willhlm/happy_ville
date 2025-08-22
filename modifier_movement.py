@@ -8,7 +8,7 @@ class Movement_manager():
         self._sorted_modifiers = []
 
     def add_modifier(self, modifier, priority = 0, **kwarg):
-        new_modifier = getattr(sys.modules[__name__], modifier)(priority, **kwarg)
+        new_modifier = getattr(sys.modules[__name__], modifier.capitalize())(priority, **kwarg)
         self.modifiers[modifier] = new_modifier
         self._sort_modifiers()
 
@@ -97,7 +97,7 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         context.friction[1] = self.friction_y
 
     def handle_input(self, input):
-        if input in ['groun', 'wall']:
+        if input in ['ground', 'wall']:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 
     def update(self, dt):
@@ -111,7 +111,15 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         if self.target - self.friction_x < 0.0003:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 
+class Dash_ground(Movement_modifier):#should it instead be a general driction modifier?
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.entity = kwarg['entity']
 
+    def apply(self, context):
+        context.gravity = 0
+        #context.friction = [0, 0]
+        self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel, abs(self.entity.velocity[0]))#max horizontal speed        
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):

@@ -967,7 +967,7 @@ class Player(Character):
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
+        self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1])#gravity
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
         self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
 
