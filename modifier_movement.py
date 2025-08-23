@@ -119,6 +119,7 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         if self.target - self.friction_x < 0.0003:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 
+class Upstream(Movement_modifier):
 
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability

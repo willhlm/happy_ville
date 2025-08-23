@@ -654,6 +654,13 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
 
     def player_collision(self, player):#player collision
+        NEW = True
+
+        if NEW:
+            player.movement_manager.add_modifier('Upstream', entity = player)
+
+        else:
+
         context = player.movement_manager.resolve()
         player.velocity[0] += self.dir[0] * self.game_objects.game.dt * self.accel_x * context.upstream + self.dir[0] * 0.5
         player.velocity[1] += self.dir[1] * self.game_objects.game.dt * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
