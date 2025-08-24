@@ -4,7 +4,7 @@ class Shaders():
     def __init__(self, post_process):
         self.post_process = post_process
 
-    def update(self):
+    def update_render(self, dt):
         pass
 
     def set_uniforms(self):
@@ -48,8 +48,8 @@ class Chromatic_aberration(Shaders):
         super().__init__(post_process)
         self.duration = kwarg.get('duration',20)
 
-    def update(self):
-        self.duration -= self.post_process.game_objects.game.dt
+    def update_render(self, dt):
+        self.duration -= dt
         if self.duration < 0:
             self.post_process.remove_shader('chromatic_aberration')
 
@@ -120,8 +120,8 @@ class White_balance(Shaders):
         self.temperature = kwarg.get('temperature', 0.2)
         self.init_temperature = 0
 
-    def update(self):
-        self.init_temperature += self.post_process.game_objects.game.dt * 0.01
+    def update_render(self, dt):
+        self.init_temperature += dt * 0.01
         self.init_temperature = min(self.init_temperature, self.temperature)
 
     def draw(self, temp_layer, composite_screen):
@@ -146,16 +146,16 @@ class Zoom(Shaders):#only zoom in?
         self.methods = {'zoom_out': self.zoom_out, 'zoom_in': self.zoom_in}
         self.zoom_start_timer = C.fps
 
-    def update(self):
-        self.methods[self.method]()
+    def update_render(self, dt):
+        self.methods[self.method](dt)
 
-    def zoom_in(self):
-        self.zoom_start_timer -= self.post_process.game_objects.game.dt
+    def zoom_in(self, dt):
+        self.zoom_start_timer -= dt
         if self.zoom_start_timer < 0:
             self.zoom -= (self.zoom - self.scale)*self.rate
             self.zoom = max(self.zoom, self.scale)
 
-    def zoom_out(self):
+    def zoom_out(self, dt):
         self.zoom += (1 - self.zoom)*(2*self.rate)
         self.zoom = min(self.zoom, 1)
         if abs(self.zoom - 1) < 0.001:
@@ -187,8 +187,8 @@ class Speed_lines(Shaders):#TODO, should jusu be a cosmetic, not a screen shader
         self.number = kwarg.get('number', 1)
         self.time = 0
 
-    def update(self):
-        self.time += self.post_process.game_objects.game.dt * 0.1
+    def update_render(self, dt):
+        self.time += dt * 0.1
 
     def set_uniforms(self):
         self.post_process.game_objects.shaders['speed_lines']['TIME'] = self.time
@@ -224,11 +224,11 @@ class Slowmotion(Shaders):
         self.time = 0
         self.duration = kwarg.get('duration', 20)
 
-    def update(self):
-        self.time += self.post_process.game_objects.game.dt * 0.01
-        self.duration -= self.post_process.game_objects.game.dt
+    def update_render(self, dt):
+        self.time += dt * 0.01
+        self.duration -= dt
         if self.duration <= 0:
-            self.post_process.game_objects.shader_render.remove_shader('slowmotion')
+            self.post_process.game_objects.post_process.remove_shader('slowmotion')
 
     def draw(self, temp_layer, composite_screen):
         self.post_process.game_objects.shaders['noise_perlin']['u_resolution'] = self.post_process.game_objects.game.display_size
@@ -271,8 +271,8 @@ class Hurt(Shaders):#turn white -> enteties use it
     def set_uniforms(self):
         self.renderer.game_objects.shaders['colour'] = self.colour
 
-    def update(self):
-        self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
+    def update_render(self, dt):
+        self.duration -= dt
         if self.duration < 0:
             self.entity.shader_render.append_shader(self.next_animation)
 
@@ -291,9 +291,9 @@ class Invincibile(Shaders):#blink white -> enteyties use it
         self.duration = C.invincibility_time_player - (C.hurt_animation_length + 1)#a duration which considers the player invinsibility
         self.time = 0
 
-    def update(self):
-        self.duration -= self.entity.game_objects.game.dt*self.entity.slow_motion
-        self.time += 0.5 * self.entity.game_objects.game.dt*self.entity.slow_motion
+    def update_render(self, dt):
+        self.duration -= dt
+        self.time += 0.5 * dt
         if self.duration < 0:
             self.enter_state('Idle')
 

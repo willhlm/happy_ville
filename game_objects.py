@@ -118,8 +118,8 @@ class Game_Objects():
         self.timer_manager.clear_timers()
         self.weather.empty()
 
-    def collide_all(self):        
-        self.platform_collision()
+    def collide_all(self, dt):        
+        self.platform_collision(dt)
 
         self.collisions.player_collision(self.loot)
         self.collisions.player_collision(self.enemies)
@@ -130,71 +130,96 @@ class Game_Objects():
         self.collisions.projectile_collision(self.fprojectiles, self.enemies)
         self.collisions.projectile_collision(self.eprojectiles, self.players)
 
-    def platform_collision(self):        
-        self.collisions.platform_collision(self.players)        
-        self.collisions.platform_collision(self.enemies)
-        self.collisions.platform_collision(self.eprojectiles)
-        self.collisions.platform_collision(self.fprojectiles)
-        self.collisions.platform_collision(self.npcs)
-        self.collisions.platform_collision(self.loot)
+    def platform_collision(self, dt):        
+        self.collisions.platform_collision(self.players, dt)        
+        self.collisions.platform_collision(self.enemies, dt)
+        self.collisions.platform_collision(self.eprojectiles, dt)
+        self.collisions.platform_collision(self.fprojectiles, dt)
+        self.collisions.platform_collision(self.npcs, dt)
+        self.collisions.platform_collision(self.loot, dt)
 
-    def update(self):
+    def update(self, dt):
         #things that shuodl collide
-        self.players.update()
-        self.entity_pause.update()#should be before enemies, npcs and interactable groups
-        self.enemies.update()
-        self.npcs.update()
-        self.fprojectiles.update()
-        self.eprojectiles.update()
-        self.loot.update()
+        self.players.update(dt)
+        self.entity_pause.update(dt)#should be before enemies, npcs and interactable groups
+        self.enemies.update(dt)
+        self.npcs.update(dt)
+        self.fprojectiles.update(dt)
+        self.eprojectiles.update(dt)
+        self.loot.update(dt)
 
         #collide and move the entities
-        self.collide_all()
+        self.collide_all(dt)
 
-        #camera and calculate true pos
-        self.camera_blocks.update()#need to be before camera: caemras stop needs tobe calculated before the scroll
-        self.camera_manager.update()#should be first
+        #camera and calculate true pos        
+        #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
+        self.camera_manager.update(dt)#should be first
 
         #update cosmetics and BGs
-        self.timer_manager.update()
-        self.platforms.update()        
-        self.platforms_ramps.update()
-        self.layer_pause.update()#should be before all_bgs and all_fgs
-        self.all_bgs.update()
-        self.bg_interact.update()
-        self.all_fgs.update()        
-        self.cosmetics.update()
-        self.cosmetics_no_clear.update()
-        self.cosmetics_bg.update()
-        self.interactables.update()
-        self.weather.update()
-        self.interactables_fg.update()#twoD water use it
-        self.special_shaders.update()#portal use it
-        self.lights.update()
+        self.timer_manager.update(dt)
+        self.platforms.update(dt)        
+        self.platforms_ramps.update(dt)
+        self.layer_pause.update(dt)#should be before all_bgs and all_fgs
+        self.all_bgs.update(dt)
+        self.bg_interact.update(dt)
+        self.all_fgs.update(dt)        
+        self.cosmetics.update(dt)
+        self.cosmetics_no_clear.update(dt)
+        self.cosmetics_bg.update(dt)
+        self.interactables.update(dt)
+        self.weather.update(dt)
+        self.interactables_fg.update(dt)#twoD water use it
+        self.special_shaders.update(dt)#portal use it
+        self.lights.update_render(dt)
+
+    def update_render(self, dt):#called after update_physics
+        self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll        
+        self.camera_manager.update_render(dt)#should be first     
+        self.platforms.update_render(dt)        
+        self.platforms_ramps.update_render(dt)
+        self.all_bgs.update_render(dt)
+        self.bg_interact.update_render(dt)
+        self.all_fgs.update_render(dt)
+        self.players.update_render(dt)
+        self.enemies.update_render(dt)
+        self.npcs.update_render(dt)
+        self.fprojectiles.update_render(dt)
+        self.eprojectiles.update_render(dt)
+        self.loot.update_render(dt)
+        self.cosmetics.update_render(dt)
+        self.cosmetics_no_clear.update_render(dt)
+        self.cosmetics_bg.update_render(dt)
+        self.interactables.update_render(dt)
+        self.interactables_fg.update_render(dt)#twoD water use it
+        self.special_shaders.update_render(dt)#portal use it
 
     def draw(self):#called from render states
         self.lights.clear_normal_map()        
         self.all_bgs.draw(self.game.screen_manager.screens)#returns the last layer      
         
+        #bg1:
         layer = self.all_bgs.get_topmost_screen()
-        player_layer_screen = self.game.screen_manager.screens[layer].layer
-        self.interactables.draw(player_layer_screen)#should be before bg_interact
-        self.bg_interact.draw(player_layer_screen)
-        self.cosmetics_bg.draw(player_layer_screen)#Should be before enteties
-        
-        self.enemies.draw(player_layer_screen)
-        self.npcs.draw(player_layer_screen)
-        self.loot.draw(player_layer_screen)
-        self.players.draw(player_layer_screen)
+        last_bg_screen = self.game.screen_manager.screens[layer].layer
+        self.platforms.draw(last_bg_screen)
+        self.interactables.draw(last_bg_screen)#should be before bg_interact
+        self.bg_interact.draw(last_bg_screen)#small grass stuff so that interactables blends with BG
+        self.cosmetics_bg.draw(last_bg_screen)#Should be before enteties
                 
-        self.platforms.draw(player_layer_screen)
-        self.fprojectiles.draw(player_layer_screen)
-        self.eprojectiles.draw(player_layer_screen)        
+        self.enemies.draw(last_bg_screen)
+        self.npcs.draw(last_bg_screen)
+        self.loot.draw(last_bg_screen)
+
+        self.players.draw(self.game.screen_manager.screens['player'].layer)        
+                
+        #after the player but bg1:       
+        plater_fg_screen = self.game.screen_manager.screens['player_fg'].layer         
+        self.fprojectiles.draw(plater_fg_screen)
+        self.eprojectiles.draw(plater_fg_screen)                
+        self.interactables_fg.draw(plater_fg_screen)#shoud be after the player -> upstream, 2D water
+        self.cosmetics.draw(plater_fg_screen)
+        self.cosmetics_no_clear.draw(plater_fg_screen)#e.g. big timer
         
-        self.interactables_fg.draw(player_layer_screen)#shoud be after player
-        self.cosmetics.draw(player_layer_screen)#Should be before fgs
-        self.cosmetics_no_clear.draw(player_layer_screen)#Should be before fgs
-        
+        #fgs
         self.all_fgs.draw(self.game.screen_manager.screens)#returns the last layer              
         #self.camera_blocks.draw()
       
@@ -247,5 +272,5 @@ class Game_Objects():
                     pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
 
             tex = self.game.display.surface_to_texture(image)
-            self.game.display.render(tex, player_layer_screen)#shader render
+            self.game.display.render(tex, plater_fg_screen)#shader render
             tex.release()

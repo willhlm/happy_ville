@@ -4,7 +4,7 @@ class Basic_states():
     def __init__(self,entity):
         self.entity = entity
 
-    def update(self):
+    def update(self, dt):
         pass       
 
     def enter_state(self,newstate,**kwarg):
@@ -31,5 +31,5 @@ class Wild(Basic_states):#idle once
         self.entity.hitbox = self.entity.rect.copy()#light need hitbox
         self.entity.light = self.entity.game_objects.lights.add_light(self.entity, radius = 50)
 
-    def update(self):
+    def update(self, dt):
         self.entity.twinkle()

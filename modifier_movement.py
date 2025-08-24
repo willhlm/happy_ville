@@ -8,7 +8,7 @@ class Movement_manager():
         self._sorted_modifiers = []
 
     def add_modifier(self, modifier, priority = 0, **kwarg):
-        new_modifier = getattr(sys.modules[__name__], modifier)(priority, **kwarg)
+        new_modifier = getattr(sys.modules[__name__], modifier.capitalize())(priority, **kwarg)
         self.modifiers[modifier] = new_modifier
         self._sort_modifiers()
 
@@ -25,24 +25,23 @@ class Movement_manager():
             mod.apply(context)
         return context
 
-    def resolve_collision(self, direction):
+    def handle_input(self, direction):
         for mod in list(self.modifiers.values()):
-            if direction == 'ground':
-                mod.ground_collision()
-            elif direction == 'side':
-                mod.side_collision()
+            mod.handle_input(direction)
 
-    def update(self):
+    def update(self, dt):
         modifiers = self._sorted_modifiers.copy()
         for mod in modifiers:
-            mod.update()
+            mod.update(dt)
 
     def _sort_modifiers(self):#sort modifiers by priority
         self._sorted_modifiers = sorted(self.modifiers.values(), key = lambda m: m.priority, reverse = True)
 
 class Movement_context():
     def __init__(self):
-        self.gravity = C.acceleration[1]#not used yet
+        self.gravity = C.acceleration[1]
+        self.velocity = [0, 0]
+
         self.friction = C.friction_player.copy()#firction is sampled evey frame
         self.air_timer = C.air_timer
         self.upstream = 1#a scale for upstream movement: sampled during upsteram collision
@@ -54,13 +53,10 @@ class Movement_modifier():
     def apply(self, context):
         pass
 
-    def update(self):#called from aila update
+    def update(self, dt):#called from aila update
         pass
 
-    def ground_collision(self):
-        pass
-
-    def side_collision(self):
+    def handle_input(self, input):
         pass
 
 class Wall_glide(Movement_modifier):#should it instead be a general driction modifier?
@@ -85,8 +81,8 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         self.target = Movement_context().friction[0]
         self.friction_x = 0.15
         self.friction_y = 0.00
-        self.ref_y = self.friction_y * (0.0001 * self.entity.game_objects.game.dt + 1)
-        self.ref_x = self.friction_x * (1 - 0.000000005 * self.entity.game_objects.game.dt)
+        self.ref_y = self.friction_y * (0.0001  + 1)
+        self.ref_x = self.friction_x * (1 - 0.000000005 )
         self.inc_fric = False
 
     def set_friction(self, friction):
@@ -102,24 +98,46 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         context.friction[0] = self.friction_x
         context.friction[1] = self.friction_y
 
-    def ground_collision(self):
-        self.entity.movement_manager.remove_modifier('Dash_jump')
+    def handle_input(self, input):
+        if input in ['ground', 'wall']:
+            self.entity.movement_manager.remove_modifier('Dash_jump')
 
-    def side_collision(self):
-        self.entity.movement_manager.remove_modifier('Dash_jump')
-
-    def update(self):
+    def update(self, dt):
         if self.inc_fric:
-            self.friction_x += self.entity.game_objects.game.dt * 0.0008 #this is probably the best one
+            self.friction_x += dt * 0.0008 #this is probably the best one
             #self.friction_x += self.entity.game_objects.game.dt * 0.002 * math.pow(self.friction_x/self.target, 2)
             #self.friction_x = self.friction_x * math.pow((2 - (self.target-self.friction_x)/(self.target-self.ref_x)), 0.5)
 
-        self.friction_y -= self.entity.game_objects.game.dt * 0.0015
+        self.friction_y -= dt * 0.0015
         self.friction_y = max(0, self.friction_y)
         if self.target - self.friction_x < 0.0003:
             self.entity.movement_manager.remove_modifier('Dash_jump')
 
-class Upstream(Movement_modifier):
+class Dash(Movement_modifier):#should it instead be a general driction modifier?
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.entity = kwarg['entity']
+        self.dash_speed = C.dash_vel * 0.5
+
+    def apply(self, context):
+        context.gravity = 0
+        context.velocity[0] += self.dash_speed * self.entity.dir[0]
+
+class Up_stream(Movement_modifier):
+    def __init__(self, priority, **kwarg):
+        super().__init__(priority)
+        self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided
+
+    def apply(self, context):
+        # Push as extra acceleration
+        context.velocity[0] += self.speed[0]
+        context.velocity[1] += self.speed[1]
+
+class Up_stream_vertical(Up_stream):
+    """Vertical"""
+
+class Up_stream_horizontal(Up_stream):
+    """Horizontal"""
 
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability

@@ -6,6 +6,8 @@ import state_manager
 from pygame_render import RenderEngine
 import screen_manager
 #pygame.print_debug_info()
+import statistics
+import numpy as np
 
 class Game():
     def __init__(self):
@@ -18,8 +20,7 @@ class Game():
         self.screen_manager = screen_manager.ScreenManager(self)
 
         #initiate game related values
-        self.clock = pygame.time.Clock()
-        self.dt = 1
+        self.game_loop = GameLoop(self)
         self.game_objects = game_objects.Game_Objects(self)
         self.state_manager = state_manager.State_manager(self, 'Title_menu')
 
@@ -30,7 +31,7 @@ class Game():
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP, pygame.JOYAXISMOTION, pygame.JOYHATMOTION, pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN])
         pygame.event.set_blocked([pygame.TEXTINPUT])#for some reason, there is a text input here and there. So, blocking it
 
-    def event_loop(self):
+    def event_loop(self, dt):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
@@ -42,37 +43,13 @@ class Game():
         self.game_objects.controller.continuous_input_checks()#check every frame independent of event: right, left, up, down
         #self.state_stack[-1].continuous_input_checks()#tdiscrete_inputs_UI is inprinciple not needed for gameplay state
         inputs = self.game_objects.controller.input_buffer.copy()
-        self.game_objects.input_interpreter.update()#checks for flicks and other input related things
+        self.game_objects.input_interpreter.update(dt)#checks for flicks and other input related things
         for input in inputs:
-            input.update(self.dt)
+            input.update(dt)
             self.state_manager.handle_events(input)
 
     def run(self):
-        prev_time = time.perf_counter()
-        alpha = 1 # lower alpha = more smoothing: need to be one for the slow motion to work
-        while True:
-            self.screen_manager.clear()
-
-            #time dt
-            frame_end = time.perf_counter()
-            dt = min(frame_end - prev_time, 2 / C.fps) * 60
-            dt = max(dt, 0.1)
-            prev_time = frame_end
-            self.dt = (alpha * dt) + (1 - alpha) * self.dt
-            #self.dt = 60/max(self.clock.get_fps(),30)#assert at least 30 fps (to avoid 0)
-
-            #handle event
-            self.event_loop()
-
-            #update
-            self.state_manager.update()
-
-            #render
-            self.state_manager.render()
-
-            #update display
-            pygame.display.flip()
-            self.clock.tick(C.fps)
+        self.game_loop.run()
 
     def scale_size(self, scale = None):
         if not scale:#if None
@@ -85,6 +62,54 @@ class Game():
         if scale: scale = self.scale
         else: scale = 1
         self.display.render(texture, self.display.screen, scale = scale)
+
+class GameLoop():
+    def __init__(self, game):
+        self.game = game
+        self.clock = pygame.time.Clock()
+        self.fixed_dt = 1.0 / 60.0  # 60Hz physics step
+        self.accumulator = 0.0
+        self.alpha = self.accumulator / self.fixed_dt
+        self.dt = 1.0  # Initialize filtered dt (in 60Hz units)
+        self.filter_alpha = 1  # Smoothing factor (lower = smoother)
+
+    def run(self):
+        prev_time = time.perf_counter()
+        while True:
+            self.game.screen_manager.clear()
+
+            # Calculate raw frame time
+            frame_end = time.perf_counter()
+            #raw_frame_time = 1/max(self.clock.get_fps(),30)
+            raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap to prevent large jumps
+            prev_time = frame_end
+            raw_dt = max(raw_frame_time * 60, 0.1)
+            self.dt = (self.filter_alpha * raw_dt) + (1 - self.filter_alpha) * self.dt
+
+            # Convert back to seconds for accumulator
+            filtered_frame_time = self.dt / 60.0
+
+            # Use filtered time for accumulator
+            self.accumulator += filtered_frame_time
+
+            # Event handling with filtered dt
+            self.game.event_loop(self.dt)
+
+            # Fixed timestep update(s)
+            while self.accumulator >= self.fixed_dt:
+                self.game.state_manager.update(self.fixed_dt * 60)
+                self.accumulator -= self.fixed_dt
+
+            # Render with interpolation
+            self.alpha = self.accumulator / self.fixed_dt
+            self.game.state_manager.update_render(self.dt)
+            self.game.state_manager.render()
+
+            #update display
+            pygame.display.flip()
+
+            # Frame rate limiting at the END
+            self.clock.tick(C.fps)
 
 if __name__ == '__main__':
     pygame.mixer.pre_init(44100, 16, 2, 4096)#should result in better sound if this init before pygame.init()

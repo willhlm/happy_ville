@@ -8,14 +8,16 @@ class PostProcess():
         if default_shader:
             self.set_shader(default_shader, **kwargs)
 
-    def apply(self, composite_screen):#called every frame
+    def update_render(self, dt):
+        self.update(dt)
+
+    def apply(self, composite_screen):
         """Apply shaders to composite_screen, modifying it in place"""
-        self.update()
         self.draw(composite_screen)
 
-    def update(self):
+    def update(self, dt):
         for shader_obj in list(self.shaders.values()):
-            shader_obj.update()
+            shader_obj.update_render(dt)
 
     def draw(self, composite_screen):        
         shader_items = self.shaders.items()

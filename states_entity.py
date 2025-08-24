@@ -4,7 +4,7 @@ class Entity_States():
         self.entity.animation.play(type(self).__name__.lower())#the name of the class       
         self.dir = self.entity.dir.copy()
 
-    def update(self):
+    def update(self, dt):
         pass
 
     def handle_input(self, input):

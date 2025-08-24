@@ -34,8 +34,11 @@ class Enemy(Character):
         self.aggro_distance = [100,50]#at which distance to the player when you should be aggro. Negative value make it no going aggro
         self.chase_speed = 0.6
 
-    def update(self):
-        self.hitstop_states.update()
+    def update_render(self, dt):
+        self.hitstop_states.update_render(dt)
+
+    def update(self, dt):
+        self.hitstop_states.update(dt)
         self.group_distance()
 
     def player_collision(self, player):#when player collides with enemy
@@ -151,8 +154,8 @@ class NPC(Character):
         img = pygame.image.load('Sprites/enteties/NPC/' + self.name +'/potrait.png').convert_alpha()
         self.portrait = self.game_objects.game.display.surface_to_texture(img)#need to save in memoery
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         #self.group_distance()
 
     def render_potrait(self, terget):
@@ -202,9 +205,9 @@ class Projectiles(Platform_entity):#projectiels
         self.lifetime = kwarg.get('lifetime', 300)
         self.flags = {'invincibility': False, 'charge_blocks': kwarg.get('charge_blocks', False), 'aggro': True}#if they can break special blocks
 
-    def update(self):
-        super().update()
-        self.lifetime -= self.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.lifetime -= dt
         self.destroy()
 
     def destroy(self):
@@ -327,13 +330,13 @@ class Loot(Platform_entity):#
         
         self.hitbox.topleft = (original_x, original_y)# If no space found, put it back to original position
 
-    def update_vel(self):#add gravity
-        self.velocity[1] += 0.3*self.game_objects.game.dt       
-        self.velocity[1] = min(self.velocity[1],  C.max_vel[1] * self.game_objects.game.dt)#set a y max speed#
+    def update_vel(self, dt):#add gravity
+        self.velocity[1] += 0.3*dt
+        self.velocity[1] = min(self.velocity[1],  C.max_vel[1])#set a y max speed#
 
-    def update(self):
-        super().update()
-        self.update_vel()
+    def update(self, dt):
+        super().update(dt)
+        self.update_vel(dt)
 
     def attract(self, pos):#the omamori calls on this in loot group
         pass
@@ -398,9 +401,9 @@ class Enemy_drop(Loot):
         self.lifetime = 500
         self.velocity = [random.uniform(-3, 3),-3]                
 
-    def update(self):
-        super().update()
-        self.lifetime -= self.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.lifetime -= dt
         self.destory()        
         self.perform_bounce()     
         self.bounce_directions.clear()             
@@ -427,8 +430,8 @@ class Interactable_item(Loot):#need to press Y to pick up - #key items: need to 
         else:
             self.currentstate = interactale_item_states.Idle(self, **kwarg)
 
-    def update(self):
-        super().update()
+    def update(self, dt):
+        super().update(dt)
         self.perform_bounce()     
         self.bounce_directions.clear()     
 
@@ -470,9 +473,9 @@ class Interactable(Animatedentity):#interactables
         if sfx: self.sfx = pygame.mixer.Sound('audio/SFX/environment/' + sfx + '.mp3')
         else: self.sfx = None # make more dynamic incase we want to use more than just mp3
 
-    def update(self):
-        super().update()
-        self.shader_state.update()
+    def update(self, dt):
+        super().update(dt)
+        self.shader_state.update(dt)
         self.group_distance()
 
     def draw(self, target):#called just before draw in group

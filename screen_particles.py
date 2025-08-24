@@ -16,9 +16,9 @@ class ScreenParticles(pygame.sprite.Sprite):#make a layer on screen, then use sh
         self.number_particles = number_particles#max 20, hard coded in shader
         self.set_parameters()        
 
-    def update(self):
-        self.time += self.game_objects.game.dt
-        self.update_partciles()
+    def update_render(self, dt):
+        self.time += dt
+        self.update_partciles(dt)
 
     def draw(self, target):
         self.game_objects.game.display.render(self.image.texture, target, shader = self.shader)#shader render
@@ -29,17 +29,17 @@ class ScreenParticles(pygame.sprite.Sprite):#make a layer on screen, then use sh
     def set_parameters(self):#set stuff specific for the particles
         pass        
 
-    def update_partciles(self):
+    def update_partciles(self, dt):
         for i in range(0, self.number_particles):
             self.update_vel(i)
-            self.update_centers(i)
+            self.update_centers(i, dt)
             self.update_size(i)
 
     def update_vel(self, i):#should they move?
         pass
 
-    def update_centers(self, i):
-        self.centers[i] = [self.centers[i][0] + self.game_objects.game.dt*self.velocity[i][0]*self.parallax[0], self.centers[i][1] - self.game_objects.game.dt*self.velocity[i][1]*self.parallax[1]]
+    def update_centers(self, i, dt):
+        self.centers[i] = [self.centers[i][0] + dt * self.velocity[i][0] * self.parallax[0], self.centers[i][1] - dt * self.velocity[i][1]*self.parallax[1]]
 
     def update_size(self, i):#should they change size?
         pass
@@ -118,13 +118,13 @@ class Bound_entity(Animatedentity):#entities bound to the scereen, should it be 
         self.height = self.game_objects.game.window_size[1] + 0.6*self.game_objects.game.window_size[1]
         self.velocity = [0,0]
 
-    def update(self):
-        super().update()
-        self.update_pos()
+    def update_render(self, dt):
+        super().update_render(dt)
+        self.update_pos(dt)
         self.boundary()
 
-    def update_pos(self):
-        self.true_pos = [self.true_pos[0] + self.game_objects.game.dt*self.velocity[0]*self.parallax[0], self.true_pos[1] + self.game_objects.game.dt*self.velocity[1]*self.parallax[1]]
+    def update_pos(self, dt):
+        self.true_pos = [self.true_pos[0] + dt*self.velocity[0]*self.parallax[0], self.true_pos[1] + dt*self.velocity[1]*self.parallax[1]]
         self.rect.topleft = self.true_pos.copy()
 
     def boundary(self):#continiouse falling
