@@ -4,6 +4,7 @@ import entities_UI
 import cutscene
 import constants as C
 import animation
+import UI_loader
 
 class Game_State():
     def __init__(self,game):
@@ -33,76 +34,44 @@ class Game_State():
 class Title_menu(Game_State):
     def __init__(self,game):
         super().__init__(game)
-        self.game_objects = game.game_objects#animation needs it
-        self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
-        self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
+        self.title_menu_ui = getattr(UI_loader, 'TitleMenu')(game.game_objects)
         self.play_music()
-
-        self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/start_screen',game.game_objects)}
-        self.image = self.sprites['idle'][0]
-        self.animation = animation.Animation(self)
-
-        #create buttons
+        self.image = self.title_menu_ui.sprites['idle'][0]
         self.current_button = 0
-        self.initiate_buttons()
-        self.define_BG()
-        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-8, -1], animate = True)
-        self.arrow_2 = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midright, game.game_objects, offset = [-8, -1], mirrored = True, animate = True)
-
-    def initiate_buttons(self):
-        buttons = ['New game','Load game','Option','Quit']
-        self.buttons = []
-        y_pos = 200
-        x_pos = 320
-        for b in buttons:
-            text = (self.game.game_objects.font.render(text = b))
-            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [x_pos, y_pos], center = True))
-            y_pos += 20
-
-    def define_BG(self):
-        size = (90,100)
-        bg = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()
-        pygame.draw.rect(bg,[200,200,200,150],(0,0,size[0],size[1]),border_radius=10)
-        self.bg = self.game.display.surface_to_texture(bg)
-
-    def reset_timer(self):
-        pass
+        self.update_arrow()
 
     def update_render(self, dt):
-        self.animation.update(dt)
-
-    def update(self, dt):#update menu arrow position
-        self.arrow.animate(dt)
-        self.arrow_2.animate(dt)
+        for arrow in self.title_menu_ui.arrows:
+            arrow.update(dt)#make them move back and forth
 
     def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.update(dt)
+        self.update_render(dt)
 
     def render(self):
         self.game.screen_manager.screen.clear(0,0,0,0)
-        self.buttons[self.current_button].hoover()
+        self.title_menu_ui.buttons[self.current_button].hoover()
         self.game.display.render(self.image, self.game.screen_manager.screen)#shader render
 
-        #blit title
-        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
-        #self.game.display.render(self.bg, self.game.screen, position = (70,180))
-
         #blit buttons
-        for b in self.buttons:
+        for b in self.title_menu_ui.buttons:
             self.game.display.render(b.image, self.game.screen_manager.screen, position = b.rect.topleft)
 
         #blit arrow
-        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft)
-        self.game.display.render(self.arrow_2.image, self.game.screen_manager.screen, position = self.arrow_2.rect.topleft, flip = True)
+        for arrow in self.title_menu_ui.arrows:
+            self.game.display.render(arrow.image, self.game.screen_manager.screen, position = arrow.true_pos, flip = arrow.flip)        
 
         self.game.render_display(self.game.screen_manager.screen.texture)
 
     def update_arrow(self):
-        ref_pos = self.buttons[self.current_button].rect.midleft
-        ref_pos2 = self.buttons[self.current_button].rect.midright
-        self.arrow.update_pos((ref_pos[0], ref_pos[1]))
-        self.arrow_2.update_pos((ref_pos2[0], ref_pos2[1]))
-        self.arrow.play_SFX()
+        button = self.title_menu_ui.buttons[self.current_button]
+        bx, by, bw, bh = button.rect
+
+        for arrow in self.title_menu_ui.arrows:
+            if arrow.flip:  
+                arrow.set_pos((bx + bw + 10, by))  # +10 px padding
+            else:# left arrow, align to left edge of button                
+                arrow.set_pos((bx - arrow.rect.width - 10, by))  # -10 px padding
+        arrow.play_SFX()
 
     def handle_events(self, input):
         event = input.output()
@@ -110,28 +79,28 @@ class Title_menu(Game_State):
         if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
             self.current_button -= 1
             if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
+                self.current_button = len(self.title_menu_ui.buttons) - 1
             self.update_arrow()
         elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
             self.current_button += 1
-            if self.current_button >= len(self.buttons):
+            if self.current_button >= len(self.title_menu_ui.buttons):
                 self.current_button = 0
             self.update_arrow()
         elif event[0]:
             if event[-1] in ('return', 'a'):
-                self.buttons[self.current_button].pressed()#if we want to make it e.g. glow or something
+                self.title_menu_ui.buttons[self.current_button].pressed()#if we want to make it e.g. glow or something
                 self.change_state()
             elif event[-1] == 'start':
                 pygame.quit()
                 sys.exit()
 
     def play_music(self):
-        self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['main'][0], index = 0, loop = -1, fade = 700, vol = 0.3)
-        self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['whisper'][0], index = 1, loop = -1, fade = 700, vol = 0.1)
+        self.channel = self.game.game_objects.sound.play_priority_sound(self.title_menu_ui.sounds['main'][0], index = 0, loop = -1, fade = 700, vol = 0.3)
+        self.channel = self.game.game_objects.sound.play_priority_sound(self.title_menu_ui.sounds['whisper'][0], index = 1, loop = -1, fade = 700, vol = 0.1)
 
     def change_state(self):
         if self.current_button == 0:#new game
-            self.arrow.pressed('new')#if we want to make it e.g. glow or something
+            self.title_menu_ui.arrows[0].pressed('new')#if we want to make it e.g. glow or something
             self.game.state_manager.enter_state('Gameplay')
 
             #load new game level
@@ -140,17 +109,17 @@ class Title_menu(Game_State):
             #self.game.game_objects.load_map(self,'crystal_mines_1','1')
             #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
-            self.game.game_objects.load_map(self,'nordveden_windtest','1')
-            #self.game.game_objects.load_map(self,'hlifblom_40','1')
+            #self.game.game_objects.load_map(self,'nordveden_windtest','1')
+            self.game.game_objects.load_map(self,'hlifblom_1','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 
         elif self.current_button == 1:
-            self.arrow.pressed()
+            self.title_menu_ui.arrows[0].pressed()
             self.game.state_manager.enter_state('Load_menu')
 
         elif self.current_button == 2:
-            self.arrow.pressed()
+            self.title_menu_ui.arrows[0].pressed()
             self.game.state_manager.enter_state('Option_menu')
 
         elif self.current_button == 3:
@@ -574,7 +543,7 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
         self.current_button = 0
         self.initiate_buttons()
         self.define_BG()
-        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
+        self.arrow = entities_UI.MenuArrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
 
         self.screen_copy = self.game.display.make_layer(self.game.display_size)
         self.game.game_objects.shaders['blur']['blurRadius'] = 1
@@ -599,7 +568,7 @@ class Pause_menu(Gameplay):#when pressing ESC duing gameplay
 
     def update_arrow(self):
         pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos(pos)
+        self.arrow.set_pos(pos)
         self.arrow.play_SFX()
 
     def update(self, dt):
@@ -907,7 +876,7 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
 
     def update(self, dt):
         super().update(dt)
-        self.game.game_objects.UI.update()
+        self.game.game_objects.UI.update(dt)
 
     def render(self):
         super().render()

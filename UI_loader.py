@@ -18,6 +18,9 @@ class UI_loader():#for map, omamori, ability, journal etc: json file should have
                 if type + '_UI' in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
 
+    def load_data(self):
+        pass
+
 class Vendor(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
@@ -167,6 +170,46 @@ class Inventory(UI_loader):
             elif id == 13:#heal item
                 self.items['heal_item'] = topleft_object_position
 
+class TitleMenu(UI_loader):
+    def __init__(self, game_objects):
+        self.game_objects = game_objects
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/title_menu/', game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
+
+        self.load_UI_data(type)
+        self.load_data()
+
+    def load_UI_data(self, type):
+        map_data = read_files.read_json("UI/title_menu/title_menu.json")
+        self.map_data = read_files.format_tiled_json(map_data)
+        for tileset in self.map_data['tilesets']:
+            if 'source' in tileset.keys():
+                if 'title_menu' + '_UI' in tileset['source']:#the name of the tmx file
+                    self.map_data['UI_firstgid'] =  tileset['firstgid']
+
+    def load_data(self):
+        self.buttons = []
+        self.arrows = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#buttons
+                for property in properties:
+                    if property['name'] == 'name':
+                        button = property['value']
+
+                text = (self.game_objects.font.render(text = button))
+                self.buttons.append(entities_UI.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+
+            elif id == 1:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+
+            elif id == 4:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects))
+
 class WorldMap(UI_loader):
     def __init__(self, game_objects):
         self.game_objects = game_objects
@@ -269,62 +312,8 @@ class DarkforestMap(UI_loader):
                 new_arrow = entities_UI.MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
 
-class Ability_movement_upgrade(UI_loader):
+class HlifblomMap(UI_loader):
     def __init__(self, game_objects):
-        super().__init__(game_objects)
-
-    def load_data(self):
-        self.abilities = [[],[],[]]#orginise them accotding to the grid in tiled
-        self.rows = {}
-        for obj in self.map_data['elements']:
-            object_size = [int(obj['width']),int(obj['height'])]
-            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['UI_firstgid']
-
-            if id == 0:#dash
-                new_ability = entities_UI.Dash(topleft_object_position,self.game_objects)
-                self.abilities[0].append(new_ability)
-                self.rows['Dash'] = 0
-            elif id == 1:#double_jump
-                new_ability = entities_UI.Double_jump(topleft_object_position,self.game_objects)
-                self.abilities[1].append(new_ability)
-                self.rows['Double_jump'] = 1
-            elif id == 2:#wall_glide
-                new_ability = entities_UI.Wall_glide(topleft_object_position,self.game_objects)
-                self.abilities[2].append(new_ability)
-                self.rows['Wall_glide'] = 2
-
-class Ability_spirit_upgrade(UI_loader):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
-
-    def load_data(self):
-        self.abilities = [[],[],[],[],[]]#orginise them accotding to the grid in tiled
-        self.rows = {}
-        for obj in self.map_data['elements']:
-            object_size = [int(obj['width']),int(obj['height'])]
-            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['UI_firstgid']
-
-            if id == 0:#arrow
-                new_ability = entities_UI.Arrow(topleft_object_position,self.game_objects)
-                self.abilities[0].append(new_ability)
-                self.rows['Arrow'] = 0
-            elif id == 1:#force
-                new_ability = entities_UI.Force(topleft_object_position,self.game_objects)
-                self.abilities[1].append(new_ability)
-                self.rows['Force'] = 1
-            elif id == 2:#migawari
-                new_ability = entities_UI.Migawari(topleft_object_position,self.game_objects)
-                self.abilities[2].append(new_ability)
-                self.rows['Migawari'] = 2
-            elif id == 3:#slowmotion
-                new_ability = entities_UI.Slow_motion(topleft_object_position,self.game_objects)
-                self.abilities[3].append(new_ability)
-                self.rows['Slow_motion'] = 3
-            elif id == 4:#thunder
-                new_ability = entities_UI.Thunder(topleft_object_position,self.game_objects)
-                self.abilities[4].append(new_ability)
-                self.rows['Thunder'] = 4
+        self.game_objects = game_objects
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/hlifblom/BG.png').convert_alpha())
+        self.objects = []

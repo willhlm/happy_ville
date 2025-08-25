@@ -18,15 +18,18 @@ class Movement_manager():
 
     def clear_modifiers(self):
         self.modifiers.clear()
+        self._sort_modifiers()
 
     def resolve(self):
         context = Movement_context()  # Default values
-        for mod in self.modifiers.values():
+        modifiers = self._sorted_modifiers.copy()
+        for mod in modifiers:
             mod.apply(context)
         return context
 
     def handle_input(self, direction):
-        for mod in list(self.modifiers.values()):
+        modifiers = self._sorted_modifiers.copy()
+        for mod in modifiers:
             mod.handle_input(direction)
 
     def update(self, dt):
@@ -41,8 +44,8 @@ class Movement_context():
     def __init__(self):
         self.gravity = C.acceleration[1]
         self.velocity = [0, 0]
-
         self.friction = C.friction_player.copy()#firction is sampled evey frame
+        
         self.air_timer = C.air_timer
         self.upstream = 1#a scale for upstream movement: sampled during upsteram collision
 
@@ -85,7 +88,7 @@ class Dash_jump(Movement_modifier):#should it instead be a general driction modi
         self.ref_x = self.friction_x * (1 - 0.000000005 )
         self.inc_fric = False
 
-    def set_friction(self, friction):
+    def set_friction_x(self, friction):
         self.friction_x = friction
 
     def set_fritction_y(self, friction):

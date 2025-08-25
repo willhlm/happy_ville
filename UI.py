@@ -10,13 +10,13 @@ class UI_manager():#initialised in game_objects, keep common UIs always in memor
             'map':        ui_backpack.MapUI(game_objects),
             'worldmap':        ui_backpack.MapUI_2(game_objects),
             'radna':     ui_backpack.RadnaUI(game_objects),
-            'journal':     ui_backpack.JournalUI(game_objects),
+            'journal':     ui_backpack.JournalUI(game_objects),            
         }
         self.index = 1#start at inventory
         self.backpack = list(game_objects.player.backpack.holdings.keys())#the things player has access to
 
-    def update(self):
-        self.active_ui.update()
+    def update(self, dt):
+        self.active_ui.update(dt)
 
     def render(self):                
         self.active_ui.render()

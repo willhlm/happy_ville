@@ -1246,13 +1246,12 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
     def enter(self, **kwarg):
         self.entity.animation.play('dash_jump_pre')#the name of the class
         self.dash_length = C.dash_jump_length
-        self.entity.velocity[0] = C.dash_vel * self.entity.dir[0]
+
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
         self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
-        self.entity.velocity[1] = C.dash_jump_vel_player
-        self.entity.acceleration[1] = 0.04
+
         self.buffer_time = C.jump_dash_wall_timer
 
     def exit_state(self):
@@ -1284,7 +1283,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         self.entity.shader_state.handle_input('idle')
 
     def update(self, dt):
-        #self.entity.velocity[1] = C.dash_jump_vel_player
+        self.entity.velocity[1] = C.dash_jump_vel_player
         self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= dt
