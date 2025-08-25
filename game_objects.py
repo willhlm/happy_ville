@@ -152,7 +152,7 @@ class Game_Objects():
         self.collide_all(dt)
 
         #camera and calculate true pos        
-        #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
+        self.camera_blocks.update(dt)#need to be before camera: caemras stop needs tobe calculated before the scroll
         self.camera_manager.update(dt)#should be first
 
         #update cosmetics and BGs
@@ -173,7 +173,7 @@ class Game_Objects():
         self.lights.update_render(dt)
 
     def update_render(self, dt):#called after update_physics
-        self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll        
+        #self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll        
         self.camera_manager.update_render(dt)#should be first     
         self.platforms.update_render(dt)        
         self.platforms_ramps.update_render(dt)

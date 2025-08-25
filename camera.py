@@ -73,7 +73,7 @@ class Camera():#default camera
         self.center = self.original_center.copy()
         self.game_objects.camera_manager.stop_handeler.reset()
         for stop in self.game_objects.camera_blocks:#apply cameras stopp
-            stop.update_render(0)
+            stop.update(0)
             stop.currentstate.init_pos()
         self.set_camera_position()
 

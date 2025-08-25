@@ -973,10 +973,9 @@ class Player(Character):
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
-
         self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1] 
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
-        self.velocity[0] += dt *(self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
+        self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
         return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
@@ -2033,8 +2032,8 @@ class Camera_Stop(Staticentity):
     def release_texture(self):#called when .kill() and empty group
         pass
 
-    def update_render(self, dt):
-        self.currentstate.update()
+    def update(self, dt):
+        self.currentstate.update(dt)
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
