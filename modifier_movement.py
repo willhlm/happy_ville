@@ -126,12 +126,19 @@ class Dash(Movement_modifier):#should it instead be a general driction modifier?
 class Up_stream(Movement_modifier):
     def __init__(self, priority, **kwarg):
         super().__init__(priority)
-        self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided        
+        self.speed = kwarg.get('speed', [0, 0])  # Default force if not provided
 
     def apply(self, context):
         # Push as extra acceleration
         context.velocity[0] += self.speed[0]
         context.velocity[1] += self.speed[1]
+
+class Up_stream_vertical(Up_stream):
+    """Vertical"""
+
+class Up_stream_horizontal(Up_stream):
+    """Horizontal"""
+
 
 class Tjasolmais_embrace(Movement_modifier):#added from ability
     def __init__(self, priority, **kwarg):

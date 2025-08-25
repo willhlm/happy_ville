@@ -1,9 +1,8 @@
 #version 330 core
-
 in vec2 fragmentTexCoord; // top-left is [0, 1] and bottom-right is [1, 0]
 uniform float time;       // animate the smoke over time
 uniform vec2 dir;         // direction vector for the smoke
-
+uniform vec2 resolution;  // resolution of the shader area (width, height)
 out vec4 color;
 uniform float speed = 0.3;
 
@@ -19,7 +18,6 @@ float noise(vec2 p)
     vec2 i = floor(p);
     vec2 f = fract(p);
     vec2 u = f * f * (3.0 - 2.0 * f);
-
     return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
                mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
 }
@@ -30,14 +28,12 @@ float smokeEffect(vec2 uv, float time)
     float n = 0.1;
     float scale = 2.0;
     float persistence = 0.3;
-
     for (int i = 0; i < 4; i++)
     {
         n += noise(uv * scale + time * 0.1) * persistence;
         scale *= 2.0;
         persistence *= 0.5;
     }
-
     return n;
 }
 
@@ -52,26 +48,37 @@ float edgeFade(vec2 uv)
 
 void main()
 {
-    // Modify the texture coordinates to animate the smoke and make it move in the specified direction
-    vec2 uv = fragmentTexCoord;
-    uv -= vec2(dir.x, -dir.y) * time * speed; // Invert the Y-component of `dir`
+    // Convert fragment coordinates to world space coordinates
+    // This ensures both movement speed and pattern scale are independent of shader box size
+    vec2 worldPos = fragmentTexCoord;
 
-    // Apply the smoke effect using noise
-    float smoke = smokeEffect(uv * 2.0, time); // Adjust scale for effect
+    // Scale the coordinates based on the resolution to maintain consistent
+    // pattern density and movement speed regardless of box dimensions
+    if (resolution.x > 0.0 && resolution.y > 0.0) {
+        // Use a reference resolution to maintain consistent pattern scale
+        float referenceSize = 512.0; // Reference size in pixels
+        vec2 scale = resolution / referenceSize;
+        worldPos = fragmentTexCoord * scale;
+    }
 
-    // Alpha fade near edges
-    float alphaFade = edgeFade(fragmentTexCoord); // Gradually fade at the edges
+    // Calculate movement offset in world space (constant speed regardless of box size)
+    vec2 movementOffset = normalize(vec2(dir.x, -dir.y)) * time * speed;
+
+    // Apply the movement to world coordinates
+    vec2 uv = worldPos - movementOffset;
+
+    // Apply the smoke effect using noise with fixed world-space scaling
+    // The scale factor (2.0) now represents actual world units rather than texture coordinates
+    float smoke = smokeEffect(uv * 2.0, time);
 
     // Control smoke intensity (clamp to 0-1 range)
-    float smokeIntensity = clamp(smoke, 0.0, 1.0) * alphaFade; // Only apply smoke where intensity is high
+    float smokeIntensity = clamp(smoke, 0.0, 1.0);
 
-    // Create the smoke color (white smoke, fading out at the edges)
-    vec4 smokeColor = vec4(vec3(1.0), smokeIntensity * alphaFade); // Grayscale smoke color with transparency
+    // Apply edge fading using original fragment coordinates
+    float alphaFade = edgeFade(fragmentTexCoord);
+    vec4 smokeColor = vec4(vec3(1.0), smokeIntensity * alphaFade);
 
     // Set final color with transparency for background
-    // Use step to determine transparency based on smokeIntensity
-    float visibility = step(0.01, smokeIntensity); // Step returns 1.0 if smokeIntensity > 0.01, else 0.0
-
-    // Set the final color using the visibility factor (0 for transparent, 1 for visible smoke)
-    color = smokeColor * visibility; // This will zero out the smoke color when visibility is 0
+    float visibility = step(0.01, smokeIntensity);
+    color = smokeColor * visibility;
 }

@@ -16,7 +16,7 @@ class Game():
         self.scale = self.scale_size(2)#get the scale according to your display size
         self.display_size = [int(self.window_size[0] * self.scale), int(self.window_size[1] * self.scale)]
         game_settings = read_files.read_json('game_settings.json')['display']
-        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac               
+        self.display = RenderEngine(self.display_size[0] - self.scale, self.display_size[1] - self.scale, fullscreen = game_settings['fullscreen'], vsync = game_settings['vsync']) #vsync -1 may be good for mac
         self.screen_manager = screen_manager.ScreenManager(self)
 
         #initiate game related values
@@ -59,36 +59,36 @@ class Game():
         return scale
 
     def render_display(self, texture, scale = True):#called from game states
-        if scale: scale = self.scale            
+        if scale: scale = self.scale
         else: scale = 1
         self.display.render(texture, self.display.screen, scale = scale)
 
 class GameLoop():
     def __init__(self, game):
         self.game = game
-        self.clock = pygame.time.Clock()  
+        self.clock = pygame.time.Clock()
         self.fixed_dt = 1.0 / 60.0  # 60Hz physics step
-        self.accumulator = 0.0              
+        self.accumulator = 0.0
         self.alpha = self.accumulator / self.fixed_dt
         self.dt = 1.0  # Initialize filtered dt (in 60Hz units)
         self.filter_alpha = 1  # Smoothing factor (lower = smoother)
 
     def run(self):
-        prev_time = time.perf_counter()        
+        prev_time = time.perf_counter()
         while True:
-            self.game.screen_manager.clear()                      
+            self.game.screen_manager.clear()
 
             # Calculate raw frame time
             frame_end = time.perf_counter()
             #raw_frame_time = 1/max(self.clock.get_fps(),30)
             raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap to prevent large jumps
-            prev_time = frame_end                    
+            prev_time = frame_end
             raw_dt = max(raw_frame_time * 60, 0.1)
             self.dt = (self.filter_alpha * raw_dt) + (1 - self.filter_alpha) * self.dt
-            
+
             # Convert back to seconds for accumulator
             filtered_frame_time = self.dt / 60.0
-                                    
+
             # Use filtered time for accumulator
             self.accumulator += filtered_frame_time
 
@@ -107,7 +107,7 @@ class GameLoop():
 
             #update display
             pygame.display.flip()
-            
+
             # Frame rate limiting at the END
             self.clock.tick(C.fps)
 

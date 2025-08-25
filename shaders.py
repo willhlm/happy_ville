@@ -27,11 +27,10 @@ class Vignette(Shaders):
 
     def set_uniforms(self):
         shader = self.post_process.game_objects.shaders['vignette']
-        
+
         shader['colour'] = self.colour
         shader['vignette_intensity'] = self.vignette_intensity
         shader['vignette_opacity'] = self.vignette_opacity
-        shader['u_resolution'] = self.post_process.game_objects.game.display._screen_res
 
     def draw(self, temp_layer, composite_screen):
         """For intermediate rendering in pipeline"""
@@ -41,7 +40,7 @@ class Vignette(Shaders):
 
     def draw_to_composite(self, temp_layer, composite_screen):
         """Final render back to composite_screen"""
-        self.set_uniforms()        
+        self.set_uniforms()
         self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['vignette'])
 
 class Chromatic_aberration(Shaders):
@@ -54,14 +53,14 @@ class Chromatic_aberration(Shaders):
         if self.duration < 0:
             self.post_process.remove_shader('chromatic_aberration')
 
-    def draw(self, temp_layer, composite_screen):#needs the screen   
+    def draw(self, temp_layer, composite_screen):#needs the screen
         self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer, shader = self.post_process.game_objects.shaders['chromatic_aberration'])#shader render
         return  temp_layer
 
     def draw_to_composite(self, temp_layer, composite_screen):
-        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen  
-        #composite_screen.clear(0,0,0,0)      
-        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['chromatic_aberration']      )        
+        self.post_process.game_objects.game.display.render(composite_screen.texture, temp_layer)#copy the screen
+        #composite_screen.clear(0,0,0,0)
+        self.post_process.game_objects.game.display.render(temp_layer.texture, composite_screen, shader=self.post_process.game_objects.shaders['chromatic_aberration']      )
 
 class Bloom(Shaders):
     def __init__(self, post_process, **kwarg):
@@ -201,7 +200,7 @@ class Speed_lines(Shaders):#TODO, should jusu be a cosmetic, not a screen shader
     def draw(self, temp_layer, composite_screen):
         """For intermediate rendering in pipeline"""
         self.post_process.game_objects.shaders['noise_perlin']['u_resolution'] = self.post_process.game_objects.game.window_size
-        self.post_process.game_objects.shaders['noise_perlin']['u_time'] = self.time 
+        self.post_process.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.post_process.game_objects.shaders['noise_perlin']['scroll'] = [0,0]
         self.post_process.game_objects.shaders['noise_perlin']['scale'] = [70,70]
         self.post_process.game_objects.game.display.render(self.empty.texture, self.noise_layer, shader=self.post_process.game_objects.shaders['noise_perlin'])#make perlin noise texture
@@ -220,7 +219,7 @@ class Slowmotion(Shaders):
         self.screen_copy = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
         self.empty = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
         self.empty2 = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
-        
+
         self.noise_layer = post_process.game_objects.game.display.make_layer(post_process.game_objects.game.display_size)#TODO
         self.time = 0
         self.duration = kwarg.get('duration', 20)
@@ -229,18 +228,18 @@ class Slowmotion(Shaders):
         self.time += dt * 0.01
         self.duration -= dt
         if self.duration <= 0:
-            self.post_process.game_objects.post_process.remove_shader('slowmotion')        
+            self.post_process.game_objects.post_process.remove_shader('slowmotion')
 
     def draw(self, temp_layer, composite_screen):
         self.post_process.game_objects.shaders['noise_perlin']['u_resolution'] = self.post_process.game_objects.game.display_size
-        self.post_process.game_objects.shaders['noise_perlin']['u_time'] = self.time 
+        self.post_process.game_objects.shaders['noise_perlin']['u_time'] = self.time
         self.post_process.game_objects.shaders['noise_perlin']['scroll'] = [self.post_process.game_objects.camera_manager.camera.scroll[0], -self.post_process.game_objects.camera_manager.camera.scroll[1]]
         self.post_process.game_objects.shaders['noise_perlin']['scale'] = [3, 3]
         self.post_process.game_objects.game.display.render(temp_layer.texture, self.noise_layer, shader=self.post_process.game_objects.shaders['noise_perlin'])#make perlin noise texture
 
         self.post_process.game_objects.game.display.render(composite_screen.texture, self.screen_copy)#big
 
-        self.post_process.game_objects.shaders['slowmotion']['TIME'] = self.time 
+        self.post_process.game_objects.shaders['slowmotion']['TIME'] = self.time
         self.post_process.game_objects.shaders['slowmotion']['NOISE_TEXTURE'] = self.noise_layer.texture
         self.post_process.game_objects.shaders['slowmotion']['SCREEN_TEXTURE'] = self.screen_copy.texture
 
@@ -273,7 +272,7 @@ class Hurt(Shaders):#turn white -> enteties use it
         self.renderer.game_objects.shaders['colour'] = self.colour
 
     def update_render(self, dt):
-        self.duration -= dt 
+        self.duration -= dt
         if self.duration < 0:
             self.entity.shader_render.append_shader(self.next_animation)
 
