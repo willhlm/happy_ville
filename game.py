@@ -67,48 +67,39 @@ class GameLoop():
     def __init__(self, game):
         self.game = game
         self.clock = pygame.time.Clock()
-        self.fixed_dt = 1.0 / 60.0  # 60Hz physics step
+        self.fixed_dt = 1.0 / 60.0# 60Hz physics step in seconds
         self.accumulator = 0.0
-        self.alpha = self.accumulator / self.fixed_dt
-        self.dt = 1.0  # Initialize filtered dt (in 60Hz units)
-        self.filter_alpha = 1  # Smoothing factor (lower = smoother)
+        self.alpha = 0.0
 
     def run(self):
         prev_time = time.perf_counter()
         while True:
             self.game.screen_manager.clear()
 
-            # Calculate raw frame time
+            # Calculate frame time in seconds
             frame_end = time.perf_counter()
-            #raw_frame_time = 1/max(self.clock.get_fps(),30)
-            raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap to prevent large jumps
+            raw_frame_time = min(frame_end - prev_time, 2.0 / C.fps)  # Cap large jumps
             prev_time = frame_end
-            raw_dt = max(raw_frame_time * 60, 0.1)
-            self.dt = (self.filter_alpha * raw_dt) + (1 - self.filter_alpha) * self.dt
+            dt = max(raw_frame_time, 0.001)# Avoid zero or negative dt
 
-            # Convert back to seconds for accumulator
-            filtered_frame_time = self.dt / 60.0
+            # Add to accumulator (in seconds)
+            self.accumulator += dt
 
-            # Use filtered time for accumulator
-            self.accumulator += filtered_frame_time
+            # Event handling (in frames)
+            self.game.event_loop(dt * 60)
 
-            # Event handling with filtered dt
-            self.game.event_loop(self.dt)
-
-            # Fixed timestep update(s)
+            # Fixed timestep updates (in frames)
             while self.accumulator >= self.fixed_dt:
                 self.game.state_manager.update(self.fixed_dt * 60)
                 self.accumulator -= self.fixed_dt
 
-            # Render with interpolation
+            # Interpolation factor for rendering
             self.alpha = self.accumulator / self.fixed_dt
-            self.game.state_manager.update_render(self.dt)
+            self.game.state_manager.update_render(dt * 60)
             self.game.state_manager.render()
 
-            #update display
+            # Update display and limit FPS
             pygame.display.flip()
-
-            # Frame rate limiting at the END
             self.clock.tick(C.fps)
 
 if __name__ == '__main__':

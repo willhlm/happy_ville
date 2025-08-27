@@ -933,6 +933,7 @@ class Player(Character):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
+        self.prev_true_pos = self.true_pos.copy()#to save the previous position
 
         self.max_health = 15
         self.max_spirit = 4
@@ -954,8 +955,7 @@ class Player(Character):
 
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
-        self.reset_movement()
-        self.prev_true_pos = self.true_pos.copy()#to save the previous position
+        self.reset_movement()        
 
         self.colliding_platform = None#save the last collising platform
         #self.shader_state = states_shader.Aura(self)
@@ -1039,14 +1039,13 @@ class Player(Character):
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
-        self.time = 0
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
         self.hitstop_states.update_render(dt)
 
     def update(self, dt):
-        self.prev_true_pos = self.true_pos.copy()
+        self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
         self.movement_manager.update(dt)#update the movement manager
         self.hitstop_states.update(dt)
         self.backpack.radna.update()#update the radnas
@@ -1058,11 +1057,10 @@ class Player(Character):
         alpha = self.game_objects.game.game_loop.alpha
         interp_x = self.prev_true_pos[0] + (self.true_pos[0] - self.prev_true_pos[0]) * alpha
         interp_y = self.prev_true_pos[1] + (self.true_pos[1] - self.prev_true_pos[1]) * alpha
-        self.blit_pos = [int(interp_x - self.game_objects.camera_manager.camera.interp_scroll[0]), int(interp_y - self.game_objects.camera_manager.camera.interp_scroll[1])]
-        self.blit_pos2 = [(interp_x - self.game_objects.camera_manager.camera.interp_scroll[0]), (interp_y - self.game_objects.camera_manager.camera.interp_scroll[1])]
 
-        #self.blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.scroll[0]), int(self.true_pos[1]-self.game_objects.camera_manager.camera.scroll[1]))#true scroll, int or round
-        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
+        self.blit_pos = [interp_x - self.game_objects.camera_manager.camera.interp_scroll[0], interp_y - self.game_objects.camera_manager.camera.interp_scroll[1]]#save float position for screen manager
+        blit_pos = [int(self.blit_pos[0]), int(self.blit_pos[1])]#bit at interget position, and let screen manager hanfle the sub pixel rendering
+        self.game_objects.game.display.render(self.image, target, position = blit_pos , flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
