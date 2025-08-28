@@ -1138,18 +1138,21 @@ class DashGroundPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity)      
+        self.entity.velocity[1] *= 0
+          
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
         if wall_dir:
             self.entity.dir[0] = -wall_dir[0]
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
-        pass
+        self.entity.acceleration[0] = 0
 
     def update(self, dt):
         self.jump_dash_timer -= dt
-        self.entity.velocity[1] = 0
-        self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        #self.entity.velocity[1] = 0
+        #self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= dt
         self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
@@ -1182,6 +1185,7 @@ class DashGroundPre(PhaseBase):
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')
+        self.entity.movement_manager.remove_modifier('dash')
         super().enter_state(state, **kwarg)
 
 class DashGroundMain(DashGroundPre):#level one dash: normal
@@ -1206,6 +1210,7 @@ class DashGroundPost(DashGroundPre):
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_ground_post')
+        self.entity.movement_manager.remove_modifier('dash')
 
     def update(self, dt):
         pass
@@ -1230,6 +1235,10 @@ class DashGroundPost(DashGroundPre):
             self.enter_state('jump')
             input.processed()
 
+    def enter_state(self, state, **kwarg):
+        self.entity.shader_state.handle_input('idle')
+        self.entity.currentstate.enter_state(state, **kwarg)
+
 class DashJumpPre(PhaseBase):#enters from ground dash pre
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
@@ -1237,13 +1246,12 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
     def enter(self, **kwarg):
         self.entity.animation.play('dash_jump_pre')#the name of the class
         self.dash_length = C.dash_jump_length
-        self.entity.velocity[0] = C.dash_vel * self.entity.dir[0]
+
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0])
         self.entity.movement_manager.add_modifier('Dash_jump', entity = self.entity)
         self.entity.shader_state.handle_input('motion_blur')
         self.entity.flags['ground'] = False
-        self.entity.velocity[1] = C.dash_jump_vel_player
-        self.entity.acceleration[1] = 0.04
+
         self.buffer_time = C.jump_dash_wall_timer
 
     def exit_state(self):
@@ -1275,7 +1283,7 @@ class DashJumpPre(PhaseBase):#enters from ground dash pre
         self.entity.shader_state.handle_input('idle')
 
     def update(self, dt):
-        #self.entity.velocity[1] = C.dash_jump_vel_player
+        self.entity.velocity[1] = C.dash_jump_vel_player
         self.entity.velocity[0] = self.entity.dir[0]*max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= dt
@@ -1674,19 +1682,20 @@ class DashAirPre(PhaseBase):
         self.entity.flags['ground'] = True
         self.entity.game_objects.timer_manager.remove_ID_timer('cayote')#remove any potential cayote times
         self.jump_dash_timer = C.jump_dash_timer
-
+        self.entity.movement_manager.add_modifier('dash', entity = self.entity)   
+        self.entity.velocity[1] *= 0
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['dash'][0], vol = 1)
         wall_dir = kwarg.get('wall_dir', False)
         if wall_dir:
             self.entity.dir[0] = -wall_dir[0]
 
     def handle_movement(self, event):#all dash states should omit setting entity.dir
-        pass
+        self.entity.acceleration[0] = 0
 
     def update(self, dt):
         self.jump_dash_timer -= dt
-        self.entity.velocity[1] = 0
-        self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
+        #self.entity.velocity[1] = 0
+        #self.entity.velocity[0] = self.entity.dir[0] * max(C.dash_vel,abs(self.entity.velocity[0]))#max horizontal speed
         self.entity.game_objects.cosmetics.add(entities.Fade_effect(self.entity, alpha = 100))
         self.dash_length -= dt
         self.entity.emit_particles(lifetime = 40, scale=3, colour = C.spirit_colour, gravity_scale = 0.5, gradient = 1, fade_scale = 7,  number_particles = 1, vel = {'wave': [-10*self.entity.dir[0], -2]})
@@ -1719,6 +1728,7 @@ class DashAirPre(PhaseBase):
 
     def enter_state(self, state, **kwarg):
         self.entity.shader_state.handle_input('idle')
+        self.entity.movement_manager.remove_modifier('dash')
         super().enter_state(state, **kwarg)
 
 class DashAirMain(DashGroundPre):#level one dash: normal
@@ -1743,6 +1753,7 @@ class DashAirPost(DashGroundPre):
 
     def enter(self, **kwarg):
         self.entity.animation.play('dash_air_post')
+        self.entity.movement_manager.remove_modifier('dash')
 
     def update(self, dt):
         pass
@@ -1766,6 +1777,10 @@ class DashAirPost(DashGroundPre):
         if event[-1] == 'a':
             self.enter_state('jump')
             input.processed()
+
+    def enter_state(self, state, **kwarg):
+        self.entity.shader_state.handle_input('idle')
+        self.entity.currentstate.enter_state(state, **kwarg)
 
 class DeathPre(PhaseBase):
     def __init__(self,entity):

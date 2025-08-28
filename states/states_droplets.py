@@ -14,15 +14,15 @@ class Basic_states():
     def handle_input(self,input,**kwarg):
         pass
 
-    def update(self):
+    def update(self, dt):
         pass
 
 class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)    
 
-    def update(self):
-        self.entity.velocity[1] += 1
+    def update(self, dt):
+        self.entity.velocity[1] += dt
         self.entity.velocity[1] = min(7,self.entity.velocity[1])
 
     def handle_input(self,input,**kwarg):
@@ -33,7 +33,7 @@ class Death(Basic_states):#idle once
     def __init__(self,entity):
         super().__init__(entity)        
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity = [0,0]
 
     def increase_phase(self):

@@ -15,7 +15,7 @@ class Idle(Basic_states):
     def __init__(self,entity):
         super().__init__(entity)
 
-    def update(self):
+    def update(self, dt):
         if random.randint(0,100) == 0:
             self.enter_state('Transform')
 

@@ -169,7 +169,7 @@ class Movement_hud():#gameplay UI
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
 
-    def update(self):
+    def update(self, dt):
         pass
 
 class Money_frame(): #HJORTRON!!!!
@@ -181,52 +181,43 @@ class Money_frame(): #HJORTRON!!!!
         self.rect = pygame.Rect(0,0,self.image.width,self.image.height)
         self.dir = [1,0]#[horizontal (right 1, left -1),vertical (up 1, down -1)]: animation and state need this
 
-    def update(self):
+    def update(self, dt):
         pass
 
 #utilities
-class Menu_Arrow():
-    def __init__(self, pos, game_objects, offset = [0,0], mirrored = False, animate = False):
+class MenuArrow():
+    def __init__(self, pos, game_objects, flip = False):
         self.game_objects = game_objects
-        self.image = Menu_Arrow.image
-        self.sounds = Menu_Arrow.sounds
-        self.offset = offset
-        self.mirrored = mirrored
-        self.time = 0
-        self.aniamte = animate
+        self.image = MenuArrow.image
+        self.sounds = MenuArrow.sounds              
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
-        self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
-        if mirrored: self.rect.midleft = [pos[0] - self.offset[0], pos[1] + self.offset[1]]
-        self.pos_ref = self.rect.center
+        self.true_pos = self.rect.topleft
+        
+        self.time = 0
+        self.flip = flip  
+
+        if flip: self.phase = math.pi             
+        else: self.phase = 0        
 
     def pool(game_objects):
-        Menu_Arrow.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')
-        img = pygame.image.load("Sprites/utils/arrow_elf.png").convert_alpha()
-        Menu_Arrow.image = game_objects.game.display.surface_to_texture(img)
+        MenuArrow.sounds = read_files.load_sounds_dict('audio/SFX/UI/arrow/')
+        img = pygame.image.load("Sprites/utils/arrow/arrow_right.png").convert_alpha()
+        MenuArrow.image = game_objects.game.display.surface_to_texture(img)
 
-    def update(self):#note: sets pos to input, doesn't update with an increment of pos like other entities
-        pass
+    def update(self, dt):#note: sets pos to input, doesn't update with an increment of pos like other entities
+        self.time += dt * 0.1
+        self.update_pos()
 
-    def animate(self, dt):
-        if self.animate:
-            amp = 5
-            self.time += dt
-            _T = 0.08
-            d = amp*math.pow(math.sin(self.time * _T) + 1, 0.5)
-            if self.mirrored:
-                self.rect.center = [self.pos_ref[0] + d, self.pos_ref[1]]
-            else:
-                self.rect.center = [self.pos_ref[0] - d, self.pos_ref[1]]
+    def update_pos(self):                
+        shift = 0.5 * math.sin(self.time + self.phase)
+        self.true_pos = [self.true_pos[0] + shift, self.true_pos[1]]
 
-    def play_SFX(self, state = 'idle', frame = 0, vol = 0.8):
+    def play_SFX(self, state = 'idle', frame = 0, vol = 0.8):        
         self.game_objects.sound.play_sfx(self.sounds[state][frame], vol = vol)
 
-    def update_pos(self, pos):
-        if self.mirrored:
-            self.rect.midleft = [pos[0] - self.offset[0], pos[1] + self.offset[1]]
-        else:
-            self.rect.midright = [pos[0] + self.offset[0], pos[1] + self.offset[1]]
-        self.pos_ref = self.rect.center
+    def set_pos(self, pos):
+        self.rect.topleft = pos
+        self.true_pos = list(pos)
 
     def pressed(self, state = 'select'):#when pressing a button
         self.play_SFX(state)
@@ -267,8 +258,8 @@ class Controllers():
     def reset_timer(self):#animation neeed it
         pass
 
-    def update(self):
-        self.animation.update()
+    def update(self, dt):
+        self.animation.update(dt)
 
 class Xbox(Controllers):
     def __init__(self, pos, game_objects,type):

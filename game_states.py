@@ -4,6 +4,7 @@ import entities_UI
 import cutscene
 import constants as C
 import animation
+import UI_loader
 
 class Game_State():
     def __init__(self,game):
@@ -13,7 +14,7 @@ class Game_State():
         pass
 
     def update_render(self, dt):
-        pass        
+        pass
 
     def render(self):
         pass
@@ -30,495 +31,36 @@ class Game_State():
     def release_texture(self):#in the final version, this should not be needed sinec we wil not dynamically make layers
         pass
 
-class Title_menu(Game_State):
-    def __init__(self,game):
-        super().__init__(game)
-        self.game_objects = game.game_objects#animation needs it
-        self.title = self.game.game_objects.font.render(text = 'HAPPY VILLE')
-        self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
-        self.play_music()
-
-        self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/start_screen',game.game_objects)}
-        self.image = self.sprites['idle'][0]
-        self.animation = animation.Animation(self)
-
-        #create buttons
-        self.current_button = 0
-        self.initiate_buttons()
-        self.define_BG()
-        self.arrow = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midleft, game.game_objects, offset = [-8, -1], animate = True)
-        self.arrow_2 = entities_UI.Menu_Arrow(self.buttons[self.current_button].rect.midright, game.game_objects, offset = [-8, -1], mirrored = True, animate = True)
-
-    def initiate_buttons(self):
-        buttons = ['New game','Load game','Option','Quit']
-        self.buttons = []
-        y_pos = 200
-        x_pos = 320
-        for b in buttons:
-            text = (self.game.game_objects.font.render(text = b))
-            self.buttons.append(entities_UI.Button(self.game.game_objects, image = text, position = [x_pos, y_pos], center = True))
-            y_pos += 20
-
-    def define_BG(self):
-        size = (90,100)
-        bg = pygame.Surface(size, pygame.SRCALPHA,32).convert_alpha()
-        pygame.draw.rect(bg,[200,200,200,150],(0,0,size[0],size[1]),border_radius=10)
-        self.bg = self.game.display.surface_to_texture(bg)
-
-    def reset_timer(self):
-        pass
-
-    def update_render(self, dt):
-        self.animation.update(dt)
-
-    def update(self, dt):#update menu arrow position
-        self.arrow.animate(dt)
-        self.arrow_2.animate(dt)
-
-    def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.update(dt)
-
-    def render(self):
-        self.game.screen_manager.screen.clear(0,0,0,0)
-        self.buttons[self.current_button].hoover()
-        self.game.display.render(self.image, self.game.screen_manager.screen)#shader render
-
-        #blit title
-        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
-        #self.game.display.render(self.bg, self.game.screen, position = (70,180))
-
-        #blit buttons
-        for b in self.buttons:
-            self.game.display.render(b.image, self.game.screen_manager.screen, position = b.rect.topleft)
-
-        #blit arrow
-        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft)
-        self.game.display.render(self.arrow_2.image, self.game.screen_manager.screen, position = self.arrow_2.rect.topleft, flip = True)
-
-        self.game.render_display(self.game.screen_manager.screen.texture)
-
-    def update_arrow(self):
-        ref_pos = self.buttons[self.current_button].rect.midleft
-        ref_pos2 = self.buttons[self.current_button].rect.midright
-        self.arrow.update_pos((ref_pos[0], ref_pos[1]))
-        self.arrow_2.update_pos((ref_pos2[0], ref_pos2[1]))
-        self.arrow.play_SFX()
-
-    def handle_events(self, input):
-        event = input.output()
-        input.processed()
-        if event[2]['l_stick'][1] < 0 or (event[-1] == 'dpad_up' and event[0]):#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
-            self.update_arrow()
-        elif event[2]['l_stick'][1] > 0 or (event[-1] == 'dpad_down' and event[0]):#down
-            self.current_button += 1
-            if self.current_button >= len(self.buttons):
-                self.current_button = 0
-            self.update_arrow()
-        elif event[0]:
-            if event[-1] in ('return', 'a'):
-                self.buttons[self.current_button].pressed()#if we want to make it e.g. glow or something
-                self.change_state()
-            elif event[-1] == 'start':
-                pygame.quit()
-                sys.exit()
-
-    def play_music(self):
-        self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['main'][0], index = 0, loop = -1, fade = 700, vol = 0.3)
-        self.channel = self.game.game_objects.sound.play_priority_sound(self.sounds['whisper'][0], index = 1, loop = -1, fade = 700, vol = 0.1)
-
-    def change_state(self):
-        if self.current_button == 0:#new game
-            self.arrow.pressed('new')#if we want to make it e.g. glow or something
-            self.game.state_manager.enter_state('Gameplay')
-
-            #load new game level
-            #self.game.game_objects.load_map(self,'village_ola2_5','1')
-            #self.game.game_objects.load_map(self,'golden_fields_1','1')
-            #self.game.game_objects.load_map(self,'crystal_mines_1','1')
-            #self.game.game_objects.load_map(self,'nordveden_2','1')
-            #self.game.game_objects.load_map(self,'dark_forest_1','5')
-            self.game.game_objects.load_map(self,'tall_trees_4','1')
-            #self.game.game_objects.load_map(self,'hlifblom_1','1')
-            #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
-            #self.game.game_objects.load_map(self,'collision_map_4','1')
-
-        elif self.current_button == 1:
-            self.arrow.pressed()
-            self.game.state_manager.enter_state('Load_menu')
-
-        elif self.current_button == 2:
-            self.arrow.pressed()
-            self.game.state_manager.enter_state('Option_menu')
-
-        elif self.current_button == 3:
-            pygame.quit()
-            sys.exit()
-
-class Load_menu(Game_State):
-    def __init__(self,game):
-        super().__init__(game)
-        self.game_objects = game.game_objects
-        self.title = self.game.game_objects.font.render(text = 'LOAD GAME') #temporary
-        self.sprites = {'idle': read_files.load_sprites_list('Sprites/UI/load_screen/new_game',game.game_objects)}
-        self.image = self.sprites['idle'][0]
-        self.animation = animation.Animation(self)
-
-        #create buttons
-        self.buttons = ['SLOT 1','SLOT 2','SLOT 3','SLOT 4']
-        self.current_button = 0
-        self.initiate_buttons()
-        self.define_BG()
-        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
-
-    def define_BG(self):
-        size = (90,100)
-        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()#the length should be fixed determined, putting 500 for now
-        pygame.draw.rect(bg,[200,200,200,100],(0,0,size[0],size[1]),border_radius=10)
-        self.bg = self.game.display.surface_to_texture(bg)
-
-    def initiate_buttons(self):
-        y_pos = 200
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b))
-            #text.fill(color=(255,255,255),special_flags=pygame.BLEND_ADD)
-            self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((100,y_pos),self.button_surfaces[b].size)
-            y_pos += 20
-
-    def reset_timer(self):
-        pass
-
-    def update_render(self, dt):
-        self.animation.update(dt)
-
-    def update_arrow(self):
-        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
-        self.arrow.play_SFX()
-
-    def render(self):
-        #fill game.screen
-        self.game.screen_manager.screen.clear(0,0,0,0)
-        self.game.display.render(self.image, self.game.screen_manager.screen)
-
-        #blit title
-        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]/2 - self.title.width/2,50))
-        self.game.display.render(self.bg, self.game.screen_manager.screen, position = (70,180))
-
-        #blit buttons
-        for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
-
-        #blit arrow
-        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft)
-        self.game.render_display(self.game.screen_manager.screen.texture)
-
-    def handle_events(self, input):
-        event = input.output()
-        input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
-            self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.buttons):
-                self.current_button = 0
-            self.update_arrow()
-        elif event[0]:
-            if event[-1] == 'start':
-                self.game.state_manager.exit_state()
-            elif event[-1] in ('return', 'a'):
-                self.arrow.pressed()
-                self.game.game_objects.load_game()#load saved game data
-                self.game.state_manager.enter_state('Gameplay')
-
-                map = self.game.game_objects.player.backpak.map.spawn_point['map']
-                point=self.game.game_objects.player.backpak.map.spawn_point['point']
-                self.game.game_objects.load_map(self, map, point)
-
-class Option_menu(Game_State):
-    def __init__(self,game):
-        super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Options', color = (0,0,0)) #temporary
-
-        #create buttons
-        self.buttons = ['Display','Sounds']
-        if self.game.DEBUG_MODE:
-            self.buttons += ['Render FPS', 'Render Hitboxes']
-        self.current_button = 0
-        self.initiate_buttons()
-        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
-
-    def initiate_buttons(self):
-        y_pos = 90
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b, color = (0,0,0)))
-            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
-            y_pos += 20
-
-    def update_arrow(self):#update menu arrow position
-        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
-        self.arrow.play_SFX()
-
-    def render(self):
-        #fill game.screen
-        self.game.screen_manager.screen.clear(255,255,255, 255)        
-
-        #blit title
-        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,50))
-
-        #blit buttons
-        for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
-
-        #blit arrow
-        self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
-        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-
-        self.game.render_display(self.game.screen_manager.screen.texture)
-        #self.arrow.draw(self.game.screen)
-
-    def handle_events(self, input):
-        event = input.output()
-        input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
-            self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.buttons):
-                self.current_button = 0
-            self.update_arrow()
-        elif event[0]:
-            if event[-1] == 'start':
-                self.game.state_manager.exit_state()
-            elif event[-1] in ('return', 'a'):
-                self.arrow.pressed()
-                self.update_options()
-
-    def update_options(self):
-        if self.current_button == 0:#resolution
-            self.game.state_manager.enter_state('Option_menu_display')
-        elif self.current_button == 1:#sounds
-            self.game.state_manager.enter_state('Option_menu_sounds')
-        if self.current_button == 2:
-            self.game.RENDER_FPS_FLAG = not self.game.RENDER_FPS_FLAG
-        elif self.current_button == 3:
-            self.game.RENDER_HITBOX_FLAG = not self.game.RENDER_HITBOX_FLAG
-
-class Option_menu_sounds(Game_State):
-    def __init__(self,game):
-        super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
-        self.game_settings = read_files.read_json('game_settings.json')
-
-        #create buttons
-        self.buttons = ['overall', 'SFX','music']
-        self.current_button = 0
-        self.initiate_buttons()
-        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
-
-    def initiate_buttons(self):
-        y_pos = 90
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
-            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
-            y_pos += 20
-
-    def update_arrow(self):
-        #update menu arrow position
-        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
-        self.arrow.play_SFX()
-
-    def blit_buttons(self):
-        for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
-
-            volume_string = self.game.game_objects.font.render((30,12), str(self.game.game_objects.sound.volume[b]))
-            self.game.game_objects.shaders['colour']['colour'] = (0,0,0,255)
-            self.game.display.render(volume_string, self.game.screen_manager.screen, position = [self.button_rects[b].centerx + 10,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
-            volume_string.release()
-
-    def render(self):
-        #fill game.screen
-        self.game.screen_manager.screen.clear(255,255,255, 255)     
-
-        #blit title
-        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5, 50))
-
-        #blit buttons
-        self.blit_buttons()
-
-        #blit arrow
-        self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
-        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-        self.game.render_display(self.game.screen_manager.screen.texture)
-        #self.arrow.draw(self.game.screen)
-
-    def on_exit(self):
-        super().on_exit()
-        self.game_settings['sounds'] = self.game.game_objects.sound.volume
-        read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
-
-    def handle_events(self, input):
-        event = input.output()
-        input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
-            self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.buttons):
-                self.current_button = 0
-            self.update_arrow()
-        elif event[0]:
-            if event[-1] == 'start':
-                self.game.state_manager.exit_state()
-            elif event[-1] in ('return', 'a'):
-                self.update_options(1)
-            elif event[-1] in ('b'):
-                self.update_options(-1)
-
-    def update_options(self, int):
-        if self.current_button == 0:#overall
-            self.game.game_objects.sound.change_volume('overall', int)
-        if self.current_button == 1:#SFX
-            self.game.game_objects.sound.change_volume('SFX', int)
-        elif self.current_button == 2:#music
-            self.game.game_objects.sound.change_volume('music', int)
-
-class Option_menu_display(Game_State):
-    def __init__(self,game):
-        super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Resolution') #temporary
-        self.game_settings = read_files.read_json('game_settings.json')
-
-        #create buttons
-        self.buttons = ['vsync', 'fullscreen','resolution']
-        self.current_button = 0
-        self.initiate_buttons()
-        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
-
-    def initiate_buttons(self):
-        y_pos = 90
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            self.button_surfaces[b] = (self.game.game_objects.font.render(text = b))
-            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
-            y_pos += 20
-
-    def update_arrow(self):
-        #update menu arrow position
-        ref_pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos((ref_pos[0] - 10, ref_pos[1]))
-        self.arrow.play_SFX()
-
-    def blit_buttons(self):
-        for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.game.screen_manager.screen, position = self.button_rects[b].topleft)
-
-            settig_string = self.game.game_objects.font.render((60,12), str(self.game_settings['display'][b]))
-            self.game.game_objects.shaders['colour']['colour'] = (0,0,0,255)
-            self.game.display.render(settig_string, self.game.screen_manager.screen, position = [self.button_rects[b].centerx + 50,self.button_rects[b].centery] ,shader = self.game.game_objects.shaders['colour'])#shader render
-            settig_string.release()
-
-    def render(self):
-        #fill game.screen
-        self.game.screen_manager.screen.clear(255,255,255, 255)     
-
-        #blit title
-        self.game.display.render(self.title, self.game.screen_manager.screen, position = (self.game.window_size[0]*0.5 - self.title.width*0.5, 50))
-
-        #blit buttons
-        self.blit_buttons()
-
-        #blit arrow
-        self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
-        self.game.display.render(self.arrow.image, self.game.screen_manager.screen, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-        self.game.render_display(self.game.screen_manager.screen.texture)
-        #self.arrow.draw(self.game.screen)
-
-    def handle_events(self, input):
-        event = input.output()
-        input.processed()
-        if event[2]['l_stick'][1] < 0:#up
-            self.current_button -= 1
-            if self.current_button < 0:
-                self.current_button = len(self.buttons) - 1
-            self.update_arrow()
-        elif event[2]['l_stick'][1] > 0:#down
-            self.current_button += 1
-            if self.current_button >= len(self.buttons):
-                self.current_button = 0
-            self.update_arrow()
-        elif event[0]:
-            if event[-1] == 'start':
-                self.game.state_manager.exit_state()
-            elif event[-1] in ('return', 'a'):
-                self.update_options(1)
-            elif event[-1] in ('b'):
-                self.update_options(-1)
-
-    def on_exit(self):
-        super().on_exit()
-        read_files.write_json(self.game_settings, 'game_settings.json')#overwrite
-
-    def update_options(self, int):
-        if self.current_button == 0:#vsync
-            self.game_settings['display']['vsync'] = not self.game_settings['display']['vsync']
-        if self.current_button == 1:#fullsceren
-            self.game_settings['display']['fullscreen'] = not self.game_settings['display']['fullscreen']
-        elif self.current_button == 2:#resolution
-            pass
-
 class Gameplay(Game_State):
     def __init__(self, game):
         super().__init__(game)
 
-    def update(self, dt):        
+    def update(self, dt):
         self.game.game_objects.time_manager.update(dt)#setäs the timescale
         dt *= self.game.game_objects.time_manager.time_scale#apply time scale
-        self.handle_movement()               
-        self.game.game_objects.update(dt)        
+        self.handle_movement()
+        self.game.game_objects.update(dt)
 
     def update_render(self, dt):
         dt *= self.game.game_objects.time_manager.time_scale#apply time scale
         self.game.game_objects.update_render(dt)
-        self.game.game_objects.UI.hud.update(dt)        
+        self.game.game_objects.UI.hud.update(dt)
         self.game.game_objects.post_process.update_render(dt)#apply post process shaders to the composite screen, which is large
 
     def fade_update(self, dt):#called from fade out: update that should be played when fading: it is needed becayse depending on state, only part of the update loop should be called
-        self.game.game_objects.update_render(dt)        
+        self.game.game_objects.update_render(dt)
         #self.game.game_objects.platform_collision(dt)
         self.game.game_objects.UI.hud.update(dt)
 
     def render(self):
-        self.game.game_objects.draw()#rendered on multiple layers on each parallax screen        
+        self.game.game_objects.draw()#rendered on multiple layers on each parallax screen
         self.game.screen_manager.render()#renders each parllax to a composite screen with pp shader, which makes it display size
         #self.game.game_objects.render_state.render()#handles normal and special rendering (e.g. portal rendering)
         self.game.game_objects.lights.draw(self.game.screen_manager.composite_screen)#before post procssing shader?
         self.game.game_objects.post_process.apply(self.game.screen_manager.composite_screen)#apply post process shaders to the composite screen, which is large
-        self.game.game_objects.UI.hud.draw(self.game.screen_manager.composite_screen)#renders hud elements to the composite             
-        
-        self.game.render_display(self.game.screen_manager.composite_screen.texture, scale = False)            
+        self.game.game_objects.UI.hud.draw(self.game.screen_manager.composite_screen)#renders hud elements to the composite
+
+        self.game.render_display(self.game.screen_manager.composite_screen.texture, scale = False)
 
     def handle_movement(self):#every frame
         #value = self.game.game_objects.controller.continuous_input_checks()
@@ -531,7 +73,7 @@ class Gameplay(Game_State):
         if event[0]:#press
             if event[-1]=='start':#escape button
                 input.processed()
-                self.game.state_manager.enter_state('Pause_menu')
+                self.game.state_manager.enter_state('Pause_menu', category = 'menu')
 
             elif event[-1]=='rb':
                 input.processed()
@@ -564,119 +106,6 @@ class Gameplay(Game_State):
             input.processed()#should it be processed here or when passed through?
             self.game.game_objects.collisions.pass_through(self.game.game_objects.player)
 
-class Pause_menu(Gameplay):#when pressing ESC duing gameplay
-    def __init__(self, game):
-        super().__init__(game)
-        self.title = self.game.game_objects.font.render(text = 'Pause menu') #TODO
-
-        #create buttons
-        self.buttons = ['Resume','Options','Quit to main menu','Quit game']
-        self.current_button = 0
-        self.initiate_buttons()
-        self.define_BG()
-        self.arrow = entities_UI.Menu_Arrow(self.button_rects[self.buttons[self.current_button]].topleft, game.game_objects)
-        
-        self.screen_copy = self.game.display.make_layer(self.game.display_size)
-        self.game.game_objects.shaders['blur']['blurRadius'] = 1
-        self.game.display.render(self.game.screen_manager.composite_screen.texture, self.screen_copy, shader = self.game.game_objects.shaders['blur'])
-
-    def define_BG(self):
-        size = (100,120)
-        bg = pygame.Surface(size,pygame.SRCALPHA,32).convert_alpha()
-        pygame.draw.rect(bg,[200,200,200,220],(0,0,size[0],size[1]),border_radius=10)
-        self.bg = self.game.display.surface_to_texture(bg)
-        self.background = self.game.display.make_layer(self.game.window_size)
-
-    def initiate_buttons(self):
-        y_pos = 140
-        self.button_surfaces = {}
-        self.button_rects = {}
-        for b in self.buttons:
-            text = (self.game.game_objects.font.render(text = b))
-            self.button_surfaces[b] = text
-            self.button_rects[b] = pygame.Rect((self.game.window_size[0]/2 - self.button_surfaces[b].width/2 ,y_pos),self.button_surfaces[b].size)
-            y_pos += 20
-
-    def update_arrow(self):
-        pos = self.button_rects[self.buttons[self.current_button]].topleft
-        self.arrow.update_pos(pos)
-        self.arrow.play_SFX()
-
-    def update(self, dt):
-        pass
-
-    def update_render(self, dt):
-        pass        
-
-    def render(self):
-        #super().render()
-        self.background.clear(50, 50, 50, 30)
-
-        self.game.display.render(self.bg, self.background, position = (self.game.window_size[0]*0.5 - self.bg.width*0.5,100))#shader render
-
-        #blit title
-        self.game.display.render(self.title, self.background, position = (self.game.window_size[0]*0.5 - self.title.width*0.5,110))#shader render
-
-        #blit buttons
-        for b in self.buttons:
-            self.game.display.render(self.button_surfaces[b], self.background, position = self.button_rects[b].topleft)#shader render
-
-        #blit arrow
-        self.game.game_objects.shaders['colour']['colour'] = [0,0,0,255]
-        self.game.display.render(self.arrow.image, self.background, position = self.arrow.rect.topleft, shader = self.game.game_objects.shaders['colour'])
-
-        self.game.render_display(self.screen_copy.texture, scale = False)
-        self.game.render_display(self.background.texture)
-
-    def release_texture(self):
-        self.title.release()
-        self.bg.release()
-        self.background.release()
-        self.screen_copy.release()
-        for key in self.button_surfaces.keys():
-            self.button_surfaces[key].release()
-
-    def handle_events(self, input):
-        event = input.output()
-        input.processed()
-        if not input.key:#if it is a directinal input
-            if event[2]['l_stick'][1] < 0:#up
-                self.current_button -= 1
-                if self.current_button < 0:
-                    self.current_button = len(self.buttons) - 1
-                self.update_arrow()
-            elif event[2]['l_stick'][1] > 0:#down
-                self.current_button += 1
-                if self.current_button >= len(self.buttons):
-                    self.current_button = 0
-                self.update_arrow()
-        if event[0]:
-            if event[-1] in ['a', 'return']:
-                self.arrow.pressed()
-                self.change_state()
-            elif event[-1] == 'start':
-                self.game.state_manager.exit_state()
-
-    def on_exit(self):
-        self.release_texture()
-
-    def change_state(self):
-        if self.current_button == 0:
-            self.game.state_manager.exit_state()
-
-        elif self.current_button == 1:
-            self.game.state_manager.enter_state('Option_menu')
-
-        elif self.current_button == 2:#exit to main menu
-            for state in self.game.state_manager.state_stack[1:]:#except the first one
-                state.release_texture()
-            self.game.state_manager.state_stack = [self.game.state_manager.state_stack[0]]
-            self.game.state_manager.state_stack[-1].play_music()
-
-        elif self.current_button == 3:
-            pygame.quit()
-            sys.exit()
-
 class Ability_menu(Gameplay):#when pressing tab
     def __init__(self, game):
         super().__init__(game)
@@ -693,7 +122,7 @@ class Ability_menu(Gameplay):#when pressing tab
 
     def render(self):
         super().render()
-        self.surface.clear(20,20,20,100)        
+        self.surface.clear(20,20,20,100)
 
         hud = self.sprites[self.index]
         for index, ability in enumerate(self.abilities):
@@ -738,7 +167,7 @@ class Fadein(Gameplay):
 
     def update_render(self, dt):
         self.fade_update(dt)#so that it doesn't collide with collision path
-        self.count += dt     
+        self.count += dt
         if self.count > self.fade_length*2:
             self.exit()
 
@@ -818,14 +247,14 @@ class Safe_spawn_2(Gameplay):#fade
         super().update(dt)
         self.count += dt
         if self.count > self.fade_length*2:
-            self.game.game_objects.player.currentstate.handle_input('pray_post')            
+            self.game.game_objects.player.currentstate.handle_input('pray_post')
             self.game.state_manager.exit_state()
 
     def render(self):
         super().render()#gameplay render
         alpha = max(int((self.fade_length - self.count)*(255/self.fade_length)),0)
         self.fade_surface.clear(0,0,0,alpha)
-        self.game.render_display(self.fade_surface.texture)        
+        self.game.render_display(self.fade_surface.texture)
 
 class Conversation(Gameplay):
     def __init__(self, game, npc):
@@ -859,7 +288,7 @@ class Conversation(Gameplay):
 
     def render(self):
         super().render()
-        self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant        
+        self.conv_screen.clear(10,10,10,100)#needed to make the self.background semi trasnaprant
 
         text = self.game.game_objects.font.render((272,80), self.conv, int(self.letter_frame))
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,255)
@@ -868,7 +297,7 @@ class Conversation(Gameplay):
         self.npc.render_potrait(self.conv_screen)#some conversation target may not have potraits
         text.release()
         self.game.game_objects.shaders['alpha']['alpha'] = self.alpha
-                
+
         self.game.display.render(self.conv_screen.texture, self.game.screen_manager.screen, shader = self.game.game_objects.shaders['alpha'])#shader render
         self.game.render_display(self.game.screen_manager.screen.texture)
 
@@ -898,7 +327,7 @@ class Conversation(Gameplay):
     def on_exit(self):
         self.conv_screen.release()
         self.background.release()
-        self.npc.buisness()        
+        self.npc.buisness()
 
 class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
     def __init__(self, game, page, **kwarg):
@@ -907,7 +336,7 @@ class UIs(Gameplay):#pressing i: map, inventory, omamori, journal
 
     def update(self, dt):
         super().update(dt)
-        self.game.game_objects.UI.update()
+        self.game.game_objects.UI.update(dt)
 
     def render(self):
         super().render()
@@ -942,7 +371,7 @@ class Blit_image_text(Gameplay):#when player obtaines a new ability, pick up ine
         self.game.game_objects.shaders['colour']['colour'] = (255,255,255,self.fade[1])
 
         self.game.screen_manager.screen.clear(40, 40, 40, self.fade[0])
-        
+
         self.game.display.render(self.image.texture, self.game.screen_manager.screen, position = (320, 120), shader = self.game.game_objects.shaders['alpha'])
         self.game.display.render(self.text, self.game.screen_manager.screen, position = (320,140), shader = self.game.game_objects.shaders['colour'])
         self.game.render_display(self.game.screen_manager.screen.texture)

@@ -1,15 +1,17 @@
 import game_states
 import game_states_facilities 
 import game_states_cutscenes
+import game_states_menu
 
 class State_manager():
-    def __init__(self, game, initial_state):
+    def __init__(self, game, initial_state = 'Title_menu'):
         self.game = game
-        self.state_stack = [getattr(game_states, initial_state)(self.game)]  # Initialize with the first state
+        self.state_stack = [getattr(game_states_menu, initial_state)(self.game)]  # Initialize with the first state
         self.category_map = {
             'game_states': game_states,
             'game_states_facilities': game_states_facilities,
-            'game_states_cutscenes': game_states_cutscenes
+            'game_states_cutscenes': game_states_cutscenes,
+            'menu': game_states_menu
         }
 
     def enter_state(self, state_name, category = 'game_states', **kwarg):

@@ -6,7 +6,7 @@ class ScreenManager():
         
         self.screen_copy = self.game.display.make_layer(self.game.window_size)#used to get a copy of the screen: mostly for shaders
         self.screen = self.game.display.make_layer(self.game.window_size)#the screen we can use to render things on
-        self.composite_screen = self.game.display.make_layer(self.game.display._screen_res)#display size
+        self.composite_screen = self.game.display.make_layer(self.game.display_size)#display size
         
     def register_screen(self, key, parallax):#called from maploader when loading each layer in titled
         if self.screens.get(key):#already exist, just update parallax
@@ -32,19 +32,14 @@ class ScreenManager():
         self.active_screens = []       
 
     def render(self):#render multiple screen, for each parallax, with pp precision
-        self.game.display.set_premultiplied_alpha_blending()
+        self.game.display.use_premultiplied_alpha_mode()
         for key in self.active_screens:     
-            screen = self.screens[key]
-            screen.update()#get the offset
-            self.game.game_objects.shaders['pp']['u_camera_offset'] = screen.offset
-            self.game.game_objects.shaders['pp']['u_scale'] = self.game.scale
-            self.game.game_objects.shaders['pp']['u_screen_size'] = self.game.window_size
-            self.game.display.render(screen.layer.texture, self.composite_screen, scale = self.game.scale, shader = self.game.game_objects.shaders['pp'])        
-        self.game.display.set_normal_alpha_blending()
+            self.screens[key].render(self.composite_screen)#render to composite screen with pp precision              
+        self.game.display.use_standard_alpha_mode()
 
     def get_screen(self, layer = None, include = False):#get a copy of screen (not pixel perfect), up to a specific layer (name according to tiled), excluding the layer if include is false.
         self.screen_copy.clear(0, 0, 0, 0)
-        self.game.display.set_premultiplied_alpha_blending()
+        self.game.display.use_premultiplied_alpha_mode()
         
         if layer:
             idx = self.active_screens.index(layer)           
@@ -55,7 +50,7 @@ class ScreenManager():
         for key in screens_to_get:       
             screen = self.screens[key]
             self.game.display.render(screen.layer.texture, self.screen_copy)
-        self.game.display.set_normal_alpha_blending()
+        self.game.display.use_standard_alpha_mode()
         return self.screen_copy
 
     def clear(self):
@@ -74,9 +69,9 @@ class ScreenLayer():
         self.game = game
         self.parallax = parallax#(x, y) parallax factor
         self.layer = self.game.display.make_layer(self.game.window_size)
-        self.offset = [0,0]
+        self.offset = [0, 0]
 
-    def update(self):      
+    def calculate_offset(self):      
         camera_scroll_x = self.game.game_objects.camera_manager.camera.interp_scroll[0] * self.parallax[0]
         camera_scroll_y = self.game.game_objects.camera_manager.camera.interp_scroll[1] * self.parallax[1]
         
@@ -86,18 +81,19 @@ class ScreenLayer():
         
         self.offset = (-frac_x, frac_y )#fractional paty of the scroll
 
-    def render(self, target, scale):
+    def render(self, target):
         """
-        Blits this layer onto the main screen with sub-pixel correction.
+        Render this layer onto the main screen with sub-pixel correction.
         """
-        self.game.game_objects.shaders['pp']['u_camera_offset'] = self.offset 
-        self.game.game_objects.shaders['pp']['u_scale'] = scale 
+        self.calculate_offset()
+        self.game.game_objects.shaders['pp']['u_camera_offset'] = self.offset
+        self.game.game_objects.shaders['pp']['u_scale'] = self.game.scale
         self.game.game_objects.shaders['pp']['u_screen_size'] = self.game.window_size
-        self.game.display.render(self.layer.texture, target, scale = scale, shader = self.game.game_objects.shaders['pp'])#shader render  
+        self.game.display.render(self.layer.texture, target, scale = self.game.scale, shader = self.game.game_objects.shaders['pp'])      
 
     def reset(self, parallax):
         self.parallax = parallax
-        self.offset = [0,0]
+        self.offset = [0, 0]
 
     def __getattr__(self, attr):
         return getattr(self.layer, attr)
@@ -106,12 +102,12 @@ class ScreenLayerPlayer(ScreenLayer):
     def __init__(self, game):
         super().__init__(game, parallax = [1, 1])
 
-    def update(self):      
-        camera_scroll_x = self.game.game_objects.player.blit_pos2[0]
-        camera_scroll_y = self.game.game_objects.player.blit_pos2[1]
+    def calculate_offset(self):      
+        camera_scroll_x = self.game.game_objects.player.blit_pos[0]
+        camera_scroll_y = self.game.game_objects.player.blit_pos[1]
         
         # Use fractional scroll for smooth offset
         frac_x = camera_scroll_x - int(camera_scroll_x)
         frac_y = camera_scroll_y - int(camera_scroll_y)
         
-        self.offset = (frac_x, -frac_y )#fractional paty of the scroll
+        self.offset = (frac_x, -frac_y)#fractional paty of the scroll

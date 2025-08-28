@@ -266,8 +266,8 @@ class Vines_2(Layered_objects):#light forest cave
         self.offset = random.uniform(0,10)
         self.upsidedown = 1
 
-    def update(self):
-        self.time += self.game_objects.game.dt
+    def update(self, dt):
+        self.time += dt
         self.group_distance()
 
     def draw(self,target):
@@ -290,12 +290,12 @@ class Crystals(Layered_objects):
         self.speed = 2
         self.shine_progress = 0
 
-    def update(self):
+    def update(self, dt):
         super().update()  
         if self.shine_progress * self.speed >= 1:
             if random.randint(0,500) == 0: self.shine_progress = 0                    
         else:
-            self.shine_progress += 0.01 * self.game_objects.game.dt
+            self.shine_progress += 0.01 * dt
 
     def draw(self, target):
         self.shader['shine_progress'] = self.shine_progress
@@ -391,18 +391,18 @@ class Droplet(Dynamic_layered_objects):#cosmetic droplet
         else:
             self.shader_state = states_shader.Idle(self)              
 
-    def update(self):
-        super().update()
-        self.update_vel()
-        self.destroy()
+    def update(self, dt):
+        super().update(dt)
+        self.update_vel(dt)
+        self.destroy(dt)
 
-    def destroy(self):
-        self.lifetime -= self.game_objects.game.dt
+    def destroy(self, dt):
+        self.lifetime -= dt
         if self.lifetime < 0:
             self.kill()
 
-    def update_vel(self):
-        self.velocity[1] += 1
+    def update_vel(self, dt):
+        self.velocity[1] += dt
         self.velocity[1] = min(7,self.velocity[1])
 
     def pool(game_objects):

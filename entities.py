@@ -36,7 +36,7 @@ class BG_Block(Staticentity):
             shader = self.game_objects.shaders['blur']
             shader['blurRadius'] = self.blur_radius  # Set the blur radius
             self.layers = self.game_objects.game.display.make_layer(self.image.size)# Make an empty layer
-            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline        
+            self.game_objects.game.display.use_alpha_blending(False)#remove thr black outline
             self.game_objects.game.display.render(self.image, self.layers, shader = shader)  # Render the image onto the layer
             self.game_objects.game.display.use_alpha_blending(True)#remove thr black outline
             self.image.release()
@@ -44,7 +44,7 @@ class BG_Block(Staticentity):
 
     def draw(self, target):
         self.blurstate.set_uniform()#zsets the blur radius
-        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))       
+        pos = (int(self.true_pos[0] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[0]),int(self.true_pos[1] - self.parallax[0] * self.game_objects.camera_manager.camera.interp_scroll[1]))
         self.game_objects.game.display.render(self.image, target, position = pos)  # Shader render
 
     def release_texture(self):  # Called when .kill() and when emptying the group
@@ -639,7 +639,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
     def __init__(self, pos, game_objects, size, **kwarg):
         super().__init__(pos, game_objects)
         self.image = game_objects.game.display.make_layer(size)
-        self.hitbox = pygame.Rect(pos[0] + size[0]* 0.2 * 0.5, pos[1], size[0] * 0.8, size[1])#adjust the hitbox size based on texture
+        self.hitbox = pygame.Rect(pos[0] + size[0]* 0.05, pos[1], size[0] * 0.9, size[1])#adjust the hitbox size based on texture
         self.time = 0
         self.accel_y = 0.8
         self.accel_x = 0.8
@@ -652,16 +652,30 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
 
         sounds = read_files.load_sounds_dict('audio/SFX/environment/up_stream/')
         self.channel = game_objects.sound.play_sfx(sounds['idle'][0], loop = -1, vol = 0.5)
+        self.interacted = False#for player collision
 
     def player_collision(self, player):#player collision
-        context = player.movement_manager.resolve()
-        player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
-        player.velocity[1] += self.dir[1] * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
-        if (player.velocity[1]) < 0:
-            player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
+        if self.interacted: return
+        self.interacted = True
+        if self.dir[0] != 0:
+            player.movement_manager.add_modifier('up_stream_horizontal', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y])
+        elif self.dir[1] != 0:
+            player.movement_manager.add_modifier('up_stream_vertical', speed = [self.dir[0] * self.accel_x, self.dir[1] * self.accel_y])#add modifier to player movement manager
+
+        #context = player.movement_manager.resolve()
+        #player.velocity[0] += self.dir[0] * self.accel_x * context.upstream
+        #player.velocity[1] += self.dir[1] * self.accel_y * context.upstream + self.dir[1] * int(player.collision_types['bottom'])#a small inital boost if on ground
+        #if (player.velocity[1]) < 0:
+        #    player.velocity[1] = min(abs(player.velocity[1]), self.max_speed) * self.dir[1]
 
     def player_noncollision(self):
-        pass
+        if not self.interacted: return
+        if self.dir[0] != 0:
+            self.game_objects.player.movement_manager.remove_modifier('up_stream_horizontal')
+        elif self.dir[1] != 0:
+            self.game_objects.player.movement_manager.remove_modifier('up_stream_vertical')
+
+        self.interacted = False
 
     def release_texture(self):
         self.image.release()
@@ -674,7 +688,7 @@ class Up_stream(Staticentity):#a draft that can lift enteties along a direction
         self.game_objects.shaders['up_stream']['dir'] = self.dir
         self.game_objects.shaders['up_stream']['time'] = self.time*0.1
         pos = (int(self.true_pos[0] - self.game_objects.camera_manager.camera.scroll[0]),int(self.true_pos[1] - self.game_objects.camera_manager.camera.scroll[1]))
-        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render        
+        self.game_objects.game.display.render(self.image.texture, target, position = pos, shader = self.game_objects.shaders['up_stream'])#shader render
 
 class Smoke(Staticentity):#2D smoke
     def __init__(self, pos, game_objects, size, **properties):
@@ -852,7 +866,7 @@ class InteractableIndicator(Staticentity):#the hoovering above things to indicat
         self.rect.topleft = self.true_pos
 
     def update_vel(self):
-        self.velocity[1] = 0.25*math.sin(self.time)   
+        self.velocity[1] = 0.25*math.sin(self.time)
 
 class ConversationBubbles(Staticentity):#the thing npcs have hoovering above them for random messages
     def __init__(self, pos, game_objects, text, lifetime = 200, size = (32,32)):
@@ -894,7 +908,7 @@ class ConversationBubbles(Staticentity):#the thing npcs have hoovering above the
         self.game_objects.game.display.render(self.bg, self.layer)#shader render
         self.game_objects.game.display.render(texture, self.layer, position = [10, self.rect[3]])#shader render
         self.image = self.layer.texture
-        texture.release()    
+        texture.release()
 
 class BG_Animated(Animatedentity):
     def __init__(self, game_objects, pos, sprite_folder_path, parallax = (1,1)):
@@ -919,6 +933,7 @@ class Player(Character):
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
+        self.prev_true_pos = self.true_pos.copy()#to save the previous position
 
         self.max_health = 15
         self.max_spirit = 4
@@ -940,8 +955,7 @@ class Player(Character):
 
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
-        self.reset_movement()
-        self.prev_true_pos = self.true_pos.copy()#to save the previous position
+        self.reset_movement()        
 
         self.colliding_platform = None#save the last collising platform
         #self.shader_state = states_shader.Aura(self)
@@ -967,9 +981,10 @@ class Player(Character):
 
     def update_vel(self, dt):#called from hitsop_states
         context = self.movement_manager.resolve()
-        self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * context.friction[1])#gravity
+
+        self.velocity[1] += dt * (context.gravity - self.velocity[1] * context.friction[1]) + context.velocity[1]
         self.velocity[1] = min(self.velocity[1], self.max_vel[1])#set a y max speed#
-        self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - context.friction[0] * self.velocity[0])
+        self.velocity[0] += dt * (self.dir[0] * self.acceleration[0] - self.velocity[0] * context.friction[0]) + context.velocity[0]
 
     def take_dmg(self, dmg = 1, effects = []):#called from collisions
         return self.damage_manager.take_dmg(dmg, effects)#called from damage_manager: trturns true or false dependign on apply damaage was called or not
@@ -1024,30 +1039,28 @@ class Player(Character):
     def reset_movement(self):#called when loading new map or entering conversations
         self.acceleration =  [0, C.acceleration[1]]
         self.friction = C.friction_player.copy()
-        self.time = 0
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
         self.hitstop_states.update_render(dt)
 
-    def update(self, dt):      
-        self.prev_true_pos = self.true_pos.copy()  
+    def update(self, dt):
+        self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
         self.movement_manager.update(dt)#update the movement manager
         self.hitstop_states.update(dt)
         self.backpack.radna.update()#update the radnas
         self.update_timers(dt)
-        
+
     def draw(self, target):#called in group
         self.shader_state.draw()
-  
-        alpha = self.game_objects.game.game_loop.alpha
-        interp_x = self.prev_true_pos[0] + (self.true_pos[0] - self.prev_true_pos[0]) * alpha 
-        interp_y = self.prev_true_pos[1] + (self.true_pos[1] - self.prev_true_pos[1]) * alpha
-        self.blit_pos = [int(interp_x - self.game_objects.camera_manager.camera.interp_scroll[0]), int(interp_y - self.game_objects.camera_manager.camera.interp_scroll[1])]
-        self.blit_pos2 = [(interp_x - self.game_objects.camera_manager.camera.interp_scroll[0]), (interp_y - self.game_objects.camera_manager.camera.interp_scroll[1])]
 
-        #self.blit_pos = (int(self.true_pos[0]-self.game_objects.camera_manager.camera.scroll[0]), int(self.true_pos[1]-self.game_objects.camera_manager.camera.scroll[1]))#true scroll, int or round
-        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render
+        alpha = self.game_objects.game.game_loop.alpha
+        interp_x = self.prev_true_pos[0] + (self.true_pos[0] - self.prev_true_pos[0]) * alpha
+        interp_y = self.prev_true_pos[1] + (self.true_pos[1] - self.prev_true_pos[1]) * alpha
+
+        self.blit_pos = [interp_x - self.game_objects.camera_manager.camera.interp_scroll[0], interp_y - self.game_objects.camera_manager.camera.interp_scroll[1]]#save float position for screen manager
+        blit_pos = [int(self.blit_pos[0]), int(self.blit_pos[1])]#bit at interget position, and let screen manager hanfle the sub pixel rendering
+        self.game_objects.game.display.render(self.image, target, position = blit_pos , flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
@@ -2026,8 +2039,8 @@ class Camera_Stop(Staticentity):
     def release_texture(self):#called when .kill() and empty group
         pass
 
-    def update_render(self, dt):
-        self.currentstate.update()
+    def update(self, dt):
+        self.currentstate.update(dt)
 
 class Spawner(Staticentity):#an entity spawner
     def __init__(self,pos,game_objects,values):
@@ -2942,7 +2955,7 @@ class Shield(Projectiles):#a protection shield
         #cut out the screen
         screen_copy = self.game_objects.game.screen_manager.get_screen(layer = 'player', include = True)#make a copy of the screen
         self.reflect_rect.bottomleft = [self.hitbox.topleft[0], 640 - self.hitbox.topleft[1] + 90 - 10]
-        self.game_objects.game.display.render(screen_copy.texture, self.screen_layer, section = self.reflect_rect)        
+        self.game_objects.game.display.render(screen_copy.texture, self.screen_layer, section = self.reflect_rect)
 
         self.game_objects.shaders['shield']['TIME'] = self.time*0.001
         self.game_objects.shaders['shield']['noise_texture'] = self.noise_layer.texture
@@ -3224,7 +3237,7 @@ class Half_dmg(Radna):
         self.sprites = Half_dmg.sprites
         self.image = self.sprites[kwarg.get('state', 'idle')][0]
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
-        self.hitbox = self.rect.copy()        
+        self.hitbox = self.rect.copy()
         self.level = 1
         self.description = 'Take half dmg ' + '[' + str(self.level) + ']'
 
@@ -3914,7 +3927,7 @@ class Safe_spawn(Interactable):#area which gives the coordinates which will make
         pass
 
     def update_render(self, dt):
-        pass        
+        pass
 
     def update(self, dt):
         self.group_distance()
@@ -3942,7 +3955,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
         #print(self.interacted, 'update')
 
     def update_render(self, dt):
-        pass        
+        pass
 
     def player_collision(self, player):
         if self.interacted: return#enter only once
@@ -3960,7 +3973,7 @@ class Hole(Interactable):#area which will make aila spawn to safe_point if colli
 
     def player_noncollision(self):#when player doesn't collide
         #print(self.interacted, 'non')
-        self.interacted = False        
+        self.interacted = False
 
 class Zoom_col(Interactable):
     def __init__(self, pos, game_objects, size, **kwarg):

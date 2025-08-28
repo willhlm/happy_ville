@@ -60,7 +60,7 @@ class HUD():
         for spirit in self.spirits:
             spirit.update(dt)
         for ability_hud in self.ability_hud:
-            ability_hud.update()
+            ability_hud.update(dt)
         for ability in self.abilities:
             ability.update(dt)
 

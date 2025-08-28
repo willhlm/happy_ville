@@ -7,9 +7,9 @@ class BaseUI():
     def __init__(self, game_objects, **kwarg):
         self.game_objects = game_objects
 
-    def update(self):
-        self.letter_frame += self.game_objects.game.dt
-        self.screen_alpha += self.game_objects.game.dt*4
+    def update(self, dt):
+        self.letter_frame += dt
+        self.screen_alpha += dt*4
         self.screen_alpha = min(self.screen_alpha, 230)
 
     def render(self):
@@ -45,6 +45,12 @@ class InventoryUI(BaseUI):
         for conv in convs:
             self.texts.append(game_objects.font.render((32,32), conv, len(conv)))
 
+    def update(self, dt):
+        super().update(dt)
+        self.iventory_UI.items['sword'].animation.update(dt)
+        for index, button in enumerate(self.iventory_UI.buttons.keys()):
+            self.iventory_UI.buttons[button].update(dt)
+
     def render(self):
         self.game_objects.UI.screen.clear(0, 0, 0, 0)#clear the screen
         self.blit_inventory_BG()
@@ -73,8 +79,7 @@ class InventoryUI(BaseUI):
             self.game_objects.game.display.render(number, self.game_objects.UI.screen, position = [topleft[0] + item.rect[2], topleft[1] + item.rect[3]])#shader render
             number.release()
 
-    def blit_sword(self):
-        self.iventory_UI.items['sword'].animation.update()
+    def blit_sword(self):        
         self.game_objects.game.display.render(self.iventory_UI.items['sword'].image, self.game_objects.UI.screen, position = self.iventory_UI.items['sword'].rect.topleft)#shader render
   
     def blit_pointer(self):
@@ -93,7 +98,6 @@ class InventoryUI(BaseUI):
 
     def blit_bottons(self):
         for index, button in enumerate(self.iventory_UI.buttons.keys()):
-            self.iventory_UI.buttons[button].update()
             self.game_objects.game.display.render(self.iventory_UI.buttons[button].image, self.game_objects.UI.screen, position = self.iventory_UI.buttons[button].rect.topleft)#shader render
             self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
             self.game_objects.game.display.render(self.texts[index], self.game_objects.UI.screen, position = self.iventory_UI.buttons[button].rect.center,shader = self.game_objects.shaders['colour'])#shader render
@@ -185,6 +189,13 @@ class RadnaUI(BaseUI):
         self.pointer = InventoryPointer([0,0], game_objects)
         self.selected_container = self.radna_UI.containers[0]#initial default container
 
+    def update(self, dt):
+        self.radna_UI.items['hand'].animation.update(dt)
+
+        for key in self.game_objects.player.backpack.radna.rings.keys():#blit the rings there is in inventory
+            ring = self.game_objects.player.backpack.radna.get_ring(key)
+            ring.animation.update(dt)      
+
     def render(self):
         self.game_objects.UI.screen.clear(0, 0, 0, 0)#clear the screen
         self.blit_BG()
@@ -227,7 +238,6 @@ class RadnaUI(BaseUI):
         self.game_objects.game.display.render(self.pointer.image, self.game_objects.UI.screen, position = pos)#shader render        
 
     def blit_hand(self):
-        self.radna_UI.items['hand'].animation.update()
         self.game_objects.shaders['colour']['colour'] = (0,0,0,255)
         self.game_objects.game.display.render(self.radna_UI.items['hand'].image, self.game_objects.UI.screen, position = self.radna_UI.items['hand'].rect.topleft,shader = self.game_objects.shaders['colour'])#shader render
 
@@ -429,14 +439,14 @@ class JournalUI(BaseUI):
 class MapUI(BaseUI):#local maps
     def __init__(self, game_objects, **kwarg):
         super().__init__(game_objects, **kwarg)
-        self.map_UIs = {'nordveden': getattr(UI_loader, 'NordvedenMap')(game_objects),'dark_forest': getattr(UI_loader, 'DarkforestMap')(game_objects)}        
+        self.map_UIs = {'nordveden': getattr(UI_loader, 'NordvedenMap')(game_objects),'dark_forest': getattr(UI_loader, 'DarkforestMap')(game_objects), 'hlifblom': getattr(UI_loader, 'HlifblomMap')(game_objects)}        
 
     def on_enter(self, **kwarg):
         super().on_enter(**kwarg)
         self.map_UI = self.map_UIs[kwarg.get('map', self.game_objects.map.biome_name)]#load the map the player is in
         self.selected_container = self.map_UI.objects[0]#initial default container
 
-    def update(self):
+    def update(self, dt):
         self.selected_container.update()#make it move
 
     def render(self):        
@@ -528,7 +538,7 @@ class MapUI_2(BaseUI):#world map
         for object in self.map_UI.objects:
             object.update_scroll(self.pos)
         
-    def update(self):
+    def update(self, dt):
         self.selected_container.update()#make it move
         self.continious_input()
         self.update_pos(self.scroll)

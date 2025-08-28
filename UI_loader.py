@@ -5,22 +5,25 @@ import entities_UI
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
         self.game_objects = game_objects
-        type = self.__class__.__name__.lower()
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/' + type + '/BG.png').convert_alpha())
-        self.load_UI_data(type)
-        self.load_data()
 
-    def load_UI_data(self, type):
-        map_data = read_files.read_json("UI/%s/%s.json" % (type,type))
+    def load_UI_data(self, path, name):
+        map_data = read_files.read_json(path)
         self.map_data = read_files.format_tiled_json(map_data)
         for tileset in self.map_data['tilesets']:
             if 'source' in tileset.keys():
-                if type + '_UI' in tileset['source']:#the name of the tmx file
+                if name + '_UI' in tileset['source']:#the name of the tmx file
                     self.map_data['UI_firstgid'] =  tileset['firstgid']
+
+    def load_data(self):
+        pass
 
 class Vendor(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/facilities/vendor/BG.png').convert_alpha())    
+        path = 'UI/facilities/vendor/vendor.json'
+        self.load_UI_data(path, 'vendor')
+        self.load_data()
 
     def load_data(self):
         self.objects = []
@@ -46,6 +49,11 @@ class Vendor(UI_loader):
 class Radna(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/backpack/radna/BG.png').convert_alpha())    
+
+        path = 'UI/backpack/radna/radna.json'
+        self.load_UI_data(path, 'radna')
+        self.load_data()
 
     def load_data(self):
         self.buttons = {}
@@ -94,6 +102,10 @@ class Radna(UI_loader):
 class Journal(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/backpack/journal/BG.png').convert_alpha())            
+        path = 'UI/backpack/journal/journal.json'
+        self.load_UI_data(path, 'journal')
+        self.load_data()
 
     def load_data(self):
         self.name_pos = []
@@ -111,6 +123,10 @@ class Journal(UI_loader):
 class Fast_travel(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/facilities/fast_travel/BG.png').convert_alpha())                    
+        path = 'UI/facility/fast_travel/fast_travel.json'
+        self.load_UI_data(path, 'fast_travel')
+        self.load_data()
 
     def load_data(self):
         self.name_pos = []
@@ -126,6 +142,10 @@ class Fast_travel(UI_loader):
 class Inventory(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/backpack/inventory/BG.png').convert_alpha())                    
+        path = 'UI/backpack/inventory/inventory.json'
+        self.load_UI_data(path, 'inventory')
+        self.load_data()
 
     def load_data(self):
         self.buttons = {}
@@ -167,21 +187,140 @@ class Inventory(UI_loader):
             elif id == 13:#heal item
                 self.items['heal_item'] = topleft_object_position
 
-class WorldMap(UI_loader):
+class TitleMenu(UI_loader):
     def __init__(self, game_objects):
-        self.game_objects = game_objects
-        type = self.__class__.__name__.lower()
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/' + type + '/BG.png').convert_alpha())
-        self.load_UI_data(type)
+        super().__init__(game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/menus/title_menu/', game_objects)
+        self.sounds = read_files.load_sounds_dict('audio/music/load_screen/')
+
+        path = 'UI/menus/title_menu/title_menu.json'
+        self.load_UI_data(path, 'title_menu')
         self.load_data()
 
-    def load_UI_data(self, type):
-        map_data = read_files.read_json("UI/maps/worldmap/worldmap.json")
-        self.map_data = read_files.format_tiled_json(map_data)
-        for tileset in self.map_data['tilesets']:
-            if 'source' in tileset.keys():
-                if type + '_UI' in tileset['source']:#the name of the tmx file
-                    self.map_data['UI_firstgid'] =  tileset['firstgid']
+    def load_data(self):
+        self.buttons = []
+        self.arrows = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#buttons
+                for property in properties:
+                    if property['name'] == 'name':
+                        button = property['value']
+
+                text = (self.game_objects.font.render(text = button))
+                self.buttons.append(entities_UI.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+
+            elif id == 1:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+
+            elif id == 4:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects))
+
+class LoadMenu(UI_loader):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/menus/load_menu/', game_objects)
+
+        path = 'UI/menus/load_menu/load_menu.json'
+        self.load_UI_data(path, 'load_menu')
+        self.load_data()
+
+    def load_data(self):
+        self.buttons = []
+        self.arrows = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#buttons
+                for property in properties:
+                    if property['name'] == 'name':
+                        button = property['value']
+
+                text = (self.game_objects.font.render(text = button))
+                self.buttons.append(entities_UI.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+
+            elif id == 1:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+
+            elif id == 4:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects))
+
+class OptionMenu(UI_loader):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/UI/menus/option_menu/', game_objects)
+
+        path = 'UI/menus/option_menu/option_menu.json'
+        self.load_UI_data(path, 'option_menu')
+        self.load_data()
+
+    def load_data(self):
+        self.buttons = []
+        self.arrows = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#buttons
+                for property in properties:
+                    if property['name'] == 'name':
+                        button = property['value']
+
+                text = (self.game_objects.font.render(text = button))
+                self.buttons.append(entities_UI.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+
+            elif id == 1:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+
+            elif id == 4:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects))
+
+class PauseMenu(UI_loader):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        path = 'UI/menus/pause_menu/pause_menu.json'
+        self.load_UI_data(path, 'pause_menu')
+        self.load_data()
+
+    def load_data(self):
+        self.buttons = []
+        self.arrows = []
+        for obj in self.map_data['elements']:
+            object_size = [int(obj['width']),int(obj['height'])]
+            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
+            properties = obj.get('properties',[])
+            id = obj['gid'] - self.map_data['UI_firstgid']
+
+            if id == 0:#buttons
+                for property in properties:
+                    if property['name'] == 'name':
+                        button = property['value']
+
+                text = (self.game_objects.font.render(text = button))
+                self.buttons.append(entities_UI.Button(self.game_objects, image = text, position = topleft_object_position, center = True))
+
+            elif id == 1:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects, flip = True))
+
+            elif id == 4:#arrows
+                self.arrows.append(entities_UI.MenuArrow(topleft_object_position, self.game_objects))
+
+class WorldMap(UI_loader):
+    def __init__(self, game_objects):
+        super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/backpack/maps/worldmap/BG.png').convert_alpha())
+        path = 'UI/backpack/maps/worldmap/worldmap.json'
+        self.load_UI_data(path, 'worldmap')
+        self.load_data()
 
     def load_data(self):
         self.objects = []
@@ -203,19 +342,12 @@ class WorldMap(UI_loader):
 
 class NordvedenMap(UI_loader):
     def __init__(self, game_objects):
-        self.game_objects = game_objects
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/nordveden/BG.png').convert_alpha())
+        super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/backpack/maps/nordveden/BG.png').convert_alpha())
         self.objects = []
-        self.load_UI_data()
+        path = 'UI/backpack/maps/nordveden/nordveden.json'
+        self.load_UI_data(path, 'nordveden')
         self.load_data()
-
-    def load_UI_data(self):
-        map_data = read_files.read_json("UI/maps/nordveden/nordveden.json")
-        self.map_data = read_files.format_tiled_json(map_data)
-        for tileset in self.map_data['tilesets']:
-            if 'source' in tileset.keys():
-                if 'nordveden' + '_UI' in tileset['source']:#the name of the tmx file
-                    self.map_data['UI_firstgid'] =  tileset['firstgid']
 
     def load_data(self):
         self.objects = []
@@ -237,19 +369,12 @@ class NordvedenMap(UI_loader):
 
 class DarkforestMap(UI_loader):
     def __init__(self, game_objects):
-        self.game_objects = game_objects
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/maps/darkforest/BG.png').convert_alpha())
+        super().__init__(game_objects)
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/backpack/maps/darkforest/BG.png').convert_alpha())
         self.objects = []
-        self.load_UI_data()
+        path = 'UI/backpack/maps/darkforest/darkforest.json'
+        self.load_UI_data(path, 'darkforest')
         self.load_data()
-
-    def load_UI_data(self):
-        map_data = read_files.read_json("UI/maps/darkforest/darkforest.json")
-        self.map_data = read_files.format_tiled_json(map_data)
-        for tileset in self.map_data['tilesets']:
-            if 'source' in tileset.keys():
-                if 'darkforest' + '_UI' in tileset['source']:#the name of the tmx file
-                    self.map_data['UI_firstgid'] =  tileset['firstgid']
 
     def load_data(self):
         self.objects = []
@@ -269,62 +394,8 @@ class DarkforestMap(UI_loader):
                 new_arrow = entities_UI.MapArrow(topleft_object_position, self.game_objects, map, direction)
                 self.objects.append(new_arrow)
 
-class Ability_movement_upgrade(UI_loader):
+class HlifblomMap(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-
-    def load_data(self):
-        self.abilities = [[],[],[]]#orginise them accotding to the grid in tiled
-        self.rows = {}
-        for obj in self.map_data['elements']:
-            object_size = [int(obj['width']),int(obj['height'])]
-            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['UI_firstgid']
-
-            if id == 0:#dash
-                new_ability = entities_UI.Dash(topleft_object_position,self.game_objects)
-                self.abilities[0].append(new_ability)
-                self.rows['Dash'] = 0
-            elif id == 1:#double_jump
-                new_ability = entities_UI.Double_jump(topleft_object_position,self.game_objects)
-                self.abilities[1].append(new_ability)
-                self.rows['Double_jump'] = 1
-            elif id == 2:#wall_glide
-                new_ability = entities_UI.Wall_glide(topleft_object_position,self.game_objects)
-                self.abilities[2].append(new_ability)
-                self.rows['Wall_glide'] = 2
-
-class Ability_spirit_upgrade(UI_loader):
-    def __init__(self, game_objects):
-        super().__init__(game_objects)
-
-    def load_data(self):
-        self.abilities = [[],[],[],[],[]]#orginise them accotding to the grid in tiled
-        self.rows = {}
-        for obj in self.map_data['elements']:
-            object_size = [int(obj['width']),int(obj['height'])]
-            topleft_object_position = [int(obj['x']), int(obj['y'])-int(obj['height'])]
-            properties = obj.get('properties',[])
-            id = obj['gid'] - self.map_data['UI_firstgid']
-
-            if id == 0:#arrow
-                new_ability = entities_UI.Arrow(topleft_object_position,self.game_objects)
-                self.abilities[0].append(new_ability)
-                self.rows['Arrow'] = 0
-            elif id == 1:#force
-                new_ability = entities_UI.Force(topleft_object_position,self.game_objects)
-                self.abilities[1].append(new_ability)
-                self.rows['Force'] = 1
-            elif id == 2:#migawari
-                new_ability = entities_UI.Migawari(topleft_object_position,self.game_objects)
-                self.abilities[2].append(new_ability)
-                self.rows['Migawari'] = 2
-            elif id == 3:#slowmotion
-                new_ability = entities_UI.Slow_motion(topleft_object_position,self.game_objects)
-                self.abilities[3].append(new_ability)
-                self.rows['Slow_motion'] = 3
-            elif id == 4:#thunder
-                new_ability = entities_UI.Thunder(topleft_object_position,self.game_objects)
-                self.abilities[4].append(new_ability)
-                self.rows['Thunder'] = 4
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('UI/backpack/maps/hlifblom/BG.png').convert_alpha())
+        self.objects = []
