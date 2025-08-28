@@ -86,7 +86,7 @@ class Title_menu(BaseUI):
             #self.game.game_objects.load_map(self,'nordveden_1','1')
             #self.game.game_objects.load_map(self,'dark_forest_1','5')
             #self.game.game_objects.load_map(self,'nordveden_windtest','1')
-            self.game.game_objects.load_map(self,'hlifblom_1','1')
+            self.game.game_objects.load_map(self,'tall_trees_ola','1')
             #self.game.game_objects.load_map(self,'rhoutta_encounter_1','1')
             #self.game.game_objects.load_map(self,'collision_map_4','1')
 

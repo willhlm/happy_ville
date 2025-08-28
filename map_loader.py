@@ -921,7 +921,7 @@ class Light_forest(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = platforms.Breakable_oneside_1(object_position, self.level.game_objects, str(ID_key))
+                    platform = platforms.Breakable_oneside_left(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type2/')
                     self.level.game_objects.platforms.add(platform)
 
 class Nordveden(Biome):
@@ -1049,7 +1049,7 @@ class Nordveden(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = platforms.Breakable_oneside_1(object_position, self.level.game_objects, str(ID_key))
+                    platform = platforms.Breakable_oneside_left(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type2/')
                     self.level.game_objects.platforms.add(platform)
 
             elif id == 10:#dissapera when standing on it
@@ -1067,7 +1067,7 @@ class Nordveden(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = platforms.Breakable_oneside_2(object_position, self.level.game_objects, str(ID_key))
+                    platform = platforms.Breakable_oneside_right(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type3/')
                     self.level.game_objects.platforms.add(platform)                                      
 
 class Rhoutta_encounter(Biome):
@@ -1499,3 +1499,21 @@ class Tall_trees(Biome):
 
                 new_viens = entities.Packun(object_position, self.level.game_objects, **kwarg)
                 self.level.game_objects.enemies.add(new_viens)
+
+            elif id == 11:#one side brakable
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID_key = property['value']
+
+                if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
+                    platform = platforms.Breakable_oneside_left(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type2/')
+                    self.level.game_objects.platforms.add(platform)      
+
+            elif id == 12:#one side brakable
+                for property in properties:
+                    if property['name'] == 'ID':
+                        ID_key = property['value']
+
+                if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
+                    platform = platforms.Breakable_oneside_right(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type3/')
+                    self.level.game_objects.platforms.add(platform)                       

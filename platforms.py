@@ -766,7 +766,7 @@ class Collision_breakable(Collision_texture):#breakable collision blocks
 class Breakable_block_1(Collision_breakable):
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
-        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type1/', game_objects)
+        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/nordveden/type1/', game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
@@ -794,10 +794,10 @@ class Collision_breakable_oneside(Collision_breakable):
         super().kill()
         self.game_objects.world_state.state[self.game_objects.map.level_name]['breakable_platform'][self.ID_key] = True#write in the
 
-class Breakable_oneside_1(Collision_breakable_oneside):
-    def __init__(self, pos, game_objects, ID):
+class Breakable_oneside_right(Collision_breakable_oneside):
+    def __init__(self, pos, game_objects, ID, path):
         super().__init__(pos, game_objects, ID)
-        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type2/', game_objects)
+        self.sprites = read_files.load_sprites_dict(path, game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()
@@ -806,10 +806,10 @@ class Breakable_oneside_1(Collision_breakable_oneside):
         if projectile.rect.centerx - self.hitbox.centerx > 0:#projectile from right: depends on the speciic objects
             super().take_dmg(projectile)
 
-class Breakable_oneside_2(Collision_breakable_oneside):
-    def __init__(self, pos, game_objects, ID):
+class Breakable_oneside_left(Collision_breakable_oneside):
+    def __init__(self, pos, game_objects, ID, path):
         super().__init__(pos, game_objects, ID)
-        self.sprites = read_files.load_sprites_dict('Sprites/block/breakable/light_forest/type3/', game_objects)
+        self.sprites = read_files.load_sprites_dict(path, game_objects)
         self.image = self.sprites['idle'][0]
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = self.rect.copy()

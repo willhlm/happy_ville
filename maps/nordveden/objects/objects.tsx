@@ -9,7 +9,7 @@
   <image width="176" height="288" source="../../../Sprites/animations/trees/tree_2/idle/tree01.png"/>
  </tile>
  <tile id="4">
-  <image width="16" height="16" source="../../../Sprites/block/breakable/light_forest/type1/idle/Sprite-0001.png"/>
+  <image width="16" height="16" source="../../../Sprites/block/breakable/nordveden/type1/idle/Sprite-0001.png"/>
  </tile>
  <tile id="5">
   <properties>
@@ -37,7 +37,7 @@
   <properties>
    <property name="ID" value=""/>
   </properties>
-  <image width="64" height="64" source="../../../Sprites/block/breakable/light_forest/type2/idle/breakable1.png"/>
+  <image width="64" height="64" source="../../../Sprites/block/breakable/nordveden/type2/idle/breakable1.png"/>
  </tile>
  <tile id="10">
   <properties>
@@ -49,6 +49,6 @@
   <properties>
    <property name="ID" value=""/>
   </properties>
-  <image width="64" height="64" source="../../../Sprites/block/breakable/light_forest/type3/idle/breakable1.png"/>
+  <image width="64" height="64" source="../../../Sprites/block/breakable/nordveden/type3/idle/breakable1.png"/>
  </tile>
 </tileset>
