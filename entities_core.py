@@ -2,7 +2,7 @@ import pygame
 import animation, particles
 import constants as C
 
-from states import states_basic, states_shader, hitstop_states
+from states import states_basic, hitstop_states, states_shader
 
 class Staticentity(pygame.sprite.Sprite):#all enteties
     def __init__(self, pos, game_objects):
@@ -136,10 +136,10 @@ class Character(Platform_entity):#enemy, NPC,player
     def update(self, dt):
         self.update_vel(dt)
         self.currentstate.update(dt)#need to be aftre update_vel since some state transitions look at velocity
-
-    def update_render(self, dt):
         self.animation.update(dt)#need to be after currentstate since animation will animate the current state
-        self.shader_state.update(dt)#need to be after animation
+
+    def update_render(self, dt):        
+        self.shader_state.update_render(dt)
 
     def update_vel(self, dt):#called from hitsop_states
         self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
@@ -179,9 +179,9 @@ class Character(Platform_entity):#enemy, NPC,player
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
 
-    def draw(self, target):
-        self.shader_state.draw()#for entetirs to turn white
-        super().draw(target)
+    def draw(self, target):        
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render        
 
     def on_invincibility_timeout(self):#runs when sword timer runs out
         self.flags['invincibility'] = False

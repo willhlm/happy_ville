@@ -5,7 +5,7 @@ class Idle():
         self.entity = entity
 
     def update_render(self, dt):#notmal, do nothing        
-        self.entity.shader_state.update(dt)#need to be after animation
+        self.entity.shader_state.update_render(dt)#need to be after animation
 
     def update(self, dt):#notmal, do nothing
         self.entity.update_vel(dt)

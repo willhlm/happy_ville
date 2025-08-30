@@ -6,7 +6,8 @@ from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Lo
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
 #from folder
-from states import loot_container_states, runestone_states, player_states, packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
+from render import entity_shader_manager
+from states import loot_container_states, runestone_states, player_states, packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_basic, rav_states, larv_wall_states, states_shader
 
 def sign(number):
     if number > 0: return 1
@@ -74,8 +75,8 @@ class BG_Fade(BG_Block):
         height = max(y) - min(y)
         self.hitbox = pygame.Rect(min(x),min(y),width,height)
 
-    def update(self, dt):
-        self.shader_state.update(dt)
+    def update_render(self, dt):
+        self.shader_state.update_render(dt)
 
     def interact(self):
         self.shader_state.handle_input('alpha')
@@ -930,6 +931,8 @@ class Player(Character):
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/aila/texture/', game_objects)
         self.normal_maps = read_files.load_sprites_dict('Sprites/enteties/aila/normal/', game_objects)
         self.image = self.sprites['idle'][0]
+        self.shader_state = entity_shader_manager.EntityShaderManager(self)
+        self.shader_state.define_size(self.image.size)
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
@@ -955,10 +958,9 @@ class Player(Character):
 
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
-        self.reset_movement()        
+        self.reset_movement()                
 
         self.colliding_platform = None#save the last collising platform
-        #self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -1042,7 +1044,7 @@ class Player(Character):
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
-        self.hitstop_states.update_render(dt)
+        self.hitstop_states.update_render(dt)        
 
     def update(self, dt):
         self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
@@ -1052,15 +1054,14 @@ class Player(Character):
         self.update_timers(dt)
 
     def draw(self, target):#called in group
-        self.shader_state.draw()
-
         alpha = self.game_objects.game.game_loop.alpha
         interp_x = self.prev_true_pos[0] + (self.true_pos[0] - self.prev_true_pos[0]) * alpha
         interp_y = self.prev_true_pos[1] + (self.true_pos[1] - self.prev_true_pos[1]) * alpha
 
         self.blit_pos = [interp_x - self.game_objects.camera_manager.camera.interp_scroll[0], interp_y - self.game_objects.camera_manager.camera.interp_scroll[1]]#save float position for screen manager
         blit_pos = [int(self.blit_pos[0]), int(self.blit_pos[1])]#bit at interget position, and let screen manager hanfle the sub pixel rendering
-        self.game_objects.game.display.render(self.image, target, position = blit_pos , flip = self.dir[0] > 0, shader = self.shader)#shader render
+        self.shader_state.draw(self.image, target, blit_pos, flip = self.dir[0] > 0)
+        #self.game_objects.game.display.render(self.image, target, position = blit_pos , flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
@@ -1414,7 +1415,6 @@ class Froggy(Enemy):
         self.attack_distance = [150,50]
 
         self.currentstate = states_froggy.Idle(self)
-        self.shader_state = states_shader.Idle(self)
         self.inventory = {'Amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
 
     def knock_back(self,dir):
@@ -3790,10 +3790,6 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
 
-    def draw(self, target):
-        self.shader_state.draw()
-        super().draw(target)
-
     def render_potrait(self, target):
         pass
 
@@ -4269,7 +4265,6 @@ class Loot_containers(Interactable):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
-        self.shader_state = states_shader.Idle(self)
 
         self.health = 3
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
@@ -4282,11 +4277,7 @@ class Loot_containers(Interactable):
             self.currentstate = loot_container_states.Idle(self)
 
     def update_render(self, dt):
-        self.shader_state.update(dt)
-
-    def draw(self, target):
-        self.shader_state.draw()
-        super().draw(target)
+        self.shader_state.update_render(dt)
 
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
