@@ -1243,7 +1243,7 @@
                         }, 
                         {
                          "gid":264,
-                         "height":624,
+                         "height":640,
                          "id":1892,
                          "name":"",
                          "rotation":0,
@@ -1944,7 +1944,7 @@
                  "name":"interactables",
                  "objects":[
                         {
-                         "gid":307,
+                         "gid":309,
                          "height":32,
                          "id":1946,
                          "name":"",
@@ -1956,7 +1956,7 @@
                          "y":800
                         }, 
                         {
-                         "gid":307,
+                         "gid":309,
                          "height":32,
                          "id":1947,
                          "name":"",
@@ -2009,7 +2009,7 @@
          "source":"objects\/objects.tsx"
         }, 
         {
-         "firstgid":303,
+         "firstgid":305,
          "source":"..\/_objects\/interactables.tsx"
         }],
  "tilewidth":16,
