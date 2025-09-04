@@ -157,10 +157,10 @@ class Character(Platform_entity):#enemy, NPC,player
             pass
 
         if self.health > 0:#check if dead
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)            
             self.shader_state.handle_input('Hurt')#turn white and shake
-            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state -> can handle hitstop if we want
-            self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
+            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 15, scale = 0.9)
             
             for effect in effects:#e.g. knock back
                 effect()
@@ -188,3 +188,6 @@ class Character(Platform_entity):#enemy, NPC,player
 
     def on_attack_timeout(self):#when attack cooldown timer runs out
         self.flags['attack_able'] = True
+
+    def on_hurt_timeout(self):#starts when entering hurt state, and make sure that you don't eneter again until timer runs out
+        self.flags['hurt_able'] = False

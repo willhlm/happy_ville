@@ -27,7 +27,7 @@ class Enemy(Character):
         self.spirit = 10
         self.health = 3
 
-        self.flags = {'aggro': True, 'invincibility': False, 'attack_able': True}#'attack able': a flag used as a cooldown of attack
+        self.flags = {'aggro': True, 'invincibility': False, 'attack_able': True, 'hurt_able': False}#'attack able': a flag used as a cooldown of attack
         self.dmg = 1#projectile damage
 
         self.attack_distance = [0,0]#at which distance to the player to attack
@@ -72,6 +72,9 @@ class Enemy(Character):
 
     def patrol(self, position = [0,0]):#called from AI: when patroling
         self.velocity[0] += self.dir[0]*0.3
+
+    def modify_hit(self, effect):
+        return effect
 
 class Flying_enemy(Enemy):
     def __init__(self,pos,game_objects):

@@ -1336,7 +1336,7 @@ class Sword(PhaseBase):#main phases shold inheret this
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
-        self.entity.sword.stone_states['slash'].slash_speed()
+        self.entity.sword.use_sword()
 
 class SwordAir(PhaseAirBase):
     def __init__(self,entity):
@@ -1347,7 +1347,7 @@ class SwordAir(PhaseAirBase):
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
-        self.entity.sword.stone_states['slash'].slash_speed()
+        self.entity.sword.use_sword()
 
 class SwordStandPre(Sword):
     def __init__(self, entity, **kwarg):
@@ -1376,10 +1376,13 @@ class SwordStandMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
+        
         self.entity.sword.dir = self.entity.dir.copy()
+        self.currentstate.enter_state('Slash_1')        
+        self.entity.sword.use_sword()
+        
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
-        self.entity.sword.currentstate.enter_state('Slash_1')
-        self.entity.sword.stone_states['slash'].slash_speed()
+
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def handle_movement(self, event):#all states should inehrent this function: called in update function of gameplay state
@@ -1422,8 +1425,8 @@ class SwordDownMain(SwordAir):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.sword.use_sword()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
-        self.entity.sword.stone_states['slash'].slash_speed()
         self.entity.sword.currentstate.enter_state('Slash_down')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1439,8 +1442,8 @@ class SwordUpMain(Sword):
         self.entity.flags['attack_able'] = False#if fasle, sword cannot be swang. sets to true when timer runs out
         self.entity.game_objects.timer_manager.start_timer(C.sword_time_player, self.entity.on_attack_timeout)
         self.entity.abilities.spirit_abilities['Shield'].sword()
+        self.entity.sword.use_sword()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
-        self.entity.sword.stone_states['slash'].slash_speed()
         self.entity.sword.currentstate.enter_state('Slash_up')
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
@@ -1523,7 +1526,7 @@ class SmashSideMain(Sword):
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.entity.sword.currentstate.enter_state('Slash_1')
-        self.entity.sword.stone_states['slash'].slash_speed()
+        self.entity.sword.use_sword()
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def update(self, dt):
@@ -1620,7 +1623,7 @@ class SmashUpMain(Sword):
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)
         self.entity.sword.currentstate.enter_state('Slash_up')
-        self.entity.sword.stone_states['slash'].slash_speed()
+        self.entity.sword.use_sword()
         self.entity.projectiles.add(self.entity.sword)#add sword to group
 
     def update(self, dt):
@@ -1655,6 +1658,7 @@ class SwordAirMain(SwordAir):
 
     def enter(self, **kwarg):
         self.entity.animation.play(self.animation_name)#animation name
+        self.entity.sword.use_sword()
         self.entity.sword.dir = self.entity.dir.copy()
         self.entity.sword.currentstate.enter_state('Slash_1')#slash 1 and 2
         self.entity.projectiles.add(self.entity.sword)#add sword to grou

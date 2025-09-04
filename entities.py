@@ -1440,7 +1440,7 @@ class Packun(Enemy):
         attack = Projectile_1(self.rect.topleft, self.game_objects, dir = dir, amp = amp)#make the object
         self.projectiles.add(attack)#add to group but in main phase
 
-    def update_vel(self):
+    def update_vel(self, dt):
         pass
 
     def draw(self, target):#called just before draw in group
@@ -2156,8 +2156,8 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
     def release_texture(self):
         self.image.release()
 
-    def update(self, dt):
-        self.shader_state.update(dt)
+    def update_render(self, dt):
+        self.shader_state.update_render(dt)
 
     def draw(self, target):
         self.shader_state.draw()
@@ -2507,7 +2507,7 @@ class Projectile_1(Projectiles):
         super().update(dt)
         self.update_vel(dt)
 
-    def update_vel(self):
+    def update_vel(self, dt):
         self.velocity[1] += 0.05 * dt#gravity
 
     def collision_platform(self,platform):
@@ -2713,8 +2713,13 @@ class Aila_sword(Melee):
         self.stones = {}#{'red': Red_infinity_stone([0,0], entity.game_objects, entity = self), 'green': Green_infinity_stone([0,0], entity.game_objects, entity = self), 'blue': Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange': Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple': Purple_infinity_stone([0,0], entity.game_objects, entity = self)}#gets filled in when pick up stone. used also for inventory
         self.swing = 0#a flag to check which swing we are at (0 or 1)
         self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#infinity stones can change these to do specific things
+        
+    def use_sword(self, swing = 'light'):#called from player stetas whenswing sword
+        self.stone_states['slash'].slash_speed()
+        particle = {'dir': self.dir,'lifetime': 180,'scale': 5,'angle_spread': [13, 15],'angle_dist': 'normal','colour': C.spirit_colour,'gravity_scale': -0.1,'gradient': 1,'fade_scale': 2.2,'number_particles': 8,'vel': {'ejac': [13, 17]}}
+        self.effects = HitEffect(sound = self.sounds['sword_hit_enemy'][0], particles = particle, knockback = (25, 10), hitstop = 10)
 
-    def update_hitbox(self):#every frame from collisions
+    def update_hitbox(self):
         hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
@@ -2727,17 +2732,10 @@ class Aila_sword(Melee):
         self.stone_states['projectile_collision'].projectile_collision(eprojectile)
 
     def collision_enemy(self, collision_enemy):
-        self.currentstate.sword_jump()#only down sword will give velocity up        ]
-        if collision_enemy.take_dmg(dmg = self.dmg):#if damage was taken
-            self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
-            collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(amp = [25,10], dir = self.dir))#hitstop to enemy, with knock back after hittop
-            #collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
-            collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=5, angle_spread = [13, 15], angle_dist = 'normal', colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 8, vel = {'ejac':[13,17]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
-            self.clash_particles(collision_enemy.hitbox.center, number_particles = 5)
-
-            #self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.3)
-
+        self.currentstate.sword_jump()
+        if collision_enemy.take_dmg(dmg = self.dmg):
+            modified_effect = collision_enemy.modify_hit(self.effects)
+            modified_effect.apply(self, collision_enemy)
             collision_enemy.currentstate.handle_input('sword')
             self.stone_states['enemy_collision'].enemy_collision()
 
@@ -4764,3 +4762,23 @@ class ChainProjectile(Staticentity):
         pos = [self.pos[0] + self.direction[0] * self.distance * self.spawn_number, self.pos[1]+ self.direction[1] * self.distance * self.spawn_number]
         self.game_objects.eprojectiles.add(self.projecticle(pos, self.game_objects, dir = self.direction))
         self.spawn_number += 1
+
+class HitEffect():
+    def __init__(self, sound, particles, hitstop = 10, knockback=(25, 10)):
+        self.hitstop = hitstop
+        self.knockback = knockback
+        self.particles = particles
+        self.sound = sound
+
+    def apply(self, sword, enemy):
+        """Apply effects when the sword hits an enemy."""
+        # Hitstop
+        sword.entity.hitstop_states.enter_state('Stop', lifetime = self.hitstop)
+        enemy.hitstop_states.enter_state('Stop',lifetime = self.hitstop,call_back=lambda: enemy.knock_back(amp=self.knockback, dir=sword.dir))
+
+        # Particles
+        enemy.emit_particles(**self.particles)
+        sword.clash_particles(enemy.hitbox.center, number_particles=5)
+
+        # Sound
+        sword.game_objects.sound.play_sfx(self.sound, vol=0.3)        

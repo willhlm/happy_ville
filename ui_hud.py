@@ -105,10 +105,8 @@ class HUD():
     def render_fps(self):
         if self.game_objects.game.RENDER_FPS_FLAG:
             fps_string = str(int(self.game_objects.game.game_loop.clock.get_fps()))
-            image = self.game_objects.font.render((50,12),'fps ' + fps_string)
-            self.game_objects.shaders['colour']['colour'] = (255,255,255,255)
-            self.game_objects.game.display.render(image, self.screen, position = (self.game_objects.game.window_size[0]-50,20),shader = self.game_objects.shaders['colour'])#shader render
-            image.release()        
+            text = 'fps ' + fps_string
+            self.game_objects.game.display.render_text(self.game_objects.font.font_atals, self.screen, text, letter_frame = None, color = (255,255,255,255), position = (self.screen.width - 50, 10))
 
     def remove_hearts(self,dmg):#dmg is 0.5, 1 or 2. Will set the rellavant to hurt
         index = int(self.game_objects.player.health)-1
