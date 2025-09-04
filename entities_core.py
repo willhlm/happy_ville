@@ -2,7 +2,7 @@ import pygame
 import animation, particles
 import constants as C
 
-from states import states_basic, states_shader, hitstop_states
+from states import states_basic, hitstop_states, states_shader
 
 class Staticentity(pygame.sprite.Sprite):#all enteties
     def __init__(self, pos, game_objects):
@@ -136,10 +136,10 @@ class Character(Platform_entity):#enemy, NPC,player
     def update(self, dt):
         self.update_vel(dt)
         self.currentstate.update(dt)#need to be aftre update_vel since some state transitions look at velocity
-
-    def update_render(self, dt):
         self.animation.update(dt)#need to be after currentstate since animation will animate the current state
-        self.shader_state.update(dt)#need to be after animation
+
+    def update_render(self, dt):        
+        self.shader_state.update_render(dt)
 
     def update_vel(self, dt):#called from hitsop_states
         self.velocity[1] += dt * (self.acceleration[1] - self.velocity[1] * self.friction[1])#gravity
@@ -157,10 +157,10 @@ class Character(Platform_entity):#enemy, NPC,player
             pass
 
         if self.health > 0:#check if dead
-            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)
+            self.game_objects.timer_manager.start_timer(C.invincibility_time_enemy, self.on_invincibility_timeout)            
             self.shader_state.handle_input('Hurt')#turn white and shake
-            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state -> can handle hitstop if we want
-            self.game_objects.camera_manager.camera_shake(amplitude = 15, duration = 15, scale = 0.9)
+            self.currentstate.handle_input('Hurt')#handle if we shoudl go to hurt state
+            self.game_objects.camera_manager.camera_shake(amplitude = 10, duration = 15, scale = 0.9)
             
             for effect in effects:#e.g. knock back
                 effect()
@@ -179,12 +179,15 @@ class Character(Platform_entity):#enemy, NPC,player
             obj1 = getattr(particles, type)(self.hitbox.center, self.game_objects, **kwarg)
             self.game_objects.cosmetics.add(obj1)
 
-    def draw(self, target):
-        self.shader_state.draw()#for entetirs to turn white
-        super().draw(target)
+    def draw(self, target):        
+        self.blit_pos = [int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])]
+        self.game_objects.game.display.render(self.image, target, position = self.blit_pos, flip = self.dir[0] > 0, shader = self.shader)#shader render        
 
     def on_invincibility_timeout(self):#runs when sword timer runs out
         self.flags['invincibility'] = False
 
     def on_attack_timeout(self):#when attack cooldown timer runs out
         self.flags['attack_able'] = True
+
+    def on_hurt_timeout(self):#starts when entering hurt state, and make sure that you don't eneter again until timer runs out
+        self.flags['hurt_able'] = False

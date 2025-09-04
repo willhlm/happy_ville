@@ -129,7 +129,8 @@ def load_sprites_list(path_to_folder, game_objects, flip_x = False):#returns a l
 
 def load_sprite(path_to_sprite, flip_x = False):#use to load single sprite, full path must be provided
     temp = pygame.image.load(path_to_sprite).convert_alpha()
-    temp = pygame.transform.flip(temp, flip_x, False)
+    if flip_x:
+        temp = pygame.transform.flip(temp, True, False)#flip(surface, flip_x, flip_y)  
     return temp
 
 def generic_sheet_reader(path_to_sheet, w, h, r, c):

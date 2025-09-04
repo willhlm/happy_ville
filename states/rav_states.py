@@ -22,6 +22,7 @@ class BaseState():
 
     def handle_input(self, input):#input is hurt when taking dmg
         if input == 'Hurt':
+            if self.entity.flags['hurt_able']: return
             self.enter_state('Hurt')
 
 class Idle(BaseState):#do nothing
@@ -122,6 +123,8 @@ class Hurt(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.animation.play('hurt', 0.2)
+        self.entity.game_objects.timer_manager.start_timer(100, self.entity.on_hurt_timeout)
+        self.entity.flags['hurt_able'] = True
 
     def increase_phase(self):
         self.enter_state('Wait', time=20)

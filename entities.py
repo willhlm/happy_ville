@@ -6,7 +6,8 @@ from entities_base import Enemy, Flying_enemy, NPC, Boss, Projectiles, Melee, Lo
 from entities_core import Staticentity, Animatedentity, Platform_entity, Character
 
 #from folder
-from states import loot_container_states, runestone_states, player_states, packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_shader, states_basic, rav_states, larv_wall_states
+from render import entity_shader_manager
+from states import loot_container_states, runestone_states, player_states, packun_states, hitstop_states, states_savepoint, states_mygga_crystal, states_crab_crystal, states_exploding_mygga, states_droplets, states_twoD_liquid, states_death, states_lever, states_grind, states_portal, states_froggy, states_sword, states_fireplace, states_shader_guide, states_butterfly, states_cocoon_boss, states_maggot, states_horn_vines, states_camerastop, states_player, states_traps, states_NPC, states_enemy, states_vatt, states_enemy_flying, reindeer_states, states_bird, states_kusa, states_rogue_cultist, states_sandrew, states_blur, states_basic, rav_states, larv_wall_states, states_shader
 
 def sign(number):
     if number > 0: return 1
@@ -74,8 +75,8 @@ class BG_Fade(BG_Block):
         height = max(y) - min(y)
         self.hitbox = pygame.Rect(min(x),min(y),width,height)
 
-    def update(self, dt):
-        self.shader_state.update(dt)
+    def update_render(self, dt):
+        self.shader_state.update_render(dt)
 
     def interact(self):
         self.shader_state.handle_input('alpha')
@@ -930,6 +931,8 @@ class Player(Character):
         self.sprites = read_files.load_sprites_dict('Sprites/enteties/aila/texture/', game_objects)
         self.normal_maps = read_files.load_sprites_dict('Sprites/enteties/aila/normal/', game_objects)
         self.image = self.sprites['idle'][0]
+        self.shader_state = entity_shader_manager.EntityShaderManager(self)
+        self.shader_state.define_size(self.image.size)
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width, self.image.height)
         self.hitbox = pygame.Rect(pos[0], pos[1], 16, 35)
         self.rect.midbottom = self.hitbox.midbottom#match the positions of hitboxes
@@ -955,10 +958,9 @@ class Player(Character):
 
         self.damage_manager = modifier_damage.Damage_manager(self)
         self.movement_manager = modifier_movement.Movement_manager()
-        self.reset_movement()        
+        self.reset_movement()                
 
         self.colliding_platform = None#save the last collising platform
-        #self.shader_state = states_shader.Aura(self)
 
     def ramp_down_collision(self, ramp):#when colliding with platform beneth
         super().ramp_down_collision(ramp)
@@ -1042,7 +1044,7 @@ class Player(Character):
         #self.movement_manager.clear_modifiers()#TODO probably not all should be cleared
 
     def update_render(self, dt):#called in group
-        self.hitstop_states.update_render(dt)
+        self.hitstop_states.update_render(dt)        
 
     def update(self, dt):
         self.prev_true_pos = self.true_pos.copy()#save previous position for interpolation
@@ -1052,15 +1054,14 @@ class Player(Character):
         self.update_timers(dt)
 
     def draw(self, target):#called in group
-        self.shader_state.draw()
-
         alpha = self.game_objects.game.game_loop.alpha
         interp_x = self.prev_true_pos[0] + (self.true_pos[0] - self.prev_true_pos[0]) * alpha
         interp_y = self.prev_true_pos[1] + (self.true_pos[1] - self.prev_true_pos[1]) * alpha
 
         self.blit_pos = [interp_x - self.game_objects.camera_manager.camera.interp_scroll[0], interp_y - self.game_objects.camera_manager.camera.interp_scroll[1]]#save float position for screen manager
         blit_pos = [int(self.blit_pos[0]), int(self.blit_pos[1])]#bit at interget position, and let screen manager hanfle the sub pixel rendering
-        self.game_objects.game.display.render(self.image, target, position = blit_pos , flip = self.dir[0] > 0, shader = self.shader)#shader render
+        self.shader_state.draw(self.image, target, blit_pos, flip = self.dir[0] > 0)
+        #self.game_objects.game.display.render(self.image, target, position = blit_pos , flip = self.dir[0] > 0, shader = self.shader)#shader render
 
         #normal map draw
         self.game_objects.shaders['normal_map']['direction'] = -self.dir[0]#the normal map shader can invert the normal map depending on direction
@@ -1414,7 +1415,6 @@ class Froggy(Enemy):
         self.attack_distance = [150,50]
 
         self.currentstate = states_froggy.Idle(self)
-        self.shader_state = states_shader.Idle(self)
         self.inventory = {'Amber_droplet':random.randint(5,15)}#thigs to drop wgen killed
 
     def knock_back(self,dir):
@@ -1440,7 +1440,7 @@ class Packun(Enemy):
         attack = Projectile_1(self.rect.topleft, self.game_objects, dir = dir, amp = amp)#make the object
         self.projectiles.add(attack)#add to group but in main phase
 
-    def update_vel(self):
+    def update_vel(self, dt):
         pass
 
     def draw(self, target):#called just before draw in group
@@ -2156,8 +2156,8 @@ class Shade_Screen(Staticentity):#a screen that can be put on each layer to make
     def release_texture(self):
         self.image.release()
 
-    def update(self, dt):
-        self.shader_state.update(dt)
+    def update_render(self, dt):
+        self.shader_state.update_render(dt)
 
     def draw(self, target):
         self.shader_state.draw()
@@ -2507,7 +2507,7 @@ class Projectile_1(Projectiles):
         super().update(dt)
         self.update_vel(dt)
 
-    def update_vel(self):
+    def update_vel(self, dt):
         self.velocity[1] += 0.05 * dt#gravity
 
     def collision_platform(self,platform):
@@ -2713,8 +2713,13 @@ class Aila_sword(Melee):
         self.stones = {}#{'red': Red_infinity_stone([0,0], entity.game_objects, entity = self), 'green': Green_infinity_stone([0,0], entity.game_objects, entity = self), 'blue': Blue_infinity_stone([0,0],entity.game_objects, entity = self),'orange': Orange_infinity_stone([0,0],entity.game_objects, entity = self),'purple': Purple_infinity_stone([0,0], entity.game_objects, entity = self)}#gets filled in when pick up stone. used also for inventory
         self.swing = 0#a flag to check which swing we are at (0 or 1)
         self.stone_states = {'enemy_collision': states_sword.Stone_states(self), 'projectile_collision': states_sword.Stone_states(self), 'slash': states_sword.Stone_states(self)}#infinity stones can change these to do specific things
+        
+    def use_sword(self, swing = 'light'):#called from player stetas whenswing sword
+        self.stone_states['slash'].slash_speed()
+        particle = {'dir': self.dir,'lifetime': 180,'scale': 5,'angle_spread': [13, 15],'angle_dist': 'normal','colour': C.spirit_colour,'gravity_scale': -0.1,'gradient': 1,'fade_scale': 2.2,'number_particles': 8,'vel': {'ejac': [13, 17]}}
+        self.effects = HitEffect(sound = self.sounds['sword_hit_enemy'][0], particles = particle, knockback = (25, 10), hitstop = 10)
 
-    def update_hitbox(self):#every frame from collisions
+    def update_hitbox(self):
         hitbox_attr, entity_attr = self.direction_mapping[tuple(self.dir)]#self.dir is set in states_sword
         setattr(self.hitbox, hitbox_attr, getattr(self.entity.hitbox, entity_attr))
         self.rect.center = self.hitbox.center#match the positions of hitboxes
@@ -2727,17 +2732,10 @@ class Aila_sword(Melee):
         self.stone_states['projectile_collision'].projectile_collision(eprojectile)
 
     def collision_enemy(self, collision_enemy):
-        self.currentstate.sword_jump()#only down sword will give velocity up        ]
-        if collision_enemy.take_dmg(dmg = self.dmg):#if damage was taken
-            self.entity.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop)#hitstop to sword vielder
-            collision_enemy.hitstop_states.enter_state('Stop', lifetime = C.default_enemydmg_hitstop, call_back = lambda: collision_enemy.knock_back(amp = [25,10], dir = self.dir))#hitstop to enemy, with knock back after hittop
-            #collision_enemy.emit_particles(dir = self.dir, scale = 4, fade_scale=4, number_particles=10, vel = {'linear':[12,15]})#, colour=[255,255,255,255])
-            collision_enemy.emit_particles(dir = self.dir, lifetime = 180, scale=5, angle_spread = [13, 15], angle_dist = 'normal', colour = C.spirit_colour, gravity_scale = -0.1, gradient = 1, fade_scale = 2.2,  number_particles = 8, vel = {'ejac':[13,17]})#, vel = {'wave': [-10*self.entity.dir[0], -2]})
-            self.clash_particles(collision_enemy.hitbox.center, number_particles = 5)
-
-            #self.game_objects.cosmetics.add(Slash(self.hitbox.center,self.game_objects))#make a slash animation
-            self.game_objects.sound.play_sfx(self.sounds['sword_hit_enemy'][0], vol = 0.3)
-
+        self.currentstate.sword_jump()
+        if collision_enemy.take_dmg(dmg = self.dmg):
+            modified_effect = collision_enemy.modify_hit(self.effects)
+            modified_effect.apply(self, collision_enemy)
             collision_enemy.currentstate.handle_input('sword')
             self.stone_states['enemy_collision'].enemy_collision()
 
@@ -3790,10 +3788,6 @@ class Challenges(Interactable):#monuments you interact to get quests or challeng
     def __init__(self, pos, game_objects):
         super().__init__(pos, game_objects)
 
-    def draw(self, target):
-        self.shader_state.draw()
-        super().draw(target)
-
     def render_potrait(self, target):
         pass
 
@@ -4269,7 +4263,6 @@ class Loot_containers(Interactable):
         self.rect = pygame.Rect(pos[0],pos[1],self.image.width,self.image.height)
         self.hitbox = pygame.Rect(pos[0],pos[1],32,32)
         self.hitbox.midbottom = self.rect.midbottom
-        self.shader_state = states_shader.Idle(self)
 
         self.health = 3
         self.ID_key = ID_key#an ID key to identify which item that the player is intracting within the world
@@ -4282,11 +4275,7 @@ class Loot_containers(Interactable):
             self.currentstate = loot_container_states.Idle(self)
 
     def update_render(self, dt):
-        self.shader_state.update(dt)
-
-    def draw(self, target):
-        self.shader_state.draw()
-        super().draw(target)
+        self.shader_state.update_render(dt)
 
     def loots(self):#this is called when the opening animation is finished
         for key in self.inventory.keys():#go through all loot
@@ -4773,3 +4762,23 @@ class ChainProjectile(Staticentity):
         pos = [self.pos[0] + self.direction[0] * self.distance * self.spawn_number, self.pos[1]+ self.direction[1] * self.distance * self.spawn_number]
         self.game_objects.eprojectiles.add(self.projecticle(pos, self.game_objects, dir = self.direction))
         self.spawn_number += 1
+
+class HitEffect():
+    def __init__(self, sound, particles, hitstop = 10, knockback=(25, 10)):
+        self.hitstop = hitstop
+        self.knockback = knockback
+        self.particles = particles
+        self.sound = sound
+
+    def apply(self, sword, enemy):
+        """Apply effects when the sword hits an enemy."""
+        # Hitstop
+        sword.entity.hitstop_states.enter_state('Stop', lifetime = self.hitstop)
+        enemy.hitstop_states.enter_state('Stop',lifetime = self.hitstop,call_back=lambda: enemy.knock_back(amp=self.knockback, dir=sword.dir))
+
+        # Particles
+        enemy.emit_particles(**self.particles)
+        sword.clash_particles(enemy.hitbox.center, number_particles=5)
+
+        # Sound
+        sword.game_objects.sound.play_sfx(self.sound, vol=0.3)        

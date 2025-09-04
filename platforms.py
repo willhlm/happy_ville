@@ -1,8 +1,9 @@
 import pygame
 import entities, animation, read_files
-from states import states_time_collision, states_gate, states_smacker, states_moving_platform, states_shader, states_basic
+from states import states_time_collision, states_gate, states_smacker, states_moving_platform, states_basic
 import constants as C
 import math, random
+from render import entity_shader_manager
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, pos, size = (16,16), run_particle = 'dust'):
@@ -377,6 +378,8 @@ class Gate_1(Collision_texture):#a gate. The ones that are owned by the lever wi
         else:
             state = {True: 'erect', False: 'down'}[kwarg.get('erect', False)]#a flag that can be specified in titled
         self.image = self.sprites[state][0]
+        self.shader_state = entity_shader_manager.EntityShaderManager(self)
+        self.shader_state.define_size(self.image.size)
         self.rect = pygame.Rect(pos[0], pos[1], self.image.width,self.image.height)#hitbox is set in state
 
         self.animation = animation.Animation(self)
@@ -397,23 +400,21 @@ class Door(Gate_1):
         super().__init__(pos, game_objects, **kwarg)
         #self.sfx = ADDSFXHERE
         self.key = kwarg.get('key', 'None')
-        self.shader = None
-        self.shader_state = states_shader.Idle(self)
+        self.shader = None        
 
     def update_render(self, dt):
-        self.shader_state.update(dt)
+        self.shader_state.update_render(dt)
 
     def draw(self, target):
-        self.shader_state.draw()
-        self.game_objects.game.display.render(self.image, target, position = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1])), shader = self.shader)#int seem nicer than round
+        blit_pos = (int(self.rect[0]-self.game_objects.camera_manager.camera.scroll[0]),int(self.rect[1]-self.game_objects.camera_manager.camera.scroll[1]))
+        self.shader_state.draw(self.image, target, blit_pos)
 
     def shake(self):
         self.shader_state.handle_input('Hurt', colour = (1,1,1,0))
 
 class Door_right_orient(Door):
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)
-        self.shader_state = states_shader.Idle(self)
+        super().__init__(pos, game_objects, **kwarg)        
         self.hitbox[2] = self.hitbox[2] - 8
         self.hitbox.bottomright = self.rect.bottomright
 
@@ -422,8 +423,7 @@ class Door_right_orient(Door):
 
 class Door_left_orient(Door):
     def __init__(self, pos, game_objects, **kwarg):
-        super().__init__(pos, game_objects, **kwarg)
-        self.shader_state = states_shader.Idle(self)
+        super().__init__(pos, game_objects, **kwarg)        
 
     def init(self):
         self.sprites = read_files.load_sprites_dict('Sprites/animations/door_left/', self.game_objects)

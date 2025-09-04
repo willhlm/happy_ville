@@ -2,7 +2,7 @@ import constants as C
 
 class Shaders():
     def __init__(self, post_process):
-        self.post_process = post_process
+        self.post_process = post_process#TODO change this to game_objects
 
     def update_render(self, dt):
         pass
@@ -250,56 +250,53 @@ class Slowmotion(Shaders):
         """Final render back to composite_screen"""
         self.draw(temp_layer, composite_screen)
 
-#not used below
-class Idle(Shaders):#enteties use it
-    def __init__(self, renderer, **kwarg):
-        super().__init__(renderer)
-
-    def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):#the final drawing onto the screen
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip)
-
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
-        return base_texture
-
-class Hurt(Shaders):#turn white -> enteties use it
-    def __init__(self,entity, **kwarg):
-        super().__init__(entity)
-        self.duration = C.hurt_animation_length#hurt animation duration
-        self.next_animation = kwarg.get('next_animation', 'Idle')
-        self.colour = kwarg.get('colour', [1,1,1,1])
-
-    def set_uniforms(self):
-        self.renderer.game_objects.shaders['colour'] = self.colour
-
-    def update_render(self, dt):
-        self.duration -= dt
-        if self.duration < 0:
-            self.entity.shader_render.append_shader(self.next_animation)
-
-    def draw(self, base_texture, pos = [0,0], flip = [False, False]):
-        self.set_uniforms()
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.layer, flip = flip, shader = self.renderer.game_objects.shaders['colour'])#shader render
-        return self.renderer.layer.texture
-
-    def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):
-        self.set_uniforms()
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip, shader = self.renderer.game_objects.shaders['colour'])#shader render
-
-class Invincibile(Shaders):#blink white -> enteyties use it
-    def __init__(self,entity):
-        super().__init__(entity)
-        self.duration = C.invincibility_time_player - (C.hurt_animation_length + 1)#a duration which considers the player invinsibility
+#For entities
+class Aura(Shaders):
+    def __init__(self, game_objects):
+        self.game_objects = game_objects    
         self.time = 0
 
     def update_render(self, dt):
-        self.duration -= dt
-        self.time += 0.5 * dt
-        if self.duration < 0:
-            self.enter_state('Idle')
+        self.time += dt * 0.1
+ 
+    def set_uniforms(self):
+        self.game_objects.shaders['aura']['TIME'] = self.time
+        self.game_objects.shaders['aura']['AuraProgres'] = 1     
+
+    def draw(self, source_texture, composite_screen):
+        """For intermediate rendering in pipeline"""
+        self.set_uniforms()
+        self.game_objects.game.display.render(source_texture.texture, composite_screen, shader=self.game_objects.shaders['aura'])
+        return composite_screen
+
+    def draw_to_composite(self, source_texture, target, position, flip):
+        """Final render back to composite_screen"""
+        self.set_uniforms()
+        self.game_objects.game.display.render(source_texture.texture, target, position, flip = flip, shader=self.game_objects.shaders['aura'])
+
+class Outline(Shaders):
+    def __init__(self,game_objects, **kwarg):
+        self.game_objects = game_objects    
+        self.colour = kwarg.get('colour', [1, 1, 1, 1])
+        self.thickness = kwarg.get('thickness', 5)
+        self.falloff = kwarg.get('falloff', 0)
+        self.time = 0
+
+    def update(self, dt):
+        self.time += dt
 
     def set_uniforms(self):
-        self.entity.game_objects.shaders['invincible']['time']  = self.time#(colour,colour,colour)
+        self.game_objects.shaders['outline']['outlineColor'] = self.colour
+        self.game_objects.shaders['outline']['outlineThickness'] = self.thickness
+        self.game_objects.shaders['outline']['outlineAlphaFalloff'] = self.falloff
 
-    def draw_screen(self, base_texture, pos = [0,0], flip = [False, False]):
+    def draw(self, source_texture, composite_screen):
+        """For intermediate rendering in pipeline"""
         self.set_uniforms()
-        self.renderer.game_objects.game.display.render(base_texture, self.renderer.game_objects.game.screen, position = pos, flip = flip, shader = self.renderer.game_objects.shaders['invincible'])#shader render
+        self.game_objects.game.display.render(source_texture.texture, composite_screen, shader = self.game_objects.shaders['outline'])
+        return composite_screen
+
+    def draw_to_composite(self, source_texture, target, position, flip):
+        """Final render back to composite_screen"""
+        self.set_uniforms()
+        self.game_objects.game.display.render(source_texture.texture, target, position, flip = flip, shader = self.game_objects.shaders['outline']) 

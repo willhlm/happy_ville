@@ -694,9 +694,8 @@ class Level():
 
             if 'fade' in tile_layer:#add fade blocks
                 for fade in blit_fade_surfaces.keys():
-                    if 'fade' in fade:#is needed
-                        continue
-                        bg = entities.BG_Fade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])
+                    if 'fade' in fade:#is needed                                                
+                        bg = entities.BG_Fade(pos, self.game_objects, blit_fade_surfaces[fade], parallax, blit_fade_pos[fade], data[fade]['id'])                        
                         if self.layer.startswith('bg'): self.game_objects.all_bgs.add(self.layer,bg)#bg
                         else: self.game_objects.all_fgs.add(self.layer,bg)
                         self.game_objects.bg_fade.add(bg)
@@ -1506,7 +1505,7 @@ class Tall_trees(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = platforms.Breakable_oneside_left(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type2/')
+                    platform = platforms.Breakable_oneside_right(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type2/')
                     self.level.game_objects.platforms.add(platform)      
 
             elif id == 12:#one side brakable
@@ -1515,5 +1514,5 @@ class Tall_trees(Biome):
                         ID_key = property['value']
 
                 if not self.level.game_objects.world_state.state[self.level.level_name]['breakable_platform'].get(str(ID_key), False):
-                    platform = platforms.Breakable_oneside_right(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type3/')
+                    platform = platforms.Breakable_oneside_left(object_position, self.level.game_objects, str(ID_key), 'Sprites/block/breakable/nordveden/type3/')
                     self.level.game_objects.platforms.add(platform)                       

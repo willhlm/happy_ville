@@ -1,26 +1,32 @@
 import sys, math
 import constants as C
 
-class Shader_states():
+class BaseState():
     def __init__(self,entity):
-        self.entity = entity
+        self.entity = entity        
 
-    def enter_state(self,newstate,**kwarg):
-        self.entity.shader_state = getattr(sys.modules[__name__], newstate)(self.entity,**kwarg)#make a class based on the name of the newstate: need to import sys
-
-    def handle_input(self,input):
+    def handle_input(self, input):
         pass
 
-    def update_render(self, dt):#called in update loop
-        pass
+    def update_render(self, dt):
+        pass   
 
-    def draw(self):#called just before draw
-        pass
+    def draw(self, base_texture, target, position, flip):#called from post_process entity and entity_shader_manager
+        """Draw base_texture to target using current shader."""
+        self.set_uniforms()
+        self.entity.game_objects.game.display.render(base_texture, target, position = position, flip = flip, shader = self.shader)#This part is inpricnple npt needed for idle state. However, to fix it, base_txture neeeds to be a layer -> i.e. make all textures into a layer in initialization.
+        return target
 
-class Idle(Shader_states):
+    def set_uniforms(self):#called before draw
+        pass
+    
+    def enter_state(self, newstate, **kwarg):
+        self.entity.shader_state.enter_state(newstate, **kwarg)        
+
+class Idle(BaseState):
     def __init__(self,entity, **kwarg):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['idle']
+        self.shader = self.entity.game_objects.shaders['idle']
 
     def handle_input(self, input, **kwarg):
         if input == 'Hurt':
@@ -40,11 +46,11 @@ class Idle(Shader_states):
         if input == 'colour':
             self.enter_state('Colour', **kwarg)            
 
-class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
+class Hurt(BaseState):#turn white and shake it a bit -> enteties use it
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.duration = C.hurt_animation_length#hurt animation duration
-        self.entity.shader = self.entity.game_objects.shaders['shock_damage']
+        self.shader = self.entity.game_objects.shaders['shock_damage']
         self.next_animation = 'Idle'
         self.time = 0
         self.amplitude = kwarg.get('amplitude', 1) * 0.08
@@ -54,14 +60,14 @@ class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
         self.direction = kwarg.get('direction', [1,0])
         self.alpha_decay = kwarg.get('alpha_decay', 0.974)
 
-    def draw(self):
-        self.entity.shader['time'] = self.time*0.01
-        self.entity.shader['frequency'] = self.frequency
-        self.entity.shader['amplitude'] = self.amplitude
+    def set_uniforms(self):
+        self.shader['time'] = self.time*0.01
+        self.shader['frequency'] = self.frequency
+        self.shader['amplitude'] = self.amplitude
         self.colour[-1] *= self.alpha_decay
-        self.entity.shader['colour'] = self.colour
-        self.entity.shader['decay_rate'] = self.decay_rate
-        self.entity.shader['direction'] = self.direction
+        self.shader['colour'] = self.colour
+        self.shader['decay_rate'] = self.decay_rate
+        self.shader['direction'] = self.direction
 
     def update_render(self, dt):
         self.duration -= dt
@@ -73,10 +79,10 @@ class Hurt(Shader_states):#turn white and shake it a bit -> enteties use it
         if input == 'Invincibile':
             self.next_animation = 'Invincibile'
 
-class Invincibile(Shader_states):#blink white -> enteyties use it
+class Invincibile(BaseState):#blink white -> enteyties use it
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['invincible']
+        self.shader = self.entity.game_objects.shaders['invincible']
         self.duration = C.invincibility_time_player - (C.hurt_animation_length + 1)#a duration which considers the player invinsibility
         self.time = 0
 
@@ -86,16 +92,16 @@ class Invincibile(Shader_states):#blink white -> enteyties use it
         if self.duration < 0:
             self.enter_state('Idle')
 
-    def draw(self):
-        self.entity.shader['time']  = self.time#(colour,colour,colour)
+    def set_uniforms(self):
+        self.shader['time']  = self.time#(colour,colour,colour)
 
-class Mix_colour(Shader_states):#shade screen uses it
+class Mix_colour(BaseState):#shade screen uses it
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['mix_colour']
         self.entity.shader['position'] = 0
 
-    def draw(self):
+    def set_uniforms(self):
         self.entity.shader['colour'] = self.entity.colour#higher alpha for lower parallax
         self.entity.shader['new_colour'] = self.entity.new_colour#higher alpha for lower parallax
         self.entity.shader['position'] = max((self.entity.game_objects.player.hitbox.centerx - self.entity.bounds.left)/self.entity.bounds[2],0)
@@ -104,23 +110,23 @@ class Mix_colour(Shader_states):#shade screen uses it
         if input == 'idle':
             self.enter_state('Idle')
 
-class Colour(Shader_states):#shade screen uses it
+class Colour(BaseState):#shade screen uses it
     def __init__(self,entity, **kwarg):#colour is a list of 4 floats):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['colour']
         self.colour = kwarg.get('colour', [1,1,1,1])#colour is a list of 4 floats
         
-    def update_render(self, dt):
+    def set_uniforms(self, dt):
         self.entity.shader['colour'] = self.colour
 
     def handle_input(self,input):
         if input == 'idle':
             self.enter_state('Idle')
 
-class Alpha(Shader_states):#fade screen uses it
+class Alpha(BaseState):#fade screen uses it
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['alpha']
+        self.shader = self.entity.game_objects.shaders['alpha']
         self.alpha = 255
 
     def update_render(self, dt):
@@ -128,10 +134,10 @@ class Alpha(Shader_states):#fade screen uses it
         if self.alpha < 5:
             self.entity.kill()
 
-    def draw(self):
-        self.entity.shader['alpha'] = self.alpha
+    def set_uniforms(self):
+        self.shader['alpha'] = self.alpha
 
-class Teleport(Shader_states):
+class Teleport(BaseState):
     def __init__(self,entity):
         super().__init__(entity)
         self.time = 0
@@ -142,22 +148,22 @@ class Teleport(Shader_states):
         if self.time >= 1:
             self.entity.kill()
 
-    def draw(self):
+    def set_uniforms(self):
         self.entity.shader['progress'] = self.time
 
-class Glow(Shader_states):#tint with a colour and apply bloom
+class Glow(BaseState):#tint with a colour and apply bloom
     def __init__(self,entity, colour = [100,200,255,100]):
         super().__init__(entity)
         self.colour = colour
         self.entity.shader = self.entity.game_objects.shaders['bloom']
         self.layer1 = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#!! need to move it somewehre in memory
 
-    def draw(self):
+    def set_uniforms(self):
         self.entity.game_objects.shaders['tint']['colour'] = self.colour
         self.entity.game_objects.game.display.render(self.entity.image, self.layer1, shader = self.entity.game_objects.shaders['tint'])#shader render
         self.entity.image = self.layer1.texture
 
-class Shining(Shader_states):#called for aila when particle hit when guide dissolves
+class Shining(BaseState):#called for aila when particle hit when guide dissolves
     def __init__(self,entity, colour = [0.39, 0.78, 1,1]):
         super().__init__(entity)
         self.colour = colour
@@ -169,12 +175,12 @@ class Shining(Shader_states):#called for aila when particle hit when guide disso
     def update_render(self, dt):
         self.time += dt * 0.01
 
-    def draw(self):
+    def set_uniforms(self):
         self.entity.shader['TIME'] = self.time
         self.entity.shader['tint'] = self.colour
         self.entity.shader['speed'] = self.speed
 
-class Dissolve(Shader_states):#disolve and bloom
+class Dissolve(BaseState):#disolve and bloom
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
@@ -188,7 +194,7 @@ class Dissolve(Shader_states):#disolve and bloom
     def update_render(self, dt):
         self.time += dt * 0.01
 
-    def draw(self):
+    def set_uniforms(self):
         self.empty.clear(0,0,0,0)
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
         self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
@@ -205,20 +211,20 @@ class Dissolve(Shader_states):#disolve and bloom
 
         self.entity.game_objects.shaders['bloom']['targetColor'] = self.colour[0:3]
 
-class Tint(Shader_states):#challaenge momutment use it
+class Tint(BaseState):#challaenge momutment use it
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['tint']
         self.colour = kwarg.get('colour', [0,0,0,0])
 
-    def draw(self):
+    def set_uniforms(self):
         self.entity.shader['colour'] = self.colour
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':
             self.enter_state('Idle')
 
-class Blur(Shader_states):
+class Blur(BaseState):
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['blur']
@@ -228,19 +234,19 @@ class Blur(Shader_states):
         self.blur_radius += (1.1 - self.blur_radius) * 0.06
         self.blur_radius = min(1.1, self.blur_radius)
 
-    def draw(self):
+    def set_uniforms(self):
         self.entity.shader['blurRadius'] = self.blur_radius
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':
             self.enter_state('Idle')
 
-class Palette_swap(Shader_states):#droplet use it
+class Palette_swap(BaseState):#droplet use it
     def __init__(self,entity):
         super().__init__(entity)
         self.entity.shader = self.entity.game_objects.shaders['palette_swap']
 
-    def draw(self):
+    def set_uniforms(self):
         self.entity.shader['number_colour'] = len(self.entity.original_colour)
         for index, color in enumerate(self.entity.original_colour):
             self.entity.shader['original_' + str(index)] = color
@@ -250,39 +256,15 @@ class Palette_swap(Shader_states):#droplet use it
         if input == 'idle':
             self.enter_state('Idle')
 
-class Outline(Shader_states):
-    def __init__(self,entity, **kwarg):
-        super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['outline']
-        self.colour = kwarg.get('colour', [1, 1, 1, 1])
-        self.thickness = kwarg.get('thickness', 5)
-        self.falloff = kwarg.get('falloff', 0)
-        self.time = 0
-
-    def update_render(self, dt):
-        self.time += dt
-
-    def draw(self):
-        self.entity.shader['outlineColor'] = self.colour
-        self.entity.shader['outlineThickness'] = self.thickness
-        self.entity.shader['outlineAlphaFalloff'] = self.falloff
-
-    def handle_input(self, input, **kwarg):
-        if input == 'idle':
-            self.enter_state('Idle')
-
-class MB(Shader_states):#motion blur
+class Mb(BaseState):#motion blur
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['motion_blur']
+        self.shader = self.entity.game_objects.shaders['motion_blur']
         self.dir = [0.04, 0]
 
-    def update_render(self, dt):
-        pass
-
-    def draw(self):
-        self.entity.shader['dir'] = self.dir
-        self.entity.shader['quality'] = 6
+    def set_uniforms(self):
+        self.shader['dir'] = self.dir
+        self.shader['quality'] = 6
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':
@@ -290,7 +272,7 @@ class MB(Shader_states):#motion blur
         elif input == 'Hurt':
             self.enter_state('Hurt')
 
-class Noise_border(Shader_states):
+class Noise_border(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
@@ -303,7 +285,7 @@ class Noise_border(Shader_states):
     def update_render(self, dt):
         self.time += dt * 0.01
 
-    def draw(self):
+    def set_uniforms(self):
         self.empty.clear(0,0,0,0)
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
         self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time
@@ -325,25 +307,12 @@ class Noise_border(Shader_states):
 
 
         #blit_pos = (round(self.entity.true_pos[0]-self.entity.game_objects.camera_manager.camera.true_scroll[0]), round(self.entity.true_pos[1]-self.entity.game_objects.camera_manager.camera.true_scroll[1]))
-        #self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render
+        #self.entity.game_objects.game.display.render(self.empty.texture, self.entity.game_objects.game.screen, position = blit_pos, flip = self.entity.dir[0] > 0, shader = self.entity.game_objects.shaders['slash'])#shader render  
 
-class Aura(Shader_states):
+class Swirl(BaseState):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['aura']
-        self.time = 0
-
-    def update_render(self, dt):
-        self.time += dt * 0.1
- 
-    def draw(self):
-        self.entity.game_objects.shaders['aura']['TIME'] = self.time
-        self.entity.game_objects.shaders['aura']['AuraProgres'] =1        
-
-class Swirl(Shader_states):
-    def __init__(self, entity, **kwarg):
-        super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['swirl']
+        self.shader = self.entity.game_objects.shaders['swirl']
         self.ratio = 1
 
     def update_render(self, dt):
@@ -352,10 +321,10 @@ class Swirl(Shader_states):
         if self.ratio <= 0:
             self.enter_state('Idle')
 
-    def draw(self):        
-        self.entity.shader['ratio'] = self.ratio        
+    def set_uniforms(self):        
+        self.shader['ratio'] = self.ratio        
 
-class Slash(Shader_states):#not working
+class Slash(BaseState):#not working
     def __init__(self, entity, **kwarg):
         super().__init__(entity)
         self.noise_layer = self.entity.game_objects.game.display.make_layer(self.entity.image.size)#move wlesewhere, memory leaks
@@ -372,7 +341,7 @@ class Slash(Shader_states):#not working
     def update_render(self, dt):
         self.time += dt * 0.01
 
-    def draw(self):
+    def set_uniforms(self):
         self.empty.clear(0,0,0,0)
         self.entity.game_objects.shaders['noise_perlin']['u_resolution'] = self.entity.image.size
         self.entity.game_objects.shaders['noise_perlin']['u_time'] = self.time

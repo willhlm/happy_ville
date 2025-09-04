@@ -78,11 +78,11 @@ class Chase(EnemyStates):
         super().update(dt)
         self.look_target()
         self.entity.chase(self.player_distance)
-        self.check_sight()
+        self.check_sight(dt)
 
-    def check_sight(self):
+    def check_sight(self, dt):
         if abs(self.player_distance[0]) > self.entity.aggro_distance[0] or abs(self.player_distance[1]) > self.entity.aggro_distance[1]:#player far away
-            self.time -= self.entity.game_objects.game.dt
+            self.time -= dt
             if self.time < 0:
                 self.enter_state('Wait',next_state = 'Patrol', time = 20)
         elif abs(self.player_distance[0]) < self.entity.attack_distance[0] and abs(self.player_distance[1]) < self.entity.attack_distance[1]:#player close
