@@ -1,7 +1,7 @@
 import pygame, random
 from engine.utils import read_files
 from gameplay.entities.states import weather_states, weatherfx_states
-from gameplay.particles.screen_particles import ScreenParticles
+from gameplay.visuals.particles.screen_particles import ScreenParticles
 
 class Weather():#initialied in game_objects: a container of weather objects
     def __init__(self, game_objects):

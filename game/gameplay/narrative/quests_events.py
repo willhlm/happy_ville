@@ -1,6 +1,6 @@
 import sys, random
-from gameplay.entities import entities, platforms
-
+from gameplay.entities import platforms
+from gameplay.entities.enemies import enemies
 class Quests_events():#quest and event handlere
     def __init__(self, game_objects):
         self.game_objects = game_objects
@@ -34,7 +34,7 @@ class Butterfly_encounter(Tasks):#called from cutscene if aggro path is chosen: 
         super().__init__(game_objects)
         spawn_pos = self.game_objects.map.references['cocoon_boss'].rect.topleft
         self.game_objects.weather.flash()
-        butterfly = entities.Butterfly(spawn_pos, self.game_objects)
+        butterfly = enemies.Butterfly(spawn_pos, self.game_objects)
         self.game_objects.enemies.add(butterfly)
         self.game_objects.map.references['cocoon_boss'].currentstate.handle_input('Hurt')
         spawn_pos = [2576, 1320]

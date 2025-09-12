@@ -1,6 +1,6 @@
 import pygame
 from engine.utils import read_files
-from gameplay.entities import entities_ui
+from gameplay.ui.elements import entities_ui
 
 class UI_loader():#for map, omamori, ability, journal etc: json file should have same name as class and folder, tsx file should end with _UI
     def __init__(self, game_objects):
@@ -20,8 +20,8 @@ class UI_loader():#for map, omamori, ability, journal etc: json file should have
 class Vendor(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/facilities/vendor/BG.png').convert_alpha())    
-        path = 'assets/sprites/ui/layouts/facilities/vendor/vendor.json'
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/facilities/vendor/BG.png').convert_alpha())    
+        path = 'assets/ui_layouts/facilities/vendor/vendor.json'
         self.load_UI_data(path, 'vendor')
         self.load_data()
 
@@ -49,9 +49,9 @@ class Vendor(UI_loader):
 class Radna(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/backpack/radna/BG.png').convert_alpha())    
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/radna/BG.png').convert_alpha())    
 
-        path = 'assets/sprites/ui/layouts/backpack/radna/radna.json'
+        path = 'assets/ui_layouts/backpack/radna/radna.json'
         self.load_UI_data(path, 'radna')
         self.load_data()
 
@@ -102,8 +102,8 @@ class Radna(UI_loader):
 class Journal(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/backpack/journal/BG.png').convert_alpha())            
-        path = 'assets/sprites/ui/layouts/backpack/journal/journal.json'
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/journal/BG.png').convert_alpha())            
+        path = 'assets/ui_layouts/backpack/journal/journal.json'
         self.load_UI_data(path, 'journal')
         self.load_data()
 
@@ -123,8 +123,8 @@ class Journal(UI_loader):
 class Fast_travel(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/facilities/fast_travel/BG.png').convert_alpha())                    
-        path = 'assets/sprites/ui/layouts/facility/fast_travel/fast_travel.json'
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/facilities/fast_travel/BG.png').convert_alpha())                    
+        path = 'assets/ui_layouts/facility/fast_travel/fast_travel.json'
         self.load_UI_data(path, 'fast_travel')
         self.load_data()
 
@@ -142,8 +142,8 @@ class Fast_travel(UI_loader):
 class Inventory(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/backpack/inventory/BG.png').convert_alpha())                    
-        path = 'assets/sprites/ui/layouts/backpack/inventory/inventory.json'
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/inventory/BG.png').convert_alpha())                    
+        path = 'assets/ui_layouts/backpack/inventory/inventory.json'
         self.load_UI_data(path, 'inventory')
         self.load_data()
 
@@ -190,10 +190,10 @@ class Inventory(UI_loader):
 class TitleMenu(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/images/menus/title_menu/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/menus/title_menu/', game_objects)
         self.sounds = read_files.load_sounds_dict('assets/audio/music/load_screen/')
 
-        path = 'assets/sprites/ui/layouts/menus/title_menu/title_menu.json'
+        path = 'assets/ui_layouts/menus/title_menu/title_menu.json'
         self.load_UI_data(path, 'title_menu')
         self.load_data()
 
@@ -223,9 +223,9 @@ class TitleMenu(UI_loader):
 class LoadMenu(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/images/menus/load_menu/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/menus/load_menu/', game_objects)
 
-        path = 'assets/sprites/ui/layouts/menus/load_menu/load_menu.json'
+        path = 'assets/ui_layouts/menus/load_menu/load_menu.json'
         self.load_UI_data(path, 'load_menu')
         self.load_data()
 
@@ -255,9 +255,9 @@ class LoadMenu(UI_loader):
 class OptionMenu(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/images/menus/option_menu/', game_objects)
+        self.sprites = read_files.load_sprites_dict('assets/sprites/ui/menus/option_menu/', game_objects)
 
-        path = 'assets/sprites/ui/layouts/menus/option_menu/option_menu.json'
+        path = 'assets/ui_layouts/menus/option_menu/option_menu.json'
         self.load_UI_data(path, 'option_menu')
         self.load_data()
 
@@ -287,7 +287,7 @@ class OptionMenu(UI_loader):
 class PauseMenu(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        path = 'assets/sprites/ui/layouts/menus/pause_menu/pause_menu.json'
+        path = 'assets/ui_layouts/menus/pause_menu/pause_menu.json'
         self.load_UI_data(path, 'pause_menu')
         self.load_data()
 
@@ -317,8 +317,8 @@ class PauseMenu(UI_loader):
 class WorldMap(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/backpack/maps/worldmap/BG.png').convert_alpha())
-        path = 'assets/sprites/ui/layouts/backpack/maps/worldmap/worldmap.json'
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/worldmap/BG.png').convert_alpha())
+        path = 'assets/ui_layouts/backpack/maps/worldmap/worldmap.json'
         self.load_UI_data(path, 'worldmap')
         self.load_data()
 
@@ -343,9 +343,9 @@ class WorldMap(UI_loader):
 class NordvedenMap(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/backpack/maps/nordveden/BG.png').convert_alpha())
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/nordveden/BG.png').convert_alpha())
         self.objects = []
-        path = 'assets/sprites/ui/layouts/backpack/maps/nordveden/nordveden.json'
+        path = 'assets/ui_layouts/backpack/maps/nordveden/nordveden.json'
         self.load_UI_data(path, 'nordveden')
         self.load_data()
 
@@ -370,9 +370,9 @@ class NordvedenMap(UI_loader):
 class DarkforestMap(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/backpack/maps/darkforest/BG.png').convert_alpha())
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/darkforest/BG.png').convert_alpha())
         self.objects = []
-        path = 'assets/sprites/ui/layouts/backpack/maps/darkforest/darkforest.json'
+        path = 'assets/ui_layouts/backpack/maps/darkforest/darkforest.json'
         self.load_UI_data(path, 'darkforest')
         self.load_data()
 
@@ -397,5 +397,5 @@ class DarkforestMap(UI_loader):
 class HlifblomMap(UI_loader):
     def __init__(self, game_objects):
         super().__init__(game_objects)
-        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/sprites/ui/layouts/backpack/maps/hlifblom/BG.png').convert_alpha())
+        self.BG = game_objects.game.display.surface_to_texture(pygame.image.load('assets/ui_layouts/backpack/maps/hlifblom/BG.png').convert_alpha())
         self.objects = []

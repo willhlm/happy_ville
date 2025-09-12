@@ -28,7 +28,7 @@ class Idle(Basic_states):
         if input == 'start':
             self.enter_state('centraliser', **kwarg)
 
-class Shift(Basic_states):
+class Shift(Basic_states):#for right analogue stick
     def __init__(self,camera_manager,**kwarg):
         super().__init__(camera_manager)
        

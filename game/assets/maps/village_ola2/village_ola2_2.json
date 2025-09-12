@@ -372,7 +372,7 @@
                                 {
                                  "name":"spawn",
                                  "type":"string",
-                                 "value":"2"
+                                 "value":"1"
                                 }],
                          "rotation":0,
                          "type":"",
@@ -475,24 +475,6 @@
                          "width":16,
                          "x":80,
                          "y":608
-                        }, 
-                        {
-                         "gid":3,
-                         "height":16,
-                         "id":66,
-                         "name":"",
-                         "properties":[
-                                {
-                                 "name":"class",
-                                 "type":"string",
-                                 "value":"Exploding_mygga"
-                                }],
-                         "rotation":0,
-                         "type":"",
-                         "visible":true,
-                         "width":16,
-                         "x":3728,
-                         "y":383
                         }, 
                         {
                          "gid":8,

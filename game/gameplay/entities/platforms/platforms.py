@@ -1,5 +1,4 @@
 import pygame, math, random
-from gameplay.entities import entities
 from engine.system import animation
 from engine.utils import read_files
 from gameplay.entities.states import states_time_collision, states_gate, states_smacker, states_moving_platform, states_basic
@@ -583,6 +582,9 @@ class Collision_shadow_light(Shadow_light):#collsion block but only lights and i
         self.time = 0
 
         self.game_objects.shaders['rectangle_border']['screenSize'] = self.game_objects.game.window_size
+
+    def update_render(self, dt):                
+        pass
 
     def update(self, dt):
         self.check_light()  # Check if the platform is hit by light

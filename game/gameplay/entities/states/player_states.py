@@ -1380,7 +1380,7 @@ class SwordStandMain(Sword):
         self.entity.abilities.spirit_abilities['Shield'].sword()
         
         self.entity.sword.dir = self.entity.dir.copy()
-        self.currentstate.enter_state('Slash_1')        
+        self.entity.sword.currentstate.enter_state('Slash_1')        
         self.entity.sword.use_sword()
         
         self.entity.game_objects.sound.play_sfx(self.entity.sounds['sword'][0], vol = 0.7)

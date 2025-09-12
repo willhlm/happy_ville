@@ -72,7 +72,7 @@ def format_tiled_json(map_data):#used from UI loader
 'shader loader'
 def load_shaders_dict(game_objects):#returns a dicy with "state" as key and shader program as value
     shader_dict = {}
-    base_path = 'assets/shaders/'
+    base_path = 'engine/render/shaders/'
     for subdir in [d[0] for d in walk(base_path) if d[0] != base_path]:
         shader_dict[subdir.split("/")[-1]] = load_shader_list(subdir,game_objects)
     return shader_dict

@@ -55,7 +55,7 @@ class Camera():#default camera
         self.target = self.original_center.copy()#is set by camera stop, the target position of center for the centraliser
 
     def update(self, dt):        
-        target_x = self.game_objects.player.true_pos[0] - self.center[0] 
+        target_x = self.game_objects.player.true_pos[0] - self.center[0]
         target_y = self.game_objects.player.true_pos[1] - self.center[1]
 
         # Smooth towards player once per physics step   

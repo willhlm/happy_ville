@@ -1,7 +1,9 @@
 import pygame
 from engine.utils import read_files
-from engine.system import collisions, sound, camera, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter, post_process
-from gameplay.entities import entities
+from engine.system import collisions, sound, camera, save_load, groups, object_pool, controller, lights, timer, signals, time_manager, alphabet, input_interpreter
+from gameplay.entities.player.base import player
+from engine.render import post_process
+
 from gameplay.world import map_loader, weather, world_state
 from engine import constants as C
 from gameplay.ui import ui
@@ -59,7 +61,7 @@ class Game_Objects():
         self.layer_pause = groups.PauseLayer()#like eneitty pause but for those at different parallax layers
 
         #initiate player
-        self.player = entities.Player([0,0],self)
+        self.player = player.Player([0,0],self)
         self.players = groups.Group()#blits on float positions
         self.players.add(self.player)
 
@@ -158,7 +160,7 @@ class Game_Objects():
         self.lights.update_render(dt)
 
     def update_render(self, dt):#called after update_physics
-        #self.camera_blocks.update_render(dt)#need to be before camera: caemras stop needs to be calculated before the scroll        
+        #self.camera_blocks.update(dt)#need to be before camera: caemras stop needs to be calculated before the scroll        
         self.camera_manager.update_render(dt)#should be first     
         self.platforms.update_render(dt)        
         self.platforms_ramps.update_render(dt)
@@ -242,14 +244,19 @@ class Game_Objects():
                 pygame.draw.rect(image, (255,100,100), (int(fade.hitbox[0]-fade.parallax[0]*self.camera_manager.camera.scroll[0]),int(fade.hitbox[1]-fade.parallax[1]*self.camera_manager.camera.scroll[1]),fade.hitbox[2],fade.hitbox[3]),1)#draw hitbox
             for light in self.lights.lights_sources:
                 pygame.draw.rect(image, (255,100,100), (int(light.hitbox[0]-light.parallax[0]*self.camera_manager.camera.scroll[0]),int(light.hitbox[1]-light.parallax[1]*self.camera_manager.camera.scroll[1]),light.hitbox[2],light.hitbox[3]),1)#draw hitbox
-            #for reflect in self.reflections:
-            #    pygame.draw.rect(image, (255,100,100), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
-            #    pygame.draw.rect(image, (255,100,100), (int(reflect.rect[0]-self.camera.scroll[0]),int(reflect.rect[1]-self.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+
             for group in self.all_bgs.group_dict.values():
                 for obj in group:
-                    if type(obj).__name__ == 'Reflection':
+                    if type(obj).__name__ == 'Reflection':                        
                         pygame.draw.rect(image, (0,0,255), (int(reflect.reflect_rect[0]),int(reflect.reflect_rect[1]),reflect.reflect_rect[2],reflect.reflect_rect[3]),1)#draw hitbox
                         pygame.draw.rect(image, (255,0,0), (int(reflect.rect[0]-reflect.parallax[0]*self.camera_manager.camera.scroll[0]),int(reflect.rect[1]-reflect.parallax[1]*self.camera_manager.camera.scroll[1]),reflect.rect[2],reflect.rect[3]),1)#draw hitbox
+
+            for group in self.all_fgs.group_dict.values():
+                for obj in group:
+                    if type(obj).__name__ == 'Reflection':                        
+                        pygame.draw.rect(image, (0,0,255), (int(obj.reflect_rect[0]),int(obj.reflect_rect[1]),obj.reflect_rect[2],obj.reflect_rect[3]),1)#draw hitbox
+                        pygame.draw.rect(image, (255,0,0), (int(obj.rect[0]-obj.parallax[0]*self.camera_manager.camera.scroll[0]),int(obj.rect[1]-obj.parallax[1]*self.camera_manager.camera.scroll[1]),obj.rect[2],obj.rect[3]),1)#draw hitbox
+
 
             for reflect in self.cosmetics:
                 if type(reflect).__name__ == 'Reflection':

@@ -1,5 +1,5 @@
 from gameplay.ui import ui_backpack  # Inventory, map, etc.
-from gameplay.ui import ui_hud  # HUD elements like health bar, timers, etc.
+from gameplay.ui.overlay import ui_hud  # HUD elements like health bar, timers, etc.
 
 class UI_manager():#initialised in game_objects, keep common UIs always in memory
     def __init__(self, game_objects):

@@ -1,5 +1,5 @@
 from gameplay.entities.states import shader_states
-from engine.system.post_process import EntityProcess
+from engine.render.post_process import PostProcess
 
 class EntityShaderManager():
     def __init__(self, entity, default = 'idle', **kwargs):
@@ -36,4 +36,33 @@ class EntityShaderManager():
                 
         self.effects.draw(base_texture, target, position, flip) # Pass through overlay pipeline
 
+class EntityProcess(PostProcess):#for entity overlay effects
+    def __init__(self, entity):   
+        self.entity = entity             
+        self.shaders = {}
 
+    def define_size(self, size):
+        self.base_layer = self.entity.game_objects.game.display.make_layer(size)
+        self.temp_layer = self.entity.game_objects.game.display.make_layer(size)        
+
+    def draw(self, base_texture, target, position, flip):
+        """Apply overlay shaders to base_texture, last shader draws to target."""  
+        self.base_layer.clear(0, 0, 0, 0)
+        self.temp_layer.clear(0, 0, 0, 0)        
+        
+        dst = self.temp_layer
+        src = self.entity.shader_state.states.draw(base_texture, self.base_layer, position = (0, 0), flip = False)        
+
+        shader_items = list(self.shaders.items())
+
+        for i, (name, shader_obj) in enumerate(shader_items):
+            is_last_shader = (i == len(shader_items) - 1)
+
+            if is_last_shader:                
+                shader_obj.draw_to_composite(src, target, position, flip)# Last shader draws to final target
+            else:                
+                src = shader_obj.draw(src, dst)# Intermediate shader: draw src -> dst
+
+    def append_shader(self, shader_name, **kwargs):        
+        shader_class = getattr(shaders, shader_name.capitalize())
+        self.shaders[shader_name] = shader_class(self.entity.game_objects, **kwargs)

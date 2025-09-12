@@ -21,24 +21,24 @@ class Basic_states():
 class Idle_right(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
-        self.entity.game_objects.camera_manager.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
+        #self.entity.game_objects.camera_manager.camera.center[0] = self.entity.game_objects.map.PLAYER_CENTER[0] #- self.entity.game_objects.player.rect[2]*0.5
 
     def update(self, dt):
         distance = [self.entity.rect.left - self.entity.game_objects.player.true_pos[0],self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
         if distance[0] < -self.entity.offset*16: return
 
-        if abs(distance[1]) < self.entity.size[1]*0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x
+        if abs(distance[1]) < self.entity.size[1] and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 +  self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
             self.enter_state('Stop_right')
 
 class Stop_right(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
-        self.entity.game_objects.camera_manager.camera.center[0] = self.entity.game_objects.game.window_size[0] - (self.entity.rect.left - self.entity.game_objects.player.true_pos[0]) - self.entity.game_objects.player.rect[2]*0.5
+        self.entity.game_objects.camera_manager.camera.center[0] = self.entity.game_objects.game.window_size[0] - (self.entity.rect.left - self.entity.game_objects.player.true_pos[0])# - self.entity.game_objects.player.rect[2]*0.5
 
     def update(self, dt):
         distance = [self.entity.rect.left - self.entity.game_objects.player.true_pos[0], self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
-        if abs(distance[1]) < self.entity.size[1]*0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x
-            self.entity.game_objects.camera_manager.camera.target[0] = self.entity.game_objects.game.window_size[0] - (self.entity.rect.left - self.entity.game_objects.player.true_pos[0]) - self.entity.game_objects.player.rect[2]*0.5
+        if abs(distance[1]) < self.entity.size[1] and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 + self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
+            self.entity.game_objects.camera_manager.camera.target[0] = self.entity.game_objects.game.window_size[0] - (self.entity.rect.left - self.entity.game_objects.player.true_pos[0])# + self.entity.game_objects.player.rect[2]*0.5
             self.entity.game_objects.camera_manager.camera.center[0] = self.entity.game_objects.camera_manager.camera.target[0]
         else:
             self.enter_state('Idle_right')
@@ -46,24 +46,25 @@ class Stop_right(Basic_states):
 class Idle_left(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
-        self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
+        #self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.map.PLAYER_CENTER[0] - self.entity.game_objects.player.rect[2]*0.5
 
     def update(self, dt):        
-        distance = [self.entity.rect.right - self.entity.game_objects.player.true_pos[0],self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
-        if distance[0] > self.entity.offset*16: return
+        distance = [self.entity.rect.right - self.entity.game_objects.player.true_pos[0] - self.entity.game_objects.player.rect[2]*0.5, self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
 
-        if abs(distance[1]) < self.entity.size[1]*0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x
+        if distance[0] > self.entity.offset*16: return        
+
+        if abs(distance[1]) < self.entity.size[1] and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5: #- self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
             self.enter_state('Stop_left')
 
 class Stop_left(Basic_states):
     def __init__(self,entity,**kwarg):
         super().__init__(entity)
-        self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.player.true_pos[0] - self.entity.rect.right - self.entity.game_objects.player.rect[2]*0.5
+        self.entity.game_objects.camera_manager.camera.center[0] =  self.entity.game_objects.player.true_pos[0] - self.entity.rect.right #- self.entity.game_objects.player.rect[2]*0.5
 
     def update(self, dt):  
         distance = [self.entity.rect.right - self.entity.game_objects.player.true_pos[0],self.entity.rect.centery - self.entity.game_objects.player.true_pos[1]]
-        if abs(distance[1]) < self.entity.size[1]*0.5 and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5:#if on screen on y and coser than half screen on x
-            self.entity.game_objects.camera_manager.camera.target[0] = self.entity.game_objects.player.true_pos[0] - self.entity.rect.right - self.entity.game_objects.player.rect[2] * 0.5
+        if abs(distance[1]) < self.entity.size[1] and abs(distance[0]) < self.entity.game_objects.game.window_size[0]*0.5 - self.entity.game_objects.player.rect[2]*0.5:#if on screen on y and coser than half screen on x
+            self.entity.game_objects.camera_manager.camera.target[0] = self.entity.game_objects.player.true_pos[0] - self.entity.rect.right #- self.entity.game_objects.player.rect[2] * 0.5
             self.entity.game_objects.camera_manager.camera.center[0] = self.entity.game_objects.camera_manager.camera.target[0]
         else:
             self.enter_state('Idle_left')
@@ -88,7 +89,7 @@ class Stop_bottom(Basic_states):
         self.entity.game_objects.camera_manager.stop_handeler.add_stop('bottom')
 
     def init_pos(self):#called from map loader
-        self.entity.game_objects.camera_manager.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
+        self.entity.game_objects.camera_manager.camera.center[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5 - self.entity.rect[3]
         self.center = self.entity.game_objects.camera_manager.camera.center.copy()
         self.sign = 1
 
@@ -100,13 +101,12 @@ class Stop_bottom(Basic_states):
             self.sign = -1#from down to up
 
     def update(self, dt):
-        distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx,self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
+        distance = [self.entity.rect.centerx - self.entity.game_objects.player.hitbox.centerx, self.entity.rect.top - self.entity.game_objects.player.hitbox.centery]
 
         if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5 + self.y_offset:#if on screen on y and coser than half screen on x
-            self.entity.game_objects.camera_manager.camera.target[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3]*0.5
+            self.entity.game_objects.camera_manager.camera.target[1] = self.entity.game_objects.game.window_size[1] - (self.entity.rect.top - self.entity.game_objects.player.hitbox.centery) - self.entity.game_objects.player.rect[3] + self.entity.rect[3]
             self.true_center[1] -= (self.entity.game_objects.camera_manager.camera.center[1] - self.entity.game_objects.camera_manager.camera.target[1]) * (0.03 - self.sign * 0.01)
             self.center[1] = int(self.true_center[1])
-            #self.center[1] -= self.sign*3#self.sign*(abs(self.entity.game_objects.camera_manager.camera.center[1]-target))*0.1
             self.entity.game_objects.camera_manager.camera.center[1] = self.sign * max(self.sign * self.entity.game_objects.camera_manager.camera.target[1], self.sign * self.center[1])#when sign is negative, it works as min
         else:
             self.entity.game_objects.camera_manager.stop_handeler.remove_stop('bottom')
@@ -134,8 +134,8 @@ class Stop_top(Basic_states):
     def update(self, dt):
         distance = [self.entity.rect.centerx - self.entity.game_objects.player.true_pos[0],self.entity.rect.bottom - self.entity.game_objects.player.true_pos[1]]
 
-        if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5 + self.y_offset:#if on screen on y and coser than half screen on x
-            self.entity.game_objects.camera_manager.camera.target[1] = self.entity.game_objects.player.true_pos[1] - self.entity.rect.bottom - self.entity.game_objects.player.rect[3]*0.5
+        if abs(distance[0]) < self.entity.size[0]*0.5 and abs(distance[1]) < self.entity.game_objects.game.window_size[1]*0.5 + self.y_offset - self.entity.game_objects.player.rect[3] * 0.5:#if on screen on y and coser than half screen on x
+            self.entity.game_objects.camera_manager.camera.target[1] = self.entity.game_objects.player.true_pos[1] - self.entity.rect.bottom #+ self.entity.game_objects.player.rect[3] * 0.5 - self.entity.rect[3]
             #self.true_center[1] -= (self.entity.game_objects.camera_manager.camera.center[1] - target)*0.03
             self.entity.game_objects.camera_manager.camera.center[1] = self.entity.game_objects.camera_manager.camera.target[1]
         else:

@@ -2,7 +2,7 @@ import pygame, sys, time
 from engine import constants as C
 from engine.utils import read_files
 from engine.system import state_manager
-from engine.system.screen_manager import ScreenManager
+from engine.render.screen_manager import ScreenManager
 from pygame_render import RenderEngine
 from engine import game_objects
 

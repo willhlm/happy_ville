@@ -8,7 +8,7 @@ class Enemy_states(Entity_States):
     def enter_state(self,newstate):
         self.entity.currentstate = getattr(sys.modules[__name__], newstate)(self.entity)#make a class based on the name of the newstate: need to import sys
 
-    def update(self):
+    def update(self, dt):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx,self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance            
         if abs(self.player_distance[0]) < self.entity.aggro_distance[0] and abs(self.player_distance[1]) < self.entity.aggro_distance[1]:
             self.enter_state('Fly')
@@ -19,9 +19,9 @@ class Idle(Enemy_states):
         self.entity.acceleration[0] = 0
         self.duration = random.randint(10,100)
 
-    def update(self):
-        super().update()
-        self.duration -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.duration -= dt
 
     def increase_phase(self):
         if self.duration < 0:                    
@@ -43,9 +43,9 @@ class Walk(Enemy_states):
         self.entity.acceleration[0] = 0.5
         self.duration = random.randint(10,100)
 
-    def update(self):
-        super().update()
-        self.duration -= self.entity.game_objects.game.dt
+    def update(self, dt):
+        super().update(dt)
+        self.duration -= dt
 
     def increase_phase(self):
         if self.duration < 0:
@@ -65,8 +65,8 @@ class Fly(Enemy_states):
         self.entity.dir[0] = sign        
         self.entity.velocity=[sign*rand,-rand]
 
-    def update(self):
-        self.lifetime -= self.entity.game_objects.game.dt    
+    def update(self, dt):
+        self.lifetime -= dt
         if self.lifetime < 0:
             self.entity.kill()
 
@@ -75,7 +75,7 @@ class Death(Enemy_states):
         super().__init__(entity)
         self.entity.acceleration = [0,0]
 
-    def update(self):
+    def update(self, dt):
         self.entity.velocity[0] *= 0.8
         self.entity.velocity[1] *= 0.8
 

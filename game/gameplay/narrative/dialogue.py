@@ -60,7 +60,7 @@ class Dialogue(Conversation):#handles dialoage and what to say for NPC
 class Dialogue_interactable(Conversation):#interactables
     def __init__(self, entity, name):
         super().__init__(entity)
-        self.dialoages = {'conversation':read_files.read_json("text/interactables/" + name + ".json")}
+        self.dialoages = {'conversation':read_files.read_json("gameplay/narrative/text/interactables/" + name + ".json")}
 
     def get_conversation(self):#quest stuff first, then priority evens, and then normal events followed by notmal conversation        
         event = 'state_0'

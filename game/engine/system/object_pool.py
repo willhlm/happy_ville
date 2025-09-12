@@ -1,69 +1,77 @@
-from gameplay.entities import entities, entities_parallax, entities_ui
-from gameplay.particles import particles, screen_particles
+from gameplay.entities.enviroment import entities_parallax
+from gameplay.ui.elements import entities_ui
+from gameplay.visuals.particles import particles, screen_particles
 from gameplay.world import weather
 from gameplay.entities.platforms import platforms
-from gameplay.states import game_states_facilities, game_states_menu
+from gameplay.states.facilities import facilities
+from gameplay.states.menus import menus
 from gameplay.entities.projectiles import seeds
+from gameplay.entities.enemies import enemies
+from gameplay.entities.items import items
+from gameplay.entities.projectiles import projectiles
+from gameplay.entities.cosmetics import cosmetics
+from gameplay.entities.enviroment import background
+from gameplay.visuals.effects import effects
+from gameplay.ui.overlay import point_arrow
 
 class Object_pool():#a class that contains the objecte one may one to spawn duirng the game: it preloads stiff that needs to be loaded from file
     def __init__(self, game_objects):
         #loot
-        entities.Amber_droplet.pool(game_objects)
-        entities.Bone.pool(game_objects)
-        entities.Heal_item.pool(game_objects)
-        entities.Tungsten.pool(game_objects)
-        entities.Red_infinity_stone.pool(game_objects)
-        entities.Green_infinity_stone.pool(game_objects)
-        entities.Blue_infinity_stone.pool(game_objects)
-        entities.Orange_infinity_stone.pool(game_objects)
-        entities.Purple_infinity_stone.pool(game_objects)
+        items.Amber_droplet.pool(game_objects)
+        items.Bone.pool(game_objects)
+        items.Heal_item.pool(game_objects)
+        items.Tungsten.pool(game_objects)
+        items.Red_infinity_stone.pool(game_objects)
+        items.Green_infinity_stone.pool(game_objects)
+        items.Blue_infinity_stone.pool(game_objects)
+        items.Orange_infinity_stone.pool(game_objects)
+        items.Purple_infinity_stone.pool(game_objects)
 
         #radna
-        entities.Boss_HP.pool(game_objects)
-        entities.Loot_magnet.pool(game_objects)
-        entities.Half_dmg.pool(game_objects)
-        entities.Rings.pool(game_objects)
+        items.Boss_HP.pool(game_objects)
+        items.Loot_magnet.pool(game_objects)
+        items.Half_dmg.pool(game_objects)
+        items.Rings.pool(game_objects)
 
         #cosmetics
-        entities.Water_running_particles.pool(game_objects)
-        entities.Grass_running_particles.pool(game_objects)
-        entities.Dust_running_particles.pool(game_objects)
-        entities.Slash.pool(game_objects)
-        entities.Twinkle.pool(game_objects)
-        entities.Logo_loading.pool(game_objects)
-        entities.Blood.pool(game_objects)
-        entities.Dusts.pool(game_objects)
-        entities.Player_Soul.pool(game_objects)
-        entities.Pray_effect.pool(game_objects)
-        entities.Fade_effect.pool(game_objects)
-        entities.ThunderBall.pool(game_objects)
-        entities.ThunderSpark.pool(game_objects)
-        entities.ConversationBubbles.pool(game_objects)
-        entities.InteractableIndicator.pool(game_objects)
+        cosmetics.Water_running_particles.pool(game_objects)
+        cosmetics.Grass_running_particles.pool(game_objects)
+        cosmetics.Dust_running_particles.pool(game_objects)
+        cosmetics.Slash.pool(game_objects)
+        cosmetics.Twinkle.pool(game_objects)
+        cosmetics.Logo_loading.pool(game_objects)
+        cosmetics.Blood.pool(game_objects)
+        cosmetics.Dusts.pool(game_objects)
+        cosmetics.Player_Soul.pool(game_objects)
+        cosmetics.Pray_effect.pool(game_objects)
+        effects.FadeEffect.pool(game_objects)
+        cosmetics.ThunderBall.pool(game_objects)
+        cosmetics.ThunderSpark.pool(game_objects)
+        cosmetics.ConversationBubbles.pool(game_objects)
+        cosmetics.InteractableIndicator.pool(game_objects)
 
         #enemies
-        entities.Reindeer.pool(game_objects)
-        entities.Cultist_warrior.pool(game_objects)
-        entities.Cultist_rogue.pool(game_objects)
+        enemies.Reindeer.pool(game_objects)
+        enemies.Cultist_warrior.pool(game_objects)
+        enemies.Cultist_rogue.pool(game_objects)
 
         #projectiles
-        entities.Bouncy_balls.pool(game_objects)
-        entities.Explosion.pool(game_objects)
-        entities.Poisoncloud.pool(game_objects)
-        entities.Falling_rock.pool(game_objects)
-        entities.Projectile_1.pool(game_objects)
-        entities.Poisonblobb.pool(game_objects)
-        entities.Sword.pool(game_objects)
-        entities.Arrow.pool(game_objects)
-        entities.Wind.pool(game_objects)
-        entities.Shield.pool(game_objects)
-        entities.Thunder.pool(game_objects)
-        entities.Droplet.pool(game_objects)
-        entities.SlamAttack.pool(game_objects)
+        projectiles.Bouncy_balls.pool(game_objects)
+        projectiles.Explosion.pool(game_objects)
+        projectiles.Poisoncloud.pool(game_objects)
+        projectiles.Falling_rock.pool(game_objects)
+        projectiles.Projectile_1.pool(game_objects)
+        projectiles.Poisonblobb.pool(game_objects)
+        projectiles.Sword.pool(game_objects)
+        projectiles.Arrow.pool(game_objects)
+        projectiles.Wind.pool(game_objects)
+        projectiles.Shield.pool(game_objects)
+        projectiles.Droplet.pool(game_objects)
+        projectiles.SlamAttack.pool(game_objects)
 
         #UI
         entities_ui.MenuArrow.pool(game_objects)
-        entities.Arrow_UI.pool(game_objects)
+        point_arrow.PointArrow.pool(game_objects)
 
         entities_parallax.Leaves.pool(game_objects)
         entities_parallax.Droplet.pool(game_objects)
@@ -80,6 +88,5 @@ class Object_pool():#a class that contains the objecte one may one to spawn duir
         seeds.Seed_platform.pool(game_objects)
 
         #states
-        game_states_facilities.Bank.pool(game_objects)
-
-        game_states_menu.Option_menu.pool(game_objects)
+        facilities.Bank.pool(game_objects)
+        menus.Option_menu.pool(game_objects)

@@ -13,7 +13,7 @@ class EnemyStates():
     def enter_state(self, newstate, **kwarg):        
         self.entity.currentstate = getattr(sys.modules[__name__], newstate.capitalize())(self.entity, **kwarg)#make a class based on the name of the newstate: need to import sys
     
-    def update(self):
+    def update(self, dt):
         self.player_distance = [self.entity.game_objects.player.rect.centerx - self.entity.rect.centerx,self.entity.game_objects.player.rect.centery - self.entity.rect.centery]#check plater distance
     
     def deactivate(self):
@@ -34,8 +34,8 @@ class Patrol(EnemyStates):#patrol in a circle aorund the original position
         super().__init__(entity)   
         self.calculate_postion()  
 
-    def update(self):
-        super().update()                        
+    def update(self, dt):
+        super().update(dt)                        
         self.check_position()
         self.check_sight()
         self.entity.patrol(self.target_position)
@@ -70,8 +70,8 @@ class Wait(EnemyStates):
         self.time = kwarg.get('time',50)
         self.next_state = kwarg.get('next_state','Patrol')
 
-    def update(self):   
-        self.time -= self.entity.game_objects.game.dt  
+    def update(self, dt):   
+        self.time -= dt
         if self.time < 0:
             self.enter_state(self.next_state)
 
@@ -85,8 +85,8 @@ class Chase(EnemyStates):#keep some distance and keep attacking
         self.give_up_duration = kwarg.get('give_up', 300)
         self.chase_direction = [0, 0]   
 
-    def update(self):   
-        super().update()   
+    def update(self, dt):   
+        super().update(dt)   
         self.chase_direction = [sign(self.player_distance[0]), sign(self.player_distance[1])]        
         self.look_target()
         self.check_sight()
@@ -116,8 +116,8 @@ class Flee(EnemyStates):
     def __init__(self, entity, **kwarg):
         super().__init__(entity)            
 
-    def update(self):   
-        super().update()  
+    def update(self, dt):   
+        super().update(dt)  
         self.chase_direction = [-sign(self.player_distance[0]), -sign(self.player_distance[1])]                
         self.look_target()
         self.check_sight()

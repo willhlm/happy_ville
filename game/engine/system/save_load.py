@@ -1,4 +1,3 @@
-from gameplay.entities import entities
 from engine.utils import read_files
 
 class Save_load():

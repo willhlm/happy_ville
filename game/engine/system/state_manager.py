@@ -1,20 +1,20 @@
-from gameplay.states import game_states
-from gameplay.states import game_states_facilities
-from gameplay.states import game_states_cutscenes
-from gameplay.states import game_states_menu
+from gameplay.states.gameplay import gameplay
+from gameplay.states.facilities import facilities
+from gameplay.states.cutscenes import cutscenes
+from gameplay.states.menus import menus
 
 class State_manager():
     def __init__(self, game, initial_state = 'Title_menu'):
         self.game = game
-        self.state_stack = [getattr(game_states_menu, initial_state)(self.game)]  # Initialize with the first state
+        self.state_stack = [getattr(menus, initial_state)(self.game)]  # Initialize with the first state
         self.category_map = {
-            'game_states': game_states,
-            'game_states_facilities': game_states_facilities,
-            'game_states_cutscenes': game_states_cutscenes,
-            'menu': game_states_menu
+            'gameplay': gameplay,
+            'facility': facilities,
+            'cutscene': cutscenes,
+            'menu': menus
         }
 
-    def enter_state(self, state_name, category = 'game_states', **kwarg):
+    def enter_state(self, state_name, category = 'gameplay', **kwarg):
         """Push a new state onto the stack."""
         # Get the state class dynamically and instantiate it
         module = self.category_map[category]

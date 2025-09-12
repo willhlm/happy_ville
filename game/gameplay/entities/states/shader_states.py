@@ -227,7 +227,7 @@ class Tint(BaseState):#challaenge momutment use it
 class Blur(BaseState):
     def __init__(self,entity):
         super().__init__(entity)
-        self.entity.shader = self.entity.game_objects.shaders['blur']
+        self.shader = self.entity.game_objects.shaders['blur']
         self.blur_radius = 0.1
 
     def update_render(self, dt):
@@ -235,7 +235,7 @@ class Blur(BaseState):
         self.blur_radius = min(1.1, self.blur_radius)
 
     def set_uniforms(self):
-        self.entity.shader['blurRadius'] = self.blur_radius
+        self.shader['blurRadius'] = self.blur_radius
 
     def handle_input(self, input, **kwarg):
         if input == 'idle':
